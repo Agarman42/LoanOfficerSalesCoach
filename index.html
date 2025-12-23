@@ -146,6 +146,45 @@ select {
 .dark ::placeholder {
     color: #64748b !important;
 }
+/* Fix text visibility in all inputs and textareas on mobile and desktop */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    color: #002B5C !important;  /* Navy text on light backgrounds */
+    background-color: #ffffff !important;  /* Force white background */
+    caret-color: #002B5C !important;  /* Cursor color */
+}
+
+/* Dark mode override */
+.dark input[type="text"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark textarea,
+.dark select {
+    color: #e2e8f0 !important;  /* Light text in dark mode */
+    background-color: #1a202c !important;  /* Dark background in dark mode */
+    caret-color: #00A89D !important;  /* Teal cursor */
+}
+
+/* Placeholder text visibility */
+::placeholder {
+    color: #94a3b8 !important;  /* Medium gray */
+    opacity: 1;
+}
+
+.dark ::placeholder {
+    color: #64748b !important;
+}
+
+/* Focus ring consistency */
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none !important;
+    ring: 4px solid #F15A29 !important;
+}
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -1638,7 +1677,7 @@ select {
                 </div>
             </div>
         </section>
-                <section id="social-post" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+                <section id="social-post" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Social Media Post Creator</h2>
             <p class="mb-8 text-lg">Generate ready-to-post content that builds relationships, sparks engagement, and grows your reach organically.</p>
 
@@ -1721,7 +1760,7 @@ select {
 </div>
                 </section>
                     
-                <section id="sales-script" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+                <section id="sales-script" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Sales Script Generator</h2>
             <p class="mb-8 text-lg">Get instant, relationship-focused scripts for objections, asking for meetings, locking loans, and more — in your warm, trustworthy style.</p>
 
@@ -1884,7 +1923,7 @@ select {
                 </div>
             </div>
         </section>
-                <section id="underwriting-search" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+                <section id="underwriting-search" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Underwriting Guideline Search</h2>
             <p class="mb-8 text-lg">Ask any underwriting question (Conventional, FHA, VA, USDA, Non-QM) and get a clear, accurate answer with confidence level.</p>
 
@@ -1926,7 +1965,7 @@ select {
                 <p class="mt-4 text-xl">Researching guidelines...</p>
             </div>
         </section>
-                <section id="blog-creator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+                <section id="blog-creator" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Blog Creator</h2>
             <p class="mb-8 text-lg">Generate professional, value-first blog posts in seconds. Perfect for your website, email, or social sharing.</p>
 
@@ -2099,7 +2138,7 @@ select {
             </div>
         </section>
                 <!-- AI Chat Section -->
-        <section id="ai-chat" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <section id="ai-chat" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">AI Chat Assistant</h2>
             <p class="mb-8 text-lg">Ask me anything — sales scripts, underwriting questions, marketing ideas, motivation, or just chat. I'm here to help you win.</p>
 
@@ -2126,7 +2165,7 @@ select {
                 <p class="mt-4 text-xl">Thinking...</p>
             </div>
         </section>
-                <section id="calculator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+                <section id="calculator" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Advanced Payment Calculator</h2>
             <p class="mb-6">Estimate monthly payments with taxes, insurance, PMI, extra payments, and biweekly options. See lifetime interest, payoff timeline, and potential savings.</p>
 
@@ -2351,37 +2390,37 @@ select {
                 </div>
             </div>
         </section>
-        <section id="sales-advice" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <section id="sales-advice" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Sales Advice (Coming Soon)</h2>
             <p class="mb-4">Get personalized advice on overcoming objections, script strategies, thank you notes, and value ideas for partners.</p>
             <input type="text" placeholder="E.g., 'Script for rate lock objection'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
             <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Ask Grok</button>
         </section>
-        <section id="underwriting-guide" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <section id="underwriting-guide" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Underwriting Guide (Coming Soon)</h2>
             <p class="mb-4">Accurate guide with Ruoff overlays and confidence ratings per response.</p>
             <input type="text" placeholder="E.g., 'FHA income requirements'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
             <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Ask Grok</button>
         </section>
-        <section id="newsletter-gen" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <section id="newsletter-gen" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Newsletter Generator (Coming Soon)</h2>
             <p class="mb-4">Create HTML newsletters for your local market with verified links.</p>
             <input type="text" placeholder="E.g., 'Weekly market update for Indianapolis'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
             <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Generate</button>
         </section>
-        <section id="blog-gen" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <section id="blog-gen" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Blog Creator (Coming Soon)</h2>
             <p class="mb-4">Generate blog content on any topic instantly.</p>
             <input type="text" placeholder="E.g., 'Benefits of VA loans'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
             <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Generate</button>
         </section>
-        <section id="graphics-gen" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <section id="graphics-gen" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Graphics Creator (Coming Soon)</h2>
             <p class="mb-4">Create marketing graphics for social, flyers, and more.</p>
             <input type="text" placeholder="E.g., 'Open house flyer for FHA loans'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
             <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Generate</button>
         </section>
-        <section id="chat" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <section id="chat" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Chat (Coming Soon)</h2>
             <p class="mb-4">Personalized advice on any topic.</p>
             <input type="text" placeholder="E.g., 'How to handle rates too high?'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
