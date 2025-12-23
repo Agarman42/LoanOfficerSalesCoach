@@ -120,6 +120,32 @@ main > section {
 main section > *:first-child {
     margin-top: 0 !important;
 }
+/* Fix input/textarea text visibility on all backgrounds */
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+    color: #002B5C !important;  /* Navy text for light backgrounds */
+    background-color: white !important;  /* Force white background */
+}
+
+.dark input[type="text"],
+.dark input[type="password"],
+.dark textarea,
+.dark select {
+    color: #e2e8f0 !important;  /* Light text for dark mode */
+    background-color: #1a202c !important;  /* Dark background in dark mode */
+}
+
+/* Ensure placeholder text is visible */
+::placeholder {
+    color: #94a3b8 !important;  /* Slate gray */
+    opacity: 1;
+}
+
+.dark ::placeholder {
+    color: #64748b !important;
+}
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
