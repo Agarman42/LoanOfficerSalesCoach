@@ -1,14 +1,19 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const path = require('path');  // Add this for serving static files
 const app = express();
 
-// Allow JSON body parsing
 app.use(express.json({ limit: '10mb' }));
 
-// Your real Grok API key — keep it secret!
-const GROK_API_KEY = 'gsk_YOUR_REAL_GROK_API_KEY_HERE';  // ← Replace with your actual key
+// Serve static files (HTML, CSS, JS, manifest, icons, service worker) from the current directory
+app.use(express.static(path.join(__dirname, '.')));
 
-// Proxy endpoint
+const GROK_API_KEY = process.env.GROK_API_KEY;
+
+if (!GROK_API_KEY) {
+    console.error('GROK_API_KEY not set! Add it in environment variables.');
+}
+
 app.post('/api/chat', async (req, res) => {
     try {
         const response = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -21,20 +26,19 @@ app.post('/api/chat', async (req, res) => {
         });
 
         const data = await response.json();
-
         res.status(response.status).json(data);
     } catch (error) {
         console.error('Proxy error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Proxy failed' });
     }
 });
 
-// Health check (optional)
-app.get('/', (req, res) => {
-    res.send('Grok proxy is running!');
+// Catch-all route to serve index.html for any unmatched paths (enables client-side routing if needed)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/', (req, res) => res.send('Grok proxy running!'));
+
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Proxy server running on port ${port}`);
-});
+app.listen(port, () => console.log(`Running on port ${port}`));
