@@ -185,6 +185,42 @@ select:focus {
     outline: none !important;
     ring: 4px solid #F15A29 !important;
 }
+/* Fix text visibility in modals - especially light mode */
+#post-modal .modal-content {
+    background-color: white !important;
+    color: #002B5C !important;  /* Navy text */
+}
+
+#post-modal .modal-content h3,
+#post-modal .modal-content p,
+#post-modal .modal-content li,
+#post-modal .modal-content ul {
+    color: #002B5C !important;
+}
+
+/* Dark mode override for modal */
+.dark #post-modal .modal-content {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+}
+
+.dark #post-modal .modal-content h3,
+.dark #post-modal .modal-content p,
+.dark #post-modal .modal-content li,
+.dark #post-modal .modal-content ul {
+    color: #e2e8f0 !important;
+}
+
+/* Suggestion list items - extra insurance */
+#post-modal .modal-suggestions li {
+    color: #002B5C !important;
+    background: linear-gradient(to right, #002B5C/5, #00A89D/5) !important;
+}
+
+.dark #post-modal .modal-suggestions li {
+    color: #e2e8f0 !important;
+    background: linear-gradient(to right, #00A89D/20, #F15A29/20) !important;
+}
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
