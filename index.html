@@ -2527,65 +2527,94 @@ function cycleActivities() {
     const list = selection.map(act => `<li class="mb-2">${act}</li>`).join('');
     document.getElementById('time-block-output').innerHTML = `<h4 class="text-2xl font-medium mb-4 capitalize text-[#00A89D]">Cycled ${freq} Ideas</h4><ul class="space-y-2">${list}</ul>`;
 }
-async function generateSalesScript() {
+    async function generateSalesScript() {
     const scenarioSelect = document.getElementById('script-scenario');
     const contextInput = document.getElementById('script-context');
     const output = document.getElementById('script-output');
     const loading = document.getElementById('script-loading');
+
+    if (!scenarioSelect || !output || !loading) {
+        alert("Script generator elements not found.");
+        return;
+    }
 
     const scenario = scenarioSelect.options[scenarioSelect.selectedIndex].text;
     const context = contextInput.value.trim();
 
     output.classList.add('hidden');
     loading.classList.remove('hidden');
+    output.innerHTML = '';
 
-    let userPrompt = `Generate 3 short, warm, relationship-focused script responses for this situation: "${scenario}".
+    let userPrompt = `Write a natural, relationship-focused sales script for a loan officer in this situation: ${scenario}.
 
-    Style guidelines:
-    - Warm, curious, and helpful — never pushy or salesy
-    - Use Phil M. Jones-style magic words where natural (e.g., "Just out of curiosity", "How would you feel if", "Most people in your position")
-    - Focus on building trust and long-term relationships
-    - End with an open-ended question to continue the conversation
-    - Keep each script under 6 sentences
+Tone: Warm, trustworthy, curious — never pushy. Use open-ended questions, listen more than talk, and focus on helping.
 
-    Make them sound like a trusted advisor who genuinely cares about the client's success.`;
+`;
 
     if (context) {
-        userPrompt += ` Additional context: ${context}. Tailor the scripts accordingly.`;
+        userPrompt += `Additional context: ${context}\n\n`;
     }
 
+    userPrompt += `Structure:
+- Greeting and rapport building
+- Discovery questions
+- Value presentation
+- Handling common objection (if relevant)
+- Natural close/ next step
+- Keep under 400 words, conversational`;
+
     try {
-        const response = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-        // NO Authorization header — key is on server
-    },
-    body: JSON.stringify({
-        model: "grok-beta",
-        messages: [
-            { role: "system", content: "Your system prompt here" },
-            { role: "user", content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500
-    })
-});
+        const response = await fetch('https://loanofficersalescoach.onrender.com/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: "grok-beta",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are an expert sales coach for mortgage loan officers. Write natural, authentic scripts that build trust and encourage conversation. Use empathy, curiosity, and value-first language."
+                    },
+                    {
+                        role: "user",
+                        content: userPrompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 800
+            })
+        });
+
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
         const data = await response.json();
-        const scriptContent = data.choices[0].message.content;
+        const scriptContent = data.choices[0].message.content.trim();
 
-        output.innerHTML = `<div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30">
-            <div class="prose prose-lg dark:prose-invert max-w-none">${marked.parse(scriptContent)}</div>
-        </div>`;
+        output.innerHTML = `
+            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30 shadow-lg">
+                <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+                    ${marked.parse(scriptContent)}
+                </div>
+                <div class="text-center">
+                    <button onclick="navigator.clipboard.writeText(document.querySelector('#script-output .prose').innerText)" 
+                            class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                        📋 Copy Script to Clipboard
+                    </button>
+                </div>
+            </div>`;
 
         output.classList.remove('hidden');
-        loading.classList.add('hidden');
 
     } catch (error) {
-        console.error(error);
-        output.innerHTML = `<p class="text-red-600 text-center">Error generating script. Check console.</p>`;
+        console.error("Script generation failed:", error);
+        output.innerHTML = `
+            <div class="text-center text-red-600 dark:text-red-400 p-8 bg-red-50 dark:bg-red-900/30 rounded-2xl">
+                <p class="font-bold text-xl mb-2">Oops! Script generation failed.</p>
+                <p>Check console or try again.</p>
+            </div>`;
         output.classList.remove('hidden');
+    } finally {
         loading.classList.add('hidden');
     }
 }
@@ -3248,4 +3277,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
