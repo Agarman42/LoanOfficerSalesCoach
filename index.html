@@ -2608,13 +2608,17 @@ Tone: Warm, trustworthy, curious — never pushy. Use open-ended questions, list
 
     } catch (error) {
         console.error("Script generation failed:", error);
-        output.innerHTML = `
-            <div class="text-center text-red-600 dark:text-red-400 p-8 bg-red-50 dark:bg-red-900/30 rounded-2xl">
-                <p class="font-bold text-xl mb-2">Oops! Script generation failed.</p>
-                <p>Check console or try again.</p>
-            </div>`;
+        output.innerHTML = `<div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30">
+            <div class="prose prose-lg dark:prose-invert max-w-none">${marked.parse(scriptContent)}</div>
+        </div>`;
+
         output.classList.remove('hidden');
-    } finally {
+        loading.classList.add('hidden');
+
+    } catch (error) {
+        console.error(error);
+        output.innerHTML = `<p class="text-red-600 text-center">Error generating script. Check console.</p>`;
+        output.classList.remove('hidden');
         loading.classList.add('hidden');
     }
 }
@@ -3277,5 +3281,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
+
 
 
