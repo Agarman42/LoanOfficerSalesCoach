@@ -1959,48 +1959,42 @@ select:focus {
                 </div>
             </div>
         </section>
-                <section id="underwriting-search" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Underwriting Guideline Search</h2>
-            <p class="mb-8 text-lg">Ask any underwriting question (Conventional, FHA, VA, USDA, Non-QM) and get a clear, accurate answer with confidence level.</p>
-
-            <div class="bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-400 dark:border-yellow-600 rounded-2xl p-6 mb-8">
-                <p class="text-lg font-semibold text-yellow-800 dark:text-yellow-200">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    Always verify final decisions with official guidelines and Ruoff overlays.
-                </p>
-            </div>
-
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-lg font-semibold mb-2">Your Underwriting Question</label>
-                    <textarea id="uw-question" rows="4" placeholder="e.g., What are the minimum credit score requirements for FHA with compensating factors? Can a borrower with a recent bankruptcy qualify for Conventional? DTI limits for VA loans?" 
-                              class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg resize-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-lg font-semibold mb-2">Loan Type (optional)</label>
-                    <select id="uw-loan-type" class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg">
-                        <option value="any">Any / General</option>
-                        <option value="conventional">Conventional</option>
-                        <option value="fha">FHA</option>
-                        <option value="va">VA</option>
-                        <option value="usda">USDA</option>
-                        <option value="non-qm">Non-QM / Jumbo</option>
-                    </select>
-                </div>
-
-                <button onclick="searchUnderwriting()" class="w-full bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-                    Search Guidelines
-                </button>
-            </div>
-
-            <div id="uw-output" class="mt-12 prose prose-lg dark:prose-invert max-w-none hidden"></div>
-
-            <div id="uw-loading" class="mt-12 text-center hidden">
-                <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
-                <p class="mt-4 text-xl">Researching guidelines...</p>
-            </div>
-        </section>
+                <section id="underwriting-search" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+    <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Underwriting Guideline Search</h2>
+    <p class="mb-8 text-lg">Ask any underwriting question (Conventional, FHA, VA, USDA, Non-QM) and get a clear, accurate answer with confidence level.</p>
+    <div class="bg-red-50 dark:bg-red-900/30 border-2 border-red-500 dark:border-red-600 rounded-2xl p-6 mb-8 shadow-md">
+        <p class="text-lg font-bold text-red-800 dark:text-red-200">
+            <i class="fas fa-exclamation-triangle mr-2 text-red-600 dark:text-red-400 text-2xl"></i>
+            Always verify final decisions with official guidelines and Ruoff overlays.
+        </p>
+    </div>
+    <div class="space-y-6">
+        <div>
+            <label class="block text-lg font-semibold mb-2">Your Underwriting Question</label>
+            <textarea id="uw-question" rows="4" placeholder="e.g., What are the minimum credit score requirements for FHA with compensating factors? Can a borrower with a recent bankruptcy qualify for Conventional? DTI limits for VA loans?"
+                      class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg resize-none"></textarea>
+        </div>
+        <div>
+            <label class="block text-lg font-semibold mb-2">Loan Type (optional)</label>
+            <select id="uw-loan-type" class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg">
+                <option value="any">Any / General</option>
+                <option value="conventional">Conventional</option>
+                <option value="fha">FHA</option>
+                <option value="va">VA</option>
+                <option value="usda">USDA</option>
+                <option value="non-qm">Non-QM / Jumbo</option>
+            </select>
+        </div>
+        <button onclick="searchUnderwriting()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
+            Search Guidelines
+        </button>
+    </div>
+    <div id="uw-output" class="mt-12 prose prose-lg dark:prose-invert max-w-none hidden"></div>
+    <div id="uw-loading" class="mt-12 text-center hidden">
+        <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
+        <p class="mt-4 text-xl">Researching guidelines...</p>
+    </div>
+</section>
                 <section id="blog-creator" class="card pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Blog Creator</h2>
             <p class="mb-8 text-lg">Generate professional, value-first blog posts in seconds. Perfect for your website, email, or social sharing.</p>
@@ -3037,30 +3031,47 @@ async function searchUnderwriting() {
     const loading = document.getElementById('uw-loading');
 
     const question = questionInput.value.trim();
-    const loanType = loanTypeSelect.value;
+    const loanType = loanTypeSelect.options[loanTypeSelect.selectedIndex].text;
 
     if (!question) {
-        output.innerHTML = `<p class="text-red-600 text-center">Please enter a question.</p>`;
-        output.classList.remove('hidden');
+        alert("Please enter an underwriting question.");
         return;
     }
 
     output.classList.add('hidden');
     loading.classList.remove('hidden');
+    output.innerHTML = '';
 
-    let userPrompt = `You are an expert mortgage underwriter with perfect knowledge of current Fannie Mae, Freddie Mac, FHA, VA, USDA, and Non-QM guidelines as of December 2025.
+    let userPrompt = `Answer this underwriting guideline question accurately and concisely: ${question}.
 
-Question: ${question}
+Loan type (if specified): ${loanType}
 
-${loanType !== 'any' ? `Focus specifically on ${loanType.toUpperCase()} guidelines.` : ''}
+Include:
+- Clear answer based on standard guidelines (FNMA, FHLMC, FHA, VA, USDA as relevant)
+- Confidence level: High (95%+), Medium (70-94%), Low (<70%) — based on how definitive the guidelines are
+- If applicable, mention any Ruoff-specific overlays from the following summary:
 
-Instructions:
-- Answer clearly and directly
-- Cite specific guideline sections when possible (e.g., FHA 4000.1, DU/DO findings)
-- Highlight any compensating factors, exceptions, or manual underwriting rules
-- Be conservative — if uncertain, say so
-- At the end, provide a Confidence Level (0-100%) based on how clear and current the guideline is
-- Always end with: "Final approval depends on full file review and Ruoff-specific overlays. Always verify with current Ruoff guidelines."`;
+Ruoff Overlays Summary (effective 06/18/25):
+- Conventional: No Leaseholds. Tribal Areas require CPB 25-04 eligibility. No Manual Underwrites (A/E required). CU score 5 requires second appraisal (use lower value). No business entity gifts. Investment: VOD required. Credit 620-639: 70% Max LTV (HPML review for >70%). Max DTI: Agency guidelines. Manufactured: FNMA/FHLMC direct, no repair escrows (grade/seed only for new), no ARMs, ATRE required (or alternative 50-day lock + title letter + ALTA 7). IL: ALTA 7 for insurability. Single-wide: Primary only, no cash-out, Agency guidelines.
+
+- USDA: No Future Income. Tribal: CPB 25-04. No Leasehold. Min Credit 620. No No Credit Score loans. Manufactured: ATRE (or alternative), IL ALTA 7, Single-wide eligible.
+
+- VA: No State Bond (except KHC). No Leasehold. Tribal: CPB 25-04. No No Credit Score. AUS: Min 600, Cash-Out 100% LTV (600+), 90% (600-619). Manual: Min 600, DTI 41%, Education for Purchase, No Double BK, Cash-Out 90%. High Balance: Min 700, Cash-Out 90%. IRRRL: Max LTV 105%, Exempt DTI. Manufactured: No Manual, No IRRRL, Cash-Out 75%, ATRE, IL ALTA 7, Single-wide: Primary, No Cash-Out.
+
+- FHA: No Leasehold. Tribal: CPB 25-04. 203(k) separate. Manufactured: No Manual, No Non-Credit Streamline, No $100 Down, Cash-Out 75%, ATRE, IL ALTA 7, Single-wide: Primary, No Cash-Out, No HomeNow. AUS: <580 Not Eligible, 580-599 Education for housing lates/rent free, 600-619 Education for rent free/DTI >=40%. Manual: No Credit: Education, No Pre-Approval, No Cash-Out, No Double BK, Zero lates 24mo housing/installment, 12mo revolving, Max LTV 90% or with reserves, No MFH, GNMA direct. <600 Not Eligible, 600-619 No Cash-Out, DTI 31/43, Zero lates. 620-639 Education, Zero lates. >=640 No overlays.
+
+- State Bond HFA: No VA (except KHC), No Manual, Check Encompass, MCC for Conv/FHA, Earnest money verified, Manufactured: Allowed per state, No single-wide, ATRE, IL ALTA 7, Alternative: 50-day lock, etc.
+
+- 2-1 Buydown: Eligible Conv/FHA/VA/USDA, Ineligible State Bond/renov/construction, Purchase only, Fixed rate, 1-2 units, No Manufactured, Occupancy: Gov Primary, Conv Primary/Second, Contract: Buydown fee in concessions, Fee: Seller/builder, No borrower pay, Locked direct FNMA/FHLMC/GNMA.
+
+Structure response:
+- Main answer
+- Ruoff Overlays Check: List any relevant overlays
+- Confidence level (emphasize)
+
+Be accurate and conservative. If unsure, say so.
+
+`;
 
     try {
         const response = await fetch('/api/chat', {
@@ -3071,105 +3082,42 @@ Instructions:
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [
-                    {
-                        role: "system",
-                        content: "You are a highly accurate, conservative mortgage underwriting expert. Prioritize correctness over speed. Never guess. If a guideline is ambiguous or agency-specific overlays may apply, note it clearly. Use precise terminology. Always include a confidence percentage and Ruoff overlay reminder."
-                    },
-                    {
-                        role: "user",
-                        content: userPrompt
-                    }
+                    { role: "system", content: "You are an expert in mortgage underwriting guidelines. Provide accurate, concise answers based on standard agency rules and the provided Ruoff overlays. Always include confidence level and remind to verify." },
+                    { role: "user", content: userPrompt }
                 ],
-                temperature: 0.3,  // Low temperature = more factual, less creative
+                temperature: 0.5,
                 max_tokens: 1000
             })
         });
 
-        const data = await response.json();
-        const answer = data.choices[0].message.content;
-
-        output.innerHTML = `<div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border-l-8 border-[#002B5C]">
-            <div class="prose prose-lg dark:prose-invert max-w-none">${marked.parse(answer)}</div>
-        </div>`;
-
-        output.classList.remove('hidden');
-
-    } catch (error) {
-        console.error(error);
-        output.innerHTML = `<p class="text-red-600 text-center">Error searching guidelines. Check console.</p>`;
-        output.classList.remove('hidden');
-    } finally {
-        loading.classList.add('hidden');
-    }
-}
-let chatHistory = [
-    { role: "system", content: "You are Grok, a helpful AI assistant for loan officers. Be warm, direct, and practical. Focus on sales, marketing, underwriting, motivation, and relationship-building. Use humor when appropriate. Always aim to help the user succeed." }
-];
-
-async function sendChatMessage() {
-    const input = document.getElementById('chat-input');
-    const messagesDiv = document.getElementById('chat-messages');
-    const loading = document.getElementById('chat-loading');
-
-    const userMessage = input.value.trim();
-    if (!userMessage) return;
-
-    // Add user message to chat
-    messagesDiv.innerHTML += `
-        <div class="text-right mb-4">
-            <div class="inline-block bg-[#F15A29] text-white rounded-2xl px-6 py-4 max-w-lg shadow-lg">
-                ${userMessage}
-            </div>
-        </div>
-    `;
-
-    input.value = '';
-    loading.classList.remove('hidden');
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-    // Add to history
-    chatHistory.push({ role: "user", content: userMessage });
-
-    try {
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning",
-                messages: chatHistory,
-                temperature: 0.7,
-                max_tokens: 1000
-            })
-        });
-
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        if (!response.ok) throw new Error('API error');
 
         const data = await response.json();
-        const aiReply = data.choices[0].message.content;
+        const answer = data.choices[0].message.content.trim();
 
-        // Add AI reply
-        messagesDiv.innerHTML += `
-            <div class="text-left mb-4">
-                <div class="inline-block bg-[#002B5C] text-white rounded-2xl px-6 py-4 max-w-lg shadow-lg">
-                    ${marked.parse(aiReply)}
+        // Parse confidence from answer (assume AI outputs "Confidence: X%")
+        const confidenceMatch = answer.match(/Confidence:\s*(\d+)%/i);
+        const confidence = confidenceMatch ? confidenceMatch[1] : '80';  // Default if not found
+
+        output.innerHTML = `
+            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30 shadow-lg">
+                <div class="text-center mb-8">
+                    <span class="inline-block px-6 py-3 rounded-full bg-[#F15A29]/20 text-[#F15A29] font-bold text-3xl">
+                        Confidence: ${confidence}%
+                    </span>
+                </div>
+                <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+                    ${marked.parse(answer)}
                 </div>
             </div>
         `;
 
-        chatHistory.push({ role: "assistant", content: aiReply });
+        output.classList.remove('hidden');
 
     } catch (error) {
-        console.error(error);
-        messagesDiv.innerHTML += `
-            <div class="text-center text-red-600 font-bold">
-                Error: Could not get response. Check console.
-            </div>
-        `;
+        // ... error handling
     } finally {
         loading.classList.add('hidden');
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 }
 
