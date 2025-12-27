@@ -63,8 +63,8 @@
     backdrop-filter: blur(8px);
 }
 .modal-content {
-    background-color: white;
-    dark:bg-gray-800;
+    background-color: #ffffff; /* Light mode */
+    color: #1f2937; /* Dark gray text for light mode */
     margin: 10% auto;
     padding: 32px;
     border-radius: 24px;
@@ -73,6 +73,22 @@
     max-height: 80vh;
     overflow-y: auto;
     border: 2px solid #00A89D;
+}
+
+/* Dark mode override */
+.dark .modal-content {
+    background-color: #1f2937; /* gray-800 equivalent */
+    color: #f3f4f6; /* light gray text for dark mode */
+}
+/* Ensure all text inside modals inherits the correct color */
+.modal-content p,
+.modal-content ul,
+.modal-content li,
+.modal-content h1,
+.modal-content h2,
+.modal-content h3,
+.modal-content h4 {
+    color: inherit;
 }
 .modal-header {
     text-align: center;
@@ -94,6 +110,12 @@
     right: 32px;
 }
 .close-modal:hover {
+    color: #F15A29;
+}
+.dark .close-modal {
+    color: #cbd5e1; /* lighter gray in dark mode */
+}
+.dark .close-modal:hover {
     color: #F15A29;
 }
 .modal-suggestions {
@@ -119,6 +141,71 @@ main > section {
 
 main section > *:first-child {
     margin-top: 0 !important;
+}
+/* Global Fix: Readable Text in Inputs for Light & Dark Mode */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+    background-color: #ffffff !important; /* White in light mode */
+    color: #1f2937 !important; /* Dark gray text in light mode */
+}
+
+.dark input[type="text"],
+.dark input[type="number"],
+.dark input[type="search"],
+.dark textarea,
+.dark select {
+    background-color: #1f2937 !important; /* Dark background in dark mode */
+    color: #f3f4f6 !important; /* Light text in dark mode */
+    border-color: #4b5563 !important; /* Medium gray border */
+}
+
+/* Placeholder text visibility */
+input::placeholder,
+textarea::placeholder {
+    color: #9ca3af !important; /* Gray-400 */
+    opacity: 1;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #9ca3af !important;
+}
+/* Unified AI Tool Styling – Matches Social Media Post Creator */
+.ai-tool-wrapper {
+    @apply bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12;
+}
+
+.ai-tool-wrapper label {
+    @apply block text-lg font-semibold mb-3 text-[#00A89D];
+}
+
+.ai-tool-wrapper select,
+.ai-tool-wrapper input[type="text"],
+.ai-tool-wrapper textarea {
+    @apply w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all;
+}
+
+.ai-tool-wrapper .generate-btn {
+    @apply w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl mt-8;
+}
+
+.ai-tool-wrapper .copy-btn {
+    @apply bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md;
+}
+
+.ai-tool-wrapper .loading-spinner {
+    @apply text-center py-12;
+}
+
+.ai-tool-wrapper .loading-spinner i {
+    @apply fas fa-spinner fa-spin text-6xl text-[#00A89D];
+}
+
+.ai-tool-output {
+    @apply bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96;
 }
     </style>
 </head>
@@ -161,7 +248,7 @@ main section > *:first-child {
 <li><a href="#underwriting-search" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-search-dollar mr-3"></i> Underwriting Guideline Search
 </a></li>
-          <li><a href="#blog-creator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+          <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
             <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
@@ -694,7 +781,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-                messages: [{ role: "user", content: prompt }],
+                    messages: [{ role: "user", content: prompt }],
                     temperature: 0.7,
                     max_tokens: 2000
                 })
@@ -1836,146 +1923,209 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     </div>
 </section>
                 <section id="social-post" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Social Media Post Creator</h2>
-            <p class="mb-8 text-lg">Generate ready-to-post content that builds relationships, sparks engagement, and grows your reach organically.</p>
+    <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Social Media Post Creator</h2>
+    <p class="mb-8 text-lg">Generate ready-to-post content that builds relationships, sparks engagement, and grows your reach organically.</p>
 
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-xl font-semibold mb-3 text-[#002B5C] dark:text-[#00A89D]">Post Type / Goal</label>
-    <select id="post-type" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/50 text-lg">
-                        <option value="custom" selected>Custom Post Idea (type your own below)</option>
-                        <option value="educational">Educational Mortgage Tip</option>
-                        <option value="local">Local Community Spotlight</option>
-                        <option value="personal">Personal / Behind-the-Scenes</option>
-                        <option value="client-win">Client Success Story (with permission)</option>
-                        <option value="market">Market Update</option>
-                        <option value="reel">Fun & Relatable Reel Idea</option>
-                        <option value="engagement">Poll or Engagement Question</option>
-                        <option value="value">Value Giveaway (Guide/Checklist)</option>
-                        <option value="rate-myth">Rate Myth Buster</option>
-                        <option value="just-closed">Just Closed Celebration</option>
-                        <option value="market-update">Local Market Update (Stats + Insight)</option>
-                        <option value="client-story">Client Success Story / Testimonial</option>
-                        <option value="personal">Personal / Behind-the-Scenes (Build Trust)</option>
-                        <option value="educational">Educational Tip (Mortgage or Homeownership)</option>
-                        <option value="engagement">Engagement Question / Poll</option>
-                        <option value="holiday">Holiday / Seasonal Post</option>
-                        <option value="realtor-value">Value for Realtor Partners</option>
-                        <option value="just-listed">Just Listed / Just Sold (Co-Brand Ready)</option>
-                        <option value="motivational">Motivational / Mindset Quote</option>
-                        <option value="fun">Fun / Relatable Meme or Humor</option>
-                        <option value="referral-ask">Subtle Referral Request</option>
-                        <option value="local-spotlight">Local Business or Community Spotlight</option>
-                    </select>
-                </div>
+    <!-- Unified Form Wrapper -->
+    <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12 space-y-8">
+        <!-- Post Type Dropdown -->
+        <div>
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Post Type / Goal</label>
+            <select id="post-type" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
+                <option value="custom" selected>Custom Post Idea (type your own below)</option>
+                <option value="educational">Educational Mortgage Tip</option>
+                <option value="local">Local Community Spotlight</option>
+                <option value="personal">Personal / Behind-the-Scenes</option>
+                <option value="client-win">Client Success Story (with permission)</option>
+                <option value="market">Market Update</option>
+                <option value="reel">Fun & Relatable Reel Idea</option>
+                <option value="engagement">Poll or Engagement Question</option>
+                <option value="value">Value Giveaway (Guide/Checklist)</option>
+                <option value="rate-myth">Rate Myth Buster</option>
+                <option value="just-closed">Just Closed Celebration</option>
+                <option value="market-update">Local Market Update (Stats + Insight)</option>
+                <option value="client-story">Client Success Story / Testimonial</option>
+                <option value="holiday">Holiday / Seasonal Post</option>
+                <option value="realtor-value">Value for Realtor Partners</option>
+                <option value="just-listed">Just Listed / Just Sold (Co-Brand Ready)</option>
+                <option value="motivational">Motivational / Mindset Quote</option>
+                <option value="fun">Fun / Relatable Meme or Humor</option>
+                <option value="referral-ask">Subtle Referral Request</option>
+                <option value="local-spotlight">Local Business or Community Spotlight</option>
+            </select>
+        </div>
 
-                <div class="mt-6">
-    <label class="block text-xl font-semibold mb-3 text-[#002B5C] dark:text-[#00A89D]">Custom Idea or Additional Details (optional if using preset)</label>
-    <textarea id="post-details" rows="4" placeholder="E.g., 'Shout out to my favorite local coffee shop', 'Quick tip on credit scores', 'Behind-the-scenes of a closing day', or any specific angle..." 
-              class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/50 text-lg"></textarea>
-</div>
+        <!-- Custom Details with Dynamic Helper -->
+        <div>
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">
+                Custom Idea or Additional Details
+                <span id="details-helper" class="block text-base font-normal text-gray-600 dark:text-gray-400 mt-2">
+                    e.g., Shout out to my favorite local coffee shop, or quick tip on credit scores
+                </span>
+            </label>
+            <textarea id="post-details" rows="4" 
+                      placeholder="e.g., Shout out to my favorite local coffee shop, or quick tip on credit scores" 
+                      class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 resize-none"></textarea>
+        </div>
 
-                <div id="social-output" class="mt-12 prose prose-lg dark:prose-invert max-w-none hidden"></div>
+        <!-- Generate Button -->
+        <div class="text-center">
+            <button onclick="generateSocialPost()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
+                Generate My Post Now
+            </button>
+        </div>
 
-            <div id="social-loading" class="mt-12 text-center hidden">
-                <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
-                <p class="mt-4 text-xl">Creating your post...</p>
-            </div>
-<!-- Generate Button - Clean, no wrapper background -->
-<div class="text-center mt-12">
-    <button onclick="generateSocialPost()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-        Generate My Post Now
-    </button>
-</div>
-
-            <!-- Key Social Media Tips (from your existing section) -->
-            <!-- Pro Tips Card - Contains ONLY the tips -->
-<div class="mt-12 bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 rounded-2xl p-8 border border-[#00A89D]/30">
-    <h3 class="text-2xl font-bold mb-6 text-[#002B5C] dark:text-[#00A89D]">Pro Tips for Maximum Engagement</h3>
-    <ul class="space-y-3 text-lg text-gray-700 dark:text-gray-300 list-disc pl-6">
-        <li><strong>Educational + Local + Personal + Client Wins + Value</strong> — these are your 5 content pillars</li>
-        <li><strong>Ask questions</strong> — polls, "What do you think?", tag friends</li>
-        <li><strong>Post consistently</strong> — follow the weekly schedule (Motivation Monday, Tip Tuesday, etc.)</li>
-        <li><strong>Use stories daily</strong> — behind-the-scenes, quick tips, polls</li>
-        <li><strong>Tag local businesses/partners</strong> — increases reach exponentially</li>
-        <li><strong>End with subtle CTA</strong> — "DM me", "Comment below", "Tag a friend who needs this"</li>
-        <li><strong>Be human</strong> — share hobbies, family (with permission), wins, and lessons</li>
-    </ul>
-</div>
-
-
-<!-- Loading Spinner -->
-<div id="social-loading" class="text-center mt-12 hidden">
-    <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
-    <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
-        Crafting your perfect post... this takes 5-10 seconds
-    </p>
-</div>
-
-<!-- Output -->
-<div id="social-output" class="mt-12 hidden"></div>
+        <!-- Loading Spinner -->
+        <div id="social-loading" class="text-center py-12 hidden">
+            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
+            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
+                Crafting your perfect post... this takes 5–10 seconds
+            </p>
+        </div>
     </div>
-</div>
-                </section>
+
+    <!-- Output -->
+    <div id="social-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
+        <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+            <!-- Post content will appear here -->
+        </div>
+        <div class="text-center">
+            <button onclick="copySocialPost()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                📋 Copy Post to Clipboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Pro Tips Card -->
+    <div class="mt-12 bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 rounded-3xl p-10 border-2 border-[#00A89D]/30">
+        <h3 class="text-2xl font-bold mb-6 text-[#002B5C] dark:text-[#00A89D]">Pro Tips for Maximum Engagement</h3>
+        <ul class="space-y-4 text-lg text-gray-700 dark:text-gray-300 list-disc pl-6">
+            <li><strong>Educational + Local + Personal + Client Wins + Value</strong> — these are your 5 content pillars</li>
+            <li><strong>Ask questions</strong> — polls, "What do you think?", tag friends</li>
+            <li><strong>Post consistently</strong> — follow the weekly schedule (Motivation Monday, Tip Tuesday, etc.)</li>
+            <li><strong>Use stories daily</strong> — behind-the-scenes, quick tips, polls</li>
+            <li><strong>Tag local businesses/partners</strong> — increases reach exponentially</li>
+            <li><strong>End with subtle CTA</strong> — "DM me", "Comment below", "Tag a friend who needs this"</li>
+            <li><strong>Be human</strong> — share hobbies, family (with permission), wins, and lessons</li>
+        </ul>
+    </div>
+</section>
                     
                 <section id="sales-script" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Sales Script Generator</h2>
-            <p class="mb-8 text-lg">Get instant, relationship-focused scripts for objections, asking for meetings, locking loans, and more — in your warm, trustworthy style.</p>
+    <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Sales Script Generator</h2>
+    <p class="mb-8 text-lg">Generate natural, relationship-focused scripts for any sales situation. Select a common scenario or type your own — get 3–5 warm, effective scripts instantly.</p>
 
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-lg font-semibold mb-2">What Situation Are You Facing?</label>
-                    <select id="script-scenario" class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg">
-    <option value="objection-rate">Borrower says: "Rates are too high right now"</option>
-    <option value="objection-wait">Borrower says: "We're going to wait for rates to drop"</option>
-    <option value="objection-happy">Realtor says: "I'm happy with my current lender"</option>
-    <option value="objection-busy">Realtor says: "I'm too busy right now"</option>
-    <option value="objection-info">Borrower says: "I just want information"</option>
-    <option value="objection-online">Borrower says: "I'm going online for a better rate"</option>
-    <option value="objection-friend">Borrower says: "A friend/family is a loan officer"</option>
-    <option value="ask-meeting-realtor">Ask a realtor for a 1:1 meeting</option>
-    <option value="ask-meeting-borrower">Ask a borrower for an application call</option>
-    <option value="lock-loan">Encourage borrower to lock rate or move forward</option>
-    <option value="referral-ask">Ask past client for referrals</option>
-    <option value="follow-up">Follow up after sending pre-approval or quote</option>
-    <option value="value-add">Offer value to a realtor partner</option>
-    <option value="close-app">Close the loan application</option>
-    <option value="post-closing-survey">Remind client to complete post-closing survey</option>
-    <option value="loan-officer-for-life">Reinforce "I'm your loan officer for life"</option>
-    <option value="equity-check">Reach out for annual equity review</option>
-    <option value="birthday-checkin">Birthday or home anniversary check-in</option>
-    <option value="rate-watch">Offer to monitor rates for future refinance</option>
-    <option value="lost-deal">Re-engage a borrower who went elsewhere</option>
-    <option value="thank-you">Thank realtor partner after a closing</option>
-    <option value="lunch-invite">Invite realtor to lunch/coffee (networking)</option>
-    <option value="new-agent">Welcome a new real estate agent to the market</option>
-    <option value="struggling-agent">Support a realtor having a slow month</option>
-    <option value="client-moving">Help past client who is relocating</option>
-    <option value="investor-client">Talk to investor about next property purchase</option>
-</select>
-<p class="text-sm text-gray-600 dark:text-gray-400 mt-3 italic">
-    Pro Tip: Use these scripts as starting points — personalize with the client's name, shared history, and genuine curiosity for the best results.
-</p>
-                </div>
+    <!-- Unified Form Wrapper -->
+    <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12 space-y-8">
+        <!-- Sales Situation Dropdown -->
+        <div>
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Sales Situation</label>
+            <select id="script-scenario-select" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
+                <option value=" " selected class="font-bold">Use Custom Scenario (type below)</option>
+                <option value="" disabled>──────────────────</option>
+                
+                <optgroup label="Borrower Objections">
+                    <option value="Rates are too high right now">Borrower says: "Rates are too high right now"</option>
+                    <option value="We're going to wait for rates to drop">Borrower says: "We're going to wait for rates to drop"</option>
+                    <option value="I want to wait until after the election">Borrower says: "I want to wait until after the election"</option>
+                    <option value="I don't have enough for a down payment">Borrower says: "I don't have enough for a down payment"</option>
+                    <option value="My credit isn't good enough">Borrower says: "My credit isn't good enough"</option>
+                    <option value="I'm happy renting / not ready to buy">Borrower says: "I'm happy renting / not ready to buy"</option>
+                    <option value="I can get a better deal online">Borrower says: "I can get a better deal online"</option>
+                    <option value="A friend/family member is a loan officer">Borrower says: "A friend/family member is a loan officer"</option>
+                    <option value="I already have a lender">Borrower says: "I already have a lender"</option>
+                    <option value="I'm just shopping around / getting info">Borrower says: "I'm just shopping around / getting info"</option>
+                    <option value="Buying a home is too stressful">Borrower says: "Buying a home is too stressful"</option>
+                    <option value="I don't want to pay PMI">Borrower says: "I don't want to pay PMI"</option>
+                    <option value="I heard closing costs are really high">Borrower says: "I heard closing costs are really high"</option>
+                </optgroup>
+                
+                <optgroup label="Realtor Partner Objections">
+                    <option value="I'm happy with my current lender">Realtor says: "I'm happy with my current lender"</option>
+                    <option value="I'm too busy right now">Realtor says: "I'm too busy right now"</option>
+                    <option value="I have multiple lenders I use">Realtor says: "I have multiple lenders I use"</option>
+                    <option value="Your rates aren't competitive">Realtor says: "Your rates aren't competitive"</option>
+                    <option value="I only work with [big bank]">Realtor says: "I only work with [big bank]"</option>
+                    <option value="My clients go direct to their bank">Realtor says: "My clients go direct to their bank"</option>
+                </optgroup>
+                
+                <optgroup label="Asking for Business">
+                    <option value="Ask a realtor for a 1:1 meeting">Ask a realtor for a 1:1 meeting</option>
+                    <option value="Ask a borrower for an application call">Ask a borrower for an application call</option>
+                    <option value="Encourage borrower to lock rate or move forward">Encourage borrower to lock rate or move forward</option>
+                    <option value="Ask past client for referrals">Ask past client for referrals</option>
+                    <option value="Offer to monitor rates for future refinance">Offer to monitor rates for future refinance</option>
+                    <option value="Re-engage a borrower who went elsewhere">Re-engage a borrower who went elsewhere</option>
+                    <option value="Invite realtor to lunch/coffee">Invite realtor to lunch/coffee</option>
+                    <option value="Welcome a new real estate agent to the market">Welcome a new real estate agent to the market</option>
+                    <option value="Support a realtor having a slow month">Support a realtor having a slow month</option>
+                </optgroup>
+                
+                <optgroup label="Relationship Building">
+                    <option value="Follow up after sending pre-approval or quote">Follow up after sending pre-approval or quote</option>
+                    <option value="Offer value to a realtor partner">Offer value to a realtor partner</option>
+                    <option value="Thank realtor partner after a closing">Thank realtor partner after a closing</option>
+                    <option value="Birthday or home anniversary check-in">Birthday or home anniversary check-in</option>
+                    <option value="Reinforce I'm your loan officer for life">Reinforce "I'm your loan officer for life"</option>
+                    <option value="Reach out for annual equity review">Reach out for annual equity review</option>
+                    <option value="Help past client who is relocating">Help past client who is relocating</option>
+                    <option value="Talk to investor about next property purchase">Talk to investor about next property purchase</option>
+                    <option value="Remind client to complete post-closing survey">Remind client to complete post-closing survey</option>
+                </optgroup>
+                
+                <optgroup label="Special Situations">
+                    <option value="Client moving out of state">Client moving out of state</option>
+                    <option value="Client buying second home/vacation property">Client buying second home/vacation property</option>
+                    <option value="Client going through divorce">Client going through divorce</option>
+                    <option value="Client inheriting property">Client inheriting property</option>
+                    <option value="Client with non-traditional income">Client with non-traditional income (self-employed, gig)</option>
+                    <option value="Client with recent credit event">Client with recent credit event (bankruptcy, foreclosure)</option>
+                </optgroup>
+            </select>
+        </div>
 
-                <div>
-                    <label class="block text-lg font-semibold mb-2">Additional Context (optional)</label>
-                    <input type="text" id="script-context" placeholder="e.g., first-time buyer, move-up buyer, strong referral partner" 
-                           class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg">
-                </div>
+        <!-- Custom Scenario – Only visible when custom selected -->
+        <div id="custom-scenario-wrapper" class="space-y-3">
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Custom Scenario (type your own)</label>
+            <textarea id="custom-scenario" rows="3" placeholder="Describe the exact situation (e.g., Client wants to buy but has a recent short sale)" 
+                      class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"></textarea>
+        </div>
 
-                <button onclick="generateSalesScript()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-                    Generate Script
-                </button>
-            </div>
+        <!-- Additional Context -->
+        <div>
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Additional Context (optional – helps make scripts better)</label>
+            <textarea id="script-context" rows="4" placeholder="e.g., first-time buyer, strong referral partner, move-up buyer, investor, self-employed" 
+                      class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"></textarea>
+        </div>
 
-            <div id="script-output" class="mt-12 prose prose-lg dark:prose-invert max-w-none hidden"></div>
+        <!-- Generate Button -->
+        <div class="text-center">
+            <button onclick="generateSalesScript()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
+                Generate Scripts
+            </button>
+        </div>
 
-            <div id="script-loading" class="mt-12 text-center hidden">
-                <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
-                <p class="mt-4 text-xl">Crafting your perfect script...</p>
-            </div>
-        </section>
+        <!-- Loading Spinner -->
+        <div id="script-loading" class="text-center py-12 hidden">
+            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
+            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
+                Generating your scripts... this takes 10–20 seconds
+            </p>
+        </div>
+    </div>
+
+    <!-- Output -->
+    <div id="script-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
+        <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+            <!-- Scripts will be inserted here -->
+        </div>
+        <div class="text-center">
+            <button onclick="copySalesScripts()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                📋 Copy All Scripts
+            </button>
+        </div>
+    </div>
+</section>
         <section id="eventplanning" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Event Planning – Build Relationships & Generate Referrals</h2>
     <p class="mb-8 text-lg">Events are one of the highest-ROI activities for loan officers. Done right, they strengthen relationships with past clients, impress referral partners, and create organic leads — all while being fun and memorable. This is your complete playbook for planning, executing, and following up on events that drive business.</p>
@@ -2228,21 +2378,28 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
                 <section id="underwriting-search" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Underwriting Guideline Search</h2>
     <p class="mb-8 text-lg">Ask any underwriting question (Conventional, FHA, VA, USDA, Non-QM) and get a clear, accurate answer with confidence level.</p>
+
+    <!-- Important Warning -->
     <div class="bg-red-50 dark:bg-red-900/30 border-2 border-red-500 dark:border-red-600 rounded-2xl p-6 mb-8 shadow-md">
         <p class="text-lg font-bold text-red-800 dark:text-red-200">
             <i class="fas fa-exclamation-triangle mr-2 text-red-600 dark:text-red-400 text-2xl"></i>
             Always verify final decisions with official guidelines and Ruoff overlays.
         </p>
     </div>
-    <div class="space-y-6">
+
+    <!-- Unified Form Wrapper -->
+    <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12 space-y-8">
+        <!-- Question Input -->
         <div>
-            <label class="block text-lg font-semibold mb-2">Your Underwriting Question</label>
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Your Underwriting Question</label>
             <textarea id="uw-question" rows="4" placeholder="e.g., What are the minimum credit score requirements for FHA with compensating factors? Can a borrower with a recent bankruptcy qualify for Conventional? DTI limits for VA loans?"
-                      class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg resize-none"></textarea>
+                      class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 resize-none"></textarea>
         </div>
+
+        <!-- Loan Type Dropdown -->
         <div>
-            <label class="block text-lg font-semibold mb-2">Loan Type (optional)</label>
-            <select id="uw-loan-type" class="w-full p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg">
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Loan Type (optional)</label>
+            <select id="uw-loan-type" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
                 <option value="any">Any / General</option>
                 <option value="conventional">Conventional</option>
                 <option value="fha">FHA</option>
@@ -2251,85 +2408,148 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
                 <option value="non-qm">Non-QM / Jumbo</option>
             </select>
         </div>
-        <button onclick="searchUnderwriting()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-            Search Guidelines
-        </button>
+
+        <!-- Generate Button -->
+        <div class="text-center">
+            <button onclick="searchUnderwriting()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
+                Search Guidelines
+            </button>
+        </div>
+
+        <!-- Loading Spinner (Large & Clear) -->
+        <div id="uw-loading" class="text-center py-12 hidden">
+            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
+            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
+                Researching guidelines... this takes 10–20 seconds
+            </p>
+        </div>
     </div>
-    <div id="uw-output" class="mt-12 prose prose-lg dark:prose-invert max-w-none hidden"></div>
-    <div id="uw-loading" class="mt-12 text-center hidden">
-        <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
-        <p class="mt-4 text-xl">Researching guidelines...</p>
+
+    <!-- Output -->
+    <div id="uw-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
+        <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+            <!-- Response will appear here -->
+        </div>
+        <div class="text-center">
+            <button onclick="copyUwOutput()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                📋 Copy Response
+            </button>
+        </div>
     </div>
 </section>
-                <section id="blog-creator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Blog Creator</h2>
-            <p class="mb-8 text-lg">Generate professional, value-first blog posts in seconds. Perfect for your website, email, or social sharing.</p>
+                <section id="blog" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+    <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Blog Creator – Authority-Building Content in Seconds</h2>
+    <p class="mb-8 text-lg">Generate SEO + GEO-optimized blog posts that position you as the trusted expert. Select a topic from the list or type your own, choose your tone, and get a ready-to-publish post (800–1,200 words).</p>
 
-            <div class="space-y-6">
-                <div>
-    <label class="block text-xl font-semibold mb-3 text-[#002B5C] dark:text-[#00A89D]">Blog Topic / Angle</label>
-    <select id="blog-topic" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/50 text-lg">
-        <option value="custom" selected>Custom Topic (type your own idea below)</option>
-        <option value="rates">Current Mortgage Rates & Trends</option>
-        <option value="first-time">First-Time Homebuyer Guide</option>
-        <option value="refinance">When & How to Refinance</option>
-        <option value="local-market">Local Market Update</option>
-        <option value="credit">Improving Credit for Better Rates</option>
-        <option value="down-payment">Down Payment Assistance Programs</option>
-        <option value="closing">What to Expect at Closing</option>
-        <option value="myths">Common Mortgage Myths Busted</option>
-        <option value="investment">Buying an Investment Property</option>
-        <option value="renovation">Renovation Loans Explained</option>
-        <option value="va-fha">VA vs FHA Loans</option>
-        <option value="first-time-basics">First-Time Homebuyer Basics: What to Expect</option>
-        <option value="down-payment">Down Payment Assistance Programs in IN, OH, MI, KY</option>
-        <option value="credit-improvement">5 Credit Moves to Boost Your Score Before Applying</option>
-        <option value="pre-approval">Why Pre-Approval Is Your Strongest Offer Weapon</option>
-        <option value="rate-environment">Should You Buy Now or Wait for Rates to Drop?</option>
-        <option value="refinance">Is Refinancing Worth It in Today’s Market?</option>
-        <option value="market-update">Current Housing Market Update (Local + National Trends)</option>
-        <option value="home-tips">Home Maintenance Calendar: What to Do Each Season</option>
-        <option value="buying-process">The Step-by-Step Home Buying Process Explained</option>
-        <option value="closing-costs">Closing Costs 101: What They Are & How to Reduce Them</option>
-        <option value="fha-va">FHA vs VA vs Conventional: Which Is Right for You?</option>
-        <option value="investment">Buying Your First Investment Property</option>
-        <option value="move-up">Moving Up: Selling Your Current Home & Buying the Next</option>
-        <option value="new-construction">Pros & Cons of New Construction vs Resale Homes</option>
-        <option value="inspection">Home Inspections: What Buyers Need to Know</option>
-        <option value="appraisal">Understanding Appraisals & How to Avoid Low Values</option>
-        <option value="equity">Home Equity: How to Use It Wisely (HELOC vs Cash-Out Refi)</option>
-        <option value="renovation">Financing Renovations: 203(k) and Other Options</option>
-        <option value="self-employed">Self-Employed Borrowers: How to Qualify Successfully</option>
-        <option value="gift-funds">Using Gift Funds for Down Payment: Rules & Tips</option>
-        <option value="co-borrower">Adding a Co-Borrower or Co-Signer: Pros & Cons</option>
-        <option value="rate-buydown">Temporary vs Permanent Rate Buydowns Explained</option>
-        <option value="local-spotlight">Spotlight: Best Neighborhoods for Families in [Your Area]</option>
-</select>
-<p class="text-sm text-gray-600 dark:text-gray-400 mt-3 italic">
-        Pro Tip: Great blogs educate first, sell second. Include local insights, real client examples, and end with a natural call-to-action.
-    </p>
-                </div>
+    <!-- Unified Form Wrapper -->
+    <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12 space-y-8">
+        <!-- Tone Selector -->
+        <div>
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Tone</label>
+            <select id="blog-tone" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
+                <option value="Friendly & Relatable" selected>Friendly & Relatable (Recommended)</option>
+                <option value="Educational & Informative">Educational & Informative</option>
+                <option value="Professional & Authoritative">Professional & Authoritative</option>
+                <option value="Fun & Lighthearted">Fun & Lighthearted</option>
+                <option value="Motivational & Inspiring">Motivational & Inspiring</option>
+            </select>
+        </div>
 
-                <div class="mt-6">
-    <label class="block text-xl font-semibold mb-3 text-[#002B5C] dark:text-[#00A89D]">Your Custom Topic or Details (optional if using a preset)</label>
-    <textarea id="blog-details" rows="4" placeholder="E.g., 'Why rates are dropping in 2026', 'Holiday home buying tips', 'Local Fort Wayne market forecast', or any specific angle..." 
-              class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/50 text-lg"></textarea>
-</div>
+        <!-- Topic Dropdown + Custom Input -->
+        <div>
+            <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Topic</label>
+            <select id="blog-topic-select" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 mb-4">
+                <option value="" disabled selected>Choose a topic or type your own below</option>
+                
+                <optgroup label="First-Time Home Buyers">
+                    <option>The Complete 2026 Guide to Buying Your First Home</option>
+                    <option>How Much Down Payment Do You Really Need in 2026?</option>
+                    <option>First-Time Buyer Programs: What’s Available and How to Qualify</option>
+                    <option>The Biggest Mistakes First-Time Buyers Make (and How to Avoid Them)</option>
+                    <option>Buying a Home with Student Loans: Yes, It’s Possible!</option>
+                    <option>How to Get Pre-Approved: What Lenders Really Look For</option>
+                    <option>Closing Costs Explained: What First-Time Buyers Should Budget</option>
+                    <option>Should You Buy Now or Wait for Lower Rates in 2026?</option>
+                    <option>The Truth About PMI: When You Need It and How to Cancel</option>
+                    <option>Building Equity as a First-Time Buyer: Strategies That Work</option>
+                </optgroup>
+                
+                <optgroup label="Refinancing & Rates">
+                    <option>Should You Refinance in 2026? A Complete Guide</option>
+                    <option>When Is the Best Time to Refinance Your Mortgage?</option>
+                    <option>Temporary Rate Buydowns Explained: Lower Payments for the First Few Years</option>
+                    <option>Cash-Out Refinance: When It Makes Sense (and When It Doesn’t)</option>
+                    <option>Refinancing to Remove PMI: Step-by-Step</option>
+                    <option>How Much Can You Save by Refinancing? Real Examples</option>
+                    <option>Refinance Myths That Could Cost You Thousands</option>
+                    <option>ARMs vs Fixed: Which Is Better in Today’s Market?</option>
+                </optgroup>
+                
+                <optgroup label="Credit & Qualification">
+                    <option>How to Improve Your Credit Score Before Buying a Home</option>
+                    <option>Can You Buy a Home with a Credit Score Under 620? The Truth</option>
+                    <option>Debt-to-Income Ratio Explained: How Lenders Really Look at It</option>
+                    <option>Common Credit Report Errors That Block Approvals</option>
+                    <option>Non-Traditional Credit: How to Qualify Without a FICO Score</option>
+                    <option>Rapid Rescoring: Boost Your Score in Days</option>
+                </optgroup>
+                
+                <optgroup label="Homeownership & Lifestyle">
+                    <option>The Hidden Costs of Homeownership (and How to Budget for Them)</option>
+                    <option>Rent vs Buy in 2026: The Math You Need to Know</option>
+                    <option>Home Renovation Loans: 203(k), HomeStyle, and More</option>
+                    <option>Is Homeownership Still Worth It in 2026?</option>
+                    <option>Moving Up: How to Buy Your Second Home</option>
+                    <option>Downsizing in Retirement: Financial and Emotional Considerations</option>
+                    <option>Turning Your Home into an Income Property</option>
+                </optgroup>
+                
+                <optgroup label="Loan Programs">
+                    <option>FHA Loans in 2026: Lower MIP and New Guidelines</option>
+                    <option>VA Loans: The Best Benefit Most Veterans Don’t Use</option>
+                    <option>USDA Loans: Zero Down in Rural and Suburban Areas</option>
+                    <option>Jumbo Loans: What Changed in 2026 and How to Qualify</option>
+                    <option>Non-QM Loans: Options for Self-Employed and Investors</option>
+                    <option>Bank Statement Loans for Gig Workers and Entrepreneurs</option>
+                    <option>Reverse Mortgages: New Rules and Who Benefits</option>
+                </optgroup>
+                
+                <optgroup label="Market Trends & Insights">
+                    <option>Mortgage Rate Forecast for 2026: What Experts Are Saying</option>
+                    <option>Why Home Inventory Is Increasing (and What It Means for Buyers)</option>
+                    <option>The Truth About iBuyers and Instant Offers in 2026</option>
+                    <option>Investment Properties in 2026: Where the Opportunities Are</option>
+                    <option>How Inflation and Fed Policy Affect Mortgage Rates</option>
+                    <option>New Construction vs Resale: Pros, Cons, and Financing</option>
+                </optgroup>
+            </select>
 
-                <button onclick="generateBlog()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-                    Generate Blog Post
-                </button>
-            </div>
+            <input type="text" id="blog-topic" placeholder="Or type your own custom topic here" 
+                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Select from above or type your own — both work!</p>
+        </div>
 
-            <div id="blog-output" class="mt-12 prose prose-lg dark:prose-invert max-w-none hidden">
-                <!-- Generated blog will appear here -->
-            </div>
+        <!-- Generate Button -->
+        <div class="text-center">
+            <button onclick="generateBlog()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
+                Generate Blog Post
+            </button>
+        </div>
 
-            <div id="blog-loading" class="mt-12 text-center hidden">
-                <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
-                <p class="mt-4 text-xl">Crafting your blog post...</p>
-            </div>
-        </section>
+        <!-- Loading Spinner (Now Matches Social Post & Sales Script) -->
+        <div id="blog-loading" class="text-center py-12 hidden">
+            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
+            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
+                Generating your blog post... this takes 20–40 seconds
+            </p>
+        </div>
+    </div>
+
+    <!-- Blog Output -->
+    <div id="blog-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96">
+        <p class="text-gray-500 dark:text-gray-400 italic text-center py-20">Select or type a topic → choose tone → click Generate to create your blog post</p>
+    </div>
+</section>
         <section id="books" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Recommended Books</h2>
             <p class="mb-4">Explore these highly rated books to enhance your skills in sales, networking, and more.</p>
@@ -2728,43 +2948,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     </div>
 </section>
        
-        <section id="sales-advice" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Sales Advice (Coming Soon)</h2>
-            <p class="mb-4">Get personalized advice on overcoming objections, script strategies, thank you notes, and value ideas for partners.</p>
-            <input type="text" placeholder="E.g., 'Script for rate lock objection'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
-            <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Ask Grok</button>
-        </section>
-        <section id="underwriting-guide" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Underwriting Guide (Coming Soon)</h2>
-            <p class="mb-4">Accurate guide with Ruoff overlays and confidence ratings per response.</p>
-            <input type="text" placeholder="E.g., 'FHA income requirements'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
-            <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Ask Grok</button>
-        </section>
-        <section id="newsletter-gen" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Newsletter Generator (Coming Soon)</h2>
-            <p class="mb-4">Create HTML newsletters for your local market with verified links.</p>
-            <input type="text" placeholder="E.g., 'Weekly market update for Indianapolis'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
-            <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Generate</button>
-        </section>
-        <section id="blog-gen" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Blog Creator (Coming Soon)</h2>
-            <p class="mb-4">Generate blog content on any topic instantly.</p>
-            <input type="text" placeholder="E.g., 'Benefits of VA loans'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
-            <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Generate</button>
-        </section>
-        <section id="graphics-gen" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Graphics Creator (Coming Soon)</h2>
-            <p class="mb-4">Create marketing graphics for social, flyers, and more.</p>
-            <input type="text" placeholder="E.g., 'Open house flyer for FHA loans'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
-            <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Generate</button>
-        </section>
-        <section id="chat" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Grok Chat (Coming Soon)</h2>
-            <p class="mb-4">Personalized advice on any topic.</p>
-            <input type="text" placeholder="E.g., 'How to handle rates too high?'" class="w-full p-4 rounded-full border border-[#00A89D] mb-4 focus:ring-[#F15A29] focus:glow-[#00A89D]">
-            <button class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full">Ask Grok</button>
-        </section>
-    </main>
+          </main>
     <script>
 // Menu toggle
 document.getElementById('menu-toggle').addEventListener('click', () => {
@@ -2929,122 +3113,56 @@ function cycleActivities() {
     const list = selection.map(act => `<li class="mb-2">${act}</li>`).join('');
     document.getElementById('time-block-output').innerHTML = `<h4 class="text-2xl font-medium mb-4 capitalize text-[#00A89D]">Cycled ${freq} Ideas</h4><ul class="space-y-2">${list}</ul>`;
 }
+
 async function generateSalesScript() {
-    const scenarioSelect = document.getElementById('script-scenario');
-    const contextInput = document.getElementById('script-context');
-    const output = document.getElementById('script-output');
-    const loading = document.getElementById('script-loading');
+    const dropdown = document.getElementById('script-scenario-select');
+    const customTextarea = document.getElementById('custom-scenario');
+    const context = document.getElementById('script-context').value.trim();
 
-    const scenario = scenarioSelect.options[scenarioSelect.selectedIndex].text;
-    const context = contextInput.value.trim();
+    let scenario = '';
 
-    output.classList.add('hidden');
-    loading.classList.remove('hidden');
-
-    let userPrompt = `Generate 3 short, warm, relationship-focused script responses for this situation: "${scenario}".
-
-    Style guidelines:
-    - Warm, curious, and helpful — never pushy or salesy
-    - Use Phil M. Jones-style magic words where natural (e.g., "Just out of curiosity", "How would you feel if", "Most people in your position")
-    - Focus on building trust and long-term relationships
-    - End with an open-ended question to continue the conversation
-    - Keep each script under 6 sentences
-
-    Make them sound like a trusted advisor who genuinely cares about the client's success.`;
-
-    if (context) {
-        userPrompt += ` Additional context: ${context}. Tailor the scripts accordingly.`;
+    // Handle custom vs dropdown selection
+    if (dropdown.value === ' ') {  // ' ' is your custom option value
+        scenario = customTextarea.value.trim();
+    } else {
+        scenario = dropdown.value || customTextarea.value.trim();
     }
 
-    try {
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are an expert loan officer sales coach. All responses must be relationship-first, value-driven, and aligned with building lifelong client and partner relationships. Use curiosity, empathy, and subtle influence (Phil M. Jones style). Never pressure. Always educate and serve."
-                    },
-                    {
-                        role: "user",
-                        content: userPrompt
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 800
-            })
-        });
-
-        const data = await response.json();
-        const scriptContent = data.choices[0].message.content;
-
-        output.innerHTML = `<div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30">
-            <div class="prose prose-lg dark:prose-invert max-w-none">${marked.parse(scriptContent)}</div>
-        </div>`;
-
-        output.classList.remove('hidden');
-        loading.classList.add('hidden');
-
-    } catch (error) {
-        console.error(error);
-        output.innerHTML = `<p class="text-red-600 text-center">Error generating script. Check console.</p>`;
-        output.classList.remove('hidden');
-        loading.classList.add('hidden');
-    }
-}
-async function generateBlog() {
-    const topicSelect = document.getElementById('blog-topic');
-    const detailsInput = document.getElementById('blog-details');  // Your existing textarea
-    const keywordsInput = document.getElementById('blog-keywords'); // Optional — safe if missing
-    const output = document.getElementById('blog-output');
-    const loading = document.getElementById('blog-loading');
-
-    if (!topicSelect || !detailsInput || !output || !loading) {
-        alert("Blog generator elements not found. Check HTML IDs.");
+    if (!scenario) {
+        alert('Please select a situation or type your own scenario');
         return;
     }
 
-    const selectedTopicText = topicSelect.options[topicSelect.selectedIndex].text;
-    const details = detailsInput.value.trim();
-    const keywords = keywordsInput ? keywordsInput.value.trim() : '';
+    const loading = document.getElementById('script-loading');
+    const output = document.getElementById('script-output');
 
-    // Show loading, hide old output
-    output.classList.add('hidden');
     loading.classList.remove('hidden');
-    output.innerHTML = '';
+    output.classList.add('hidden');
 
-    // Build smart prompt
-    let userPrompt = `Write a professional, engaging 800-1000 word blog post for a mortgage loan officer. 
-Tone: Warm, trustworthy, helpful — never salesy. Focus on education and building trust.
+    let prompt = `You are an expert real estate communication coach helping realtors build better relationships.
 
-`;
+Generate exactly 4 varied, natural scripts for this situation:
 
-    // Determine main topic
-    if (selectedTopicText.includes('Custom Topic') || details) {
-        userPrompt += `Main topic/focus: ${details || 'A valuable mortgage-related topic of your choice'}\n\n`;
-    } else {
-        userPrompt += `Main topic/focus: ${selectedTopicText}\n\n`;
-    }
+Situation: "${scenario}"
 
-    // Add structure guidelines
-    userPrompt += `Structure:
-- Catchy, SEO-friendly title
-- Engaging intro with a hook
-- 3-5 main sections with clear subheadings
-- Practical tips, real examples, or current market relevance
-- Short paragraphs and bullet points for readability
-- Subtle, natural CTA at the end (e.g., "Have questions? DM me" or "Comment below")
-- End with 5-7 relevant hashtags
+${context ? `Additional context: ${context}` : ''}
 
-`;
+Requirements for each script:
+- 3–6 sentences long
+- Warm, curious, helpful — never salesy or pushy
+- Use open-ended questions
+- Include a soft next step
+- End with a gentle call-to-action
+- Tone: Friendly, relatable, professional, trustworthy
 
-    if (keywords) {
-        userPrompt += `Incorporate these keywords naturally: ${keywords}\n`;
-    }
+Formatting (very important):
+- Start each script with "## Script 1", "## Script 2", etc.
+- Use **bold** for light emphasis where it feels natural
+- Use - bullet points when listing questions, benefits, or ideas
+- Separate paragraphs with a blank line
+- Do NOT use code blocks, backticks, or any other formatting
+
+Focus on building connection and trust — not closing the deal.`;
 
     try {
         const response = await fetch('/api/chat', {
@@ -3054,56 +3172,85 @@ Tone: Warm, trustworthy, helpful — never salesy. Focus on education and buildi
             },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are an expert mortgage marketing copywriter. Write in a warm, authoritative, helpful tone. Use short paragraphs, subheadings, and bullet points for readability. Never sound salesy — focus on educating and building trust. Always end with a natural CTA."
-                    },
-                    {
-                        role: "user",
-                        content: userPrompt
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 1500
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.8,
+                max_tokens: 1400
             })
         });
 
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error('API error');
 
         const data = await response.json();
-        const blogContent = data.choices[0].message.content.trim();
+        const rawMarkdown = data.choices[0].message.content.trim();
 
-        // Display with nice formatting
+        // Convert full markdown to HTML using marked
+        const fullHtml = marked.parse(rawMarkdown);
+
+        // Split into individual scripts by <h2> or <h3> headings (marked turns ## into <h2>)
+        const scriptBlocks = fullHtml.split(/<h[23][^>]*>.*?<\/h[23]>/gi).filter(Boolean);
+        const headings = [...fullHtml.matchAll(/<h[23][^>]*>(.*?)<\/h[23]>/gi)].map(m => m[1]);
+
+        let outputHtml = '<div class="space-y-12">';
+
+        headings.forEach((heading, i) => {
+            const content = scriptBlocks[i] || '';
+            const scriptNumber = i + 1;
+
+            outputHtml += `
+                <div class="bg-gray-50 dark:bg-gray-900 p-8 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-5 mb-7">
+                        <div class="flex-shrink-0 w-14 h-14 rounded-full bg-[#F15A29] flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                            ${scriptNumber}
+                        </div>
+                        <h3 class="text-2xl font-bold text-[#F15A29]">${heading.trim()}</h3>
+                    </div>
+                    <div class="prose prose-lg dark:prose-invert max-w-none leading-relaxed text-gray-800 dark:text-gray-200">
+                        ${content.trim()}
+                    </div>
+                </div>`;
+        });
+
+        outputHtml += '</div>';
+
+        // Final output structure
         output.innerHTML = `
-            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30 shadow-lg">
-                <div class="prose prose-lg dark:prose-invert max-w-none">
-                    ${marked.parse(blogContent)}
-                </div>
-                <div class="text-center mt-8">
-                    <button onclick="navigator.clipboard.writeText(document.querySelector('#blog-output .prose').innerText)" 
-                            class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
-                        📋 Copy Full Blog to Clipboard
-                    </button>
-                </div>
-            </div>`;
+            <div class="prose prose-lg dark:prose-invert max-w-none mb-10">
+                ${outputHtml}
+            </div>
+            <div class="text-center mt-8">
+                <button onclick="copySalesScripts()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-10 py-4 rounded-full font-bold transition-all shadow-lg text-lg">
+                    📋 Copy All Scripts
+                </button>
+            </div>
+        `;
 
         output.classList.remove('hidden');
-
     } catch (error) {
-        console.error("Blog generation failed:", error);
-        output.innerHTML = `
-            <div class="text-center text-red-600 dark:text-red-400 p-8 bg-red-50 dark:bg-red-900/30 rounded-2xl">
-                <p class="font-bold text-xl mb-2">Oops! Blog generation failed.</p>
-                <p>Check console for details (common: invalid API key, network issue, or rate limit).</p>
-            </div>`;
+        console.error(error);
+        output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl">Error generating scripts. Please try again.</p>';
         output.classList.remove('hidden');
     } finally {
         loading.classList.add('hidden');
     }
-    }
+}
+
+function copySalesScripts() {
+    const proseDiv = document.querySelector('#script-output .prose');
+    if (!proseDiv) return;
+
+    // Get clean text (strip HTML, preserve line breaks)
+    const temp = document.createElement('div');
+    temp.innerHTML = proseDiv.innerHTML;
+
+    // Remove the numbered circles for cleaner copy
+    const circles = temp.querySelectorAll('.w-14.h-14.rounded-full');
+    circles.forEach(el => el.remove());
+
+    const text = temp.innerText || temp.textContent || '';
+    navigator.clipboard.writeText(text).then(() => {
+        alert('All scripts copied to clipboard!');
+    });
+}
 // Accordion toggle
 function toggleAccordion(button) {
     const content = button.nextElementSibling;
@@ -3124,45 +3271,41 @@ document.querySelectorAll('#sidebar a').forEach(link => {
         target.querySelectorAll('.accordion-content').forEach(content => content.classList.remove('open'));
     });
 });
-async function generateSocialPost() {
-    const typeSelect = document.getElementById('post-type');
-    const detailsInput = document.getElementById('post-details');
-    const output = document.getElementById('social-output');
-    const loading = document.getElementById('social-loading');
-
-    if (!typeSelect || !detailsInput || !output || !loading) {
-        alert("Error: Social post elements not found.");
-        return;
+// Auto-fill custom textarea when selecting from dropdown (but allow override)
+document.getElementById('script-scenario-select').addEventListener('change', function() {
+    const selected = this.value;
+    if (selected) {
+        document.getElementById('custom-scenario').value = selected;
+    } else {
+        document.getElementById('custom-scenario').value = ''; // Reset to custom when "Use Custom" selected
     }
+});
+async function generateSocialPost() {
+    const type = document.getElementById('post-type').value;
+    const details = document.getElementById('post-details').value.trim();
 
-    const selectedTypeText = typeSelect.options[typeSelect.selectedIndex].text;
-    const details = detailsInput.value.trim();
+    const loading = document.getElementById('social-loading');
+    const output = document.getElementById('social-output');
 
-    output.classList.add('hidden');
     loading.classList.remove('hidden');
+    output.classList.add('hidden');
     output.innerHTML = '';
 
-    let userPrompt = `Create a highly engaging social media post for a loan officer. Goal: Build genuine relationships and encourage likes, comments, shares, and tags.
+    let prompt = `Create a ready-to-post social media caption for a mortgage loan officer.
 
-`;
+Post type/goal: ${type === 'custom' ? 'Custom idea' : type.replace('-', ' ')}
 
-    if (selectedTypeText.includes('Custom Post Idea') || details) {
-        userPrompt += `Main idea/focus: ${details || 'A general, value-first post that builds trust'}\n\n`;
-    } else {
-        userPrompt += `Post type: ${selectedTypeText}\n\n`;
-    }
+${details ? `Specific details/idea: ${details}` : ''}
 
-    userPrompt += `Guidelines:
-- Warm, relatable, authentic tone — like talking to a friend
-- Focus on shared interests, local community, or personal connection
-- Include engagement hook: question, poll idea, or "tag a friend"
-- Educational or value-first when possible
-- Subtle CTA (e.g., "Comment below", "DM me if this resonates", "Tag someone who needs this")
-- Platform-ready: Instagram/Facebook/LinkedIn friendly
-- Suggest 2-3 relevant hashtags
-- Suggest image/video idea (e.g., "Photo of local coffee shop" or "Quick reel showing closing day")
+Requirements:
+- Warm, authentic, relationship-focused
+- Engaging and conversational
+- Never salesy — focus on value and trust
+- Include relevant emojis
+- End with subtle CTA (question, "Comment below", "DM me", "Tag a friend")
+- Add 8–10 relevant hashtags at the end
 
-Keep post under 200 words. Make it exponentially shareable.`;
+Make it feel like it comes from a trusted friend who happens to be a mortgage expert.`;
 
     try {
         const response = await fetch('/api/chat', {
@@ -3172,52 +3315,38 @@ Keep post under 200 words. Make it exponentially shareable.`;
             },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are an expert social media strategist for mortgage professionals. All posts must prioritize relationship-building, authenticity, and engagement over selling. Use curiosity, humor, and relatability. Inspire shares, comments, and saves. Never be pushy. Focus on value, community, and trust."
-                    },
-                    {
-                        role: "user",
-                        content: userPrompt
-                    }
-                ],
-                temperature: 0.8,
-                max_tokens: 600
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.7,
+                max_tokens: 800
             })
         });
 
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        if (!response.ok) throw new Error('API error');
 
         const data = await response.json();
-        const postContent = data.choices[0].message.content.trim();
+        const post = data.choices[0].message.content.trim();
 
         output.innerHTML = `
-            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30 shadow-lg">
-                <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
-                    ${marked.parse(postContent)}
-                </div>
-                <div class="text-center">
-                    <button onclick="navigator.clipboard.writeText(this.closest('div').querySelector('.prose').innerText || '')" 
-                            class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
-                        📋 Copy Post to Clipboard
-                    </button>
-                </div>
-            </div>`;
-
+            <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+                ${marked.parse(post)}
+            </div>
+            <div class="text-center">
+                <button onclick="copySocialPost()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                    📋 Copy Post to Clipboard
+                </button>
+            </div>
+        `;
         output.classList.remove('hidden');
-
     } catch (error) {
-        console.error("Social post generation failed:", error);
-        output.innerHTML = `
-            <div class="text-center text-red-600 dark:text-red-400 p-8 bg-red-50 dark:bg-red-900/30 rounded-2xl">
-                <p class="font-bold text-xl mb-2">Oops! Something went wrong.</p>
-                <p>Check console or try again.</p>
-            </div>`;
+        output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating post. Check console or try again.</p>';
         output.classList.remove('hidden');
     } finally {
         loading.classList.add('hidden');
     }
+}
+function copySocialPost() {
+    const text = document.querySelector('#social-output .prose')?.innerText || '';
+    navigator.clipboard.writeText(text).then(() => alert('Post copied!'));
 }
 function showSocialPostCreator() {
     // Hide all sections
@@ -3235,6 +3364,88 @@ function showSocialPostCreator() {
         console.error("Social Post Creator section (#social-post) not found!");
     }
 }
+// Dynamic helper text and placeholder for post details
+// Dynamic helper/placeholder for post details based on selected type
+document.getElementById('post-type').addEventListener('change', function() {
+    const type = this.value;
+    const helper = document.getElementById('details-helper');
+    const textarea = document.getElementById('post-details');
+
+    let helperText = '';
+    let placeholder = '';
+
+    switch(type) {
+        case 'educational':
+            helperText = "e.g., Explain rate buydowns, credit tips, or down payment myths";
+            placeholder = "e.g., How temporary rate buydowns can lower payments for the first 2 years";
+            break;
+        case 'local':
+            helperText = "e.g., Local event, favorite business, community story";
+            placeholder = "e.g., Loved the holiday lights downtown last night!";
+            break;
+        case 'personal':
+            helperText = "e.g., Family updates, hobbies, behind-the-scenes";
+            placeholder = "e.g., Weekend hiking with the family — nature recharge!";
+            break;
+        case 'client-win':
+        case 'just-closed':
+        case 'client-story':
+            helperText = "e.g., Client challenge overcome (keep anonymous or with permission)";
+            placeholder = "e.g., Helped a first-time buyer close despite credit challenges";
+            break;
+        case 'market':
+        case 'market-update':
+            helperText = "e.g., Local stats, rate trends, inventory insight";
+            placeholder = "e.g., Inventory up 12% locally — great time for buyers!";
+            break;
+        case 'reel':
+            helperText = "e.g., Fun skit, day-in-the-life, myth-bust idea";
+            placeholder = "e.g., 'Marry the house, date the rate' wedding skit";
+            break;
+        case 'engagement':
+            helperText = "e.g., Poll or question to spark comments";
+            placeholder = "e.g., Rent forever or own your home? Vote!";
+            break;
+        case 'value':
+            helperText = "e.g., Free resource you're giving away";
+            placeholder = "e.g., Sharing my 2026 Home Buyer Checklist — link in bio";
+            break;
+        case 'rate-myth':
+            helperText = "e.g., Common rate misconception";
+            placeholder = "e.g., 'You need 20% down' — here's the truth";
+            break;
+        case 'holiday':
+            helperText = "e.g., Holiday tradition or seasonal tie-in";
+            placeholder = "e.g., Favorite holiday recipe from our family";
+            break;
+        case 'realtor-value':
+            helperText = "e.g., Tool or support for realtor partners";
+            placeholder = "e.g., New co-branded open house flyer ready!";
+            break;
+        case 'motivational':
+            helperText = "e.g., Inspirational message or quote";
+            placeholder = "e.g., 'Your dream home is worth the effort'";
+            break;
+        case 'fun':
+            helperText = "e.g., Relatable humor or light moment";
+            placeholder = "e.g., When rates drop and everyone calls at once...";
+            break;
+        case 'referral-ask':
+            helperText = "e.g., Soft way to ask for referrals";
+            placeholder = "e.g., Know someone thinking about moving? Happy to help";
+            break;
+        case 'local-spotlight':
+            helperText = "e.g., Local business or community feature";
+            placeholder = "e.g., Shoutout to [Local Bakery] — best donuts in town!";
+            break;
+        default:
+            helperText = "e.g., Describe what you'd like the post to say";
+            placeholder = "e.g., Tell me your idea and I'll craft it";
+    }
+
+    helper.textContent = helperText;
+    textarea.placeholder = placeholder;
+});
 // Modal functions
 function openModal(category) {
     document.getElementById('modal-title').innerText = category;
@@ -3350,7 +3561,9 @@ async function searchUnderwriting() {
     loading.classList.remove('hidden');
     output.innerHTML = '';
 
-    let userPrompt = `Answer this underwriting guideline question accurately and concisely: ${question}.
+    let userPrompt = `You are a senior mortgage underwriting compliance expert with 20+ years experience. 
+Your answers must be extremely accurate, conservative, and based solely on official published guidelines 
+(FNMA Selling Guide, FHLMC Seller/Servicer Guide, FHA 4000.1, VA PAM 26-7, USDA HB-1-3555) and known lender overlays. ${question}.
 
 Loan type (if specified): ${loanType}
 
@@ -3372,14 +3585,22 @@ Ruoff Overlays Summary (effective 06/18/25):
 
 - 2-1 Buydown: Eligible Conv/FHA/VA/USDA, Ineligible State Bond/renov/construction, Purchase only, Fixed rate, 1-2 units, No Manufactured, Occupancy: Gov Primary, Conv Primary/Second, Contract: Buydown fee in concessions, Fee: Seller/builder, No borrower pay, Locked direct FNMA/FHLMC/GNMA.
 
-Structure response:
-- Main answer
-- Ruoff Overlays Check: List any relevant overlays
-- Confidence level (emphasize)
+Confidence Levels:
+- High (95%+): Clear, unambiguous rule in primary guideline source
+- Medium (70–94%): Generally accepted practice or overlay, minor ambiguity
+- Low (<70%): Unclear, varies significantly, or no definitive source
+
+Structure every response:
+1. Direct, concise main answer
+2. Supporting guideline reference (if applicable)
+3. Ruoff Overlays Check: List any relevant overlays
+4. Confidence level (emphasize) + brief explanation
+4. Final disclaimer:
 
 Be accurate and conservative. If unsure, say so.
 
-`;
+Provide a precise, well-reasoned answer following the strict rules above. 
+Double-check your logic before finalizing. Accuracy is paramount.`;
 
     try {
         const response = await fetch('/api/chat', {
@@ -3403,34 +3624,37 @@ Be accurate and conservative. If unsure, say so.
         const data = await response.json();
         const answer = data.choices[0].message.content.trim();
 
-        // Parse confidence from answer (assume AI outputs "Confidence: X%")
-        const confidenceMatch = answer.match(/Confidence:\s*(\d+)%/i);
-        const confidence = confidenceMatch ? confidenceMatch[1] : '80';  // Default if not found
-
         output.innerHTML = `
-            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-2xl border border-[#00A89D]/30 shadow-lg">
-                <div class="text-center mb-8">
-                    <span class="inline-block px-6 py-3 rounded-full bg-[#F15A29]/20 text-[#F15A29] font-bold text-3xl">
-                        Confidence: ${confidence}%
-                    </span>
-                </div>
-                <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
-                    ${marked.parse(answer)}
-                </div>
+            <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+                ${marked.parse(answer)}
+            </div>
+            <div class="text-center">
+                <button onclick="copyUwOutput()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                    📋 Copy Response
+                </button>
             </div>
         `;
 
         output.classList.remove('hidden');
 
     } catch (error) {
-        // ... error handling
+        console.error(error);
+        output.innerHTML = `
+            <div class="text-center text-red-600 dark:text-red-400 p-8 bg-red-50 dark:bg-red-900/30 rounded-2xl">
+                <p class="font-bold text-xl">Error generating response</p>
+                <p>Check console or try again.</p>
+            </div>
+        `;
+        output.classList.remove('hidden');
     } finally {
         loading.classList.add('hidden');
     }
 }
-let chatHistory = [
-    { role: "system", content: "You are Grok, a helpful AI assistant for loan officers. Be warm, direct, and practical. Focus on sales, marketing, underwriting, motivation, and relationship-building. Use humor when appropriate. Always aim to help the user succeed." }
-];
+
+function copyUwOutput() {
+    const text = document.querySelector('#uw-output .prose')?.innerText || '';
+    navigator.clipboard.writeText(text).then(() => alert('Response copied!'));
+}
 
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
@@ -3440,7 +3664,28 @@ async function sendChatMessage() {
     const userMessage = input.value.trim();
     if (!userMessage) return;
 
-    // Add user message to chat
+    // === SMART ROUTING: Check if it's an underwriting question ===
+    if (smartRouteChat(userMessage)) {
+        // If routed to underwriting tool, add message to chat and exit
+        messagesDiv.innerHTML += `
+            <div class="text-right mb-4">
+                <div class="inline-block bg-[#F15A29] text-white rounded-2xl px-6 py-4 max-w-lg shadow-lg">
+                    ${userMessage}
+                </div>
+            </div>
+            <div class="text-left mb-4">
+                <div class="inline-block bg-[#002B5C] text-white rounded-2xl px-6 py-4 max-w-lg shadow-lg">
+                    <p class="italic">I've moved you to the <strong>Underwriting Guideline Search</strong> tool for the most accurate answer. Your question is pre-filled — just hit "Search Guidelines" or review the result!</p>
+                </div>
+            </div>
+        `;
+        input.value = '';
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return; // Stop here — don't send to general Grok
+    }
+    // === END SMART ROUTING ===
+
+    // Normal chat flow continues below
     messagesDiv.innerHTML += `
         <div class="text-right mb-4">
             <div class="inline-block bg-[#F15A29] text-white rounded-2xl px-6 py-4 max-w-lg shadow-lg">
@@ -3453,7 +3698,6 @@ async function sendChatMessage() {
     loading.classList.remove('hidden');
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-    // Add to history
     chatHistory.push({ role: "user", content: userMessage });
 
     try {
@@ -3475,7 +3719,6 @@ async function sendChatMessage() {
         const data = await response.json();
         const aiReply = data.choices[0].message.content;
 
-        // Add AI reply
         messagesDiv.innerHTML += `
             <div class="text-left mb-4">
                 <div class="inline-block bg-[#002B5C] text-white rounded-2xl px-6 py-4 max-w-lg shadow-lg">
@@ -3489,8 +3732,8 @@ async function sendChatMessage() {
     } catch (error) {
         console.error(error);
         messagesDiv.innerHTML += `
-            <div class="text-center text-red-600 font-bold">
-                Error: Could not get response. Check console.
+            <div class="text-center text-red-600 font-bold p-4 bg-red-50 dark:bg-red-900/30 rounded-2xl">
+                Error: Could not get response. Check console or try again.
             </div>
         `;
     } finally {
@@ -3640,7 +3883,20 @@ searchInput.addEventListener('input', (e) => {
         }
     });
 });
+// KEEP THIS — this is the good one
+document.getElementById('script-scenario-select').addEventListener('change', function() {
+    const customWrapper = document.getElementById('custom-scenario-wrapper');
+    const customTextarea = document.getElementById('custom-scenario');
 
+    if (this.value === ' ') {
+        customWrapper.classList.remove('hidden');
+        customTextarea.value = '';
+        customTextarea.focus();
+    } else {
+        customWrapper.classList.add('hidden');
+        customTextarea.value = '';
+    }
+});
 // Page load: show Prospecting, initial calc, and quote
 // Page load: show AI Chat Assistant by default
 // Page load: show AI Chat Assistant by default (no auto-scroll)
@@ -3747,7 +4003,96 @@ function openDatabaseModal(category) {
 
     content.innerHTML = html;
 }
+// Auto-fill text input when selecting from dropdown
+document.getElementById('blog-topic-select').addEventListener('change', function() {
+    if (this.value) {
+        document.getElementById('blog-topic').value = this.value;
+    }
+});
 
+// ... other functions
+async function generateBlog() {
+    const topicInput = document.getElementById('blog-topic').value.trim();
+    const tone = document.getElementById('blog-tone').value;
+
+    if (!topicInput) {
+        alert('Please select or type a blog topic');
+        return;
+    }
+
+    const output = document.getElementById('blog-output');
+    const loading = document.getElementById('blog-loading');
+
+    // Show loading spinner, hide output
+    output.classList.add('hidden');
+    loading.classList.remove('hidden');
+    output.innerHTML = '';
+
+    const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized blog posts for loan officers.
+
+Key Requirements:
+- Length: 800–1,200 words
+- Tone: ${tone}
+- Structure:
+  - Engaging, clickable title
+  - Strong intro hook
+  - H2 subheadings
+  - Short paragraphs
+  - Bullet points where helpful
+  - Bold key phrases
+  - FAQ section near end
+  - Soft CTA at end: "Ready to explore your options? Reach out — I’m here to help."
+- SEO/GEO: Natural keywords, reader-first, local relevance
+- Voice: Helpful, trustworthy, never salesy
+
+Write a complete blog post on: ${topicInput}`;
+
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: "grok-4-1-fast-reasoning",
+                messages: [{ role: "user", content: systemPrompt }],
+                temperature: 0.7,
+                max_tokens: 3000
+            })
+        });
+
+        if (!response.ok) throw new Error('API error');
+
+        const data = await response.json();
+        const blog = data.choices[0].message.content;
+
+        const wordCount = blog.split(/\s+/).length;
+
+        output.innerHTML = `
+            <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+                ${marked.parse(blog)}
+            </div>
+            <div class="flex justify-between items-center pt-6 border-t border-gray-300 dark:border-gray-700">
+                <p class="text-gray-600 dark:text-gray-400">Word count: ${wordCount}</p>
+                <button onclick="copyBlog()" class="bg-[#00A89D] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90">Copy to Clipboard</button>
+            </div>
+        `;
+
+        output.classList.remove('hidden');
+
+    } catch (error) {
+        output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating blog. Check console or API key.</p>';
+        output.classList.remove('hidden');
+        console.error(error);
+    } finally {
+        loading.classList.add('hidden');
+    }
+}
+
+function copyBlog() {
+    const text = document.querySelector('#blog-output .prose')?.innerText || '';
+    navigator.clipboard.writeText(text).then(() => alert('Blog copied!'));
+}
 function closeDatabaseModal() {
     document.getElementById('db-modal').style.display = 'none';
 }
@@ -3848,7 +4193,16 @@ function openReferralModal(type) {
 function closeReferralModal() {
     document.getElementById('referral-modal').style.display = 'none';
 }
-
+function copyOutput(outputId) {
+    const prose = document.querySelector(`#${outputId} .prose`);
+    if (!prose) {
+        alert('No content to copy yet');
+        return;
+    }
+    navigator.clipboard.writeText(prose.innerText).then(() => {
+        alert('Copied to clipboard!');
+    });
+}
 // Close referral modal when clicking outside
 window.addEventListener('click', (event) => {
     const referralModal = document.getElementById('referral-modal');
@@ -3856,6 +4210,50 @@ window.addEventListener('click', (event) => {
         referralModal.style.display = 'none';
     }
 });
+// Smart routing for AI Chat Assistant — more flexible
+// Smart routing for AI Chat Assistant – optimized for your exact IDs
+function smartRouteChat(message) {
+    const lowerMessage = message.toLowerCase();
+
+    const underwritingKeywords = [
+        'underwriting', 'guideline', 'overlay', 'fannie', 'freddie', 'fha', 'va', 'usda',
+        'dti', 'debt to income', 'credit score', 'appraisal', 'income', 'assets',
+        'employment', 'reserve', 'self-employed', 'bank statement', 'non-qm',
+        'compensating factor', 'exception', 'manual underwrite', 'du', 'lp', 'findings'
+    ];
+
+    const isUnderwriting = underwritingKeywords.some(keyword => lowerMessage.includes(keyword));
+
+    if (isUnderwriting) {
+        // Hide all sections
+        document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+
+        // Show underwriting section
+        const uwSection = document.getElementById('underwriting-search');
+        if (uwSection) {
+            uwSection.classList.remove('hidden');
+        }
+
+        // Pre-fill the question
+        const uwInput = document.getElementById('uw-question');
+        if (uwInput) {
+            uwInput.value = message;
+            uwInput.focus();
+            uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Auto-trigger search after short delay
+        setTimeout(() => {
+            if (typeof searchUnderwriting === 'function') {
+                searchUnderwriting();
+            }
+        }, 800);
+
+        return true; // Routed successfully
+    }
+
+    return false; // Not an underwriting question
+}
 </script>
 <!-- Post Ideas Modal -->
 <div id="post-modal" class="modal">
