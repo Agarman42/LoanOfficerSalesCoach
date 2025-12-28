@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Loan Officer Sales Coach</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -208,6 +208,25 @@ textarea::placeholder {
     @apply bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96;
 }
     </style>
+    /* Fix top overlap on mobile (address bar/status bar) */
+@supports (padding-top: env(safe-area-inset-top)) {
+    body {
+        padding-top: env(safe-area-inset-top);
+    }
+}
+
+/* Optional: Add padding to header/content to avoid overlap */
+header, 
+#sidebar, 
+main {
+    padding-top: env(safe-area-inset-top);
+}
+
+/* For full-screen feel on mobile */
+html, body {
+    height: 100%;
+    overscroll-behavior: contain;
+}
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
                 <header class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white py-6 shadow-2xl">
@@ -4294,3 +4313,4 @@ function smartRouteChat(message) {
 </div>
 </body>
 </html>
+
