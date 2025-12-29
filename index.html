@@ -2003,26 +2003,107 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         <div>
             <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Post Type / Goal</label>
             <select id="post-type" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
-                <option value="custom" selected>Custom Post Idea (type your own below)</option>
-                <option value="educational">Educational Mortgage Tip</option>
-                <option value="local">Local Community Spotlight</option>
-                <option value="personal">Personal / Behind-the-Scenes</option>
-                <option value="client-win">Client Success Story (with permission)</option>
-                <option value="market">Market Update</option>
-                <option value="reel">Fun & Relatable Reel Idea</option>
-                <option value="engagement">Poll or Engagement Question</option>
-                <option value="value">Value Giveaway (Guide/Checklist)</option>
-                <option value="rate-myth">Rate Myth Buster</option>
-                <option value="just-closed">Just Closed Celebration</option>
-                <option value="market-update">Local Market Update (Stats + Insight)</option>
-                <option value="client-story">Client Success Story / Testimonial</option>
-                <option value="holiday">Holiday / Seasonal Post</option>
-                <option value="realtor-value">Value for Realtor Partners</option>
-                <option value="just-listed">Just Listed / Just Sold (Co-Brand Ready)</option>
-                <option value="motivational">Motivational / Mindset Quote</option>
-                <option value="fun">Fun / Relatable Meme or Humor</option>
-                <option value="referral-ask">Subtle Referral Request</option>
-                <option value="local-spotlight">Local Business or Community Spotlight</option>
+                <option value=" " selected class="font-bold">Use Custom Idea (type below)</option>
+                <option value="" disabled>──────────────────</option>
+
+                <optgroup label="Educational & Myth-Busting">
+                    <option value="Myth: You need 20% down to buy a home">Myth: You need 20% down to buy a home</option>
+                    <option value="Pre-qual vs pre-approval: What's the difference?">Pre-qual vs pre-approval: What's the difference?</option>
+                    <option value="How temporary rate buydowns work">How temporary rate buydowns work</option>
+                    <option value="5 hidden costs every buyer should know">5 hidden costs every buyer should know</option>
+                    <option value="How to boost your credit score fast">How to boost your credit score fast</option>
+                    <option value="The truth about closing costs">The truth about closing costs</option>
+                    <option value="FHA vs Conventional: Which is better?">FHA vs Conventional: Which is better?</option>
+                    <option value="Why PMI isn't as bad as you think">Why PMI isn't as bad as you think</option>
+                    <option value="What lenders really look for beyond credit">What lenders really look for beyond credit</option>
+                    <option value="Red flags to avoid in your Loan Estimate">Red flags to avoid in your Loan Estimate</option>
+                </optgroup>
+
+                <optgroup label="Market Updates">
+                    <option value="Local inventory is up/down — what it means for buyers">Local inventory is up/down — what it means for buyers</option>
+                    <option value="Are rates trending up or down this week?">Are rates trending up or down this week?</option>
+                    <option value="Is now a good time to buy or should you wait?">Is now a good time to buy or should you wait?</option>
+                    <option value="Local home prices: Year-over-year update">Local home prices: Year-over-year update</option>
+                    <option value="Why buyer competition is easing">Why buyer competition is easing</option>
+                    <option value="Refinance opportunity alert">Refinance opportunity alert</option>
+                    <option value="What the latest Fed news means for rates">What the latest Fed news means for rates</option>
+                    <option value="Spring 2026 market preview">Spring 2026 market preview</option>
+                </optgroup>
+
+                <optgroup label="Local Community">
+                    <option value="Shoutout to my favorite local coffee shop">Shoutout to my favorite local coffee shop</option>
+                    <option value="Upcoming weekend event in town">Upcoming weekend event in town</option>
+                    <option value="Hidden gem park or trail">Hidden gem park or trail</option>
+                    <option value="Spotlight on a great local business">Spotlight on a great local business</option>
+                    <option value="Best farmers market finds this season">Best farmers market finds this season</option>
+                    <option value="New restaurant opening downtown">New restaurant opening downtown</option>
+                    <option value="Local school or team achievement">Local school or team achievement</option>
+                    <option value="Holiday lights tour recommendations">Holiday lights tour recommendations</option>
+                </optgroup>
+
+                <optgroup label="Personal & Behind-the-Scenes">
+                    <option value="A day in the life of a loan officer">A day in the life of a loan officer</option>
+                    <option value="Weekend family adventure">Weekend family adventure</option>
+                    <option value="What I'm grateful for this week">What I'm grateful for this week</option>
+                    <option value="My morning routine for staying sharp">My morning routine for staying sharp</option>
+                    <option value="Coffee run before the approvals come in">Coffee run before the approvals come in</option>
+                    <option value="Celebrating X years in mortgage">Celebrating X years in mortgage</option>
+                    <option value="Book or podcast I'm loving right now">Book or podcast I'm loving right now</option>
+                    <option value="Home office setup tour">Home office setup tour</option>
+                </optgroup>
+
+                <optgroup label="Client Wins & Celebrations">
+                    <option value="Just helped another family get their keys!">Just helped another family get their keys!</option>
+                    <option value="First-time buyer success story">First-time buyer success story</option>
+                    <option value="Overcame a tough credit challenge">Overcame a tough credit challenge</option>
+                    <option value="Refinance that saved big monthly">Refinance that saved big monthly</option>
+                    <option value="From pre-approval to closing fast">From pre-approval to closing fast</option>
+                    <option value="Helped a family win in a competitive market">Helped a family win in a competitive market</option>
+                    <option value="Celebrating a smooth closing today">Celebrating a smooth closing today</option>
+                    <option value="Turning 'maybe' into 'yes'">Turning "maybe" into "yes"</option>
+                </optgroup>
+
+                <optgroup label="Value & Resources">
+                    <option value="Free 2026 Home Buyer Checklist">Free 2026 Home Buyer Checklist</option>
+                    <option value="Questions every buyer should ask their lender">Questions every buyer should ask their lender</option>
+                    <option value="Download my moving checklist">Download my moving checklist</option>
+                    <option value="Free credit review offer">Free credit review offer</option>
+                    <option value="Home maintenance calendar">Home maintenance calendar</option>
+                    <option value="Local vendor list for new homeowners">Local vendor list for new homeowners</option>
+                    <option value="Rate buydown explainer">Rate buydown explainer</option>
+                </optgroup>
+
+                <optgroup label="Engagement & Fun">
+                    <option value="Poll: Rent forever or own your home?">Poll: Rent forever or own your home?</option>
+                    <option value="This or That: Beach vs mountain home?">This or That: Beach vs mountain home?</option>
+                    <option value="Tag a friend who needs this tip">Tag a friend who needs this tip</option>
+                    <option value="What's your dream home feature?">What's your dream home feature?</option>
+                    <option value="Fixer-upper or move-in ready?">Fixer-upper or move-in ready?</option>
+                    <option value="Relatable: When rates drop and everyone calls">Relatable: When rates drop and everyone calls</option>
+                </optgroup>
+
+                <optgroup label="Motivational">
+                    <option value="Your dream home is worth the effort">Your dream home is worth the effort</option>
+                    <option value="Homeownership builds wealth over time">Homeownership builds wealth over time</option>
+                    <option value="Don't wait to buy real estate — buy and wait">Don't wait to buy real estate — buy and wait</option>
+                    <option value="Small steps lead to big keys">Small steps lead to big keys</option>
+                    <option value="Mindset: You deserve this">Mindset: You deserve this</option>
+                </optgroup>
+
+                <optgroup label="Holiday / Seasonal">
+                    <option value="Favorite holiday tradition">Favorite holiday tradition</option>
+                    <option value="New Year's home goals for 2026">New Year's home goals for 2026</option>
+                    <option value="Grateful this holiday season">Grateful this holiday season</option>
+                    <option value="Spring cleaning + refinance tip">Spring cleaning + refinance tip</option>
+                </optgroup>
+
+                <optgroup label="Realtor Partner Value">
+                    <option value="How I support my realtor partners">How I support my realtor partners</option>
+                    <option value="Fast pre-approvals for your buyers">Fast pre-approvals for your buyers</option>
+                    <option value="Co-branded tools ready for you">Co-branded tools ready for you</option>
+                    <option value="Shoutout to an amazing agent partner">Shoutout to an amazing agent partner</option>
+                    <option value="Why agents love working with me">Why agents love working with me</option>
+                </optgroup>
             </select>
         </div>
 
@@ -2035,7 +2116,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
                 </span>
             </label>
             <textarea id="post-details" rows="4" 
-                      placeholder="e.g., Shout out to my favorite local coffee shop, or quick tip on credit scores" 
+                      placeholder="Be sure to include any additional details here to help shape or personalize your post" 
                       class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 resize-none"></textarea>
         </div>
 
@@ -4395,4 +4476,3 @@ function smartRouteChat(message) {
 </div>
 </body>
 </html>
-
