@@ -3,230 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Loan Officer Sales Coach</title>
+    <title>Ultimate Loan Officer Sales Coach</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- SWITCH TO CLASS MODE -->
+    <script>
+      tailwind.config = {
+        darkMode: 'class'
+      }
+    </script>
+
+    <!-- FORCE DARK CLASS -->
+    <script>
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+
+      const observer = new MutationObserver(() => {
+        if (!document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.add('dark');
+        }
+        if (!document.body.classList.contains('dark')) {
+          document.body.classList.add('dark');
+        }
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#002B5C">
     <style>
-      html, body {
-    overscroll-behavior: contain;
-}
-        .dark { background: linear-gradient(to bottom, #1a202c, #0f172a); color: #e2e8f0; }
-        .card { transition: transform 0.2s, box-shadow 0.2s; }
-        .card:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(0,168,157,0.3); }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-        .accordion-content.open { max-height: 3000px; }
-        .sidebar-group {
-    font-weight: 800;                           /* Bolder text */
-    color: white;
-    padding: 16px 24px;                         /* Larger padding = bigger box */
-    text-transform: uppercase;
-    font-size: 1.05rem;                         /* Slightly larger font */
-    letter-spacing: 1.8px;
-    background-color: rgba(0, 43, 92, 0.7);     /* Slightly more opaque navy */
-    border-radius: 16px;                        /* Softer, larger corners */
-    margin: 16px 20px 12px 20px;                 /* More breathing room */
-    text-align: center;                         /* Perfectly centered text */
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);   /* Deeper shadow for pop */
-    backdrop-filter: blur(8px);                 /* Stronger glass effect */
-    border: 2px solid rgba(255, 255, 255, 0.6); /* Clean white border */
-    transition: all 0.3s ease;                  /* Smooth hover */
-}
+    html, body {
+        overscroll-behavior: contain;
+        height: 100%;
+    }
 
-.sidebar-group:hover {
-    background-color: rgba(0, 43, 92, 0.9);     /* Darker on hover */
-    border-color: white;                        /* Full white border on hover */
-    transform: translateY(-2px);                /* Slight lift */
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
-}
-.accordion button[aria-expanded="true"] i.fa-chevron-down,
-.accordion-content.open + button i.fa-chevron-down,
-.accordion button .fa-chevron-down {
-    transition: transform 0.3s ease;
-}
-.accordion button[aria-expanded="true"] .fa-chevron-down {
-    transform: rotate(180deg);
-}
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
-}
-.modal-content {
-    background-color: #ffffff; /* Light mode */
-    color: #1f2937; /* Dark gray text for light mode */
-    margin: 10% auto;
-    padding: 32px;
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    max-width: 800px;
-    max-height: 80vh;
-    overflow-y: auto;
-    border: 2px solid #00A89D;
-}
+    .dark { 
+        background: linear-gradient(to bottom, #1a202c, #0f172a); 
+        color: #e2e8f0; 
+    }
 
-/* Dark mode override */
-.dark .modal-content {
-    background-color: #1f2937; /* gray-800 equivalent */
-    color: #f3f4f6; /* light gray text for dark mode */
-}
-/* Ensure all text inside modals inherits the correct color */
-.modal-content p,
-.modal-content ul,
-.modal-content li,
-.modal-content h1,
-.modal-content h2,
-.modal-content h3,
-.modal-content h4 {
-    color: inherit;
-}
-.modal-header {
-    text-align: center;
-    margin-bottom: 24px;
-}
-.modal-header h3 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #F15A29;
-}
-.close-modal {
-    color: #aaa;
-    float: right;
-    font-size: 48px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    top: 16px;
-    right: 32px;
-}
-.close-modal:hover {
-    color: #F15A29;
-}
-.dark .close-modal {
-    color: #cbd5e1; /* lighter gray in dark mode */
-}
-.dark .close-modal:hover {
-    color: #F15A29;
-}
-.modal-suggestions {
-    space-y-6;
-}
-.modal-suggestions li {
-    padding: 16px;
-    background: linear-gradient(to right, #002B5C/5, #00A89D/5);
-    border-radius: 16px;
-    border-left: 6px solid #00A89D;
-    font-size: 1.1rem;
-}
-/* FINAL FIX: Eliminate any remaining top gap from Tailwind or browser */
-main {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
+    .card { 
+        transition: transform 0.2s, box-shadow 0.2s; 
+    }
+    .card:hover { 
+        transform: scale(1.02); 
+        box-shadow: 0 10px 20px rgba(0,168,157,0.3); 
+    }
 
-main > section {
-    margin-top: 0 !important;
-    padding-top: 1.5rem !important;  /* forces exactly pt-6 */
-}
+    .accordion-content { 
+        max-height: 0; 
+        overflow: hidden; 
+        transition: max-height 0.3s ease; 
+    }
+    .accordion-content.open { 
+        max-height: 3000px; 
+    }
 
-main section > *:first-child {
-    margin-top: 0 !important;
-}
-/* Global Fix: Readable Text in Inputs for Light & Dark Mode */
-input[type="text"],
-input[type="number"],
-input[type="search"],
-textarea,
-select {
-    background-color: #ffffff !important; /* White in light mode */
-    color: #1f2937 !important; /* Dark gray text in light mode */
-}
+    /* === HEADER - BOLDER & DARKER === */
+    header {
+        background: linear-gradient(to right, #001429, #002b5c) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
 
-.dark input[type="text"],
-.dark input[type="number"],
-.dark input[type="search"],
-.dark textarea,
-.dark select {
-    background-color: #1f2937 !important; /* Dark background in dark mode */
-    color: #f3f4f6 !important; /* Light text in dark mode */
-    border-color: #4b5563 !important; /* Medium gray border */
-}
+    /* === SIDEBAR - BOLDER & DARKER === */
+    #sidebar {
+        background: linear-gradient(to bottom, #001429, #001f3f) !important;
+        box-shadow: 12px 0 40px rgba(0, 0, 0, 0.7);
+    }
 
-/* Placeholder text visibility */
-input::placeholder,
-textarea::placeholder {
-    color: #9ca3af !important; /* Gray-400 */
-    opacity: 1;
-}
+    /* === SIDEBAR GROUP BUTTONS - MORE IMPACT === */
+    .sidebar-group {
+        font-weight: 900;                           /* Even bolder */
+        color: white;
+        padding: 20px 28px;                         /* Bigger, more presence */
+        text-transform: uppercase;
+        font-size: 1.1rem;                          /* Slightly larger */
+        letter-spacing: 2.2px;
+        background-color: rgba(0, 31, 63, 0.9);     /* Much deeper navy base */
+        border-radius: 20px;
+        margin: 20px 24px 16px 24px;
+        text-align: center;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);   /* Deeper shadow */
+        backdrop-filter: blur(12px);
+        border: 3px solid rgba(0, 168, 157, 0.9);   /* Bolder teal glow */
+        transition: all 0.4s ease;
+    }
 
-.dark input::placeholder,
-.dark textarea::placeholder {
-    color: #9ca3af !important;
-}
-/* Unified AI Tool Styling – Matches Social Media Post Creator */
-.ai-tool-wrapper {
-    @apply bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12;
-}
+    .sidebar-group:hover {
+        background-color: rgba(0, 43, 92, 1);       /* Solid deep navy on hover */
+        border-color: #00A89D;                      /* Full bright teal */
+        transform: translateY(-6px) scale(1.03);    /* Bigger lift + slight grow */
+        box-shadow: 0 20px 50px rgba(0, 168, 157, 0.5); /* Teal glow on hover */
+    }
 
-.ai-tool-wrapper label {
-    @apply block text-lg font-semibold mb-3 text-[#00A89D];
-}
+    .accordion button[aria-expanded="true"] i.fa-chevron-down,
+    .accordion-content.open + button i.fa-chevron-down,
+    .accordion button .fa-chevron-down {
+        transition: transform 0.3s ease;
+    }
+    .accordion button[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+    }
 
-.ai-tool-wrapper select,
-.ai-tool-wrapper input[type="text"],
-.ai-tool-wrapper textarea {
-    @apply w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all;
-}
+    /* === ALL YOUR ORIGINAL RULES BELOW - 100% PRESERVED === */
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.6);
+        backdrop-filter: blur(8px);
+    }
+    .modal-content {
+        background-color: #ffffff;
+        color: #1f2937;
+        margin: 10% auto;
+        padding: 32px;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        border: 2px solid #00A89D;
+    }
 
-.ai-tool-wrapper .generate-btn {
-    @apply w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl mt-8;
-}
+    .dark .modal-content {
+        background-color: #1f2937;
+        color: #f3f4f6;
+    }
 
-.ai-tool-wrapper .copy-btn {
-    @apply bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md;
-}
+    .modal-content p,
+    .modal-content ul,
+    .modal-content li,
+    .modal-content h1,
+    .modal-content h2,
+    .modal-content h3,
+    .modal-content h4 {
+        color: inherit;
+    }
+    .modal-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .modal-header h3 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #F15A29;
+    }
+    .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 48px;
+        font-weight: bold;
+        cursor: pointer;
+        position: absolute;
+        top: 16px;
+        right: 32px;
+    }
+    .close-modal:hover {
+        color: #F15A29;
+    }
+    .dark .close-modal {
+        color: #cbd5e1;
+    }
+    .dark .close-modal:hover {
+        color: #F15A29;
+    }
+    .modal-suggestions {
+        space-y-6;
+    }
+    .modal-suggestions li {
+        padding: 16px;
+        background: linear-gradient(to right, #002B5C/5, #00A89D/5);
+        border-radius: 16px;
+        border-left: 6px solid #00A89D;
+        font-size: 1.1rem;
+    }
 
-.ai-tool-wrapper .loading-spinner {
-    @apply text-center py-12;
-}
+    /* Eliminate top gap */
+    main {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    main > section {
+        margin-top: 0 !important;
+        padding-top: 1.5rem !important;
+    }
+    main section > *:first-child {
+        margin-top: 0 !important;
+    }
 
-.ai-tool-wrapper .loading-spinner i {
-    @apply fas fa-spinner fa-spin text-6xl text-[#00A89D];
-}
+    /* Input readability */
+    input[type="text"],
+    input[type="number"],
+    input[type="search"],
+    textarea,
+    select {
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
+    }
 
-.ai-tool-output {
-    @apply bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96;
-}
-  
-    /* Fix top overlap on mobile (address bar/status bar) */
-@supports (padding-top: env(safe-area-inset-top)) {
-    body {
+    .dark input[type="text"],
+    .dark input[type="number"],
+    .dark input[type="search"],
+    .dark textarea,
+    .dark select {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+        border-color: #4b5563 !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: #9ca3af !important;
+        opacity: 1;
+    }
+    .dark input::placeholder,
+    .dark textarea::placeholder {
+        color: #9ca3af !important;
+    }
+
+    /* Unified AI Tool Styling */
+    .ai-tool-wrapper {
+        @apply bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12;
+    }
+
+    .ai-tool-wrapper label {
+        @apply block text-lg font-semibold mb-3 text-[#00A89D];
+    }
+
+    .ai-tool-wrapper select,
+    .ai-tool-wrapper input[type="text"],
+    .ai-tool-wrapper textarea {
+        @apply w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all;
+    }
+
+    .ai-tool-wrapper .generate-btn {
+        @apply w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl mt-8;
+    }
+
+    .ai-tool-wrapper .copy-btn {
+        @apply bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md;
+    }
+
+    .ai-tool-wrapper .loading-spinner {
+        @apply text-center py-12;
+    }
+
+    .ai-tool-wrapper .loading-spinner i {
+        @apply fas fa-spinner fa-spin text-6xl text-[#00A89D];
+    }
+
+    .ai-tool-output {
+        @apply bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96;
+    }
+
+    /* Mobile safe area */
+    @supports (padding-top: env(safe-area-inset-top)) {
+        body {
+            padding-top: env(safe-area-inset-top);
+        }
+    }
+
+    header, 
+    #sidebar, 
+    main {
         padding-top: env(safe-area-inset-top);
     }
-}
-
-/* Optional: Add padding to header/content to avoid overlap */
-header, 
-#sidebar, 
-main {
-    padding-top: env(safe-area-inset-top);
-}
-
-/* For full-screen feel on mobile */
-html, body {
-    height: 100%;
-    overscroll-behavior: contain;
-}
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -2479,7 +2530,8 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         <div>
             <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Topic</label>
             <select id="blog-topic-select" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 mb-4">
-                <option value="" disabled selected>Choose a topic or type your own below</option>
+    <option value="" selected>Use Custom Topic (type below)</option>
+    <option value="" disabled>──────────────────</option>
                 
                 <optgroup label="First-Time Home Buyers">
                     <option>The Complete 2026 Guide to Buying Your First Home</option>
@@ -2675,32 +2727,20 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         </section>
                 <!-- AI Chat Section -->
         <section id="ai-chat" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">AI Chat Assistant</h2>
-            <p class="mb-8 text-lg">Ask me anything — sales scripts, underwriting questions, marketing ideas, motivation, or just chat. I'm here to help you win.</p>
-
-            <div class="flex flex-col h-96 md:h-full max-h-screen">
-                <!-- Chat Messages -->
-                <div id="chat-messages" class="flex-1 overflow-y-auto mb-6 space-y-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-[#00A89D]/30">
-                    <div class="text-center text-gray-500 dark:text-gray-400 italic">
-                        Start a conversation below...
-                    </div>
-                </div>
-
-                <!-- Input Area -->
-                <div class="flex gap-4">
-                    <input type="text" id="chat-input" placeholder="Type your message..." 
-                           class="flex-1 p-4 rounded-full border border-[#00A89D] focus:ring-[#F15A29] focus:outline-none text-lg">
-                    <button onclick="sendChatMessage()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 py-4 rounded-full hover:opacity-90 transition-all font-bold shadow-lg">
-                        Send
-                    </button>
-                </div>
-            </div>
-
-            <div id="chat-loading" class="mt-8 text-center hidden">
-                <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
-                <p class="mt-4 text-xl">Thinking...</p>
-            </div>
-        </section>
+    <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">AI Chat Assistant</h2>
+    <p class="mb-8 text-lg">Ask me anything — sales scripts, market updates, marketing ideas, motivation, or just chat. I'm here to help you win.</p>
+    <div id="chat-messages" class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl mb-6 min-h-32 max-h-96 overflow-y-auto prose dark:prose-invert max-w-none transition-all duration-300">
+    <!-- Messages appear here -->
+</div>
+    <div class="flex space-x-4">
+        <textarea id="chat-input" rows="3" class="flex-grow p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg resize-none" placeholder="Type your message..."></textarea>
+        <button onclick="sendChatMessage()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-4 rounded-lg font-bold hover:opacity-90">Send</button>
+    </div>
+    <div id="chat-loading" class="text-center mt-6 hidden">
+        <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
+        <p class="mt-4 text-xl">Thinking...</p>
+    </div>
+</section>
                 <section id="calculator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Advanced Payment Calculator</h2>
             <p class="mb-6">Estimate monthly payments with taxes, insurance, PMI, extra payments, and biweekly options. See lifetime interest, payoff timeline, and potential savings.</p>
@@ -3675,8 +3715,32 @@ function copyUwOutput() {
     const text = document.querySelector('#uw-output .prose')?.innerText || '';
     navigator.clipboard.writeText(text).then(() => alert('Response copied!'));
 }
-let chatHistory = [];  // Initialize as an empty array
-        
+let chatHistory = [
+    { 
+        role: "system", 
+        content: `You are Grok, the ultimate AI Sales Coach for loan officers. This app is packed with powerful AI tools designed to help LOs close more loans, build stronger relationships, and grow their business.
+
+When asked what the tool does or about its features, ALWAYS highlight the AI TOOLS first — they are the coolest and most valuable part:
+
+• Sales Script Generator – Instant objection handlers and conversation scripts
+• Social Media Post Creator – Ready-to-post content that builds trust and engagement
+• Blog Creator – Full SEO-optimized blog posts in seconds
+• Business Plan Creator 
+• AI Chat Assistant – Ask anything: motivation, marketing ideas, scenario help
+
+Other key sections:
+• Prospecting strategies
+• Event planning ideas
+• Referral partner systems
+• Database nurturing
+• Underwriting Guideline Search – Fast, accurate answers with confidence levels
+
+Be enthusiastic, encouraging, and focus on how these tools save time and help win more business. Use bullet points for clarity.
+
+Never lead with underwriting — it's one tool among many amazing features.` 
+    }
+];
+
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
     const messagesDiv = document.getElementById('chat-messages');
@@ -3924,7 +3988,10 @@ document.getElementById('script-scenario-select').addEventListener('change', fun
 document.addEventListener('DOMContentLoaded', () => {
     // Hide all sections
     document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-    
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) {
+        chatInput.value = "Tell me how this tool can help me as a loan officer. What are all the features?";
+    }
     // Show AI Chat Assistant
     const aiChat = document.querySelector('#ai-chat');
     if (aiChat) {
@@ -4236,26 +4303,40 @@ window.addEventListener('click', (event) => {
 function smartRouteChat(message) {
     const lowerMessage = message.toLowerCase();
 
-    const underwritingKeywords = [
-        'underwriting', 'guideline', 'overlay', 'fannie', 'freddie', 'fha', 'va', 'usda',
-        'dti', 'debt to income', 'credit score', 'appraisal', 'income', 'assets',
-        'employment', 'reserve', 'self-employed', 'bank statement', 'non-qm',
-        'compensating factor', 'exception', 'manual underwrite', 'du', 'lp', 'findings'
+    // First, detect if user is asking ABOUT the tool/features
+    const aboutToolPhrases = [
+        'what is this tool', 'what does this tool do', 'what can this tool do',
+        'tell me about this app', 'what features', 'how does this help',
+        'what are the tools', 'ai tools', 'features of this app'
     ];
 
-    const isUnderwriting = underwritingKeywords.some(keyword => lowerMessage.includes(keyword));
+    if (aboutToolPhrases.some(phrase => lowerMessage.includes(phrase))) {
+        return false; // Do NOT route — let general chat handle it
+    }
 
-    if (isUnderwriting) {
-        // Hide all sections
+    // Only route if it's clearly a guideline question
+    const underwritingKeywords = [
+        'fha', 'va', 'usda', 'conventional', 'dti', 'credit score',
+        'guideline', 'overlay', 'qualify', 'eligible', 'minimum', 'maximum',
+        'bankruptcy', 'foreclosure', 'manual underwrite', 'compensating factor',
+        '203k', 'buydown', 'irr rl', 'cash out', 'lpmi', 'manufactured'
+    ];
+
+    const isUnderwritingQuestion = underwritingKeywords.some(keyword => 
+        lowerMessage.includes(keyword) && 
+        // Require at least 2 keywords or a question structure
+        (underwritingKeywords.filter(k => lowerMessage.includes(k)).length >= 2 ||
+         lowerMessage.includes('?'))
+    );
+
+    if (isUnderwritingQuestion) {
+        // Route to underwriting tool
         document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-
-        // Show underwriting section
         const uwSection = document.getElementById('underwriting-search');
         if (uwSection) {
             uwSection.classList.remove('hidden');
         }
 
-        // Pre-fill the question
         const uwInput = document.getElementById('uw-question');
         if (uwInput) {
             uwInput.value = message;
@@ -4263,17 +4344,16 @@ function smartRouteChat(message) {
             uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // Auto-trigger search after short delay
         setTimeout(() => {
             if (typeof searchUnderwriting === 'function') {
                 searchUnderwriting();
             }
         }, 800);
 
-        return true; // Routed successfully
+        return true;
     }
 
-    return false; // Not an underwriting question
+    return false;
 }
 </script>
 <!-- Post Ideas Modal -->
@@ -4282,7 +4362,7 @@ function smartRouteChat(message) {
         <span class="close-modal" onclick="closeModal()">&times;</span>
         <div class="modal-header">
             <h3 id="modal-title" class="text-3xl font-bold"></h3>
-            <p class="text-xl mt-4 text-gray-600 dark:text-gray-400">Click any idea to copy it, or use it as inspiration for the AI generator!</p>
+            <p class="text-xl mt-4 text-gray-600 dark:text-gray-400">Feel free to copy any idea, or use it as inspiration for the AI generator!</p>
         </div>
         <ul id="modal-suggestions" class="modal-suggestions list-disc pl-8 space-y-4 text-lg">
             <!-- Filled by JS -->
@@ -4315,6 +4395,3 @@ function smartRouteChat(message) {
 </div>
 </body>
 </html>
-
-
-
