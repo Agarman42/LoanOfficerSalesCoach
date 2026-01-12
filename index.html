@@ -5,42 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ultimate Loan Officer Sales Coach</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- SWITCH TO CLASS MODE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <!-- SWITCH TO CLASS MODE -->
     <script>
       tailwind.config = {
         darkMode: 'class'
       }
     </script>
 
-    <!-- FORCE DARK CLASS -->
-    <script>
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-
-      const observer = new MutationObserver(() => {
-        if (!document.documentElement.classList.contains('dark')) {
-          document.documentElement.classList.add('dark');
-        }
-        if (!document.body.classList.contains('dark')) {
-          document.body.classList.add('dark');
-        }
-      });
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#002B5C">
     <style>
-    html, body {
-        overscroll-behavior: contain;
-        height: 100%;
-    }
-
-    .dark { 
+        
+     .dark { 
         background: linear-gradient(to bottom, #1a202c, #0f172a); 
         color: #e2e8f0; 
     }
@@ -49,9 +28,9 @@
         transition: transform 0.2s, box-shadow 0.2s; 
     }
     .card:hover { 
-        transform: scale(1.02); 
-        box-shadow: 0 10px 20px rgba(0,168,157,0.3); 
-    }
+    transform: translateY(-8px) !important;  /* Lighter than scale — fixes GPU delay, keeps lift effect */
+    box-shadow: 0 20px 40px rgba(0,168,157,0.5); 
+}
 
     .accordion-content { 
         max-height: 0; 
@@ -76,27 +55,27 @@
 
     /* === SIDEBAR GROUP BUTTONS - MORE IMPACT === */
     .sidebar-group {
-        font-weight: 900;                           /* Even bolder */
+        font-weight: 900;
         color: white;
-        padding: 20px 28px;                         /* Bigger, more presence */
+        padding: 20px 28px;
         text-transform: uppercase;
-        font-size: 1.1rem;                          /* Slightly larger */
+        font-size: 1.1rem;
         letter-spacing: 2.2px;
-        background-color: rgba(0, 31, 63, 0.9);     /* Much deeper navy base */
+        background-color: rgba(0, 31, 63, 0.9);
         border-radius: 20px;
         margin: 20px 24px 16px 24px;
         text-align: center;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);   /* Deeper shadow */
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(12px);
-        border: 3px solid rgba(0, 168, 157, 0.9);   /* Bolder teal glow */
+        border: 3px solid rgba(0, 168, 157, 0.9);
         transition: all 0.4s ease;
     }
 
     .sidebar-group:hover {
-        background-color: rgba(0, 43, 92, 1);       /* Solid deep navy on hover */
-        border-color: #00A89D;                      /* Full bright teal */
-        transform: translateY(-6px) scale(1.03);    /* Bigger lift + slight grow */
-        box-shadow: 0 20px 50px rgba(0, 168, 157, 0.5); /* Teal glow on hover */
+        background-color: rgba(0, 43, 92, 1);
+        border-color: #00A89D;
+        transform: translateY(-6px) scale(1.03);
+        box-shadow: 0 20px 50px rgba(0, 168, 157, 0.5);
     }
 
     .accordion button[aria-expanded="true"] i.fa-chevron-down,
@@ -108,7 +87,6 @@
         transform: rotate(180deg);
     }
 
-    /* === ALL YOUR ORIGINAL RULES BELOW - 100% PRESERVED === */
     /* Modal Styles */
     .modal {
         display: none;
@@ -122,6 +100,7 @@
         background-color: rgba(0,0,0,0.6);
         backdrop-filter: blur(8px);
     }
+
     .modal-content {
         background-color: #ffffff;
         color: #1f2937;
@@ -149,6 +128,7 @@
     .modal-content h4 {
         color: inherit;
     }
+
     .modal-header {
         text-align: center;
         margin-bottom: 24px;
@@ -168,24 +148,37 @@
         top: 16px;
         right: 32px;
     }
-    .close-modal:hover {
-        color: #F15A29;
-    }
-    .dark .close-modal {
-        color: #cbd5e1;
-    }
-    .dark .close-modal:hover {
-        color: #F15A29;
-    }
+    .close-modal:hover { color: #F15A29; }
+    .dark .close-modal { color: #cbd5e1; }
+    .dark .close-modal:hover { color: #F15A29; }
+
+    /* Fixed: Use @apply correctly */
     .modal-suggestions {
-        space-y-6;
+        @apply space-y-6;
     }
+
     .modal-suggestions li {
         padding: 16px;
         background: linear-gradient(to right, #002B5C/5, #00A89D/5);
         border-radius: 16px;
         border-left: 6px solid #00A89D;
         font-size: 1.1rem;
+    }
+
+    /* === DETAIL MODAL: Most reliable repaint method === */
+        /* === DETAIL MODAL: Most reliable repaint method === */
+    #detail-modal {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        position: fixed;
+        inset: 0;
+        /* ADD THIS LINE - forces GPU layer and fixes offset/repaint bug */
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+
+    #detail-modal[style*="flex"] {
+        opacity: 1;
     }
 
     /* Eliminate top gap */
@@ -272,12 +265,61 @@
             padding-top: env(safe-area-inset-top);
         }
     }
-
+    
     header, 
     #sidebar, 
     main {
         padding-top: env(safe-area-inset-top);
     }
+
+    .tab-btn {
+        @apply px-10 py-4 font-bold text-xl bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-t-lg transition-all;
+    }
+
+    .tab-btn.active {
+        @apply bg-[#F15A29] text-white;
+    }
+    /* Nuclear fix for Chrome fixed modal offset + repaint delay */
+#detail-modal {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    position: fixed !important;
+    inset: 0 !important;
+    transform: translateZ(0);           /* Promote to GPU layer */
+    backface-visibility: hidden;        /* Stabilize fixed positioning */
+    will-change: opacity;               /* Hint to browser */
+}
+
+#detail-modal[style*="flex"] {
+    opacity: 1;
+}
+#detail-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow: auto;
+}
+#detail-modal.flex {
+    display: flex;
+}
+.force-reflow {
+    opacity: 0.99;  /* Tiny change forces repaint without visual flicker */
+}
+main, #equity-scanner, #equity-output, #opportunity-cards {
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+}
+
+/* Reduce GPU aggression on detail modal (keeps fixes but less repaint bugs) */
+#detail-modal {
+    transform: none !important;  /* Remove translateZ(0) — it's often the repaint offender */
+    will-change: auto !important;
+}
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -293,16 +335,12 @@
             </div>
         </div>
 
-        <div class="max-w-4xl mx-auto">
-            <div class="bg-white/15 backdrop-blur-md rounded-2xl p-6 text-center border border-white/20">
-                <p id="persistent-quote" class="text-2xl md:text-3xl font-medium italic text-white mb-8 drop-shadow-lg">
-                    "Loading inspiration..."
-                </p>
-                <button onclick="generateQuote()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-12 py-5 rounded-full hover:opacity-90 transition-opacity font-bold text-xl shadow-2xl">
-                    Get Inspired – New Quote
-                </button>
-            </div>
-        </div>
+        <!-- Compact Inline Quote Bar (replaces the large card) -->
+<div class="max-w-4xl mx-auto mt-6 bg-white/10 backdrop-blur-md rounded-xl px-6 py-4 text-center border border-white/20 shadow-md">
+    <p id="persistent-quote" class="text-lg md:text-xl font-medium italic text-white drop-shadow-md">
+        "Loading inspiration..."
+    </p>
+   </div>
 
         <i class="fas fa-bars cursor-pointer text-3xl absolute top-8 right-6 md:hidden" id="menu-toggle"></i>
     </div>
@@ -310,19 +348,22 @@
              <aside id="sidebar" class="fixed left-[-300px] top-0 bottom-0 w-72 bg-gradient-to-b from-[#002B5C] to-[#00A89D] text-white overflow-y-auto transition-left duration-300 ease-in-out z-50 shadow-2xl rounded-r-xl md:left-0 md:w-64 lg:w-72">
         <ul class="p-6 space-y-3">
             <li class="sidebar-group">A.I. Tools</li>
-            <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
-    <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
+            <li><a href="#equity-scanner" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+    <i class="fas fa-comment-dots mr-3"></i> Equity & Opportunity Scanner
 </a></li>
 <li><a href="#social-post" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-share-alt mr-3"></i> Social Media Post Creator
 </a></li>            
+<li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+    <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
+</a></li>
+<li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+    <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
+</a></li>
 <li><a href="#underwriting-search" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-search-dollar mr-3"></i> Underwriting Guideline Search
 </a></li>
-          <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
-    <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
-</a></li>
-            <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+                      <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
                         <li class="sidebar-group">Marketing</li>
@@ -1842,6 +1883,71 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         <p class="text-xl">Nurture it like the gold mine it is — and it will take care of you for decades.</p>
     </div>
 </section>
+<section id="equity-scanner" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in">
+    <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Equity & Opportunity Scanner</h2>
+    <p class="mb-8 text-lg">Upload your past client spreadsheet → get a prioritized, interactive dashboard showing equity built, refi savings, cash-out potential, move-up power, and personalized outreach scripts. Turn your database into your #1 lead source.</p>
+
+    <!-- Upload Area -->
+    <div id="upload-area" class="border-4 border-dashed border-[#00A89D] rounded-2xl p-12 text-center hover:border-[#F15A29] transition-all cursor-pointer mb-8">
+        <i class="fas fa-file-upload text-6xl text-[#00A89D] mb-6"></i>
+        <p class="text-xl mb-4">Drag & drop your spreadsheet here<br><span class="text-sm block mt-2">or click to browse (CSV or Excel files only)</span></p>
+        <input type="file" id="database-upload" accept=".csv,.xlsx,.xls" class="hidden">
+        <button type="button" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:opacity-90">
+            Choose File
+        </button>
+        <p id="file-status" class="text-sm text-gray-600 dark:text-gray-400 mt-6">No file chosen</p>
+        <p id="file-name" class="mt-2 font-bold text-[#F15A29] hidden"></p>
+    </div>
+
+    <!-- Generate Button -->
+    <div class="text-center mb-12">
+        <button onclick="generateEquityReport(event)" class="w-full max-w-2xl mx-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl">
+            Generate Equity Report
+        </button>
+    </div>
+    <!-- Instructions -->
+    <div class="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-2xl mb-8">
+        <p class="font-semibold mb-2">Ideal columns (at minimum):</p>
+        <ul class="list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300">
+            <li>Borrower's Name</li>
+            <li>Borrower's Phone</li>
+            <li>Borrower's Email</li>
+            <li>Property Address</li>
+            <li>Closed Date</li>
+            <li>Current Rate (or Original Rate)</li>
+            <li>Current Balance (or Original Loan Amount)</li>
+            <li>Current Term</li>
+            <li>Appraised Value or Purchase Price</li>
+        </ul>
+        <p class="mt-4 text-sm">The tool automatically matches column names — no need for exact titles!</p>
+    </div>
+
+    <!-- New Refinance Rate Input -->
+    <div class="mb-8">
+        <label for="new-rate">New Refinance Rate (%)</label>
+        <input id="new-rate" type="number" step="0.125" value="5.0" min="0" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+    </div>
+
+        <!-- Loading -->
+    <div id="equity-loading" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl text-center max-w-md">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#F15A29] mx-auto mb-6"></div>
+        <p class="text-2xl font-bold text-[#F15A29]">Processing Spreadsheet...</p>
+        <p class="text-lg mt-4">This may take a few seconds for large files</p>
+        <p id="progress-text" class="text-xl mt-6 text-[#00A89D] font-semibold">Starting...</p>
+    </div>
+</div>
+
+    <!-- Output -->
+    <div id="equity-output" class="hidden">
+        <div id="opportunity-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12">
+    <!-- Cards will be injected here -->
+</div>
+        <div id="no-results" class="text-center py-20 text-2xl text-gray-500 hidden">
+            No opportunities found. Try adjusting filters or uploading a different file.
+        </div>
+    </div>
+</section>
                         <section id="process" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">The Loan Process – World-Class, Scalable, White-Glove</h2>
     <p class="mb-8 text-lg">This is your complete playbook for delivering an extraordinary, consistent client and referral partner experience — no matter if you're at 20 loans/month or 60. Over-communicate, systematize everything, and build processes that scale without sacrificing quality.</p>
@@ -1993,7 +2099,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         <p class="text-xl">When you deliver that consistently, referrals become automatic and your business becomes unstoppable.</p>
     </div>
 </section>
-                <section id="social-post" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+    <section id="social-post" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Social Media Post Creator</h2>
     <p class="mb-8 text-lg">Generate ready-to-post content that builds relationships, sparks engagement, and grows your reach organically.</p>
 
@@ -2689,6 +2795,17 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             </button>
         </div>
 
+        <!-- Helpful Hints for Blog Content (add after Generate Blog button) -->
+<div class="mt-8 bg-blue-50 dark:bg-blue-900/30 p-6 rounded-2xl shadow-inner border border-blue-200 dark:border-blue-700">
+    <h3 class="text-xl font-bold text-[#00A89D] mb-4">Quick Tips for Creating Great Blog Content</h3>
+    <ul class="list-disc pl-6 space-y-3 text-gray-700 dark:text-gray-300 text-base">
+         <li>How to Use This Tool: Input your topic, tone (e.g., professional or conversational), and length. Click Generate — the AI creates a draft optimized for readability and SEO.</li>
+         <li>Choose a Relevant Topic: Focus on timely mortgage issues like "Interest Rate Trends" or "First-Time Homebuyer Tips" to attract readers searching for real estate advice. Use keywords like "mortgage rates 2026" for SEO.</li>
+        <li>Keep It Engaging and Short: Aim for 800-1200 words. Start with a hook question or statistic, use subheadings, and include calls-to-action like "Contact me for a free rate quote."</li>
+        <li>Best Practices After Generation: Always read through the blog for accuracy (verify facts like rates or regulations). Edit to add personal anecdotes, like "In my 10 years as an LO, I've helped clients save thousands by refinancing early." This makes it authentic and builds trust.</li>
+        <li>Publish and Promote: Once edited, post on your website or LinkedIn. Share on social media with a teaser and link back to your contact info. Track engagement to refine future posts.</li>
+    </ul>
+</div>
         <!-- Loading Spinner (Now Matches Social Post & Sales Script) -->
         <div id="blog-loading" class="text-center py-12 hidden">
             <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
@@ -2701,6 +2818,18 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     <!-- Blog Output -->
     <div id="blog-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96">
         <p class="text-gray-500 dark:text-gray-400 italic text-center py-20">Select or type a topic → choose tone → click Generate to create your blog post</p>
+        <h4 class="text-3xl font-bold text-[#F15A29] mb-6 mt-12">Suggested Social Media Caption</h4>
+<div id="social-caption" class="bg-gray-100 dark:bg-gray-700 p-6 rounded-2xl text-lg mb-8 whitespace-pre-wrap"></div>
+
+<!-- Copy Buttons -->
+<div class="flex flex-col md:flex-row gap-6 justify-center">
+    <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3">
+        <i class="fas fa-copy"></i> Copy Blog (with Formatting)
+    </button>
+    <button id="copy-caption-btn" class="bg-[#00A89D] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#00A89D]/80 flex items-center justify-center gap-3">
+        <i class="fas fa-share-alt"></i> Copy Social Caption
+    </button>
+</div>
     </div>
 </section>
         <section id="books" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -3204,25 +3333,24 @@ const quotes = [
 ];
 
 // Generate quote (for Dashboard)
-function generateQuote() {
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    const formatted = `<span class="not-italic font-bold text-[#00A89D]">"</span>${randomQuote}<span class="not-italic font-bold text-[#00A89D]">"</span>`;
-
-    const persistent = document.getElementById('persistent-quote');
-    if (persistent) persistent.innerHTML = formatted;
-
-    const oldQuote = document.getElementById('daily-quote');
-    if (oldQuote) oldQuote.innerHTML = formatted;
+// Function to get random quote
+function getRandomQuote() {
+    return quotes[Math.floor(Math.random() * quotes.length)];
 }
 
-function updateCarouselQuote() {
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    const carouselEl = document.getElementById('carousel-quote');
-    if (carouselEl) {
-        carouselEl.innerHTML = `<p class="italic text-lg">"${randomQuote}"</p>`;
+// Auto-rotate every 15 seconds
+document.addEventListener('DOMContentLoaded', () => {
+    const quoteElement = document.getElementById('persistent-quote');
+    if (quoteElement) {
+        // Set initial quote
+        quoteElement.textContent = getRandomQuote();
+
+        // Rotate every 15 seconds
+        setInterval(() => {
+            quoteElement.textContent = getRandomQuote();
+        }, 12500);  
     }
-}
-updateCarouselQuote();  // Now safe to call
+});
 
 // Activities (full)
 const activities = {
@@ -3351,21 +3479,8 @@ Focus on building connection and trust — not closing the deal.`;
                 </div>`;
         });
 
-        outputHtml += '</div>';
-
-        // Final output structure
-        output.innerHTML = `
-            <div class="prose prose-lg dark:prose-invert max-w-none mb-10">
-                ${outputHtml}
-            </div>
-            <div class="text-center mt-8">
-                <button onclick="copySalesScripts()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-10 py-4 rounded-full font-bold transition-all shadow-lg text-lg">
-                    📋 Copy All Scripts
-                </button>
-            </div>
-        `;
-
-        output.classList.remove('hidden');
+              // Final output structure
+           output.classList.remove('hidden');
     } catch (error) {
         console.error(error);
         output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl">Error generating scripts. Please try again.</p>';
@@ -3421,23 +3536,754 @@ document.getElementById('script-scenario-select').addEventListener('change', fun
         document.getElementById('custom-scenario').value = ''; // Reset to custom when "Use Custom" selected
     }
 });
-async function generateSocialPost() {
-    const type = document.getElementById('post-type').value;
-    const details = document.getElementById('post-details').value.trim();
+const uploadArea = document.getElementById('upload-area');
+const fileInput = document.getElementById('database-upload');
+const fileStatus = document.getElementById('file-status');
+const fileNameDisplay = document.getElementById('file-name');
+const loading = document.getElementById('equity-loading');
+const dashboard = document.getElementById('equity-dashboard-output');
 
-    const loading = document.getElementById('social-loading');
-    const output = document.getElementById('social-output');
+// === ADD THIS BLOCK HERE ===
+uploadArea.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON') return;
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        fileStatus.textContent = 'File selected:';
+        fileNameDisplay.textContent = file.name;
+        fileNameDisplay.classList.remove('hidden');
+    }
+});
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('border-[#F15A29]', 'bg-[#F15A29]/10');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
+    if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        const file = e.dataTransfer.files[0];
+        fileStatus.textContent = 'File selected:';
+        fileNameDisplay.textContent = file.name;
+        fileNameDisplay.classList.remove('hidden');
+    }
+});
+
+function pmt(rate, nper, pv) {
+    const monthlyRate = rate / 12 / 100;
+    if (monthlyRate === 0) return pv / nper;
+    return monthlyRate * pv * Math.pow(1 + monthlyRate, nper) / (Math.pow(1 + monthlyRate, nper) - 1);
+}
+// Remaining balance (optimized closed-form formula)
+function remainingBalance(originalBalance, originalRate, originalTermMonths, monthsPaid) {
+    if (originalBalance <= 0 || originalTermMonths <= 0) return 0;
+    const monthlyRate = originalRate / 12 / 100;
+    if (monthlyRate === 0) {
+        return originalBalance * (1 - monthsPaid / originalTermMonths);
+    }
+    const monthlyPayment = pmt(originalRate, originalTermMonths, originalBalance);
+    const power = Math.pow(1 + monthlyRate, monthsPaid);
+    const balance = originalBalance * power - monthlyPayment * (power - 1) / monthlyRate;
+    return Math.max(0, Math.round(balance * 100) / 100);
+}
+// Chunk processor — prevents long-running script warning
+// Chunk processor — steadier progress, faster overall
+function processInChunks(items, chunkSize = 200, processItemCallback, completeCallback) {  // bumped to 200
+    let index = 0;
+    const total = items.length;
+    const progressText = document.getElementById('progress-text');
+
+    function doChunk() {
+        const end = Math.min(index + chunkSize, total);
+
+        for (; index < end; index++) {
+            processItemCallback(items[index], index);
+        }
+
+        // Live progress update
+        if (progressText) {
+            progressText.textContent = `Processed ${index} of ${total} rows...`;
+        }
+
+        if (index < total) {
+            setTimeout(doChunk, 0); // Yield to browser
+        } else {
+            if (completeCallback) completeCallback();
+            if (progressText) {
+                progressText.textContent = 'Complete! Building dashboard...';
+            }
+        }
+    }
+
+    doChunk();
+}
+// Excel serial to date (fixed for 1900 base)
+function excelSerialToDate(serial) {
+    if (!serial || isNaN(serial)) return null;
+    var utc_days = Math.floor(serial - 25569);
+    var utc_value = utc_days * 86400;
+    var date_info = new Date(utc_value * 1000);
+    return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate());
+}
+// Months elapsed
+function calculateMonthsElapsed(closingDate) {
+    const currentDate = new Date(2026, 0, 6); // January 6, 2026
+    let months = (currentDate.getFullYear() - closingDate.getFullYear()) * 12;
+    months += currentDate.getMonth() - closingDate.getMonth();
+    if (currentDate.getDate() < closingDate.getDate()) months--;
+    return Math.max(0, months);
+}
+// Render cards
+function renderCards() {
+    const container = document.getElementById('opportunity-cards');
+    if (!container) return;
+
+    const opps = window.filteredOpportunities || window.currentOpportunities;
+    if (!opps || opps.length === 0) {
+        document.getElementById('no-results')?.classList.remove('hidden');
+        return;
+    }
+    document.getElementById('no-results')?.classList.add('hidden');
+
+    const cardsHTML = [];
+
+    opps.forEach((opp, index) => {
+        const scoreColor = opp.score >= 70 ? 'bg-green-600' : opp.score >= 40 ? 'bg-orange-600' : 'bg-red-600';
+        const typeColor = opp.type === 'Refi Ready' ? 'bg-teal-600' : opp.type === 'Cash-Out Goldmine' ? 'bg-green-600' : 'bg-blue-600';
+        const pmiBadge = opp.pmiEligible ? `<span class="px-5 py-2.5 rounded-full text-white font-bold text-base shadow-md bg-green-600">PMI Removal Eligible</span>` : '';
+
+       const cardHTML = `
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:scale-105 hover:shadow-2xl transition-all duration-300 flex flex-col cursor-pointer border border-gray-200 dark:border-gray-700" onclick="openDetailModal(${index})">
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex-1">
+                            <h4 class="text-2xl font-bold text-[#002B5C] dark:text-white">${opp.fullName || 'Unknown'}</h4>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">${opp.fullAddress || 'Address not available'}</p>
+                        </div>
+                        <div class="w-16 h-16 ${scoreColor} rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-lg flex-shrink-0">
+                            ${opp.score}
+                        </div>
+                    </div>
+                    <div class="space-y-4 flex-grow text-lg">
+                        <p><strong>Estimated Monthly Savings:</strong>
+                            <span class="font-bold ml-2 ${opp.monthlySavings > 0 ? 'text-green-600' : 'text-gray-500'}">
+                                $${opp.monthlySavings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                            </span>
+                        </p>
+                        <p><strong>Cash-Out Potential (80% LTV):</strong>
+                            <span class="font-bold text-teal-600 ml-2">
+                                $${opp.cashOut.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            </span>
+                        </p>
+                        <p><strong>Move-Up Power:</strong>
+                            <span class="font-bold text-blue-600 ml-2 text-2xl">
+                                $${opp.moveUp.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="mt-8 flex flex-wrap justify-center gap-4">
+                        <span class="px-5 py-2.5 rounded-full text-white font-bold text-base shadow-md ${typeColor}">
+                            ${opp.type}
+                        </span>
+                        ${pmiBadge}
+                    </div>
+                </div>
+            </div>
+        `;
+        cardsHTML.push(cardHTML);
+    });
+
+    container.innerHTML = cardsHTML.join('');
+    // Force browser to calculate grid/scroll height immediately after injection
+setTimeout(() => {
+    container.style.minHeight = container.offsetHeight + 'px';  // Nudge height read
+    void container.offsetHeight;  // Force reflow
+    container.style.minHeight = '';  // Clean up
+}, 100);
+}
+// Sort & Filter
+function sortAndRenderCards() {
+    const filterType = document.getElementById('filter-type')?.value || 'All';
+    const sortBy = document.getElementById('sort-by')?.value || 'score';
+
+    let filtered = window.currentOpportunities.filter(opp => {
+        if (filterType === 'All') return true;
+        if (filterType === 'PMI Removal Eligible') return opp.pmiEligible;
+        return opp.type === filterType;
+    });
+
+    filtered.sort((a, b) => b[sortBy] - a[sortBy]);
+
+    window.filteredOpportunities = filtered;
+    renderCards();
+}
+// Copy Dashboard
+function copyDashboard() {
+    const opps = window.filteredOpportunities || window.currentOpportunities;
+    if (!opps || opps.length === 0) {
+        alert('No data to copy');
+        return;
+    }
+    let text = 'Equity Opportunity Report\n\n';
+    text += 'Name\tAddress\tPhone\tEmail\tSavings\tCash-Out\tMove-Up\tScore\tType\n';
+    opps.forEach(opp => {
+        text += `${opp.fullName}\t${opp.fullAddress}\t${opp.phone}\t${opp.email}\t$${opp.monthlySavings}\t$${opp.cashOut}\t$${opp.moveUp}\t${opp.score}\t${opp.type}\n`;
+    });
+    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+}
+// openDetailModal
+function openDetailModal(index) {
+    const opps = window.filteredOpportunities || window.currentOpportunities;
+    const c = opps[index];
+    if (!c) return;
+
+    try {
+        // Safe currency formatter
+        const formatCurrency = (val) => {
+            const num = parseFloat(val) || 0;
+            return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        // Basic info
+        document.getElementById('modal-client-name').textContent = c.fullName || 'N/A';
+        document.getElementById('modal-address').textContent = c.fullAddress || 'N/A';
+
+        // Phone
+        const phoneLink = document.getElementById('modal-phone-link');
+        const phoneNa = document.getElementById('modal-phone-na');
+        if (c.phone && c.phone.trim()) {
+            phoneLink.href = 'tel:' + c.phone.replace(/[^\d]/g, '');
+            phoneLink.textContent = c.phone;
+            phoneLink.classList.remove('hidden');
+            phoneNa.classList.add('hidden');
+        } else {
+            phoneLink.classList.add('hidden');
+            phoneNa.classList.remove('hidden');
+        }
+
+        // Email
+        const emailLink = document.getElementById('modal-email-link');
+        const emailNa = document.getElementById('modal-email-na');
+        if (c.email && c.email.trim()) {
+            emailLink.href = 'mailto:' + c.email;
+            emailLink.textContent = c.email;
+            emailLink.classList.remove('hidden');
+            emailNa.classList.add('hidden');
+        } else {
+            emailLink.classList.add('hidden');
+            emailNa.classList.remove('hidden');
+        }
+
+        // Current Loan Details
+        document.getElementById('modal-program').textContent = c.loanProgram || 'N/A';
+        document.getElementById('modal-closing-date').textContent = c.closingDate || 'N/A';
+        document.getElementById('modal-current-rate').textContent = (c.currentRate || 0).toFixed(3) + '%';
+        document.getElementById('modal-term').textContent = c.currentTerm > 0 ? `${Math.round(c.currentTerm / 12)} years` : 'N/A';
+        document.getElementById('modal-original-ltv').textContent = (c.originalLTV || 0).toFixed(2) + '%';
+        document.getElementById('modal-balance').textContent = formatCurrency(c.estimatedBalance);
+        document.getElementById('modal-value').textContent = formatCurrency(c.appraisedValue);
+        document.getElementById('modal-original-pi').textContent = formatCurrency(c.originalPI);
+        document.getElementById('modal-original-mi').textContent = formatCurrency(c.originalMI);
+        document.getElementById('modal-original-insurance').textContent = formatCurrency(c.originalInsurance);
+        document.getElementById('modal-original-taxes').textContent = formatCurrency(c.originalTaxes);
+
+        // PMI Removal Alert
+        const pmiAlert = document.getElementById('modal-pmi-alert'); // Add this ID to the HTML alert div
+        pmiAlert.style.display = c.pmiEligible ? 'block' : 'none';
+
+        // Buyer's Agent section
+        const isPurchase = c.loanProgram.toLowerCase().includes('pur');
+        const buyersAgentSection = document.getElementById('modal-buyers-agent-section');
+        if (isPurchase && c.buyersAgent) {
+            buyersAgentSection.style.display = 'block';
+            document.getElementById('modal-transaction-type').textContent = 'Purchase';
+            document.getElementById('modal-buyers-agent').textContent = c.buyersAgent;
+        } else {
+            buyersAgentSection.style.display = 'none';
+        }
+
+        // Refinance Comparison
+        const balance = parseFloat(c.estimatedBalance) || 0;
+        const value = parseFloat(c.appraisedValue) || 0;
+        const equity = value - balance;
+        const cashout = Math.max(0, value * 0.8 - balance);
+        const moveup = equity * 0.95;
+
+        let currentLTV = 'N/A';
+        let currentLTVNum = 0;
+        if (value > 0) {
+            currentLTVNum = (balance / value) * 100;
+            currentLTV = currentLTVNum.toFixed(2);
+        }
+
+        const originalLTVNum = parseFloat(c.originalLTV) || 0;
+        const pmiDisplay = c.pmiEligible ? 'block' : 'none';
+
+        const currentPI = parseFloat(c.originalPI) || 0;
+
+        let remainingMonths = c.currentTerm || 360;
+        if (c.closingDate && c.currentTerm) {
+            const currentDate = new Date(2026, 0, 9); // January 9, 2026
+            const closingDateObj = new Date(c.closingDate);
+            if (!isNaN(closingDateObj.getTime())) {
+                const monthsPassed = (currentDate.getFullYear() - closingDateObj.getFullYear()) * 12 + (currentDate.getMonth() - closingDateObj.getMonth());
+                remainingMonths = Math.max(c.currentTerm - monthsPassed, 0);
+            }
+        }
+
+        const newRate = parseFloat(document.getElementById('new-rate')?.value) || 5.0;
+        const monthlyRate = newRate / 1200;
+        const closingCosts = 4000;
+
+        const paddedBalanceOpt1 = balance + closingCosts;
+        const newPIOpt1 = remainingMonths <= 0 ? 0 : pmt(newRate, remainingMonths, paddedBalanceOpt1);
+        const savingsOpt1 = currentPI - newPIOpt1;
+
+        const paddedBalanceOpt2 = balance + closingCosts;
+        const newPIOpt2 = c.currentTerm <= 0 ? 0 : pmt(newRate, c.currentTerm, paddedBalanceOpt2);
+        const savingsOpt2 = currentPI - newPIOpt2;
+
+        const comparisonSection = document.getElementById('refi-comparison-grid');
+        comparisonSection.innerHTML = `
+            <div class="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-300 dark:border-gray-600">
+                <h5 class="text-2xl font-extrabold text-[#002B5C] dark:text-[#00A89D]">Option 1: Keep Remaining Term (${remainingMonths} months)</h5>
+                <p class="text-lg"><strong>Current Estimated LTV:</strong> <span class="font-bold text-blue-600 text-xl">${currentLTV}%</span></p>
+                <p class="bg-green-100 dark:bg-green-900 p-4 rounded-lg font-bold text-white-700 dark:text-white-700 flex items-center text-lg" style="display: ${pmiDisplay};">
+                    <i class="fas fa-check-circle mr-2 text-green-600 text-xl"></i>Eligible for PMI Removal! (LTV ≤ 80%)
+                </p>
+                <p class="text-lg"><strong>Current P&I Payment:</strong> <span class="text-xl font-bold">${formatCurrency(currentPI)}</span></p>
+                <p class="text-lg"><strong>Estimated New P&I (at ${newRate.toFixed(3)}%):</strong> <span class="text-xl font-bold text-green-600">${formatCurrency(newPIOpt1)}</span></p>
+                <p class="text-lg"><strong>Estimated Monthly Savings:</strong> <span class="text-2xl font-extrabold ${savingsOpt1 > 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(savingsOpt1)}</span></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 italic">Savings calculated as: Current P&I (${formatCurrency(currentPI)}) - New P&I (${formatCurrency(newPIOpt1)}) based on current balance (${formatCurrency(balance)}), assuming $4,000 added for closing costs, new rate (${newRate}%), and remaining term (${remainingMonths} months).</p>
+            </div>
+            <div class="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-300 dark:border-gray-600">
+                <h5 class="text-2xl font-extrabold text-[#002B5C] dark:text-[#00A89D]">Option 2: Reset to Original Term (${c.currentTerm} months)</h5>
+                <p class="text-lg"><strong>Current Estimated LTV:</strong> <span class="font-bold text-blue-600 text-xl">${currentLTV}%</span></p>
+                <p class="bg-green-100 dark:bg-green-900 p-4 rounded-lg font-bold text-white-700 dark:text-white-700 flex items-center text-lg" style="display: ${pmiDisplay};">
+                    <i class="fas fa-check-circle mr-2 text-green-600 text-xl"></i>Eligible for PMI Removal! (LTV ≤ 80%)
+                </p>
+                <p class="text-lg"><strong>Current P&I Payment:</strong> <span class="text-xl font-bold">${formatCurrency(currentPI)}</span></p>
+                <p class="text-lg"><strong>Estimated New P&I (at ${newRate.toFixed(3)}%):</strong> <span class="text-xl font-bold text-green-600">${formatCurrency(newPIOpt2)}</span></p>
+                <p class="text-lg"><strong>Estimated Monthly Savings:</strong> <span class="text-2xl font-extrabold ${savingsOpt2 > 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(savingsOpt2)}</span></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 italic">Savings calculated as: Current P&I (${formatCurrency(currentPI)}) - New P&I (${formatCurrency(newPIOpt2)}) based on current balance (${formatCurrency(balance)}), assuming $4,000 added for closing costs, new rate (${newRate}%), and reset to original term (${c.currentTerm} months).</p>
+            </div>
+        `;
+
+        // Opportunity Type
+        const typeColor = c.type === 'Refi Ready' ? 'bg-teal-600' : c.type === 'Cash-Out Goldmine' ? 'bg-green-600' : 'bg-blue-600';
+        const typeBadge = document.getElementById('modal-type-badge');
+        typeBadge.className = `px-6 py-3 rounded-full text-white font-bold text-lg inline-block ${typeColor}`;
+        typeBadge.textContent = c.type;
+
+        // Personalized Script
+        const script = `Hi ${c.fullName.split(' ')[0] || 'there'},
+
+Hope you're doing great! Quick update — your home has built significant equity.
+
+${c.monthlySavings > 0 ? `A refinance could save you ~$${c.monthlySavings.toLocaleString()}/month.` : ''}
+${c.cashOut > 50000 ? `You may be able to access up to $${c.cashOut.toLocaleString()} cash-out.` : ''}
+${c.moveUp > 100000 ? `That's enough for a strong down payment on your next home.` : ''}
+
+No pressure — just wanted to offer a free equity review. When's a good time for a quick chat?
+
+Best,
+[Your Name]`;
+        document.getElementById('modal-scripts').textContent = script;
+
+        // Show modal
+        const modal = document.getElementById('detail-modal');
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+
+    } catch (error) {
+        console.error('Modal error:', error);
+    }
+}
+// closeDetailModal
+function closeDetailModal() {
+    const modal = document.getElementById('detail-modal');
+    modal.style.opacity = '0';
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+    }, 200);
+}
+// Single consolidated DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Force dark mode
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+    
+    // Start on AI chat
+    document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+    const chatSection = document.getElementById('ai-chat-section') || document.querySelector('main section:first-child');
+    if (chatSection) chatSection.classList.remove('hidden');
+    // Choose File button
+    const chooseButton = document.querySelector('#upload-area button[type="button"]');
+    const fileInput = document.getElementById('database-upload');
+    if (chooseButton && fileInput) {
+        chooseButton.addEventListener('click', () => fileInput.click());
+    }
+    // Drag & Drop
+    const uploadArea = document.getElementById('upload-area');
+    if (uploadArea) {
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.add('border-[#F15A29]', 'bg-[#F15A29]/5');
+        });
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/5');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/5');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                document.getElementById('file-name').textContent = files[0].name;
+                document.getElementById('file-name').classList.remove('hidden');
+                document.getElementById('file-status').textContent = 'File loaded — click Generate';
+            }
+        });
+    }
+    // Initial render if data exists
+    if (window.currentOpportunities) renderCards();
+    // Add event listeners for sorting/filtering
+    const filterType = document.getElementById('filter-type');
+    const sortBy = document.getElementById('sort-by');
+    if (filterType) filterType.addEventListener('change', sortAndRenderCards);
+    if (sortBy) sortBy.addEventListener('change', sortAndRenderCards);
+});
+// Generate report locally
+ function generateEquityReport(event) {
+    if (event) event.stopPropagation();
+
+    const fileInput = document.getElementById('database-upload');
+    const loading = document.getElementById('equity-loading');
+    const output = document.getElementById('equity-output');
+    const inputArea = document.getElementById('equity-input-area');  // Wrapper for upload/input/generate
+
+    if (!fileInput.files.length) {
+        alert('Please upload your client database file first');
+        return;
+    }
+
+    const file = fileInput.files[0];
 
     loading.classList.remove('hidden');
+    document.getElementById('progress-text').textContent = 'Reading file...';
     output.classList.add('hidden');
     output.innerHTML = '';
 
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            let rawData = [];
+            if (file.name.endsWith('.csv')) {
+                const text = e.target.result;
+                const rows = text.split('\n').map(r => r.split(',').map(c => c.trim()));
+                const headers = rows[0].map(h => h.toLowerCase());
+                rawData = rows.slice(1).filter(r => r.length > 1).map(row => {
+                    const obj = {};
+                    headers.forEach((h, i) => obj[h] = row[i] || '');
+                    return obj;
+                });
+            } else if (file.name.match(/\.(xlsx|xls)$/)) {
+                const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === 'table') || workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                rawData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                rawData = rawData.map(row => {
+                    const normRow = {};
+                    for (let key in row) {
+                        normRow[key.toLowerCase().trim()] = row[key];
+                    }
+                    return normRow;
+                });
+            } else {
+                throw new Error('Please upload a CSV or Excel file');
+            }
+
+            if (rawData.length === 0) throw new Error('No data found in file');
+
+            // Dedupe (unchanged)
+            rawData.sort((a, b) => {
+                const dateA = parseFloat(a['closing date'] || 0);
+                const dateB = parseFloat(b['closing date'] || 0);
+                return dateB - dateA;
+            });
+
+            const uniqueMap = new Map();
+            rawData.forEach(row => {
+                const first = (row['borrower first name'] || '').trim();
+                const last = (row['borrower last name'] || '').trim();
+                const email = (row['borr email'] || '').trim();
+                const address = (row['subject property address'] || '').trim();
+                const key = `${first}_${last}_${email}_${address}`.toLowerCase();
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, row);
+                }
+            });
+
+            const dedupedData = Array.from(uniqueMap.values());
+
+            const opportunities = [];
+            const currentMarketRate = parseFloat(document.getElementById('market-rate')?.value) || 5.5;
+
+            document.getElementById('progress-text').textContent = `Processing 0 of ${dedupedData.length} rows...`;
+
+            processInChunks(
+                dedupedData,
+                200,
+                (row) => {
+    const firstName = (row['borrower first name'] || '').trim();
+                    const lastName = (row['borrower last name'] || '').trim();
+                    const fullName = `${firstName} ${lastName}`.trim() || 'Unknown Client';
+                    const address = (row['subject property address'] || '').trim();
+                    const city = (row['subject property city'] || '').trim();
+                    const state = (row['subject property state'] || '').trim();
+                    const zip = (row['subject property zip'] || '').trim();
+                    const fullAddress = `${address}, ${city}, ${state} ${zip}`.trim();
+                    const phone = (row['borr home phone'] || '').trim();
+                    const email = (row['borr email'] || '').trim();
+                    const closingStr = row['closing date'] || '';
+                    const loanProgram = (row['loan program'] || 'N/A').trim();
+                    const loanAmount = parseFloat(row['loan amount'] || 0) || 0;
+                    const rate = parseFloat(row['note rate'] || 0) || 0;
+                    const term = parseInt(row['loan term'] || 360) || 360;
+                    const appraisedValue = parseFloat(row['appraised value'] || 0) || 0;
+                    const purchasePrice = parseFloat(row['subject property purchase price'] || 0) || appraisedValue;
+                    const buyersAgent = (row['buyers agent contact name'] || '').trim();
+
+                    const valueAtClosing = purchasePrice > 0 ? purchasePrice : appraisedValue;
+                    const originalLTV = valueAtClosing > 0 ? (loanAmount / valueAtClosing) * 100 : 0;
+
+                    const originalPI = pmt(rate, term, loanAmount);
+
+                    const estimatedAnnualInsurance = appraisedValue * 0.0035;
+                    const originalInsurance = estimatedAnnualInsurance / 12;
+
+                    const estimatedAnnualTaxes = appraisedValue * 0.011;
+                    const originalTaxes = estimatedAnnualTaxes / 12;
+
+                    const originalMI = originalLTV > 80 ? (loanAmount * 0.008 / 12) : 0;
+
+                    let closingDate;
+                    const serialNum = parseFloat(closingStr);
+                    if (!isNaN(serialNum) && serialNum > 10000) {
+                        closingDate = excelSerialToDate(serialNum);
+                    } else {
+                        closingDate = new Date(closingStr);
+                    }
+
+                    let monthsPaid = 0;
+                    let closingDateFormatted = 'N/A';
+                    if (!isNaN(closingDate.getTime())) {
+                        monthsPaid = calculateMonthsElapsed(closingDate);
+                        closingDateFormatted = closingDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    }
+
+                    let estimatedBalance = remainingBalance(loanAmount, rate, term, monthsPaid);
+                    if (isNaN(estimatedBalance)) estimatedBalance = loanAmount;
+
+                    let equity = Math.max(0, appraisedValue - estimatedBalance);
+
+                    let cashOut = Math.max(0, appraisedValue * 0.8 - estimatedBalance);
+
+                    let moveUp = Math.max(0, appraisedValue * 0.95 - estimatedBalance);
+
+                    const newPI = pmt(currentMarketRate, term, estimatedBalance);
+                    let monthlySavings = rate > currentMarketRate ? Math.round(originalPI - newPI) : 0;
+                    monthlySavings = Math.max(0, monthlySavings);
+
+                    const type = monthlySavings > 100 ? 'Refi Ready' : cashOut > 50000 ? 'Cash-Out Goldmine' : 'Move-Up Ready';
+
+                    let score = Math.round((monthlySavings / 5) + (equity / 5000) + (cashOut / 5000));
+                    if (isNaN(score)) score = 0;
+
+                    const currentLTV = appraisedValue > 0 ? (estimatedBalance / appraisedValue) * 100 : 0;
+                    const pmiEligible = originalLTV > 80 && currentLTV <= 80;
+
+                    opportunities.push({
+                        fullName,
+                        fullAddress,
+                        phone,
+                        email,
+                        loanProgram,
+                        closingDate: closingDateFormatted,
+                        currentRate: rate,
+                        currentTerm: term,
+                        estimatedBalance,
+                        appraisedValue,
+                        equity,
+                        monthlySavings,
+                        cashOut,
+                        moveUp,
+                        type,
+                        score,
+                        originalPI,
+                        originalLTV,
+                        originalMI,
+                        originalInsurance,
+                        originalTaxes,
+                        buyersAgent,
+                        pmiEligible
+                    });
+                },
+                () => {
+                    // === ALL ROWS PROCESSED — NOW SORT AND BUILD DASHBOARD ===
+                    opportunities.sort((a, b) => b.score - a.score);
+
+                    window.currentOpportunities = opportunities;
+
+                    let dashboardHTML = `
+                        <div class="max-w-7xl mx-auto">
+                            <div class="bg-gradient-to-r from-[#F15A29] to-[#7c3aed] text-white p-12 rounded-3xl shadow-2xl mb-12 text-center relative">
+                                <!-- New Scan button -->
+                                <button onclick="resetEquityTool()" class="absolute top-6 left-6 bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-full font-bold transition-all shadow-md">
+                                    ← New Scan
+                                </button>
+                                <h3 class="text-5xl font-bold mb-6">Equity Opportunity Dashboard</h3>
+                                <p class="text-2xl mb-10">Analyzed ${opportunities.length} clients</p>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                    <div class="bg-white/20 p-8 rounded-2xl">
+                                        <p class="text-6xl font-bold">$${ (opportunities.reduce((sum, o) => sum + o.equity, 0) / 1000000).toFixed(1) }M</p>
+                                        <p class="text-2xl mt-2">Total Equity</p>
+                                    </div>
+                                    <div class="bg-white/20 p-8 rounded-2xl">
+                                        <p class="text-6xl font-bold">${opportunities.filter(o => o.score > 70).length}</p>
+                                        <p class="text-2xl mt-2">High-Priority</p>
+                                    </div>
+                                    <div class="bg-white/20 p-8 rounded-2xl">
+                                        <p class="text-6xl font-bold">$${ opportunities.reduce((sum, o) => sum + o.monthlySavings, 0).toLocaleString() }</p>
+                                        <p class="text-2xl mt-2">Monthly Savings</p>
+                                    </div>
+                                    <div class="bg-white/20 p-8 rounded-2xl">
+                                        <p class="text-6xl font-bold">${opportunities.length}</p>
+                                        <p class="text-2xl mt-2">Clients</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sorting and Filtering -->
+                            <div class="flex gap-6 mb-8 justify-center">
+    <select id="filter-type" class="py-4 px-8 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xl font-semibold shadow-md border border-gray-300 dark:border-gray-600 focus:ring-4 focus:ring-[#F15A29]/50 focus:outline-none">
+        <option>All</option>
+        <option>Refi Ready</option>
+        <option>Cash-Out Goldmine</option>
+        <option>Move-Up Ready</option>
+        <option>PMI Removal Eligible</option>
+    </select>
+    <select id="sort-by" class="py-4 px-8 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xl font-semibold shadow-md border border-gray-300 dark:border-gray-600 focus:ring-4 focus:ring-[#F15A29]/50 focus:outline-none">
+        <option value="score">Score (High to Low)</option>
+        <option value="equity">Equity (High to Low)</option>
+        <option value="monthlySavings">Savings (High to Low)</option>
+    </select>
+</div>
+
+                            <div id="opportunity-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12"></div>
+
+                            <div class="text-center mt-12 space-x-8">
+                                <button onclick="copyDashboard()" class="bg-[#002B5C] text-white px-12 py-6 rounded-full font-bold text-xl shadow-2xl">
+                                    📋 Copy All Data
+                                </button>
+                                <button onclick="window.print()" class="bg-[#00A89D] text-white px-12 py-6 rounded-full font-bold text-xl shadow-2xl">
+                                    🖨️ Print Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    output.innerHTML = dashboardHTML;
+                    output.classList.remove('hidden');
+
+                    // Re-attach sort/filter listeners
+                    document.getElementById('filter-type').addEventListener('change', sortAndRenderCards);
+                    document.getElementById('sort-by').addEventListener('change', sortAndRenderCards);
+
+                    renderCards();
+
+// === AUTO-SCROLL TO DASHBOARD ===
+setTimeout(() => {
+    const dashboardContainer = document.getElementById('equity-output');
+    if (dashboardContainer) {
+        dashboardContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}, 400);
+
+loading.classList.add('hidden');
+                }
+            );
+
+        } catch (error) {
+            console.error(error);
+            output.innerHTML = `<p class="text-red-600 text-center py-20 text-xl font-bold">Error: ${error.message}</p>`;
+            output.classList.remove('hidden');
+            loading.classList.add('hidden');
+        }
+    };
+
+    if (file.name.match(/\.(xlsx|xls)$/)) {
+        reader.readAsBinaryString(file);
+    } else {
+        reader.readAsText(file);
+    }
+}
+function calculateMonthlyPayment(principal, monthlyRate, months) {
+    if (monthlyRate === 0) return principal / months;
+    return principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+}
+function resetEquityTool() {
+    const output = document.getElementById('equity-output');
+    const inputArea = document.getElementById('equity-input-area');
+    if (output) {
+        output.classList.add('hidden');
+        output.innerHTML = '';
+    }
+    if (inputArea) {
+        inputArea.classList.remove('hidden');
+    }
+    window.currentOpportunities = null;
+    window.filteredOpportunities = null;
+
+    // Clear file
+    document.getElementById('database-upload').value = '';
+    document.getElementById('file-name').classList.add('hidden');
+    document.getElementById('file-status').textContent = 'No file chosen';
+
+    const equitySection = document.getElementById('equity-scanner');
+    if (equitySection) {
+        equitySection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+async function generateSocialPost() {
+    const type = document.getElementById('post-type').value;
+    const details = document.getElementById('post-details').value.trim();
+    const loading = document.getElementById('social-loading');
+    const output = document.getElementById('social-output');
+    loading.classList.remove('hidden');
+    output.classList.add('hidden');
+    output.innerHTML = '';
     let prompt = `Create a ready-to-post social media caption for a mortgage loan officer.
-
 Post type/goal: ${type === 'custom' ? 'Custom idea' : type.replace('-', ' ')}
-
 ${details ? `Specific details/idea: ${details}` : ''}
-
 Requirements:
 - Warm, authentic, relationship-focused
 - Engaging and conversational
@@ -3445,9 +4291,7 @@ Requirements:
 - Include relevant emojis
 - End with subtle CTA (question, "Comment below", "DM me", "Tag a friend")
 - Add 8–10 relevant hashtags at the end
-
 Make it feel like it comes from a trusted friend who happens to be a mortgage expert.`;
-
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -3461,12 +4305,9 @@ Make it feel like it comes from a trusted friend who happens to be a mortgage ex
                 max_tokens: 800
             })
         });
-
         if (!response.ok) throw new Error('API error');
-
         const data = await response.json();
         const post = data.choices[0].message.content.trim();
-
         output.innerHTML = `
             <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
                 ${marked.parse(post)}
@@ -3492,13 +4333,13 @@ function copySocialPost() {
 function showSocialPostCreator() {
     // Hide all sections
     document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-    
+   
     // Show the AI post creator
     const target = document.getElementById('social-post');
     if (target) {
         target.classList.remove('hidden');
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
+       
         // Close mobile sidebar
         document.getElementById('sidebar').classList.add('left-[-300px]');
     } else {
@@ -3511,10 +4352,8 @@ document.getElementById('post-type').addEventListener('change', function() {
     const type = this.value;
     const helper = document.getElementById('details-helper');
     const textarea = document.getElementById('post-details');
-
     let helperText = '';
     let placeholder = '';
-
     switch(type) {
         case 'educational':
             helperText = "e.g., Explain rate buydowns, credit tips, or down payment myths";
@@ -3583,7 +4422,6 @@ document.getElementById('post-type').addEventListener('change', function() {
             helperText = "e.g., Describe what you'd like the post to say";
             placeholder = "e.g., Tell me your idea and I'll craft it";
     }
-
     helper.textContent = helperText;
     textarea.placeholder = placeholder;
 });
@@ -3593,11 +4431,9 @@ function openModal(category) {
     document.getElementById('modal-suggestions').innerHTML = getSuggestions(category);
     document.getElementById('post-modal').style.display = 'block';
 }
-
 function closeModal() {
     document.getElementById('post-modal').style.display = 'none';
 }
-
 // Click outside modal to close
 window.onclick = function(event) {
     const modal = document.getElementById('post-modal');
@@ -3605,7 +4441,6 @@ window.onclick = function(event) {
         closeModal();
     }
 }
-
 function getSuggestions(category) {
     const suggestions = {
         "Educational": [
@@ -3681,7 +4516,6 @@ function getSuggestions(category) {
             "Ask followers to share their home buying stories"
         ]
     };
-
     return suggestions[category].map(s => `<li>${s}</li>`).join('');
 }
 async function searchUnderwriting() {
@@ -3689,60 +4523,43 @@ async function searchUnderwriting() {
     const loanTypeSelect = document.getElementById('uw-loan-type');
     const output = document.getElementById('uw-output');
     const loading = document.getElementById('uw-loading');
-
     const question = questionInput.value.trim();
     const loanType = loanTypeSelect.options[loanTypeSelect.selectedIndex].text;
-
     if (!question) {
         alert("Please enter an underwriting question.");
         return;
     }
-
     output.classList.add('hidden');
     loading.classList.remove('hidden');
     output.innerHTML = '';
-
-    let userPrompt = `You are a senior mortgage underwriting compliance expert with 20+ years experience. 
-Your answers must be extremely accurate, conservative, and based solely on official published guidelines 
+    let userPrompt = `You are a senior mortgage underwriting compliance expert with 20+ years experience.
+Your answers must be extremely accurate, conservative, and based solely on official published guidelines
 (FNMA Selling Guide, FHLMC Seller/Servicer Guide, FHA 4000.1, VA PAM 26-7, USDA HB-1-3555) and known lender overlays. ${question}.
-
 Loan type (if specified): ${loanType}
-
 Include:
 - Clear answer based on standard guidelines (FNMA, FHLMC, FHA, VA, USDA as relevant)
 - Confidence level: High (95%+), Medium (70-94%), Low (<70%) — based on how definitive the guidelines are
 - If applicable, mention any Ruoff-specific overlays from the following summary:
-
 Ruoff Overlays Summary (effective 06/18/25):
 - Conventional: No Leaseholds. Tribal Areas require CPB 25-04 eligibility. No Manual Underwrites (A/E required). CU score 5 requires second appraisal (use lower value). No business entity gifts. Investment: VOD required. Credit 620-639: 70% Max LTV (HPML review for >70%). Max DTI: Agency guidelines. Manufactured: FNMA/FHLMC direct, no repair escrows (grade/seed only for new), no ARMs, ATRE required (or alternative 50-day lock + title letter + ALTA 7). IL: ALTA 7 for insurability. Single-wide: Primary only, no cash-out, Agency guidelines.
-
 - USDA: No Future Income. Tribal: CPB 25-04. No Leasehold. Min Credit 620. No No Credit Score loans. Manufactured: ATRE (or alternative), IL ALTA 7, Single-wide eligible.
-
 - VA: No State Bond (except KHC). No Leasehold. Tribal: CPB 25-04. No No Credit Score. AUS: Min 600, Cash-Out 100% LTV (600+), 90% (600-619). Manual: Min 600, DTI 41%, Education for Purchase, No Double BK, Cash-Out 90%. High Balance: Min 700, Cash-Out 90%. IRRRL: Max LTV 105%, Exempt DTI. Manufactured: No Manual, No IRRRL, Cash-Out 75%, ATRE, IL ALTA 7, Single-wide: Primary, No Cash-Out.
-
 - FHA: No Leasehold. Tribal: CPB 25-04. 203(k) separate. Manufactured: No Manual, No Non-Credit Streamline, No $100 Down, Cash-Out 75%, ATRE, IL ALTA 7, Single-wide: Primary, No Cash-Out, No HomeNow. AUS: <580 Not Eligible, 580-599 Education for housing lates/rent free, 600-619 Education for rent free/DTI >=40%. Manual: No Credit: Education, No Pre-Approval, No Cash-Out, No Double BK, Zero lates 24mo housing/installment, 12mo revolving, Max LTV 90% or with reserves, No MFH, GNMA direct. <600 Not Eligible, 600-619 No Cash-Out, DTI 31/43, Zero lates. 620-639 Education, Zero lates. >=640 No overlays.
-
 - State Bond HFA: No VA (except KHC), No Manual, Check Encompass, MCC for Conv/FHA, Earnest money verified, Manufactured: Allowed per state, No single-wide, ATRE, IL ALTA 7, Alternative: 50-day lock, etc.
-
 - 2-1 Buydown: Eligible Conv/FHA/VA/USDA, Ineligible State Bond/renov/construction, Purchase only, Fixed rate, 1-2 units, No Manufactured, Occupancy: Gov Primary, Conv Primary/Second, Contract: Buydown fee in concessions, Fee: Seller/builder, No borrower pay, Locked direct FNMA/FHLMC/GNMA.
-
 Confidence Levels:
 - High (95%+): Clear, unambiguous rule in primary guideline source
 - Medium (70–94%): Generally accepted practice or overlay, minor ambiguity
 - Low (<70%): Unclear, varies significantly, or no definitive source
-
 Structure every response:
 1. Direct, concise main answer
 2. Supporting guideline reference (if applicable)
 3. Ruoff Overlays Check: List any relevant overlays
 4. Confidence level (emphasize) + brief explanation
 4. Final disclaimer:
-
 Be accurate and conservative. If unsure, say so.
-
-Provide a precise, well-reasoned answer following the strict rules above. 
+Provide a precise, well-reasoned answer following the strict rules above.
 Double-check your logic before finalizing. Accuracy is paramount.`;
-
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -3759,12 +4576,9 @@ Double-check your logic before finalizing. Accuracy is paramount.`;
                 max_tokens: 1000
             })
         });
-
         if (!response.ok) throw new Error('API error');
-
         const data = await response.json();
         const answer = data.choices[0].message.content.trim();
-
         output.innerHTML = `
             <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
                 ${marked.parse(answer)}
@@ -3775,9 +4589,7 @@ Double-check your logic before finalizing. Accuracy is paramount.`;
                 </button>
             </div>
         `;
-
         output.classList.remove('hidden');
-
     } catch (error) {
         console.error(error);
         output.innerHTML = `
@@ -3791,45 +4603,36 @@ Double-check your logic before finalizing. Accuracy is paramount.`;
         loading.classList.add('hidden');
     }
 }
-
 function copyUwOutput() {
     const text = document.querySelector('#uw-output .prose')?.innerText || '';
     navigator.clipboard.writeText(text).then(() => alert('Response copied!'));
 }
 let chatHistory = [
-    { 
-        role: "system", 
+    {
+        role: "system",
         content: `You are Grok, the ultimate AI Sales Coach for loan officers. This app is packed with powerful AI tools designed to help LOs close more loans, build stronger relationships, and grow their business.
-
 When asked what the tool does or about its features, ALWAYS highlight the AI TOOLS first — they are the coolest and most valuable part:
-
 • Sales Script Generator – Instant objection handlers and conversation scripts
 • Social Media Post Creator – Ready-to-post content that builds trust and engagement
 • Blog Creator – Full SEO-optimized blog posts in seconds
-• Business Plan Creator 
+• Business Plan Creator
 • AI Chat Assistant – Ask anything: motivation, marketing ideas, scenario help
-
 Other key sections:
 • Prospecting strategies
 • Event planning ideas
 • Referral partner systems
 • Database nurturing
 • Underwriting Guideline Search – Fast, accurate answers with confidence levels
-
 Be enthusiastic, encouraging, and focus on how these tools save time and help win more business. Use bullet points for clarity.
-
-Never lead with underwriting — it's one tool among many amazing features.` 
+Never lead with underwriting — it's one tool among many amazing features.`
     }
 ];
-
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
     const messagesDiv = document.getElementById('chat-messages');
     const loading = document.getElementById('chat-loading');
-
     const userMessage = input.value.trim();
     if (!userMessage) return;
-
     // === SMART ROUTING: Check if it's an underwriting question ===
     if (smartRouteChat(userMessage)) {
         // If routed to underwriting tool, add message to chat and exit
@@ -3850,7 +4653,6 @@ async function sendChatMessage() {
         return; // Stop here — don't send to general Grok
     }
     // === END SMART ROUTING ===
-
     // Normal chat flow continues below
     messagesDiv.innerHTML += `
         <div class="text-right mb-4">
@@ -3859,13 +4661,10 @@ async function sendChatMessage() {
             </div>
         </div>
     `;
-
     input.value = '';
     loading.classList.remove('hidden');
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
     chatHistory.push({ role: "user", content: userMessage });
-
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -3879,12 +4678,9 @@ async function sendChatMessage() {
                 max_tokens: 1000
             })
         });
-
         if (!response.ok) throw new Error(`API Error: ${response.status}`);
-
         const data = await response.json();
         const aiReply = data.choices[0].message.content;
-
         messagesDiv.innerHTML += `
             <div class="text-left mb-4">
                 <div class="inline-block bg-[#002B5C] text-white rounded-2xl px-6 py-4 max-w-lg shadow-lg">
@@ -3892,9 +4688,7 @@ async function sendChatMessage() {
                 </div>
             </div>
         `;
-
         chatHistory.push({ role: "assistant", content: aiReply });
-
     } catch (error) {
         console.error(error);
         messagesDiv.innerHTML += `
@@ -3907,7 +4701,6 @@ async function sendChatMessage() {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 }
-
 // Allow Enter to send
 document.getElementById('chat-input').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendChatMessage();
@@ -3922,28 +4715,21 @@ function calculateAdvanced() {
     const pmiRate = parseFloat(document.getElementById('pmi').value) || 0;
     const extraMonthly = parseFloat(document.getElementById('extraMonthly').value) || 0;
     const biweekly = document.getElementById('biweekly').checked;
-
     if (loanAmount <= 0 || annualRate <= 0 || termYears <= 0) {
         document.getElementById('calc-output').innerHTML = '<p class="text-red-600 font-bold">Invalid inputs.</p>';
         return;
     }
-
     const monthlyRate = annualRate / 100 / 12;
     const totalPayments = termYears * 12;
-
     // Standard P&I for the selected term
     const standardPI = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalPayments) /
                       (Math.pow(1 + monthlyRate, totalPayments) - 1);
-
     const monthlyTaxes = annualTaxes / 12;
     const monthlyInsurance = annualInsurance / 12;
     const monthlyPMI = pmiRate > 0 ? loanAmount * pmiRate / 100 / 12 : 0;
-
     const basePITI = standardPI + monthlyTaxes + monthlyInsurance + monthlyPMI;
-
     // Standard interest over full selected term
     const standardInterest = standardPI * totalPayments - loanAmount;
-
     // Custom principal payment
     let principalPayment = standardPI + extraMonthly;
     let userMonthlyCost = basePITI + extraMonthly;
@@ -3951,7 +4737,6 @@ function calculateAdvanced() {
         principalPayment = (standardPI + extraMonthly) * 13 / 12;
         userMonthlyCost = userMonthlyCost / 2 * 26 / 12;
     }
-
     // Exact months to payoff (no extra month bug)
     let monthsToPayoff = totalPayments;
     if (principalPayment > loanAmount * monthlyRate + 0.01) { // safety for floating point
@@ -3959,13 +4744,10 @@ function calculateAdvanced() {
         monthsToPayoff = Math.log(ratio) / Math.log(1 + monthlyRate);
         monthsToPayoff = Math.round(monthsToPayoff); // round to nearest month
     }
-
     const yearsToPayoff = Math.floor(monthsToPayoff / 12);
     const remainingMonths = monthsToPayoff % 12;
-
     const customInterest = principalPayment * monthsToPayoff - loanAmount;
     const interestSavings = standardInterest - customInterest;
-
     // Output with full breakdown and high-contrast text
     document.getElementById('calc-output').innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
@@ -3982,7 +4764,6 @@ function calculateAdvanced() {
                     <p class="mt-6"><strong>Total Interest Over Term:</strong> $${standardInterest.toFixed(0)}</p>
                 </div>
             </div>
-
             <div class="p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-4 border-[#F15A29]">
                 <h4 class="text-2xl font-bold mb-8 text-[#F15A29]">Your Custom Schedule</h4>
                 <div class="space-y-4 text-gray-800 dark:text-gray-200 text-lg">
@@ -4010,50 +4791,90 @@ document.querySelectorAll('#calculator input, #calculator input[type="checkbox"]
     input.addEventListener('change', calculateAdvanced);
 });
 // Search with highlights
-// Improved Search with proper reset and highlighting
 const searchInput = document.getElementById('search');
-const sections = document.querySelectorAll('main section');
-const originalContent = new Map(); // Stores clean original HTML for each section
+const searchWrapper = searchInput.parentElement;
 
-// Save original content once on load
-sections.forEach(section => {
-    originalContent.set(section, section.innerHTML);
-});
+if (searchInput) {
+    let resultsDropdown = null;
 
-searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        
+        // Clear previous
+        if (resultsDropdown) {
+            resultsDropdown.remove();
+            resultsDropdown = null;
+        }
 
-    if (query === '') {
-        // Fully restore original clean content and show all sections
-        sections.forEach(section => {
-            section.innerHTML = originalContent.get(section);
-            section.classList.remove('hidden');
+        if (query === '') return;
+
+        const sections = Array.from(document.querySelectorAll('main section'));
+        const matches = [];
+
+        sections.forEach(sec => {
+            const titleEl = sec.querySelector('h2');
+            const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+            const content = sec.textContent.toLowerCase();
+
+            if (title.includes(query) || content.includes(query)) {
+                // Score: title match = higher priority
+                const score = title.includes(query) ? 2 : 1;
+                // Snippet: find context around match
+                const idx = content.indexOf(query);
+                const start = Math.max(0, idx - 50);
+                const snippetText = sec.textContent.slice(start, idx + query.length + 100);
+                const highlighted = snippetText.replace(new RegExp(`(${query})`, 'gi'), '<strong class="font-bold text-[#F15A29]">$1</strong>');
+
+                matches.push({
+                    id: sec.id,
+                    title: titleEl ? titleEl.textContent : 'Untitled',
+                    snippet: highlighted + (snippetText.length < sec.textContent.length ? '...' : ''),
+                    score
+                });
+            }
         });
-        return;
-    }
 
-    // Search and highlight
-    sections.forEach(section => {
-        const originalHTML = originalContent.get(section);
-        const text = section.textContent.toLowerCase();
+        // Sort: title matches first, then relevance
+        matches.sort((a, b) => b.score - a.score);
 
-        if (text.includes(query)) {
-            section.classList.remove('hidden');
+        // Limit to 6
+        const limitedMatches = matches.slice(0, 6);
 
-            // Highlight matches safely using original HTML
-            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-            const highlightedHTML = originalHTML.replace(regex, '<mark class="bg-[#F15A29]/30 dark:bg-[#F15A29]/50 text-[#F15A29] font-semibold rounded px-1">$1</mark>');
-            section.innerHTML = highlightedHTML;
-        } else {
-            section.classList.add('hidden');
+        if (limitedMatches.length === 0) {
+            return;  // Or add "No results" div
+        }
+
+        // Build dropdown
+        resultsDropdown = document.createElement('div');
+        resultsDropdown.className = 'absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-2xl max-h-96 overflow-y-auto z-50 border border-white/20';
+        resultsDropdown.innerHTML = `
+            <ul class="py-2">
+                ${limitedMatches.map(match => `
+                    <li class="px-6 py-4 hover:bg-[#F15A29]/10 dark:hover:bg-[#F15A29]/20 cursor-pointer flex items-center justify-between border-b border-gray-200/50 dark:border-gray-700/50 last:border-0 transition-all" onclick="showSection('${match.id}'); searchInput.value = ''; resultsDropdown.remove(); dashboardHeader?.scrollIntoView({ behavior: 'smooth', block: 'start' });">
+                        <div>
+                            <p class="font-bold text-[#002B5C] dark:text-white text-lg">${match.title}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" innerHTML="${match.snippet}"></p>
+                        </div>
+                        <i class="fas fa-arrow-right text-[#F15A29] ml-4"></i>
+                    </li>
+                `).join('')}
+                ${matches.length > 6 ? '<li class="px-6 py-3 text-center text-gray-500 text-sm">+ ${matches.length - 6} more results — refine search</li>' : ''}
+            </ul>
+        `;
+        searchWrapper.appendChild(resultsDropdown);
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (!searchWrapper.contains(e.target)) {
+            if (resultsDropdown) resultsDropdown.remove();
         }
     });
-});
+}
 // KEEP THIS — this is the good one
 document.getElementById('script-scenario-select').addEventListener('change', function() {
     const customWrapper = document.getElementById('custom-scenario-wrapper');
     const customTextarea = document.getElementById('custom-scenario');
-
     if (this.value === ' ') {
         customWrapper.classList.remove('hidden');
         customTextarea.value = '';
@@ -4077,26 +4898,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiChat = document.querySelector('#ai-chat');
     if (aiChat) {
         aiChat.classList.remove('hidden');
-        // REMOVED: aiChat.scrollIntoView({ behavior: 'smooth' });  <-- Delete this line
+        // REMOVED: aiChat.scrollIntoView({ behavior: 'smooth' }); <-- Delete this line
     } else {
         // Fallback: show first section if AI Chat not found
         document.querySelector('main section')?.classList.remove('hidden');
     }
-
     // Initial calculation and quote (keep if needed)
     calculateAdvanced();
     generateQuote();
 });
    // === DATABASE NURTURING CATEGORY MODALS ===
-
 function openDatabaseModal(category) {
     const modal = document.getElementById('db-modal');
     const title = document.getElementById('db-modal-title');
     const content = document.getElementById('db-modal-content');
     modal.style.display = 'block';
-
     let html = '';
-
     if (category === 'Past Clients') {
         title.textContent = 'Past Clients – Your Gold Mine';
         html = `
@@ -4169,7 +4986,6 @@ function openDatabaseModal(category) {
             </ul>
         `;
     }
-
     content.innerHTML = html;
 }
 // Auto-fill text input when selecting from dropdown
@@ -4178,29 +4994,23 @@ document.getElementById('blog-topic-select').addEventListener('change', function
         document.getElementById('blog-topic').value = this.value;
     }
 });
-
 // ... other functions
 async function generateBlog() {
     const topicInput = document.getElementById('blog-topic').value.trim();
     const tone = document.getElementById('blog-tone').value;
-
     if (!topicInput) {
         alert('Please select or type a blog topic');
         return;
     }
-
     const output = document.getElementById('blog-output');
     const loading = document.getElementById('blog-loading');
-
     // Show loading spinner, hide output
     output.classList.add('hidden');
     loading.classList.remove('hidden');
     output.innerHTML = '';
-
     const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized blog posts for loan officers.
-
 Key Requirements:
-- Length: 800–1,200 words
+- Length: 600–1,000 words
 - Tone: ${tone}
 - Structure:
   - Engaging, clickable title
@@ -4212,10 +5022,10 @@ Key Requirements:
   - FAQ section near end
   - Soft CTA at end: "Ready to explore your options? Reach out — I’m here to help."
 - SEO/GEO: Natural keywords, reader-first, local relevance
+- Avoid: Any "trigger terms"that could lead to compliance issues. 
 - Voice: Helpful, trustworthy, never salesy
-
+- At the end of the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**) to post with a link to the blog. Keep the caption 100-200 characters (but do NOT include the character count in your response), engaging, and include relevant hashtags.
 Write a complete blog post on: ${topicInput}`;
-
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -4229,28 +5039,54 @@ Write a complete blog post on: ${topicInput}`;
                 max_tokens: 3000
             })
         });
-
         if (!response.ok) throw new Error('API error');
-
         const data = await response.json();
-        const blog = data.choices[0].message.content;
+        let fullContent = data.choices[0].message.content.trim();
 
-        const wordCount = blog.split(/\s+/).length;
+        // Split blog and caption at separator
+        let blogMarkdown = fullContent;
+        let captionText = '';
+        const separatorIndex = fullContent.lastIndexOf('---');
+        if (separatorIndex !== -1) {
+            blogMarkdown = fullContent.substring(0, separatorIndex).trim();
+            captionText = fullContent.substring(separatorIndex + 3).trim();
+            // Clean caption label if present
+            captionText = captionText.replace(/^\*\*Suggested Social Media Caption:\*\*\s*/i, '').trim();
+        }
+
+        const wordCount = blogMarkdown.split(/\s+/).length;
 
         output.innerHTML = `
-            <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
-                ${marked.parse(blog)}
+            <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
+                ${marked.parse(blogMarkdown)}
             </div>
-            <div class="flex justify-between items-center pt-6 border-t border-gray-300 dark:border-gray-700">
-                <p class="text-gray-600 dark:text-gray-400">Word count: ${wordCount}</p>
-                <button onclick="copyBlog()" class="bg-[#00A89D] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90">Copy to Clipboard</button>
+
+            <h4 class="text-3xl font-bold text-[#F15A29] mb-6">Suggested Social Media Caption</h4>
+            <div id="social-caption" class="bg-gray-100 dark:bg-gray-700 p-8 rounded-2xl text-lg mb-12 whitespace-pre-wrap font-medium">
+                ${captionText || 'No caption generated — try regenerating!'}
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6 justify-center">
+                <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3">
+                    <i class="fas fa-copy"></i> Copy Blog (with Formatting)
+                </button>
+                <button id="copy-caption-btn" class="bg-[#00A89D] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#00A89D]/80 flex items-center justify-center gap-3">
+                    <i class="fas fa-share-alt"></i> Copy Social Caption
+                </button>
+            </div>
+
+            <div class="flex justify-between items-center pt-8 mt-12 border-t border-gray-300 dark:border-gray-700">
+                <p class="text-gray-600 dark:text-gray-400 text-lg">Word count: ${wordCount}</p>
             </div>
         `;
-
         output.classList.remove('hidden');
 
+        // Attach copy handlers (must be after DOM insertion)
+        document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
+        document.getElementById('copy-caption-btn').onclick = copySocialCaption;
+
     } catch (error) {
-        output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating blog. Check console or API key.</p>';
+        output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error generating blog. Check console or API key.</p>';
         output.classList.remove('hidden');
         console.error(error);
     } finally {
@@ -4258,14 +5094,49 @@ Write a complete blog post on: ${topicInput}`;
     }
 }
 
-function copyBlog() {
-    const text = document.querySelector('#blog-output .prose')?.innerText || '';
-    navigator.clipboard.writeText(text).then(() => alert('Blog copied!'));
+// Rich copy for blog (preserves formatting)
+function copyBlogWithFormatting() {
+    const blogContent = document.querySelector('#blog-output .prose');
+    if (!blogContent) {
+        alert('No blog content to copy!');
+        return;
+    }
+    const html = blogContent.innerHTML;
+    const plainText = blogContent.innerText;
+
+    const clipboardItem = new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([plainText], { type: 'text/plain' })
+    });
+
+    navigator.clipboard.write([clipboardItem]).then(() => {
+        alert('Blog copied with formatting! Paste into WordPress, email, Google Docs, etc.');
+    }).catch(err => {
+        console.error('Rich copy failed:', err);
+        navigator.clipboard.writeText(plainText).then(() => {
+            alert('Copied as plain text (rich formatting not supported)');
+        });
+    });
+}
+
+// Plain text copy for caption
+function copySocialCaption() {
+    const captionEl = document.getElementById('social-caption');
+    if (!captionEl || !captionEl.textContent.trim()) {
+        alert('No caption to copy!');
+        return;
+    }
+    const caption = captionEl.textContent.trim();
+    navigator.clipboard.writeText(caption).then(() => {
+        alert('Social caption copied! Ready for LinkedIn, Facebook, Instagram, etc.');
+    }).catch(err => {
+        console.error('Copy failed:', err);
+        alert('Copy failed — select and copy manually');
+    });
 }
 function closeDatabaseModal() {
     document.getElementById('db-modal').style.display = 'none';
 }
-
 // Close database modal when clicking outside
 window.addEventListener('click', (event) => {
     const dbModal = document.getElementById('db-modal');
@@ -4274,15 +5145,12 @@ window.addEventListener('click', (event) => {
     }
 });
 // === REFERRAL PARTNERS CATEGORY MODALS ===
-
 function openReferralModal(type) {
     const modal = document.getElementById('referral-modal');
     const title = document.getElementById('referral-modal-title');
     const content = document.getElementById('referral-modal-content');
     modal.style.display = 'block';
-
     let html = '';
-
     if (type === 'Realtors') {
         title.textContent = 'Realtors – Your Core Referral Engine';
         html = `
@@ -4355,10 +5223,8 @@ function openReferralModal(type) {
             </ul>
         `;
     }
-
     content.innerHTML = html;
 }
-
 function closeReferralModal() {
     document.getElementById('referral-modal').style.display = 'none';
 }
@@ -4383,18 +5249,15 @@ window.addEventListener('click', (event) => {
 // Smart routing for AI Chat Assistant – optimized for your exact IDs
 function smartRouteChat(message) {
     const lowerMessage = message.toLowerCase();
-
     // First, detect if user is asking ABOUT the tool/features
     const aboutToolPhrases = [
         'what is this tool', 'what does this tool do', 'what can this tool do',
         'tell me about this app', 'what features', 'how does this help',
         'what are the tools', 'ai tools', 'features of this app'
     ];
-
     if (aboutToolPhrases.some(phrase => lowerMessage.includes(phrase))) {
         return false; // Do NOT route — let general chat handle it
     }
-
     // Only route if it's clearly a guideline question
     const underwritingKeywords = [
         'fha', 'va', 'usda', 'conventional', 'dti', 'credit score',
@@ -4402,14 +5265,12 @@ function smartRouteChat(message) {
         'bankruptcy', 'foreclosure', 'manual underwrite', 'compensating factor',
         '203k', 'buydown', 'irr rl', 'cash out', 'lpmi', 'manufactured'
     ];
-
-    const isUnderwritingQuestion = underwritingKeywords.some(keyword => 
-        lowerMessage.includes(keyword) && 
+    const isUnderwritingQuestion = underwritingKeywords.some(keyword =>
+        lowerMessage.includes(keyword) &&
         // Require at least 2 keywords or a question structure
         (underwritingKeywords.filter(k => lowerMessage.includes(k)).length >= 2 ||
          lowerMessage.includes('?'))
     );
-
     if (isUnderwritingQuestion) {
         // Route to underwriting tool
         document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
@@ -4417,23 +5278,19 @@ function smartRouteChat(message) {
         if (uwSection) {
             uwSection.classList.remove('hidden');
         }
-
         const uwInput = document.getElementById('uw-question');
         if (uwInput) {
             uwInput.value = message;
             uwInput.focus();
             uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-
         setTimeout(() => {
             if (typeof searchUnderwriting === 'function') {
                 searchUnderwriting();
             }
         }, 800);
-
         return true;
     }
-
     return false;
 }
 </script>
@@ -4473,6 +5330,91 @@ function smartRouteChat(message) {
             <!-- Filled dynamically by JS -->
         </div>
     </div>
+</div>
+<!-- Detail Modal - PERFECTLY CENTERED (No Scroll Needed) -->
+<!-- Detail Modal - BULLETPROOF CENTERED VERSION -->
+<!-- Detail Modal - TRUE VIEWPORT CENTERED (No Scroll Needed) -->
+<!-- Detail Modal - PERFECTLY CENTERED IN CURRENT VIEWPORT -->
+<!-- Detail Modal - STABLE & CENTERED (No Flicker on Hover) -->
+<!-- Detail Modal - FINAL STABLE VERSION (No Flicker) -->
+<!-- Detail Modal for Equity Scanner -->
+<div id="detail-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" style="display: none;" onclick="closeDetailModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <!-- Close button -->
+        <button onclick="closeDetailModal()" class="absolute top-6 right-6 text-4xl text-gray-500 hover:text-gray-700 z-10 bg-white/90 dark:bg-gray-800/90 rounded-full w-14 h-14 flex items-center justify-center shadow-lg">&times;</button>
+
+        <!-- Content -->
+        <div class="p-10 pt-20 pb-12">
+            <h3 class="text-4xl font-black text-[#F15A29] mb-4" id="modal-client-name"></h3>
+            <p class="text-2xl text-gray-700 dark:text-gray-300 mb-10" id="modal-address"></p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                <div class="space-y-6 text-lg">
+                    <p><strong>Phone:</strong> 
+                        <a id="modal-phone-link" href="" class="text-green-600 font-bold hover:underline text-xl"></a>
+                        <span id="modal-phone-na" class="text-gray-500 ml-3 hidden">Not available</span>
+                    </p>
+                    <p><strong>Email:</strong> 
+                        <a id="modal-email-link" href="" class="text-blue-600 font-bold hover:underline text-xl"></a>
+                        <span id="modal-email-na" class="text-gray-500 ml-3 hidden">Not available</span>
+                    </p>
+                </div>
+                <div class="space-y-6 text-lg" id="modal-buyers-agent-section" style="display: none;">
+                    <p><strong>Transaction Type:</strong> <span id="modal-transaction-type"></span></p>
+                    <p><strong>Buyer's Agent:</strong> <span id="modal-buyers-agent" class="font-bold text-purple-600"></span></p>
+                </div>
+            </div>
+
+            <!-- Original Loan Details Section -->
+            <div class="mt-10 p-8 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-inner">
+                <h4 class="text-2xl font-bold text-[#002B5C] dark:text-[#00A89D] mb-6 flex items-center"><i class="fas fa-file-invoice-dollar mr-3 text-[#F15A29]"></i>Original Loan Details</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
+                    <p><strong>Program:</strong> <span id="modal-program"></span></p>
+                    <p><strong>Closing Date:</strong> <span id="modal-closing-date"></span></p>
+                    <p><strong>Rate:</strong> <span id="modal-current-rate"></span></p>
+                    <p><strong>Term:</strong> <span id="modal-term"></span></p>
+                    <p><strong>Original LTV:</strong> <span id="modal-original-ltv"></span></p>
+                    <p><strong>Est. Balance:</strong> <span id="modal-balance"></span></p>
+                    <p><strong>Estimated Home Value:</strong> <span id="modal-value"></span></p>
+                    <p><strong>P&I Payment:</strong> <span id="modal-original-pi"></span></p>
+                    <p><strong>Monthly MI:</strong> <span id="modal-original-mi"></span></p>
+                    <p><strong>Homeowners Insurance:</strong> <span id="modal-original-insurance"></span></p>
+                    <p><strong>Property Taxes:</strong> <span id="modal-original-taxes"></span></p>
+                </div>
+                <p id="modal-pmi-alert" class="bg-green-600 text-green p-6 rounded-xl font-bold flex items-center justify-center text-lg shadow-lg mt-6" style="display: none;">
+    <i class="fas fa-check-circle mr-3 text-2xl"></i>Eligible for PMI Removal! (Current LTV ≤ 80%)
+</p>
+            </div>
+
+            <!-- Current Estimates & Comparison Section -->
+            <!-- Current Estimates & Comparison Section -->
+<div class="mt-10 p-8 bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 rounded-2xl shadow-inner">
+    <h4 class="text-3xl font-bold text-[#002B5C] dark:text-[#00A89D] mb-8 flex items-center"><i class="fas fa-chart-line mr-3 text-[#00A89D] text-2xl"></i>Current Estimates & Refinance Comparison</h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10" id="refi-comparison-grid">
+        <!-- This will be populated dynamically by JS -->
+    </div>
+</div>
+
+            <p class="mt-6"><strong>Opportunity Type(s):</strong> <span id="modal-type-badge"></span></p>
+
+            <!-- Score Breakdown -->
+            <div class="mt-10 p-8 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-inner">
+                <h4 class="text-2xl font-bold text-[#002B5C] dark:text-[#00A89D] mb-4 flex items-center"><i class="fas fa-star mr-3 text-[#F15A29]"></i>Score Breakdown</h4>
+                <p class="text-lg">The overall score ranks clients based on new loan potential: (Monthly Savings / 5) + (Equity / 5000) + (Cash-Out Potential / 5000). Higher scores indicate stronger opportunities for refinance, cash-out, or move-up.</p>
+            </div>
+
+            <!-- Personalized Scripts Section -->
+            <div id="modal-scripts" class="mt-12"></div>
+
+            <!-- Call to Action Buttons -->
+            <div class="mt-10 text-center">
+                <button onclick="closeDetailModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-10 py-4 rounded-full font-bold text-xl">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 </body>
 </html>
