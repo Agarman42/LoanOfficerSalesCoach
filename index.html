@@ -6,7 +6,7 @@
     <title>Ultimate Loan Officer Sales Coach</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-        <!-- SWITCH TO CLASS MODE -->
+          <!-- SWITCH TO CLASS MODE -->
     <script>
       tailwind.config = {
         darkMode: 'class'
@@ -320,6 +320,23 @@ main, #equity-scanner, #equity-output, #opportunity-cards {
     transform: none !important;  /* Remove translateZ(0) — it's often the repaint offender */
     will-change: auto !important;
 }
+.animate-scroll {
+    animation: scroll 45s linear infinite; /* Adjust 45s for faster/slower scroll */
+}
+
+@keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } /* -50% because quotes are duplicated */
+}
+
+#quote-display {
+    opacity: 1;
+    transition: opacity 0.8s ease-in-out;
+}
+
+#quote-display.fade {
+    opacity: 0;
+}
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -335,12 +352,23 @@ main, #equity-scanner, #equity-output, #opportunity-cards {
             </div>
         </div>
 
-        <!-- Compact Inline Quote Bar (replaces the large card) -->
-<div class="max-w-4xl mx-auto mt-6 bg-white/10 backdrop-blur-md rounded-xl px-6 py-4 text-center border border-white/20 shadow-md">
-    <p id="persistent-quote" class="text-lg md:text-xl font-medium italic text-white drop-shadow-md">
-        "Loading inspiration..."
-    </p>
-   </div>
+<!-- Single Quote Display with Manual Arrows & Auto-Rotation – Compact Size -->
+<div class="relative bg-gradient-to-r from-[#002B5C] to-[#00A89D] py-3 my-8 rounded-3xl shadow-2xl text-center overflow-hidden max-w-3xl mx-auto">
+    <!-- Quote Container – reduced padding & height -->
+    <div id="quote-display" class="text-xl md:text-2xl font-bold text-white opacity-90 min-h-[60px] flex items-center justify-center px-6 transition-opacity duration-800">
+        "The harder you work, the luckier you get."
+    </div>
+
+    <!-- Left Arrow (smaller & positioned tighter) -->
+    <button id="quote-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-4xl font-light transition-all duration-300 z-10 opacity-70 hover:opacity-100">
+        ‹
+    </button>
+
+    <!-- Right Arrow -->
+    <button id="quote-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-4xl font-light transition-all duration-300 z-10 opacity-70 hover:opacity-100">
+        ›
+    </button>
+</div>
 
         <i class="fas fa-bars cursor-pointer text-3xl absolute top-8 right-6 md:hidden" id="menu-toggle"></i>
     </div>
@@ -348,12 +376,15 @@ main, #equity-scanner, #equity-output, #opportunity-cards {
              <aside id="sidebar" class="fixed left-[-300px] top-0 bottom-0 w-72 bg-gradient-to-b from-[#002B5C] to-[#00A89D] text-white overflow-y-auto transition-left duration-300 ease-in-out z-50 shadow-2xl rounded-r-xl md:left-0 md:w-64 lg:w-72">
         <ul class="p-6 space-y-3">
             <li class="sidebar-group">A.I. Tools</li>
+            <li><a href="#weekly-win-plan" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+    <i class="fas fa-fire mr-3"></i> Weekly Win Plan
+</a></li>
             <li><a href="#equity-scanner" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Equity & Opportunity Scanner
 </a></li>
 <li><a href="#social-post" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-share-alt mr-3"></i> Social Media Post Creator
-</a></li>            
+</a></li>
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
@@ -890,7 +921,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
+              },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                     messages: [{ role: "user", content: prompt }],
@@ -1898,7 +1929,11 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         <p id="file-status" class="text-sm text-gray-600 dark:text-gray-400 mt-6">No file chosen</p>
         <p id="file-name" class="mt-2 font-bold text-[#F15A29] hidden"></p>
     </div>
-
+<!-- New Refinance Rate Input -->
+    <div class="mb-8">
+        <label for="new-rate">New Refinance Rate (%)</label>
+        <input id="new-rate" type="number" step="0.125" value="6.0" min="0" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+    </div>
     <!-- Generate Button -->
     <div class="text-center mb-12">
         <button onclick="generateEquityReport(event)" class="w-full max-w-2xl mx-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl">
@@ -1919,16 +1954,9 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             <li>Current Term</li>
             <li>Appraised Value or Purchase Price</li>
         </ul>
-        <p class="mt-4 text-sm">The tool automatically matches column names — no need for exact titles!</p>
-    </div>
+           </div>
 
-    <!-- New Refinance Rate Input -->
-    <div class="mb-8">
-        <label for="new-rate">New Refinance Rate (%)</label>
-        <input id="new-rate" type="number" step="0.125" value="5.0" min="0" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-    </div>
-
-        <!-- Loading -->
+     <!-- Loading -->
     <div id="equity-loading" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
     <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl text-center max-w-md">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#F15A29] mx-auto mb-6"></div>
@@ -2232,15 +2260,152 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
                 Generate My Post Now
             </button>
         </div>
+        </div>
+        
+<div class="mt-16">
+    <!-- Collapsible Trigger (Premium Expand Button) -->
+    <button type="button" onclick="toggleCalendarSection()" class="w-full text-left focus:outline-none group">
+        <div class="flex items-center justify-between bg-gradient-to-r from-[#002B5C]/50 to-[#00A89D]/30 rounded-3xl p-10 hover:from-[#002B5C]/70 hover:to-[#00A89D]/50 transition-all shadow-2xl cursor-pointer border border-[#00A89D]/20">
+            <div class="flex items-center">
+                <i class="fas fa-calendar-alt text-6xl text-[#F15A29] mr-8"></i>
+                <div>
+                    <h2 class="text-4xl font-bold text-[#F15A29]">Full-Year Social Media Calendar Planner</h2>
+                    <p class="text-lg mt-3 text-gray-300 group-hover:text-white transition-colors">
+                        Click to expand → Generate a complete Excel calendar with themed days + 3–4 ready-to-post ideas for every day of the year
+                    </p>
+                </div>
+            </div>
+            <i id="calendar-toggle-icon" class="fas fa-chevron-down text-5xl text-[#00A89D] transition-transform duration-500 group-hover:scale-110"></i>
+        </div>
+    </button>
 
-        <!-- Loading Spinner -->
-        <div id="social-loading" class="text-center py-12 hidden">
-            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
-            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
-                Crafting your perfect post... this takes 5–10 seconds
-            </p>
+    <!-- Collapsible Content (hidden by default) -->
+    <div id="calendar-content" class="hidden mt-12 space-y-12">
+        <!-- Intro Description -->
+        <p class="text-lg text-gray-700 dark:text-gray-300 max-w-4xl">
+            While you're creating individual posts, lock in consistency for the entire year. This planner gives you a downloadable Excel with themed days + 3–4 ready-to-post ideas every single day — 75% personal/engagement for real connections, 25% business for growth.
+        </p>
+
+        <!-- Why This Works Callouts -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 p-6 rounded-2xl text-center border border-[#00A89D]/20">
+                <i class="fas fa-heart text-4xl text-[#F15A29] mb-4"></i>
+                <p class="font-bold">Build Real Relationships</p>
+                <p class="text-sm mt-2">Heavy on personal, local, and engagement content</p>
+            </div>
+            <div class="bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 p-6 rounded-2xl text-center border border-[#00A89D]/20">
+                <i class="fas fa-chart-line text-4xl text-[#00A89D] mb-4"></i>
+                <p class="font-bold">Grow Without Burning Out</p>
+                <p class="text-sm mt-2">Know exactly what to post — no more blank-page stress</p>
+            </div>
+            <div class="bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 p-6 rounded-2xl text-center border border-[#00A89D]/20">
+                <i class="fas fa-download text-4xl text-[#F15A29] mb-4"></i>
+                <p class="font-bold">Ready-to-Use Excel</p>
+                <p class="text-sm mt-2">Printable, editable, with holidays & hashtags included</p>
+            </div>
+        </div>
+
+        <!-- Live Preview Sample -->
+        <div class="p-8 bg-white/5 dark:bg-gray-800/50 rounded-3xl overflow-x-auto border border-[#00A89D]/30 shadow-lg">
+            <h4 class="text-2xl font-bold mb-6 text-[#00A89D] text-center">Live Preview: Sample Week (January 2026)</h4>
+            <table class="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                    <tr class="bg-gradient-to-r from-[#002B5C]/50 to-[#00A89D]/30">
+                        <th class="p-4 border border-[#00A89D]/30 font-bold">Date</th>
+                        <th class="p-4 border border-[#00A89D]/30 font-bold">Theme</th>
+                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 1</th>
+                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 2</th>
+                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 3</th>
+                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 4</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    <tr class="bg-gray-50/50 dark:bg-gray-900/50">
+                        <td class="p-4 border">January 1, 2026</td>
+                        <td class="p-4 border">Personal & Relax Sunday</td>
+                        <td class="p-4 border">New Year's morning coffee tradition ☕</td>
+                        <td class="p-4 border">2026 goals I'm excited about</td>
+                        <td class="p-4 border">Family NYE recap photo</td>
+                        <td class="p-4 border">Poll: Your #1 resolution?</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 border">January 5, 2026</td>
+                        <td class="p-4 border">Motivational Monday</td>
+                        <td class="p-4 border">Quote: "The best way to predict the future is to create it"</td>
+                        <td class="p-4 border">My why: Helping Hoosier families buy homes</td>
+                        <td class="p-4 border">Weekend hike in Indiana trails</td>
+                        <td class="p-4 border">Small win from last week</td>
+                    </tr>
+                    <tr class="bg-gray-50/50 dark:bg-gray-900/50">
+                        <td class="p-4 border">January 6, 2026</td>
+                        <td class="p-4 border">Tip Tuesday</td>
+                        <td class="p-4 border">Quick tip: How to boost credit 50+ points fast</td>
+                        <td class="p-4 border">Morning walk in Auburn neighborhood</td>
+                        <td class="p-4 border">Favorite local coffee spot shoutout</td>
+                        <td class="p-4 border">This or That: FHA vs Conventional?</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="text-center mt-6 text-gray-500 italic">Your full calendar will have 365 tailored days just like this →</p>
+        </div>
+
+        <!-- Inputs Card -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-12 rounded-3xl shadow-2xl border border-[#00A89D]/20">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                <div>
+                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Year</label>
+                    <input type="number" id="calendar-year" value="2026" min="2024" max="2030" 
+                           class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+                </div>
+                <div>
+                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Week Starts On</label>
+                    <select id="week-start" 
+                            class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+                        <option value="Sun">Sunday</option>
+                        <option value="Mon" selected>Monday</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Template</label>
+                    <select id="calendar-template" 
+                            class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+                        <option value="balanced">Balanced Loan Officer (Recommended)</option>
+                        <option value="engagement">High Engagement Focus</option>
+                        <option value="personal">Personal Brand Builder</option>
+                        <option value="realtor">Realtor Partnership Focus</option>
+                        <option value="custom">Custom (AI-Personalized)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="custom-preferences" class="hidden mb-10">
+                <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Customization Prompt</label>
+                <textarea id="custom-prompt" rows="5" placeholder="e.g., Heavy Indiana/Auburn local focus, more family posts, include DeKalb County events, realtor partnership tips, motivational Mondays..."
+                          class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all"></textarea>
+            </div>
+
+            <div class="text-center">
+                <button onclick="generateCalendar()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl flex items-center justify-center">
+                    <i class="fas fa-calendar-alt mr-4 text-3xl"></i> Generate & Download My Full-Year Calendar
+                </button>
+            </div>
+
+            <div id="calendar-loading" class="hidden mt-12 text-center">
+                <div class="w-full max-w-md mx-auto bg-gray-700 rounded-full h-6 mb-6 overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] h-6 rounded-full w-0 transition-all duration-700"></div>
+                </div>
+                <p class="text-xl">Building your personalized calendar... <span id="progress-text">0%</span></p>
+                <i class="fas fa-spinner fa-spin text-4xl mt-6 text-[#00A89D]"></i>
+            </div>
+
+            <div id="calendar-success" class="hidden mt-12 p-8 bg-green-900/50 rounded-3xl text-center border border-green-500">
+                <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
+                <p class="text-2xl font-bold">Success! Your calendar is ready.</p>
+                <p class="mt-4">Check your downloads folder — start posting with confidence all year!</p>
+            </div>
         </div>
     </div>
+</div>
 
     <!-- Output -->
     <div id="social-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
@@ -2267,6 +2432,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             <li><strong>Be human</strong> — share hobbies, family (with permission), wins, and lessons</li>
         </ul>
     </div>
+  
 </section>
                     
                 <section id="sales-script" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -2720,68 +2886,139 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     <option value="" selected>Use Custom Topic (type below)</option>
     <option value="" disabled>──────────────────</option>
                 
-                <optgroup label="First-Time Home Buyers">
-                    <option>The Complete 2026 Guide to Buying Your First Home</option>
-                    <option>How Much Down Payment Do You Really Need in 2026?</option>
-                    <option>First-Time Buyer Programs: What’s Available and How to Qualify</option>
-                    <option>The Biggest Mistakes First-Time Buyers Make (and How to Avoid Them)</option>
-                    <option>Buying a Home with Student Loans: Yes, It’s Possible!</option>
-                    <option>How to Get Pre-Approved: What Lenders Really Look For</option>
-                    <option>Closing Costs Explained: What First-Time Buyers Should Budget</option>
-                    <option>Should You Buy Now or Wait for Lower Rates in 2026?</option>
-                    <option>The Truth About PMI: When You Need It and How to Cancel</option>
-                    <option>Building Equity as a First-Time Buyer: Strategies That Work</option>
-                </optgroup>
-                
-                <optgroup label="Refinancing & Rates">
-                    <option>Should You Refinance in 2026? A Complete Guide</option>
-                    <option>When Is the Best Time to Refinance Your Mortgage?</option>
-                    <option>Temporary Rate Buydowns Explained: Lower Payments for the First Few Years</option>
-                    <option>Cash-Out Refinance: When It Makes Sense (and When It Doesn’t)</option>
-                    <option>Refinancing to Remove PMI: Step-by-Step</option>
-                    <option>How Much Can You Save by Refinancing? Real Examples</option>
-                    <option>Refinance Myths That Could Cost You Thousands</option>
-                    <option>ARMs vs Fixed: Which Is Better in Today’s Market?</option>
-                </optgroup>
-                
-                <optgroup label="Credit & Qualification">
-                    <option>How to Improve Your Credit Score Before Buying a Home</option>
-                    <option>Can You Buy a Home with a Credit Score Under 620? The Truth</option>
-                    <option>Debt-to-Income Ratio Explained: How Lenders Really Look at It</option>
-                    <option>Common Credit Report Errors That Block Approvals</option>
-                    <option>Non-Traditional Credit: How to Qualify Without a FICO Score</option>
-                    <option>Rapid Rescoring: Boost Your Score in Days</option>
-                </optgroup>
-                
-                <optgroup label="Homeownership & Lifestyle">
-                    <option>The Hidden Costs of Homeownership (and How to Budget for Them)</option>
-                    <option>Rent vs Buy in 2026: The Math You Need to Know</option>
-                    <option>Home Renovation Loans: 203(k), HomeStyle, and More</option>
-                    <option>Is Homeownership Still Worth It in 2026?</option>
-                    <option>Moving Up: How to Buy Your Second Home</option>
-                    <option>Downsizing in Retirement: Financial and Emotional Considerations</option>
-                    <option>Turning Your Home into an Income Property</option>
-                </optgroup>
-                
-                <optgroup label="Loan Programs">
-                    <option>FHA Loans in 2026: Lower MIP and New Guidelines</option>
-                    <option>VA Loans: The Best Benefit Most Veterans Don’t Use</option>
-                    <option>USDA Loans: Zero Down in Rural and Suburban Areas</option>
-                    <option>Jumbo Loans: What Changed in 2026 and How to Qualify</option>
-                    <option>Non-QM Loans: Options for Self-Employed and Investors</option>
-                    <option>Bank Statement Loans for Gig Workers and Entrepreneurs</option>
-                    <option>Reverse Mortgages: New Rules and Who Benefits</option>
-                </optgroup>
-                
-                <optgroup label="Market Trends & Insights">
-                    <option>Mortgage Rate Forecast for 2026: What Experts Are Saying</option>
-                    <option>Why Home Inventory Is Increasing (and What It Means for Buyers)</option>
-                    <option>The Truth About iBuyers and Instant Offers in 2026</option>
-                    <option>Investment Properties in 2026: Where the Opportunities Are</option>
-                    <option>How Inflation and Fed Policy Affect Mortgage Rates</option>
-                    <option>New Construction vs Resale: Pros, Cons, and Financing</option>
-                </optgroup>
-            </select>
+        <optgroup label="First-Time Home Buyers">
+        <option>The Complete 2026 Guide to Buying Your First Home</option>
+        <option>How Much Down Payment Do You Really Need in 2026?</option>
+        <option>First-Time Buyer Programs: What’s Available and How to Qualify</option>
+        <option>The Biggest Mistakes First-Time Buyers Make (and How to Avoid Them)</option>
+        <option>Buying a Home with Student Loans: Yes, It’s Possible!</option>
+        <option>How to Get Pre-Approved: What Lenders Really Look For</option>
+        <option>Closing Costs Explained: What First-Time Buyers Should Budget</option>
+        <option>Should You Buy Now or Wait for Lower Rates in 2026?</option>
+        <option>The Truth About PMI: When You Need It and How to Cancel</option>
+        <option>Building Equity as a First-Time Buyer: Strategies That Work</option>
+        <option>Navigating Home Inspections: What Every First-Time Buyer Must Know</option>
+        <option>Choosing the Right Neighborhood: Schools, Commute, and Resale Value</option>
+        <option>HOA Fees Explained: Pros, Cons, and What to Watch For</option>
+        <option>Buying a Condo vs. Single-Family Home: Which Is Right for You?</option>
+        <option>First-Time Buyer Tax Credits and Incentives in 2026</option>
+        <option>How to Win in a Competitive Market Without Overpaying</option>
+        <option>Eco-Friendly Homes: Energy Incentives and Green Mortgage Options</option>
+        <option>The Role of a Buyer’s Agent: Do You Really Need One?</option>
+        <option>Is a Home Warranty Worth It for First-Time Buyers?</option>
+        <option>Remote Work and Relocation: Financing Your Move in 2026</option>
+    </optgroup>
+
+    <optgroup label="Refinancing & Rates">
+        <option>Should You Refinance in 2026? A Complete Guide</option>
+        <option>When Is the Best Time to Refinance Your Mortgage?</option>
+        <option>Temporary Rate Buydowns Explained: Lower Payments for the First Few Years</option>
+        <option>Cash-Out Refinance: When It Makes Sense (and When It Doesn’t)</option>
+        <option>Refinancing to Remove PMI: Step-by-Step</option>
+        <option>How Much Can You Save by Refinancing? Real Examples</option>
+        <option>Refinance Myths That Could Cost You Thousands</option>
+        <option>ARMs vs Fixed: Which Is Better in Today’s Market?</option>
+        <option>Rate-and-Term vs. Cash-Out: Which Refinance Is Right for You?</option>
+        <option>No-Closing-Cost Refinance: Is It Really Free?</option>
+        <option>Streamline Refinancing for FHA and VA Loans: Faster and Easier</option>
+        <option>How Your Credit Score Impacts Refinance Rates in 2026</option>
+        <option>Refinancing After a Recent Purchase: When It’s Allowed</option>
+        <option>Locking Your Rate: Timing Tips to Save Money</option>
+        <option>Refinancing Investment Properties: Special Rules and Benefits</option>
+        <option>HELOC vs. Cash-Out Refinance: Which Is Better for Home Improvements?</option>
+    </optgroup>
+
+    <optgroup label="Credit & Qualification">
+        <option>How to Improve Your Credit Score Before Buying a Home</option>
+        <option>Can You Buy a Home with a Credit Score Under 620? The Truth</option>
+        <option>Debt-to-Income Ratio Explained: How Lenders Really Look at It</option>
+        <option>Common Credit Report Errors That Block Approvals</option>
+        <option>Non-Traditional Credit: How to Qualify Without a FICO Score</option>
+        <option>Rapid Rescoring: Boost Your Score in Days</option>
+        <option>Hard vs. Soft Credit Inquiries: What Borrowers Need to Know</option>
+        <option>Using Gift Funds for Down Payment: Rules and Documentation</option>
+        <option>Asset Depletion Mortgages: Qualifying with Investments Instead of Income</option>
+        <option>Compensating Factors That Help Lower Credit Scores Get Approved</option>
+        <option>Employment Gaps: How to Explain Them to Lenders</option>
+        <option>Co-Borrowers and Co-Signers: Pros, Cons, and Risks</option>
+        <option>Bankruptcy and Foreclosure: How Long Until You Can Buy Again?</option>
+    </optgroup>
+
+    <optgroup label="Homeownership & Lifestyle">
+        <option>The Hidden Costs of Homeownership (and How to Budget for Them)</option>
+        <option>Rent vs Buy in 2026: The Math You Need to Know</option>
+        <option>Home Renovation Loans: 203(k), HomeStyle, and More</option>
+        <option>Is Homeownership Still Worth It in 2026?</option>
+        <option>Moving Up: How to Buy Your Second Home</option>
+        <option>Downsizing in Retirement: Financial and Emotional Considerations</option>
+        <option>Turning Your Home into an Income Property</option>
+        <option>Home Maintenance 101: Essential Costs New Owners Overlook</option>
+        <option>Energy Efficiency Upgrades: Financing Options and Tax Credits</option>
+        <option>Property Taxes and Assessments: What to Expect After Closing</option>
+        <option>Multi-Generational Homes: Financing and Design Trends</option>
+        <option>Pet-Friendly Home Buying: Features That Matter Most</option>
+        <option>Home Insurance Basics: Coverage Every Homeowner Needs</option>
+        <option>Sustainable Homeownership: Lowering Bills and Carbon Footprint</option>
+    </optgroup>
+
+    <optgroup label="Loan Programs">
+        <option>FHA Loans in 2026: Lower MIP and New Guidelines</option>
+        <option>VA Loans: The Best Benefit Most Veterans Don’t Use</option>
+        <option>USDA Loans: Zero Down in Rural and Suburban Areas</option>
+        <option>Jumbo Loans: What Changed in 2026 and How to Qualify</option>
+        <option>Non-QM Loans: Options for Self-Employed and Investors</option>
+        <option>Bank Statement Loans for Gig Workers and Entrepreneurs</option>
+        <option>Reverse Mortgages: New Rules and Who Benefits</option>
+        <option>Conventional 97% LTV Loans: Low Down Payment Options</option>
+        <option>Physician and Medical Professional Loans: Special Benefits</option>
+        <option>DSCR Loans: Investor Financing Based on Property Cash Flow</option>
+        <option>Construction and Renovation-to-Permanent Loans</option>
+        <option>ITIN Loans: Homeownership for Non-Citizens</option>
+        <option>Bridge Loans: Short-Term Financing for Move-Up Buyers</option>
+        <option>HELOCs and Home Equity Loans: Current Rates and Uses</option>
+    </optgroup>
+
+    <optgroup label="Market Trends & Insights">
+        <option>Mortgage Rate Forecast for 2026: What Experts Are Saying</option>
+        <option>Why Home Inventory Is Increasing (and What It Means for Buyers)</option>
+        <option>The Truth About iBuyers and Instant Offers in 2026</option>
+        <option>Investment Properties in 2026: Where the Opportunities Are</option>
+        <option>How Inflation and Fed Policy Affect Mortgage Rates</option>
+        <option>New Construction vs Resale: Pros, Cons, and Financing</option>
+        <option>Affordable Housing Initiatives and Programs in 2026</option>
+        <option>The Rise of Build-to-Rent Communities: Should You Buy or Rent?</option>
+        <option>Climate Risk and Insurance: How It’s Changing Home Buying</option>
+        <option>Immigration and Population Growth: Impact on Local Housing Demand</option>
+        <option>Technology in Real Estate: Virtual Tours, Digital Closings, and More</option>
+        <option>Regional Market Spotlight: Where Prices Are Rising/Falling in 2026</option>
+    </optgroup>
+
+    <optgroup label="The Mortgage Process">
+        <option>Step-by-Step: The Mortgage Application Process in 2026</option>
+        <option>What Happens at Closing? A Day-by-Day Breakdown</option>
+        <option>Home Appraisal vs. Home Inspection: Key Differences</option>
+        <option>Escrow Accounts Explained: Taxes and Insurance Made Simple</option>
+        <option>Title Insurance: Why You Need It and What It Covers</option>
+        <option>Underwriting: What Lenders Check Behind the Scenes</option>
+        <option>Clear to Close: Final Steps Before Getting Your Keys</option>
+        <option>Common Closing Delays and How to Avoid Them</option>
+        <option>Digital Mortgages: Faster Approvals and E-Closing Options</option>
+        <option>Contingencies Explained: Appraisal, Inspection, and Financing</option>
+    </optgroup>
+
+    <optgroup label="Investment Properties">
+        <option>Financing Your First Rental Property in 2026</option>
+        <option>DSCR Loans Explained: No Personal Income Required</option>
+        <option>1031 Exchanges: Defer Taxes When Upgrading Investments</option>
+        <option>BRRRR Strategy: How to Scale Your Portfolio with Financing</option>
+        <option>Short-Term Rentals: Airbnb and VRBO Financing Options</option>
+        <option>Portfolio Loans: Managing Multiple Investment Properties</option>
+        <option>Cash-Out Refinance on Rentals: Pulling Equity for More Deals</option>
+        <option>Fix-and-Flip Loans: Hard Money vs. Traditional Options</option>
+        <option>Tax Benefits Every Real Estate Investor Should Know</option>
+        <option>Multi-Family Properties: Financing 2–4 Units vs. Larger Complexes</option>
+    </optgroup>
+</select>
 
             <input type="text" id="blog-topic" placeholder="Or type your own custom topic here" 
                    class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
@@ -2831,7 +3068,8 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
 </div>
     </div>
 </section>
-        <section id="books" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+
+ <section id="books" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Recommended Books</h2>
             <p class="mb-4">Explore these highly rated books to enhance your skills in sales, networking, and more.</p>
             <div class="accordion">
@@ -3216,8 +3454,255 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         </div>
     </div>
 </section>
+<!-- Full Updated Weekly Win Plan Section -->
+<!-- Changes:
+   - Expanded wizard with new optional fields (production, partners, past clients, prospecting time, hobbies)
+   - Hobbies multi-select for easy choice + free text
+   - Progress bar updates LIVE on checkbox click (fixed with delegation)
+   - Name used in hero, messages, and tasks ("Adam's Monday Crush")
+   - Goal tied to weekly target ("For your 10-loan goal: Aim for 75 touches this week")
+   - Tasks clickable → sexy modal with execution help (script, timer start, tips)
+   - AI personalization: Custom plans use Grok API for truly tailored tasks (falls back to local if fails)
+   - Super sexy: More gradients, animations, hobby emojis in tasks, confetti upgrade
+-->
+
+<section id="weekly-win-plan" class="hidden">
+    <div class="ai-tool-wrapper">
+        <div class="text-center mb-12">
+            <h2 class="text-5xl font-black mb-4 text-[#F15A29] tracking-tight" id="personalized-title">My Weekly Win Plan 🔥</h2>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Your personal prospecting coach. Clear daily actions, built-in balance, and execution help to make winning feel effortless.
+            </p>
+        </div>
+
+        <!-- Hero Motivation + Streak -->
+        <div class="bg-gradient-to-br from-[#002B5C]/60 to-[#00A89D]/40 rounded-3xl p-10 mb-12 shadow-2xl border border-[#00A89D]/30">
+            <div class="flex flex-col md:flex-row items-center justify-around gap-8 text-center">
+                <div class="text-6xl animate-pulse">🔥</div>
+                <div>
+                    <p class="text-4xl font-bold text-[#F15A29]" id="streak-display">0 Week Streak</p>
+                    <p class="text-2xl mt-2" id="streak-message">Let's start your fire today!</p>
+                </div>
+                <div class="text-6xl">💰</div>
+                <div>
+                    <p class="text-2xl font-bold">Monthly Goal: <span id="monthly-goal-display">8</span> Funded Loans</p>
+                    <p class="text-lg mt-2" id="weekly-target">Aim for ~72 touches this week</p>
+                </div>
+                <div class="text-6xl">🏆</div>
+            </div>
+        </div>
+<div class="text-center my-12">
+    <button id="edit-setup-btn" class="w-full max-w-2xl mx-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl">
+        <i class="fas fa-eye mr-3"></i> View/Change Plan Details
+    </button>
+</div>
+        <!-- Generate Button (ID added, onclick removed, full gradient for perfect match) -->
+        <div class="text-center mb-20">
+            <button id="generate-win-plan-btn" class="w-full max-w-2xl mx-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl">
+    <i class="fas fa-bolt-lightning mr-4 text-3xl"></i> Build My Personalized Win Plan
+</button>
+        </div>
+
+        <!-- Weekly Task Cards -->
+        <div id="weekly-tasks-container" class="space-y-12 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                <!-- Tasks injected by JS -->
+            </div>
+
+            <!-- Progress Summary -->
+            <div class="mt-20 text-center">
+                <p class="text-4xl font-bold mb-8">
+                    <span id="tasks-completed">0</span> / <span id="tasks-total">0</span> Tasks Complete
+                </p>
+                <div class="w-full max-w-3xl mx-auto bg-gray-800 rounded-full h-10 overflow-hidden shadow-2xl">
+                    <div id="weekly-progress-bar" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] h-full w-0 transition-all duration-1000 rounded-full"></div>
+                </div>
+                <p class="text-3xl mt-10" id="completion-message">Keep going — you're building momentum!</p>
+            </div>
+        </div>
+
+        <!-- Confetti Canvas -->
+        <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+        <!-- Task Help Modal -->
+        <div id="task-help-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-10 max-w-2xl shadow-2xl border border-[#00A89D]/50">
+                <h3 class="text-3xl font-bold text-[#F15A29] mb-6" id="task-help-title">Task Help</h3>
+                <div id="task-help-content" class="text-lg text-gray-200 space-y-4"></div>
+                <div class="text-center mt-10">
+                    <button onclick="closeTaskHelp()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
+                        Got It — Back to Winning
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div id="setup-wizard" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center hidden">
+    <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 md:p-12 max-w-4xl w-full mx-4 shadow-2xl border border-[#00A89D]/50 max-h-[95vh] overflow-y-auto">
+        
+        <h3 class="text-4xl md:text-5xl font-bold text-[#F15A29] text-center mb-6">Your Personalized Setup ⚡</h3>
+        <p class="text-lg md:text-xl text-gray-300 text-center mb-12 max-w-3xl mx-auto">
+            The more you share (all optional except goal), the smarter your weekly plan becomes — perfectly balanced with your production, schedule, and passions.
+        </p>
+        
+        <div class="space-y-12">
+            <!-- Row 1: Name & Goal (even spacing) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4 flex items-center">
+                        <i class="fas fa-user mr-3"></i> Your Name (for motivation)
+                    </label>
+                    <input type="text" id="setup-name" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4 flex items-center">
+                        <i class="fas fa-chart-line mr-3"></i> Monthly Funded Loan Goal
+                    </label>
+                    <input type="number" id="setup-monthly-goal" min="1" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+                </div>
+            </div>
+
+            <!-- Row 2: Production & Database (3 columns, even) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4">Last Month's Funded Loans</label>
+                    <input type="number" id="setup-last-month" min="0" placeholder="Optional" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4"># Active Referral Partners 🤝</label>
+                    <input type="number" id="setup-partners" min="0" placeholder="Optional" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4">Number of Past Clients 🏡</label>
+                    <input type="number" id="setup-past-clients" min="0" placeholder="Optional" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+                </div>
+            </div>
+
+            <!-- Row 3: Schedule & Focus -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4 flex items-center">
+                        <i class="fas fa-clock mr-3"></i> Weekly Prospecting Hours Available
+                    </label>
+                    <select id="setup-hours" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+                        <option>Less than 10</option>
+                        <option>10–15</option>
+                        <option selected>15–20 (recommended)</option>
+                        <option>20+</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4">Preferred Prospecting Focus (optional)</label>
+                    <select id="setup-focus" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+                        <option>Balanced (Realtors + Past Clients + Equity)</option>
+                        <option>Heavy Realtor Partnerships</option>
+                        <option>Past Client Refi Focus</option>
+                        <option>Equity Scanner Leads</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Hobbies Section -->
+            <div>
+                <label class="block text-2xl font-bold text-[#00A89D] mb-6 flex items-center">
+                    <i class="fas fa-heart mr-4 text-[#F15A29]"></i> Your Passions & Hobbies (weave into plan for balance & better connections)
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Golf" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Golf</span>
+                    </label>
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Cards/Poker" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Cards/Poker</span>
+                    </label>
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Sports" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Sports</span>
+                    </label>
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Crafts" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Crafts</span>
+                    </label>
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Family Time" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Family Time</span>
+                    </label>
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Outdoors" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Outdoors</span>
+                    </label>
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Fitness" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Fitness</span>
+                    </label>
+                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+                        <input type="checkbox" value="Cooking" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Cooking</span>
+                    </label>
+                </div>
+                <input type="text" id="setup-hobbies-other" placeholder="Other passions (e.g., pedicures, wine tasting, travel)" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
+            </div>
+        </div>
+<!-- Preferred Prospecting Activities Section -->
+<div>
+    <label class="block text-2xl font-bold text-[#00A89D] mb-6 flex items-center">
+        <i class="fas fa-bullhorn mr-4 text-[#F15A29]"></i> Preferred Prospecting Activities (check all you enjoy — we'll prioritize these)
+    </label>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Coffee/Drink Appointments" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Coffee or Drink Appointments ☕</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Lunch Appointments" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Lunch Appointments 🍴</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Lunch and Learns" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Hosting Lunch & Learns 📊</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Personal Notes/Cards" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Writing Personal Notes/Cards ✍️</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Social Media Videos" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Creating Social Media Videos 📹</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Phone Calls" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Making Phone Calls ☎️</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Door Knocking" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Door Knocking 🚪</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Networking Events" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Attending Networking Events 🤝</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Video Messages" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Sending Video Messages 🎥</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Email Campaigns" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span>Sending Value Emails 📧</span>
+        </label>
+    </div>
+</div>
+        <div class="text-center mt-16">
+            <button id="save-setup-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl flex items-center justify-center">
+    <i class="fas fa-rocket mr-4 text-3xl"></i> Save Preferences
+</button>
+        </div>
+    </div>
+</div>
+</section>
        
-          </main>
+</main>
     <script>
 // Menu toggle
 document.getElementById('menu-toggle').addEventListener('click', () => {
@@ -3227,7 +3712,7 @@ document.getElementById('menu-toggle').addEventListener('click', () => {
     sidebar.classList.toggle('open');
 });
 
-// Full quotes
+// Single Quote Display with Manual Arrows & Auto-Rotation
 const quotes = [
     "The harder you work, the luckier you get.",
     "Your next loan is one call away.",
@@ -3331,25 +3816,42 @@ const quotes = [
     "Consistency is the silent closer that never takes a day off"
 ];
 
-// Generate quote (for Dashboard)
-// Function to get random quote
-function getRandomQuote() {
-    return quotes[Math.floor(Math.random() * quotes.length)];
+let currentQuoteIndex = Math.floor(Math.random() * quotes.length);
+const quoteDisplay = document.getElementById('quote-display');
+const quotePrev = document.getElementById('quote-prev');
+const quoteNext = document.getElementById('quote-next');
+
+function showQuote(index) {
+    if (!quoteDisplay) return;
+    quoteDisplay.classList.add('fade');
+    setTimeout(() => {
+        quoteDisplay.textContent = quotes[index];
+        quoteDisplay.classList.remove('fade');
+    }, 400);
 }
 
-// Auto-rotate every 15 seconds
-document.addEventListener('DOMContentLoaded', () => {
-    const quoteElement = document.getElementById('persistent-quote');
-    if (quoteElement) {
-        // Set initial quote
-        quoteElement.textContent = getRandomQuote();
+if (quoteDisplay) {
+    showQuote(currentQuoteIndex);
 
-        // Rotate every 15 seconds
-        setInterval(() => {
-            quoteElement.textContent = getRandomQuote();
-        }, 12500);  
+    setInterval(() => {
+        currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+        showQuote(currentQuoteIndex);
+    }, 12500);
+
+    if (quotePrev) {
+        quotePrev.addEventListener('click', () => {
+            currentQuoteIndex = (currentQuoteIndex - 1 + quotes.length) % quotes.length;
+            showQuote(currentQuoteIndex);
+        });
     }
-});
+
+    if (quoteNext) {
+        quoteNext.addEventListener('click', () => {
+            currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+            showQuote(currentQuoteIndex);
+        });
+    }
+}
 
 // Activities (full)
 const activities = {
@@ -3437,7 +3939,7 @@ Focus on building connection and trust — not closing the deal.`;
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
+              },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [{ role: "user", content: prompt }],
@@ -4114,7 +4616,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const type = monthlySavings > 100 ? 'Refi Ready' : cashOut > 50000 ? 'Cash-Out Goldmine' : 'Move-Up Ready';
 
-                    let score = Math.round((monthlySavings / 5) + (equity / 5000) + (cashOut / 5000));
+                    let score = Math.round((monthlySavings / 5) + (moveUp / 4000) + (cashOut / 4000));
                     if (isNaN(score)) score = 0;
 
                     const currentLTV = appraisedValue > 0 ? (estimatedBalance / appraisedValue) * 100 : 0;
@@ -4296,7 +4798,7 @@ Make it feel like it comes from a trusted friend who happens to be a mortgage ex
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
+              },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [{ role: "user", content: prompt }],
@@ -4564,7 +5066,7 @@ Structure every response:
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
+              },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [
@@ -4669,7 +5171,7 @@ async function sendChatMessage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
+              },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: chatHistory,
@@ -5030,7 +5532,7 @@ Write a complete blog post on: ${topicInput}`;
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
+              },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [{ role: "user", content: systemPrompt }],
@@ -5296,6 +5798,954 @@ function smartRouteChat(message) {
     return false;
 }
 </script>
+<script>
+// Toggle custom preferences visibility
+document.getElementById('calendar-template').addEventListener('change', function() {
+    document.getElementById('custom-preferences').classList.toggle('hidden', this.value !== 'custom');
+});
+
+// Large idea pools (varied, no repetition across year) — kept your original + slight expansions for variety
+const ideaPools = {
+    personal: [
+        "Morning coffee routine with a view of the backyard", "Weekend hike photo and what you love about Indiana trails",
+        "Family game night snapshot", "Favorite local coffee shop visit", "Book I'm reading this week",
+        "My dog's funny morning zoomies", "Garden update — first tomatoes of the season!", "Throwback to my first home purchase",
+        "Gratitude post: Thankful for great clients and teammates", "Sunday meal prep — what's your go-to recipe?",
+        "Kids' sports game highlight", "Favorite podcast episode this week", "Home office setup tour", "Pet playing in the snow/rain",
+        "Weekend BBQ with friends", "Hobby share: Golf swing at local course", "Simple pleasure: Fresh baked cookies",
+        "Throwback vacation memory", "Morning walk in the neighborhood", "What I'm watching on Netflix",
+        "Favorite seasonal drink recipe", "Family tradition we love", "Home project progress pic", "Sunset from the porch",
+        "Weekend farmer's market haul", "Cozy reading nook photo", "My why: Helping families achieve homeownership",
+        "Quick life hack I use daily", "Favorite quote on my desk", "Behind-the-scenes: My daily planner",
+        "Local Auburn park visit", "Favorite Indiana festival memory", "Home workout routine share"
+    ],
+    engagement: [
+        "Poll: Coffee or tea person?", "This or That: City living or suburbs?", "What's your dream home feature?",
+        "Biggest home-buying fear — comment below!", "Favorite local restaurant in your area?", "Buy now or wait for rates — thoughts?",
+        "Share your best moving tip", "Beach house or mountain cabin?", "Rate your credit knowledge 1–10",
+        "What's one home upgrade on your wish list?", "Cats or dogs as the ultimate home companion?", "Favorite season for house hunting?",
+        "Would you rather renovate or buy new?", "Best advice you ever got about money?", "Share a home DIY win or fail!",
+        "Favorite Auburn spot?", "Winter or summer in Indiana?"
+    ],
+    motivational: [
+        "Monday motivation: Ziglar quote about attitude", "Your why matters — quick story about why I love this industry",
+        "Small steps lead to big wins — client example", "Mindset tip: Start the week with gratitude",
+        "Quote: 'Success is 80% mindset, 20% strategy'", "Overcoming obstacles — my biggest lesson learned",
+        "Gratitude changes everything", "Focus on progress, not perfection"
+    ],
+    tips: [
+        "Quick tip: How escrow accounts work", "Myth: You need 20% down to buy — here's the truth",
+        "3 ways to boost your credit score fast", "Closing costs explained in plain English",
+        "Should you lock your rate now? Factors to consider", "FHA vs Conventional — quick comparison",
+        "How to remove PMI early", "Debt-to-income ratio basics"
+    ],
+    wins: [
+        "Just helped another family close on their dream home! 🏡", "Client testimonial Thursday (with permission)",
+        "Recent closing table celebration photo", "Saved a client $250/month on their refi — love these wins!",
+        "Another smooth approval — teamwork makes the dream work!"
+    ],
+    community: [
+        "Local business spotlight: Amazing Auburn/Fort Wayne spot", "Upcoming community event worth checking out",
+        "Support local — share your favorite small business!", "Volunteer day recap — giving back feels great",
+        "Shoutout to a great DeKalb County business"
+    ],
+    fun: [
+        "Fun fact: The average American moves 11.7 times!", "Real estate myth busted with humor",
+        "Friday funny: Mortgage meme that hits home", "Poll: What's the weirdest home feature you've seen?",
+        "Weekend laugh: Funny home renovation fail"
+    ]
+};
+
+// Weekly themes
+const weeklyThemes = {
+    Sun: "Personal & Relax Sunday – Family, hobbies, weekend vibes",
+    Mon: "Motivational Monday – Inspiration & mindset",
+    Tue: "Tip Tuesday – Quick mortgage/finance value",
+    Wed: "Wins Wednesday – Testimonials & celebrations",
+    Thu: "Community Thursday – Local spotlight & support",
+    Fri: "Fun Friday – Polls, facts & humor",
+    Sat: "Engagement Saturday – Questions & personal stories"
+};
+
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function getDaysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+}
+
+function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateLocalMonths(year, weekStart, template) {
+    const weekdays = weekStart === 'Sun' ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    let months = [];
+
+    for (let m = 0; m < 12; m++) {
+        const daysInMonth = getDaysInMonth(year, m);
+        let monthDays = [];
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateObj = new Date(year, m, d);
+            const wdIndex = dateObj.getDay();
+            const weekday = weekdays[wdIndex === 0 ? 6 : wdIndex - (weekStart === 'Sun' ? 0 : 1)];
+            const theme = weeklyThemes[weekday] || "General Day";
+
+            let ideas = [];
+            // Always 2 personal/engagement base
+            ideas.push(pickRandom(ideaPools.personal));
+            ideas.push(pickRandom([...ideaPools.personal, ...ideaPools.engagement]));
+
+            // Template-specific weighting
+            if (template === 'engagement') {
+                ideas.push(pickRandom(ideaPools.engagement));
+                ideas.push(pickRandom(ideaPools.engagement));
+            } else if (template === 'personal') {
+                ideas.push(pickRandom(ideaPools.personal));
+                ideas.push(pickRandom(ideaPools.personal));
+            } else if (template === 'realtor') {
+                ideas.push("Value for agents: Fast pre-approvals & smooth closings");
+                ideas.push(pickRandom([...ideaPools.personal, ...ideaPools.engagement]));
+            } else {
+                // Balanced — add 1 themed business + 1 mixed
+                const themedPool = weekday === 'Mon' ? ideaPools.motivational :
+                                  weekday === 'Tue' ? ideaPools.tips :
+                                  weekday === 'Wed' ? ideaPools.wins :
+                                  weekday === 'Thu' ? ideaPools.community :
+                                  weekday === 'Fri' ? ideaPools.fun :
+                                  ideaPools.tips;
+                ideas.push(pickRandom(themedPool));
+                ideas.push(pickRandom([...ideaPools.personal, ...ideaPools.engagement]));
+            }
+
+            monthDays.push({
+                date: d.toString(),
+                weekday,
+                theme,
+                ideas
+            });
+        }
+        months.push({ name: monthNames[m], days: monthDays });
+    }
+    return months;
+}
+
+// New: Branded Overview Cover Sheet
+function createOverviewSheet(year) {
+    const data = [
+        [`Your ${year} Social Media Success Plan`, "", "", "", "", "", "", ""],
+        ["Built for Loan Officers in Auburn & Beyond — Consistency Made Simple", "", "", "", "", "", "", ""],
+        [],
+        ["Core Strategy", "", "", "", "", "", "", ""],
+        ["75% Personal/Engagement/Community → Build authentic relationships", "", "", "", "", "", "", ""],
+        ["25% Business/Educational → Position yourself as the go-to expert", "", "", "", "", "", "", ""],
+        [],
+        ["Weekly Themes", "", "", "", "", "", "", ""],
+        ["Sunday: Personal & Relax", "Monday: Motivational", "Tuesday: Tip", "Wednesday: Wins", "", "", "", ""],
+        ["Thursday: Community/Local", "Friday: Fun", "Saturday: Engagement", "", "", "", "", ""],
+        [],
+        ["Pro Tips for Maximum Results", "", "", "", "", "", "", ""],
+        ["• Post 3–5 times per week minimum", "", "", "", "", "", "", ""],
+        ["• Engage daily: Like/comment/share on others' posts", "", "", "", "", "", "", ""],
+        ["• Use Stories/Reels for behind-the-scenes", "", "", "", "", "", "", ""],
+        ["• Track engagement & double down on what works", "", "", "", "", "", "", ""],
+        ["• Always add value — never hard sell", "", "", "", "", "", "", ""],
+        [],
+        ["You've got this! Start posting today and watch your business grow.", "", "", "", "", "", "", ""]
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+        { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } },
+        { s: { r: 7, c: 0 }, e: { r: 7, c: 7 } },
+        { s: { r: 11, c: 0 }, e: { r: 11, c: 7 } },
+        { s: { r: 18, c: 0 }, e: { r: 18, c: 7 } }
+    ];
+    ws['!cols'] = [{ wch: 60 }, { wch: 40 }, { wch: 30 }, { wch: 30 }, { wch: 30 }, { wch: 30 }, { wch: 30 }, { wch: 30 }];
+
+    // Styling for title
+    if (ws['A1']) {
+        ws['A1'].s = { font: { bold: true, sz: 24, color: { rgb: "F15A29" } }, alignment: { horizontal: 'center' } };
+    }
+    if (ws['A2']) {
+        ws['A2'].s = { font: { bold: true, sz: 18 }, alignment: { horizontal: 'center' } };
+    }
+
+    return ws;
+}
+
+// Updated createMonthSheet with holidays, hashtags, local flavor
+function createMonthSheet(month, year, monthIndex, weekStart) {
+    const data = [];
+
+    data.push([`${month.name} ${year}`]);
+    data.push([]); data.push([]);
+
+    data.push(['Weekly Themes Recap']);
+    data.push(['Day', 'Theme Description']);
+    const weekdayOrder = weekStart === 'Sun' ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    weekdayOrder.forEach(wd => {
+        data.push([wd, weeklyThemes[wd] || 'General Day']);
+    });
+    data.push([]); data.push([]);
+
+    data.push(['Daily Post Ideas']);
+    data.push(['Date', 'Weekday', 'Theme', 'Post Idea 1', 'Post Idea 2', 'Post Idea 3', 'Post Idea 4', 'Suggested Hashtags']);
+
+    // 2026 US Holidays (major ones)
+    const holidays = {
+        'January 1': '🎉 New Year’s Day – Share your goals!',
+        'January 19': 'MLK Day – Inspiration & equality post',
+        'February 16': 'Presidents’ Day',
+        'May 25': 'Memorial Day',
+        'June 19': 'Juneteenth',
+        'July 4': 'Independence Day 🇺🇸',
+        'September 7': 'Labor Day',
+        'November 26': 'Thanksgiving 🦃',
+        'December 25': 'Christmas 🎄'
+    };
+
+    month.days.forEach(day => {
+        const fullDateKey = `${month.name} ${day.date}`;
+        const holidayNote = holidays[fullDateKey] || '';
+
+        let hashtags = '#LoanOfficerLife #IndianaRealEstate #AuburnIN';
+        if (day.weekday === 'Mon') hashtags += ' #MotivationMonday';
+        if (day.weekday === 'Tue') hashtags += ' #TipTuesday';
+        if (day.weekday === 'Wed') hashtags += ' #WinsWednesday';
+        if (day.weekday === 'Thu') hashtags += ' #SupportLocal';
+        if (day.weekday === 'Fri') hashtags += ' #FunFriday';
+        if (holidayNote) hashtags += ' #HappyHolidays';
+
+        data.push([
+            `${month.name} ${day.date}, ${year}${holidayNote ? ' 🎉' : ''}`,
+            day.weekday,
+            day.theme + (holidayNote ? ' (Holiday!)' : ''),
+            ...day.ideas.slice(0,4).map(idea => idea || ''),
+            hashtags
+        ]);
+
+        if (holidayNote) {
+            data[data.length-1][3] = holidayNote; // Override first idea with holiday suggestion
+        }
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+        { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } },
+        { s: { r: data.length - month.days.length - 2, c: 0 }, e: { r: data.length - month.days.length - 2, c: 7 } }
+    ];
+
+    ws['!cols'] = [
+        { wch: 24 }, { wch: 12 }, { wch: 55 },
+        { wch: 55 }, { wch: 55 }, { wch: 55 }, { wch: 55 },
+        { wch: 70 }
+    ];
+
+    // Wrap text + holiday highlighting
+    const ideasStartRow = 11 + weekdayOrder.length;
+    for (let r = ideasStartRow; r < data.length; r++) {
+        for (let c = 2; c <= 7; c++) {
+            const cell = XLSX.utils.encode_cell({ r, c });
+            if (ws[cell]) {
+                ws[cell].s = { 
+                    alignment: { wrapText: true, vertical: 'top', horizontal: 'left' },
+                    font: { sz: 11 }
+                };
+                if (data[r][2].includes('Holiday')) {
+                    ws[cell].s.fill = { fgColor: { rgb: "E8F5E9" } }; // Light green
+                }
+            }
+        }
+    }
+
+    // Bold headers + title styling (your original retained)
+    const headerRows = [3, 4, data.length - month.days.length - 1];
+    headerRows.forEach(rowIdx => {
+        for (let c = 0; c < 8; c++) {
+            const cell = XLSX.utils.encode_cell({ r: rowIdx, c });
+            if (ws[cell]) {
+                ws[cell].s = ws[cell].s || {};
+                ws[cell].s.font = { bold: true, sz: 12 };
+            }
+        }
+    });
+
+    if (ws['A1']) {
+        ws['A1'].s = { font: { bold: true, sz: 18 }, alignment: { horizontal: 'center' } };
+    }
+
+    return ws;
+}
+
+// Your createTipsSheet (kept as-is — it's solid)
+function createTipsSheet() {
+    const data = [
+        ["Social Media Success Tips for Loan Officers", "", "", "", "", "", "", ""],
+        [],
+        ["Key Principle: ~75% personal/community/engagement — people connect with YOU first.", "", "", "", "", "", "", ""],
+        ["~25% business/educational — provide genuine value.", "", "", "", "", "", "", ""],
+        [],
+        ["Frequency Guidelines"],
+        ["Daily:", "Like/comment/share on followers' posts + 1–3 personal posts"],
+        ["Weekly:", "Motivational Monday, Tip Tuesday, Wins Wednesday, Community Thursday, Fun Friday"],
+        ["Monthly:", "Market update, local spotlight, deeper educational reel"],
+        ["As they occur:", "Testimonials, closing pics, just-listed/sold (with permission)"],
+        [],
+        ["Idea Bank – Steal These Anytime"],
+        ["Personal Ideas:", ...ideaPools.personal.slice(0,20).join(", ").split(", ")],
+        [],
+        ["Engagement Prompts:", ...ideaPools.engagement.slice(0,15).join(", ").split(", ")],
+        [],
+        ["Mortgage Tips:", ...ideaPools.tips],
+        ["Fun/Community:", ...ideaPools.fun.concat(ideaPools.community)]
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [
+        { wch: 30 }, { wch: 50 }, { wch: 50 }, { wch: 50 }, 
+        { wch: 50 }, { wch: 50 }, { wch: 50 }, { wch: 50 }
+    ];
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+
+    return ws;
+}
+
+// Full generateCalendar with your AI fetch, progress, overview sheet, etc.
+async function generateCalendar() {
+    const year = parseInt(document.getElementById('calendar-year').value) || 2026;
+    const weekStart = document.getElementById('week-start').value;
+    const template = document.getElementById('calendar-template').value;
+    const loading = document.getElementById('calendar-loading');
+    const success = document.getElementById('calendar-success');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    // Reset UI
+    if (success) success.classList.add('hidden');
+    loading.classList.remove('hidden');
+    progressBar.style.width = '0%';
+    progressText.textContent = '0%';
+
+    await new Promise(resolve => requestAnimationFrame(() => resolve()));
+
+    let monthsData = [];
+
+    if (template === 'custom') {
+        const userPrompt = document.getElementById('custom-prompt').value.trim() || "Standard loan officer in Auburn, Indiana";
+
+        const systemPrompt = `You are a social media strategist for mortgage loan officers. Create a full ${year} 12-month posting calendar.
+Week starts on ${weekStart === 'Sun' ? 'Sunday' : 'Monday'}.
+User preferences: ${userPrompt}
+
+Follow these guidelines strictly:
+- 75% personal/lifestyle/community/engagement content (build real connections)
+- 25% business/educational (mortgage tips, wins, market insights)
+- Use consistent themed days: Motivational Monday, Tip Tuesday, Wins Wednesday, Community Thursday, Fun Friday, Engagement Saturday, Personal & Relax Sunday
+- Include major holidays with special post ideas when applicable
+- Vary ideas — no repetition across the year
+- Make ideas specific to Auburn/Indiana when possible
+
+Output ONLY valid JSON in this exact structure (no extra text):
+{
+  "months": [
+    {
+      "name": "January",
+      "days": [
+        {
+          "date": "1",
+          "weekday": "Wednesday",
+          "theme": "Motivational Monday",
+          "ideas": ["Idea 1...", "Idea 2...", "Idea 3...", "Idea 4..."]
+        }
+        // ... all days
+      ]
+    }
+    // ... all 12 months
+  ]
+}`;
+
+        try {
+            const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify({
+                model: "grok-4-1-fast-reasoning",
+                    messages: [{ role: "user", content: systemPrompt }],
+                    temperature: 0.7,
+                    max_tokens: 3000
+                })
+            });
+
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+            const data = await response.json();
+            const content = data.choices[0].message.content.trim();
+
+            const jsonString = content.replace(/^```json\n?|```$/g, '').trim();
+            const parsed = JSON.parse(jsonString);
+            monthsData = parsed.months;
+
+        } catch (err) {
+            console.error('Custom AI generation failed:', err);
+            alert('Custom generation failed — using Balanced template instead');
+            monthsData = generateLocalMonths(year, weekStart, 'balanced');
+        }
+    } else {
+        monthsData = generateLocalMonths(year, weekStart, template);
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 12 + 5;
+        if (progress >= 95) {
+            progress = 95;
+            clearInterval(progressInterval);
+        }
+        progressBar.style.width = progress + '%';
+        progressText.textContent = Math.round(progress) + '%';
+    }, 600);
+
+    const wb = XLSX.utils.book_new();
+
+    const overviewWs = createOverviewSheet(year);
+    XLSX.utils.book_append_sheet(wb, overviewWs, "Overview");
+
+    for (const [mIdx, month] of monthsData.entries()) {
+        const ws = createMonthSheet(month, year, mIdx, weekStart);
+        XLSX.utils.book_append_sheet(wb, ws, month.name.substring(0, 31));
+        if ((mIdx + 1) % 3 === 0) await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    const tipsWs = createTipsSheet();
+    XLSX.utils.book_append_sheet(wb, tipsWs, "Tips & Ideas");
+
+    XLSX.writeFile(wb, `My_${year}_Social_Media_Calendar.xlsx`);
+
+    clearInterval(progressInterval);
+    progressBar.style.width = '100%';
+    progressText.textContent = '100%';
+
+    setTimeout(() => {
+        loading.classList.add('hidden');
+        if (success) success.classList.remove('hidden');
+    }, 800);
+}
+// Toggle function — add this to your existing <script> block (or create a new one if needed)
+function toggleCalendarSection() {
+    const content = document.getElementById('calendar-content');
+    const icon = document.getElementById('calendar-toggle-icon');
+    
+    content.classList.toggle('hidden');
+    icon.classList.toggle('rotate-180');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Weekly Win Plan — FULL AI VERSION WITH SAFE LOCAL FALLBACK
+    // - Tries personalized AI plan first (works when served over http/https)
+    // - Silently falls back to local balanced plan if AI unavailable (e.g., file:// or bad key)
+    // - No alerts, no duplication, spinner always hides
+
+    const dailyActivities = [
+        "Write two personal notes or thank-you cards to clients, referral partners, or prospects.",
+        "Make at least five outbound calls to past clients or referral partners.",
+        "Send personalized birthday messages using video to your past clients.",
+        "Engage on social media by commenting on or liking 10 posts from realtors, clients, and referral partners.",
+        "Record and post one short-form video or story about mortgage tips, market updates, or client success stories.",
+        "Follow up with any new online or social media leads received in the past 24 hours.",
+        "Reach out to a past client just to check in—no sales pitch, just relationship-building.",
+        "Send a text or video message to a referral partner to stay top of mind.",
+        "Knock on one local business door to introduce yourself (title companies, insurance agents, CPAs, etc.).",
+        "Spend time reviewing and updating CRM with notes, follow-ups, and next actions."
+    ];
+
+    const weeklyActivities = [
+        "Pipeline review with referral partners—discuss upcoming deals and potential new clients.",
+        "Pipeline review with active clients—touch base with a weekly update, even if nothing new.",
+        "Host a 15-minute coaching call (Zoom or Teams) for realtors on mortgage trends or strategies.",
+        "Attend at least one networking event (chamber of commerce, BNI, or real estate meetup).",
+        "Send a “Who do you know?” text to 5+ referral partners asking for warm introductions.",
+        "Create and send a value-packed email to your database (market updates, home tips, etc.).",
+        "Record and send a personalized video email to new leads or referral partners.",
+        "Reach out to 3 new real estate agents via social media or in person.",
+        "Host a casual coffee meeting with a referral partner or past client.",
+        "Review past closed loans and follow up with clients who may benefit from refinancing."
+    ];
+
+    const weekendActivities = [
+        "Post a personal social media update (family, hobby, local Auburn spot, or fun weekend vibe)",
+        "Check and respond to any weekend inquiries, messages, or new leads",
+        "Engage lightly on social: Like/comment on 5–10 posts from realtors/clients (no heavy prospecting)",
+        "Quick Sunday prep: Review your calendar and pick Monday's top 10 calls",
+        "Plan your social posts for the upcoming week (use your Social Calendar tool)",
+        "Light CRM check: Flag any hot weekend leads for Monday follow-up",
+        "Relax & recharge — share a weekend inspiration quote or gratitude post",
+        "Family/fun time post — keep it authentic and relationship-focused",
+        "Quick win: Send 3 'just checking in' texts to warm past clients",
+        "Prepare one value video (market tip or fun fact) to post Monday"
+    ];
+
+    // Confetti function
+    function launchConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        if (!canvas) return;
+        canvas.classList.remove('hidden');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const confetti = [];
+        const colors = ['#F15A29', '#00A89D', '#FFD700', '#FF69B4'];
+
+        for (let i = 0; i < 400; i++) {
+            confetti.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                r: Math.random() * 8 + 3,
+                d: Math.random() * 12 + 6,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                tilt: Math.random() * 10 - 5,
+                tiltAngle: 0
+            });
+        }
+
+        let animationFrame;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            confetti.forEach((c, i) => {
+                c.tiltAngle += 0.1;
+                c.y += c.d;
+                c.tilt = Math.sin(c.tiltAngle) * 20;
+
+                ctx.beginPath();
+                ctx.lineWidth = c.r;
+                ctx.strokeStyle = c.color;
+                ctx.moveTo(c.x + c.tilt + c.r, c.y);
+                ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r);
+                ctx.stroke();
+
+                if (c.y > canvas.height) confetti.splice(i, 1);
+            });
+
+            if (confetti.length > 0) animationFrame = requestAnimationFrame(draw);
+            else canvas.classList.add('hidden');
+        }
+        draw();
+    }
+
+    // Setup & Persistence
+    let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
+    name: "Loan Officer",
+    monthlyGoal: 8,
+    focus: "Balanced",
+    lastMonth: 0,
+    partners: 0,
+    pastClients: 0,
+    hours: "15–20",
+    hobbies: [],
+    hobbiesOther: "",
+    preferredActivities: []  // NEW: Initialize as empty array
+};
+    let streak = parseInt(localStorage.getItem('winPlanStreak')) || 0;
+
+    function updateSetupDisplays() {
+        const name = userSetup.name.trim() || "Loan Officer";
+        const titleEl = document.getElementById('personalized-title');
+        if (titleEl) titleEl.textContent = `${name}'s Weekly Win Plan 🔥`;
+        const goalEl = document.getElementById('monthly-goal-display');
+        if (goalEl) goalEl.textContent = userSetup.monthlyGoal;
+
+        const touchesNeeded = userSetup.monthlyGoal * 9;
+        const targetEl = document.getElementById('weekly-target');
+        if (targetEl) targetEl.textContent = `For ${userSetup.monthlyGoal} loans: Aim for ~${touchesNeeded} touches this week`;
+
+        const streakEl = document.getElementById('streak-display');
+        if (streakEl) streakEl.textContent = `${streak} Week Streak`;
+        const messageEl = document.getElementById('streak-message');
+        if (messageEl) messageEl.textContent = streak > 0 ? `${name}, you're on fire!` : `${name}, let's build your streak!`;
+    }
+
+    updateSetupDisplays();
+
+    // Wizard functions
+    function openSetupWizard() {
+        const wizard = document.getElementById('setup-wizard');
+        if (!wizard) return;
+        document.getElementById('setup-name').value = userSetup.name;
+        document.getElementById('setup-monthly-goal').value = userSetup.monthlyGoal;
+        document.getElementById('setup-focus').value = userSetup.focus;
+        document.getElementById('setup-last-month').value = userSetup.lastMonth || '';
+        document.getElementById('setup-partners').value = userSetup.partners || '';
+        document.getElementById('setup-past-clients').value = userSetup.pastClients || '';
+        document.getElementById('setup-hours').value = userSetup.hours;
+        document.getElementById('setup-hobbies-other').value = userSetup.hobbiesOther || '';
+        wizard.classList.remove('hidden');
+    }
+
+    function saveSetup() {
+    const wizard = document.getElementById('setup-wizard');
+    if (!wizard) return;
+
+    // Capture and save all values (exactly as you had it)
+    userSetup.name = document.getElementById('setup-name').value.trim() || "Loan Officer";
+    userSetup.monthlyGoal = parseInt(document.getElementById('setup-monthly-goal').value) || 8;
+    userSetup.focus = document.getElementById('setup-focus').value;
+    userSetup.lastMonth = parseInt(document.getElementById('setup-last-month').value) || 0;
+    userSetup.partners = parseInt(document.getElementById('setup-partners').value) || 0;
+    userSetup.pastClients = parseInt(document.getElementById('setup-past-clients').value) || 0;
+    userSetup.hours = document.getElementById('setup-hours').value;
+    userSetup.hobbies = Array.from(document.querySelectorAll('.hobby-checkbox:checked')).map(cb => cb.value);
+    userSetup.hobbiesOther = document.getElementById('setup-hobbies-other').value.trim();
+    userSetup.preferredActivities = Array.from(document.querySelectorAll('.activity-checkbox:checked')).map(cb => cb.value);
+
+    // Save to localStorage
+    localStorage.setItem('winPlanSetup', JSON.stringify(userSetup));
+
+    // Close the modal
+    wizard.classList.add('hidden');
+
+    // Update any live displays (e.g., name/goal in header)
+    updateSetupDisplays();
+
+    // Show the big green confirmation toast
+    const toast = document.getElementById('save-toast');
+    if (toast) {
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 4000); // Auto-hide after 4 seconds
+    }
+}
+
+    // Task Help
+    function showTaskHelp(task) {
+        const modal = document.getElementById('task-help-modal');
+        if (!modal) return;
+        document.getElementById('task-help-title').textContent = task;
+        let content = `<p class="text-xl mb-6 font-bold">How to crush this:</p>`;
+
+        if (task.includes("calls") || task.includes("outbound")) {
+            content += `<p><strong>Script:</strong> "Hey [Name], it's ${userSetup.name} — rates are great right now, who do you know thinking about buying/refi?"</p>`;
+            content += `<p class="mt-4">Tip: Smile when you dial — they hear it!</p>`;
+        } else if (task.includes("social") || task.includes("post")) {
+            content += `<p>Use your Social Post Creator → grab today's idea and post it now</p>`;
+        } else if (userSetup.hobbies.length > 0) {
+            content += `<p>Pro move: Tie this to your passion (${userSetup.hobbies[0]}) — invite a partner to join!</p>`;
+        }
+
+        content += `<p class="mt-6 text-2xl font-bold">⏱ Start a 25-min timer and go!</p>`;
+        document.getElementById('task-help-content').innerHTML = content;
+        modal.classList.remove('hidden');
+    }
+
+    function closeTaskHelp() {
+        const modal = document.getElementById('task-help-modal');
+        if (!modal) return;
+        modal.classList.add('hidden');
+    }
+
+    // Build cards — single source of truth, safe
+    function buildPlanCards(dayTasksArray) {
+        const container = document.getElementById('weekly-tasks-container');
+        if (!container) {
+            console.error('ERROR: #weekly-tasks-container missing in HTML');
+            return;
+        }
+
+        const grid = container.querySelector('.grid');
+        if (!grid) return;
+
+        let allTasks = 0;
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        dayTasksArray.forEach((dayObj, i) => {
+            const day = days[i];
+            const card = document.createElement('div');
+            card.className = 'bg-gradient-to-br from-gray-800/90 to-gray-900 rounded-3xl p-8 shadow-2xl hover:scale-105 transition-all border border-[#00A89D]/30';
+
+            let taskHTML = '<ul class="space-y-6">';
+            dayObj.tasks.forEach(task => {
+                taskHTML += `
+                    <li onclick="showTaskHelp('${task.replace(/'/g, "\\'")}')" class="flex items-start gap-5 text-lg hover:bg-white/10 p-4 rounded-2xl transition-all cursor-pointer">
+                        <input type="checkbox" class="w-8 h-8 mt-1 text-[#F15A29] rounded-lg focus:ring-[#00A89D] flex-shrink-0">
+                        <span class="text-gray-200 leading-relaxed">${task}</span>
+                    </li>`;
+                allTasks++;
+            });
+            taskHTML += '</ul>';
+
+            const dayEmoji = day === "Saturday" || day === "Sunday" 
+                ? ['🌴','☀️','🛋️','📱','🌙'][i - 5] || '🌟'
+                : ['💪','☎️','🤝','📈','☕'][i];
+
+            card.innerHTML = `
+                <h3 class="text-3xl font-bold mb-6 flex items-center ${
+                    day === "Saturday" || day === "Sunday" ? 'text-[#F15A29]/80' : 'text-[#00A89D]'
+                }">
+                    <span class="text-5xl mr-4">${dayEmoji}</span> ${day} ${day === "Saturday" || day === "Sunday" ? '(Recharge Mode)' : ''}
+                </h3>
+                ${taskHTML}
+            `;
+
+            grid.appendChild(card);
+        });
+
+        const tasksTotalEl = document.getElementById('tasks-total');
+        if (tasksTotalEl) tasksTotalEl.textContent = allTasks;
+
+        updateProgress();
+
+        streak++;
+        localStorage.setItem('winPlanStreak', streak);
+        updateSetupDisplays();
+    }
+
+    // Generate Plan — AI first, silent local fallback
+    async function generateWeeklyPlan() {
+    const loading = document.getElementById('generate-loading');
+    const generateBtn = document.getElementById('generate-win-plan-btn');
+    const originalBtnText = generateBtn ? generateBtn.textContent.trim() : 'Generate My Weekly Win Plan';
+
+    if (loading) loading.classList.remove('hidden');
+    if (generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>Generating...';
+    }
+
+    const container = document.getElementById('weekly-tasks-container');
+    if (!container) {
+        if (loading) loading.classList.add('hidden');
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.textContent = originalBtnText;
+        }
+        return;
+    }
+
+    // Unhide the container (this shows tasks + the progress summary section below)
+    container.classList.remove('hidden');
+
+    // CRITICAL FIX: Target ONLY the grid to clear old cards — do NOT overwrite the entire container
+    let grid = container.querySelector('.grid');
+    if (!grid) {
+        // Safety: if grid missing, create it in the correct spot (before progress summary)
+        grid = document.createElement('div');
+        grid.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8';
+        const progressSection = container.querySelector('.mt-20'); // reference to progress block
+        container.insertBefore(grid, progressSection);
+    }
+    grid.innerHTML = ''; // Clear only old task cards
+
+    let dayTasks = [];
+
+    if (userSetup.focus !== "Balanced") {
+        try {
+            const systemPrompt = `You are a world-class, elite loan officer sales coach with 20+ years of experience coaching top-producing loan officers to 7-figure incomes. Your style is direct, motivational, strategic, and deeply personalized—you speak like a high-energy mentor who truly cares about the loan officer's success, work-life balance, and authentic relationships.
+
+Create an ultra-personalized, high-impact 7-day prospecting and relationship-building plan for ${userSetup.name}. This plan must feel custom-built for them, incorporating every detail they shared to maximize production while protecting their energy and personal life.
+
+Key Personal Details:
+- Name: ${userSetup.name}
+- Monthly funded loan goal: ${userSetup.monthlyGoal} loans
+- Last month's funded loans: ${userSetup.lastMonth > 0 ? userSetup.lastMonth : 'not provided / starting fresh'}
+- Active referral partners: ${userSetup.partners}
+- Past client database size: ${userSetup.pastClients} clients
+- Weekly prospecting hours available: ${userSetup.hours}
+- Primary prospecting focus: ${userSetup.focus}
+- Passions & hobbies: ${[...userSetup.hobbies, userSetup.hobbiesOther].filter(Boolean).join(", ") || 'none shared—focus on professional growth and family time'}
+- Preferred prospecting activities: ${userSetup.preferredActivities.length > 0 ? userSetup.preferredActivities.join(", ") : 'no strong preferences — mix it up'}
+
+Prioritize tasks involving these activities when possible, while keeping balance.
+
+Strategic Guidelines:
+- Scale task volume and intensity to fit their available prospecting hours (${userSetup.hours}). Do not overload—aim for focused, high-leverage actions that drive results without burnout.
+- Leverage their database size: With ${userSetup.pastClients} past clients and ${userSetup.partners} active partners, prioritize warm outreach (past clients, partners) when possible, especially if focus is Balanced or Past Client/Realtor heavy.
+- Honor their primary focus (${userSetup.focus})—weight tasks accordingly while keeping overall balance.
+- Weave in their passions/hobbies naturally for authentic connections and work-life balance (e.g., invite a partner to golf, share a family-oriented post, tie a hobby to relationship building).
+- Weekdays: Heavy but focused prospecting—drive pipeline growth, referrals, and touches toward the ${userSetup.monthlyGoal}-loan monthly goal.
+- Weekends: Light recharge mode—relationship nurturing, light social engagement, personal posts, and quick prep for Monday. Include recovery and family/hobby time.
+- Reference last month's performance motivationally (e.g., build on momentum or "let's crush last month").
+- Tasks must be specific, actionable, time-bound when possible, and motivating. Include relevant emojis for energy and scannability.
+- Draw exclusively from these proven activity pools, but vary wording and make them feel fresh/personal:
+  Daily activities: ${dailyActivities.join("; ")}
+  Weekly activities: ${weeklyActivities.join("; ")}
+  Weekend/light activities: ${weekendActivities.join("; ")}
+
+Make every task feel achievable and exciting—use encouraging language like "Crush 5 warm calls" or "Build genuine connections."
+
+Output ONLY valid, perfectly formatted JSON—no extra text, explanations, or markdown:
+{
+  "days": [
+    {
+      "day": "Monday",
+      "tasks": ["🎯 Specific task 1", "☎️ Specific task 2", "..."]
+    },
+    // ... continue for all 7 days
+  ]
+}`;
+
+            const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify({
+                model: "grok-4-1-fast-reasoning",
+                    messages: [{ role: "user", content: systemPrompt }],
+                    temperature: 0.8,
+                    max_tokens: 2000
+                })
+            });
+
+            if (!response.ok) throw new Error('API error');
+
+            const data = await response.json();
+            const content = data.choices[0].message.content.trim();
+            const jsonString = content.replace(/^```json\n?|```$/g, '').trim();
+            dayTasks = JSON.parse(jsonString).days;
+
+        } catch (err) {
+            console.log('AI plan unavailable — using local balanced plan');
+            dayTasks = generateLocalDayTasks();
+        }
+    } else {
+        dayTasks = generateLocalDayTasks();
+    }
+
+    // Build the cards (your existing buildPlanCards function will append to the cleared grid)
+    buildPlanCards(dayTasks);
+
+    // Force initial progress update (in case checks were restored or something)
+    updateProgress();
+
+    if (loading) loading.classList.add('hidden');
+    if (generateBtn) {
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalBtnText;
+    }
+}
+
+function generateLocalDayTasks() {
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    return days.map((day, i) => {
+        let tasks = [];
+        if (day === "Saturday" || day === "Sunday") {
+            for (let j = 0; j < 4; j++) tasks.push(pickRandom(weekendActivities));
+        } else {
+            for (let j = 0; j < 6; j++) tasks.push(pickRandom(dailyActivities));
+            if (i < weeklyActivities.length) tasks.push(weeklyActivities[i]);
+        }
+        return { day, tasks };
+    });
+}
+
+function updateProgress() {
+    const checkboxes = document.querySelectorAll('#weekly-tasks-container input[type="checkbox"]');
+    const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const total = checkboxes.length;
+
+    const tasksCompletedEl = document.getElementById('tasks-completed');
+    if (tasksCompletedEl) tasksCompletedEl.textContent = completed;
+
+    const tasksTotalEl = document.getElementById('tasks-total');
+    if (tasksTotalEl) tasksTotalEl.textContent = total;
+
+    const progressBar = document.getElementById('weekly-progress-bar');
+    if (progressBar) {
+        const percent = total > 0 ? (completed / total) * 100 : 0;
+        progressBar.style.width = percent + '%';
+    }
+
+    const completionMsg = document.getElementById('completion-message');
+    if (!completionMsg) return;
+
+    const name = userSetup.name.trim() || "Champion"; // pulls your saved name
+    const percent = total > 0 ? (completed / total) * 100 : 0;
+
+    if (percent === 100) {
+        completionMsg.innerHTML = `
+            <span class="text-5xl animate-bounce">🎉 ${name}, YOU CRUSHED THIS WEEK! 🎉</span><br>
+            <span class="text-3xl mt-6 block">Top-tier performance — you're unstoppable!</span>
+        `;
+        launchConfetti();
+    } else if (percent >= 80) {
+        completionMsg.textContent = `${name}, almost there — finish like a boss! 🔥`;
+    } else if (percent >= 50) {
+        completionMsg.textContent = `Great momentum, ${name} — keep winning!`;
+    } else {
+        completionMsg.textContent = `Solid start, ${name} — you've got this!`;
+    }
+}
+
+// FIXED: Event delegation — works on all checkboxes, even new ones
+const tasksContainer = document.getElementById('weekly-tasks-container');
+if (tasksContainer) {
+    tasksContainer.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox') {
+            updateProgress();
+        }
+    });
+}
+
+function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Button listeners (unchanged)
+const editBtn = document.getElementById('edit-setup-btn');
+if (editBtn) editBtn.addEventListener('click', openSetupWizard);
+
+const generateBtn = document.getElementById('generate-win-plan-btn');
+if (generateBtn) generateBtn.addEventListener('click', generateWeeklyPlan);
+
+const saveBtn = document.getElementById('save-setup-btn');
+if (saveBtn) saveBtn.addEventListener('click', saveSetup);
+
+updateSetupDisplays();
+updateProgress();
+    // Scrolling Quote Arrows + Auto-Scroll
+    const scroller = document.getElementById('quote-scroller');
+    const scrollLeft = document.getElementById('scroll-left');
+    const scrollRight = document.getElementById('scroll-right');
+
+    if (scroller && scrollLeft && scrollRight) {
+        // Manual scroll on arrow click
+        scrollLeft.addEventListener('click', () => {
+            scroller.scrollBy({ left: -400, behavior: 'smooth' });
+        });
+
+        scrollRight.addEventListener('click', () => {
+            scroller.scrollBy({ left: 400, behavior: 'smooth' });
+        });
+
+        // Auto-scroll forward every 12 seconds if not hovered
+        setInterval(() => {
+            if (!scroller.matches(':hover')) {
+                scroller.scrollBy({ left: 400, behavior: 'smooth' });
+            }
+        }, 12000);
+    }
+});
+</script>
+
+<!-- Loading Overlay -->
+<div id="generate-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
+        <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
+        <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Building Your Weekly Win Plan...</p>
+        <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">Preparing your personalized plan, it may take 45–60 seconds...
+    </div>
+</div>
+
 <!-- Post Ideas Modal -->
 <div id="post-modal" class="modal">
     <div class="modal-content">
@@ -5333,12 +6783,7 @@ function smartRouteChat(message) {
         </div>
     </div>
 </div>
-<!-- Detail Modal - PERFECTLY CENTERED (No Scroll Needed) -->
-<!-- Detail Modal - BULLETPROOF CENTERED VERSION -->
-<!-- Detail Modal - TRUE VIEWPORT CENTERED (No Scroll Needed) -->
-<!-- Detail Modal - PERFECTLY CENTERED IN CURRENT VIEWPORT -->
-<!-- Detail Modal - STABLE & CENTERED (No Flicker on Hover) -->
-<!-- Detail Modal - FINAL STABLE VERSION (No Flicker) -->
+
 <!-- Detail Modal for Equity Scanner -->
 <div id="detail-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" style="display: none;" onclick="closeDetailModal()">
     <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
@@ -5388,8 +6833,7 @@ function smartRouteChat(message) {
 </p>
             </div>
 
-            <!-- Current Estimates & Comparison Section -->
-            <!-- Current Estimates & Comparison Section -->
+                     <!-- Current Estimates & Comparison Section -->
 <div class="mt-10 p-8 bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 rounded-2xl shadow-inner">
     <h4 class="text-3xl font-bold text-[#002B5C] dark:text-[#00A89D] mb-8 flex items-center"><i class="fas fa-chart-line mr-3 text-[#00A89D] text-2xl"></i>Current Estimates & Refinance Comparison</h4>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10" id="refi-comparison-grid">
@@ -5417,6 +6861,10 @@ function smartRouteChat(message) {
         </div>
     </div>
 </div>
+</div>
+<div id="save-toast" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 bg-green-600 text-white px-10 py-6 rounded-full shadow-2xl text-2xl font-bold z-50 flex items-center gap-4 animate-pulse transition-all">
+    <i class="fas fa-check-circle text-4xl"></i>
+    Settings Saved Successfully!
 </div>
 </body>
 </html>
