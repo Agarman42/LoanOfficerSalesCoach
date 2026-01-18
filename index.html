@@ -393,18 +393,36 @@ input[type="range"]:active::-moz-range-thumb {
     user-select: none;
 }
 </style>
-<div class="fixed top-4 right-4 z-50">
-    <button id="theme-toggle" class="bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-3">
-        <i id="theme-icon" class="fas fa-moon text-xl text-gray-800 dark:text-yellow-400"></i>
-        <span class="text-lg font-semibold text-gray-800 dark:text-white">Dark Mode</span>
-    </button>
-</div>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
-                <header class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white py-6 shadow-2xl">
+
+<header class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white py-8 shadow-2xl relative">
     <div class="max-w-7xl mx-auto px-6">
-        <h1 class="text-4xl md:text-5xl font-bold text-center mb-10">Ultimate Loan Officer Sales Coach</h1>
-        
+        <!-- Top Row: Hamburger (left with padding) + Title (perfectly centered) -->
+        <div class="flex items-center justify-between mb-6">
+            <!-- Hamburger Menu: Safe left padding, no edge bleed -->
+            <button id="menu-toggle" class="text-white text-3xl focus:outline-none md:hidden ml-2">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Title: Centered -->
+            <h1 class="text-3xl md:text-5xl font-bold text-center flex-1">
+                Ultimate Loan Officer Sales Coach
+            </h1>
+
+            <!-- Invisible spacer: Balances hamburger for perfect title centering -->
+            <div class="w-12 md:hidden"></div>
+        </div>
+
+        <!-- Dark/Light Toggle: Centered, evenly spaced below title and above search -->
+        <div class="flex justify-center mb-8">
+            <button id="theme-toggle" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-full font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all">
+                <i id="theme-icon" class="fas fa-moon text-xl text-gray-800 dark:text-yellow-400"></i>
+                <span class="text-lg">Dark Mode</span>
+            </button>
+        </div>
+
+        <!-- Search Bar: Centered, full-width on mobile -->
         <div class="max-w-2xl mx-auto mb-6">
             <div class="relative">
                 <input type="text" id="search" placeholder="Search for tips, scripts, or tools..." 
@@ -413,25 +431,23 @@ input[type="range"]:active::-moz-range-thumb {
             </div>
         </div>
 
-<!-- Single Quote Display with Manual Arrows & Auto-Rotation – Compact Size -->
-<div class="relative bg-gradient-to-r from-[#002B5C] to-[#00A89D] py-3 my-8 rounded-3xl shadow-2xl text-center overflow-hidden max-w-3xl mx-auto">
-    <!-- Quote Container – reduced padding & height -->
-    <div id="quote-display" class="text-xl md:text-2xl font-bold text-white opacity-90 min-h-[60px] flex items-center justify-center px-6 transition-opacity duration-800">
-        "The harder you work, the luckier you get."
-    </div>
+        <!-- Single Quote Display with Manual Arrows & Auto-Rotation – Compact Size -->
+        <div class="relative bg-gradient-to-r from-[#002B5C]/80 to-[#00A89D]/80 py-3 my-8 rounded-3xl shadow-2xl text-center overflow-hidden max-w-3xl mx-auto">
+            <!-- Quote Container – reduced padding & height -->
+            <div id="quote-display" class="text-xl md:text-2xl font-bold text-white opacity-90 min-h-[60px] flex items-center justify-center px-6 transition-opacity duration-800">
+                "The harder you work, the luckier you get."
+            </div>
 
-    <!-- Left Arrow (smaller & positioned tighter) -->
-    <button id="quote-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-4xl font-light transition-all duration-300 z-10 opacity-70 hover:opacity-100">
-        ‹
-    </button>
+            <!-- Left Arrow (smaller & positioned tighter) -->
+            <button id="quote-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-4xl font-light transition-all duration-300 z-10 opacity-70 hover:opacity-100">
+                ‹
+            </button>
 
-    <!-- Right Arrow -->
-    <button id="quote-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-4xl font-light transition-all duration-300 z-10 opacity-70 hover:opacity-100">
-        ›
-    </button>
-</div>
-
-        <i class="fas fa-bars cursor-pointer text-3xl absolute top-8 right-6 md:hidden" id="menu-toggle"></i>
+            <!-- Right Arrow -->
+            <button id="quote-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-4xl font-light transition-all duration-300 z-10 opacity-70 hover:opacity-100">
+                ›
+            </button>
+        </div>
     </div>
 </header>
              <aside id="sidebar" class="fixed left-[-300px] top-0 bottom-0 w-72 bg-gradient-to-b from-[#002B5C] to-[#00A89D] text-white overflow-y-auto transition-left duration-300 ease-in-out z-50 shadow-2xl rounded-r-xl md:left-0 md:w-64 lg:w-72">
@@ -7713,3 +7729,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
