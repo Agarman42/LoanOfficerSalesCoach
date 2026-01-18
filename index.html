@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ultimate Loan Officer Sales Coach</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
           <!-- SWITCH TO CLASS MODE -->
     <script>
       tailwind.config = {
@@ -390,6 +393,12 @@ input[type="range"]:active::-moz-range-thumb {
     user-select: none;
 }
 </style>
+<div class="fixed top-4 right-4 z-50">
+    <button id="theme-toggle" class="bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-3">
+        <i id="theme-icon" class="fas fa-moon text-xl text-gray-800 dark:text-yellow-400"></i>
+        <span class="text-lg font-semibold text-gray-800 dark:text-white">Dark Mode</span>
+    </button>
+</div>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
                 <header class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white py-6 shadow-2xl">
@@ -435,7 +444,7 @@ input[type="range"]:active::-moz-range-thumb {
     <i class="fas fa-comment-dots mr-3"></i> Equity & Opportunity Scanner
 </a></li>
 <li><a href="#social-post" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
-    <i class="fas fa-share-alt mr-3"></i> Social Media Post Creator
+    <i class="fas fa-share-alt mr-3"></i> Social Media Post/Plan Creator
 </a></li>
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
@@ -2356,9 +2365,9 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             <div class="flex items-center">
                 <i class="fas fa-calendar-alt text-6xl text-[#F15A29] mr-8"></i>
                 <div>
-                    <h2 class="text-4xl font-bold text-[#F15A29]">Full-Year Social Media Calendar Planner</h2>
-                    <p class="text-lg mt-3 text-gray-300 group-hover:text-white transition-colors">
-                        Click to expand → Generate a complete Excel calendar with themed days + 3–4 ready-to-post ideas for every day of the year
+                    <h2 class="text-4xl font-bold text-[#F15A29]">30-Day Social Media Calendar Planner</h2>
+                    <p class="text-lg mt-3 text-gray-900 dark:text-white group-hover:text-white transition-colors">
+                        Click to expand → Generate a complete interactive calendar with themed days + 3–5 ready-to-post ideas for every day of the month
                     </p>
                 </div>
             </div>
@@ -2369,8 +2378,8 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     <!-- Collapsible Content (hidden by default) -->
     <div id="calendar-content" class="hidden mt-12 space-y-12">
         <!-- Intro Description -->
-        <p class="text-lg text-gray-700 dark:text-gray-300 max-w-4xl">
-            While you're creating individual posts, lock in consistency for the entire year. This planner gives you a downloadable Excel with themed days + 3–4 ready-to-post ideas every single day — 75% personal/engagement for real connections, 25% business for growth.
+        <p class="text-lg text-gray-900 dark:dark:text-white max-w-4xl">
+            Build consistency with a fresh, localized 30-day plan every month. Get 3–5 ready-to-post ideas per day — educational, personal, local, and promotional — tailored to your region and goals. No more blank-page stress.
         </p>
 
         <!-- Why This Works Callouts -->
@@ -2382,114 +2391,131 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             </div>
             <div class="bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 p-6 rounded-2xl text-center border border-[#00A89D]/20">
                 <i class="fas fa-chart-line text-4xl text-[#00A89D] mb-4"></i>
-                <p class="font-bold">Grow Without Burning Out</p>
-                <p class="text-sm mt-2">Know exactly what to post — no more blank-page stress</p>
+                <p class="font-bold">Grow Consistently</p>
+                <p class="text-sm mt-2">Know exactly what to post every day — no guesswork</p>
             </div>
             <div class="bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 p-6 rounded-2xl text-center border border-[#00A89D]/20">
-                <i class="fas fa-download text-4xl text-[#F15A29] mb-4"></i>
-                <p class="font-bold">Ready-to-Use Excel</p>
-                <p class="text-sm mt-2">Printable, editable, with holidays & hashtags included</p>
+                <i class="fas fa-copy text-4xl text-[#F15A29] mb-4"></i>
+                <p class="font-bold">Copy Ready</p>
+                <p class="text-sm mt-2">Instantly review and copy!</p>
             </div>
         </div>
 
-        <!-- Live Preview Sample -->
-        <div class="p-8 bg-white/5 dark:bg-gray-800/50 rounded-3xl overflow-x-auto border border-[#00A89D]/30 shadow-lg">
-            <h4 class="text-2xl font-bold mb-6 text-[#00A89D] text-center">Live Preview: Sample Week (January 2026)</h4>
-            <table class="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                    <tr class="bg-gradient-to-r from-[#002B5C]/50 to-[#00A89D]/30">
-                        <th class="p-4 border border-[#00A89D]/30 font-bold">Date</th>
-                        <th class="p-4 border border-[#00A89D]/30 font-bold">Theme</th>
-                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 1</th>
-                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 2</th>
-                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 3</th>
-                        <th class="p-4 border border-[#00A89D]/30 font-bold">Idea 4</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm">
-                    <tr class="bg-gray-50/50 dark:bg-gray-900/50">
-                        <td class="p-4 border">January 1, 2026</td>
-                        <td class="p-4 border">Personal & Relax Sunday</td>
-                        <td class="p-4 border">New Year's morning coffee tradition ☕</td>
-                        <td class="p-4 border">2026 goals I'm excited about</td>
-                        <td class="p-4 border">Family NYE recap photo</td>
-                        <td class="p-4 border">Poll: Your #1 resolution?</td>
-                    </tr>
-                    <tr>
-                        <td class="p-4 border">January 5, 2026</td>
-                        <td class="p-4 border">Motivational Monday</td>
-                        <td class="p-4 border">Quote: "The best way to predict the future is to create it"</td>
-                        <td class="p-4 border">My why: Helping Hoosier families buy homes</td>
-                        <td class="p-4 border">Weekend hike in Indiana trails</td>
-                        <td class="p-4 border">Small win from last week</td>
-                    </tr>
-                    <tr class="bg-gray-50/50 dark:bg-gray-900/50">
-                        <td class="p-4 border">January 6, 2026</td>
-                        <td class="p-4 border">Tip Tuesday</td>
-                        <td class="p-4 border">Quick tip: How to boost credit 50+ points fast</td>
-                        <td class="p-4 border">Morning walk in Auburn neighborhood</td>
-                        <td class="p-4 border">Favorite local coffee spot shoutout</td>
-                        <td class="p-4 border">This or That: FHA vs Conventional?</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p class="text-center mt-6 text-gray-500 italic">Your full calendar will have 365 tailored days just like this →</p>
+        <!-- Generator Form -->
+<div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-12 rounded-3xl shadow-2xl border border-[#00A89D]/20">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <!-- Month & Year -->
+        <div class="flex gap-4 items-center">
+            <label class="text-xl font-semibold text-[#00A89D]">Month & Year</label>
+            <div class="flex gap-4">
+                <select id="plan-month" class="p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                <input type="number" id="plan-year" value="2026" min="2024" max="2030" class="p-3 w-32 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
+            </div>
         </div>
 
-        <!-- Inputs Card -->
-        <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-12 rounded-3xl shadow-2xl border border-[#00A89D]/20">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-                <div>
-                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Year</label>
-                    <input type="number" id="calendar-year" value="2026" min="2024" max="2030" 
-                           class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-                </div>
-                <div>
-                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Week Starts On</label>
-                    <select id="week-start" 
-                            class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-                        <option value="Sun">Sunday</option>
-                        <option value="Mon" selected>Monday</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Template</label>
-                    <select id="calendar-template" 
-                            class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-                        <option value="balanced">Balanced Loan Officer (Recommended)</option>
-                        <option value="engagement">High Engagement Focus</option>
-                        <option value="personal">Personal Brand Builder</option>
-                        <option value="realtor">Realtor Partnership Focus</option>
-                        <option value="custom">Custom (AI-Personalized)</option>
-                    </select>
-                </div>
+        <!-- Primary Area(s) -->
+        <div>
+            <label class="text-xl font-semibold text-[#00A89D] block mb-3">Primary City/County/Area(s)</label>
+            <textarea id="plan-areas" rows="3" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 resize-none" placeholder="e.g., Fort Wayne, Allen County, Auburn, Northeast Indiana..."></textarea>
+        </div>
+
+        <!-- Hobbies & Passions -->
+        <div>
+            <label class="text-xl font-semibold text-[#00A89D] block mb-3">Your Hobbies, Passions & Interests</label>
+            <textarea id="plan-hobbies" rows="3" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 resize-none" placeholder="e.g., golf, side-by-side trails, spending time with family and friends, live sporting events and concerts, local restaurants, cards with friends..."></textarea>
+        </div>
+
+        <!-- Family -->
+        <div>
+            <label class="text-xl font-semibold text-[#00A89D] block mb-3">Family Info (share what you're comfortable with)</label>
+            <textarea id="plan-family" rows="3" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 resize-none" placeholder="e.g., married with two kids, pets, love family game nights, weekend trips to the lake..."></textarea>
+        </div>
+    </div>
+
+    <!-- Themes to Weave In -->
+    <div class="mb-10">
+        <label class="text-xl font-semibold text-[#00A89D] block mb-4">Weave in these themes throughout the month (check all that apply)</label>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-family" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Family Moments</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-hobbies" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Hobbies & Interests</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-local" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Local Events & Spots</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-fun" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Fun & Humor</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-polls" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Polls & Engagement</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-refi" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Refi & Rate Tips</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-cashout" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Cash-Out Ideas</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-purchase" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Purchase Tips</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-equity" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Equity & Move-Up</span>
+            </label>
+            <label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-equity" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Recipe Ideas</span>
+            </label><label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-equity" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Trivia and Fun Facts</span>
+            </label><label class="flex items-center gap-3 text-lg">
+                <input type="checkbox" id="theme-equity" class="w-6 h-6 rounded border-[#00A89D] text-[#00A89D] focus:ring-[#00A89D]">
+                <span>Local Business Spotlights</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Custom Instructions -->
+    <div class="mb-10">
+        <label class="text-xl font-semibold text-[#00A89D] block mb-3">Additional Custom Instructions</label>
+        <textarea id="custom-plan-prompt" rows="6" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800" placeholder="e.g., More video ideas, focus on first-time buyers, include calls-to-action for appointments, lighter tone..."></textarea>
+    </div>
+
+    <div class="text-center">
+        <button onclick="generateMonthlyPlan()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-16 py-6 rounded-full font-bold text-2xl shadow-2xl hover:opacity-90 transition-all">
+            Generate My 30-Day Plan
+        </button>
+    </div>
+
+            <div id="plan-loading" class="hidden mt-12 text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#F15A29] mx-auto mb-6"></div>
+                <p class="text-2xl font-bold text-[#F15A29]">Building your personalized plan...</p>
             </div>
 
-            <div id="custom-preferences" class="hidden mb-10">
-                <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Customization Prompt</label>
-                <textarea id="custom-prompt" rows="5" placeholder="e.g., Heavy Indiana/Auburn local focus, more family posts, include DeKalb County events, realtor partnership tips, motivational Mondays..."
-                          class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all"></textarea>
-            </div>
-
-            <div class="text-center">
-                <button onclick="generateCalendar()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl flex items-center justify-center">
-                    <i class="fas fa-calendar-alt mr-4 text-3xl"></i> Generate & Download My Full-Year Calendar
-                </button>
-            </div>
-
-            <div id="calendar-loading" class="hidden mt-12 text-center">
-                <div class="w-full max-w-md mx-auto bg-gray-700 rounded-full h-6 mb-6 overflow-hidden">
-                    <div id="progress-bar" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] h-6 rounded-full w-0 transition-all duration-700"></div>
-                </div>
-                <p class="text-xl">Building your personalized calendar... <span id="progress-text">0%</span></p>
-                <i class="fas fa-spinner fa-spin text-4xl mt-6 text-[#00A89D]"></i>
-            </div>
-
-            <div id="calendar-success" class="hidden mt-12 p-8 bg-green-900/50 rounded-3xl text-center border border-green-500">
-                <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
-                <p class="text-2xl font-bold">Success! Your calendar is ready.</p>
-                <p class="mt-4">Check your downloads folder — start posting with confidence all year!</p>
-            </div>
+            <div id="plan-output" class="mt-12"></div>
         </div>
     </div>
 </div>
@@ -3542,22 +3568,12 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     </div>
 </section>
 <!-- Full Updated Weekly Win Plan Section -->
-<!-- Changes:
-   - Expanded wizard with new optional fields (production, partners, past clients, prospecting time, hobbies)
-   - Hobbies multi-select for easy choice + free text
-   - Progress bar updates LIVE on checkbox click (fixed with delegation)
-   - Name used in hero, messages, and tasks ("Adam's Monday Crush")
-   - Goal tied to weekly target ("For your 10-loan goal: Aim for 75 touches this week")
-   - Tasks clickable → sexy modal with execution help (script, timer start, tips)
-   - AI personalization: Custom plans use Grok API for truly tailored tasks (falls back to local if fails)
-   - Super sexy: More gradients, animations, hobby emojis in tasks, confetti upgrade
--->
 
 <section id="weekly-win-plan" class="hidden">
     <div class="ai-tool-wrapper">
         <div class="text-center mb-12">
             <h2 class="text-5xl font-black mb-4 text-[#F15A29] tracking-tight" id="personalized-title">My Weekly Win Plan 🔥</h2>
-            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p class="text-xl text-gray-900 max-w-3xl mx-auto">
                 Your personal prospecting coach. Clear daily actions, built-in balance, and execution help to make winning feel effortless.
             </p>
         </div>
@@ -3584,7 +3600,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     </button>
 </div>
         <!-- Generate Button (ID added, onclick removed, full gradient for perfect match) -->
-        <div class="text-center mb-20">
+        <div class="text-center my-12">
             <button id="generate-win-plan-btn" class="w-full max-w-2xl mx-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl">
     <i class="fas fa-bolt-lightning mr-4 text-3xl"></i> Build My Personalized Win Plan
 </button>
@@ -3628,27 +3644,28 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
    <div id="setup-wizard" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center hidden">
     <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 md:p-12 max-w-4xl w-full mx-4 shadow-2xl border border-[#00A89D]/50 max-h-[95vh] overflow-y-auto">
         
-        <h3 class="text-4xl md:text-5xl font-bold text-[#F15A29] text-center mb-6">Your Personalized Setup ⚡</h3>
-        <p class="text-lg md:text-xl text-gray-300 text-center mb-12 max-w-3xl mx-auto">
-            The more you share (all optional except goal), the smarter your weekly plan becomes — perfectly balanced with your production, schedule, and passions.
-        </p>
-        
-        <div class="space-y-12">
-            <!-- Row 1: Name & Goal (even spacing) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4 flex items-center">
-                        <i class="fas fa-user mr-3"></i> Your Name (for motivation)
-                    </label>
-                    <input type="text" id="setup-name" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xl md:text-2xl font-semibold text-[#00A89D] mb-4 flex items-center">
-                        <i class="fas fa-chart-line mr-3"></i> Monthly Funded Loan Goal
-                    </label>
-                    <input type="number" id="setup-monthly-goal" min="1" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
-                </div>
-            </div>
+        <h3 class="text-4xl md:text-5xl font-bold text-[#FF6B35] dark:text-[#FF6B35] text-center mb-6">Your Personalized Setup ⚡</h3>
+<p class="text-lg md:text-xl font-semibold text-[#00A89D] text-center mb-12 max-w-3xl mx-auto">
+    The more you share (all optional except goal), the smarter your weekly plan becomes — perfectly balanced with your production, schedule, and passions.
+</p>
+
+<!-- Form Fields Row (replace your existing name/goal inputs with this structure) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+    <div>
+        <label class="block text-xl font-semibold text-[#00A89D] mb-4 flex items-center">
+            <i class="fas fa-user mr-3 text-[#F15A29]"></i> Your Name (for motivation)
+        </label>
+        <input type="text" id="setup-name" value="Adam" placeholder="Your name" 
+               class="w-full p-5 rounded-2xl bg-white dark:bg-gray-900/90 border-2 border-[#00A89D] text-gray-900 dark:text-white text-lg focus:outline-none focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+    </div>
+    <div>
+        <label class="block text-xl font-semibold text-[#00A89D] mb-4 flex items-center">
+            <i class="fas fa-trophy mr-3 text-[#F15A29]"></i> Monthly Funded Loan Goal
+        </label>
+        <input type="number" id="setup-monthly-goal" value="10" min="1" placeholder="e.g., 10"
+               class="w-full p-5 rounded-2xl bg-white dark:bg-gray-900/90 border-2 border-[#00A89D] text-gray-900 dark:text-white text-lg focus:outline-none focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+    </div>
+</div>
 
             <!-- Row 2: Production & Database (3 columns, even) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -3692,91 +3709,92 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
 
             <!-- Hobbies Section -->
             <div>
-                <label class="block text-2xl font-bold text-[#00A89D] mb-6 flex items-center">
-                    <i class="fas fa-heart mr-4 text-[#F15A29]"></i> Your Passions & Hobbies (weave into plan for balance & better connections)
-                </label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Golf" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Golf</span>
-                    </label>
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Cards/Poker" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Cards/Poker</span>
-                    </label>
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Sports" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Sports</span>
-                    </label>
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Crafts" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Crafts</span>
-                    </label>
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Family Time" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Family Time</span>
-                    </label>
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Outdoors" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Outdoors</span>
-                    </label>
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Fitness" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Fitness</span>
-                    </label>
-                    <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-                        <input type="checkbox" value="Cooking" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                        <span>Cooking</span>
-                    </label>
-                </div>
-                <input type="text" id="setup-hobbies-other" placeholder="Other passions (e.g., pedicures, wine tasting, travel)" class="w-full p-5 rounded-2xl bg-gray-800/80 border-2 border-[#00A89D] text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all">
-            </div>
-        </div>
+    <label class="block text-2xl font-bold text-[#00A89D] mb-6 flex items-center">
+        <i class="fas fa-heart mr-4 text-[#F15A29]"></i> Your Passions & Hobbies (weave into plan for balance & better connections)
+    </label>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Golf" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Golf</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Cards/Poker" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Cards/Poker</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Sports" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Sports</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Crafts" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Crafts</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Family Time" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Family Time</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Outdoors" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Outdoors</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Fitness" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Fitness</span>
+        </label>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Cooking" class="hobby-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Cooking</span>
+        </label>
+    </div>
+    <input type="text" id="setup-hobbies-other" placeholder="Other passions (e.g., pedicures, wine tasting, travel)" 
+           class="w-full p-5 rounded-2xl bg-white dark:bg-gray-800/80 border-2 border-gray-300 dark:border-[#00A89D] text-gray-900 dark:text-white text-lg focus:ring-4 focus:ring-[#F15A29]/50 transition-all placeholder-gray-500 dark:placeholder-gray-400">
+</div>
+
 <!-- Preferred Prospecting Activities Section -->
 <div>
     <label class="block text-2xl font-bold text-[#00A89D] mb-6 flex items-center">
         <i class="fas fa-bullhorn mr-4 text-[#F15A29]"></i> Preferred Prospecting Activities (check all you enjoy — we'll prioritize these)
     </label>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Coffee/Drink Appointments" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Coffee or Drink Appointments ☕</span>
+            <span class="text-gray-900 dark:text-gray-100">Coffee or Drink Appointments ☕</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Lunch Appointments" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Lunch Appointments 🍴</span>
+            <span class="text-gray-900 dark:text-gray-100">Lunch Appointments 🍴</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Lunch and Learns" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Hosting Lunch & Learns 📊</span>
+            <span class="text-gray-900 dark:text-gray-100">Hosting Lunch & Learns 📊</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Personal Notes/Cards" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Writing Personal Notes/Cards ✍️</span>
+            <span class="text-gray-900 dark:text-gray-100">Writing Personal Notes/Cards ✍️</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Social Media Videos" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Creating Social Media Videos 📹</span>
+            <span class="text-gray-900 dark:text-gray-100">Creating Social Media Videos 📹</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Phone Calls" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Making Phone Calls ☎️</span>
+            <span class="text-gray-900 dark:text-gray-100">Making Phone Calls ☎️</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
-            <input type="checkbox" value="Door Knocking" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Door Knocking 🚪</span>
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
+            <input type="checkbox" value="Deliveries" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
+            <span class="text-gray-900 dark:text-gray-100">Delivering Pop-By Gifts</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Networking Events" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Attending Networking Events 🤝</span>
+            <span class="text-gray-900 dark:text-gray-100">Attending Networking Events 🤝</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Video Messages" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Sending Video Messages 🎥</span>
+            <span class="text-gray-900 dark:text-gray-100">Sending Video Messages 🎥</span>
         </label>
-        <label class="flex items-center gap-4 text-lg bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-700/70 transition-all cursor-pointer">
+        <label class="flex items-center gap-4 text-lg bg-white dark:bg-gray-800/50 p-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all cursor-pointer">
             <input type="checkbox" value="Email Campaigns" class="activity-checkbox w-7 h-7 text-[#F15A29] rounded focus:ring-[#00A89D]">
-            <span>Sending Value Emails 📧</span>
+            <span class="text-gray-900 dark:text-gray-100">Sending Value Emails 📧</span>
         </label>
     </div>
 </div>
@@ -5100,52 +5118,65 @@ window.addEventListener('click', (event) => {
 // Smart routing for AI Chat Assistant — more flexible
 // Smart routing for AI Chat Assistant – optimized for your exact IDs
 function smartRouteChat(message) {
-    const lowerMessage = message.toLowerCase();
+    const lower = message.toLowerCase();
 
-    // First, detect if user is asking ABOUT the tool/features — do NOT route
-    const aboutToolPhrases = [
-        'what is this tool', 'what does this tool do', 'what can this tool do',
-        'tell me about this app', 'what features', 'how does this help',
-        'what are the tools', 'ai tools', 'features of this app'
+    // === BLOCK: Explicitly about the tool/app/features/help ===
+    const blockPhrases = [
+        'what is this tool', 'what does this tool do', 'what can this tool do', 'features',
+        'tell me about this app', 'how does this help', 'what are the tools', 'ai tools',
+        'help me with', 'sales script', 'marketing idea', 'motivation', 'weekly plan',
+        'win plan', 'equity scanner', 'social media planner', 'chat assistant',
+        'how do i use', 'what sections', 'navigate', 'dashboard'
     ];
-    if (aboutToolPhrases.some(phrase => lowerMessage.includes(phrase))) {
-        return false; // Let general chat handle it
+    if (blockPhrases.some(phrase => lower.includes(phrase))) {
+        return false; // Stay in chat
     }
 
-    // Underwriting keywords — route on ANY match (removed 2-keyword and ? requirement)
-    const underwritingKeywords = [
-        'fha', 'va', 'usda', 'conventional', 'dti', 'credit score',
-        'guideline', 'overlay', 'qualify', 'eligible', 'minimum', 'maximum',
-        'bankruptcy', 'foreclosure', 'manual underwrite', 'compensating factor',
-        '203k', 'buydown', 'irr rl', 'cash out', 'lpmi', 'manufactured', 'lender overlay',
-        'debt to income', 'credit report', 'aus', 'du', 'lp', 'manual underwriting'
+    // === PRIMARY: Must have at least one strict underwriting keyword ===
+    const primaryKeywords = [
+        'guideline', 'guidelines', 'underwriting', 'scenario', 'du finding', 'lp finding',
+        'aus finding', 'overlay', 'manual underwrite', 'compensating factor'
     ];
+    const hasPrimary = primaryKeywords.some(kw => lower.includes(kw));
 
-    const hasUnderwritingKeyword = underwritingKeywords.some(keyword => 
-        lowerMessage.includes(keyword)
-    );
+    if (!hasPrimary) return false;
 
-    if (hasUnderwritingKeyword) {
-        // Route to underwriting tool
+    // === SECONDARY: Loan/underwriting context terms (optional but boosts accuracy) ===
+    const secondaryKeywords = [
+        'dti', 'debt to income', 'credit score', 'fico', 'ltv', 'cltv', 'self-employed',
+        'bankruptcy', 'foreclosure', 'fha', 'va', 'usda', 'conventional', 'jumbo',
+        'non-qm', '203k', 'buydown', 'cash out', 'lpmi', 'manufactured home'
+    ];
+    const hasSecondary = secondaryKeywords.some(kw => lower.includes(kw));
+
+    // === QUESTION STRUCTURE: Boost if it's phrased as a question ===
+    const isQuestion = lower.includes('?') || 
+                       lower.includes('what is') || 
+                       lower.includes('can i') || 
+                       lower.includes('qualify') || 
+                       lower.includes('eligible');
+
+    // === ROUTE ONLY IF STRONG SIGNAL ===
+    if (hasPrimary && (hasSecondary || isQuestion)) {
+        // Switch to underwriting section
         document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
         const uwSection = document.getElementById('underwriting-search');
         if (uwSection) {
             uwSection.classList.remove('hidden');
         }
+
+        // Pre-fill and focus (NO auto-search)
         const uwInput = document.getElementById('uw-question');
         if (uwInput) {
             uwInput.value = message;
             uwInput.focus();
             uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        setTimeout(() => {
-            if (typeof searchUnderwriting === 'function') {
-                searchUnderwriting();
-            }
-        }, 800);
-        return true;
+
+        return true; // Routed
     }
 
+    // Default: Stay in general chat
     return false;
 }
 </script>
@@ -5467,129 +5498,246 @@ function createTipsSheet() {
 }
 
 // Full generateCalendar with your AI fetch, progress, overview sheet, etc.
-async function generateCalendar() {
-    const year = parseInt(document.getElementById('calendar-year').value) || 2026;
-    const weekStart = document.getElementById('week-start').value;
-    const template = document.getElementById('calendar-template').value;
-    const loading = document.getElementById('calendar-loading');
-    const success = document.getElementById('calendar-success');
-    const progressBar = document.getElementById('progress-bar');
-    const progressText = document.getElementById('progress-text');
+async function generateMonthlyPlan() {
+    const month = document.getElementById('plan-month').value;
+    const year = document.getElementById('plan-year').value;
+    const localArea = document.getElementById('plan-areas')?.value.trim() || 'your area';
+    const customPrompt = document.getElementById('custom-plan-prompt')?.value.trim() || '';
 
-    // Reset UI
-    if (success) success.classList.add('hidden');
-    loading.classList.remove('hidden');
-    progressBar.style.width = '0%';
-    progressText.textContent = '0%';
+    // Collect checked themes (null-safe)
+    const themes = [];
+    if (document.getElementById('theme-family')?.checked) themes.push('family and personal life');
+    if (document.getElementById('theme-hobbies')?.checked) themes.push('hobbies, interests, music, sports, restaurants, vacations');
+    if (document.getElementById('theme-local')?.checked) themes.push('local events and spots in ' + localArea);
+    if (document.getElementById('theme-fun')?.checked) themes.push('fun and humor');
+    if (document.getElementById('theme-polls')?.checked) themes.push('polls and engagement');
+    if (document.getElementById('theme-refi')?.checked) themes.push('refi and rate tips');
+    if (document.getElementById('theme-cashout')?.checked) themes.push('cash-out ideas');
+    if (document.getElementById('theme-purchase')?.checked) themes.push('purchase and first-time buyer tips');
+    if (document.getElementById('theme-equity')?.checked) themes.push('equity and move-up power');
+    if (document.getElementById('theme-recipes')?.checked) themes.push('recipe ideas');
+    if (document.getElementById('theme-trivia')?.checked) themes.push('trivia and fun facts');
+    if (document.getElementById('theme-localbusiness')?.checked) themes.push('local business spotlights');
 
-    await new Promise(resolve => requestAnimationFrame(() => resolve()));
+    const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const monthName = monthNames[parseInt(month)];
 
-    let monthsData = [];
+    // Dynamic days in month (handles 28/29/30/31 correctly, including leap years)
+    const daysInMonth = new Date(year, month, 0).getDate();  // month is 1-based in select, but Date expects 0-based for month
 
-    if (template === 'custom') {
-        const userPrompt = document.getElementById('custom-prompt').value.trim() || "Standard loan officer in Auburn, Indiana";
+    const fullPrompt = `You are the world's best social media coach for loan officers. Generate a full month content calendar for ${monthName} ${year} (exactly ${daysInMonth} days) for a loan officer primarily in ${localArea}.
 
-        const systemPrompt = `You are a social media strategist for mortgage loan officers. Create a full ${year} 12-month posting calendar.
-Week starts on ${weekStart === 'Sun' ? 'Sunday' : 'Monday'}.
-User preferences: ${userPrompt}
+Core philosophy: 70% relationship-building (personal, local, fun, engaging) and 30% mortgage value. Make people WANT to see posts — be entertaining, human, and trust-building.
 
-Follow these guidelines strictly:
-- 75% personal/lifestyle/community/engagement content (build real connections)
-- 25% business/educational (mortgage tips, wins, market insights)
-- Use consistent themed days: Motivational Monday, Tip Tuesday, Wins Wednesday, Community Thursday, Fun Friday, Engagement Saturday, Personal & Relax Sunday
-- Include major holidays with special post ideas when applicable
-- Vary ideas — no repetition across the year
-- Make ideas specific to Auburn/Indiana when possible
+Weave in these themes naturally: ${themes.length ? themes.join(', ') : 'balanced personal and local content'}.
 
-Output ONLY valid JSON in this exact structure (no extra text):
-{
-  "months": [
-    {
-      "name": "January",
-      "days": [
-        {
-          "date": "1",
-          "weekday": "Wednesday",
-          "theme": "Motivational Monday",
-          "ideas": ["Idea 1...", "Idea 2...", "Idea 3...", "Idea 4..."]
-        }
-        // ... all days
-      ]
-    }
-    // ... all 12 months
-  ]
-}`;
+Custom instructions: ${customPrompt || 'None — use best judgment'}.
 
-        try {
-            const response = await fetch('/api/chat', {
+CRITICAL: Output EXACTLY ${daysInMonth} days (Day 1 to Day ${daysInMonth}). For EVERY day, provide EXACTLY 4 varied post ideas.
+
+Output as clean Markdown with:
+- Strong Overview section (key themes, why it works, execution motivation — inspiring and actionable).
+- Calendar as a table: columns "Day", "Date", "Theme", "Post 1", "Post 2", "Post 3", "Post 4".
+- Each post: full caption + hashtags.
+Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversational.`;
+
+    const loading = document.getElementById('plan-loading');
+    const output = document.getElementById('plan-output');
+
+    if (loading) loading.classList.remove('hidden');
+    if (output) output.innerHTML = '';
+
+    try {
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
               },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-                    messages: [{ role: "user", content: systemPrompt }],
-                    temperature: 0.7,
-                    max_tokens: 3000
+                messages: [
+                    { role: 'system', content: 'You are an expert social media strategist for loan officers following the 70/30 relationship rule.' },
+                    { role: 'user', content: fullPrompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 6000
+            })
+        });
+
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+        const data = await response.json();
+        const planContent = data.choices[0].message.content;
+
+        // Parse to HTML
+        const rawHTML = marked.parse(planContent);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(rawHTML, 'text/html');
+
+        // Extract Overview
+        let overviewHTML = '';
+        let tableHTML = '';
+
+        const table = doc.querySelector('table');
+        if (table) {
+            tableHTML = table.outerHTML;
+            overviewHTML = doc.body.innerHTML.split(table.outerHTML)[0] || '<p>No overview generated.</p>';
+        } else {
+            overviewHTML = rawHTML;
+        }
+
+        // Build day cards — use dynamic daysInMonth
+        let cardsHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12">';
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayDate = `${monthName} ${day}`;
+            let theme = 'Daily Mix';
+
+            const posts = [];
+            for (let i = 0; i < 4; i++) {
+                posts.push('<p class="italic text-gray-500">Free choice — share something personal or local!</p>');
+            }
+
+            // Override with Grok data if available
+            if (table) {
+                const row = table.querySelectorAll('tr')[day];
+                if (row) {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 3) {
+                        theme = cells[2].textContent.trim() || theme;
+                        for (let i = 3; i < 7 && i < cells.length; i++) {
+                            const content = cells[i].textContent.trim();
+                            if (content) posts[i - 3] = `<p class="leading-relaxed">${content}</p>`;
+                        }
+                    }
+                }
+            }
+
+            const postBoxes = posts.map((post, pIdx) => {
+                const postId = `post-${day}-${pIdx}`;
+                return `
+                    <div class="relative mb-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-md border border-[#00A89D]/20">
+                        <button type="button" onclick="copySinglePost('${postId}', event)" class="absolute top-4 right-4 bg-[#00A89D] hover:bg-[#00887A] text-white p-3 rounded-full shadow-lg transition-all flex items-center gap-2 copy-btn" data-post-id="${postId}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <div id="${postId}" class="text-lg leading-relaxed">${post}</div>
+                    </div>
+                `;
+            }).join('');
+
+            cardsHTML += `
+                <div class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-2xl hover:shadow-3xl hover:-translate-y-4 transition-all border-2 border-[#00A89D]/30">
+                    <h3 class="text-3xl font-black text-[#F15A29] mb-4">${dayDate}</h3>
+                    <p class="text-2xl font-bold text-[#00A89D] mb-8">${theme}</p>
+                    <div class="space-y-6">
+                        ${postBoxes}
+                    </div>
+                </div>
+            `;
+        }
+        cardsHTML += '</div>';
+
+        // Larger overview
+        const overviewSection = `
+            <div class="mb-20">
+                <h1 class="text-5xl font-black text-[#F15A29] text-center mb-12">${monthName} Social Media Calendar</h1>
+                <div class="prose prose-3xl dark:prose-invert max-w-none text-left text-white leading-loose">
+                    ${overviewHTML}
+                </div>
+            </div>
+        `;
+
+        // Progress tracking (30 posts goal, reset on every generation)
+        let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
+        const planKey = `${monthName}_${year}`;
+        progress[planKey] = { copied: 0, total: 30 };  // Reset copied to 0 every generation
+        localStorage.setItem('socialPlanProgress', JSON.stringify(progress));
+
+        let copiedCount = progress[planKey].copied;
+
+        const progressBar = `
+            <div id="progress-container" class="mt-20 p-10 bg-gradient-to-br from-[#002B5C]/50 to-[#00A89D]/30 rounded-3xl shadow-2xl text-center">
+                <h3 class="text-4xl font-bold text-[#F15A29] mb-8">Your Posting Progress</h3>
+                <div class="w-full max-w-2xl mx-auto bg-gray-700 rounded-full h-10 mb-6 overflow-hidden">
+                    <div id="progress-fill" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] h-10 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+                <p class="text-3xl text-white">Copied <span class="font-black text-[#F15A29]" id="copied-count">${copiedCount}</span> of 30 posts</p>
+                <p class="text-xl text-gray-300 mt-6" id="progress-message">Start copying to track progress!</p>
+            </div>
+        `;
+
+        output.innerHTML = `
+            <div id="printable-plan" class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl">
+                ${overviewSection}
+                ${cardsHTML}
+                ${progressBar}
+            </div>
+        `;
+
+        // Single post copy with live progress update
+        window.copySinglePost = function(postId, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            const el = document.getElementById(postId);
+            if (!el) return;
+
+            let text = el.innerText.trim();
+            text = text.replace(/^(IG|FB|LinkedIn|TikTok|Reels?|Story|Post|Stories):\s*/i, '').trim();
+
+            const html = el.innerHTML;
+
+            navigator.clipboard.write([
+                new ClipboardItem({
+                    'text/plain': new Blob([text], { type: 'text/plain' }),
+                    'text/html': new Blob([`<div style="font-family: sans-serif; font-size: 16pt; line-height: 1.6;">${html}</div>`], { type: 'text/html' })
                 })
+            ]).then(() => {
+                const btn = document.querySelector(`[data-post-id="${postId}"]`);
+                if (btn) {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    btn.classList.replace('bg-[#00A89D]', 'bg-green-600');
+
+                    // Update progress live
+                    let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
+                    const planKey = `${monthName}_${year}`;
+                    if (progress[planKey]) {
+                        progress[planKey].copied += 1;
+                        localStorage.setItem('socialPlanProgress', JSON.stringify(progress));
+
+                        copiedCount = progress[planKey].copied;
+                        document.getElementById('copied-count').textContent = copiedCount;
+                        document.getElementById('progress-message').textContent = copiedCount >= 30 ? '🎉 You crushed it — consistent wins!' : copiedCount >= 21 ? '🔥 On fire — keep posting!' : 'Start copying to track progress!';
+
+                        // Confetti every 10 copies + big at 30
+                        if (copiedCount % 10 === 0 || copiedCount === 30) {
+                            confetti({
+                                particleCount: copiedCount === 30 ? 300 : 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                            });
+                        }
+                    }
+
+                    setTimeout(() => {
+                        btn.innerHTML = original;
+                        btn.classList.replace('bg-green-600', 'bg-[#00A89D]');
+                    }, 2000);
+                }
+            }).catch(() => {
+                navigator.clipboard.writeText(text);
             });
+        };
 
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-            const data = await response.json();
-            const content = data.choices[0].message.content.trim();
-
-            const jsonString = content.replace(/^```json\n?|```$/g, '').trim();
-            const parsed = JSON.parse(jsonString);
-            monthsData = parsed.months;
-
-        } catch (err) {
-            console.error('Custom AI generation failed:', err);
-            alert('Custom generation failed — using Balanced template instead');
-            monthsData = generateLocalMonths(year, weekStart, 'balanced');
-        }
-    } else {
-        monthsData = generateLocalMonths(year, weekStart, template);
-        await new Promise(resolve => setTimeout(resolve, 50));
+    } catch (err) {
+        console.error('Plan generation error:', err);
+        output.innerHTML = `<p class="text-red-600 text-center text-2xl">Error: ${err.message}</p>`;
+    } finally {
+        if (loading) loading.classList.add('hidden');
     }
-
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        progress += Math.random() * 12 + 5;
-        if (progress >= 95) {
-            progress = 95;
-            clearInterval(progressInterval);
-        }
-        progressBar.style.width = progress + '%';
-        progressText.textContent = Math.round(progress) + '%';
-    }, 600);
-
-    const wb = XLSX.utils.book_new();
-
-    const overviewWs = createOverviewSheet(year);
-    XLSX.utils.book_append_sheet(wb, overviewWs, "Overview");
-
-    for (const [mIdx, month] of monthsData.entries()) {
-        const ws = createMonthSheet(month, year, mIdx, weekStart);
-        XLSX.utils.book_append_sheet(wb, ws, month.name.substring(0, 31));
-        if ((mIdx + 1) % 3 === 0) await new Promise(resolve => setTimeout(resolve, 50));
-    }
-
-    const tipsWs = createTipsSheet();
-    XLSX.utils.book_append_sheet(wb, tipsWs, "Tips & Ideas");
-
-    XLSX.writeFile(wb, `My_${year}_Social_Media_Calendar.xlsx`);
-
-    clearInterval(progressInterval);
-    progressBar.style.width = '100%';
-    progressText.textContent = '100%';
-
-    setTimeout(() => {
-        loading.classList.add('hidden');
-        if (success) success.classList.remove('hidden');
-    }, 800);
 }
 // Toggle function — add this to your existing <script> block (or create a new one if needed)
 function toggleCalendarSection() {
@@ -5599,493 +5747,6 @@ function toggleCalendarSection() {
     content.classList.toggle('hidden');
     icon.classList.toggle('rotate-180');
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Weekly Win Plan — FULL AI VERSION WITH SAFE LOCAL FALLBACK
-    // - Tries personalized AI plan first (works when served over http/https)
-    // - Silently falls back to local balanced plan if AI unavailable (e.g., file:// or bad key)
-    // - No alerts, no duplication, spinner always hides
-
-    const dailyActivities = [
-        "Write two personal notes or thank-you cards to clients, referral partners, or prospects.",
-        "Make at least five outbound calls to past clients or referral partners.",
-        "Send personalized birthday messages using video to your past clients.",
-        "Engage on social media by commenting on or liking 10 posts from realtors, clients, and referral partners.",
-        "Record and post one short-form video or story about mortgage tips, market updates, or client success stories.",
-        "Follow up with any new online or social media leads received in the past 24 hours.",
-        "Reach out to a past client just to check in—no sales pitch, just relationship-building.",
-        "Send a text or video message to a referral partner to stay top of mind.",
-        "Knock on one local business door to introduce yourself (title companies, insurance agents, CPAs, etc.).",
-        "Spend time reviewing and updating CRM with notes, follow-ups, and next actions."
-    ];
-
-    const weeklyActivities = [
-        "Pipeline review with referral partners—discuss upcoming deals and potential new clients.",
-        "Pipeline review with active clients—touch base with a weekly update, even if nothing new.",
-        "Host a 15-minute coaching call (Zoom or Teams) for realtors on mortgage trends or strategies.",
-        "Attend at least one networking event (chamber of commerce, BNI, or real estate meetup).",
-        "Send a “Who do you know?” text to 5+ referral partners asking for warm introductions.",
-        "Create and send a value-packed email to your database (market updates, home tips, etc.).",
-        "Record and send a personalized video email to new leads or referral partners.",
-        "Reach out to 3 new real estate agents via social media or in person.",
-        "Host a casual coffee meeting with a referral partner or past client.",
-        "Review past closed loans and follow up with clients who may benefit from refinancing."
-    ];
-
-    const weekendActivities = [
-        "Post a personal social media update (family, hobby, local Auburn spot, or fun weekend vibe)",
-        "Check and respond to any weekend inquiries, messages, or new leads",
-        "Engage lightly on social: Like/comment on 5–10 posts from realtors/clients (no heavy prospecting)",
-        "Quick Sunday prep: Review your calendar and pick Monday's top 10 calls",
-        "Plan your social posts for the upcoming week (use your Social Calendar tool)",
-        "Light CRM check: Flag any hot weekend leads for Monday follow-up",
-        "Relax & recharge — share a weekend inspiration quote or gratitude post",
-        "Family/fun time post — keep it authentic and relationship-focused",
-        "Quick win: Send 3 'just checking in' texts to warm past clients",
-        "Prepare one value video (market tip or fun fact) to post Monday"
-    ];
-
-    // Confetti function
-    function launchConfetti() {
-        const canvas = document.getElementById('confetti-canvas');
-        if (!canvas) return;
-        canvas.classList.remove('hidden');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const confetti = [];
-        const colors = ['#F15A29', '#00A89D', '#FFD700', '#FF69B4'];
-
-        for (let i = 0; i < 400; i++) {
-            confetti.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height - canvas.height,
-                r: Math.random() * 8 + 3,
-                d: Math.random() * 12 + 6,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                tilt: Math.random() * 10 - 5,
-                tiltAngle: 0
-            });
-        }
-
-        let animationFrame;
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            confetti.forEach((c, i) => {
-                c.tiltAngle += 0.1;
-                c.y += c.d;
-                c.tilt = Math.sin(c.tiltAngle) * 20;
-
-                ctx.beginPath();
-                ctx.lineWidth = c.r;
-                ctx.strokeStyle = c.color;
-                ctx.moveTo(c.x + c.tilt + c.r, c.y);
-                ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r);
-                ctx.stroke();
-
-                if (c.y > canvas.height) confetti.splice(i, 1);
-            });
-
-            if (confetti.length > 0) animationFrame = requestAnimationFrame(draw);
-            else canvas.classList.add('hidden');
-        }
-        draw();
-    }
-
-    // Setup & Persistence
-    let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
-    name: "Loan Officer",
-    monthlyGoal: 8,
-    focus: "Balanced",
-    lastMonth: 0,
-    partners: 0,
-    pastClients: 0,
-    hours: "15–20",
-    hobbies: [],
-    hobbiesOther: "",
-    preferredActivities: []  // NEW: Initialize as empty array
-};
-    let streak = parseInt(localStorage.getItem('winPlanStreak')) || 0;
-
-    function updateSetupDisplays() {
-        const name = userSetup.name.trim() || "Loan Officer";
-        const titleEl = document.getElementById('personalized-title');
-        if (titleEl) titleEl.textContent = `${name}'s Weekly Win Plan 🔥`;
-        const goalEl = document.getElementById('monthly-goal-display');
-        if (goalEl) goalEl.textContent = userSetup.monthlyGoal;
-
-        const touchesNeeded = userSetup.monthlyGoal * 9;
-        const targetEl = document.getElementById('weekly-target');
-        if (targetEl) targetEl.textContent = `For ${userSetup.monthlyGoal} loans: Aim for ~${touchesNeeded} touches this week`;
-
-        const streakEl = document.getElementById('streak-display');
-        if (streakEl) streakEl.textContent = `${streak} Week Streak`;
-        const messageEl = document.getElementById('streak-message');
-        if (messageEl) messageEl.textContent = streak > 0 ? `${name}, you're on fire!` : `${name}, let's build your streak!`;
-    }
-
-    updateSetupDisplays();
-
-    // Wizard functions
-    function openSetupWizard() {
-        const wizard = document.getElementById('setup-wizard');
-        if (!wizard) return;
-        document.getElementById('setup-name').value = userSetup.name;
-        document.getElementById('setup-monthly-goal').value = userSetup.monthlyGoal;
-        document.getElementById('setup-focus').value = userSetup.focus;
-        document.getElementById('setup-last-month').value = userSetup.lastMonth || '';
-        document.getElementById('setup-partners').value = userSetup.partners || '';
-        document.getElementById('setup-past-clients').value = userSetup.pastClients || '';
-        document.getElementById('setup-hours').value = userSetup.hours;
-        document.getElementById('setup-hobbies-other').value = userSetup.hobbiesOther || '';
-        wizard.classList.remove('hidden');
-    }
-
-    function saveSetup() {
-    const wizard = document.getElementById('setup-wizard');
-    if (!wizard) return;
-
-    // Capture and save all values (exactly as you had it)
-    userSetup.name = document.getElementById('setup-name').value.trim() || "Loan Officer";
-    userSetup.monthlyGoal = parseInt(document.getElementById('setup-monthly-goal').value) || 8;
-    userSetup.focus = document.getElementById('setup-focus').value;
-    userSetup.lastMonth = parseInt(document.getElementById('setup-last-month').value) || 0;
-    userSetup.partners = parseInt(document.getElementById('setup-partners').value) || 0;
-    userSetup.pastClients = parseInt(document.getElementById('setup-past-clients').value) || 0;
-    userSetup.hours = document.getElementById('setup-hours').value;
-    userSetup.hobbies = Array.from(document.querySelectorAll('.hobby-checkbox:checked')).map(cb => cb.value);
-    userSetup.hobbiesOther = document.getElementById('setup-hobbies-other').value.trim();
-    userSetup.preferredActivities = Array.from(document.querySelectorAll('.activity-checkbox:checked')).map(cb => cb.value);
-
-    // Save to localStorage
-    localStorage.setItem('winPlanSetup', JSON.stringify(userSetup));
-
-    // Close the modal
-    wizard.classList.add('hidden');
-
-    // Update any live displays (e.g., name/goal in header)
-    updateSetupDisplays();
-
-    // Show the big green confirmation toast
-    const toast = document.getElementById('save-toast');
-    if (toast) {
-        toast.classList.remove('hidden');
-        setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 4000); // Auto-hide after 4 seconds
-    }
-}
-
-    // Task Help
-    function showTaskHelp(task) {
-        const modal = document.getElementById('task-help-modal');
-        if (!modal) return;
-        document.getElementById('task-help-title').textContent = task;
-        let content = `<p class="text-xl mb-6 font-bold">How to crush this:</p>`;
-
-        if (task.includes("calls") || task.includes("outbound")) {
-            content += `<p><strong>Script:</strong> "Hey [Name], it's ${userSetup.name} — rates are great right now, who do you know thinking about buying/refi?"</p>`;
-            content += `<p class="mt-4">Tip: Smile when you dial — they hear it!</p>`;
-        } else if (task.includes("social") || task.includes("post")) {
-            content += `<p>Use your Social Post Creator → grab today's idea and post it now</p>`;
-        } else if (userSetup.hobbies.length > 0) {
-            content += `<p>Pro move: Tie this to your passion (${userSetup.hobbies[0]}) — invite a partner to join!</p>`;
-        }
-
-        content += `<p class="mt-6 text-2xl font-bold">⏱ Start a 25-min timer and go!</p>`;
-        document.getElementById('task-help-content').innerHTML = content;
-        modal.classList.remove('hidden');
-    }
-
-    function closeTaskHelp() {
-        const modal = document.getElementById('task-help-modal');
-        if (!modal) return;
-        modal.classList.add('hidden');
-    }
-
-    // Build cards — single source of truth, safe
-    function buildPlanCards(dayTasksArray) {
-        const container = document.getElementById('weekly-tasks-container');
-        if (!container) {
-            console.error('ERROR: #weekly-tasks-container missing in HTML');
-            return;
-        }
-
-        const grid = container.querySelector('.grid');
-        if (!grid) return;
-
-        let allTasks = 0;
-        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
-        dayTasksArray.forEach((dayObj, i) => {
-            const day = days[i];
-            const card = document.createElement('div');
-            card.className = 'bg-gradient-to-br from-gray-800/90 to-gray-900 rounded-3xl p-8 shadow-2xl hover:scale-105 transition-all border border-[#00A89D]/30';
-
-            let taskHTML = '<ul class="space-y-6">';
-            dayObj.tasks.forEach(task => {
-                taskHTML += `
-                    <li onclick="showTaskHelp('${task.replace(/'/g, "\\'")}')" class="flex items-start gap-5 text-lg hover:bg-white/10 p-4 rounded-2xl transition-all cursor-pointer">
-                        <input type="checkbox" class="w-8 h-8 mt-1 text-[#F15A29] rounded-lg focus:ring-[#00A89D] flex-shrink-0">
-                        <span class="text-gray-200 leading-relaxed">${task}</span>
-                    </li>`;
-                allTasks++;
-            });
-            taskHTML += '</ul>';
-
-            const dayEmoji = day === "Saturday" || day === "Sunday" 
-                ? ['🌴','☀️','🛋️','📱','🌙'][i - 5] || '🌟'
-                : ['💪','☎️','🤝','📈','☕'][i];
-
-            card.innerHTML = `
-                <h3 class="text-3xl font-bold mb-6 flex items-center ${
-                    day === "Saturday" || day === "Sunday" ? 'text-[#F15A29]/80' : 'text-[#00A89D]'
-                }">
-                    <span class="text-5xl mr-4">${dayEmoji}</span> ${day} ${day === "Saturday" || day === "Sunday" ? '(Recharge Mode)' : ''}
-                </h3>
-                ${taskHTML}
-            `;
-
-            grid.appendChild(card);
-        });
-
-        const tasksTotalEl = document.getElementById('tasks-total');
-        if (tasksTotalEl) tasksTotalEl.textContent = allTasks;
-
-        updateProgress();
-
-        streak++;
-        localStorage.setItem('winPlanStreak', streak);
-        updateSetupDisplays();
-    }
-
-    // Generate Plan — AI first, silent local fallback
-    async function generateWeeklyPlan() {
-    const loading = document.getElementById('generate-loading');
-    const generateBtn = document.getElementById('generate-win-plan-btn');
-    const originalBtnText = generateBtn ? generateBtn.textContent.trim() : 'Generate My Weekly Win Plan';
-
-    if (loading) loading.classList.remove('hidden');
-    if (generateBtn) {
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>Generating...';
-    }
-
-    const container = document.getElementById('weekly-tasks-container');
-    if (!container) {
-        if (loading) loading.classList.add('hidden');
-        if (generateBtn) {
-            generateBtn.disabled = false;
-            generateBtn.textContent = originalBtnText;
-        }
-        return;
-    }
-
-    // Unhide the container (this shows tasks + the progress summary section below)
-    container.classList.remove('hidden');
-
-    // CRITICAL FIX: Target ONLY the grid to clear old cards — do NOT overwrite the entire container
-    let grid = container.querySelector('.grid');
-    if (!grid) {
-        // Safety: if grid missing, create it in the correct spot (before progress summary)
-        grid = document.createElement('div');
-        grid.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8';
-        const progressSection = container.querySelector('.mt-20'); // reference to progress block
-        container.insertBefore(grid, progressSection);
-    }
-    grid.innerHTML = ''; // Clear only old task cards
-
-    let dayTasks = [];
-
-    if (userSetup.focus !== "Balanced") {
-        try {
-            const systemPrompt = `You are a world-class, elite loan officer sales coach with 20+ years of experience coaching top-producing loan officers to 7-figure incomes. Your style is direct, motivational, strategic, and deeply personalized—you speak like a high-energy mentor who truly cares about the loan officer's success, work-life balance, and authentic relationships.
-
-Create an ultra-personalized, high-impact 7-day prospecting and relationship-building plan for ${userSetup.name}. This plan must feel custom-built for them, incorporating every detail they shared to maximize production while protecting their energy and personal life.
-
-Key Personal Details:
-- Name: ${userSetup.name}
-- Monthly funded loan goal: ${userSetup.monthlyGoal} loans
-- Last month's funded loans: ${userSetup.lastMonth > 0 ? userSetup.lastMonth : 'not provided / starting fresh'}
-- Active referral partners: ${userSetup.partners}
-- Past client database size: ${userSetup.pastClients} clients
-- Weekly prospecting hours available: ${userSetup.hours}
-- Primary prospecting focus: ${userSetup.focus}
-- Passions & hobbies: ${[...userSetup.hobbies, userSetup.hobbiesOther].filter(Boolean).join(", ") || 'none shared—focus on professional growth and family time'}
-- Preferred prospecting activities: ${userSetup.preferredActivities.length > 0 ? userSetup.preferredActivities.join(", ") : 'no strong preferences — mix it up'}
-
-Prioritize tasks involving these activities when possible, while keeping balance.
-
-Strategic Guidelines:
-- Scale task volume and intensity to fit their available prospecting hours (${userSetup.hours}). Do not overload—aim for focused, high-leverage actions that drive results without burnout.
-- Leverage their database size: With ${userSetup.pastClients} past clients and ${userSetup.partners} active partners, prioritize warm outreach (past clients, partners) when possible, especially if focus is Balanced or Past Client/Realtor heavy.
-- Honor their primary focus (${userSetup.focus})—weight tasks accordingly while keeping overall balance.
-- Weave in their passions/hobbies naturally for authentic connections and work-life balance (e.g., invite a partner to golf, share a family-oriented post, tie a hobby to relationship building).
-- Weekdays: Heavy but focused prospecting—drive pipeline growth, referrals, and touches toward the ${userSetup.monthlyGoal}-loan monthly goal.
-- Weekends: Light recharge mode—relationship nurturing, light social engagement, personal posts, and quick prep for Monday. Include recovery and family/hobby time.
-- Reference last month's performance motivationally (e.g., build on momentum or "let's crush last month").
-- Tasks must be specific, actionable, time-bound when possible, and motivating. Include relevant emojis for energy and scannability.
-- Draw exclusively from these proven activity pools, but vary wording and make them feel fresh/personal:
-  Daily activities: ${dailyActivities.join("; ")}
-  Weekly activities: ${weeklyActivities.join("; ")}
-  Weekend/light activities: ${weekendActivities.join("; ")}
-
-Make every task feel achievable and exciting—use encouraging language like "Crush 5 warm calls" or "Build genuine connections."
-
-Output ONLY valid, perfectly formatted JSON—no extra text, explanations, or markdown:
-{
-  "days": [
-    {
-      "day": "Monday",
-      "tasks": ["🎯 Specific task 1", "☎️ Specific task 2", "..."]
-    },
-    // ... continue for all 7 days
-  ]
-}`;
-
-            const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-              },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning",
-                    messages: [{ role: "user", content: systemPrompt }],
-                    temperature: 0.8,
-                    max_tokens: 2000
-                })
-            });
-
-            if (!response.ok) throw new Error('API error');
-
-            const data = await response.json();
-            const content = data.choices[0].message.content.trim();
-            const jsonString = content.replace(/^```json\n?|```$/g, '').trim();
-            dayTasks = JSON.parse(jsonString).days;
-
-        } catch (err) {
-            console.log('AI plan unavailable — using local balanced plan');
-            dayTasks = generateLocalDayTasks();
-        }
-    } else {
-        dayTasks = generateLocalDayTasks();
-    }
-
-    // Build the cards (your existing buildPlanCards function will append to the cleared grid)
-    buildPlanCards(dayTasks);
-
-    // Force initial progress update (in case checks were restored or something)
-    updateProgress();
-
-    if (loading) loading.classList.add('hidden');
-    if (generateBtn) {
-        generateBtn.disabled = false;
-        generateBtn.textContent = originalBtnText;
-    }
-}
-
-function generateLocalDayTasks() {
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    return days.map((day, i) => {
-        let tasks = [];
-        if (day === "Saturday" || day === "Sunday") {
-            for (let j = 0; j < 4; j++) tasks.push(pickRandom(weekendActivities));
-        } else {
-            for (let j = 0; j < 6; j++) tasks.push(pickRandom(dailyActivities));
-            if (i < weeklyActivities.length) tasks.push(weeklyActivities[i]);
-        }
-        return { day, tasks };
-    });
-}
-
-function updateProgress() {
-    const checkboxes = document.querySelectorAll('#weekly-tasks-container input[type="checkbox"]');
-    const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
-    const total = checkboxes.length;
-
-    const tasksCompletedEl = document.getElementById('tasks-completed');
-    if (tasksCompletedEl) tasksCompletedEl.textContent = completed;
-
-    const tasksTotalEl = document.getElementById('tasks-total');
-    if (tasksTotalEl) tasksTotalEl.textContent = total;
-
-    const progressBar = document.getElementById('weekly-progress-bar');
-    if (progressBar) {
-        const percent = total > 0 ? (completed / total) * 100 : 0;
-        progressBar.style.width = percent + '%';
-    }
-
-    const completionMsg = document.getElementById('completion-message');
-    if (!completionMsg) return;
-
-    const name = userSetup.name.trim() || "Champion"; // pulls your saved name
-    const percent = total > 0 ? (completed / total) * 100 : 0;
-
-    if (percent === 100) {
-        completionMsg.innerHTML = `
-            <span class="text-5xl animate-bounce">🎉 ${name}, YOU CRUSHED THIS WEEK! 🎉</span><br>
-            <span class="text-3xl mt-6 block">Top-tier performance — you're unstoppable!</span>
-        `;
-        launchConfetti();
-    } else if (percent >= 80) {
-        completionMsg.textContent = `${name}, almost there — finish like a boss! 🔥`;
-    } else if (percent >= 50) {
-        completionMsg.textContent = `Great momentum, ${name} — keep winning!`;
-    } else {
-        completionMsg.textContent = `Solid start, ${name} — you've got this!`;
-    }
-}
-
-// FIXED: Event delegation — works on all checkboxes, even new ones
-const tasksContainer = document.getElementById('weekly-tasks-container');
-if (tasksContainer) {
-    tasksContainer.addEventListener('change', (e) => {
-        if (e.target.type === 'checkbox') {
-            updateProgress();
-        }
-    });
-}
-
-function pickRandom(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
-// Button listeners (unchanged)
-const editBtn = document.getElementById('edit-setup-btn');
-if (editBtn) editBtn.addEventListener('click', openSetupWizard);
-
-const generateBtn = document.getElementById('generate-win-plan-btn');
-if (generateBtn) generateBtn.addEventListener('click', generateWeeklyPlan);
-
-const saveBtn = document.getElementById('save-setup-btn');
-if (saveBtn) saveBtn.addEventListener('click', saveSetup);
-
-updateSetupDisplays();
-updateProgress();
-    // Scrolling Quote Arrows + Auto-Scroll
-    const scroller = document.getElementById('quote-scroller');
-    const scrollLeft = document.getElementById('scroll-left');
-    const scrollRight = document.getElementById('scroll-right');
-
-    if (scroller && scrollLeft && scrollRight) {
-        // Manual scroll on arrow click
-        scrollLeft.addEventListener('click', () => {
-            scroller.scrollBy({ left: -400, behavior: 'smooth' });
-        });
-
-        scrollRight.addEventListener('click', () => {
-            scroller.scrollBy({ left: 400, behavior: 'smooth' });
-        });
-
-        // Auto-scroll forward every 12 seconds if not hovered
-        setInterval(() => {
-            if (!scroller.matches(':hover')) {
-                scroller.scrollBy({ left: 400, behavior: 'smooth' });
-            }
-        }, 12000);
-    }
-});
 </script>
 <script>
 function syncRateControls() {
@@ -6108,7 +5769,7 @@ function syncRateControls() {
     const freshSlider = slider.cloneNode(true);
     slider.parentNode.replaceChild(freshSlider, slider);
 
-    // Real-time drag: Update box only (lightweight = no glitch/lag)
+    // Real-time drag: Update input box only (lightweight = no glitch/lag)
     freshSlider.addEventListener('input', () => {
         input.value = parseFloat(freshSlider.value).toFixed(3);
     });
@@ -6118,12 +5779,16 @@ function syncRateControls() {
         let val = parseFloat(freshSlider.value);
         input.value = val.toFixed(3);
 
-        // Trigger live tile update with new rate
         updateDashboardWithNewRate(val);
 
         console.log('Rate changed to:', val, '— recalculating savings...');
 
-        // Force repaint
+        // FIX: If in remaining term mode, force a second recalc after short delay
+        if (savingsMode === 'remaining') {
+            setTimeout(() => updateDashboardWithNewRate(val), 80);
+        }
+
+        // Force repaint (keeps smooth thumb movement)
         freshSlider.style.display = 'none';
         freshSlider.offsetHeight;
         freshSlider.style.display = '';
@@ -6142,47 +5807,158 @@ function syncRateControls() {
         freshSlider.value = val;
         input.value = val.toFixed(3);
 
-        // Trigger live tile update with new rate
         updateDashboardWithNewRate(val);
 
         console.log('Rate changed to:', val, '— recalculating savings...');
+
+        // FIX: If in remaining term mode, force a second recalc after short delay
+        if (savingsMode === 'remaining') {
+            setTimeout(() => updateDashboardWithNewRate(val), 80);
+        }
     });
 }
 
 // Run on page load
 document.addEventListener('DOMContentLoaded', syncRateControls);
-// Force Dark Mode on Load (fixes text visibility)
+
+// Savings Mode Toggle
 document.addEventListener('DOMContentLoaded', () => {
-    document.documentElement.classList.add('dark');
-    document.body.classList.add('dark');
-    // ← YOUR TOGGLE EVENT LISTENER GOES HERE
     document.getElementById('savings-mode-toggle')?.addEventListener('click', () => {
-        // Toggle the mode
         savingsMode = savingsMode === 'full' ? 'remaining' : 'full';
 
-        // Update thumb position (slide left/right)
         const thumb = document.getElementById('toggle-thumb');
-        if (savingsMode === 'full') {
-            thumb.classList.remove('translate-x-11');
-            thumb.classList.add('translate-x-1');
-        } else {
-            thumb.classList.remove('translate-x-1');
-            thumb.classList.add('translate-x-11');
+        if (thumb) {
+            if (savingsMode === 'full') {
+                thumb.classList.remove('translate-x-11');
+                thumb.classList.add('translate-x-1');
+            } else {
+                thumb.classList.remove('translate-x-1');
+                thumb.classList.add('translate-x-11');
+            }
         }
 
-        // Update background color (optional: teal for Full Term, orange for Remaining)
         const toggleBtn = document.getElementById('savings-mode-toggle');
-        toggleBtn.classList.toggle('bg-[#00A89D]', savingsMode === 'full');
-        toggleBtn.classList.toggle('bg-orange-500', savingsMode === 'remaining');
+        if (toggleBtn) {
+            toggleBtn.classList.toggle('bg-[#00A89D]', savingsMode === 'full');
+            toggleBtn.classList.toggle('bg-orange-500', savingsMode === 'remaining');
+        }
 
-        // Update label
-        document.getElementById('mode-label').textContent = savingsMode === 'full' ? 'Full Term Reset' : 'Remaining Term';
+        const modeLabel = document.getElementById('mode-label');
+        if (modeLabel) {
+            modeLabel.textContent = savingsMode === 'full' ? 'Full Term Reset' : 'Remaining Term';
+        }
 
-        // Recalculate everything with current rate
-        const currentRate = parseFloat(document.getElementById('new-rate-input')?.value ||
-                                       document.getElementById('new-rate-slider')?.value || '6.0');
+        const currentRate = parseFloat(
+            document.getElementById('new-rate-input')?.value ||
+            document.getElementById('new-rate-slider')?.value || '6.0'
+        );
+
         updateDashboardWithNewRate(currentRate);
+
+        // FIX: Force a second recalc after mode switch (especially critical for remaining term sync)
+        setTimeout(() => updateDashboardWithNewRate(currentRate), 100);
     });
+});
+
+// Theme Toggle + Persistence (dark/light)
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const label = toggleBtn?.querySelector('span');
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+        if (icon) {
+            icon.classList.replace('fa-moon', 'fa-sun');
+            icon.classList.replace('text-yellow-400', 'text-yellow-500');
+        }
+        if (label) label.textContent = 'Light Mode';
+    } else {
+        document.documentElement.classList.add('dark');
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (icon) {
+                    icon.classList.replace('fa-moon', 'fa-sun');
+                    icon.classList.replace('text-yellow-400', 'text-yellow-500');
+                }
+                if (label) label.textContent = 'Light Mode';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (icon) {
+                    icon.classList.replace('fa-sun', 'fa-moon');
+                    icon.classList.replace('text-yellow-500', 'text-yellow-400');
+                }
+                if (label) label.textContent = 'Dark Mode';
+            }
+        });
+    }
+});
+
+// Load saved personal info and themes
+document.addEventListener('DOMContentLoaded', () => {
+    const savedPersonal = localStorage.getItem('socialPlanPersonal');
+    if (savedPersonal) {
+        const data = JSON.parse(savedPersonal);
+        if (document.getElementById('plan-areas')) document.getElementById('plan-areas').value = data.areas || '';
+        if (document.getElementById('plan-hobbies')) document.getElementById('plan-hobbies').value = data.hobbies || '';
+        if (document.getElementById('plan-family')) document.getElementById('plan-family').value = data.family || '';
+        if (document.getElementById('custom-plan-prompt')) document.getElementById('custom-plan-prompt').value = data.custom || '';
+    }
+
+    const savedThemes = localStorage.getItem('socialPlanThemes');
+    if (savedThemes) {
+        const themes = JSON.parse(savedThemes);
+        const themeIds = [
+            'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
+            'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
+            'theme-recipes', 'theme-trivia', 'theme-localbusiness'
+        ];
+        themeIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && themes[id] !== undefined) el.checked = themes[id];
+        });
+    }
+});
+
+// Save personal info on change
+['plan-areas', 'plan-hobbies', 'plan-family', 'custom-plan-prompt'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', () => {
+            const data = {
+                areas: document.getElementById('plan-areas')?.value || '',
+                hobbies: document.getElementById('plan-hobbies')?.value || '',
+                family: document.getElementById('plan-family')?.value || '',
+                custom: document.getElementById('custom-plan-prompt')?.value || ''
+            };
+            localStorage.setItem('socialPlanPersonal', JSON.stringify(data));
+        });
+    }
+});
+
+// Save themes on change
+const themeIds = [
+    'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
+    'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
+    'theme-recipes', 'theme-trivia', 'theme-localbusiness'
+];
+
+themeIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('change', () => {
+            const saved = JSON.parse(localStorage.getItem('socialPlanThemes') || '{}');
+            saved[id] = el.checked;
+            localStorage.setItem('socialPlanThemes', JSON.stringify(saved));
+        });
+    }
 });
 </script>
 <script>
@@ -6310,151 +6086,172 @@ function generateEquityReport() {
     const reader = new FileReader();
 
     reader.onload = function(e) {
-    let rawRows = [];
-    try {
-        const workbook = XLSX.read(e.target.result, { type: 'binary' });
-        const sheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
-        rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        let rawRows = [];
+        try {
+            const workbook = XLSX.read(e.target.result, { type: 'binary' });
+            const sheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
+            rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        const headers = rawRows[0] || [];
-        const col = {};
-        const map = {
-            first: 'BORROWER FIRST NAME',
-            last: 'Borrower Last Name',
-            email: 'BORR EMAIL',
-            phone: 'BORR HOME PHONE',
-            address: 'Subject Property Address',
-            city: 'Subject Property City',
-            state: 'Subject Property State',
-            zip: 'Subject Property Zip',
-            closing: 'CLOSING DATE',
-            program: 'Loan Program',
-            amount: 'Loan Amount',
-            rate: 'Note Rate',
-            term: 'TERM',
-            appraised: 'Appraised Value',
-            purchase: 'SUBJECT PROPERTY PURCHASE PRICE',
-            mi: 'Monthly Mortgage Insurance at closing',
-            pi: 'Principal and Interest Payment',
-            ltv: 'LTV',
-            insurance: 'UNDERWRITING HAZARD INS',
-            taxes: 'UNDERWRITING TAXES',
-            agent: 'BUYERS AGENT CONTACT NAME',
-            transactionType: 'Loan Purpose'
-        };
+            const headers = rawRows[0] || [];
+            const col = {};
+            const map = {
+                first: 'BORROWER FIRST NAME',
+                last: 'Borrower Last Name',
+                email: 'BORR EMAIL',
+                phone: 'BORR HOME PHONE',
+                address: 'Subject Property Address',
+                city: 'Subject Property City',
+                state: 'Subject Property State',
+                zip: 'Subject Property Zip',
+                closing: 'CLOSING DATE',
+                program: 'Loan Program',
+                amount: 'Loan Amount',
+                rate: 'Note Rate',
+                term: 'TERM',
+                appraised: 'Appraised Value',
+                purchase: 'SUBJECT PROPERTY PURCHASE PRICE',
+                mi: 'Monthly Mortgage Insurance at closing',
+                pi: 'Principal and Interest Payment',
+                ltv: 'LTV',
+                insurance: 'UNDERWRITING HAZARD INS',
+                taxes: 'UNDERWRITING TAXES',
+                agent: 'BUYERS AGENT CONTACT NAME',
+                transactionType: 'Loan Purpose'
+            };
 
-        Object.keys(map).forEach(k => {
-            col[k] = headers.findIndex(h => h && h.trim() === map[k]);
-        });
-
-        const clients = [];
-
-        for (let i = 1; i < rawRows.length; i++) {
-            const r = rawRows[i];
-            if (!r || r.length < 10) continue;
-
-            const loanAmount = parseFloat(r[col.amount]) || 0;
-            if (loanAmount === 0) continue;
-
-            const closingDate = excelSerialToDate(r[col.closing]);
-            if (!closingDate) continue;
-
-            let baseValue = parseFloat(r[col.purchase]) || 0;
-            if (baseValue === 0) baseValue = parseFloat(r[col.appraised]) || 0;
-            if (baseValue === 0) continue;
-
-            const years = (CURRENT_DATE - closingDate) / (365.25 * 24 * 60 * 60 * 1000);
-            const yearsInHome = Math.round(years);
-            const currentValue = Math.round(baseValue * Math.pow(1.05, years));
-
-            const rate = parseFloat(r[col.rate]) || 0;
-            const termMonths = getTermMonths(r[col.program], r[col.term]);
-            const monthsPaid = monthsBetween(closingDate);
-            const balance = remainingBalance(loanAmount, rate, termMonths, monthsPaid);
-
-            const originalLTV = parseFloat(r[col.ltv]) || 0;
-            const currentLTV = currentValue > 0 ? (balance / currentValue) * 100 : 0;
-            const pmiEligible = originalLTV > 80 && currentLTV <= 80;
-
-            const equity = currentValue - balance;
-            const cashOut = Math.max(0, Math.round(currentValue * 0.80 - balance));
-            const moveUp = Math.max(0, Math.round(currentValue * 0.95 - balance));
-
-            const fullName = `${r[col.first] || ''} ${r[col.last] || ''}`.trim() || 'Unknown Client';
-            const fullAddress = `${r[col.address] || ''}, ${r[col.city] || ''}, ${r[col.state] || ''} ${r[col.zip] || ''}`.trim();
-
-            // Pull original P&I if available, else calculate
-            let originalPI = parseFloat(r[col.pi]) || 0;
-            if (originalPI <= 0 && rate >= 0 && termMonths > 0 && loanAmount > 0) {
-                originalPI = pmt(rate, termMonths, loanAmount);
-            }
-
-            // Pull actual monthly MI/Insurance/Taxes
-            const monthlyMI = parseFloat(r[col.mi]) || (originalLTV > 80 ? Math.round(loanAmount * 0.008 / 12) : 0);
-            const monthlyInsurance = parseFloat(r[col.insurance]) || Math.round(baseValue * 0.0035 / 12);
-            const monthlyTaxes = parseFloat(r[col.taxes]) || Math.round(baseValue * 0.011 / 12);
-
-            clients.push({
-                fullName,
-                fullAddress,
-                phone: r[col.phone] || '',
-                email: r[col.email] || '',
-                loanProgram: r[col.program] || 'N/A',
-                closingDate: closingDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
-                rate,
-                termMonths,
-                remainingMonths: Math.max(termMonths - monthsPaid, 0),
-                estimatedBalance: balance,
-                currentValue,
-                equity,
-                cashOut,
-                moveUp,
-                yearsInHome,
-                originalPI,
-                originalMI: monthlyMI,
-                originalInsurance: monthlyInsurance,
-                originalTaxes: monthlyTaxes,
-                originalLTV,
-                currentLTV,
-                pmiEligible,
-                buyersAgent: r[col.agent] || '',
-                transactionType: (r[col.transactionType] || 'N/A').trim(),
-                // Initial flags/savings will be overridden by updateDashboardWithNewRate — safe defaults
-                monthlySavings: 0,
-                isRefiReady: false,
-                isCashOut: cashOut > 30000,
-                isMoveUpReady: yearsInHome >= 3 && moveUp > 50000
+            Object.keys(map).forEach(k => {
+                col[k] = headers.findIndex(h => h && h.trim() === map[k]);
             });
+
+            // Temporary array for all processed rows
+const tempRows = [];
+
+// First pass: Process all rows
+for (let i = 1; i < rawRows.length; i++) {
+    const r = rawRows[i];
+    if (!r || r.length < 10) continue;
+
+    const loanAmount = parseFloat(r[col.amount]) || 0;
+    if (loanAmount === 0) continue;
+
+    const closingDate = excelSerialToDate(r[col.closing]);
+    if (!closingDate) continue;
+
+    let baseValue = parseFloat(r[col.purchase]) || 0;
+    if (baseValue === 0) baseValue = parseFloat(r[col.appraised]) || 0;
+    if (baseValue === 0) continue;
+
+    const years = (CURRENT_DATE - closingDate) / (365.25 * 24 * 60 * 60 * 1000);
+    const yearsInHome = Math.round(years);
+    const currentValue = Math.round(baseValue * Math.pow(1.05, years));
+
+    const rate = parseFloat(r[col.rate]) || 0;
+    const termMonths = getTermMonths(r[col.program], r[col.term]);
+    const monthsPaid = monthsBetween(closingDate);
+    const balance = remainingBalance(loanAmount, rate, termMonths, monthsPaid);
+
+    const originalLTV = parseFloat(r[col.ltv]) || 0;
+    const currentLTV = currentValue > 0 ? (balance / currentValue) * 100 : 0;
+    const pmiEligible = originalLTV > 80 && currentLTV <= 80;
+
+    const equity = currentValue - balance;
+    const cashOut = Math.max(0, Math.round(currentValue * 0.80 - balance));
+    const moveUp = Math.max(0, Math.round(currentValue * 0.95 - balance));
+
+    const fullName = `${r[col.first] || ''} ${r[col.last] || ''}`.trim() || 'Unknown Client';
+    const fullAddress = `${r[col.address] || ''}, ${r[col.city] || ''}, ${r[col.state] || ''} ${r[col.zip] || ''}`.trim();
+
+    let originalPI = parseFloat(r[col.pi]) || 0;
+    if (originalPI <= 0 && rate >= 0 && termMonths > 0 && loanAmount > 0) {
+        originalPI = pmt(rate, termMonths, loanAmount);
+    }
+
+    const monthlyMI = parseFloat(r[col.mi]) || (originalLTV > 80 ? Math.round(loanAmount * 0.008 / 12) : 0);
+    const monthlyInsurance = parseFloat(r[col.insurance]) || Math.round(baseValue * 0.0035 / 12);
+    const monthlyTaxes = parseFloat(r[col.taxes]) || Math.round(baseValue * 0.011 / 12);
+
+    tempRows.push({
+        fullName,
+        fullAddress,
+        phone: r[col.phone] || '',
+        email: r[col.email] || '',
+        loanProgram: r[col.program] || 'N/A',
+        closingDate: closingDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
+        closingDateObj: closingDate,
+        rate,
+        termMonths,
+        remainingMonths: Math.max(termMonths - monthsPaid, 0),
+        estimatedBalance: balance,
+        currentValue,
+        equity,
+        cashOut,
+        moveUp,
+        yearsInHome,
+        originalPI,
+        originalMI: monthlyMI,
+        originalInsurance: monthlyInsurance,
+        originalTaxes: monthlyTaxes,
+        originalLTV,
+        currentLTV,
+        pmiEligible,
+        buyersAgent: r[col.agent] || '',
+        transactionType: (r[col.transactionType] || 'N/A').trim(),
+        monthlySavings: 0,
+        isRefiReady: false,
+        isCashOut: cashOut > 30000,
+        isMoveUpReady: yearsInHome >= 3 && moveUp > 50000
+    });
+}
+
+// Normalize address for duplicate key (removes punctuation, standardizes spacing)
+const normalizeAddress = (addr) => addr
+    .toLowerCase()
+    .replace(/\./g, '')  // Remove periods (E. -> E)
+    .replace(/,/g, '')   // Remove commas
+    .replace(/\s+/g, ' ') // Multiple spaces to single
+    .trim();
+
+// De-duplication: Keep only newest loan per name + address
+const seen = new Map();
+tempRows.forEach(row => {
+    const key = `${row.fullName.toLowerCase()}|${normalizeAddress(row.fullAddress)}`;
+    const existing = seen.get(key);
+
+    if (!existing || row.closingDateObj > existing.closingDateObj) {
+        seen.set(key, row);
+    }
+});
+
+// Final unique clients (newest loans only)
+const clients = Array.from(seen.values());
+
+window.currentOpportunities = clients;
+buildDashboard();
+
+const currentRate = parseFloat(document.getElementById('new-rate-input')?.value || 
+                               document.getElementById('new-rate-slider')?.value || '6.0');
+updateDashboardWithNewRate(currentRate);
+
+        } catch (err) {
+            console.error('Processing error:', err);
+            if (output) {
+                output.innerHTML = `<p class="text-red-600 text-center py-20 text-xl font-bold">Error processing file: ${err.message || 'Unknown error'}</p>`;
+                output.classList.remove('hidden');
+            }
+        } finally {
+            if (loading) loading.classList.add('hidden');
         }
+    };
 
-        window.currentOpportunities = clients;
-        buildDashboard();
-
-        // Final consistent recalc (respects toggle, rate, Math.abs, updates counts)
-        const currentRate = parseFloat(document.getElementById('new-rate-input')?.value || 
-                                       document.getElementById('new-rate-slider')?.value || '6.0');
-        updateDashboardWithNewRate(currentRate);
-
-    } catch (err) {
-        console.error('Processing error:', err);
+    reader.onerror = function() {
         if (output) {
-            output.innerHTML = `<p class="text-red-600 text-center py-20 text-xl font-bold">Error processing file: ${err.message || 'Unknown error'}</p>`;
+            output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error reading file.</p>';
             output.classList.remove('hidden');
         }
-    } finally {
         if (loading) loading.classList.add('hidden');
-    }
-};
+    };
 
-reader.onerror = function() {
-    if (output) {
-        output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error reading file.</p>';
-        output.classList.remove('hidden');
-    }
-    if (loading) loading.classList.add('hidden');
-};
-
-reader.readAsBinaryString(file);
+    reader.readAsBinaryString(file);
 }
 
 // Dashboard - Updated to align initial savings with slider rate
@@ -7070,12 +6867,6 @@ function resetEquityTool() {
     fileInput.value = '';
     window.currentOpportunities = null;
 }
-
-// Force Dark Mode
-document.addEventListener('DOMContentLoaded', () => {
-    document.documentElement.classList.add('dark');
-    document.body.classList.add('dark');
-});
 </script>
 <!-- Loading Overlay -->
 <div id="generate-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
@@ -7123,7 +6914,20 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
 </div>
+<!-- Add this modal HTML anywhere in your <body> (preferably near other modals like #detail-modal) -->
+<!-- UPDATED Modal HTML (make tip the star) -->
+<div id="task-tip-modal" class="fixed inset-0 bg-black/70 z-50 items-center justify-center hidden" onclick="closeTaskTipModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto m-4 p-12 relative text-center" onclick="event.stopPropagation()">
+        <button onclick="closeTaskTipModal()" class="absolute top-6 right-6 ...">&times;</button>
 
+        <i class="fas fa-lightbulb text-8xl text-[#F15A29] mb-8 block mx-auto animate-pulse"></i>
+        <h3 class="text-4xl font-bold text-[#00A89D] mb-8">Elite Coaching Tip</h3>
+        <div id="task-tip-text" class="text-2xl text-gray-800 dark:text-gray-200 leading-relaxed px-8"></div>
+
+        <p class="mt-12 text-lg text-gray-600 dark:text-gray-400 italic">Click outside, X, or Esc to close • Go crush it! 🔥</p>
+    </div>
+</div>
+</div>
 <!-- Detail Modal for Equity Scanner -->
 <div id="detail-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" style="display: none;" onclick="closeDetailModal()">
     <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
@@ -7200,5 +7004,712 @@ document.addEventListener('DOMContentLoaded', () => {
     <i class="fas fa-check-circle text-4xl"></i>
     Settings Saved Successfully!
 </div>
+<script>
+
+    const dailyActivities = [
+        "Write two personal notes or thank-you cards to clients, referral partners, or prospects.",
+        "Make at least five outbound calls to past clients or referral partners.",
+        "Send personalized birthday messages using video to your past clients.",
+        "Engage on social media by commenting on or liking 10 posts from realtors, clients, and referral partners.",
+        "Record and post one short-form video or story about mortgage tips, market updates, or client success stories.",
+        "Follow up with any new online or social media leads received in the past 24 hours.",
+        "Reach out to a past client just to check in—no sales pitch, just relationship-building.",
+        "Send a text or video message to a referral partner to stay top of mind.",
+        "Knock on one local business door to introduce yourself (title companies, insurance agents, CPAs, etc.).",
+        "Spend time reviewing and updating CRM with notes, follow-ups, and next actions."
+    ];
+
+    const weeklyActivities = [
+        "Pipeline review with referral partners—discuss upcoming deals and potential new clients.",
+        "Pipeline review with active clients—touch base with a weekly update, even if nothing new.",
+        "Host a 15-minute coaching call (Zoom or Teams) for realtors on mortgage trends or strategies.",
+        "Attend at least one networking event (chamber of commerce, BNI, or real estate meetup).",
+        "Send a “Who do you know?” text to 5+ referral partners asking for warm introductions.",
+        "Create and send a value-packed email to your database (market updates, home tips, etc.).",
+        "Record and send a personalized video email to new leads or referral partners.",
+        "Reach out to 3 new real estate agents via social media or in person.",
+        "Host a casual coffee meeting with a referral partner or past client.",
+        "Review past closed loans and follow up with clients who may benefit from refinancing."
+    ];
+
+    const weekendActivities = [
+        "Post a personal social media update (family, hobby, local Auburn spot, or fun weekend vibe)",
+        "Check and respond to any weekend inquiries, messages, or new leads",
+        "Engage lightly on social: Like/comment on 5–10 posts from realtors/clients (no heavy prospecting)",
+        "Quick Sunday prep: Review your calendar and pick Monday's top 10 calls",
+        "Plan your social posts for the upcoming week (use your Social Calendar tool)",
+        "Light CRM check: Flag any hot weekend leads for Monday follow-up",
+        "Relax & recharge — share a weekend inspiration quote or gratitude post",
+        "Family/fun time post — keep it authentic and relationship-focused",
+        "Quick win: Send 3 'just checking in' texts to warm past clients",
+        "Prepare one value video (market tip or fun fact) to post Monday"
+    ];
+
+    // Confetti function
+    function launchConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        if (!canvas) return;
+        canvas.classList.remove('hidden');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const confetti = [];
+        const colors = ['#F15A29', '#00A89D', '#FFD700', '#FF69B4'];
+
+        for (let i = 0; i < 400; i++) {
+            confetti.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                r: Math.random() * 8 + 3,
+                d: Math.random() * 12 + 6,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                tilt: Math.random() * 10 - 5,
+                tiltAngle: 0
+            });
+        }
+
+        let animationFrame;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            confetti.forEach((c, i) => {
+                c.tiltAngle += 0.1;
+                c.y += c.d;
+                c.tilt = Math.sin(c.tiltAngle) * 20;
+
+                ctx.beginPath();
+                ctx.lineWidth = c.r;
+                ctx.strokeStyle = c.color;
+                ctx.moveTo(c.x + c.tilt + c.r, c.y);
+                ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r);
+                ctx.stroke();
+
+                if (c.y > canvas.height) confetti.splice(i, 1);
+            });
+
+            if (confetti.length > 0) animationFrame = requestAnimationFrame(draw);
+            else canvas.classList.add('hidden');
+        }
+        draw();
+    }
+
+    // Setup & Persistence
+    let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
+    name: "Loan Officer",
+    monthlyGoal: 8,
+    focus: "Balanced",
+    lastMonth: 0,
+    partners: 0,
+    pastClients: 0,
+    hours: "15–20",
+    hobbies: [],
+    hobbiesOther: "",
+    preferredActivities: []  // NEW: Initialize as empty array
+};
+    let streak = parseInt(localStorage.getItem('winPlanStreak')) || 0;
+
+    function updateSetupDisplays() {
+        const name = userSetup.name.trim() || "Loan Officer";
+        const titleEl = document.getElementById('personalized-title');
+        if (titleEl) titleEl.textContent = `${name}'s Weekly Win Plan 🔥`;
+        const goalEl = document.getElementById('monthly-goal-display');
+        if (goalEl) goalEl.textContent = userSetup.monthlyGoal;
+
+        const touchesNeeded = userSetup.monthlyGoal * 9;
+        const targetEl = document.getElementById('weekly-target');
+        if (targetEl) targetEl.textContent = `For ${userSetup.monthlyGoal} loans: Aim for ~${touchesNeeded} touches this week`;
+
+        const streakEl = document.getElementById('streak-display');
+        if (streakEl) streakEl.textContent = `${streak} Week Streak`;
+        const messageEl = document.getElementById('streak-message');
+        if (messageEl) messageEl.textContent = streak > 0 ? `${name}, you're on fire!` : `${name}, let's build your streak!`;
+    }
+
+    updateSetupDisplays();
+
+    // Wizard functions
+    function openSetupWizard() {
+        const wizard = document.getElementById('setup-wizard');
+        if (!wizard) return;
+        document.getElementById('setup-name').value = userSetup.name;
+        document.getElementById('setup-monthly-goal').value = userSetup.monthlyGoal;
+        document.getElementById('setup-focus').value = userSetup.focus;
+        document.getElementById('setup-last-month').value = userSetup.lastMonth || '';
+        document.getElementById('setup-partners').value = userSetup.partners || '';
+        document.getElementById('setup-past-clients').value = userSetup.pastClients || '';
+        document.getElementById('setup-hours').value = userSetup.hours;
+        document.getElementById('setup-hobbies-other').value = userSetup.hobbiesOther || '';
+        wizard.classList.remove('hidden');
+    }
+
+    function saveSetup() {
+    const wizard = document.getElementById('setup-wizard');
+    if (!wizard) return;
+
+    // Capture and save all values (exactly as you had it)
+    userSetup.name = document.getElementById('setup-name').value.trim() || "Loan Officer";
+    userSetup.monthlyGoal = parseInt(document.getElementById('setup-monthly-goal').value) || 8;
+    userSetup.focus = document.getElementById('setup-focus').value;
+    userSetup.lastMonth = parseInt(document.getElementById('setup-last-month').value) || 0;
+    userSetup.partners = parseInt(document.getElementById('setup-partners').value) || 0;
+    userSetup.pastClients = parseInt(document.getElementById('setup-past-clients').value) || 0;
+    userSetup.hours = document.getElementById('setup-hours').value;
+    userSetup.hobbies = Array.from(document.querySelectorAll('.hobby-checkbox:checked')).map(cb => cb.value);
+    userSetup.hobbiesOther = document.getElementById('setup-hobbies-other').value.trim();
+    userSetup.preferredActivities = Array.from(document.querySelectorAll('.activity-checkbox:checked')).map(cb => cb.value);
+
+    // Save to localStorage
+    localStorage.setItem('winPlanSetup', JSON.stringify(userSetup));
+
+    // Close the modal
+    wizard.classList.add('hidden');
+
+    // Update any live displays (e.g., name/goal in header)
+    updateSetupDisplays();
+
+    // Show the big green confirmation toast
+    const toast = document.getElementById('save-toast');
+    if (toast) {
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 4000); // Auto-hide after 4 seconds
+    }
+}
+
+    // Task Help
+    function showTaskHelp(task) {
+        const modal = document.getElementById('task-help-modal');
+        if (!modal) return;
+        document.getElementById('task-help-title').textContent = task;
+        let content = `<p class="text-xl mb-6 font-bold">How to crush this:</p>`;
+
+        if (task.includes("calls") || task.includes("outbound")) {
+            content += `<p><strong>Script:</strong> "Hey [Name], it's ${userSetup.name} — rates are great right now, who do you know thinking about buying/refi?"</p>`;
+            content += `<p class="mt-4">Tip: Smile when you dial — they hear it!</p>`;
+        } else if (task.includes("social") || task.includes("post")) {
+            content += `<p>Use your Social Post Creator → grab today's idea and post it now</p>`;
+        } else if (userSetup.hobbies.length > 0) {
+            content += `<p>Pro move: Tie this to your passion (${userSetup.hobbies[0]}) — invite a partner to join!</p>`;
+        }
+
+        content += `<p class="mt-6 text-2xl font-bold">⏱ Start a 25-min timer and go!</p>`;
+        document.getElementById('task-help-content').innerHTML = content;
+        modal.classList.remove('hidden');
+    }
+
+    function closeTaskHelp() {
+        const modal = document.getElementById('task-help-modal');
+        if (!modal) return;
+        modal.classList.add('hidden');
+    }
+
+    function buildPlanCards(dayTasksArray) {
+    const container = document.getElementById('weekly-tasks-container');
+    if (!container) {
+        console.error('ERROR: #weekly-tasks-container missing in HTML');
+        return;
+    }
+
+    let grid = container.querySelector('.grid');
+    if (!grid) {
+        // Safety: create grid if missing
+        grid = document.createElement('div');
+        grid.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8';
+        const progressSection = container.querySelector('.mt-20');
+        container.insertBefore(grid, progressSection || null);
+    }
+    grid.innerHTML = ''; // Clear old cards
+
+    let allTasks = 0;
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+    dayTasksArray.forEach((dayObj, i) => {
+        if (!dayObj || !dayObj.tasks || !Array.isArray(dayObj.tasks)) return;
+
+        const day = days[i] || 'Day';
+        const card = document.createElement('div');
+        card.className = 'bg-gradient-to-br from-gray-800/90 to-gray-900 rounded-3xl p-8 shadow-2xl hover:scale-105 transition-all border border-[#00A89D]/30';
+
+        let taskHTML = '<ul class="space-y-6">';
+        dayObj.tasks.forEach(item => {
+            // Support both string tasks (old format) and object {task, tip}
+            const taskText = typeof item === 'object' ? item.task || '' : item;
+            const tipText = typeof item === 'object' ? (item.tip || 'Stay focused and crush this task!') : 'Pro tip: Batch similar tasks for maximum momentum.';
+
+            // Escape single quotes for JS safety
+            const escapedTip = tipText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+            taskHTML += `
+                <li onclick="showTaskTip('${escapedTip}')" 
+                    class="flex items-start gap-5 text-lg hover:bg-white/10 p-4 rounded-2xl transition-all cursor-pointer">
+                    <input type="checkbox" class="w-8 h-8 mt-1 text-[#F15A29] rounded-lg focus:ring-[#00A89D] flex-shrink-0">
+                    <span class="text-gray-200 leading-relaxed">${taskText}</span>
+                </li>`;
+            allTasks++;
+        });
+        taskHTML += '</ul>';
+
+        const dayEmoji = day === "Saturday" || day === "Sunday" 
+            ? ['🌴','☀️','🛋️','📱','🌙'][i - 5] || '🌟'
+            : ['💪','☎️','🤝','📈','☕'][i];
+
+        card.innerHTML = `
+            <h3 class="text-3xl font-bold mb-6 flex items-center ${
+                day === "Saturday" || day === "Sunday" ? 'text-[#F15A29]/80' : 'text-[#00A89D]'
+            }">
+                <span class="text-5xl mr-4">${dayEmoji}</span> ${day} ${day === "Saturday" || day === "Sunday" ? '(Recharge Mode)' : ''}
+            </h3>
+            ${taskHTML}
+        `;
+
+        grid.appendChild(card);
+    });
+
+    // Update total tasks
+    const tasksTotalEl = document.getElementById('tasks-total');
+    if (tasksTotalEl) tasksTotalEl.textContent = allTasks;
+
+    // Update progress + streak (your existing logic)
+    updateProgress();
+
+    streak++;
+    localStorage.setItem('winPlanStreak', streak);
+    updateSetupDisplays();
+}
+
+// === Simple, Clean Tip Display (replace alert with toast/modal later if desired) ===
+function showTaskTip(tipText) {
+    // Clean up any escaped quotes
+    tipText = tipText.replace(/&quot;/g, '"').replace(/\\'/g, "'");
+
+    // Set the tip text
+    const tipEl = document.getElementById('task-tip-text');
+    if (tipEl) tipEl.textContent = tipText;
+
+    // Open modal
+    const modal = document.getElementById('task-tip-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    // Optional confetti burst for energy
+    if (typeof confetti === 'function') {
+        confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    }
+}
+
+function closeTaskTipModal() {
+    const modal = document.getElementById('task-tip-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Optional: Close on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeTaskTipModal();
+    }
+});
+
+    // Generate Plan — AI first, silent local fallback
+    async function generateWeeklyPlan() {
+    const loading = document.getElementById('generate-loading');
+    const generateBtn = document.getElementById('generate-win-plan-btn');
+    const originalBtnText = generateBtn ? generateBtn.innerHTML : '<i class="fas fa-bolt-lightning mr-4 text-3xl"></i> Build My Personalized Win Plan';
+
+    if (loading) loading.classList.remove('hidden');
+    if (generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>Generating AI Plan...';
+    }
+
+    const container = document.getElementById('weekly-tasks-container');
+    if (!container) {
+        if (loading) loading.classList.add('hidden');
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = originalBtnText;
+        }
+        return;
+    }
+
+    container.classList.remove('hidden');
+
+    let grid = container.querySelector('.grid');
+    if (!grid) {
+        grid = document.createElement('div');
+        grid.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8';
+        const progressSection = container.querySelector('.mt-20');
+        container.insertBefore(grid, progressSection || null);
+    }
+    grid.innerHTML = '';
+
+    let dayTasks = [];
+
+    if (userSetup.focus !== "Balanced") {
+        try {
+            const systemPrompt = `You are a world-class, elite loan officer sales coach with 20+ years of experience coaching top-producing loan officers to 7-figure incomes. Your style is direct, motivational, strategic, and deeply personalized—you speak like a high-energy mentor who truly cares about the loan officer's success, work-life balance, and authentic relationships.
+
+Create an ultra-personalized, high-impact 7-day prospecting and relationship-building plan for ${userSetup.name}. This plan must feel custom-built for them, incorporating every detail they shared to maximize production while protecting their energy and personal life.
+
+Key Personal Details:
+- Name: ${userSetup.name}
+- Monthly funded loan goal: ${userSetup.monthlyGoal} loans
+- Last month's funded loans: ${userSetup.lastMonth > 0 ? userSetup.lastMonth : 'not provided / starting fresh'}
+- Active referral partners: ${userSetup.partners}
+- Past client database size: ${userSetup.pastClients} clients
+- Weekly prospecting hours available: ${userSetup.hours}
+- Primary prospecting focus: ${userSetup.focus}
+- Passions & hobbies: ${[...userSetup.hobbies, userSetup.hobbiesOther].filter(Boolean).join(", ") || 'none shared—focus on professional growth and family time'}
+- Preferred prospecting activities: ${userSetup.preferredActivities.length > 0 ? userSetup.preferredActivities.join(", ") : 'no strong preferences — mix it up'}
+
+Prioritize tasks involving these activities when possible, while keeping balance.
+
+Strategic Guidelines:
+- Scale task volume and intensity to fit their available prospecting hours (${userSetup.hours}). Do not overload—aim for focused, high-leverage actions.
+- Leverage their database size: prioritize warm outreach when possible.
+- Honor their primary focus (${userSetup.focus})—weight tasks accordingly.
+- Weave in passions/hobbies naturally ONLY when authentic (e.g., golf for partner outreach).
+- Weekdays: Heavy focused prospecting.
+- Weekends: Light recharge, nurturing, recovery.
+- Tasks: Specific, actionable, motivating, with emojis.
+- Draw from these pools but vary wording: Daily: ${dailyActivities.join("; ")}; Weekly: ${weeklyActivities.join("; ")}; Weekend: ${weekendActivities.join("; ")}
+
+CRITICAL TIP GUIDELINES (MUST FOLLOW EXACTLY):
+- For EVERY task, provide EXACTLY one short, high-value tip (1-2 sentences).
+- Tip MUST be directly relevant/practical for that SPECIFIC task (mindset, script, leverage).
+- Make tips coach-like and motivating ("Crush this by...", "Pro move:").
+- Weave hobbies ONLY if it genuinely fits — NEVER force.
+- Tips must ALWAYS make sense and deliver real value.
+
+Output ONLY valid JSON:
+{
+  "days": [
+    {
+      "day": "Monday",
+      "tasks": [
+        {
+          "task": "🎯 Example task",
+          "tip": "Practical motivating tip here"
+        }
+      ]
+    }
+  ]
+}`;
+
+            const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify({
+                model: "grok-4-1-fast-reasoning",
+                    messages: [{ role: "user", content: systemPrompt }],
+                    temperature: 0.8,
+                    max_tokens: 2000
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API error ${response.status}: ${errorText}`);
+            }
+
+            const data = await response.json();
+            const rawContent = data.choices[0]?.message?.content || '';
+
+            if (!rawContent) throw new Error('Empty response');
+
+            // Robust JSON extraction
+            let jsonString = rawContent.trim();
+            jsonString = jsonString.replace(/^```json\s*|```$/gi, '').trim();
+            const firstBrace = jsonString.indexOf('{');
+            const lastBrace = jsonString.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                jsonString = jsonString.substring(firstBrace, lastBrace + 1);
+            }
+
+            let parsed = JSON.parse(jsonString);
+
+            // Normalize to {day, tasks: [{task, tip}]}
+            dayTasks = (parsed.days || []).map(dayObj => ({
+                day: dayObj.day || 'Day',
+                tasks: (dayObj.tasks || []).map(item => ({
+                    task: (typeof item === 'object' ? (item.task || item.text || '') : item || '').trim(),
+                    tip: (typeof item === 'object' ? (item.tip || item.advice || 'Execute with focus and energy!') : 'Crush this task with intention!').trim()
+                })).filter(t => t.task)
+            }));
+
+            if (dayTasks.length === 0) throw new Error('No valid tasks');
+
+        } catch (err) {
+            console.log('AI plan failed:', err.message || err);
+            console.log('Using enhanced local fallback');
+            dayTasks = generateLocalDayTasks();
+        }
+    } else {
+        dayTasks = generateLocalDayTasks();
+    }
+
+    buildPlanCards(dayTasks);
+    updateProgress();
+
+    if (loading) loading.classList.add('hidden');
+    if (generateBtn) {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = originalBtnText;
+    }
+}
+
+// === Enhanced Local Fallback (returns {task, tip} with valuable generic tips) ===
+function generateLocalDayTasks() {
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+    const tipMap = {
+        'call': 'Smile and stand — energy transfers over the phone. Lead with curiosity.',
+        'follow': 'Reference your last touch immediately for instant rapport.',
+        'partner': 'Offer value first (market update) before asking for referrals.',
+        'social': 'Include a clear CTA and engage every comment fast.',
+        'client': 'Make it personal — mention something specific from their life.',
+        'default': 'Batch similar tasks and track results for momentum.'
+    };
+
+    return days.map((day, i) => {
+        let tasks = [];
+        if (day === "Saturday" || day === "Sunday") {
+            tasks = weekendActivities.map(t => ({
+                task: `🌟 ${t}`,
+                tip: tipMap['social'] || tipMap['default']
+            }));
+        } else {
+            dailyActivities.slice(0, 6).forEach(t => {
+                const key = t.toLowerCase().includes('call') ? 'call' :
+                            t.toLowerCase().includes('follow') ? 'follow' :
+                            t.toLowerCase().includes('partner') ? 'partner' : 'default';
+                tasks.push({ task: `🎯 ${t}`, tip: tipMap[key] });
+            });
+            if (i < weeklyActivities.length) {
+                tasks.push({
+                    task: weeklyActivities[i],
+                    tip: 'Block deep focus time — these compound massively.'
+                });
+            }
+        }
+        return { day, tasks };
+    });
+}
+
+function updateProgress() {
+    const checkboxes = document.querySelectorAll('#weekly-tasks-container input[type="checkbox"]');
+    const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const total = checkboxes.length;
+
+    const tasksCompletedEl = document.getElementById('tasks-completed');
+    if (tasksCompletedEl) tasksCompletedEl.textContent = completed;
+
+    const tasksTotalEl = document.getElementById('tasks-total');
+    if (tasksTotalEl) tasksTotalEl.textContent = total;
+
+    const progressBar = document.getElementById('weekly-progress-bar');
+    if (progressBar) {
+        const percent = total > 0 ? (completed / total) * 100 : 0;
+        progressBar.style.width = percent + '%';
+    }
+
+    const completionMsg = document.getElementById('completion-message');
+    if (!completionMsg) return;
+
+    const name = userSetup.name.trim() || "Champion"; // pulls your saved name
+    const percent = total > 0 ? (completed / total) * 100 : 0;
+
+    if (percent === 100) {
+        completionMsg.innerHTML = `
+            <span class="text-5xl animate-bounce">🎉 ${name}, YOU CRUSHED THIS WEEK! 🎉</span><br>
+            <span class="text-3xl mt-6 block">Top-tier performance — you're unstoppable!</span>
+        `;
+        launchConfetti();
+    } else if (percent >= 80) {
+        completionMsg.textContent = `${name}, almost there — finish like a boss! 🔥`;
+    } else if (percent >= 50) {
+        completionMsg.textContent = `Great momentum, ${name} — keep winning!`;
+    } else {
+        completionMsg.textContent = `Solid start, ${name} — you've got this!`;
+    }
+}
+
+function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+updateSetupDisplays();
+updateProgress();
+    // Scrolling Quote Arrows + Auto-Scroll
+    const scroller = document.getElementById('quote-scroller');
+    const scrollLeft = document.getElementById('scroll-left');
+    const scrollRight = document.getElementById('scroll-right');
+
+    if (scroller && scrollLeft && scrollRight) {
+        // Manual scroll on arrow click
+        scrollLeft.addEventListener('click', () => {
+            scroller.scrollBy({ left: -400, behavior: 'smooth' });
+        });
+
+        scrollRight.addEventListener('click', () => {
+            scroller.scrollBy({ left: 400, behavior: 'smooth' });
+        });
+
+        // Auto-scroll forward every 12 seconds if not hovered
+        setInterval(() => {
+            if (!scroller.matches(':hover')) {
+                scroller.scrollBy({ left: 400, behavior: 'smooth' });
+            }
+        }, 12000);
+    }
+    // Weekly Win Plan buttons + checkbox delegation (safe, no duplicates)
+document.addEventListener('DOMContentLoaded', () => {
+    // Edit/View Change Plan Details
+    const editBtn = document.getElementById('edit-setup-btn');
+    if (editBtn) editBtn.addEventListener('click', openSetupWizard);
+
+    // Build My Personalized Win Plan
+    const generateBtn = document.getElementById('generate-win-plan-btn');
+    if (generateBtn) generateBtn.addEventListener('click', generateWeeklyPlan);
+
+    // Save Setup (if exists)
+    const saveBtn = document.getElementById('save-setup-btn');
+    if (saveBtn) saveBtn.addEventListener('click', saveSetup);
+
+    // Checkbox progress update (dynamic cards)
+    const tasksContainer = document.getElementById('weekly-tasks-container');
+    if (tasksContainer) {
+        tasksContainer.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') updateProgress();
+        });
+    }
+
+    // Initial calls
+    updateSetupDisplays();
+    updateProgress();
+});
+</script>
+<script>
+// === Weekly Win Plan Setup: Auto-Load + Auto-Save (No Button Needed) ===
+// This script automatically:
+// 1. Loads all saved values when the page opens
+// 2. Saves every change instantly (as you type/check boxes)
+// No "Save" button required — everything persists across sessions in the same browser
+
+document.addEventListener('DOMContentLoaded', () => {
+    // === STEP 1: LOAD SAVED VALUES ===
+    // Text / Number / Select inputs (by ID)
+    const singleFields = [
+        'setup-name',              // Your Name
+        'setup-monthly-goal',      // Monthly Funded Loan Goal
+        'setup-last-month',        // Last Month Funded
+        'setup-partners',          // Active Referral Partners
+        'setup-past-clients',      // Past Client Database Size
+        'setup-hours',             // Weekly Prospecting Hours
+        'setup-focus',             // Primary Focus (select or radio group)
+        'setup-hobbies-other'      // Other Passions text box
+    ];
+
+    singleFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const saved = localStorage.getItem('winPlan_' + id);
+            if (saved !== null) {
+                el.value = saved;
+            }
+        }
+    });
+
+    // Hobby Checkboxes (class="hobby-checkbox")
+    const savedHobbies = JSON.parse(localStorage.getItem('winPlan_hobbies') || '[]');
+    document.querySelectorAll('.hobby-checkbox').forEach(cb => {
+        if (savedHobbies.includes(cb.value)) {
+            cb.checked = true;
+        }
+    });
+
+    // Preferred Activity Checkboxes (class="activity-checkbox")
+    const savedActivities = JSON.parse(localStorage.getItem('winPlan_activities') || '[]');
+    document.querySelectorAll('.activity-checkbox').forEach(cb => {
+        if (savedActivities.includes(cb.value)) {
+            cb.checked = true;
+        }
+    });
+
+    // Optional: Visual feedback that setup loaded
+    const anySaved = singleFields.some(id => localStorage.getItem('winPlan_' + id) !== null) ||
+                     savedHobbies.length > 0 || savedActivities.length > 0;
+    if (anySaved) {
+        // You can replace alert with a toast/div if you want something prettier
+        console.log('✅ Weekly Win Plan setup auto-loaded from previous session');
+        // alert('✅ Your setup auto-loaded from last time!');
+    }
+});
+
+// === STEP 2: AUTO-SAVE ON EVERY CHANGE ===
+(function autoSaveSetup() {
+    // Helper to save a single field
+    function saveField(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            localStorage.setItem('winPlan_' + id, el.value || '');
+        }
+    }
+
+    // Text/Number/Select fields — save on 'change' (when user finishes editing)
+    const singleFields = [
+        'setup-name',
+        'setup-monthly-goal',
+        'setup-last-month',
+        'setup-partners',
+        'setup-past-clients',
+        'setup-hours',
+        'setup-focus',
+        'setup-hobbies-other'
+    ];
+
+    singleFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', () => saveField(id));
+            // Optional: Also save live while typing for text fields
+            if (el.type === 'text') {
+                el.addEventListener('input', () => saveField(id));
+            }
+        }
+    });
+
+    // Hobby Checkboxes — save entire array on any change
+    document.querySelectorAll('.hobby-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const checked = Array.from(document.querySelectorAll('.hobby-checkbox:checked'))
+                                 .map(c => c.value);
+            localStorage.setItem('winPlan_hobbies', JSON.stringify(checked));
+        });
+    });
+
+    // Preferred Activity Checkboxes — save entire array on any change
+    document.querySelectorAll('.activity-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const checked = Array.from(document.querySelectorAll('.activity-checkbox:checked'))
+                                 .map(c => c.value);
+            localStorage.setItem('winPlan_activities', JSON.stringify(checked));
+        });
+    });
+
+    console.log('🔄 Weekly Win Plan auto-save enabled — changes save instantly');
+})();
+</script>
 </body>
 </html>
