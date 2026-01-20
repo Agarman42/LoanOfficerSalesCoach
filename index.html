@@ -392,6 +392,43 @@ input[type="range"]:active::-moz-range-thumb {
     pointer-events: auto !important;
     user-select: none;
 }
+.headshot { 
+    width:140px; 
+    height:140px; 
+    border-radius:50%; 
+    border:5px solid #00A89D; 
+    object-fit:cover;  /* Critical — prevents squish/distortion */
+    display:block;
+}
+/* ADD TO YOUR <style> BLOCK: Bigger, Bolder Script Headers */
+.prose h2 {
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+    color: #F15A29 !important;
+    margin: 2rem 0 1rem !important;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #00A89D;
+}
+/* Prevent sidebar underlines forever — no leakage from newsletter preview */
+#sidebar,
+#sidebar * {
+    text-decoration: none !important;
+}
+
+#sidebar a,
+#sidebar li,
+.sidebar-item,
+.sidebar-item span,
+.sidebar-item i {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+#sidebar a:hover,
+#sidebar li:hover,
+.sidebar-item:hover {
+    text-decoration: none !important;
+}
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -465,16 +502,21 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
+<li class="py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center cursor-pointer" onclick="showSection('newsletter-generator')">
+    <i class="fas fa-envelope mr-3 text-xl"></i>
+    <span>Newsletter Generator</span>
+</li>
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
+<li><a href="#planning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-chart-line mr-3"></i>Business Planning</a></li>
 <li><a href="#underwriting-search" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-search-dollar mr-3"></i> Underwriting Guideline Search
 </a></li>
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-                        <li class="sidebar-group">Marketing</li>
+                       <!-- <li class="sidebar-group">Marketing</li>
             <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
             <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
@@ -483,14 +525,13 @@ input[type="range"]:active::-moz-range-thumb {
             <li><a href="#value-vault" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-gem mr-3"></i>Value Vault</a></li>
             <li><a href="#database" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-database mr-3"></i>Database Nurturing</a></li>
             <li class="sidebar-group">Planning & Process</li>
-            <li><a href="#planning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-chart-line mr-3"></i>Business Planning</a></li>
             <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li>
             <li class="sidebar-group">Tools & Resources</li>
             <li><a href="#resources" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-tools mr-3"></i>Resources</a></li>
             <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
             <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
-            </ul>
+            </ul> -->
     </aside>
     <!-- AI Chat Assistant - Persistent on every page -->
 <div class="fixed bottom-4 right-4 z-50">
@@ -501,7 +542,8 @@ input[type="range"]:active::-moz-range-thumb {
 </div>
 
 <!-- The full AI Chat section remains where it is, but now accessible from anywhere -->
-<main class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
+<main 
+class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
     <!-- pt-48 = tight but comfortable spacing below fixed quote bar -->
     <!-- pt-64 gives breathing room below the fixed quote bar -->
                  <section id="mindset-motivation" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -861,239 +903,188 @@ input[type="range"]:active::-moz-range-thumb {
 </div>
         </section>
                 
-        <section id="planning" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-    <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Business Planning – Your Personalized Success Roadmap</h2>
-    <p class="mb-8 text-lg">Create a truly customized 2026 business plan. Select your focus style, enter as much data as you want (all fields optional), and get an AI-powered plan tailored to your goals, drawing from proven sales strategies across this tool.</p>
+        <section id="planning" class="hidden">
+    <div class="max-w-5xl mx-auto px-6 py-12">
+        <h2 class="text-4xl md:text-5xl font-bold text-center text-[#F15A29] mb-6">📈 Your Custom 2026 Business Plan</h2>
+        <p class="text-xl text-center text-gray-700 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
+            Build a powerful, personalized roadmap for 2026. The more details you share, the smarter and more actionable your plan becomes.
+        </p>
 
-    <!-- Plan Style Selection -->
-    <div class="accordion mb-8">
-        <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">Choose Your Plan Style <i class="fas fa-chevron-down"></i></button>
-        <div class="accordion-content">
-            <p class="mb-6">Pick the approach that fits you best — this shapes your customized plan.</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <label class="bg-gradient-to-br from-[#002B5C] to-[#00A89D] text-white p-6 rounded-2xl cursor-pointer">
-                    <input type="radio" name="plan-style" value="Referral Mastery" checked class="mr-3">
-                    <strong>Referral Mastery</strong><br>80%+ from realtors & partners
-                </label>
-                <label class="bg-gradient-to-br from-[#00A89D] to-[#F15A29] text-white p-6 rounded-2xl cursor-pointer">
-                    <input type="radio" name="plan-style" value="Database Reactor" class="mr-3">
-                    <strong>Database Reactor</strong><br>Mine past clients & sphere
-                </label>
-                <label class="bg-gradient-to-br from-[#F15A29] to-[#002B5C] text-white p-6 rounded-2xl cursor-pointer">
-                    <input type="radio" name="plan-style" value="Balanced Growth" class="mr-3">
-                    <strong>Balanced Growth</strong><br>Multiple sources (partners, database, social/prospecting)
-                </label>
+        <!-- Loading Overlay -->
+        <div id="plan-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
+                <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
+                <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Building Your Custom 2026 Plan...</p>
+                <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">This takes 45–60 seconds — worth the wait!</p>
             </div>
         </div>
-    </div>
 
-    <!-- Input Fields -->
-    <div class="accordion mb-8">
-        <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">Your Goals & Current Stats (All Optional) <i class="fas fa-chevron-down"></i></button>
-        <div class="accordion-content">
-            <p class="mb-6">Fill what you know — smart defaults (2025 averages) fill the rest: Avg commission ~$6,500/loan, Avg loan $400k, Closing ratio 30%.</p>
+        <!-- Inputs Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 mb-12">
+            <!-- Plan Style -->
+            <div class="mb-10">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-4">Choose Your Primary Focus Style</label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <label class="bg-gradient-to-br from-[#002B5C] to-[#00A89D] text-white p-6 rounded-2xl cursor-pointer hover:opacity-90 transition-all">
+                        <input type="radio" name="plan-style" value="Referral Mastery" checked class="mr-3">
+                        <strong>Referral Mastery</strong><br>
+                        <span class="text-sm opacity-90">80%+ from realtors & partners</span>
+                    </label>
+                    <label class="bg-gradient-to-br from-[#00A89D] to-[#F15A29] text-white p-6 rounded-2xl cursor-pointer hover:opacity-90 transition-all">
+                        <input type="radio" name="plan-style" value="Database Reactor" class="mr-3">
+                        <strong>Database Reactor</strong><br>
+                        <span class="text-sm opacity-90">Mine past clients & sphere</span>
+                    </label>
+                    <label class="bg-gradient-to-br from-[#F15A29] to-[#002B5C] text-white p-6 rounded-2xl cursor-pointer hover:opacity-90 transition-all">
+                        <input type="radio" name="plan-style" value="Balanced Growth" class="mr-3">
+                        <strong>Balanced Growth</strong><br>
+                        <span class="text-sm opacity-90">Multiple sources + social/prospecting</span>
+                    </label>
+                    </div>
+            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <label>Target Annual Income ($)</label>
-                    <input type="number" id="target-income" placeholder="e.g., 250000" class="w-full p-3 border rounded-lg">
-
-                    <label>Avg Commission per Closed Loan ($)</label>
-                    <input type="number" id="avg-commission" placeholder="e.g., 6500" class="w-full p-3 border rounded-lg">
-
-                    <label>Target Closings (if no income goal)</label>
-                    <input type="number" id="target-closings" placeholder="e.g., 60" class="w-full p-3 border rounded-lg">
-
-                    <label>Average Loan Amount ($)</label>
-                    <input type="number" id="avg-loan" placeholder="e.g., 400000" class="w-full p-3 border rounded-lg">
+            <!-- Goals & Stats -->
+            <label class="block text-xl font-semibold text-[#00A89D] mb-6">Your Goals & Current Stats (All Optional)</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-lg font-medium mb-2">Target Annual Income ($)</label>
+                        <input type="number" id="target-income" placeholder="e.g., 300000" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
+                    <div>
+                        <label class="block text-lg font-medium mb-2">Target Funded Loans</label>
+                        <input type="number" id="target-closings" placeholder="e.g., 80" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
+                    <div>
+                        <label class="block text-lg font-medium mb-2">Average Commission per Loan ($)</label>
+                        <input type="number" id="avg-commission" placeholder="e.g., 6500" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
+                    <div>
+                        <label class="block text-lg font-medium mb-2">Average Loan Amount ($)</label>
+                        <input type="number" id="avg-loan" placeholder="e.g., 400000" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
                 </div>
-
-                <div class="space-y-4">
-                    <label>Closing Ratio from Referrals/Leads (%)</label>
-                    <input type="number" id="closing-ratio" placeholder="e.g., 30" class="w-full p-3 border rounded-lg">
-
-                    <label>Current Active Referral Partners</label>
-                    <input type="number" id="current-partners" placeholder="e.g., 20" class="w-full p-3 border rounded-lg">
-
-                    <label>New Partners to Add This Year</label>
-                    <input type="number" id="new-partners" placeholder="e.g., 15" class="w-full p-3 border rounded-lg">
-
-                    <label>Current Database Size (Past Clients + Sphere)</label>
-                    <input type="number" id="database-size" placeholder="e.g., 500" class="w-full p-3 border rounded-lg">
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-lg font-medium mb-2">Closing Ratio from Leads (%)</label>
+                        <input type="number" id="closing-ratio" placeholder="e.g., 30" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
+                    <div>
+                        <label class="block text-lg font-medium mb-2">Current Active Referral Partners</label>
+                        <input type="number" id="current-partners" placeholder="e.g., 25" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
+                    <div>
+                        <label class="block text-lg font-medium mb-2">New Partners Goal for 2026</label>
+                        <input type="number" id="new-partners" placeholder="e.g., 20" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
+                    <div>
+                        <label class="block text-lg font-medium mb-2">Current Database Size (Past Clients + Sphere)</label>
+                        <input type="number" id="database-size" placeholder="e.g., 800" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    </div>
                 </div>
             </div>
 
-            <button onclick="generatePlan()" class="mt-8 bg-[#F15A29] text-white px-10 py-4 rounded-lg font-bold text-xl hover:opacity-90">Generate My Custom Business Plan</button>
-            <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">Your personally customized plan pulls strategies from top industry sales coaches and more.</p>
-        </div>
-    </div>
-
-    <!-- Results Area -->
-    <div id="custom-plan" class="mt-12"></div>
-
-    <script>
-    async function generatePlan() {
-        const style = document.querySelector('input[name="plan-style"]:checked').value;
-
-        const inputs = {
-            income: document.getElementById('target-income').value || '',
-            commission: document.getElementById('avg-commission').value || '',
-            closings: document.getElementById('target-closings').value || '',
-            loanAmount: document.getElementById('avg-loan').value || '',
-            ratio: document.getElementById('closing-ratio').value || '',
-            currentPartners: document.getElementById('current-partners').value || '',
-            newPartners: document.getElementById('new-partners').value || '',
-            database: document.getElementById('database-size').value || ''
-        };
-
-        // First, quick client-side calc for immediate numbers
-        let closings = parseFloat(inputs.closings) || 60;
-        const commission = parseFloat(inputs.commission) || 6500;
-        if (inputs.income) closings = Math.ceil(parseFloat(inputs.income) / commission);
-
-        const volume = closings * (parseFloat(inputs.loanAmount) || 400000);
-        const ratio = (parseFloat(inputs.ratio) || 30) / 100;
-        const referrals = Math.ceil(closings / ratio);
-
-        // Show loading + basic numbers
-        document.getElementById('custom-plan').innerHTML = `
-            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-3xl">
-                <h3 class="text-2xl font-bold mb-6 text-[#F15A29]">Generating Your Personalized Plan...</h3>
-                <p>Quick snapshot while Grok builds the full version:</p>
-                <ul class="mt-4 space-y-2 text-lg">
-                    <li><strong>Target Closings:</strong> ${closings}</li>
-                    <li><strong>Target Volume:</strong> $${volume.toLocaleString()}</li>
-                    <li><strong>Referrals Needed:</strong> ~${referrals}</li>
-                </ul>
-            </div>
-        `;
-
-        // Now call Grok API for full customized plan
-        const prompt = `You are an expert mortgage sales coach. Create a detailed, motivational 2026 business plan for a loan officer.
-
-Plan Style: ${style}
-
-User Inputs (use defaults where blank - avg commission $6500, loan $400k, 30% close ratio):
-- Target Income: ${inputs.income || 'calculated from closings'}
-- Avg Commission: ${inputs.commission || '6500'}
-- Target Closings: ${inputs.closings || 'calculated'}
-- Avg Loan: ${inputs.loanAmount || '400000'}
-- Close Ratio: ${inputs.ratio || '30'}%
-- Current Partners: ${inputs.currentPartners || 'default'}
-- New Partners Goal: ${inputs.newPartners || 'default'}
-- Database Size: ${inputs.database || 'default'}
-
-Structure the plan:
-1. Executive Summary with key numbers (closings, volume, income, weekly activities)
-2. Focus Areas based on style (e.g., Referral Mastery = partner growth strategies)
-3. Monthly/Quarterly Milestones
-4. Weekly Scorecard Targets
-5. Specific Tactics: Pop-bys (ideas), events, objection handlers, database touches, social video ideas
-6. Accountability Tips & Motivation
-
-Make it actionable, encouraging, and tied to value-first relationship building.`;
-
-        try {
-            const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-              },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning",
-                    messages: [{ role: "user", content: prompt }],
-                    temperature: 0.7,
-                    max_tokens: 2000
-                })
-            });
-
-            const data = await response.json();
-            const plan = data.choices[0].message.content;
-
-            document.getElementById('custom-plan').innerHTML = `
-                <div class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-2xl prose prose-lg dark:prose-invert max-w-none">
-                    ${marked.parse(plan)}
+            <!-- Hobbies & Passions -->
+            <div class="mb-10">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-4">Favorite Hobbies & Passions (Optional — for personalized motivation)</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-golf" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Golf</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-poker" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Cards/Poker</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-sports" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Sports</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-crafts" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Crafts</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-family" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Family Time</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-outdoors" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Outdoors</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-fitness" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Fitness</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="hobby-cooking" class="hobby-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Cooking</span>
+                    </label>
                 </div>
-            `;
-        } catch (error) {
-            document.getElementById('custom-plan').innerHTML += `
-                <p class="text-red-600 mt-8">API connection issue — check key or try again. Basic roadmap above.</p>
-            `;
-        }
-    }
-    </script>
-<!-- Weekly Scorecard & Tracking -->
-    <div class="accordion mb-8">
-        <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">Weekly Scorecard & Tracking Tools <i class="fas fa-chevron-down"></i></button>
-        <div class="accordion-content">
-            <p class="mb-6">What gets measured gets managed. Track these leading indicators every week.</p>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-[#002B5C] text-white">
-                            <th class="p-4">Activity</th>
-                            <th class="p-4">Target</th>
-                            <th class="p-4">Why It Matters</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-gray-50 dark:bg-gray-900">
-                        <tr>
-                            <td class="p-4 border-t">Value Touches (pop-bys, calls, notes)</td>
-                            <td class="p-4 border-t">30–50/week</td>
-                            <td class="p-4 border-t">Builds relationships → referrals</td>
-                        </tr>
-                        <tr class="bg-white dark:bg-gray-800">
-                            <td class="p-4 border-t">New Conversations</td>
-                            <td class="p-4 border-t">10–15/week</td>
-                            <td class="p-4 border-t">Pipeline fuel</td>
-                        </tr>
-                        <tr>
-                            <td class="p-4 border-t">Pre-Approvals Issued</td>
-                            <td class="p-4 border-t">5–10/week</td>
-                            <td class="p-4 border-t">Leads → applications</td>
-                        </tr>
-                        <tr class="bg-white dark:bg-gray-800">
-                            <td class="p-4 border-t">Events/Seminars Hosted</td>
-                            <td class="p-4 border-t">1–2/month</td>
-                            <td class="p-4 border-t">Top-of-mind with groups</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <input type="text" id="hobby-other" placeholder="Other passions (e.g., wine tasting, travel)" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             </div>
 
-            <p class="mt-6">Pro Tip: Review your scorecard every Monday morning — adjust activities, not goals.</p>
-        </div>
-    </div>
+            <!-- Preferred Prospecting Activities -->
+            <div class="mb-10">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-4">Preferred Prospecting Activities (Optional — Grok prioritizes these)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-coffee" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Coffee/Drink Appointments ☕</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-lunch" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Lunch Appointments 🍴</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-lunchlearn" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Hosting Lunch & Learns 📊</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-notes" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Personal Notes/Cards ✍️</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-video" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Social Media Videos 📹</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-calls" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Phone Calls ☎️</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-popby" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Pop-By Gifts 🎁</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-events" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Networking Events 🤝</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-videomsg" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Video Messages 🎥</span>
+                    </label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer">
+                        <input type="checkbox" id="activity-email" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                        <span>Value Emails 📧</span>
+                    </label>
+                </div>
+            </div>
 
-    <!-- Inspiration & Top Producer Insights -->
-    <div class="accordion mb-8">
-        <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">Top Producer Insights & Inspiration <i class="fas fa-chevron-down"></i></button>
-        <div class="accordion-content">
-            <p class="mb-6">Real advice from loan officers closing 100+ units/year.</p>
-            <ul class="space-y-6">
-                <li><strong>“Plan the work, work the plan.”</strong> – Block prospecting time like client appointments. No exceptions.</li>
-                <li><strong>“Focus on people, not production.”</strong> – The closings are a byproduct of serving others well.</li>
-                <li><strong>“Your database is your gold mine.”</strong> – One past client is worth 10 cold leads.</li>
-                <li><strong>“Consistency beats intensity.”</strong> – 30 touches/week for a year > 100 touches in January only.</li>
-                <li><strong>“Track everything.”</strong> – You can’t improve what you don’t measure.</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Resources & Downloads -->
-    <div class="accordion mb-8">
-        <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">Downloads & External Resources <i class="fas fa-chevron-down"></i></button>
-        <div class="accordion-content">
-            <ul class="space-y-4">
-                <li><a href="https://www.themortgagereports.com/business-plan-for-loan-officers" target="_blank" class="text-[#00A89D] underline hover:text-[#F15A29]">Free Business Plan Template (The Mortgage Reports)</a></li>
-                <li><a href="https://www.brianbuffini.com/" target="_blank" class="text-[#00A89D] underline hover:text-[#F15A29]">Buffini & Company Referral Training</a></li>
-                <li><a href="https://www.tomferry.com/" target="_blank" class="text-[#00A89D] underline hover:text-[#F15A29]">Tom Ferry Coaching & Scripts</a></li>
-                <li><a href="https://www.mortgagemarketinganimals.com/" target="_blank" class="text-[#00A89D] underline hover:text-[#F15A29]">Mortgage Marketing Animals (Database Strategies)</a></li>
-            </ul>
-        </div>
-    </div>
-</section>
+            <!-- Additional Notes -->
+            <div class="mb-10">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Additional Notes & Priorities (Marketing budget, team plans, challenges, etc.)</label>
+                <textarea id="plan-notes" rows="6" placeholder="e.g., Want to grow realtor partnerships, hire an assistant, focus on social video, overcome lead flow issues..." class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+            </div>
+<!-- Generate Button -->
+<div class="text-center mt-12">
+    <button id="generate-plan-btn" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 px-16 rounded-full font-bold text-2xl shadow-2xl hover:opacity-90 transition-all">
+        <i class="fas fa-magic mr-4"></i> Generate My Custom 2026 Plan
+    </button>
+</div>
+<!-- Output Preview -->
+<div id="plan-output" class="hidden mt-12"></div>
+           </section>
               
         <section id="prospecting" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Prospecting Tools</h2>
@@ -2243,7 +2234,16 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Social Media Post Creator</h2>
     <p class="mb-8 text-lg">Generate ready-to-post content that builds relationships, sparks engagement, and grows your reach organically.</p>
 
-    <!-- Unified Form Wrapper -->
+    <!-- Loading Popup -->
+    <div id="social-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
+            <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
+            <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Crafting Your Perfect Post...</p>
+            <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">This takes 30-60 seconds — worth it!</p>
+        </div>
+    </div>
+
+    <!-- Form -->
     <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12 space-y-8">
         <!-- Post Type Dropdown -->
         <div>
@@ -2358,12 +2358,10 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
             <label class="block text-lg font-semibold mb-3 text-[#00A89D]">
                 Custom Idea or Additional Details
                 <span id="details-helper" class="block text-base font-normal text-gray-600 dark:text-gray-400 mt-2">
-                    e.g., Shout out to my favorite local coffee shop, or quick tip on credit scores
+                    e.g., Shout out to my favorite local coffee shop
                 </span>
             </label>
-            <textarea id="post-details" rows="4" 
-                      placeholder="Be sure to include any additional details here to help shape or personalize your post" 
-                      class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 resize-none"></textarea>
+            <textarea id="post-details" rows="4" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 resize-none"></textarea>
         </div>
 
         <!-- Generate Button -->
@@ -2372,7 +2370,20 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
                 Generate My Post Now
             </button>
         </div>
+    </div>
+
+    <!-- Output -->
+    <div id="social-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
+        <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
+            <!-- Post content -->
         </div>
+        <div class="text-center">
+            <button onclick="copySocialPost()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                📋 Copy Post to Clipboard
+            </button>
+        </div>
+    </div>
+
         
 <div class="mt-16">
     <!-- Collapsible Trigger (Premium Expand Button) -->
@@ -2526,28 +2537,20 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         </button>
     </div>
 
-            <div id="plan-loading" class="hidden mt-12 text-center">
-                <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#F15A29] mx-auto mb-6"></div>
-                <p class="text-2xl font-bold text-[#F15A29]">Building your personalized plan...</p>
-            </div>
+            <div id="social-plan-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
+        <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
+        <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Building Your Custom Plan...</p>
+        <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">This takes 45-60 seconds — worth the wait!</p>
+    </div>
+</div>
 
-            <div id="plan-output" class="mt-12"></div>
+            <div id="social-plan-output" class="mt-12"></div>
         </div>
     </div>
 </div>
 
-    <!-- Output -->
-    <div id="social-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
-        <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
-            <!-- Post content will appear here -->
-        </div>
-        <div class="text-center">
-            <button onclick="copySocialPost()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
-                📋 Copy Post to Clipboard
-            </button>
-        </div>
-    </div>
-
+    
     <!-- Pro Tips Card -->
     <div class="mt-12 bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 rounded-3xl p-10 border-2 border-[#00A89D]/30">
         <h3 class="text-2xl font-bold mb-6 text-[#002B5C] dark:text-[#00A89D]">Pro Tips for Maximum Engagement</h3>
@@ -3584,6 +3587,213 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
     </div>
 </section>
 <!-- Full Updated Weekly Win Plan Section -->
+ <!-- NEWSLETTER GENERATOR TOOL -->
+<section id="newsletter-generator" class="hidden">
+    <div class="max-w-5xl mx-auto px-6 py-12">
+        <h2 class="text-4xl md:text-5xl font-bold text-center text-[#F15A29] mb-4">✉️ Newsletter Magic Generator</h2>
+        <p class="text-xl text-center text-gray-700 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
+            Create beautiful, personalized newsletters in seconds. Stay top-of-mind with partners, past clients, and your sphere — effortlessly. 
+            <button onclick="openNewsletterTips()" class="ml-4 text-[#00A89D] underline hover:text-[#F15A29] font-semibold">Why newsletters crush it →</button>
+        </p>
+
+        <!-- Loading Overlay -->
+        <div id="newsletter-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
+                <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
+                <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Crafting Your Magical Newsletter...</p>
+                <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">Pulling fresh local content — this takes 30-60 seconds.</p>
+            </div>
+        </div>
+
+        <!-- Inputs Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Audience -->
+                <div>
+                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Audience Focus</label>
+                    <select id="nl-audience" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                        <option value="full">Full Database</option>
+                        <option value="partners">Referral Partners</option>
+                        <option value="past">Past Clients</option>
+                        <option value="sphere">Sphere of Influence</option>
+                    </select>
+                </div>
+
+                <!-- Frequency -->
+                <div>
+                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Frequency</label>
+                    <select id="nl-frequency" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+
+                <!-- Tone -->
+                <div>
+                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Tone & Style</label>
+                    <select id="nl-tone" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                        <option value="friendly">Casual & Friendly</option>
+                        <option value="professional">Professional & Polished</option>
+                        <option value="fun">Fun & Playful</option>
+                    </select>
+                </div>
+
+                <!-- NEW INPUT: Newsletter Length -->
+<!-- Add this right after the Tone dropdown (or in the grid) -->
+<div>
+    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Length</label>
+    <select id="nl-length" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+        <option value="short">Short (quick read, ~400 words)</option>
+        <option value="medium" selected>Medium (balanced, ~600 words)</option>
+        <option value="long">Long (in-depth, ~800 words)</option>
+    </select>
+</div>
+
+                <!-- ADD THIS INPUT: Newsletter Title (Optional) -->
+<!-- Place it right after the Tone dropdown (or in the first grid row) -->
+<div class="col-span-1 md:col-span-2">
+    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional — Grok creates a great one if blank)</label>
+    <input type="text" id="nl-title" placeholder="e.g., Fort Wayne Mortgage Weekly | January 2026 Insights" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+</div>
+
+                <!-- Local Market -->
+                <div>
+                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Local Market (City, State)</label>
+                    <input type="text" id="nl-location" placeholder="e.g., Auburn, Indiana" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                </div>
+            </div>
+
+            <!-- Sections Checkboxes -->
+            <label class="block text-xl font-semibold text-[#00A89D] mb-4">Sections to Include</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-market" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Market Updates 📈</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-industry" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Industry News 📰</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-local" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Local Events 🎉</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-recipes" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Recipes 🍳</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-fun" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Fun Facts 🤓</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-tip" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Homeownership Tip 🏡</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-quote" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Motivational Quote 💪</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-rate" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Rate Watch 📊</span>
+                </label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer">
+                    <input type="checkbox" id="nl-personal" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
+                    <span>Personal Update ❤️</span>
+                </label>
+                 </div>
+
+<div class="mb-8">
+    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Specific Topics/Headlines/Recipes/Links to Include (Optional)</label>
+    <textarea id="nl-specific" rows="5" placeholder="e.g., 'Include this recipe: https://example.com/chili' or 'Headline: Fort Wayne Home Show Jan 24-26' or 'Talk about Komets winning streak' — We'll incorporate it perfectly!" class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+</div>
+            <!-- Personal Update (hidden until checked) -->
+            <!-- UPDATED Personal Update Section (Always Visible, with Guidance) -->
+<!-- Replace your current personal update block with this (makes it always available, not hidden) -->
+<div class="mb-8">
+    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Personal Update (Optional — We'll polish it perfectly)</label>
+    <textarea id="nl-personal-text" rows="6" placeholder="Share a quick life update, recent win, family moment, hobby, or fun story — e.g., 'Just closed my biggest deal yet!' or 'Loving the snowy Fort Wayne winters with family snowball fights!' We'll make it warm, authentic, and newsletter-ready. Personal touches build trust & referrals! ❤️" 
+              class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+</div>
+
+
+            <!-- Optional Branding -->
+<!-- UPDATED Branding Inputs: Add YouTube, X, Google Business -->
+<!-- Replace your current branding <details> with this -->
+<details class="mb-8 bg-gray-100 dark:bg-gray-700 rounded-2xl p-6">
+    <summary class="text-xl font-semibold text-[#00A89D] cursor-pointer mb-4">Optional Branding & Contact Info (auto-saved)</summary>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <input type="text" id="nl-name" placeholder="Your Name (e.g., Adam Garman)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="tel" id="nl-cell" placeholder="Cell Phone (e.g., 260-348-0905)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="email" id="nl-email" placeholder="Email (e.g., adam@ruoff.com)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-headshot" placeholder="Headshot URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-logo" placeholder="Company Logo URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="text" id="nl-signature" placeholder="Signature (e.g., NMLS #124792)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-facebook" placeholder="Facebook URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-instagram" placeholder="Instagram URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-linkedin" placeholder="LinkedIn URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-youtube" placeholder="YouTube URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-x" placeholder="X (Twitter) URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-google" placeholder="Google Business URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+    </div>
+</details>
+
+            <!-- Generate Button -->
+            <div class="text-center">
+                <button id="generate-newsletter-btn" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 px-12 rounded-full font-bold text-2xl shadow-2xl hover:opacity-90 transition-all">
+                    <i class="fas fa-magic mr-4"></i> Generate My Magical Newsletter
+                </button>
+            </div>
+        </div>
+
+        <!-- UPDATED Output Section: Download Button + Clean Copy -->
+<!-- Replace your current #newsletter-output block with this (adds download, removes subjects from copy) -->
+<div id="newsletter-output" class="hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12">
+        <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+            <h3 class="text-3xl font-bold text-[#F15A29]">Your Newsletter Preview ✨</h3>
+            <div class="flex gap-4 flex-wrap">
+                <button onclick="copyNewsletterHTML()" class="bg-[#00A89D] hover:bg-[#00887A] text-white px-6 py-3 rounded-full font-bold">Copy HTML</button>
+                <button onclick="downloadNewsletterHTML()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold">Download .html File</button>
+                           </div>
+        </div>
+
+        <p class="text-lg mb-6 text-gray-700 dark:text-gray-300">
+            <strong>How to use:</strong> Copy HTML → paste into Mailchimp/Constant Contact. Or download the .html file, double-click to preview in browser, then upload to your email platform.
+        </p>
+
+        <!-- Preview -->
+        <div id="nl-preview" class="border-2 border-gray-300 dark:border-gray-600 rounded-2xl overflow-hidden min-h-96 bg-gray-50 dark:bg-gray-900"></div>
+
+        <!-- Raw HTML (hidden) -->
+        <textarea id="nl-html-raw" class="hidden"></textarea>
+    </div>
+</div>
+   <!-- Newsletter Tips Modal -->
+<div id="newsletter-tips-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-4xl">
+        <span class="close-modal" onclick="closeNewsletterTips()">&times;</span>
+        <div class="modal-header">
+            <h3 class="text-4xl">Why Newsletters Are Pure Gold 💰</h3>
+        </div>
+        <div class="space-y-6 text-lg">
+            <p><strong>Stay Top-of-Mind:</strong> Consistent touchpoints = more referrals without cold outreach.</p>
+            <p><strong>Build Trust:</strong> Mix value (market updates, tips) with personal (life updates) = genuine relationships.</p>
+            <p><strong>People Love Them:</strong> Recipes, local events, fun facts — your audience actually opens and enjoys these.</p>
+            <p><strong>Pro Tips:</strong></p>
+            <ul class="list-disc pl-8 space-y-2">
+                <li>Send consistently (weekly or monthly) — momentum compounds.</li>
+                <li>Keep it short & scannable — bold headers, emojis, short paragraphs.</li>
+                <li>End with a soft CTA: "Know anyone thinking about buying/refinancing? I'm here to help!"</li>
+                <li>Use tools like Mailchimp/Constant Contact for pretty delivery & tracking.</li>
+                <li>Personal updates are magic — share wins, family, hobbies to humanize yourself.</li>
+            </ul>
+            <p class="font-bold text-[#F15A29]">You got this — one newsletter at a time, you're building an unstoppable network! 🔥</p>
+        </div>
+    </div>
+</div>
+</section>
 
 <section id="weekly-win-plan" class="hidden">
     <div class="ai-tool-wrapper">
@@ -3821,8 +4031,7 @@ Make it actionable, encouraging, and tied to value-first relationship building.`
         </div>
     </div>
 </div>
-</section>
-       
+      
 </main>
     <script>
 // Menu toggle
@@ -3990,11 +4199,34 @@ function generateTimeBlock() {
     document.getElementById('time-block-output').innerHTML = `<h4 class="text-2xl font-medium mb-4 capitalize text-[#00A89D]">${freq} Schedule</h4><ul class="space-y-2">${list}</ul>`;
 }
 function showSection(id) {
-    document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    // Close mobile sidebar
-    document.getElementById('sidebar').classList.add('left-[-300px]');
+    // Hide all sections
+    document.querySelectorAll('main section').forEach(sec => {
+        sec.classList.add('hidden');
+    });
+
+    // Show target section (with safety check)
+    const target = document.getElementById(id);
+    if (target) {
+        target.classList.remove('hidden');
+        target.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        console.warn(`Section with ID "${id}" not found`);
+    }
+
+    // Close mobile sidebar (toggle class for reliability)
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        sidebar.classList.add('left-[-300px]');  // Or toggle if you prefer: sidebar.classList.toggle('left-[-300px]', true);
+        
+        // Optional: Reset hamburger state if you have an open class
+        // document.getElementById('menu-toggle')?.classList.remove('open');
+    }
+
+    // Optional: Highlight active sidebar item (add .active class to your sidebar CSS for bg/color)
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector(`[onclick="showSection('${id}')"]`)?.classList.add('active');
 }
 // Cycle activities
 function cycleActivities() {
@@ -4006,31 +4238,29 @@ function cycleActivities() {
 }
 
 async function generateSalesScript() {
-    const dropdown = document.getElementById('script-scenario-select');
-    const customTextarea = document.getElementById('custom-scenario');
-    const context = document.getElementById('script-context').value.trim();
-
-    let scenario = '';
-
-    // Handle custom vs dropdown selection
-    if (dropdown.value === ' ') {  // ' ' is your custom option value
-        scenario = customTextarea.value.trim();
-    } else {
-        scenario = dropdown.value || customTextarea.value.trim();
+    const loading = document.getElementById('script-loading');
+    const output = document.getElementById('script-output');
+    if (loading) loading.classList.remove('hidden');
+    if (output) {
+        output.innerHTML = '';
+        output.classList.add('hidden');
     }
 
+    // Get scenario
+    const select = document.getElementById('script-scenario-select');
+    const custom = document.getElementById('custom-scenario');
+    const context = document.getElementById('script-context')?.value.trim() || '';
+
+    let scenario = select.value;
+    if (scenario === ' ' || !scenario) scenario = custom.value.trim();
+
     if (!scenario) {
-        alert('Please select a situation or type your own scenario');
+        alert('Please select or type a scenario');
+        if (loading) loading.classList.add('hidden');
         return;
     }
 
-    const loading = document.getElementById('script-loading');
-    const output = document.getElementById('script-output');
-
-    loading.classList.remove('hidden');
-    output.classList.add('hidden');
-
-    let prompt = `You are an expert real estate communication coach helping realtors build better relationships.
+    const prompt = `You are an expert real estate communication coach helping realtors build better relationships.
 
 Generate exactly 4 varied, natural scripts for this situation:
 
@@ -4046,14 +4276,17 @@ Requirements for each script:
 - End with a gentle call-to-action
 - Tone: Friendly, relatable, professional, trustworthy
 
-Formatting (very important):
+CRITICAL FORMATTING:
+- Start each with ## **Script 1** (bold header), ## **Script 2**, etc.
 - Start each script with "## Script 1", "## Script 2", etc.
 - Use **bold** for light emphasis where it feels natural
 - Use - bullet points when listing questions, benefits, or ideas
 - Separate paragraphs with a blank line
-- Do NOT use code blocks, backticks, or any other formatting
+- Do NOT use code blocks
 
 Focus on building connection and trust — not closing the deal.`;
+
+    let renderedHTML = '';
 
     try {
         const response = await fetch('/api/chat', {
@@ -4069,46 +4302,37 @@ Focus on building connection and trust — not closing the deal.`;
             })
         });
 
-        if (!response.ok) throw new Error('API error');
+        if (!response.ok) throw new Error('API failed');
 
         const data = await response.json();
-        const rawMarkdown = data.choices[0].message.content.trim();
+        const raw = data.choices[0].message.content.trim();
 
-        // Convert full markdown to HTML using marked
-        const fullHtml = marked.parse(rawMarkdown);
+        renderedHTML = marked.parse(raw);
 
-        // Split into individual scripts by <h2> or <h3> headings (marked turns ## into <h2>)
-        const scriptBlocks = fullHtml.split(/<h[23][^>]*>.*?<\/h[23]>/gi).filter(Boolean);
-        const headings = [...fullHtml.matchAll(/<h[23][^>]*>(.*?)<\/h[23]>/gi)].map(m => m[1]);
-
-        let outputHtml = '<div class="space-y-12">';
-
-        headings.forEach((heading, i) => {
-            const content = scriptBlocks[i] || '';
-            const scriptNumber = i + 1;
-
-            outputHtml += `
-                <div class="bg-gray-50 dark:bg-gray-900 p-8 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center gap-5 mb-7">
-                        <div class="flex-shrink-0 w-14 h-14 rounded-full bg-[#F15A29] flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-                            ${scriptNumber}
-                        </div>
-                        <h3 class="text-2xl font-bold text-[#F15A29]">${heading.trim()}</h3>
-                    </div>
-                    <div class="prose prose-lg dark:prose-invert max-w-none leading-relaxed text-gray-800 dark:text-gray-200">
-                        ${content.trim()}
-                    </div>
-                </div>`;
-        });
-
-              // Final output structure
-           output.classList.remove('hidden');
-    } catch (error) {
-        console.error(error);
-        output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl">Error generating scripts. Please try again.</p>';
-        output.classList.remove('hidden');
+    } catch (err) {
+        console.error(err);
+        renderedHTML = `<p class="text-red-600 text-center py-20 text-xl">API unavailable locally — normal for offline testing.</p>`;
     } finally {
-        loading.classList.add('hidden');
+        if (loading) loading.classList.add('hidden');
+
+        if (output) {
+            output.innerHTML = `
+                <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
+                    ${renderedHTML}
+                </div>
+                <div class="text-center">
+                    <button onclick="copySalesScripts()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
+                        📋 Copy All Scripts
+                    </button>
+                </div>
+            `;
+            output.classList.remove('hidden');
+            output.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
     }
 }
 
@@ -4404,6 +4628,175 @@ function getSuggestions(category) {
     };
     return suggestions[category].map(s => `<li>${s}</li>`).join('');
 }
+</script>
+<script>
+    async function generatePlan() {
+    const loading = document.getElementById('plan-loading');
+    if (loading) loading.classList.remove('hidden');
+
+    const style = document.querySelector('input[name="plan-style"]:checked')?.value || 'Balanced Growth';
+
+    const inputs = {
+        income: document.getElementById('target-income')?.value || '',
+        commission: document.getElementById('avg-commission')?.value || '',
+        closings: document.getElementById('target-closings')?.value || '',
+        loanAmount: document.getElementById('avg-loan')?.value || '',
+        ratio: document.getElementById('closing-ratio')?.value || '',
+        currentPartners: document.getElementById('current-partners')?.value || '',
+        newPartners: document.getElementById('new-partners')?.value || '',
+        database: document.getElementById('database-size')?.value || ''
+    };
+
+    // === FIX: Collect Hobbies & Activities Lists ===
+    const hobbiesList = Array.from(document.querySelectorAll('.hobby-checkbox:checked'))
+                             .map(cb => cb.nextElementSibling.textContent.trim());  // Gets label text (e.g., "Golf")
+
+    const activitiesList = Array.from(document.querySelectorAll('.activity-checkbox:checked'))
+                               .map(cb => cb.nextElementSibling.textContent.trim());  // Gets label text (e.g., "Pop-By Gifts 🎁")
+
+    const hobbyOther = document.getElementById('hobby-other')?.value || '';
+
+    // Quick client-side calc (unchanged)
+    let closings = parseFloat(inputs.closings) || 60;
+    const commission = parseFloat(inputs.commission) || 6500;
+    if (inputs.income) closings = Math.ceil(parseFloat(inputs.income) / commission);
+
+    const volume = closings * (parseFloat(inputs.loanAmount) || 400000);
+    const ratio = (parseFloat(inputs.ratio) || 30) / 100;
+    const referrals = Math.ceil(closings / ratio);
+
+    // Show snapshot immediately
+    const output = document.getElementById('plan-output');
+    if (output) {
+        output.innerHTML = `
+            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-3xl mb-8">
+                <h3 class="text-2xl font-bold mb-6 text-[#F15A29]">Quick Snapshot (Full Plan Coming...)</h3>
+                <ul class="space-y-3 text-lg">
+                    <li><strong>Target Closings:</strong> ${closings}</li>
+                    <li><strong>Target Volume:</strong> $${volume.toLocaleString()}</li>
+                    <li><strong>Referrals/Leads Needed:</strong> ~${referrals}</li>
+                </ul>
+            </div>
+        `;
+        output.classList.remove('hidden');
+        output.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    let fullPlan = '';
+
+    try {
+        const prompt = `You are an expert mortgage sales coach. Create a detailed, motivational 2026 business plan for a loan officer.
+
+Plan Style: ${style}
+
+User Inputs (use defaults where blank - avg commission $6500, loan $400k, 30% close ratio):
+- Target Income: ${inputs.income || 'calculated from closings'}
+- Avg Commission: ${inputs.commission || '6500'}
+- Target Closings: ${inputs.closings || 'calculated'}
+- Avg Loan: ${inputs.loanAmount || '400000'}
+- Close Ratio: ${inputs.ratio || '30'}%
+- Current Partners: ${inputs.currentPartners || 'default'}
+- New Partners Goal: ${inputs.newPartners || 'default'}
+- Database Size: ${inputs.database || 'default'}
+- Hobbies/Passions: ${hobbiesList.join(', ') || 'none shared'} ${hobbyOther}
+- Preferred Prospecting Activities: ${activitiesList.join(', ') || 'balanced mix'}
+
+Structure the plan:
+1. Executive Summary with key numbers (closings, volume, income, weekly activities)
+2. Focus Areas based on style (e.g., Referral Mastery = partner growth strategies)
+3. Monthly/Quarterly Milestones
+4. Weekly Scorecard Targets
+5. Specific Tactics: Pop-bys (ideas), events, objection handlers, database touches, social video ideas
+6. Accountability Tips & Motivation
+
+Make it actionable, encouraging, and tied to value-first relationship building. Use clean markdown with headers, bullets, bold for emphasis.`;
+
+           const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify({
+                model: "grok-4-1-fast-reasoning",
+                    messages: [{ role: "user", content: prompt }],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
+            });
+
+            if (!response.ok) throw new Error();
+
+        const data = await response.json();
+        fullPlan = marked.parse(data.choices[0].message.content.trim());
+
+    } catch (error) {
+        fullPlan = `<p class="text-red-600">API unavailable — using snapshot above.</p>`;
+    } finally {
+        if (loading) loading.classList.add('hidden');
+
+        if (output) {
+            output.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12">
+                    <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+                        <h3 class="text-3xl font-bold text-[#F15A29]">Your Custom 2026 Business Plan ✨</h3>
+                        <div class="flex gap-4 flex-wrap">
+                            <button onclick="copyPlanFormatted()" class="bg-[#002B5C] hover:bg-[#001429] text-white px-6 py-3 rounded-full font-bold">Copy Formatted (for Word)</button>
+                            <button onclick="downloadPlanWord()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold">Download Word Doc</button>
+                        </div>
+                    </div>
+                    <div id="plan-preview" class="prose prose-lg dark:prose-invert max-w-none">
+                        ${fullPlan}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+}
+
+// Listener (safe)
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('generate-plan-btn')?.addEventListener('click', generatePlan);
+});
+
+// Copy & Download (rich formatting + Word)
+function copyPlanFormatted() {
+    const preview = document.getElementById('plan-preview');
+    if (!preview) return;
+
+    const range = document.createRange();
+    range.selectNode(preview);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+
+    try {
+        document.execCommand('copy');
+        alert('Formatted plan copied! Paste into Word.');
+    } catch (err) {
+        alert('Copy failed — select text manually.');
+    }
+
+    window.getSelection().removeAllRanges();
+}
+
+function downloadPlanWord() {
+    const preview = document.getElementById('plan-preview');
+    if (!preview) return;
+
+    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>2026 Business Plan</title><style>body{font-family:Calibri,Arial,sans-serif;margin:40px;line-height:1.6;color:#000;}h1{color:#002B5C;text-align:center;}h2{color:#00A89D;border-bottom:2px solid #00A89D;padding-bottom:8px;}ul{padding-left:30px;}li{margin:12px 0;}</style></head><body>`;
+    const content = preview.innerHTML;
+    const footer = `</body></html>`;
+    const blob = new Blob([header + content + footer], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '2026_Business_Plan.doc';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+    </script>
+    <script>
 async function searchUnderwriting() {
     const questionInput = document.getElementById('uw-question');
     const loanTypeSelect = document.getElementById('uw-loan-type');
@@ -4500,8 +4893,10 @@ let chatHistory = [
 When asked what the tool does or about its features, ALWAYS highlight the AI TOOLS first — they are the coolest and most valuable part:
 • Sales Script Generator – Instant objection handlers and conversation scripts
 • Social Media Post Creator – Ready-to-post content that builds trust and engagement
+• Social Media Monthly Plan Creator
 • Blog Creator – Full SEO-optimized blog posts in seconds
 • Business Plan Creator
+• Weekly Win Plan Creator
 • AI Chat Assistant – Ask anything: motivation, marketing ideas, scenario help
 Other key sections:
 • Prospecting strategies
@@ -5557,8 +5952,8 @@ Output as clean Markdown with:
 - Each post: full caption + hashtags.
 Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversational.`;
 
-    const loading = document.getElementById('plan-loading');
-    const output = document.getElementById('plan-output');
+    const loading = document.getElementById('social-plan-loading');
+    const output = document.getElementById('social-plan-output');
 
     if (loading) loading.classList.remove('hidden');
     if (output) output.innerHTML = '';
@@ -5657,7 +6052,7 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
         const overviewSection = `
             <div class="mb-20">
                 <h1 class="text-5xl font-black text-[#F15A29] text-center mb-12">${monthName} Social Media Calendar</h1>
-                <div class="prose prose-3xl dark:prose-invert max-w-none text-left text-white leading-loose">
+                <div class="prose prose-3xl dark:prose-invert max-w-none text-left dark:text-white dark:text-gray-200 leading-loose">
                     ${overviewHTML}
                 </div>
             </div>
@@ -7617,11 +8012,350 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script>
-// === Weekly Win Plan Setup: Auto-Load + Auto-Save (No Button Needed) ===
-// This script automatically:
-// 1. Loads all saved values when the page opens
-// 2. Saves every change instantly (as you type/check boxes)
-// No "Save" button required — everything persists across sessions in the same browser
+// === Newsletter Generator: Magical, Persistent, Grok-Powered ===
+// Auto-load/save all inputs, generate with fresh local content, beautiful outputs
+
+// Load saved values on start
+document.addEventListener('DOMContentLoaded', () => {
+    const fields = [
+        'nl-audience', 'nl-frequency', 'nl-tone', 'nl-location', 
+        'nl-name', 'nl-headshot', 'nl-logo', 'nl-signature', 
+        'nl-facebook', 'nl-instagram', 'nl-linkedin', 
+        'nl-youtube', 'nl-x', 'nl-google', 'nl-length',
+        'nl-title', 'nl-cell', 'nl-email'  // All here — one source of truth
+    ];
+
+    fields.forEach(id => {
+        const saved = localStorage.getItem(id);
+        if (saved) document.getElementById(id).value = saved;
+    });
+
+    const checkboxes = ['nl-market', 'nl-industry', 'nl-local', 'nl-recipes', 'nl-fun', 'nl-tip', 'nl-quote', 'nl-rate', 'nl-personal', 'nl-referral'];
+    const savedChecks = JSON.parse(localStorage.getItem('nl_sections') || '[]');
+    checkboxes.forEach(id => {
+        if (savedChecks.includes(id)) document.getElementById(id).checked = true;
+    const savedLength = localStorage.getItem('nl-length');
+    if (savedLength) document.getElementById('nl-length').value = savedLength;
+    });
+
+    togglePersonalSection();
+});
+
+// Auto-save on change
+document.querySelectorAll('#newsletter-generator input, #newsletter-generator select').forEach(el => {
+    el.addEventListener('change', () => {
+        if (el.type === 'checkbox') {
+            const checked = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked')).map(c => c.id);
+            localStorage.setItem('nl_sections', JSON.stringify(checked));
+        } else {
+            localStorage.setItem(el.id, el.value);
+        }
+        togglePersonalSection();
+    });
+});
+
+// Show/hide personal update
+function openNewsletterTips() {
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (modal) {
+        modal.style.display = 'flex';  // Shows modal (flex for centering)
+    }
+}
+
+function closeNewsletterTips() {
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Optional: Close on Escape key (nice UX)
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeNewsletterTips();
+    }
+});
+
+// === FULL REPLACEMENT: Newsletter Generate Button Listener (Safe, Offline-Friendly, No Errors) ===
+document.getElementById('generate-newsletter-btn')?.addEventListener('click', async () => {
+    const loading = document.getElementById('newsletter-loading');
+    if (loading) loading.classList.remove('hidden');
+
+    let html = '';
+
+    try {
+        // Build sections list
+        const sections = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked'))
+                         .map(c => c.id.replace('nl-', ''))
+                         .join(', ');
+
+        // Your full prompt (use the latest version from previous message)
+        const prompt = `You are a world-class email designer. Create ONE newsletter using this EXACT template — fill content only, NEVER change structure/layout or images.
+
+User Inputs:
+- Audience: ${document.getElementById('nl-audience').value || 'Full Database'}
+- Frequency: ${document.getElementById('nl-frequency').value || 'Weekly'}
+- Tone: ${document.getElementById('nl-tone').value || 'Professional'}
+- Location: ${document.getElementById('nl-location').value || 'Fort Wayne, Indiana'}
+- Title: ${document.getElementById('nl-title').value || 'Mortgage Insights | January 2026'}
+- Length: ${document.getElementById('nl-length').value || 'medium'}
+- Sections: ${sections || 'Market Update, Industry News, Local Spotlight, Quick Recipe'}
+- Personal update: """${document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!'}"""
+- Specific topics: """${document.getElementById('nl-specific').value || 'None'}"""
+
+Branding:
+- Name: ${document.getElementById('nl-name').value || 'Your Loan Officer'}
+- Headshot URL: ${document.getElementById('nl-headshot').value || 'https://via.placeholder.com/120x160/002B5C/FFFFFF?text=Headshot'}
+- Logo URL: ${document.getElementById('nl-logo').value || ''}
+- Cell: ${document.getElementById('nl-cell').value || ''}
+- Email: ${document.getElementById('nl-email').value || ''}
+- Signature (NMLS number): ${document.getElementById('nl-signature').value || ''}
+
+CRITICAL RULES: Follow these above all else) 
+- HERO IMAGE: Find an image of a gorgeous midwestern home with a working link and use that for the header hero image. 
+- CONFIRM WORKING HERO IMAGE LINK
+- HEADSHOT: Vertical oval — 120x160px, border-radius 50%/40%, object-fit:cover.
+- PERSONAL UPDATE: Always rewrite/polish the raw input — make it warm, relatable, newsletter-perfect (never raw paste).
+- ALL EXTERNAL LINKS: target="_blank" rel="noopener".
+- DOUBLE CHECK ALL CONTENT: Accuracy is of utmost importance. Verify content with at least 2 sources. 
+- NO separate "Personal Note" or "Referral Time" sections — personal update ALWAYS in signature, referral CTA ALWAYS at bottom.
+- ONLY ONE IMAGE: Hero beautiful winter Midwest home.Compliance: No specific rates, disclaimer in footer.
+- Content: Fresh from the most recent month, source links.
+
+OUTPUT ONLY complete standalone HTML:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Title]</title>
+    <style>
+        body { margin:0; background:#f4f4f4; font-family:Arial,sans-serif; }
+        .container { max-width:600px; margin:0 auto; background:white; }
+        .header { text-align:center; padding:40px 20px; background:white; }
+        .hero img { width:100%; height:auto; display:block; }
+        .section { padding:30px; border-left:8px solid #00A89D; margin:20px; background:#f9f9f9; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+        .section h2 { color:#002B5C; font-size:26px; margin:0 0 20px; }
+        .signature { padding:20px; background:white; display:flex; align-items:center; gap:50px; flex-wrap:wrap; }
+        .headshot { 
+            width:120px; 
+            height:160px; 
+            border-radius:50%/40%; 
+            border:5px solid #00A89D; 
+            object-fit:cover; 
+        }
+        .signature-text { flex:1; min-width:300px; }
+        .cta { text-align:center; padding:20px; background:white; }
+        .cta-button { background:#F15A29; color:white; padding:20px 44px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block; }
+        .footer { padding:30px; background:#002B5C; color:white; text-align:center; font-size:14px; }
+        a { color:#00A89D; text-decoration:underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            [Logo centered if provided]
+            <h1 style="color:#002B5C; font-size:36px;">[Title]</h1>
+            <p style="color:#666;">Weekly Insights from [Location] | January 2026</p>
+        </div>
+        <div class="hero">
+            [ONE beautiful winter Midwest home image full-width]
+        </div>
+        [Main section cards — only the checked sections]
+        <div class="signature">
+            <img src="[Headshot URL]" alt="[Name]" class="headshot">
+            <div class="signature-text">
+                <h2 style="color:#002B5C; font-size:28px; margin:0;">From [Name]</h2>
+                <p style="margin:15px 0; font-size:18px;">[Polished personal update]</p>
+                [If Signature provided: <p>NMLS # [Signature]</p>]
+                <p style="margin:10px 0; font-size:16px;">
+                    <a href="tel:[Cell]">[Cell]</a> | <a href="mailto:[Email]">[Email]</a>
+                </p>
+                <div class="social-icons">
+                    [If Facebook: <a href="[Facebook URL]" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>]
+                    [If Instagram: <a href="[Instagram URL]" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>]
+                    [If LinkedIn: <a href="[LinkedIn URL]" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>]
+                    [If YouTube: <a href="[YouTube URL]" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>]
+                    [If X: <a href="[X URL]" target="_blank"><i class="fab fa-twitter"></i> X</a>]
+                    [If Google: <a href="[Google URL]" target="_blank"><i class="fab fa-google"></i> Google</a>]
+                </div>
+            </div>
+        </div>
+        <div class="cta">
+            <h2 style="color:#002B5C; font-size:28px;">Know Someone Ready to Buy or Refinance?</h2>
+            <p style="font-size:18px; margin:20px 0;">I'd love to help — forward this or click below!</p>
+            <a href="mailto:[Email]?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi [Name],%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A[Sender Name]" class="cta-button">Send Me a Referral</a>
+            <p style="margin-top:20px; font-size:16px;">Or text/call: <a href="tel:[Cell]">[Cell]</a></p>
+        </div>
+        <div class="footer">
+            <p>Rates and programs subject to change. Contact me for personalized quote.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify({
+                model: "grok-4-1-fast-reasoning",
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.8,
+                max_tokens: 3000
+            })
+        });
+
+        if (!response.ok) throw new Error('API failed');
+
+        const data = await response.json();
+        let fullContent = data.choices[0]?.message?.content?.trim() || '';
+
+        // === AGGRESSIVE CLEANING: Pure HTML only ===
+        // Strip everything before HTML start
+        const htmlStart = fullContent.search(/<!DOCTYPE html|<html/i);
+        if (htmlStart !== -1) {
+            fullContent = fullContent.substring(htmlStart);
+        }
+
+        // Strip everything after </html>
+        const htmlEnd = fullContent.toLowerCase().indexOf('</html>');
+        if (htmlEnd !== -1) {
+            fullContent = fullContent.substring(0, htmlEnd + 7);
+        }
+
+        // Remove fences/prefix
+        fullContent = fullContent.replace(/^html\s*/i, '').trim();
+        fullContent = fullContent.replace(/^```html?\s*/i, '').trim();
+        fullContent = fullContent.replace(/^```\s*/g, '').trim();
+        fullContent = fullContent.replace(/```$/g, '').trim();
+
+        // Wrap if missing doctype
+        if (!fullContent.toLowerCase().startsWith('<!doctype') && !fullContent.toLowerCase().startsWith('<html')) {
+            fullContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Newsletter</title></head><body>${fullContent}</body></html>`;
+        }
+
+        html = fullContent || '<p>Newsletter content coming soon!</p>';
+
+        // === FORCE HERO IMAGE (always visible) ===
+        if (!html.includes('class="hero"')) {
+            const heroHTML = `<div class="hero">
+                <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter Midwest home" style="width:100%;height:auto;display:block;">
+            </div>`;
+            html = html.replace(/<\/div>\s*<\/div>/i, '</div></div>' + heroHTML);  // After header
+        }
+
+    } catch (err) {
+        console.log('Generation failed — using beautiful fallback');
+
+        html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fort Wayne Mortgage Weekly</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(to bottom, #002B5C, #001429); color: white; }
+        .hero img { width: 100%; height: auto; display: block; }
+        .section { padding: 30px; border-left: 8px solid #00A89D; background: #f9f9f9; margin: 20px; border-radius: 8px; }
+        .section h2 { color: #002B5C; font-size: 26px; margin: 0 0 20px; }
+        .signature { padding: 40px; background: white; display: flex; align-items: center; gap: 30px; }
+        .headshot { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00A89D; }
+        .cta { text-align: center; padding: 40px; background: white; }
+        .cta-button { background: #F15A29; color: white; padding: 18px 40px; border-radius: 30px; font-weight: bold; text-decoration: none; font-size: 18px; }
+        .footer { padding: 30px; background: #002B5C; color: white; text-align: center; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Fort Wayne Mortgage Weekly</h1>
+            <p>January 2026 | Insights from Adam Garman</p>
+        </div>
+        <div class="hero">
+            <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter home">
+        </div>
+        <div class="section">
+            <h2>Market Update</h2>
+            <p>Rates trending lower — improved affordability heading into spring. Local inventory steady.</p>
+        </div>
+        <div class="section">
+            <h2>Local Spotlight</h2>
+            <p>Fort Wayne winter events heating up — don't miss the ice festival!</p>
+        </div>
+        <div class="section">
+            <h2>Quick Recipe</h2>
+            <p>Cozy chili for cold nights — perfect comfort food.</p>
+        </div>
+        <div class="signature">
+            <img src="https://via.placeholder.com/120?text=Adam" class="headshot" alt="Adam Garman">
+            <div>
+                <h2>From Adam</h2>
+                <p>Excited for a fresh start to 2026 in snowy Fort Wayne!</p>
+                <p>260-348-0905 | adam@ruoff.com</p>
+            </div>
+        </div>
+        <div class="cta">
+            <h2>Know Someone Ready to Buy or Refinance?</h2>
+            <p>I'd love to help — forward this or click below!</p>
+            <a href="mailto:adam@ruoff.com?subject=Referral" class="cta-button">Send Me a Referral</a>
+        </div>
+        <div class="footer">
+            <p>Rates subject to change. Contact me for details.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+    } finally {
+    if (loading) loading.classList.add('hidden');
+
+    const previewEl = document.getElementById('nl-preview');
+    if (previewEl) {
+        previewEl.innerHTML = `
+            <div class="bg-white text-gray-900 rounded-2xl shadow-2xl overflow-hidden">
+                ${html}
+            </div>
+        `;
+    }
+
+    const rawEl = document.getElementById('nl-html-raw');
+    if (rawEl) rawEl.value = html;
+
+    const output = document.getElementById('newsletter-output');
+    if (output) {
+        output.classList.remove('hidden');
+        output.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+}
+});
+
+// Copy functions
+function copyNewsletterHTML() {
+    navigator.clipboard.writeText(document.getElementById('nl-html-raw').value);
+    alert('HTML copied! Paste into your email platform.');
+}
+
+function downloadNewsletterHTML() {
+    const html = document.getElementById('nl-html-raw').value;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `newsletter_${new Date().toISOString().slice(0,10)}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('Newsletter downloaded! Double-click the file to preview.');
+}
+
+</script>
+<script>
 
 document.addEventListener('DOMContentLoaded', () => {
     // === STEP 1: LOAD SAVED VALUES ===
@@ -7727,6 +8461,19 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🔄 Weekly Win Plan auto-save enabled — changes save instantly');
 })();
 </script>
+<script>
+// Reliable listener for Social Post generate button (paste at very bottom, before </body>)
+document.addEventListener('DOMContentLoaded', () => {
+    // Find button by inline onclick (works even without ID)
+    const generateBtn = document.querySelector('button[onclick="generateSocialPost()"]');
+
+    if (generateBtn) {
+        generateBtn.addEventListener('click', generateSocialPost);
+        console.log('Social Post generate button listener attached successfully');
+    } else {
+        console.warn('Social Post generate button not found — check inline onclick');
+    }
+});
+</script>
 </body>
 </html>
-
