@@ -401,13 +401,37 @@ input[type="range"]:active::-moz-range-thumb {
     display:block;
 }
 /* ADD TO YOUR <style> BLOCK: Bigger, Bolder Script Headers */
-.prose h2 {
-    font-size: 2rem !important;
-    font-weight: 900 !important;
+/* Enhanced Blog Headings — matches your screenshot style */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
     color: #F15A29 !important;
-    margin: 2rem 0 1rem !important;
+    border-bottom: 4px solid #00A89D;
     padding-bottom: 0.5rem;
-    border-bottom: 3px solid #00A89D;
+    margin-bottom: 2rem !important;
+}
+
+.prose h1 {
+    font-size: 3.5rem !important;   /* Much larger than H2 for clear hierarchy */
+    font-weight: 900 !important;
+}
+
+.prose h2 {
+    font-size: 2.5rem !important;   /* Still bold but noticeably smaller than H1 */
+    font-weight: 800 !important;
+}
+
+.prose h3 {
+    font-size: 2rem !important;
+}
+
+/* Optional: Make all headings stand out more in dark mode */
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4 {
+    color: #F15A29 !important; /* Keeps orange bright */
 }
 /* Prevent sidebar underlines forever — no leakage from newsletter preview */
 #sidebar,
@@ -502,10 +526,10 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-<!-- <li class="py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center cursor-pointer" onclick="showSection('newsletter-generator')">
+<li class="py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center cursor-pointer" onclick="showSection('newsletter-generator')">
     <i class="fas fa-envelope mr-3 text-xl"></i>
-    <span>Newsletter Generator</span> 
-</li> -->
+    <span>Newsletter Generator</span>
+</li>
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
@@ -516,7 +540,7 @@ input[type="range"]:active::-moz-range-thumb {
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-                       <!-- <li class="sidebar-group">Marketing</li>
+            <li class="sidebar-group">Marketing</li>
             <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
             <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
@@ -531,7 +555,7 @@ input[type="range"]:active::-moz-range-thumb {
             <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
             <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
-            </ul> -->
+            </ul> 
     </aside>
     <!-- AI Chat Assistant - Persistent on every page -->
 <div class="fixed bottom-4 right-4 z-50">
@@ -910,16 +934,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             Build a powerful, personalized roadmap for 2026. The more details you share, the smarter and more actionable your plan becomes.
         </p>
 
-        <!-- Loading Overlay -->
-        <div id="plan-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
-                <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
-                <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Building Your Custom 2026 Plan...</p>
-                <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">This takes 45–60 seconds — worth the wait!</p>
-            </div>
-        </div>
-
-        <!-- Inputs Card -->
+               <!-- Inputs Card -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 mb-12">
             <!-- Plan Style -->
             <div class="mb-10">
@@ -1987,14 +2002,13 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
     <p class="mb-8 text-lg">Upload your past client spreadsheet → get a prioritized, interactive dashboard showing equity built, refi savings, cash-out potential, move-up power, and personalized outreach scripts. Turn your database into your #1 lead source.</p>
 
     <!-- Compact Upload Area -->
-    <div id="upload-area" class="border-4 border-dashed border-[#00A89D] rounded-2xl p-8 text-center hover:border-[#F15A29] transition-all cursor-pointer mb-8 max-w-3xl mx-auto">
-        <i class="fas fa-file-upload text-5xl text-[#00A89D] mb-4"></i>
-        <p class="text-2xl mb-4">Drag & drop your spreadsheet here</p>
-        <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">or click to browse (CSV or Excel files only)</p>
-        <input type="file" id="database-upload" accept=".csv,.xlsx,.xls" class="hidden">
-        <button type="button" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-10 py-4 rounded-full font-bold shadow-lg hover:opacity-90 transition-all text-xl">
-            Choose File
-        </button>
+    <div id="upload-area" class="border-4 border-dashed border-[#00A89D] rounded-2xl p-8 text-center hover:border-[#F15A29] transition-all mb-8 max-w-3xl mx-auto">
+    <i class="fas fa-file-upload text-5xl text-[#00A89D] mb-4"></i>
+    <p class="text-2xl mb-4">Drag & drop your spreadsheet here</p>
+    <p class="text-lg text-gray-600 dark:text-gray-400">CSV or Excel files only</p>
+    <!-- Hidden input kept for drag-and-drop to work -->
+    <input type="file" id="database-upload" accept=".csv,.xlsx,.xls" class="hidden">
+</div>
         <p id="file-status" class="text-sm text-gray-600 dark:text-gray-400 mt-6">No file chosen</p>
         <p id="file-name" class="mt-2 font-bold text-[#F15A29] hidden"></p>
     </div>
@@ -2014,15 +2028,6 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <p class="text-sm mt-4 text-gray-500 dark:text-gray-400 italic">The tool works best with these — extras are ignored.</p>
     </div>
 
-    <!-- Loading -->
-    <div id="equity-loading" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl text-center max-w-md">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#F15A29] mx-auto mb-6"></div>
-            <p class="text-2xl font-bold text-[#F15A29]">Processing Spreadsheet...</p>
-            <p class="text-lg mt-4">This may take a few seconds for large files</p>
-            <p id="progress-text" class="text-xl mt-6 text-[#00A89D] font-semibold">Starting...</p>
-        </div>
-    </div>
 
 <div class="mb-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
@@ -2233,15 +2238,6 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
     <section id="social-post" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Social Media Post Creator</h2>
     <p class="mb-8 text-lg">Generate ready-to-post content that builds relationships, sparks engagement, and grows your reach organically.</p>
-
-    <!-- Loading Popup -->
-    <div id="social-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
-            <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
-            <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Crafting Your Perfect Post...</p>
-            <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">This takes 30-60 seconds — worth it!</p>
-        </div>
-    </div>
 
     <!-- Form -->
     <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12 space-y-8">
@@ -2456,7 +2452,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <!-- Primary Area(s) -->
         <div>
             <label class="text-xl font-semibold text-[#00A89D] block mb-3">Primary City/County/Area(s)</label>
-            <textarea id="plan-areas" rows="3" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 resize-none" placeholder="e.g., Fort Wayne, Allen County, Auburn, Northeast Indiana..."></textarea>
+            <textarea id="plan-areas" rows="3" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 resize-none" placeholder="e.g., Fort Wayne, Allen County, Fort Wayne, Northeast Indiana..."></textarea>
         </div>
 
         <!-- Hobbies & Passions -->
@@ -2537,19 +2533,10 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         </button>
     </div>
 
-            <div id="social-plan-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-    <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
-        <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
-        <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Building Your Custom Plan...</p>
-        <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">This takes 45-60 seconds — worth the wait!</p>
-    </div>
-</div>
-
             <div id="social-plan-output" class="mt-12"></div>
         </div>
     </div>
 </div>
-
     
     <!-- Pro Tips Card -->
     <div class="mt-12 bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 rounded-3xl p-10 border-2 border-[#00A89D]/30">
@@ -2650,7 +2637,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <!-- Additional Context -->
         <div>
             <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Additional Context (optional – helps make scripts better)</label>
-            <textarea id="script-context" rows="4" placeholder="e.g., first-time buyer, strong referral partner, move-up buyer, investor, self-employed" 
+            <textarea id="script-context" rows="4" placeholder="e.g., first-time buyer, strong referral partner, move-up buyer, investor, self-employed, add the person's name" 
                       class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"></textarea>
         </div>
 
@@ -2661,14 +2648,6 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             </button>
         </div>
 
-        <!-- Loading Spinner -->
-        <div id="script-loading" class="text-center py-12 hidden">
-            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
-            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
-                Generating your scripts... this takes 10–20 seconds
-            </p>
-        </div>
-    </div>
 
     <!-- Output -->
     <div id="script-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
@@ -2972,14 +2951,6 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             </button>
         </div>
 
-        <!-- Loading Spinner (Large & Clear) -->
-        <div id="uw-loading" class="text-center py-12 hidden">
-            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
-            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
-                Researching guidelines... this takes 10–20 seconds
-            </p>
-        </div>
-    </div>
 
     <!-- Output -->
     <div id="uw-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
@@ -2997,8 +2968,17 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Blog Creator – Authority-Building Content in Seconds</h2>
     <p class="mb-8 text-lg">Generate SEO + GEO-optimized blog posts that position you as the trusted expert. Select a topic from the list or type your own, choose your tone, and get a ready-to-publish post (800–1,200 words).</p>
 
+    
     <!-- Unified Form Wrapper -->
     <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-12 space-y-8">
+<div class="mb-8">
+    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Length</label>
+    <select id="blog-length" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+        <option value="short">Short (300–500 words)</option>
+        <option value="medium" selected>Medium (600–1,000 words)</option>
+        <option value="long">Long (800–1,200 words)</option>
+    </select>
+</div>
         <!-- Tone Selector -->
         <div>
             <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Tone</label>
@@ -3157,6 +3137,12 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Select or type a topic → choose tone → click Generate to create your blog post!</p>
         </div>
 
+        <div class="mb-8"> <!-- Optional wrapper if you want consistent section spacing -->
+    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Primary Search Phrase (Optional)</label>
+    <input type="text" id="blog-keyword" placeholder="e.g., Fort Wayne first-time home buyer" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">What phrase do people type into Google when looking for this topic? (Helps your blog show up in search results)</p>
+</div>      
+
         <!-- Generate Button -->
         <div class="text-center">
             <button onclick="generateBlog()" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
@@ -3175,15 +3161,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <li>Publish and Promote: Once edited, post on your website or LinkedIn. Share on social media with a teaser and link back to your contact info. Track engagement to refine future posts.</li>
     </ul>
 </div>
-        <!-- Loading Spinner (Now Matches Social Post & Sales Script) -->
-        <div id="blog-loading" class="text-center py-12 hidden">
-            <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
-            <p class="mt-6 text-2xl text-gray-600 dark:text-gray-400 font-medium">
-                Generating your blog post... this takes 20–40 seconds
-            </p>
-        </div>
-    </div>
-
+       
     <!-- Blog Output -->
     <div id="blog-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96">
                <h4 class="text-3xl font-bold text-[#F15A29] mb-6 mt-12">Suggested Social Media Caption</h4>
@@ -3315,11 +3293,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <textarea id="chat-input" rows="3" class="flex-grow p-4 rounded-lg border border-[#00A89D] focus:ring-[#F15A29] text-lg resize-none" placeholder="Type your message..."></textarea>
         <button onclick="sendChatMessage()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-4 rounded-lg font-bold hover:opacity-90">Send</button>
     </div>
-    <div id="chat-loading" class="text-center mt-6 hidden">
-        <i class="fas fa-spinner fa-spin text-4xl text-[#00A89D]"></i>
-        <p class="mt-4 text-xl">Thinking...</p>
-    </div>
-</section>
+    </section>
                 <section id="calculator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Advanced Payment Calculator</h2>
             <p class="mb-6">Estimate monthly payments with taxes, insurance, PMI, extra payments, and biweekly options. See lifetime interest, payoff timeline, and potential savings.</p>
@@ -3596,16 +3570,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             <button onclick="openNewsletterTips()" class="ml-4 text-[#00A89D] underline hover:text-[#F15A29] font-semibold">Why newsletters crush it →</button>
         </p>
 
-        <!-- Loading Overlay -->
-        <div id="newsletter-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
-                <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
-                <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Crafting Your Magical Newsletter...</p>
-                <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">Pulling fresh local content — this takes 30-60 seconds.</p>
-            </div>
-        </div>
-
-        <!-- Inputs Card -->
+             <!-- Inputs Card -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 mb-12">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <!-- Audience -->
@@ -3659,7 +3624,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
                 <!-- Local Market -->
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Local Market (City, State)</label>
-                    <input type="text" id="nl-location" placeholder="e.g., Auburn, Indiana" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    <input type="text" id="nl-location" placeholder="e.g., Fort Wayne, Indiana" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
                 </div>
             </div>
 
@@ -4031,8 +3996,16 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         </div>
     </div>
 </div>
-      
+    
 </main>
+<!-- Global Centered Loading Modal — matches Weekly Win Plan style -->
+<div id="global-loading" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+    <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-md w-full mx-6">
+        <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
+        <h3 class="text-3xl font-bold text-[#F15A29] mb-4">Building Your Advantage...</h3>
+<p class="text-xl text-gray-600 dark:text-gray-400">Personalized content incoming — this can take up to a minute.</p>
+    </div>
+</div>
     <script>
 // Menu toggle
 document.getElementById('menu-toggle').addEventListener('click', () => {
@@ -4238,7 +4211,7 @@ function cycleActivities() {
 }
 
 async function generateSalesScript() {
-    const loading = document.getElementById('script-loading');
+    const loading = document.getElementById('global-loading');
     const output = document.getElementById('script-output');
     if (loading) loading.classList.remove('hidden');
     if (output) {
@@ -4289,68 +4262,121 @@ Focus on building connection and trust — not closing the deal.`;
     let renderedHTML = '';
 
     try {
-        const response = await fetch('/api/chat', {
+    const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
               },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-                messages: [{ role: "user", content: prompt }],
-                temperature: 0.8,
-                max_tokens: 1400
-            })
-        });
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.8,
+            max_tokens: 1400
+        })
+    });
 
-        if (!response.ok) throw new Error('API failed');
+    if (!response.ok) throw new Error('API failed');
 
-        const data = await response.json();
-        const raw = data.choices[0].message.content.trim();
+    const data = await response.json();
+    let raw = data.choices[0].message.content.trim();
 
-        renderedHTML = marked.parse(raw);
+    // === IMPROVED SPLITTING FOR **Script X** TITLES ===
+    // Split on the bold title pattern, including the title in each section
+    let scriptSections = raw.split(/(?=\*\*Script \d+\*\*\s*\n)/i);
 
-    } catch (err) {
-        console.error(err);
-        renderedHTML = `<p class="text-red-600 text-center py-20 text-xl">API unavailable locally — normal for offline testing.</p>`;
-    } finally {
-        if (loading) loading.classList.add('hidden');
+    // Remove any leading empty/whitespace-only section
+    if (scriptSections[0] && scriptSections[0].trim().length < 20) {
+        scriptSections.shift();
+    }
 
-        if (output) {
-            output.innerHTML = `
-                <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
-                    ${renderedHTML}
-                </div>
-                <div class="text-center">
-                    <button onclick="copySalesScripts()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
-                        📋 Copy All Scripts
+    // Filter out any remaining empty/short sections
+    scriptSections = scriptSections
+        .map(s => s.trim())
+        .filter(s => s.length > 20); // Skip very short/empty
+
+    let scriptsHTML = '<div class="space-y-20">';
+
+    scriptSections.forEach((section, index) => {
+        let contentMarkdown = section;
+
+        // Extract title from **Script X**
+        const titleMatch = contentMarkdown.match(/\*\*Script (\d+)\*\*/i);
+        const title = titleMatch ? `Script ${titleMatch[1]}` : `Script ${index + 1}`;
+
+        // Remove the bold title from content (avoids duplicate)
+        contentMarkdown = contentMarkdown.replace(/\*\*Script \d+\*\*\s*\n?/i, '').trim();
+
+        const scriptId = `script-${index}`;
+
+        scriptsHTML += `
+            <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl border-2 border-[#00A89D]/30">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-4xl font-black text-[#F15A29]">${title}</h3>
+                    <button onclick="copySingleScript('${scriptId}')" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 py-4 rounded-full font-bold shadow-xl transition-all flex items-center gap-3 text-xl hover:opacity-90">
+                        <i class="fas fa-copy"></i> Copy This Script
                     </button>
                 </div>
-            `;
-            output.classList.remove('hidden');
-            output.scrollIntoView({ behavior: 'smooth' });
-        }
+                <div id="${scriptId}" class="prose prose-lg dark:prose-invert max-w-none leading-relaxed">
+                    ${marked.parse(contentMarkdown || 'No content')}
+                </div>
+            </div>
+        `;
+    });
 
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        }
+    scriptsHTML += '</div>';
+
+    renderedHTML = scriptsHTML;
+
+} catch (err) {
+    console.error(err);
+    renderedHTML = `<p class="text-red-600 text-center py-20 text-xl">API unavailable locally — normal for offline testing.</p>`;
+} finally {
+    if (loading) loading.classList.add('hidden');
+
+    if (output) {
+        output.innerHTML = renderedHTML;
+        output.classList.remove('hidden');
+        output.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
 }
+}
 
-function copySalesScripts() {
-    const proseDiv = document.querySelector('#script-output .prose');
-    if (!proseDiv) return;
+// === INDIVIDUAL SCRIPT COPY FUNCTION (keep or add this if not present) ===
+function copySingleScript(scriptId) {
+    const scriptEl = document.getElementById(scriptId);
+    if (!scriptEl) {
+        alert('Script not found!');
+        return;
+    }
 
-    // Get clean text (strip HTML, preserve line breaks)
-    const temp = document.createElement('div');
-    temp.innerHTML = proseDiv.innerHTML;
+    const html = scriptEl.innerHTML;
+    const plainText = scriptEl.innerText;
 
-    // Remove the numbered circles for cleaner copy
-    const circles = temp.querySelectorAll('.w-14.h-14.rounded-full');
-    circles.forEach(el => el.remove());
+    const clipboardItem = new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([plainText], { type: 'text/plain' })
+    });
 
-    const text = temp.innerText || temp.textContent || '';
-    navigator.clipboard.writeText(text).then(() => {
-        alert('All scripts copied to clipboard!');
+    navigator.clipboard.write([clipboardItem]).then(() => {
+        const btn = event.target.closest('button');
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.classList.replace('bg-[#00A89D]', 'bg-green-600');
+
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.replace('bg-green-600', 'bg-[#00A89D]');
+            }, 2000);
+        }
+    }).catch(() => {
+        navigator.clipboard.writeText(plainText).then(() => {
+            alert('Copied as plain text');
+        });
     });
 }
 // Accordion toggle
@@ -4386,7 +4412,7 @@ document.getElementById('script-scenario-select').addEventListener('change', fun
 async function generateSocialPost() {
     const type = document.getElementById('post-type').value;
     const details = document.getElementById('post-details').value.trim();
-    const loading = document.getElementById('social-loading');
+    const loading = document.getElementById('global-loading');
     const output = document.getElementById('social-output');
     loading.classList.remove('hidden');
     output.classList.add('hidden');
@@ -4631,7 +4657,7 @@ function getSuggestions(category) {
 </script>
 <script>
     async function generatePlan() {
-    const loading = document.getElementById('plan-loading');
+    const loading = document.getElementById('global-loading');
     if (loading) loading.classList.remove('hidden');
 
     const style = document.querySelector('input[name="plan-style"]:checked')?.value || 'Balanced Growth';
@@ -4801,7 +4827,7 @@ async function searchUnderwriting() {
     const questionInput = document.getElementById('uw-question');
     const loanTypeSelect = document.getElementById('uw-loan-type');
     const output = document.getElementById('uw-output');
-    const loading = document.getElementById('uw-loading');
+    const loading = document.getElementById('global-loading');
     const question = questionInput.value.trim();
     const loanType = loanTypeSelect.options[loanTypeSelect.selectedIndex].text;
     if (!question) {
@@ -4911,7 +4937,7 @@ Never lead with underwriting — it's one tool among many amazing features.`
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
     const messagesDiv = document.getElementById('chat-messages');
-    const loading = document.getElementById('chat-loading');
+    const loading = document.getElementById('global-loading');
     const userMessage = input.value.trim();
     if (!userMessage) return;
     // === SMART ROUTING: Check if it's an underwriting question ===
@@ -5275,38 +5301,66 @@ document.getElementById('blog-topic-select').addEventListener('change', function
         document.getElementById('blog-topic').value = this.value;
     }
 });
-// ... other functions
+
 async function generateBlog() {
     const topicInput = document.getElementById('blog-topic').value.trim();
     const tone = document.getElementById('blog-tone').value;
+    const lengthSelect = document.getElementById('blog-length')?.value || 'medium';
+    const keywordInput = document.getElementById('blog-keyword')?.value.trim() || '';
+
     if (!topicInput) {
         alert('Please select or type a blog topic');
         return;
     }
+
     const output = document.getElementById('blog-output');
-    const loading = document.getElementById('blog-loading');
-    // Show loading spinner, hide output
+    const loading = document.getElementById('global-loading');
+
     output.classList.add('hidden');
     loading.classList.remove('hidden');
     output.innerHTML = '';
-    const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized blog posts for loan officers.
+
+    const lengthGuide = lengthSelect === 'short' ? '300–500 words' :
+                        lengthSelect === 'long' ? '800–1,200 words' :
+                        '600–1,000 words';
+
+    const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized blog posts for loan officers that Educate, Empower and Entertain the reader.
+
 Key Requirements:
-- Length: 600–1,000 words
+- Length: ${lengthGuide}
 - Tone: ${tone}
+- Primary SEO keyword/phrase (use naturally throughout, especially in title if it fits, intro, H2s, and body — aim for 1–2% density with semantic variations): ${keywordInput || 'Optimize naturally for the main topic'}
 - Structure:
-  - Engaging, clickable title
-  - Strong intro hook
-  - H2 subheadings
-  - Short paragraphs
-  - Bullet points where helpful
-  - Bold key phrases
-  - FAQ section near end
+  - Engaging, clickable title (incorporate primary keyword if it flows naturally)
+  - Strong intro hook that grabs attention and includes the primary keyword early
+  - H2 subheadings for scannability
+  - Short paragraphs (3–5 sentences max)
+  - Bullet or numbered lists where helpful
+  - Bold key phrases for emphasis
+  - Research the most common consumer questions about this topic and naturally answer them throughout the post
+  - Dedicated FAQ section near the end (H2: "Frequently Asked Questions") answering the top 4–6 real consumer questions in clear, helpful bullet format
   - Soft CTA at end: "Ready to explore your options? Reach out — I’m here to help."
-- SEO/GEO: Natural keywords, reader-first, local relevance
-- Avoid: Any "trigger terms"that could lead to compliance issues. 
-- Voice: Helpful, trustworthy, never salesy
-- At the end of the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**) to post with a link to the blog. Keep the caption 100-200 characters (but do NOT include the character count in your response), engaging, and include relevant hashtags.
-Write a complete blog post on: ${topicInput}`;
+- SEO/GEO: Reader-first writing, natural keywords, local relevance where it fits the topic
+- Avoid: Any "trigger terms" that could lead to compliance issues
+- Voice: Helpful, trustworthy, conversational — never salesy
+
+At the end of the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**) to share with a link to the blog. Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags.
+
+Write a complete blog post on: ${topicInput}
+
+Output ONLY valid JSON in this exact format (no markdown, no extra text):
+{
+  "scripts": [
+    {
+      "title": "Script 1: Annual Equity Review Outreach",
+      "content": "Full script text here..."
+    },
+    {
+      "title": "Script 2: Casual Check-In",
+      "content": "Full script text here..."
+    }
+  ]
+}`;
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -5320,24 +5374,40 @@ Write a complete blog post on: ${topicInput}`;
                 max_tokens: 3000
             })
         });
+
         if (!response.ok) throw new Error('API error');
+
         const data = await response.json();
         let fullContent = data.choices[0].message.content.trim();
 
-        // Split blog and caption at separator
+        // === POST-PROCESSING: Humanize ===
+        fullContent = fullContent
+            .replace(/—/g, '-')    // em dash → hyphen
+            .replace(/–/g, '-')    // en dash → hyphen
+            .replace(/“|”/g, '"')  // smart double quotes
+            .replace(/‘|’/g, "'"); // smart single quotes
+
+        // Split blog and caption
         let blogMarkdown = fullContent;
         let captionText = '';
         const separatorIndex = fullContent.lastIndexOf('---');
         if (separatorIndex !== -1) {
             blogMarkdown = fullContent.substring(0, separatorIndex).trim();
             captionText = fullContent.substring(separatorIndex + 3).trim();
-            // Clean caption label if present
             captionText = captionText.replace(/^\*\*Suggested Social Media Caption:\*\*\s*/i, '').trim();
         }
 
-        const wordCount = blogMarkdown.split(/\s+/).length;
+        // Word count & read time
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = marked.parse(blogMarkdown);
+        const wordCount = tempDiv.textContent.trim().split(/\s+/).length;
+        const readTime = Math.max(1, Math.ceil(wordCount / 225));
 
         output.innerHTML = `
+            <div class="text-center text-[#F15A29] dark:text-[#F15A29] mb-12 font-bold text-2xl">
+    ${wordCount} words • ~${readTime} minute read
+</div>
+
             <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
                 ${marked.parse(blogMarkdown)}
             </div>
@@ -5355,14 +5425,11 @@ Write a complete blog post on: ${topicInput}`;
                     <i class="fas fa-share-alt"></i> Copy Social Caption
                 </button>
             </div>
-
-            <div class="flex justify-between items-center pt-8 mt-12 border-t border-gray-300 dark:border-gray-700">
-                <p class="text-gray-600 dark:text-gray-400 text-lg">Word count: ${wordCount}</p>
-            </div>
         `;
+
         output.classList.remove('hidden');
 
-        // Attach copy handlers (must be after DOM insertion)
+        // Attach copy handlers
         document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
 
@@ -5375,7 +5442,7 @@ Write a complete blog post on: ${topicInput}`;
     }
 }
 
-// Rich copy for blog (preserves formatting)
+// Rich copy for blog (preserves headers, bold, lists, etc.)
 function copyBlogWithFormatting() {
     const blogContent = document.querySelector('#blog-output .prose');
     if (!blogContent) {
@@ -5400,19 +5467,12 @@ function copyBlogWithFormatting() {
     });
 }
 
-// Plain text copy for caption
+// Copy social caption
 function copySocialCaption() {
     const captionEl = document.getElementById('social-caption');
-    if (!captionEl || !captionEl.textContent.trim()) {
-        alert('No caption to copy!');
-        return;
-    }
-    const caption = captionEl.textContent.trim();
-    navigator.clipboard.writeText(caption).then(() => {
-        alert('Social caption copied! Ready for LinkedIn, Facebook, Instagram, etc.');
-    }).catch(err => {
-        console.error('Copy failed:', err);
-        alert('Copy failed — select and copy manually');
+    if (!captionEl) return alert('No caption to copy!');
+    navigator.clipboard.writeText(captionEl.innerText).then(() => {
+        alert('Social caption copied!');
     });
 }
 function closeDatabaseModal() {
@@ -5591,12 +5651,8 @@ function smartRouteChat(message) {
     return false;
 }
 </script>
-<script>
 // Toggle custom preferences visibility
-document.getElementById('calendar-template').addEventListener('change', function() {
-    document.getElementById('custom-preferences').classList.toggle('hidden', this.value !== 'custom');
-});
-
+<script>
 // Large idea pools (varied, no repetition across year) — kept your original + slight expansions for variety
 const ideaPools = {
     personal: [
@@ -5610,7 +5666,7 @@ const ideaPools = {
         "Favorite seasonal drink recipe", "Family tradition we love", "Home project progress pic", "Sunset from the porch",
         "Weekend farmer's market haul", "Cozy reading nook photo", "My why: Helping families achieve homeownership",
         "Quick life hack I use daily", "Favorite quote on my desk", "Behind-the-scenes: My daily planner",
-        "Local Auburn park visit", "Favorite Indiana festival memory", "Home workout routine share"
+        "Local Fort Wayne park visit", "Favorite Indiana festival memory", "Home workout routine share"
     ],
     engagement: [
         "Poll: Coffee or tea person?", "This or That: City living or suburbs?", "What's your dream home feature?",
@@ -5618,7 +5674,7 @@ const ideaPools = {
         "Share your best moving tip", "Beach house or mountain cabin?", "Rate your credit knowledge 1–10",
         "What's one home upgrade on your wish list?", "Cats or dogs as the ultimate home companion?", "Favorite season for house hunting?",
         "Would you rather renovate or buy new?", "Best advice you ever got about money?", "Share a home DIY win or fail!",
-        "Favorite Auburn spot?", "Winter or summer in Indiana?"
+        "Favorite Fort Wayne spot?", "Winter or summer in Indiana?"
     ],
     motivational: [
         "Monday motivation: Ziglar quote about attitude", "Your why matters — quick story about why I love this industry",
@@ -5638,7 +5694,7 @@ const ideaPools = {
         "Another smooth approval — teamwork makes the dream work!"
     ],
     community: [
-        "Local business spotlight: Amazing Auburn/Fort Wayne spot", "Upcoming community event worth checking out",
+        "Local business spotlight: Amazing Fort Wayne/Fort Wayne spot", "Upcoming community event worth checking out",
         "Support local — share your favorite small business!", "Volunteer day recap — giving back feels great",
         "Shoutout to a great DeKalb County business"
     ],
@@ -5727,7 +5783,7 @@ function generateLocalMonths(year, weekStart, template) {
 function createOverviewSheet(year) {
     const data = [
         [`Your ${year} Social Media Success Plan`, "", "", "", "", "", "", ""],
-        ["Built for Loan Officers in Auburn & Beyond — Consistency Made Simple", "", "", "", "", "", "", ""],
+        ["Built for Loan Officers in Fort Wayne & Beyond — Consistency Made Simple", "", "", "", "", "", "", ""],
         [],
         ["Core Strategy", "", "", "", "", "", "", ""],
         ["75% Personal/Engagement/Community → Build authentic relationships", "", "", "", "", "", "", ""],
@@ -5804,7 +5860,7 @@ function createMonthSheet(month, year, monthIndex, weekStart) {
         const fullDateKey = `${month.name} ${day.date}`;
         const holidayNote = holidays[fullDateKey] || '';
 
-        let hashtags = '#LoanOfficerLife #IndianaRealEstate #AuburnIN';
+        let hashtags = '#LoanOfficerLife #IndianaRealEstate #Fort WayneIN';
         if (day.weekday === 'Mon') hashtags += ' #MotivationMonday';
         if (day.weekday === 'Tue') hashtags += ' #TipTuesday';
         if (day.weekday === 'Wed') hashtags += ' #WinsWednesday';
@@ -5908,7 +5964,64 @@ function createTipsSheet() {
     return ws;
 }
 
-// Full generateCalendar with your AI fetch, progress, overview sheet, etc.
+// === PERSISTENCE: Load saved plan on page load or month/year change ===
+document.addEventListener('DOMContentLoaded', () => {
+    loadSavedSocialPlan();
+
+    document.getElementById('plan-month')?.addEventListener('change', loadSavedSocialPlan);
+    document.getElementById('plan-year')?.addEventListener('change', loadSavedSocialPlan);
+});
+
+function loadSavedSocialPlan() {
+    const month = document.getElementById('plan-month')?.value;
+    const year = document.getElementById('plan-year')?.value;
+    if (!month || !year) return;
+
+    const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const monthName = monthNames[parseInt(month)];
+
+    const planKey = `savedSocialPlan_${monthName}_${year}`;
+    const savedHTML = localStorage.getItem(planKey);
+
+    const output = document.getElementById('social-plan-output');
+    if (!output) return;
+
+    if (savedHTML) {
+        output.innerHTML = savedHTML;
+
+        // Restore progress bar from saved count
+        let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
+        const progKey = `${monthName}_${year}`;
+        const copiedCount = progress[progKey]?.copied || 0;
+
+        const copiedEl = document.getElementById('copied-count');
+        if (copiedEl) copiedEl.textContent = copiedCount;
+
+        const msgEl = document.getElementById('progress-message');
+        if (msgEl) {
+            msgEl.textContent = copiedCount >= 30 ? '🎉 You crushed it — consistent wins!' 
+                              : copiedCount >= 21 ? '🔥 On fire — keep posting!' 
+                              : 'Start copying to track progress!';
+        }
+
+        const fill = document.getElementById('progress-fill');
+        if (fill) fill.style.width = `${(copiedCount / 30) * 100}%`;
+
+        // Add note if not already there
+        if (!document.getElementById('saved-plan-note')) {
+            const note = document.createElement('div');
+            note.id = 'saved-plan-note';
+            note.className = 'text-center text-gray-500 italic mb-12 text-xl';
+            note.textContent = '📅 Showing your previously generated plan for this month — generate again for a fresh one!';
+            output.prepend(note);
+        }
+    } else {
+        output.innerHTML = '';
+        document.getElementById('saved-plan-note')?.remove();
+    }
+}
+
+// === UPDATED generateMonthlyPlan WITH PERSISTENCE ===
 async function generateMonthlyPlan() {
     const month = document.getElementById('plan-month').value;
     const year = document.getElementById('plan-year').value;
@@ -5952,7 +6065,7 @@ Output as clean Markdown with:
 - Each post: full caption + hashtags.
 Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversational.`;
 
-    const loading = document.getElementById('social-plan-loading');
+    const loading = document.getElementById('global-loading');
     const output = document.getElementById('social-plan-output');
 
     if (loading) loading.classList.remove('hidden');
@@ -5998,7 +6111,7 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
         }
 
         // Build day cards — use dynamic daysInMonth
-        let cardsHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12">';
+        let cardsHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">';
 
         for (let day = 1; day <= daysInMonth; day++) {
             const dayDate = `${monthName} ${day}`;
@@ -6031,13 +6144,13 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
                         <button type="button" onclick="copySinglePost('${postId}', event)" class="absolute top-4 right-4 bg-[#00A89D] hover:bg-[#00887A] text-white p-3 rounded-full shadow-lg transition-all flex items-center gap-2 copy-btn" data-post-id="${postId}">
                             <i class="fas fa-copy"></i>
                         </button>
-                        <div id="${postId}" class="text-lg leading-relaxed">${post}</div>
+                        <div id="${postId}" class="text-base md:text-lg leading-relaxed">${post}</div>
                     </div>
                 `;
             }).join('');
 
             cardsHTML += `
-                <div class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-2xl hover:shadow-3xl hover:-translate-y-4 transition-all border-2 border-[#00A89D]/30">
+                    <div class="min-w-[320px] bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-2xl hover:shadow-3xl hover:-translate-y-4 transition-all border-2 border-[#00A89D]/30">
                     <h3 class="text-3xl font-black text-[#F15A29] mb-4">${dayDate}</h3>
                     <p class="text-2xl font-bold text-[#00A89D] mb-8">${theme}</p>
                     <div class="space-y-6">
@@ -6085,63 +6198,16 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
             </div>
         `;
 
-        // Single post copy with live progress update
-        window.copySinglePost = function(postId, event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
+        // === PERSIST THE NEW PLAN (overwrites old one for this month/year) ===
+        const savePlanKey = `savedSocialPlan_${monthName}_${year}`;
+        localStorage.setItem(savePlanKey, output.innerHTML);
 
-            const el = document.getElementById(postId);
-            if (!el) return;
+        // Remove "saved plan" note since this is freshly generated
+        document.getElementById('saved-plan-note')?.remove();
 
-            let text = el.innerText.trim();
-            text = text.replace(/^(IG|FB|LinkedIn|TikTok|Reels?|Story|Post|Stories):\s*/i, '').trim();
-
-            const html = el.innerHTML;
-
-            navigator.clipboard.write([
-                new ClipboardItem({
-                    'text/plain': new Blob([text], { type: 'text/plain' }),
-                    'text/html': new Blob([`<div style="font-family: sans-serif; font-size: 16pt; line-height: 1.6;">${html}</div>`], { type: 'text/html' })
-                })
-            ]).then(() => {
-                const btn = document.querySelector(`[data-post-id="${postId}"]`);
-                if (btn) {
-                    const original = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i>';
-                    btn.classList.replace('bg-[#00A89D]', 'bg-green-600');
-
-                    // Update progress live
-                    let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
-                    const planKey = `${monthName}_${year}`;
-                    if (progress[planKey]) {
-                        progress[planKey].copied += 1;
-                        localStorage.setItem('socialPlanProgress', JSON.stringify(progress));
-
-                        copiedCount = progress[planKey].copied;
-                        document.getElementById('copied-count').textContent = copiedCount;
-                        document.getElementById('progress-message').textContent = copiedCount >= 30 ? '🎉 You crushed it — consistent wins!' : copiedCount >= 21 ? '🔥 On fire — keep posting!' : 'Start copying to track progress!';
-
-                        // Confetti every 10 copies + big at 30
-                        if (copiedCount % 10 === 0 || copiedCount === 30) {
-                            confetti({
-                                particleCount: copiedCount === 30 ? 300 : 100,
-                                spread: 70,
-                                origin: { y: 0.6 }
-                            });
-                        }
-                    }
-
-                    setTimeout(() => {
-                        btn.innerHTML = original;
-                        btn.classList.replace('bg-green-600', 'bg-[#00A89D]');
-                    }, 2000);
-                }
-            }).catch(() => {
-                navigator.clipboard.writeText(text);
-            });
-        };
+        // Reset progress bar visually
+        const fill = document.getElementById('progress-fill');
+        if (fill) fill.style.width = '0%';
 
     } catch (err) {
         console.error('Plan generation error:', err);
@@ -6150,7 +6216,8 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
         if (loading) loading.classList.add('hidden');
     }
 }
-// Toggle function — add this to your existing <script> block (or create a new one if needed)
+
+// Toggle function
 function toggleCalendarSection() {
     const content = document.getElementById('calendar-content');
     const icon = document.getElementById('calendar-toggle-icon');
@@ -6158,6 +6225,81 @@ function toggleCalendarSection() {
     content.classList.toggle('hidden');
     icon.classList.toggle('rotate-180');
 }
+
+// Global copy function — works for freshly generated OR loaded saved plans
+window.copySinglePost = function(postId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    const el = document.getElementById(postId);
+    if (!el) return;
+
+    let text = el.innerText.trim();
+    text = text.replace(/^(IG|FB|LinkedIn|TikTok|Reels?|Story|Post|Stories):\s*/i, '').trim();
+
+    const html = el.innerHTML;
+
+    navigator.clipboard.write([
+        new ClipboardItem({
+            'text/plain': new Blob([text], { type: 'text/plain' }),
+            'text/html': new Blob([`<div style="font-family: sans-serif; font-size: 16pt; line-height: 1.6;">${html}</div>`], { type: 'text/html' })
+        })
+    ]).then(() => {
+        const btn = document.querySelector(`[data-post-id="${postId}"]`);
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.replace('bg-[#00A89D]', 'bg-green-600');
+
+            // Update progress live
+            const month = document.getElementById('plan-month')?.value;
+            const year = document.getElementById('plan-year')?.value;
+            if (!month || !year) return;
+
+            const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const monthName = monthNames[parseInt(month)];
+            const planKey = `${monthName}_${year}`;
+
+            let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
+            if (progress[planKey]) {
+                progress[planKey].copied += 1;
+                localStorage.setItem('socialPlanProgress', JSON.stringify(progress));
+
+                const copiedCount = progress[planKey].copied;
+                const copiedEl = document.getElementById('copied-count');
+                if (copiedEl) copiedEl.textContent = copiedCount;
+
+                const msgEl = document.getElementById('progress-message');
+                if (msgEl) {
+                    msgEl.textContent = copiedCount >= 30 ? '🎉 You crushed it — consistent wins!' 
+                                      : copiedCount >= 21 ? '🔥 On fire — keep posting!' 
+                                      : 'Start copying to track progress!';
+                }
+
+                const fill = document.getElementById('progress-fill');
+                if (fill) fill.style.width = `${(copiedCount / 30) * 100}%`;
+
+                // Confetti every 10 copies + big at 30
+                if (copiedCount % 10 === 0 || copiedCount === 30) {
+                    confetti({
+                        particleCount: copiedCount === 30 ? 300 : 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+            }
+
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.replace('bg-green-600', 'bg-[#00A89D]');
+            }, 2000);
+        }
+    }).catch(() => {
+        navigator.clipboard.writeText(text);
+    });
+};
 </script>
 <script>
 function syncRateControls() {
@@ -6383,18 +6525,29 @@ const fileInput = document.getElementById('database-upload');
 const fileStatus = document.getElementById('file-status');
 const fileNameDisplay = document.getElementById('file-name');
 
-uploadArea.addEventListener('click', (e) => {
-    if (e.target.tagName === 'BUTTON') return;
-    fileInput.click();
-});
-
 fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-        const file = e.target.files[0];
-        fileStatus.textContent = 'File selected:';
-        fileNameDisplay.textContent = file.name;
-        fileNameDisplay.classList.remove('hidden');
+    const file = e.target.files[0];
+
+    if (!file) {
+        // User canceled the picker — do NOTHING (prevents re-opening)
+        fileStatus.textContent = 'No file selected';
+        fileNameDisplay.textContent = '';
+        return;
     }
+
+    // Your normal file processing code here...
+    fileStatus.textContent = 'File selected — processing...';
+    fileNameDisplay.textContent = file.name;
+
+    // Example: read/process the file (your existing code)
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        // Your XLSX/parsing logic here...
+    };
+    reader.readAsArrayBuffer(file);
+
+    // Optional: Reset input after successful load (allows re-upload same file)
+    // e.target.value = '';
 });
 
 uploadArea.addEventListener('dragover', (e) => {
@@ -6485,7 +6638,7 @@ function generateEquityReport() {
     }
 
     const file = fileInput.files[0];
-    const loading = document.getElementById('equity-loading');
+    const loading = document.getElementById('global-loading');
     const output = document.getElementById('equity-output');
 
     if (loading) loading.classList.remove('hidden');
@@ -7279,14 +7432,6 @@ function resetEquityTool() {
     window.currentOpportunities = null;
 }
 </script>
-<!-- Loading Overlay -->
-<div id="generate-loading" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-    <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4">
-        <i class="fas fa-spinner fa-spin text-8xl text-[#00A89D] mb-8"></i>
-        <p class="text-3xl font-bold text-[#002B5C] dark:text-white">Building Your Weekly Win Plan...</p>
-        <p class="text-xl mt-6 text-gray-600 dark:text-gray-400">Preparing your personalized plan, it may take 45–60 seconds...
-    </div>
-</div>
 
 <!-- Post Ideas Modal -->
 <div id="post-modal" class="modal">
@@ -7418,94 +7563,94 @@ function resetEquityTool() {
 <script>
 
     const dailyActivities = [
-        "Write two personal notes or thank-you cards to clients, referral partners, or prospects.",
-        "Make at least five outbound calls to past clients or referral partners.",
-        "Send personalized birthday messages using video to your past clients.",
-        "Engage on social media by commenting on or liking 10 posts from realtors, clients, and referral partners.",
-        "Record and post one short-form video or story about mortgage tips, market updates, or client success stories.",
-        "Follow up with any new online or social media leads received in the past 24 hours.",
-        "Reach out to a past client just to check in—no sales pitch, just relationship-building.",
-        "Send a text or video message to a referral partner to stay top of mind.",
-        "Knock on one local business door to introduce yourself (title companies, insurance agents, CPAs, etc.).",
-        "Spend time reviewing and updating CRM with notes, follow-ups, and next actions."
-    ];
+    "Write two personal notes or thank-you cards to clients, referral partners, or prospects.",
+    "Make at least five outbound calls to past clients or referral partners.",
+    "Send personalized birthday messages using video to your past clients.",
+    "Engage on social media by commenting on or liking 10 posts from realtors, clients, and referral partners.",
+    "Record and post one short-form video or story about mortgage tips, market updates, or client success stories.",
+    "Follow up with any new online or social media leads received in the past 24 hours.",
+    "Reach out to a past client just to check in—no sales pitch, just relationship-building.",
+    "Send a text or video message to a referral partner to stay top of mind.",
+    "Knock on one local business door to introduce yourself (title companies, insurance agents, CPAs, etc.).",
+    "Spend time reviewing and updating CRM with notes, follow-ups, and next actions."
+];
 
-    const weeklyActivities = [
-        "Pipeline review with referral partners—discuss upcoming deals and potential new clients.",
-        "Pipeline review with active clients—touch base with a weekly update, even if nothing new.",
-        "Host a 15-minute coaching call (Zoom or Teams) for realtors on mortgage trends or strategies.",
-        "Attend at least one networking event (chamber of commerce, BNI, or real estate meetup).",
-        "Send a “Who do you know?” text to 5+ referral partners asking for warm introductions.",
-        "Create and send a value-packed email to your database (market updates, home tips, etc.).",
-        "Record and send a personalized video email to new leads or referral partners.",
-        "Reach out to 3 new real estate agents via social media or in person.",
-        "Host a casual coffee meeting with a referral partner or past client.",
-        "Review past closed loans and follow up with clients who may benefit from refinancing."
-    ];
+const weeklyActivities = [
+    "Pipeline review with referral partners—discuss upcoming deals and potential new clients.",
+    "Pipeline review with active clients—touch base with a weekly update, even if nothing new.",
+    "Host a 15-minute coaching call (Zoom or Teams) for realtors on mortgage trends or strategies.",
+    "Attend at least one networking event (chamber of commerce, BNI, or real estate meetup).",
+    "Send a “Who do you know?” text to 5+ referral partners asking for warm introductions.",
+    "Create and send a value-packed email to your database (market updates, home tips, etc.).",
+    "Record and send a personalized video email to new leads or referral partners.",
+    "Reach out to 3 new real estate agents via social media or in person.",
+    "Host a casual coffee meeting with a referral partner or past client.",
+    "Review past closed loans and follow up with clients who may benefit from refinancing."
+];
 
-    const weekendActivities = [
-        "Post a personal social media update (family, hobby, local Auburn spot, or fun weekend vibe)",
-        "Check and respond to any weekend inquiries, messages, or new leads",
-        "Engage lightly on social: Like/comment on 5–10 posts from realtors/clients (no heavy prospecting)",
-        "Quick Sunday prep: Review your calendar and pick Monday's top 10 calls",
-        "Plan your social posts for the upcoming week (use your Social Calendar tool)",
-        "Light CRM check: Flag any hot weekend leads for Monday follow-up",
-        "Relax & recharge — share a weekend inspiration quote or gratitude post",
-        "Family/fun time post — keep it authentic and relationship-focused",
-        "Quick win: Send 3 'just checking in' texts to warm past clients",
-        "Prepare one value video (market tip or fun fact) to post Monday"
-    ];
+const weekendActivities = [
+    "Post a personal social media update (family, hobby, local Fort Wayne spot, or fun weekend vibe)",
+    "Check and respond to any weekend inquiries, messages, or new leads",
+    "Engage lightly on social: Like/comment on 5–10 posts from realtors/clients (no heavy prospecting)",
+    "Quick Sunday prep: Review your calendar and pick Monday's top 10 calls",
+    "Plan your social posts for the upcoming week (use your Social Calendar tool)",
+    "Light CRM check: Flag any hot weekend leads for Monday follow-up",
+    "Relax & recharge — share a weekend inspiration quote or gratitude post",
+    "Family/fun time post — keep it authentic and relationship-focused",
+    "Quick win: Send 3 'just checking in' texts to warm past clients",
+    "Prepare one value video (market tip or fun fact) to post Monday"
+];
 
-    // Confetti function
-    function launchConfetti() {
-        const canvas = document.getElementById('confetti-canvas');
-        if (!canvas) return;
-        canvas.classList.remove('hidden');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+// Confetti function
+function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+    canvas.classList.remove('hidden');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-        const confetti = [];
-        const colors = ['#F15A29', '#00A89D', '#FFD700', '#FF69B4'];
+    const confetti = [];
+    const colors = ['#F15A29', '#00A89D', '#FFD700', '#FF69B4'];
 
-        for (let i = 0; i < 400; i++) {
-            confetti.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height - canvas.height,
-                r: Math.random() * 8 + 3,
-                d: Math.random() * 12 + 6,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                tilt: Math.random() * 10 - 5,
-                tiltAngle: 0
-            });
-        }
-
-        let animationFrame;
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            confetti.forEach((c, i) => {
-                c.tiltAngle += 0.1;
-                c.y += c.d;
-                c.tilt = Math.sin(c.tiltAngle) * 20;
-
-                ctx.beginPath();
-                ctx.lineWidth = c.r;
-                ctx.strokeStyle = c.color;
-                ctx.moveTo(c.x + c.tilt + c.r, c.y);
-                ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r);
-                ctx.stroke();
-
-                if (c.y > canvas.height) confetti.splice(i, 1);
-            });
-
-            if (confetti.length > 0) animationFrame = requestAnimationFrame(draw);
-            else canvas.classList.add('hidden');
-        }
-        draw();
+    for (let i = 0; i < 400; i++) {
+        confetti.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            r: Math.random() * 8 + 3,
+            d: Math.random() * 12 + 6,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            tilt: Math.random() * 10 - 5,
+            tiltAngle: 0
+        });
     }
 
-    // Setup & Persistence
-    let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
+    let animationFrame;
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confetti.forEach((c, i) => {
+            c.tiltAngle += 0.1;
+            c.y += c.d;
+            c.tilt = Math.sin(c.tiltAngle) * 20;
+
+            ctx.beginPath();
+            ctx.lineWidth = c.r;
+            ctx.strokeStyle = c.color;
+            ctx.moveTo(c.x + c.tilt + c.r, c.y);
+            ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r);
+            ctx.stroke();
+
+            if (c.y > canvas.height) confetti.splice(i, 1);
+        });
+
+        if (confetti.length > 0) animationFrame = requestAnimationFrame(draw);
+        else canvas.classList.add('hidden');
+    }
+    draw();
+}
+
+// Setup & Persistence
+let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
     name: "Loan Officer",
     monthlyGoal: 8,
     focus: "Balanced",
@@ -7515,49 +7660,52 @@ function resetEquityTool() {
     hours: "15–20",
     hobbies: [],
     hobbiesOther: "",
-    preferredActivities: []  // NEW: Initialize as empty array
+    preferredActivities: []
 };
-    let streak = parseInt(localStorage.getItem('winPlanStreak')) || 0;
+let streak = parseInt(localStorage.getItem('winPlanStreak')) || 0;
 
-    function updateSetupDisplays() {
-        const name = userSetup.name.trim() || "Loan Officer";
-        const titleEl = document.getElementById('personalized-title');
-        if (titleEl) titleEl.textContent = `${name}'s Weekly Win Plan 🔥`;
-        const goalEl = document.getElementById('monthly-goal-display');
-        if (goalEl) goalEl.textContent = userSetup.monthlyGoal;
+// === PERSISTENCE FOR GENERATED PLAN ===
+let savedWeeklyPlan = JSON.parse(localStorage.getItem('savedWeeklyPlan')) || null;
+let savedWeeklyChecked = JSON.parse(localStorage.getItem('savedWeeklyChecked') || '[]');
 
-        const touchesNeeded = userSetup.monthlyGoal * 9;
-        const targetEl = document.getElementById('weekly-target');
-        if (targetEl) targetEl.textContent = `For ${userSetup.monthlyGoal} loans: Aim for ~${touchesNeeded} touches this week`;
+function updateSetupDisplays() {
+    const name = userSetup.name.trim() || "Loan Officer";
+    const titleEl = document.getElementById('personalized-title');
+    if (titleEl) titleEl.textContent = `${name}'s Weekly Win Plan 🔥`;
+    const goalEl = document.getElementById('monthly-goal-display');
+    if (goalEl) goalEl.textContent = userSetup.monthlyGoal;
 
-        const streakEl = document.getElementById('streak-display');
-        if (streakEl) streakEl.textContent = `${streak} Week Streak`;
-        const messageEl = document.getElementById('streak-message');
-        if (messageEl) messageEl.textContent = streak > 0 ? `${name}, you're on fire!` : `${name}, let's build your streak!`;
-    }
+    const touchesNeeded = userSetup.monthlyGoal * 9;
+    const targetEl = document.getElementById('weekly-target');
+    if (targetEl) targetEl.textContent = `For ${userSetup.monthlyGoal} loans: Aim for ~${touchesNeeded} touches this week`;
 
-    updateSetupDisplays();
+    const streakEl = document.getElementById('streak-display');
+    if (streakEl) streakEl.textContent = `${streak} Week Streak`;
+    const messageEl = document.getElementById('streak-message');
+    if (messageEl) messageEl.textContent = streak > 0 ? `${name}, you're on fire!` : `${name}, let's build your streak!`;
+}
 
-    // Wizard functions
-    function openSetupWizard() {
-        const wizard = document.getElementById('setup-wizard');
-        if (!wizard) return;
-        document.getElementById('setup-name').value = userSetup.name;
-        document.getElementById('setup-monthly-goal').value = userSetup.monthlyGoal;
-        document.getElementById('setup-focus').value = userSetup.focus;
-        document.getElementById('setup-last-month').value = userSetup.lastMonth || '';
-        document.getElementById('setup-partners').value = userSetup.partners || '';
-        document.getElementById('setup-past-clients').value = userSetup.pastClients || '';
-        document.getElementById('setup-hours').value = userSetup.hours;
-        document.getElementById('setup-hobbies-other').value = userSetup.hobbiesOther || '';
-        wizard.classList.remove('hidden');
-    }
+updateSetupDisplays();
 
-    function saveSetup() {
+// Wizard functions
+function openSetupWizard() {
+    const wizard = document.getElementById('setup-wizard');
+    if (!wizard) return;
+    document.getElementById('setup-name').value = userSetup.name;
+    document.getElementById('setup-monthly-goal').value = userSetup.monthlyGoal;
+    document.getElementById('setup-focus').value = userSetup.focus;
+    document.getElementById('setup-last-month').value = userSetup.lastMonth || '';
+    document.getElementById('setup-partners').value = userSetup.partners || '';
+    document.getElementById('setup-past-clients').value = userSetup.pastClients || '';
+    document.getElementById('setup-hours').value = userSetup.hours;
+    document.getElementById('setup-hobbies-other').value = userSetup.hobbiesOther || '';
+    wizard.classList.remove('hidden');
+}
+
+function saveSetup() {
     const wizard = document.getElementById('setup-wizard');
     if (!wizard) return;
 
-    // Capture and save all values (exactly as you had it)
     userSetup.name = document.getElementById('setup-name').value.trim() || "Loan Officer";
     userSetup.monthlyGoal = parseInt(document.getElementById('setup-monthly-goal').value) || 8;
     userSetup.focus = document.getElementById('setup-focus').value;
@@ -7569,53 +7717,47 @@ function resetEquityTool() {
     userSetup.hobbiesOther = document.getElementById('setup-hobbies-other').value.trim();
     userSetup.preferredActivities = Array.from(document.querySelectorAll('.activity-checkbox:checked')).map(cb => cb.value);
 
-    // Save to localStorage
     localStorage.setItem('winPlanSetup', JSON.stringify(userSetup));
 
-    // Close the modal
     wizard.classList.add('hidden');
-
-    // Update any live displays (e.g., name/goal in header)
     updateSetupDisplays();
 
-    // Show the big green confirmation toast
     const toast = document.getElementById('save-toast');
     if (toast) {
         toast.classList.remove('hidden');
-        setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 4000); // Auto-hide after 4 seconds
+        setTimeout(() => toast.classList.add('hidden'), 4000);
     }
 }
 
-    // Task Help
-    function showTaskHelp(task) {
-        const modal = document.getElementById('task-help-modal');
-        if (!modal) return;
-        document.getElementById('task-help-title').textContent = task;
-        let content = `<p class="text-xl mb-6 font-bold">How to crush this:</p>`;
+// Task Help
+function showTaskHelp(task) {
+    const modal = document.getElementById('task-help-modal');
+    if (!modal) return;
+    document.getElementById('task-help-title').textContent = task;
+    let content = `<p class="text-xl mb-6 font-bold">How to crush this:</p>`;
 
-        if (task.includes("calls") || task.includes("outbound")) {
-            content += `<p><strong>Script:</strong> "Hey [Name], it's ${userSetup.name} — rates are great right now, who do you know thinking about buying/refi?"</p>`;
-            content += `<p class="mt-4">Tip: Smile when you dial — they hear it!</p>`;
-        } else if (task.includes("social") || task.includes("post")) {
-            content += `<p>Use your Social Post Creator → grab today's idea and post it now</p>`;
-        } else if (userSetup.hobbies.length > 0) {
-            content += `<p>Pro move: Tie this to your passion (${userSetup.hobbies[0]}) — invite a partner to join!</p>`;
-        }
-
-        content += `<p class="mt-6 text-2xl font-bold">⏱ Start a 25-min timer and go!</p>`;
-        document.getElementById('task-help-content').innerHTML = content;
-        modal.classList.remove('hidden');
+    if (task.includes("calls") || task.includes("outbound")) {
+        content += `<p><strong>Script:</strong> "Hey [Name], it's ${userSetup.name} — rates are great right now, who do you know thinking about buying/refi?"</p>`;
+        content += `<p class="mt-4">Tip: Smile when you dial — they hear it!</p>`;
+    } else if (task.includes("social") || task.includes("post")) {
+        content += `<p>Use your Social Post Creator → grab today's idea and post it now</p>`;
+    } else if (userSetup.hobbies.length > 0) {
+        content += `<p>Pro move: Tie this to your passion (${userSetup.hobbies[0]}) — invite a partner to join!</p>`;
     }
 
-    function closeTaskHelp() {
-        const modal = document.getElementById('task-help-modal');
-        if (!modal) return;
-        modal.classList.add('hidden');
-    }
+    content += `<p class="mt-6 text-2xl font-bold">⏱ Start a 25-min timer and go!</p>`;
+    document.getElementById('task-help-content').innerHTML = content;
+    modal.classList.remove('hidden');
+}
 
-    function buildPlanCards(dayTasksArray) {
+function closeTaskHelp() {
+    const modal = document.getElementById('task-help-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+}
+
+// === UPDATED buildPlanCards WITH PERSISTENCE ===
+function buildPlanCards(dayTasksArray) {
     const container = document.getElementById('weekly-tasks-container');
     if (!container) {
         console.error('ERROR: #weekly-tasks-container missing in HTML');
@@ -7624,7 +7766,6 @@ function resetEquityTool() {
 
     let grid = container.querySelector('.grid');
     if (!grid) {
-        // Safety: create grid if missing
         grid = document.createElement('div');
         grid.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8';
         const progressSection = container.querySelector('.mt-20');
@@ -7633,6 +7774,7 @@ function resetEquityTool() {
     grid.innerHTML = ''; // Clear old cards
 
     let allTasks = 0;
+    let taskIndex = 0; // For unique checkbox IDs
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
     dayTasksArray.forEach((dayObj, i) => {
@@ -7644,17 +7786,18 @@ function resetEquityTool() {
 
         let taskHTML = '<ul class="space-y-6">';
         dayObj.tasks.forEach(item => {
-            // Support both string tasks (old format) and object {task, tip}
             const taskText = typeof item === 'object' ? item.task || '' : item;
             const tipText = typeof item === 'object' ? (item.tip || 'Stay focused and crush this task!') : 'Pro tip: Batch similar tasks for maximum momentum.';
 
-            // Escape single quotes for JS safety
             const escapedTip = tipText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const checkboxId = `weekly-task-${taskIndex++}`;
+
+            const isChecked = savedWeeklyChecked.includes(checkboxId) ? 'checked' : '';
 
             taskHTML += `
                 <li onclick="showTaskTip('${escapedTip}')" 
                     class="flex items-start gap-5 text-lg hover:bg-white/10 p-4 rounded-2xl transition-all cursor-pointer">
-                    <input type="checkbox" class="w-8 h-8 mt-1 text-[#F15A29] rounded-lg focus:ring-[#00A89D] flex-shrink-0">
+                    <input type="checkbox" id="${checkboxId}" class="w-8 h-8 mt-1 text-[#F15A29] rounded-lg focus:ring-[#00A89D] flex-shrink-0" ${isChecked}>
                     <span class="text-gray-200 leading-relaxed">${taskText}</span>
                 </li>`;
             allTasks++;
@@ -7681,31 +7824,34 @@ function resetEquityTool() {
     const tasksTotalEl = document.getElementById('tasks-total');
     if (tasksTotalEl) tasksTotalEl.textContent = allTasks;
 
-    // Update progress + streak (your existing logic)
-    updateProgress();
+    container.classList.remove('hidden');
 
-    streak++;
-    localStorage.setItem('winPlanStreak', streak);
-    updateSetupDisplays();
+    // Re-attach checkbox listeners for progress saving
+    document.querySelectorAll('#weekly-tasks-container input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const checkedIds = Array.from(document.querySelectorAll('#weekly-tasks-container input[type="checkbox"]:checked'))
+                                 .map(c => c.id);
+            localStorage.setItem('savedWeeklyChecked', JSON.stringify(checkedIds));
+            savedWeeklyChecked = checkedIds;
+            updateProgress();
+        });
+    });
+
+    updateProgress();
 }
 
-// === Simple, Clean Tip Display (replace alert with toast/modal later if desired) ===
+// Tip modal functions
 function showTaskTip(tipText) {
-    // Clean up any escaped quotes
     tipText = tipText.replace(/&quot;/g, '"').replace(/\\'/g, "'");
-
-    // Set the tip text
     const tipEl = document.getElementById('task-tip-text');
     if (tipEl) tipEl.textContent = tipText;
 
-    // Open modal
     const modal = document.getElementById('task-tip-modal');
     if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
-    // Optional confetti burst for energy
     if (typeof confetti === 'function') {
         confetti({
             particleCount: 80,
@@ -7723,16 +7869,13 @@ function closeTaskTipModal() {
     }
 }
 
-// Optional: Close on Escape key
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeTaskTipModal();
-    }
+    if (e.key === 'Escape') closeTaskTipModal();
 });
 
-    // Generate Plan — AI first, silent local fallback
-    async function generateWeeklyPlan() {
-    const loading = document.getElementById('generate-loading');
+// === generateWeeklyPlan WITH PERSISTENCE ===
+async function generateWeeklyPlan() {
+    const loading = document.getElementById('global-loading');
     const generateBtn = document.getElementById('generate-win-plan-btn');
     const originalBtnText = generateBtn ? generateBtn.innerHTML : '<i class="fas fa-bolt-lightning mr-4 text-3xl"></i> Build My Personalized Win Plan';
 
@@ -7753,15 +7896,6 @@ document.addEventListener('keydown', (e) => {
     }
 
     container.classList.remove('hidden');
-
-    let grid = container.querySelector('.grid');
-    if (!grid) {
-        grid = document.createElement('div');
-        grid.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8';
-        const progressSection = container.querySelector('.mt-20');
-        container.insertBefore(grid, progressSection || null);
-    }
-    grid.innerHTML = '';
 
     let dayTasks = [];
 
@@ -7870,6 +8004,15 @@ Output ONLY valid JSON:
         dayTasks = generateLocalDayTasks();
     }
 
+    // === SAVE NEW PLAN & RESET CHECKED TASKS ===
+    localStorage.setItem('savedWeeklyPlan', JSON.stringify(dayTasks));
+    localStorage.removeItem('savedWeeklyChecked');
+    savedWeeklyChecked = [];
+    savedWeeklyPlan = dayTasks;
+
+    // Remove saved note (this is fresh)
+    document.getElementById('weekly-saved-note')?.remove();
+
     buildPlanCards(dayTasks);
     updateProgress();
 
@@ -7880,7 +8023,7 @@ Output ONLY valid JSON:
     }
 }
 
-// === Enhanced Local Fallback (returns {task, tip} with valuable generic tips) ===
+// === Enhanced Local Fallback ===
 function generateLocalDayTasks() {
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -7938,7 +8081,7 @@ function updateProgress() {
     const completionMsg = document.getElementById('completion-message');
     if (!completionMsg) return;
 
-    const name = userSetup.name.trim() || "Champion"; // pulls your saved name
+    const name = userSetup.name.trim() || "Champion";
     const percent = total > 0 ? (completed / total) * 100 : 0;
 
     if (percent === 100) {
@@ -7956,49 +8099,19 @@ function updateProgress() {
     }
 }
 
-function pickRandom(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
-updateSetupDisplays();
-updateProgress();
-    // Scrolling Quote Arrows + Auto-Scroll
-    const scroller = document.getElementById('quote-scroller');
-    const scrollLeft = document.getElementById('scroll-left');
-    const scrollRight = document.getElementById('scroll-right');
-
-    if (scroller && scrollLeft && scrollRight) {
-        // Manual scroll on arrow click
-        scrollLeft.addEventListener('click', () => {
-            scroller.scrollBy({ left: -400, behavior: 'smooth' });
-        });
-
-        scrollRight.addEventListener('click', () => {
-            scroller.scrollBy({ left: 400, behavior: 'smooth' });
-        });
-
-        // Auto-scroll forward every 12 seconds if not hovered
-        setInterval(() => {
-            if (!scroller.matches(':hover')) {
-                scroller.scrollBy({ left: 400, behavior: 'smooth' });
-            }
-        }, 12000);
-    }
-    // Weekly Win Plan buttons + checkbox delegation (safe, no duplicates)
+// === LOAD SAVED PLAN ON PAGE LOAD ===
 document.addEventListener('DOMContentLoaded', () => {
-    // Edit/View Change Plan Details
+    // Buttons
     const editBtn = document.getElementById('edit-setup-btn');
     if (editBtn) editBtn.addEventListener('click', openSetupWizard);
 
-    // Build My Personalized Win Plan
     const generateBtn = document.getElementById('generate-win-plan-btn');
     if (generateBtn) generateBtn.addEventListener('click', generateWeeklyPlan);
 
-    // Save Setup (if exists)
     const saveBtn = document.getElementById('save-setup-btn');
     if (saveBtn) saveBtn.addEventListener('click', saveSetup);
 
-    // Checkbox progress update (dynamic cards)
+    // Checkbox progress (delegated)
     const tasksContainer = document.getElementById('weekly-tasks-container');
     if (tasksContainer) {
         tasksContainer.addEventListener('change', (e) => {
@@ -8006,7 +8119,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initial calls
+    // Load saved plan if exists
+    if (savedWeeklyPlan) {
+        buildPlanCards(savedWeeklyPlan);
+
+        // Add note that this is a saved plan
+        const container = document.getElementById('weekly-tasks-container');
+        if (container && !document.getElementById('weekly-saved-note')) {
+            const note = document.createElement('div');
+            note.id = 'weekly-saved-note';
+            note.className = 'text-center text-gray-400 italic mb-12 text-xl';
+            note.textContent = '📅 Showing your last generated Weekly Win Plan — generate a new one to refresh!';
+            container.prepend(note);
+        }
+    }
+
+    // Initial displays
     updateSetupDisplays();
     updateProgress();
 });
@@ -8078,7 +8206,7 @@ document.addEventListener('keydown', (e) => {
 
 // === FULL REPLACEMENT: Newsletter Generate Button Listener (Safe, Offline-Friendly, No Errors) ===
 document.getElementById('generate-newsletter-btn')?.addEventListener('click', async () => {
-    const loading = document.getElementById('newsletter-loading');
+    const loading = document.getElementById('global-loading');
     if (loading) loading.classList.remove('hidden');
 
     let html = '';
@@ -8120,7 +8248,7 @@ CRITICAL RULES: Follow these above all else)
 - DOUBLE CHECK ALL CONTENT: Accuracy is of utmost importance. Verify content with at least 2 sources. 
 - NO separate "Personal Note" or "Referral Time" sections — personal update ALWAYS in signature, referral CTA ALWAYS at bottom.
 - ONLY ONE IMAGE: Hero beautiful winter Midwest home.Compliance: No specific rates, disclaimer in footer.
-- Content: Fresh from the most recent month, source links.
+- Content: Fresh from the most recent month, source links. Content should Educate, Empower and Entertain whenever possible. 
 
 OUTPUT ONLY complete standalone HTML:
 
@@ -8477,4 +8605,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
