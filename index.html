@@ -5348,19 +5348,8 @@ At the end of the blog post, add a clear separator (---) followed by a short, cl
 
 Write a complete blog post on: ${topicInput}
 
-Output ONLY valid JSON in this exact format (no markdown, no extra text):
-{
-  "scripts": [
-    {
-      "title": "Script 1: Annual Equity Review Outreach",
-      "content": "Full script text here..."
-    },
-    {
-      "title": "Script 2: Casual Check-In",
-      "content": "Full script text here..."
-    }
-  ]
-}`;
+Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *italic*, - bullets, etc.) followed by the separator and caption — no HTML tags, no extra commentary, no code fences, no explanations.`;
+
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -5380,12 +5369,12 @@ Output ONLY valid JSON in this exact format (no markdown, no extra text):
         const data = await response.json();
         let fullContent = data.choices[0].message.content.trim();
 
-        // === POST-PROCESSING: Humanize ===
+        // Humanize: replace smart quotes/dashes
         fullContent = fullContent
-            .replace(/—/g, '-')    // em dash → hyphen
-            .replace(/–/g, '-')    // en dash → hyphen
-            .replace(/“|”/g, '"')  // smart double quotes
-            .replace(/‘|’/g, "'"); // smart single quotes
+            .replace(/—/g, '-')
+            .replace(/–/g, '-')
+            .replace(/“|”/g, '"')
+            .replace(/‘|’/g, "'");
 
         // Split blog and caption
         let blogMarkdown = fullContent;
@@ -5405,8 +5394,8 @@ Output ONLY valid JSON in this exact format (no markdown, no extra text):
 
         output.innerHTML = `
             <div class="text-center text-[#F15A29] dark:text-[#F15A29] mb-12 font-bold text-2xl">
-    ${wordCount} words • ~${readTime} minute read
-</div>
+                ${wordCount} words • ~${readTime} minute read
+            </div>
 
             <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
                 ${marked.parse(blogMarkdown)}
@@ -5442,7 +5431,7 @@ Output ONLY valid JSON in this exact format (no markdown, no extra text):
     }
 }
 
-// Rich copy for blog (preserves headers, bold, lists, etc.)
+// Rich copy for blog
 function copyBlogWithFormatting() {
     const blogContent = document.querySelector('#blog-output .prose');
     if (!blogContent) {
@@ -8604,5 +8593,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
