@@ -4,11 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ultimate Loan Officer Sales Coach</title>
+    <!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MDYP4C0BJ1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MDYP4C0BJ1');
+  // Optional: you can remove the page_title/page_path object unless you need custom values
+</script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
           <!-- SWITCH TO CLASS MODE -->
     <script>
       tailwind.config = {
@@ -526,9 +537,9 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-<!--<li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+     <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Newsletter Generator
-</a></li>-->
+</a></li>
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
@@ -540,7 +551,7 @@ input[type="range"]:active::-moz-range-thumb {
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-            <!--<li class="sidebar-group">Marketing</li>
+            <li class="sidebar-group">Marketing</li>
             <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
             <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
@@ -555,7 +566,7 @@ input[type="range"]:active::-moz-range-thumb {
             <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
             <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
-            </ul> -->
+            </ul> 
     </aside>
     <!-- AI Chat Assistant - Persistent on every page -->
 <div class="fixed bottom-4 right-4 z-50">
@@ -2855,20 +2866,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <section id="resources" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Resources</h2>
             <p class="mb-4">Leverage these for growth.</p>
-            <div class="accordion">
-                <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">Scripts or Word Tracks <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <ul class="space-y-4">
-                        <li><strong>Rate Locking:</strong> "Based on current trends, locking now secures your rate – option 1: 'Let's protect against rises.' Option 2: 'What are your thoughts on timing?' Option 3: 'This gives peace of mind; ready?' Option 4: 'Market volatile; lock to avoid regret.' Option 5: 'Secure today, float down if rates drop.'"</li>
-                        <li><strong>Asking for Lunch:</strong> "I'd love to catch up over lunch – when works? Option 2: 'Let's discuss co-marketing over lunch?' Option 3: 'Free lunch on me to brainstorm?' Option 4: 'How open to lunch next week?' Option 5: 'Lunch to share market insights?'"</li>
-                        <li><strong>Asking for a Meeting:</strong> "When good for a quick meeting? Option 2: 'Let's meet to align on goals.' Option 3: 'Schedule a strategy session?' Option 4: 'Meeting to explore partnership?' Option 5: 'Chat over coffee about business?'"</li>
-                        <li><strong>Survey:</strong> "You'll get a survey post-closing; my team strives for you to be comfortable rating us 5 stars. If not, call me – I want to improve. Your feedback helps us serve better and continue providing the smooth process we aim for."</li>
-                        <li><strong>Referral:</strong> "Who do you know needing mortgage help? Option 2: 'Happy to help friends/family – intro?' Option 3: 'Referral your biggest compliment.' Option 4: 'Know anyone buying/refinancing?' Option 5: 'Share my name with network?'"</li>
-                        <li><strong>Realtor Intro:</strong> "Have agent? If not, great intro. Option 2: 'Connect to top realtor?' Option 3: 'Partner with excellent agents – recommend?' Option 4: 'Need realtor suggestion?' Option 5: 'Let's team with proven realtor.'"</li>
-                        <li><strong>For Agent:</strong> "What can I do to earn more of your business?"</li>
-                    </ul>
-                </div>
-            </div>
+            
             <div class="accordion">
                 <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">Potential Uses of Expense Report <i class="fas fa-chevron-down"></i></button>
                 <div class="accordion-content">
@@ -3294,42 +3292,96 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <button onclick="sendChatMessage()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-4 rounded-lg font-bold hover:opacity-90">Send</button>
     </div>
     </section>
-                <section id="calculator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Advanced Payment Calculator</h2>
-            <p class="mb-6">Estimate monthly payments with taxes, insurance, PMI, extra payments, and biweekly options. See lifetime interest, payoff timeline, and potential savings.</p>
+                <section id="calculator" class="card bg-white dark:bg-gray-800 pt-8 pb-16 px-10 rounded-3xl shadow-2xl animate-fade-in hidden">
+    <h2 class="text-4xl font-black mb-4 text-[#F15A29] text-center">Advanced Payment Calculator</h2>
+    <p class="text-center text-lg mb-10 text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Estimate monthly payments with taxes, insurance, PMI, extra payments, and biweekly options. See lifetime interest, payoff timeline, and potential savings.</p>
 
-            <form id="calc-form" class="space-y-4 calc-grid gap-4">
-                <label class="block"><strong>Loan Amount ($):</strong> 
-                    <input type="number" id="loanAmount" min="50000" value="300000" class="w-full p-2 rounded-lg border border-[#00A89D] focus:ring-[#F15A29]">
-                </label>
-                <label class="block"><strong>Interest Rate (%):</strong> 
-                    <input type="number" id="rate" min="0" step="0.001" value="6.5" class="w-full p-2 rounded-lg border border-[#00A89D] focus:ring-[#F15A29]">
-                </label>
-                <label class="block"><strong>Loan Term (years):</strong> 
-                    <input type="number" id="term" min="10" max="40" value="30" class="w-full p-2 rounded-lg border border-[#00A89D] focus:ring-[#F15A29]">
-                </label>
-                <label class="block"><strong>Annual Property Taxes ($):</strong> 
-                    <input type="number" id="taxes" value="3600" class="w-full p-2 rounded-lg border border-[#00A89D] focus:ring-[#F15A29]">
-                </label>
-                <label class="block"><strong>Annual Homeowners Insurance ($):</strong> 
-                    <input type="number" id="insurance" value="1500" class="w-full p-2 rounded-lg border border-[#00A89D] focus:ring-[#F15A29]">
-                </label>
-                <label class="block"><strong>PMI Rate (% of loan, if &lt;20% down):</strong> 
-    <input type="number" id="pmi" step="0.01" value="0" class="w-full p-2 rounded-lg border border-[#00A89D] focus:ring-[#F15A29]">
-</label>
-                <label class="block"><strong>Extra Monthly Payment ($):</strong> 
-                    <input type="number" id="extraMonthly" value="0" placeholder="e.g., 200" class="w-full p-2 rounded-lg border border-[#00A89D] focus:ring-[#F15A29]">
-                </label>
-                <label class="block flex items-center">
-                    <input type="checkbox" id="biweekly" class="mr-3 h-5 w-5 text-[#00A89D]">
-                    <strong>Make Biweekly Payments (26 per year)</strong>
-                </label>
-            </form>
+    <!-- Mode Toggle -->
+    <div class="flex justify-center mb-10">
+        <div class="inline-flex rounded-full bg-gray-200 dark:bg-gray-700 p-1 shadow-lg">
+            <button type="button" id="mode-purchase" class="px-10 py-4 rounded-full font-bold text-xl transition-all bg-gradient-to-r from-[#00A89D] to-[#00A89D]/80 text-white shadow-md">Purchase</button>
+            <button type="button" id="mode-refinance" class="px-10 py-4 rounded-full font-bold text-xl transition-all text-gray-700 dark:text-gray-300">Refinance</button>
+        </div>
+    </div>
 
-            <button type="button" onclick="calculateAdvanced()" class="mt-8 bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 py-4 rounded-full hover:opacity-90 w-full font-bold text-lg">
-           
-            <div id="calc-output" class="mt-8 space-y-6"></div>
-        </section>
+    <form id="calc-form" class="max-w-5xl mx-auto space-y-8">
+        <!-- Purchase Mode Inputs -->
+        <div id="purchase-inputs" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Home Price ($)</strong></label>
+                <input type="number" id="homePrice" min="0" value="375000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Down Payment</strong></label>
+                <input type="number" id="downPayment" min="0" step="0.01" value="20" placeholder="e.g., 20 or 75000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl mb-2">
+                <div class="flex gap-0">
+                    <button type="button" id="dp-percent-btn" class="flex-1 py-2 px-4 rounded-l-xl bg-gradient-to-r from-[#00A89D] to-[#00A89D]/80 text-white font-bold text-base transition-all shadow-inner">%</button>
+                    <button type="button" id="dp-dollar-btn" class="flex-1 py-2 px-4 rounded-r-xl bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-base transition-all shadow-inner">$</button>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Loan Amount ($)</strong></label>
+                <input type="number" id="loanAmountManual" min="0" value="300000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Auto-calculated or type directly</p>
+            </div>
+        </div>
+
+        <!-- Refinance Mode Input -->
+        <div id="refinance-inputs" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Loan Amount ($)</strong></label>
+                <input type="number" id="loanAmountDirect" min="0" value="300000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+            <div></div><div></div>
+        </div>
+
+        <!-- Rest of inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Interest Rate (%)</strong></label>
+                <input type="number" id="rate" min="0" step="0.001" value="6.5" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Loan Term (years)</strong></label>
+                <input type="number" id="term" min="1" max="40" value="30" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Annual Property Taxes ($)</strong></label>
+                <input type="number" id="taxes" min="0" value="3600" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Annual Homeowners Insurance ($)</strong></label>
+                <input type="number" id="insurance" min="0" value="1500" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>PMI Rate (% of loan, if &lt;20% down)</strong></label>
+                <input type="number" id="pmi" min="0" step="0.01" value="0" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Extra Monthly Payment ($)</strong></label>
+                <input type="number" id="extraMonthly" min="0" value="0" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+        </div>
+
+        <label class="flex items-center justify-center text-xl">
+            <input type="checkbox" id="biweekly" class="mr-4 h-7 w-7 text-[#00A89D] rounded focus:ring-[#F15A29]">
+            <strong>Make Biweekly Payments (26 per year)</strong>
+        </label>
+    </form>
+
+    <div id="calc-output" class="mt-16"></div>
+</section>
                 <!-- MISSING SECTION: Value Vault -->
                 <section id="value-vault" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Value Vault – Your Ultimate Resource Library</h2>
@@ -4095,6 +4147,7 @@ const quotes = [
     "Keep swinging—the home runs are coming.",
     "Success is a decision away. Decide now.",
     "Go out there and make someone’s dream happen.",
+    "Visibility beats ability 8 days a week.",
     "Be intentional with your hours or someone else will be.",
     "Small, consistent actions compound into massive results.",
     "Intentional effort today, dividends paid tomorrow.",
@@ -4327,6 +4380,12 @@ Focus on building connection and trust — not closing the deal.`;
 
     renderedHTML = scriptsHTML;
 
+    gtag('event', 'generate_scripts', {
+  event_category: 'Tool Usage',
+  event_label: 'Sales Scripts Generated',
+  value: scripts.length || 1  // tracks how many scripts
+});
+
 } catch (err) {
     console.error(err);
     renderedHTML = `<p class="text-red-600 text-center py-20 text-xl">API unavailable locally — normal for offline testing.</p>`;
@@ -4344,6 +4403,7 @@ Focus on building connection and trust — not closing the deal.`;
     }
 }
 }
+
 
 // === INDIVIDUAL SCRIPT COPY FUNCTION (keep or add this if not present) ===
 function copySingleScript(scriptId) {
@@ -4455,6 +4515,13 @@ Make it feel like it comes from a trusted friend who happens to be a mortgage ex
             </div>
         `;
         output.classList.remove('hidden');
+
+        gtag('event', 'generate_social_post', {
+  event_category: 'Tool Usage',
+  event_label: 'Social Post Generated',
+  value: 1
+});
+
     } catch (error) {
         output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating post. Check console or try again.</p>';
         output.classList.remove('hidden');
@@ -4655,7 +4722,7 @@ function getSuggestions(category) {
     return suggestions[category].map(s => `<li>${s}</li>`).join('');
 }
 </script>
-<script>
+<script type="text/javascript">
     async function generatePlan() {
     const loading = document.getElementById('global-loading');
     if (loading) loading.classList.remove('hidden');
@@ -4694,16 +4761,15 @@ function getSuggestions(category) {
     // Show snapshot immediately
     const output = document.getElementById('plan-output');
     if (output) {
-        output.innerHTML = `
-            <div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-3xl mb-8">
-                <h3 class="text-2xl font-bold mb-6 text-[#F15A29]">Quick Snapshot (Full Plan Coming...)</h3>
-                <ul class="space-y-3 text-lg">
-                    <li><strong>Target Closings:</strong> ${closings}</li>
-                    <li><strong>Target Volume:</strong> $${volume.toLocaleString()}</li>
-                    <li><strong>Referrals/Leads Needed:</strong> ~${referrals}</li>
-                </ul>
-            </div>
-        `;
+        output.innerHTML = 
+            '<div class="bg-gray-50 dark:bg-gray-900 p-10 rounded-3xl mb-8">' +
+                '<h3 class="text-2xl font-bold mb-6 text-[#F15A29]">Quick Snapshot (Full Plan Coming...)</h3>' +
+                '<ul class="space-y-3 text-lg">' +
+                    '<li><strong>Target Closings:</strong> ' + closings + '</li>' +
+                    '<li><strong>Target Volume:</strong> $' + volume.toLocaleString() + '</li>' +
+                    '<li><strong>Referrals/Leads Needed:</strong> ~' + referrals + '</li>' +
+                '</ul>' +
+            '</div>';
         output.classList.remove('hidden');
         output.scrollIntoView({ behavior: 'smooth' });
     }
@@ -4711,31 +4777,27 @@ function getSuggestions(category) {
     let fullPlan = '';
 
     try {
-        const prompt = `You are an expert mortgage sales coach. Create a detailed, motivational 2026 business plan for a loan officer.
-
-Plan Style: ${style}
-
-User Inputs (use defaults where blank - avg commission $6500, loan $400k, 30% close ratio):
-- Target Income: ${inputs.income || 'calculated from closings'}
-- Avg Commission: ${inputs.commission || '6500'}
-- Target Closings: ${inputs.closings || 'calculated'}
-- Avg Loan: ${inputs.loanAmount || '400000'}
-- Close Ratio: ${inputs.ratio || '30'}%
-- Current Partners: ${inputs.currentPartners || 'default'}
-- New Partners Goal: ${inputs.newPartners || 'default'}
-- Database Size: ${inputs.database || 'default'}
-- Hobbies/Passions: ${hobbiesList.join(', ') || 'none shared'} ${hobbyOther}
-- Preferred Prospecting Activities: ${activitiesList.join(', ') || 'balanced mix'}
-
-Structure the plan:
-1. Executive Summary with key numbers (closings, volume, income, weekly activities)
-2. Focus Areas based on style (e.g., Referral Mastery = partner growth strategies)
-3. Monthly/Quarterly Milestones
-4. Weekly Scorecard Targets
-5. Specific Tactics: Pop-bys (ideas), events, objection handlers, database touches, social video ideas
-6. Accountability Tips & Motivation
-
-Make it actionable, encouraging, and tied to value-first relationship building. Use clean markdown with headers, bullets, bold for emphasis.`;
+        const prompt = 'You are an expert mortgage sales coach. Create a detailed, motivational 2026 business plan for a loan officer.' + '\n\n' +
+                       'Plan Style: ' + style + '\n\n' +
+                       'User Inputs (use defaults where blank - avg commission $6500, loan $400k, 30% close ratio):' + '\n' +
+                       '- Target Income: ' + (inputs.income || 'calculated from closings') + '\n' +
+                       '- Avg Commission: ' + (inputs.commission || '6500') + '\n' +
+                       '- Target Closings: ' + (inputs.closings || 'calculated') + '\n' +
+                       '- Avg Loan: ' + (inputs.loanAmount || '400000') + '\n' +
+                       '- Close Ratio: ' + (inputs.ratio || '30') + '%\n' +
+                       '- Current Partners: ' + (inputs.currentPartners || 'default') + '\n' +
+                       '- New Partners Goal: ' + (inputs.newPartners || 'default') + '\n' +
+                       '- Database Size: ' + (inputs.database || 'default') + '\n' +
+                       '- Hobbies/Passions: ' + (hobbiesList.join(', ') || 'none shared') + ' ' + hobbyOther + '\n' +
+                       '- Preferred Prospecting Activities: ' + (activitiesList.join(', ') || 'balanced mix') + '\n\n' +
+                       'Structure the plan:' + '\n' +
+                       '1. Executive Summary with key numbers (closings, volume, income, weekly activities)' + '\n' +
+                       '2. Focus Areas based on style (e.g., Referral Mastery = partner growth strategies)' + '\n' +
+                       '3. Monthly/Quarterly Milestones' + '\n' +
+                       '4. Weekly Scorecard Targets' + '\n' +
+                       '5. Specific Tactics: Pop-bys (ideas), events, objection handlers, database touches, social video ideas' + '\n' +
+                       '6. Accountability Tips & Motivation' + '\n\n' +
+                       'Make it actionable, encouraging, and tied to value-first relationship building. Use clean markdown with headers, bullets, bold for emphasis.';
 
            const response = await fetch('/api/chat', {
             method: 'POST',
@@ -4755,26 +4817,31 @@ Make it actionable, encouraging, and tied to value-first relationship building. 
         const data = await response.json();
         fullPlan = marked.parse(data.choices[0].message.content.trim());
 
+        gtag('event', 'generate_plan', {
+  event_category: 'Tool Usage',
+  event_label: 'Business Plan Generated',
+  value: 1
+});
+
     } catch (error) {
-        fullPlan = `<p class="text-red-600">API unavailable — using snapshot above.</p>`;
+        fullPlan = '<p class="text-red-600">API unavailable — using snapshot above.</p>';
     } finally {
         if (loading) loading.classList.add('hidden');
 
         if (output) {
-            output.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12">
-                    <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
-                        <h3 class="text-3xl font-bold text-[#F15A29]">Your Custom 2026 Business Plan ✨</h3>
-                        <div class="flex gap-4 flex-wrap">
-                            <button onclick="copyPlanFormatted()" class="bg-[#002B5C] hover:bg-[#001429] text-white px-6 py-3 rounded-full font-bold">Copy Formatted (for Word)</button>
-                            <button onclick="downloadPlanWord()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold">Download Word Doc</button>
-                        </div>
-                    </div>
-                    <div id="plan-preview" class="prose prose-lg dark:prose-invert max-w-none">
-                        ${fullPlan}
-                    </div>
-                </div>
-            `;
+            output.innerHTML = 
+                '<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12">' +
+                    '<div class="flex justify-between items-center mb-8 flex-wrap gap-4">' +
+                        '<h3 class="text-3xl font-bold text-[#F15A29]">Your Custom 2026 Business Plan ✨</h3>' +
+                        '<div class="flex gap-4 flex-wrap">' +
+                            '<button onclick="copyPlanFormatted()" class="bg-[#002B5C] hover:bg-[#001429] text-white px-6 py-3 rounded-full font-bold">Copy Formatted (for Word)</button>' +
+                            '<button onclick="downloadPlanWord()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold">Download Word Doc</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div id="plan-preview" class="prose prose-lg dark:prose-invert max-w-none">' +
+                        fullPlan +
+                    '</div>' +
+                '</div>';
         }
 
         if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
@@ -4810,9 +4877,11 @@ function downloadPlanWord() {
     const preview = document.getElementById('plan-preview');
     if (!preview) return;
 
-    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>2026 Business Plan</title><style>body{font-family:Calibri,Arial,sans-serif;margin:40px;line-height:1.6;color:#000;}h1{color:#002B5C;text-align:center;}h2{color:#00A89D;border-bottom:2px solid #00A89D;padding-bottom:8px;}ul{padding-left:30px;}li{margin:12px 0;}</style></head><body>`;
+    const header = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>2026 Business Plan</title><style>body{font-family:Calibri,Arial,sans-serif;margin:40px;line-height:1.6;color:#000;}' +
+                   'h1{color:#002B5C;text-align:center;}h2{color:#00A89D;border-bottom:2px solid #00A89D;padding-bottom:8px;}' +
+                   'ul{padding-left:30px;}li{margin:12px 0;}</style></head><bo' + 'dy>';  // Split here to prevent any parsing issues
     const content = preview.innerHTML;
-    const footer = `</body></html>`;
+    const footer = '</bo' + 'dy></ht' + 'ml>';  // Split the problematic line
     const blob = new Blob([header + content + footer], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -4857,10 +4926,11 @@ Ruoff Overlays Summary (effective 06/18/25):
 - 2-1 Buydown: Eligible Conv/FHA/VA/USDA, Ineligible State Bond/renov/construction, Purchase only, Fixed rate, 1-2 units, No Manufactured, Occupancy: Gov Primary, Conv Primary/Second, Contract: Buydown fee in concessions, Fee: Seller/builder, No borrower pay, Locked direct FNMA/FHLMC/GNMA.
 Confidence Levels:
 - High (95%+): Clear, unambiguous rule in primary guideline source
-- Medium (70–94%): Generally accepted practice or overlay, minor ambiguity
+- Medium (70-94%): Generally accepted practice or overlay, minor ambiguity
 - Low (<70%): Unclear, varies significantly, or no definitive source
+
 Structure every response:
-1. Direct, concise main answer
+1. Direct concise main answer
 2. Supporting guideline reference (if applicable)
 3. Ruoff Overlays Check: List any relevant overlays
 4. Confidence level (emphasize) + brief explanation
@@ -4895,6 +4965,13 @@ Structure every response:
             </div>
         `;
         output.classList.remove('hidden');
+
+        gtag('event', 'search_underwriting', {
+  event_category: 'Tool Usage',
+  event_label: 'Underwriting Guideline Searched',
+  value: 1
+});
+
     } catch (error) {
         console.error(error);
         output.innerHTML = `
@@ -4907,11 +4984,13 @@ Structure every response:
     } finally {
         loading.classList.add('hidden');
     }
-}
-function copyUwOutput() {
+    function copyUwOutput() {
     const text = document.querySelector('#uw-output .prose')?.innerText || '';
     navigator.clipboard.writeText(text).then(() => alert('Response copied!'));
 }
+}
+
+
 let chatHistory = [
     {
         role: "system",
@@ -4996,6 +5075,13 @@ async function sendChatMessage() {
             </div>
         `;
         chatHistory.push({ role: "assistant", content: aiReply });
+
+        gtag('event', 'send_chat_message', {
+  event_category: 'Tool Usage',
+  event_label: 'AI Chat Message Sent',
+  value: 1
+});
+
     } catch (error) {
         console.error(error);
         messagesDiv.innerHTML += `
@@ -5008,177 +5094,220 @@ async function sendChatMessage() {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 }
-// Allow Enter to send
+// Chat input Enter key
+// Chat input Enter key
 document.getElementById('chat-input').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendChatMessage();
 });
-// Calculator JS
+
+
+// === PURCHASE / REFI MODE TOGGLE (UPDATED FOR YOUR HTML IDs) ===
+document.getElementById('mode-purchase')?.addEventListener('click', () => {
+    // Activate Purchase button
+    document.getElementById('mode-purchase').classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
+    document.getElementById('mode-purchase').classList.remove('text-gray-700', 'dark:text-gray-300');
+
+    // Deactivate Refinance button
+    document.getElementById('mode-refinance').classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
+    document.getElementById('mode-refinance').classList.add('text-gray-700', 'dark:text-gray-300');
+
+    // Show/hide fields
+    document.getElementById('purchase-inputs')?.classList.remove('hidden');
+    document.getElementById('refinance-inputs')?.classList.add('hidden');
+
+    calculateAdvanced();
+});
+
+document.getElementById('mode-refinance')?.addEventListener('click', () => {
+    // Activate Refinance button
+    document.getElementById('mode-refinance').classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
+    document.getElementById('mode-refinance').classList.remove('text-gray-700', 'dark:text-gray-300');
+
+    // Deactivate Purchase button
+    document.getElementById('mode-purchase').classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
+    document.getElementById('mode-purchase').classList.add('text-gray-700', 'dark:text-gray-300');
+
+    // Show/hide fields
+    document.getElementById('refinance-inputs')?.classList.remove('hidden');
+    document.getElementById('purchase-inputs')?.classList.add('hidden');
+
+    calculateAdvanced();
+});
+
+// === IMPROVED CALCULATOR WITH FULL BIDIRECTIONAL SYNC ===
 function calculateAdvanced() {
-    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+    const isPurchase = document.getElementById('mode-purchase').classList.contains('bg-gradient-to-r');
+
+    let homePrice = 0;
+    let downPaymentInput = 0;
+    let isPercent = true;
+    let loanAmountInput = 0;
+    let loanAmount = 0;
+    let downAmount = 0;
+
+    if (isPurchase) {
+        homePrice = parseFloat(document.getElementById('homePrice').value) || 0;
+        downPaymentInput = parseFloat(document.getElementById('downPayment').value) || 0;
+        isPercent = document.getElementById('dp-percent-btn').classList.contains('bg-gradient-to-r');
+        loanAmountInput = parseFloat(document.getElementById('loanAmountManual').value) || 0;
+
+        // Determine source of truth based on what was last edited (using activeElement)
+        const focusedId = document.activeElement ? document.activeElement.id : '';
+
+        if (focusedId === 'loanAmountManual' && loanAmountInput > 0) {
+            // User typed in loan amount — recalc down payment from it
+            loanAmount = loanAmountInput;
+            downAmount = Math.max(0, homePrice - loanAmount);
+            const newDown = isPercent ? (homePrice > 0 ? (downAmount / homePrice * 100) : 0) : downAmount;
+            if (Math.abs(newDown - downPaymentInput) > 1) {
+                document.getElementById('downPayment').value = isPercent ? newDown.toFixed(2) : newDown.toFixed(0);
+            }
+        } else {
+            // Default: calc from home price + down payment
+            downAmount = isPercent ? (downPaymentInput / 100 * homePrice) : downPaymentInput;
+            loanAmount = Math.max(0, homePrice - downAmount);
+
+            // Update manual loan field if different (but not if it's focused)
+            if (focusedId !== 'loanAmountManual' && Math.abs(loanAmount - loanAmountInput) > 1) {
+                document.getElementById('loanAmountManual').value = loanAmount.toFixed(0);
+            }
+        }
+    } else {
+        loanAmount = parseFloat(document.getElementById('loanAmountDirect').value) || 0;
+    }
+
     const annualRate = parseFloat(document.getElementById('rate').value) || 0;
     const termYears = parseFloat(document.getElementById('term').value) || 30;
     const annualTaxes = parseFloat(document.getElementById('taxes').value) || 0;
     const annualInsurance = parseFloat(document.getElementById('insurance').value) || 0;
-    const pmiRate = parseFloat(document.getElementById('pmi').value) || 0;
+    const pmiRateInput = parseFloat(document.getElementById('pmi').value) || 0;
     const extraMonthly = parseFloat(document.getElementById('extraMonthly').value) || 0;
     const biweekly = document.getElementById('biweekly').checked;
+
     if (loanAmount <= 0 || annualRate <= 0 || termYears <= 0) {
-        document.getElementById('calc-output').innerHTML = '<p class="text-red-600 font-bold">Invalid inputs.</p>';
+        document.getElementById('calc-output').innerHTML = '<p class="text-red-600 font-bold text-center text-2xl">Please enter valid values.</p>';
         return;
     }
+
     const monthlyRate = annualRate / 100 / 12;
     const totalPayments = termYears * 12;
-    // Standard P&I for the selected term
-    const standardPI = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalPayments) /
-                      (Math.pow(1 + monthlyRate, totalPayments) - 1);
+
+    const standardPI = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
+                      (Math.pow(1 + monthlyRate, totalPayments) - 1) || 0;
+
     const monthlyTaxes = annualTaxes / 12;
     const monthlyInsurance = annualInsurance / 12;
-    const monthlyPMI = pmiRate > 0 ? loanAmount * pmiRate / 100 / 12 : 0;
+
+    let monthlyPMI = 0;
+    if (isPurchase) {
+        const downPercent = homePrice > 0 ? ((homePrice - loanAmount) / homePrice * 100) : 0;
+        monthlyPMI = downPercent < 20 ? (loanAmount * pmiRateInput / 100 / 12) : 0;
+        if (downPercent >= 20 && pmiRateInput > 0) {
+            document.getElementById('pmi').value = '0';
+        }
+    } else {
+        monthlyPMI = loanAmount * pmiRateInput / 100 / 12;
+    }
+
     const basePITI = standardPI + monthlyTaxes + monthlyInsurance + monthlyPMI;
-    // Standard interest over full selected term
-    const standardInterest = standardPI * totalPayments - loanAmount;
-    // Custom principal payment
+
     let principalPayment = standardPI + extraMonthly;
     let userMonthlyCost = basePITI + extraMonthly;
+
     if (biweekly) {
         principalPayment = (standardPI + extraMonthly) * 13 / 12;
-        userMonthlyCost = userMonthlyCost / 2 * 26 / 12;
+        userMonthlyCost = (basePITI + extraMonthly) * 13 / 12;
     }
-    // Exact months to payoff (no extra month bug)
+
     let monthsToPayoff = totalPayments;
-    if (principalPayment > loanAmount * monthlyRate + 0.01) { // safety for floating point
-        const ratio = principalPayment / (principalPayment - loanAmount * monthlyRate);
-        monthsToPayoff = Math.log(ratio) / Math.log(1 + monthlyRate);
-        monthsToPayoff = Math.round(monthsToPayoff); // round to nearest month
+    if (extraMonthly > 0 || biweekly) {
+        const r = monthlyRate;
+        const p = principalPayment;
+        const logArg = p / (p - loanAmount * r);
+        if (logArg > 1) {
+            monthsToPayoff = Math.log(logArg) / Math.log(1 + r);
+            monthsToPayoff = Math.ceil(monthsToPayoff);
+        }
     }
+
     const yearsToPayoff = Math.floor(monthsToPayoff / 12);
     const remainingMonths = monthsToPayoff % 12;
+
+    const standardInterest = standardPI * totalPayments - loanAmount;
     const customInterest = principalPayment * monthsToPayoff - loanAmount;
-    const interestSavings = standardInterest - customInterest;
-    // Output with full breakdown and high-contrast text
+    const interestDiff = standardInterest - customInterest;
+
     document.getElementById('calc-output').innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-            <div class="p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-4 border-[#002B5C]">
-                <h4 class="text-2xl font-bold mb-8 text-[#002B5C] dark:text-[#00A89D]">Standard ${termYears}-Year Schedule</h4>
-                <div class="space-y-4 text-gray-800 dark:text-gray-200 text-lg">
-                    <p><strong>Principal & Interest:</strong> $${standardPI.toFixed(2)}/mo</p>
-                    <p><strong>Property Taxes:</strong> $${monthlyTaxes.toFixed(2)}/mo</p>
-                    <p><strong>Homeowners Insurance:</strong> $${monthlyInsurance.toFixed(2)}/mo</p>
-                    <p><strong>PMI:</strong> $${monthlyPMI.toFixed(2)}/mo</p>
-                    <p class="text-xl font-bold pt-4 border-t-2 border-[#002B5C]/30 text-[#002B5C] dark:text-[#00A89D]">
-                        <strong>Total Monthly Payment:</strong> $${basePITI.toFixed(2)}
-                    </p>
-                    <p class="mt-6"><strong>Total Interest Over Term:</strong> $${standardInterest.toFixed(0)}</p>
-                </div>
-            </div>
-            <div class="p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-4 border-[#F15A29]">
-                <h4 class="text-2xl font-bold mb-8 text-[#F15A29]">Your Custom Schedule</h4>
-                <div class="space-y-4 text-gray-800 dark:text-gray-200 text-lg">
-                    <p><strong>Principal & Interest Applied:</strong> $${(standardPI + extraMonthly).toFixed(2)}/mo${biweekly ? ' (biweekly)' : ''}</p>
-                    <p><strong>Property Taxes:</strong> $${monthlyTaxes.toFixed(2)}/mo</p>
-                    <p><strong>Homeowners Insurance:</strong> $${monthlyInsurance.toFixed(2)}/mo</p>
-                    <p><strong>PMI:</strong> $${monthlyPMI.toFixed(2)}/mo</p>
-                    <p><strong>Extra Principal:</strong> $${extraMonthly.toFixed(2)}/mo</p>
-                    <p class="text-xl font-bold pt-4 border-t-2 border-[#F15A29]/30 text-[#F15A29]">
-                        <strong>Your Total Monthly Cost:</strong> $${userMonthlyCost.toFixed(2)}
-                    </p>
-                    <p class="mt-6"><strong>Payoff Time:</strong> ${yearsToPayoff} years${remainingMonths > 0 ? ', ' + remainingMonths + ' months' : ''}</p>
-                    <p><strong>Total Interest Paid:</strong> $${customInterest.toFixed(0)}</p>
-                    <p class="text-3xl font-bold ${interestSavings > 0 ? 'text-green-600' : 'text-red-600'} mt-8">
-                        You Save: $${interestSavings.toFixed(0)} in interest
-                    </p>
-                </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div class="p-10 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-3xl shadow-2xl border-4 border-[#002B5C]">
+            <h4 class="text-3xl font-black mb-8 text-[#002B5C] dark:text-[#00A89D]">Standard ${termYears}-Year Loan</h4>
+            <div class="space-y-5 text-xl">
+                <p><strong>Loan Amount:</strong> $${loanAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                <p><strong>P&I:</strong> $${standardPI.toFixed(2)}/mo</p>
+                <p><strong>Taxes + Insurance:</strong> $${(monthlyTaxes + monthlyInsurance).toFixed(2)}/mo</p>
+                <p><strong>PMI:</strong> $${monthlyPMI.toFixed(2)}/mo</p>
+                <p class="text-3xl font-black pt-8 border-t-4 border-[#002B5C]/50 text-[#002B5C] dark:text-[#00A89D]">
+                    Total Payment: $${basePITI.toFixed(2)}/mo
+                </p>
+                <p class="text-3xl font-black mt-12 text-[#002B5C] dark:text-[#00A89D]">
+                    Total Interest Paid: $${standardInterest.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </p>
             </div>
         </div>
-    `;
+
+        <div class="p-10 bg-gradient-to-br from-[#F15A29]/10 to-[#00A89D]/10 dark:from-[#F15A29]/20 dark:to-[#00A89D]/20 rounded-3xl shadow-2xl border-4 border-[#F15A29]">
+            <h4 class="text-3xl font-black mb-8 text-[#F15A29]">Your Custom Plan</h4>
+            <div class="space-y-5 text-xl">
+                <p><strong>Extra Principal Payment:</strong> 
+    $${extraMonthly.toFixed(2)}${extraMonthly > 0 ? '/month' : ''} 
+    ${biweekly ? ` (≈ $${(extraMonthly / 2).toFixed(0)} per biweekly payment)` : ''}
+</p>
+                <p><strong>Your Payment:</strong> $${userMonthlyCost.toFixed(2)}/mo</p>
+                <p><strong>Payoff Time:</strong> ${yearsToPayoff} years${remainingMonths ? `, ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}</p>
+                <p class="text-3xl font-black pt-8 border-t-4 border-[#F15A29]/50 text-[#F15A29]">
+                    Total Interest Paid: $${customInterest.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </p>
+                <p class="text-4xl font-black mt-12 ${interestDiff > 0 ? 'text-green-600' : interestDiff < 0 ? 'text-red-600' : 'text-gray-600'}">
+                    ${interestDiff > 0 ? 'You Save' : interestDiff < 0 ? 'Extra Cost' : 'No Change'}: $${Math.abs(interestDiff).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </p>
+            </div>
+        </div>
+    </div>
+`;
 }
-// Auto-calculate on any input change (including checkbox)
-document.querySelectorAll('#calculator input, #calculator input[type="checkbox"]').forEach(input => {
-    input.addEventListener('input', calculateAdvanced);
-    input.addEventListener('change', calculateAdvanced);
+gtag('event', 'calculate_payment', {
+        event_category: 'Tool Usage',
+        event_label: 'Calculator Used',
+        value: 1
+    });
+
+// Auto-calc on any input change
+document.querySelectorAll('#calculator input, #calculator input[type="checkbox"]').forEach(el => {
+    el.addEventListener('input', calculateAdvanced);
+    el.addEventListener('change', calculateAdvanced);
 });
-// Search with highlights
-const searchInput = document.getElementById('search');
-const searchWrapper = searchInput.parentElement;
 
-if (searchInput) {
-    let resultsDropdown = null;
 
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim().toLowerCase();
-        
-        // Clear previous
-        if (resultsDropdown) {
-            resultsDropdown.remove();
-            resultsDropdown = null;
-        }
+// Down payment %/$ toggle buttons
+document.getElementById('dp-percent-btn').addEventListener('click', () => {
+    document.getElementById('dp-percent-btn').classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80');
+    document.getElementById('dp-percent-btn').classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+    document.getElementById('dp-dollar-btn').classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80');
+    document.getElementById('dp-dollar-btn').classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+    document.getElementById('downPayment').placeholder = 'e.g., 20 for 20%';
+    calculateAdvanced();
+});
 
-        if (query === '') return;
+document.getElementById('dp-dollar-btn').addEventListener('click', () => {
+    document.getElementById('dp-dollar-btn').classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80');
+    document.getElementById('dp-dollar-btn').classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+    document.getElementById('dp-percent-btn').classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80');
+    document.getElementById('dp-percent-btn').classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+    document.getElementById('downPayment').placeholder = 'e.g., 75000';
+    calculateAdvanced();
+});
 
-        const sections = Array.from(document.querySelectorAll('main section'));
-        const matches = [];
-
-        sections.forEach(sec => {
-            const titleEl = sec.querySelector('h2');
-            const title = titleEl ? titleEl.textContent.toLowerCase() : '';
-            const content = sec.textContent.toLowerCase();
-
-            if (title.includes(query) || content.includes(query)) {
-                // Score: title match = higher priority
-                const score = title.includes(query) ? 2 : 1;
-                // Snippet: find context around match
-                const idx = content.indexOf(query);
-                const start = Math.max(0, idx - 50);
-                const snippetText = sec.textContent.slice(start, idx + query.length + 100);
-                const highlighted = snippetText.replace(new RegExp(`(${query})`, 'gi'), '<strong class="font-bold text-[#F15A29]">$1</strong>');
-
-                matches.push({
-                    id: sec.id,
-                    title: titleEl ? titleEl.textContent : 'Untitled',
-                    snippet: highlighted + (snippetText.length < sec.textContent.length ? '...' : ''),
-                    score
-                });
-            }
-        });
-
-        // Sort: title matches first, then relevance
-        matches.sort((a, b) => b.score - a.score);
-
-        // Limit to 6
-        const limitedMatches = matches.slice(0, 6);
-
-        if (limitedMatches.length === 0) {
-            return;  // Or add "No results" div
-        }
-
-        // Build dropdown
-        resultsDropdown = document.createElement('div');
-        resultsDropdown.className = 'absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-2xl max-h-96 overflow-y-auto z-50 border border-white/20';
-        resultsDropdown.innerHTML = `
-            <ul class="py-2">
-                ${limitedMatches.map(match => `
-                    <li class="px-6 py-4 hover:bg-[#F15A29]/10 dark:hover:bg-[#F15A29]/20 cursor-pointer flex items-center justify-between border-b border-gray-200/50 dark:border-gray-700/50 last:border-0 transition-all" onclick="showSection('${match.id}'); searchInput.value = ''; resultsDropdown.remove(); dashboardHeader?.scrollIntoView({ behavior: 'smooth', block: 'start' });">
-                        <div>
-                            <p class="font-bold text-[#002B5C] dark:text-white text-lg">${match.title}</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" innerHTML="${match.snippet}"></p>
-                        </div>
-                        <i class="fas fa-arrow-right text-[#F15A29] ml-4"></i>
-                    </li>
-                `).join('')}
-                ${matches.length > 6 ? '<li class="px-6 py-3 text-center text-gray-500 text-sm">+ ${matches.length - 6} more results — refine search</li>' : ''}
-            </ul>
-        `;
-        searchWrapper.appendChild(resultsDropdown);
-    });
-
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-        if (!searchWrapper.contains(e.target)) {
-            if (resultsDropdown) resultsDropdown.remove();
-        }
-    });
-}
-// KEEP THIS — this is the good one
+// Script scenario custom toggle
 document.getElementById('script-scenario-select').addEventListener('change', function() {
     const customWrapper = document.getElementById('custom-scenario-wrapper');
     const customTextarea = document.getElementById('custom-scenario');
@@ -5191,28 +5320,70 @@ document.getElementById('script-scenario-select').addEventListener('change', fun
         customTextarea.value = '';
     }
 });
-// Page load: show Prospecting, initial calc, and quote
+
 // Page load: show AI Chat Assistant by default
-// Page load: show AI Chat Assistant by default (no auto-scroll)
 document.addEventListener('DOMContentLoaded', () => {
     // Hide all sections
     document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+
     const chatInput = document.getElementById('chat-input');
     if (chatInput) {
         chatInput.value = "Tell me how this tool can help me as a loan officer. What are all the features?";
     }
+
     // Show AI Chat Assistant
     const aiChat = document.querySelector('#ai-chat');
     if (aiChat) {
         aiChat.classList.remove('hidden');
-        // REMOVED: aiChat.scrollIntoView({ behavior: 'smooth' }); <-- Delete this line
     } else {
-        // Fallback: show first section if AI Chat not found
+        // Fallback: show first section
         document.querySelector('main section')?.classList.remove('hidden');
     }
-    // Initial calculation and quote (keep if needed)
+
+    // Initial calculator state
     calculateAdvanced();
-    generateQuote();
+    document.getElementById('mode-purchase')?.click();
+    document.getElementById('dp-percent-btn')?.click();
+});
+
+// Script scenario custom toggle
+document.getElementById('script-scenario-select').addEventListener('change', function() {
+    const customWrapper = document.getElementById('custom-scenario-wrapper');
+    const customTextarea = document.getElementById('custom-scenario');
+    if (this.value === ' ') {
+        customWrapper.classList.remove('hidden');
+        customTextarea.value = '';
+        customTextarea.focus();
+    } else {
+        customWrapper.classList.add('hidden');
+        customTextarea.value = '';
+    }
+});
+
+
+// Page load: show AI Chat Assistant by default
+document.addEventListener('DOMContentLoaded', () => {
+    // Hide all sections
+    document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) {
+        chatInput.value = "Tell me how this tool can help me as a loan officer. What are all the features?";
+    }
+
+    // Show AI Chat Assistant
+    const aiChat = document.querySelector('#ai-chat');
+    if (aiChat) {
+        aiChat.classList.remove('hidden');
+    } else {
+        // Fallback: show first section
+        document.querySelector('main section')?.classList.remove('hidden');
+    }
+
+    // Initial calculator state
+    calculateAdvanced();
+    document.getElementById('mode-purchase')?.click();
+    document.getElementById('dp-percent-btn')?.click();
 });
    // === DATABASE NURTURING CATEGORY MODALS ===
 function openDatabaseModal(category) {
@@ -5296,6 +5467,7 @@ function openDatabaseModal(category) {
     content.innerHTML = html;
 }
 // Auto-fill text input when selecting from dropdown
+
 document.getElementById('blog-topic-select').addEventListener('change', function() {
     if (this.value) {
         document.getElementById('blog-topic').value = this.value;
@@ -5422,6 +5594,12 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
         document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
 
+        gtag('event', 'generate_blog', {
+  event_category: 'Tool Usage',
+  event_label: 'Blog Generated',
+  value: 1
+});
+
     } catch (error) {
         output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error generating blog. Check console or API key.</p>';
         output.classList.remove('hidden');
@@ -5464,6 +5642,7 @@ function copySocialCaption() {
         alert('Social caption copied!');
     });
 }
+
 function closeDatabaseModal() {
     document.getElementById('db-modal').style.display = 'none';
 }
@@ -6192,6 +6371,12 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
 
         // Remove "saved plan" note since this is freshly generated
         document.getElementById('saved-plan-note')?.remove();
+
+        gtag('event', 'generate_monthly_plan', {
+  event_category: 'Tool Usage',
+  event_label: 'Monthly Social Plan Generated',
+  value: 1
+});
 
         // Reset progress bar visually
         const fill = document.getElementById('progress-fill');
@@ -7419,9 +7604,11 @@ function resetEquityTool() {
     fileInput.value = '';
     window.currentOpportunities = null;
 }
-</script>
 
+
+</script>
 <!-- Post Ideas Modal -->
+
 <div id="post-modal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -7548,6 +7735,7 @@ function resetEquityTool() {
     <i class="fas fa-check-circle text-4xl"></i>
     Settings Saved Successfully!
 </div>
+
 <script>
 
     const dailyActivities = [
@@ -7904,7 +8092,7 @@ Key Personal Details:
 - Passions & hobbies: ${[...userSetup.hobbies, userSetup.hobbiesOther].filter(Boolean).join(", ") || 'none shared—focus on professional growth and family time'}
 - Preferred prospecting activities: ${userSetup.preferredActivities.length > 0 ? userSetup.preferredActivities.join(", ") : 'no strong preferences — mix it up'}
 
-Prioritize tasks involving these activities when possible, while keeping balance.
+Prioritize tasks involving these activities when possible, while keeping balance. Example, golf is a passion, schedule a tee time or range time with a referral partner, the same for wine tasting, or manicures, schedule time with a referral partner doing one of your passions, hobbies or interest. 
 
 Strategic Guidelines:
 - Scale task volume and intensity to fit their available prospecting hours (${userSetup.hours}). Do not overload—aim for focused, high-leverage actions.
@@ -7982,6 +8170,12 @@ Output ONLY valid JSON:
             }));
 
             if (dayTasks.length === 0) throw new Error('No valid tasks');
+
+            gtag('event', 'generate_weekly_plan', {
+  event_category: 'Tool Usage',
+  event_label: 'Weekly Win Plan Generated',
+  value: 1
+});
 
         } catch (err) {
             console.log('AI plan failed:', err.message || err);
@@ -8127,72 +8321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgress();
 });
 </script>
-<script>
-// === Newsletter Generator: Magical, Persistent, Grok-Powered ===
-// Auto-load/save all inputs, generate with fresh local content, beautiful outputs
-
-// Load saved values on start
-document.addEventListener('DOMContentLoaded', () => {
-    const fields = [
-        'nl-audience', 'nl-frequency', 'nl-tone', 'nl-location', 
-        'nl-name', 'nl-headshot', 'nl-logo', 'nl-signature', 
-        'nl-facebook', 'nl-instagram', 'nl-linkedin', 
-        'nl-youtube', 'nl-x', 'nl-google', 'nl-length',
-        'nl-title', 'nl-cell', 'nl-email'  // All here — one source of truth
-    ];
-
-    fields.forEach(id => {
-        const saved = localStorage.getItem(id);
-        if (saved) document.getElementById(id).value = saved;
-    });
-
-    const checkboxes = ['nl-market', 'nl-industry', 'nl-local', 'nl-recipes', 'nl-fun', 'nl-tip', 'nl-quote', 'nl-rate', 'nl-personal', 'nl-referral'];
-    const savedChecks = JSON.parse(localStorage.getItem('nl_sections') || '[]');
-    checkboxes.forEach(id => {
-        if (savedChecks.includes(id)) document.getElementById(id).checked = true;
-    const savedLength = localStorage.getItem('nl-length');
-    if (savedLength) document.getElementById('nl-length').value = savedLength;
-    });
-
-    togglePersonalSection();
-});
-
-// Auto-save on change
-document.querySelectorAll('#newsletter-generator input, #newsletter-generator select').forEach(el => {
-    el.addEventListener('change', () => {
-        if (el.type === 'checkbox') {
-            const checked = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked')).map(c => c.id);
-            localStorage.setItem('nl_sections', JSON.stringify(checked));
-        } else {
-            localStorage.setItem(el.id, el.value);
-        }
-        togglePersonalSection();
-    });
-});
-
-// Show/hide personal update
-function openNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (modal) {
-        modal.style.display = 'flex';  // Shows modal (flex for centering)
-    }
-}
-
-function closeNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Optional: Close on Escape key (nice UX)
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeNewsletterTips();
-    }
-});
-
-// === FULL REPLACEMENT: Newsletter Generate Button Listener (Safe, Offline-Friendly, No Errors) ===
+<script type="text/javascript">
 document.getElementById('generate-newsletter-btn')?.addEventListener('click', async () => {
     const loading = document.getElementById('global-loading');
     if (loading) loading.classList.remove('hidden');
@@ -8200,116 +8329,129 @@ document.getElementById('generate-newsletter-btn')?.addEventListener('click', as
     let html = '';
 
     try {
-        // Build sections list
         const sections = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked'))
                          .map(c => c.id.replace('nl-', ''))
                          .join(', ');
 
-        // Your full prompt (use the latest version from previous message)
-        const prompt = `You are a world-class email designer. Create ONE newsletter using this EXACT template — fill content only, NEVER change structure/layout or images.
+        const promptLines = [
+            'You are a world-class email designer. Create ONE newsletter using this EXACT template — fill content only, NEVER change structure/layout or images.',
+            '',
+            'User Inputs:',
+            '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
+            '- Frequency: ' + (document.getElementById('nl-frequency').value || 'Weekly'),
+            '- Tone: ' + (document.getElementById('nl-tone').value || 'Professional'),
+            '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
+            '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights | January 2026'),
+            '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
+            '- Sections: ' + (sections || 'Market Update, Industry News, Local Spotlight, Quick Recipe'),
+            '- Personal update: "' + (document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!') + '"',
+            '- Specific topics: "' + (document.getElementById('nl-specific').value || 'None') + '"',
+            '',
+            'Branding:',
+            '- Name: ' + (document.getElementById('nl-name').value || 'Your Loan Officer'),
+            '- Headshot URL: ' + (document.getElementById('nl-headshot').value || 'https://via.placeholder.com/120x160/002B5C/FFFFFF?text=Headshot'),
+            '- Logo URL: ' + (document.getElementById('nl-logo').value || ''),
+            '- Cell: ' + (document.getElementById('nl-cell').value || ''),
+            '- Email: ' + (document.getElementById('nl-email').value || ''),
+            '- Signature (NMLS number): ' + (document.getElementById('nl-signature').value || ''),
+            '',
+            'Social Media Links (include icons only if URL is provided — use Font Awesome classes):',
+            '- Facebook: ' + (document.getElementById('nl-facebook').value || 'none'),
+            '- Instagram: ' + (document.getElementById('nl-instagram').value || 'none'),
+            '- LinkedIn: ' + (document.getElementById('nl-linkedin').value || 'none'),
+            '- YouTube: ' + (document.getElementById('nl-youtube').value || 'none'),
+            '- X (Twitter): ' + (document.getElementById('nl-x').value || 'none'),
+            '- Google Reviews: ' + (document.getElementById('nl-google').value || 'none'),
+            '',
+            'CRITICAL RULES: Follow these above all else',
+            '- HERO IMAGE: Find an image of a gorgeous midwestern home with a working link and use that for the header hero image.',
+            '- CONFIRM WORKING HERO IMAGE LINK',
+            '- HEADSHOT: Vertical oval — 120x160px, border-radius 50%/40%, object-fit:cover.',
+            '- PERSONAL UPDATE: Always rewrite/polish the raw input — make it warm, relatable, newsletter-perfect (never raw paste).',
+            '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
+            '- DOUBLE CHECK ALL CONTENT: Accuracy is of utmost importance. Verify content with at least 2 reliable sources.',
+            '- NO separate "Personal Note" or "Referral Time" sections — personal update ALWAYS in signature, referral CTA ALWAYS at bottom.',
+            '- ONLY ONE IMAGE: Hero beautiful winter Midwest home.',
+            '- Always pull new and different Fun Facts, Recipes, Local info and Pro Tips each week to share, NEVER REUSE PRIORS.',
+            '- Compliance: No specific rates, disclaimer in footer.',
+            '- Content: Fresh from the most recent month, ONLY include 1 source link. Content should Educate, Empower and Entertain whenever possible.',
+            '- Do not quote specific mortgage rates, make guarantees, or forecast outcomes.',
+            '',
+            'OUTPUT ONLY complete standalone HTML:',
+            '',
+            '<!DOCTYPE html>',
+            '<html lang="en">',
+            '<head>',
+            '    <meta charset="UTF-8">',
+            '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+            '    <title>[Title]</title>',
+            '    <style>',
+            '        body { margin:0; background:#f4f4f4; font-family:Arial,sans-serif; }',
+            '        .container { max-width:600px; margin:0 auto; background:white; }',
+            '        .header { text-align:center; padding:40px 20px; background:white; }',
+            '        .hero img { width:100%; height:auto; display:block; }',
+            '        .section { padding:30px; border-left:8px solid #00A89D; margin:20px; background:#f9f9f9; box-shadow:0 4px 12px rgba(0,0,0,0.05); }',
+            '        .section h2 { color:#002B5C; font-size:26px; margin:0 0 20px; }',
+            '        .signature { padding:20px; background:white; display:flex; align-items:center; gap:50px; flex-wrap:wrap; }',
+            '        .headshot { ',
+            '            width:120px; ',
+            '            height:160px; ',
+            '            border-radius:50%/40%; ',
+            '            border:5px solid #00A89D; ',
+            '            object-fit:cover; ',
+            '        }',
+            '        .signature-text { flex:1; min-width:300px; }',
+            '        .cta { text-align:center; padding:10px 20px 20px; background:white; }',
+            '        .cta-button { background:#F15A29; color:white; padding:20px 44px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block; }',
+            '        .footer { padding:30px; background:#002B5C; color:white; text-align:center; font-size:14px; }',
+            '        a { color:#00A89D; text-decoration:underline; }',
+            '    </style>',
+            '</head>',
+            '<body>',
+            '    <div class="container">',
+            '        <div class="header">',
+            '            [Logo centered if provided]',
+            '            <h1 style="color:#002B5C; font-size:36px;">[Title]</h1>',
+            '            <p style="color:#666;">Weekly Insights from [Location] | January 2026</p>',
+            '        </div>',
+            '        <div class="hero">',
+            '            [ONE beautiful winter Midwest home image full-width]',
+            '        </div>',
+            '        [Main section cards — only the checked sections]',
+            '        <div class="signature">',
+            '            <img src="[Headshot URL]" alt="[Name]" class="headshot">',
+            '            <div class="signature-text">',
+            '                <h2 style="color:#002B5C; font-size:28px; margin:0;">From [Name]</h2>',
+            '                <p style="margin:15px 0; font-size:18px;">[Polished personal update]</p>',
+            '                [If Signature provided: <p>NMLS # [Signature]</p>]',
+            '                <p style="margin:10px 0; font-size:16px;">',
+            '                    <a href="tel:[Cell]">[Cell]</a> | <a href="mailto:[Email]">[Email]</a>',
+            '                </p>',
+            '                <div class="social-icons">',
+            '                    [If Facebook: <a href="[Facebook URL]" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>]',
+            '                    [If Instagram: <a href="[Instagram URL]" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>]',
+            '                    [If LinkedIn: <a href="[LinkedIn URL]" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>]',
+            '                    [If YouTube: <a href="[YouTube URL]" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>]',
+            '                    [If X: <a href="[X URL]" target="_blank"><i class="fab fa-twitter"></i> X</a>]',
+            '                    [If Google: <a href="[Google URL]" target="_blank"><i class="fab fa-google"></i> Google</a>]',
+            '                </div>',
+            '            </div>',
+            '        </div>',
+            '        <div class="cta">',
+            '            <h2 style="color:#002B5C; font-size:28px;">Know Someone Ready to Buy or Refinance?</h2>',
+            '            <p style="font-size:18px; margin:20px 0;">I\'d love to help — forward this or click below!</p>',
+            '            <a href="mailto:[Email]?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi [Name],%0A%0AI\'d like to refer someone who\'s interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey\'re looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A[Sender Name]" class="cta-button">Send Me a Referral</a>',
+            '            <p style="margin-top:20px; font-size:16px;">Or text/call: <a href="tel:[Cell]">[Cell]</a></p>',
+            '        </div>',
+            '        <div class="footer">',
+            '            <p>Rates and programs subject to change. Contact me for personalized quote.</p>',
+            '        </div>',
+            '    </div>',
+            '</bo' + 'dy>',
+            '</ht' + 'ml>'
+        ];
+        const prompt = promptLines.join('\n');
 
-User Inputs:
-- Audience: ${document.getElementById('nl-audience').value || 'Full Database'}
-- Frequency: ${document.getElementById('nl-frequency').value || 'Weekly'}
-- Tone: ${document.getElementById('nl-tone').value || 'Professional'}
-- Location: ${document.getElementById('nl-location').value || 'Fort Wayne, Indiana'}
-- Title: ${document.getElementById('nl-title').value || 'Mortgage Insights | January 2026'}
-- Length: ${document.getElementById('nl-length').value || 'medium'}
-- Sections: ${sections || 'Market Update, Industry News, Local Spotlight, Quick Recipe'}
-- Personal update: """${document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!'}"""
-- Specific topics: """${document.getElementById('nl-specific').value || 'None'}"""
-
-Branding:
-- Name: ${document.getElementById('nl-name').value || 'Your Loan Officer'}
-- Headshot URL: ${document.getElementById('nl-headshot').value || 'https://via.placeholder.com/120x160/002B5C/FFFFFF?text=Headshot'}
-- Logo URL: ${document.getElementById('nl-logo').value || ''}
-- Cell: ${document.getElementById('nl-cell').value || ''}
-- Email: ${document.getElementById('nl-email').value || ''}
-- Signature (NMLS number): ${document.getElementById('nl-signature').value || ''}
-
-CRITICAL RULES: Follow these above all else) 
-- HERO IMAGE: Find an image of a gorgeous midwestern home with a working link and use that for the header hero image. 
-- CONFIRM WORKING HERO IMAGE LINK
-- HEADSHOT: Vertical oval — 120x160px, border-radius 50%/40%, object-fit:cover.
-- PERSONAL UPDATE: Always rewrite/polish the raw input — make it warm, relatable, newsletter-perfect (never raw paste).
-- ALL EXTERNAL LINKS: target="_blank" rel="noopener".
-- DOUBLE CHECK ALL CONTENT: Accuracy is of utmost importance. Verify content with at least 2 sources. 
-- NO separate "Personal Note" or "Referral Time" sections — personal update ALWAYS in signature, referral CTA ALWAYS at bottom.
-- ONLY ONE IMAGE: Hero beautiful winter Midwest home.Compliance: No specific rates, disclaimer in footer.
-- Content: Fresh from the most recent month, source links. Content should Educate, Empower and Entertain whenever possible. 
-
-OUTPUT ONLY complete standalone HTML:
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[Title]</title>
-    <style>
-        body { margin:0; background:#f4f4f4; font-family:Arial,sans-serif; }
-        .container { max-width:600px; margin:0 auto; background:white; }
-        .header { text-align:center; padding:40px 20px; background:white; }
-        .hero img { width:100%; height:auto; display:block; }
-        .section { padding:30px; border-left:8px solid #00A89D; margin:20px; background:#f9f9f9; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
-        .section h2 { color:#002B5C; font-size:26px; margin:0 0 20px; }
-        .signature { padding:20px; background:white; display:flex; align-items:center; gap:50px; flex-wrap:wrap; }
-        .headshot { 
-            width:120px; 
-            height:160px; 
-            border-radius:50%/40%; 
-            border:5px solid #00A89D; 
-            object-fit:cover; 
-        }
-        .signature-text { flex:1; min-width:300px; }
-        .cta { text-align:center; padding:20px; background:white; }
-        .cta-button { background:#F15A29; color:white; padding:20px 44px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block; }
-        .footer { padding:30px; background:#002B5C; color:white; text-align:center; font-size:14px; }
-        a { color:#00A89D; text-decoration:underline; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            [Logo centered if provided]
-            <h1 style="color:#002B5C; font-size:36px;">[Title]</h1>
-            <p style="color:#666;">Weekly Insights from [Location] | January 2026</p>
-        </div>
-        <div class="hero">
-            [ONE beautiful winter Midwest home image full-width]
-        </div>
-        [Main section cards — only the checked sections]
-        <div class="signature">
-            <img src="[Headshot URL]" alt="[Name]" class="headshot">
-            <div class="signature-text">
-                <h2 style="color:#002B5C; font-size:28px; margin:0;">From [Name]</h2>
-                <p style="margin:15px 0; font-size:18px;">[Polished personal update]</p>
-                [If Signature provided: <p>NMLS # [Signature]</p>]
-                <p style="margin:10px 0; font-size:16px;">
-                    <a href="tel:[Cell]">[Cell]</a> | <a href="mailto:[Email]">[Email]</a>
-                </p>
-                <div class="social-icons">
-                    [If Facebook: <a href="[Facebook URL]" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>]
-                    [If Instagram: <a href="[Instagram URL]" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>]
-                    [If LinkedIn: <a href="[LinkedIn URL]" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>]
-                    [If YouTube: <a href="[YouTube URL]" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>]
-                    [If X: <a href="[X URL]" target="_blank"><i class="fab fa-twitter"></i> X</a>]
-                    [If Google: <a href="[Google URL]" target="_blank"><i class="fab fa-google"></i> Google</a>]
-                </div>
-            </div>
-        </div>
-        <div class="cta">
-            <h2 style="color:#002B5C; font-size:28px;">Know Someone Ready to Buy or Refinance?</h2>
-            <p style="font-size:18px; margin:20px 0;">I'd love to help — forward this or click below!</p>
-            <a href="mailto:[Email]?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi [Name],%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A[Sender Name]" class="cta-button">Send Me a Referral</a>
-            <p style="margin-top:20px; font-size:16px;">Or text/call: <a href="tel:[Cell]">[Cell]</a></p>
-        </div>
-        <div class="footer">
-            <p>Rates and programs subject to change. Contact me for personalized quote.</p>
-        </div>
-    </div>
-</body>
-</html>`;
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
@@ -8328,131 +8470,145 @@ OUTPUT ONLY complete standalone HTML:
         const data = await response.json();
         let fullContent = data.choices[0]?.message?.content?.trim() || '';
 
-        // === AGGRESSIVE CLEANING: Pure HTML only ===
-        // Strip everything before HTML start
         const htmlStart = fullContent.search(/<!DOCTYPE html|<html/i);
         if (htmlStart !== -1) {
             fullContent = fullContent.substring(htmlStart);
         }
 
-        // Strip everything after </html>
         const htmlEnd = fullContent.toLowerCase().indexOf('</html>');
         if (htmlEnd !== -1) {
             fullContent = fullContent.substring(0, htmlEnd + 7);
         }
 
-        // Remove fences/prefix
         fullContent = fullContent.replace(/^html\s*/i, '').trim();
         fullContent = fullContent.replace(/^```html?\s*/i, '').trim();
         fullContent = fullContent.replace(/^```\s*/g, '').trim();
         fullContent = fullContent.replace(/```$/g, '').trim();
 
-        // Wrap if missing doctype
         if (!fullContent.toLowerCase().startsWith('<!doctype') && !fullContent.toLowerCase().startsWith('<html')) {
-            fullContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Newsletter</title></head><body>${fullContent}</body></html>`;
+            const wrapperLines = [
+                '<!DOCTYPE html>',
+                '<html lang="en">',
+                '<head>',
+                '    <meta charset="UTF-8">',
+                '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+                '    <title>Newsletter</title>',
+                '</head>',
+                '<body>' + fullContent,
+                '</bo' + 'dy>',
+                '</ht' + 'ml>'
+            ];
+            fullContent = wrapperLines.join('\n');
         }
 
         html = fullContent || '<p>Newsletter content coming soon!</p>';
 
-        // === FORCE HERO IMAGE (always visible) ===
         if (!html.includes('class="hero"')) {
-            const heroHTML = `<div class="hero">
-                <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter Midwest home" style="width:100%;height:auto;display:block;">
-            </div>`;
-            html = html.replace(/<\/div>\s*<\/div>/i, '</div></div>' + heroHTML);  // After header
+            const heroHTML = '<div class="hero">' +
+                             '    <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter Midwest home" style="width:100%;height:auto;display:block;">' +
+                             '</div>';
+            html = html.replace(/<\/div>\s*<\/div>/i, '</div></div>' + heroHTML);
         }
 
     } catch (err) {
         console.log('Generation failed — using beautiful fallback');
 
-        html = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fort Wayne Mortgage Weekly</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
-        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .header { text-align: center; padding: 40px 20px; background: linear-gradient(to bottom, #002B5C, #001429); color: white; }
-        .hero img { width: 100%; height: auto; display: block; }
-        .section { padding: 30px; border-left: 8px solid #00A89D; background: #f9f9f9; margin: 20px; border-radius: 8px; }
-        .section h2 { color: #002B5C; font-size: 26px; margin: 0 0 20px; }
-        .signature { padding: 40px; background: white; display: flex; align-items: center; gap: 30px; }
-        .headshot { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00A89D; }
-        .cta { text-align: center; padding: 40px; background: white; }
-        .cta-button { background: #F15A29; color: white; padding: 18px 40px; border-radius: 30px; font-weight: bold; text-decoration: none; font-size: 18px; }
-        .footer { padding: 30px; background: #002B5C; color: white; text-align: center; font-size: 14px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Fort Wayne Mortgage Weekly</h1>
-            <p>January 2026 | Insights from Adam Garman</p>
-        </div>
-        <div class="hero">
-            <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter home">
-        </div>
-        <div class="section">
-            <h2>Market Update</h2>
-            <p>Rates trending lower — improved affordability heading into spring. Local inventory steady.</p>
-        </div>
-        <div class="section">
-            <h2>Local Spotlight</h2>
-            <p>Fort Wayne winter events heating up — don't miss the ice festival!</p>
-        </div>
-        <div class="section">
-            <h2>Quick Recipe</h2>
-            <p>Cozy chili for cold nights — perfect comfort food.</p>
-        </div>
-        <div class="signature">
-            <img src="https://via.placeholder.com/120?text=Adam" class="headshot" alt="Adam Garman">
-            <div>
-                <h2>From Adam</h2>
-                <p>Excited for a fresh start to 2026 in snowy Fort Wayne!</p>
-                <p>260-348-0905 | adam@ruoff.com</p>
-            </div>
-        </div>
-        <div class="cta">
-            <h2>Know Someone Ready to Buy or Refinance?</h2>
-            <p>I'd love to help — forward this or click below!</p>
-            <a href="mailto:adam@ruoff.com?subject=Referral" class="cta-button">Send Me a Referral</a>
-        </div>
-        <div class="footer">
-            <p>Rates subject to change. Contact me for details.</p>
-        </div>
-    </div>
-</body>
-</html>`;
+        const fallbackLines = [
+            '<!DOCTYPE html>',
+            '<html>',
+            '<head>',
+            '    <meta charset="UTF-8">',
+            '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+            '    <title>Fort Wayne Mortgage Weekly</title>',
+            '    <style>',
+            '        body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }',
+            '        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }',
+            '        .header { text-align: center; padding: 40px 20px; background: linear-gradient(to bottom, #002B5C, #001429); color: white; }',
+            '        .hero img { width: 100%; height: auto; display: block; }',
+            '        .section { padding: 30px; border-left: 8px solid #00A89D; background: #f9f9f9; margin: 20px; border-radius: 8px; }',
+            '        .section h2 { color: #002B5C; font-size: 26px; margin: 0 0 20px; }',
+            '        .signature { padding: 40px; background: white; display: flex; align-items: center; gap: 30px; }',
+            '        .headshot { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00A89D; }',
+            '        .cta { text-align: center; padding: 40px; background: white; }',
+            '        .cta-button { background: #F15A29; color: white; padding: 18px 40px; border-radius: 30px; font-weight: bold; text-decoration: none; font-size: 18px; }',
+            '        .footer { padding: 30px; background: #002B5C; color: white; text-align: center; font-size: 14px; }',
+            '    </style>',
+            '</head>',
+            '<body>',
+            '    <div class="container">',
+            '        <div class="header">',
+            '            <h1>Fort Wayne Mortgage Weekly</h1>',
+            '            <p>January 2026 | Insights from Adam Garman</p>',
+            '        </div>',
+            '        <div class="hero">',
+            '            <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter home">',
+            '        </div>',
+            '        <div class="section">',
+            '            <h2>Market Update</h2>',
+            '            <p>Rates trending lower — improved affordability heading into spring. Local inventory steady.</p>',
+            '        </div>',
+            '        <div class="section">',
+            '            <h2>Local Spotlight</h2>',
+            '            <p>Fort Wayne winter events heating up — don\'t miss the ice festival!</p>',
+            '        </div>',
+            '        <div class="section">',
+            '            <h2>Quick Recipe</h2>',
+            '            <p>Cozy chili for cold nights — perfect comfort food.</p>',
+            '        </div>',
+            '        <div class="signature">',
+            '            <img src="https://via.placeholder.com/120?text=Adam" class="headshot" alt="Adam Garman">',
+            '            <div>',
+            '                <h2>From Adam</h2>',
+            '                <p>Excited for a fresh start to 2026 in snowy Fort Wayne!</p>',
+            '                <p>260-348-0905 | adam@ruoff.com</p>',
+            '            </div>',
+            '        </div>',
+            '        <div class="cta">',
+            '            <h2>Know Someone Ready to Buy or Refinance?</h2>',
+            '            <p>I\'d love to help — forward this or click below!</p>',
+            '            <a href="mailto:adam@ruoff.com?subject=Referral" class="cta-button">Send Me a Referral</a>',
+            '        </div>',
+            '        <div class="footer">',
+            '            <p>Rates subject to change. Contact me for details.</p>',
+            '        </div>',
+            '    </div>',
+            '</bo' + 'dy>',
+            '</ht' + 'ml>'
+        ];
+        html = fallbackLines.join('\n');
     } finally {
-    if (loading) loading.classList.add('hidden');
+        if (loading) loading.classList.add('hidden');
 
-    const previewEl = document.getElementById('nl-preview');
-    if (previewEl) {
-        previewEl.innerHTML = `
-            <div class="bg-white text-gray-900 rounded-2xl shadow-2xl overflow-hidden">
-                ${html}
-            </div>
-        `;
+        const previewEl = document.getElementById('nl-preview');
+        if (previewEl) {
+            previewEl.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
+            iframe.srcdoc = html;
+            previewEl.appendChild(iframe);
+        }
+
+        const rawEl = document.getElementById('nl-html-raw');
+        if (rawEl) rawEl.value = html;
+
+        const output = document.getElementById('newsletter-output');
+        if (output) {
+            output.classList.remove('hidden');
+            output.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        gtag('event', 'generate_newsletter', {
+            event_category: 'Tool Usage',
+            event_label: 'Newsletter Generated',
+            value: 1
+        });
+
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
     }
-
-    const rawEl = document.getElementById('nl-html-raw');
-    if (rawEl) rawEl.value = html;
-
-    const output = document.getElementById('newsletter-output');
-    if (output) {
-        output.classList.remove('hidden');
-        output.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    if (typeof confetti === 'function') {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-    }
-}
 });
 
-// Copy functions
 function copyNewsletterHTML() {
     navigator.clipboard.writeText(document.getElementById('nl-html-raw').value);
     alert('HTML copied! Paste into your email platform.');
@@ -8464,12 +8620,11 @@ function downloadNewsletterHTML() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `newsletter_${new Date().toISOString().slice(0,10)}.html`;
+    a.download = 'newsletter_' + new Date().toISOString().slice(0,10) + '.html';
     a.click();
     URL.revokeObjectURL(url);
     alert('Newsletter downloaded! Double-click the file to preview.');
 }
-
 </script>
 <script>
 
@@ -8577,22 +8732,20 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🔄 Weekly Win Plan auto-save enabled — changes save instantly');
 })();
 </script>
-<script>
-// Reliable listener for Social Post generate button (paste at very bottom, before </body>)
-document.addEventListener('DOMContentLoaded', () => {
-    // Find button by inline onclick (works even without ID)
-    const generateBtn = document.querySelector('button[onclick="generateSocialPost()"]');
+<script type="text/javascript">
+(function addSocialPostListener() {
+    document.addEventListener('DOMContentLoaded', () => {
+        // Find button by inline onclick (works even without ID)
+        const generateBtn = document.querySelector('button[onclick=\'generateSocialPost()\']');  // Escaped inner single quotes for safety
 
-    if (generateBtn) {
-        generateBtn.addEventListener('click', generateSocialPost);
-        console.log('Social Post generate button listener attached successfully');
-    } else {
-        console.warn('Social Post generate button not found — check inline onclick');
-    }
-});
+        if (generateBtn) {
+            generateBtn.addEventListener('click', generateSocialPost);
+            console.log('Social Post generate button listener attached successfully');
+        } else {
+            console.warn('Social Post generate button not found — check inline onclick');
+        }
+    });
+})();
 </script>
 </body>
 </html>
-
-
-
