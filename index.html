@@ -537,9 +537,9 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-    <!-- <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+     <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Newsletter Generator
-</a></li> -->
+</a></li>
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
@@ -551,7 +551,7 @@ input[type="range"]:active::-moz-range-thumb {
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-           <!-- <li class="sidebar-group">Marketing</li>
+            <li class="sidebar-group">Marketing</li>
             <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
             <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
@@ -566,7 +566,7 @@ input[type="range"]:active::-moz-range-thumb {
             <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
             <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
-            </ul> -->
+            </ul> 
     </aside>
     <!-- AI Chat Assistant - Persistent on every page -->
 <div class="fixed bottom-4 right-4 z-50">
@@ -4266,6 +4266,7 @@ function cycleActivities() {
 async function generateSalesScript() {
     const loading = document.getElementById('global-loading');
     const output = document.getElementById('script-output');
+
     if (loading) loading.classList.remove('hidden');
     if (output) {
         output.innerHTML = '';
@@ -4277,8 +4278,8 @@ async function generateSalesScript() {
     const custom = document.getElementById('custom-scenario');
     const context = document.getElementById('script-context')?.value.trim() || '';
 
-    let scenario = select.value;
-    if (scenario === ' ' || !scenario) scenario = custom.value.trim();
+    let scenario = select?.value || '';
+    if (scenario === ' ' || !scenario) scenario = custom?.value?.trim() || '';
 
     if (!scenario) {
         alert('Please select or type a scenario');
@@ -4315,101 +4316,116 @@ Focus on building connection and trust — not closing the deal.`;
     let renderedHTML = '';
 
     try {
-    const response = await fetch('/api/chat', {
+        console.log('[Sales Script] Starting generation...');
+        console.log('[Sales Script] Prompt length:', prompt.length);
+
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
               },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.8,
-            max_tokens: 1400
-        })
-    });
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.8,
+                max_tokens: 1400
+            })
+        });
 
-    if (!response.ok) throw new Error('API failed');
+        console.log('[Sales Script] Response status:', response.status);
 
-    const data = await response.json();
-    let raw = data.choices[0].message.content.trim();
+        if (!response.ok) {
+            const errorText = await response.text().catch(() => '(no response body)');
+            console.error(`[Sales Script] API error ${response.status}: ${errorText}`);
+            throw new Error(`API returned ${response.status}: ${errorText}`);
+        }
 
-    // === IMPROVED SPLITTING FOR **Script X** TITLES ===
-    // Split on the bold title pattern, including the title in each section
-    let scriptSections = raw.split(/(?=\*\*Script \d+\*\*\s*\n)/i);
+        const data = await response.json();
+        let raw = data.choices?.[0]?.message?.content?.trim() || '';
 
-    // Remove any leading empty/whitespace-only section
-    if (scriptSections[0] && scriptSections[0].trim().length < 20) {
-        scriptSections.shift();
-    }
+        if (!raw) {
+            throw new Error('Empty response from API');
+        }
 
-    // Filter out any remaining empty/short sections
-    scriptSections = scriptSections
-        .map(s => s.trim())
-        .filter(s => s.length > 20); // Skip very short/empty
+        // Split on bold Script headers (includes the header in each chunk)
+        let scriptSections = raw.split(/(?=\*\*Script \d+\*\*\s*\n)/i);
 
-    let scriptsHTML = '<div class="space-y-20">';
+        // Clean up leading/trailing empty sections
+        scriptSections = scriptSections
+            .map(s => s.trim())
+            .filter(s => s.length > 20);
 
-    scriptSections.forEach((section, index) => {
-        let contentMarkdown = section;
+        if (scriptSections.length === 0) {
+            throw new Error('No valid scripts found in response');
+        }
 
-        // Extract title from **Script X**
-        const titleMatch = contentMarkdown.match(/\*\*Script (\d+)\*\*/i);
-        const title = titleMatch ? `Script ${titleMatch[1]}` : `Script ${index + 1}`;
+        let scriptsHTML = '<div class="space-y-20">';
 
-        // Remove the bold title from content (avoids duplicate)
-        contentMarkdown = contentMarkdown.replace(/\*\*Script \d+\*\*\s*\n?/i, '').trim();
+        scriptSections.forEach((section, index) => {
+            let contentMarkdown = section;
 
-        const scriptId = `script-${index}`;
+            // Extract title
+            const titleMatch = contentMarkdown.match(/\*\*Script (\d+)\*\*/i);
+            const title = titleMatch ? `Script ${titleMatch[1]}` : `Script ${index + 1}`;
 
-        scriptsHTML += `
-            <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl border-2 border-[#00A89D]/30">
-                <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-4xl font-black text-[#F15A29]">${title}</h3>
-                    <button onclick="copySingleScript('${scriptId}')" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 py-4 rounded-full font-bold shadow-xl transition-all flex items-center gap-3 text-xl hover:opacity-90">
-                        <i class="fas fa-copy"></i> Copy This Script
-                    </button>
+            // Remove the title line from content
+            contentMarkdown = contentMarkdown.replace(/\*\*Script \d+\*\*\s*\n?/i, '').trim();
+
+            const scriptId = `script-${index}`;
+
+            scriptsHTML += `
+                <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl shadow-2xl border-2 border-[#00A89D]/30">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-4xl font-black text-[#F15A29]">${title}</h3>
+                        <button onclick="copySingleScript('${scriptId}', this)" 
+                                class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 py-4 rounded-full font-bold shadow-xl transition-all flex items-center gap-3 text-xl hover:opacity-90">
+                            <i class="fas fa-copy"></i> Copy This Script
+                        </button>
+                    </div>
+                    <div id="${scriptId}" class="prose prose-lg dark:prose-invert max-w-none leading-relaxed">
+                        ${marked.parse(contentMarkdown || 'No content generated')}
+                    </div>
                 </div>
-                <div id="${scriptId}" class="prose prose-lg dark:prose-invert max-w-none leading-relaxed">
-                    ${marked.parse(contentMarkdown || 'No content')}
-                </div>
-            </div>
-        `;
-    });
+            `;
+        });
 
-    scriptsHTML += '</div>';
+        scriptsHTML += '</div>';
 
-    renderedHTML = scriptsHTML;
+        renderedHTML = scriptsHTML;
 
-    gtag('event', 'generate_scripts', {
-  event_category: 'Tool Usage',
-  event_label: 'Sales Scripts Generated',
-  value: scripts.length || 1  // tracks how many scripts
-});
+        // Fixed: use scriptSections.length
+        gtag('event', 'generate_scripts', {
+            event_category: 'Tool Usage',
+            event_label: 'Sales Scripts Generated',
+            value: scriptSections.length || 1
+        });
 
-} catch (err) {
-    console.error(err);
-    renderedHTML = `<p class="text-red-600 text-center py-20 text-xl">API unavailable locally — normal for offline testing.</p>`;
-} finally {
-    if (loading) loading.classList.add('hidden');
+    } catch (err) {
+        console.error('[Sales Script] Generation failed:', err.message, err.stack);
+        renderedHTML = `<p class="text-red-600 text-center py-20 text-xl">
+            Error: ${err.message || 'Failed to generate scripts'}<br>
+            <small>(Check console for details)</small>
+        </p>`;
+    } finally {
+        if (loading) loading.classList.add('hidden');
 
-    if (output) {
-        output.innerHTML = renderedHTML;
-        output.classList.remove('hidden');
-        output.scrollIntoView({ behavior: 'smooth' });
-    }
+        if (output) {
+            output.innerHTML = renderedHTML;
+            output.classList.remove('hidden');
+            output.scrollIntoView({ behavior: 'smooth' });
+        }
 
-    if (typeof confetti === 'function') {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
     }
 }
-}
 
-
-// === INDIVIDUAL SCRIPT COPY FUNCTION (keep or add this if not present) ===
-function copySingleScript(scriptId) {
+// Fixed copy function – now receives the button element directly
+function copySingleScript(scriptId, buttonEl) {
     const scriptEl = document.getElementById(scriptId);
-    if (!scriptEl) {
-        alert('Script not found!');
+    if (!scriptEl || !buttonEl) {
+        alert('Script or button not found!');
         return;
     }
 
@@ -4422,20 +4438,22 @@ function copySingleScript(scriptId) {
     });
 
     navigator.clipboard.write([clipboardItem]).then(() => {
-        const btn = event.target.closest('button');
-        if (btn) {
-            const original = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            btn.classList.replace('bg-[#00A89D]', 'bg-green-600');
+        const original = buttonEl.innerHTML;
+        buttonEl.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        buttonEl.classList.replace('from-[#00A89D]', 'from-green-600');
+        buttonEl.classList.replace('to-[#F15A29]', 'to-green-700');
 
-            setTimeout(() => {
-                btn.innerHTML = original;
-                btn.classList.replace('bg-green-600', 'bg-[#00A89D]');
-            }, 2000);
-        }
+        setTimeout(() => {
+            buttonEl.innerHTML = original;
+            buttonEl.classList.replace('from-green-600', 'from-[#00A89D]');
+            buttonEl.classList.replace('to-green-700', 'to-[#F15A29]');
+        }, 2000);
     }).catch(() => {
+        // Fallback
         navigator.clipboard.writeText(plainText).then(() => {
-            alert('Copied as plain text');
+            alert('Copied as plain text (rich formatting not supported)');
+        }).catch(() => {
+            alert('Copy failed — please select and copy manually');
         });
     });
 }
@@ -4808,7 +4826,7 @@ function getSuggestions(category) {
                 model: "grok-4-1-fast-reasoning",
                     messages: [{ role: "user", content: prompt }],
                     temperature: 0.7,
-                    max_tokens: 2000
+                    max_tokens: 4000
                 })
             });
 
@@ -8749,5 +8767,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
