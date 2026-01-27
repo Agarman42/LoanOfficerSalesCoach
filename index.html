@@ -8643,6 +8643,13 @@ function downloadNewsletterHTML() {
     URL.revokeObjectURL(url);
     alert('Newsletter downloaded! Double-click the file to preview.');
 }
+    function openNewsletterTips() {
+    document.getElementById('newsletter-tips-modal').style.display = 'flex'; // or 'block' if not using flex centering
+}
+
+function closeNewsletterTips() {
+    document.getElementById('newsletter-tips-modal').style.display = 'none';
+}
 </script>
 <script>
 
@@ -8767,4 +8774,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
