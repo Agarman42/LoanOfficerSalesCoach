@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ultimate Loan Officer Sales Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MDYP4C0BJ1"></script>
 <script>
@@ -464,6 +465,42 @@ input[type="range"]:active::-moz-range-thumb {
 .sidebar-item:hover {
     text-decoration: none !important;
 }
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 50;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+}
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .animate-modal {
+        animation: modalFadeIn 0.3s ease-out forwards;
+    }
+    #modal-list li {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        dark:bg-gray-700;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    #modal-list li:hover {
+        background: #e9ecef;
+        dark:bg-gray-600;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -537,9 +574,9 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-     <!--<li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+     <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Newsletter Generator
-</a></li> -->
+</a></li>
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
@@ -551,7 +588,7 @@ input[type="range"]:active::-moz-range-thumb {
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-           <!-- <li class="sidebar-group">Marketing</li>
+            <li class="sidebar-group">Marketing</li>
             <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
             <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
@@ -566,7 +603,7 @@ input[type="range"]:active::-moz-range-thumb {
             <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
             <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
-            </ul> -->
+            </ul> 
     </aside>
     <!-- AI Chat Assistant - Persistent on every page -->
 <div class="fixed bottom-4 right-4 z-50">
@@ -1052,7 +1089,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
 
             <!-- Preferred Prospecting Activities -->
             <div class="mb-10">
-                <label class="block text-xl font-semibold text-[#00A89D] mb-4">Preferred Prospecting Activities (Optional — Grok prioritizes these)</label>
+                <label class="block text-xl font-semibold text-[#00A89D] mb-4">Preferred Prospecting Activities (Optional — We'll prioritize these)</label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <label class="flex items-center gap-3 text-lg cursor-pointer">
                         <input type="checkbox" id="activity-coffee" class="activity-checkbox w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
@@ -1191,24 +1228,24 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             <p class="mb-6">Top LOs post 80% personal or value, 20% business. Follow this mix for trust + leads without being salesy.</p>
             <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
                 <div class="text-center p-6 bg-[#002B5C]/10 dark:bg-[#002B5C]/30 rounded-2xl">
-                    <div class="text-4xl mb-4">40%</div>
-                    <strong>{Personal}</strong><br>Market updates, tips, myth-busts
+                    <div class="text-4xl mb-4">50%</div>
+                    <strong>{Personal}</strong><br>Behind the scenes, family, travels, favorite teams, hobbies and passions
                 </div>
                 <div class="text-center p-6 bg-[#00A89D]/10 dark:bg-[#00A89D]/30 rounded-2xl">
-                    <div class="text-4xl mb-4">20%</div>
-                    <strong>Value</strong><br>Testimonials, closing stories
+                    <div class="text-4xl mb-4">15%</div>
+                    <strong>Value</strong><br>Tips, market updates, etc
                 </div>
                 <div class="text-center p-6 bg-[#F15A29]/10 dark:bg-[#F15A29]/30 rounded-2xl">
                     <div class="text-4xl mb-4">15%</div>
-                    <strong>Engagement</strong><br>Behind-the-scenes, family, hobbies
+                    <strong>Engagement</strong><br>Polls, questions, this-or-that posts
                 </div>
                 <div class="text-center p-6 bg-[#002B5C]/10 dark:bg-[#002B5C]/30 rounded-2xl">
-                    <div class="text-4xl mb-4">15%</div>
-                    <strong>Local</strong><br>Community events, spotlights
+                    <div class="text-4xl mb-4">10%</div>
+                    <strong>Local</strong><br>Community events, business spotlights
                 </div>
                 <div class="text-center p-6 bg-[#00A89D]/10 dark:bg-[#00A89D]/30 rounded-2xl">
                     <div class="text-4xl mb-4">10%</div>
-                    <strong>Educational</strong><br>Polls, questions, this-or-that
+                    <strong>Educational</strong><br>Programs, products, advice
                 </div>
             </div>
             <p class="mt-6 font-semibold">Post 4–5 times/week using this mix → consistent leads without burnout.</p>
@@ -1375,254 +1412,271 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         </div>
     </div>
 
-    <!-- 7. Idea Bank: Holiday Polls, Questions & Topics -->
-    <div class="accordion mb-8">
-        <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">7. Massive Idea Bank: Holidays, Polls, Topics & More <i class="fas fa-chevron-down"></i></button>
-        <div class="accordion-content">
-            <p class="mb-6">Your full evergreen idea vault — never run out of content.</p>
+    <!-- 7. Massive Idea Bank: Holidays, Polls, Topics & More -->
+<div class="accordion mb-8">
+    <button onclick="toggleAccordion(this)" class="w-full text-left text-xl font-semibold py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">7. Massive Idea Bank: Holidays, Polls, Topics & More <i class="fas fa-chevron-down"></i></button>
+    <div class="accordion-content">
+        <p class="mb-6">Your full evergreen idea vault — expand categories below. Never run out of content!</p>
 
-            <h4 class="text-xl font-bold mb-4">Holiday "This or That" Polls</h4>
-            <ul class="columns-1 md:columns-2 gap-8 space-y-2 mb-8 text-lg">
-                <li>Real Tree vs. Artificial Tree</li>
-                <li>White Lights vs. Multi-Colored Lights</li>
-                <li>Tinsel vs. Garland</li>
-                <li>Classic Christmas Songs vs. Modern Holiday Hits</li>
-                <li>Red Ornaments vs. Gold Ornaments</li>
-                <li>Hot Chocolate with Marshmallows vs. Whipped Cream</li>
-                <li>Ugly Sweater Party vs. Formal Christmas Dinner</li>
-                <li>Open Presents Christmas Eve vs. Christmas Morning</li>
-                <li>Christmas Shopping: Black Friday vs. Cyber Monday</li>
-                <li>Rudolph vs. Frosty the Snowman</li>
-                <li>Elf on the Shelf vs. Christmas Elf</li>
-                <li>Baking Cookies vs. Decorating Gingerbread Houses</li>
-                <li>Mistletoe vs. Holly</li>
-                <li>White Christmas vs. Warm Christmas</li>
-                <li>Christmas Market vs. Indoor Shopping</li>
-                <li>Christmas in the Mountains vs. Christmas at the Beach</li>
-                <li>Snowy Cabin Retreat vs. City Christmas Adventure</li>
-                <li>Sleigh Ride vs. Horse Carriage Ride</li>
-                <li>Silent Night Indoors vs. Festive Caroling Outside</li>
-                <li>Decorating the Outside vs. Inside of Your Home, or BOTH</li>
-                <li>Pumpkin Pie vs. Apple Pie</li>
-                <li>Eggnog vs. Apple Cider vs. Hot Chocolate</li>
-                <li>Roast Turkey vs. Honey-Glazed Ham</li>
-                <li>Mashed Potatoes vs. Sweet Potato Casserole</li>
-                <li>Sugar Cookies vs. Shortbread</li>
-                <li>Hot Toddy vs. Spiked Eggnog</li>
-                <li>Peppermint Bark vs. Fudge</li>
-                <li>Traditional Fruitcake vs. Yule Log Cake</li>
-                <li>Candy Canes vs. Chocolate Truffles</li>
-                <li>Gingerbread Cookies vs. Snickerdoodles</li>
-                <li>Christmas Movies: Animated vs. Live Action</li>
-                <li>Secret Santa vs. White Elephant Gift Exchange</li>
-                <li>Caroling vs. Watching Christmas Movies</li>
-                <li>Festive Pajamas vs. Regular PJs</li>
-                <li>Holiday Movie Marathon vs. Game Night</li>
-                <li>Family Gathering at Home vs. Vacation Getaway</li>
-                <li>Attending Christmas Markets vs. Shopping Online</li>
-                <li>Stocking Stuffers vs. Big Presents</li>
-                <li>Driving to See Lights vs. Lighting the Tree at Home</li>
-                <li>Making Holiday Crafts vs. Watching Christmas Specials</li>
-                <li>Morning Pajamas vs. Matching Sweaters</li>
-                <li>Ice Skating vs. Sledding</li>
-                <li>Snowman Building vs. Snowball Fight</li>
-                <li>Snow Angel vs. Sitting by the Fireplace</li>
-                <li>Skiing Vacation vs. Cozy Cabin Stay</li>
-                <li>Gift Cards vs. Handmade Gifts</li>
-                <li>Traditional Holiday Music vs. Modern Christmas Hits</li>
-                <li>Making New Year’s Resolutions: Yes or No</li>
-            </ul>
+        <!-- Holiday Polls Sub-Accordion -->
+        <div class="accordion mb-6">
+            <button onclick="toggleAccordion(this)" class="w-full text-left text-lg font-semibold py-3 border-b border-gray-300 dark:border-gray-600 flex justify-between items-center">Holiday "This or That" Polls <i class="fas fa-chevron-down"></i></button>
+            <div class="accordion-content">
+                <ul class="columns-1 md:columns-2 gap-8 space-y-2 mt-4 text-lg">
+                    <li>Real Tree vs. Artificial Tree</li>
+                    <li>White Lights vs. Multi-Colored Lights</li>
+                    <li>Tinsel vs. Garland</li>
+                    <li>Classic Christmas Songs vs. Modern Holiday Hits</li>
+                    <li>Red Ornaments vs. Gold Ornaments</li>
+                    <li>Hot Chocolate with Marshmallows vs. Whipped Cream</li>
+                    <li>Ugly Sweater Party vs. Formal Christmas Dinner</li>
+                    <li>Open Presents Christmas Eve vs. Christmas Morning</li>
+                    <li>Christmas Shopping: Black Friday vs. Cyber Monday</li>
+                    <li>Rudolph vs. Frosty the Snowman</li>
+                    <li>Elf on the Shelf vs. Christmas Elf</li>
+                    <li>Baking Cookies vs. Decorating Gingerbread Houses</li>
+                    <li>Mistletoe vs. Holly</li>
+                    <li>White Christmas vs. Warm Christmas</li>
+                    <li>Christmas Market vs. Indoor Shopping</li>
+                    <li>Christmas in the Mountains vs. Christmas at the Beach</li>
+                    <li>Snowy Cabin Retreat vs. City Christmas Adventure</li>
+                    <li>Sleigh Ride vs. Horse Carriage Ride</li>
+                    <li>Silent Night Indoors vs. Festive Caroling Outside</li>
+                    <li>Decorating the Outside vs. Inside of Your Home, or BOTH</li>
+                    <li>Pumpkin Pie vs. Apple Pie</li>
+                    <li>Eggnog vs. Apple Cider vs. Hot Chocolate</li>
+                    <li>Roast Turkey vs. Honey-Glazed Ham</li>
+                    <li>Mashed Potatoes vs. Sweet Potato Casserole</li>
+                    <li>Sugar Cookies vs. Shortbread</li>
+                    <li>Hot Toddy vs. Spiked Eggnog</li>
+                    <li>Peppermint Bark vs. Fudge</li>
+                    <li>Traditional Fruitcake vs. Yule Log Cake</li>
+                    <li>Candy Canes vs. Chocolate Truffles</li>
+                    <li>Gingerbread Cookies vs. Snickerdoodles</li>
+                    <li>Christmas Movies: Animated vs. Live Action</li>
+                    <li>Secret Santa vs. White Elephant Gift Exchange</li>
+                    <li>Caroling vs. Watching Christmas Movies</li>
+                    <li>Festive Pajamas vs. Regular PJs</li>
+                    <li>Holiday Movie Marathon vs. Game Night</li>
+                    <li>Family Gathering at Home vs. Vacation Getaway</li>
+                    <li>Attending Christmas Markets vs. Shopping Online</li>
+                    <li>Stocking Stuffers vs. Big Presents</li>
+                    <li>Driving to See Lights vs. Lighting the Tree at Home</li>
+                    <li>Making Holiday Crafts vs. Watching Christmas Specials</li>
+                    <li>Morning Pajamas vs. Matching Sweaters</li>
+                    <li>Ice Skating vs. Sledding</li>
+                    <li>Snowman Building vs. Snowball Fight</li>
+                    <li>Snow Angel vs. Sitting by the Fireplace</li>
+                    <li>Skiing Vacation vs. Cozy Cabin Stay</li>
+                    <li>Gift Cards vs. Handmade Gifts</li>
+                    <li>Traditional Holiday Music vs. Modern Christmas Hits</li>
+                    <li>Making New Year’s Resolutions: Yes or No</li>
+                </ul>
+            </div>
+        </div>
 
-            <h4 class="text-xl font-bold mb-4">Open-Ended Engagement Questions</h4>
-            <ul class="columns-1 md:columns-2 gap-8 space-y-2 mb-8 text-lg">
-                <!-- All 50+ questions from your original list here — fully preserved -->
-                <li>Best gift you've ever received?</li>
-                <li>One wish granted this holiday?</li>
-                <li>Most memorable Christmas?</li>
-                <li>Favorite movie to watch yearly?</li>
-                <li>Favorite holiday song?</li>
-                <li>Funny/embarrassing holiday stories?</li>
-                <li>Worst gift received?</li>
-                <li>Dream holiday location?</li>
-                <li>Favorite holiday food?</li>
-                <li>Favorite New Year's Eve drink?</li>
-                <li>Proudest resolution achieved?</li>
-                <li>Three dinner guests (living/dead)?</li>
-                <li>Unique family tradition?</li>
-                <li>Favorite snowy day activity?</li>
-                <li>How celebrate New Year?</li>
-                <li>Most creative gift given?</li>
-                <li>Funny holiday movie scene?</li>
-                <li>Prefer giving or receiving gifts?</li>
-                <li>Strategy for family gatherings?</li>
-                <li>Best holiday party attended?</li>
-                <li>New tradition to start?</li>
-                <li>Choose your Christmas name?</li>
-                <li>Ideal Christmas Day?</li>
-                <li>First gift bought with own money?</li>
-                <li>Favorite carol and why?</li>
-                <li>Surprising place for decoration?</li>
-                <li>One irresistible cookie?</li>
-                <li>Favorite childhood memory?</li>
-                <li>One holiday meal forever?</li>
-                <li>Funniest thing at holiday event?</li>
-                <li>Holiday activity as Olympic sport?</li>
-                <li>Best holiday play/performance?</li>
-                <li>Secret Santa story?</li>
-                <li>Wish for someone else?</li>
-                <li>Holiday miracle?</li>
-                <li>Holiday gadget wish?</li>
-                <li>Quirky traditions?</li>
-                <li>Favorite way to ring in New Year?</li>
-                <li>Resolutions worth it?</li>
-                <li>Most thoughtful non-physical gift?</li>
-                <li>Favorite quote/saying?</li>
-                <li>Go-to comfort food?</li>
-                <li>Favorite part of season?</li>
-                <li>If Santa real?</li>
-                <li>Holiday book recommendation?</li>
-                <li>Holiday dish from around world?</li>
-                <li>Memorable holiday away from home?</li>
-                <li>Keep spirit alive in tough times?</li>
-                <li>One thing never gets old?</li>
-            </ul>
+        <!-- Open-Ended Questions Sub-Accordion -->
+        <div class="accordion mb-6">
+            <button onclick="toggleAccordion(this)" class="w-full text-left text-lg font-semibold py-3 border-b border-gray-300 dark:border-gray-600 flex justify-between items-center">Open-Ended Engagement Questions <i class="fas fa-chevron-down"></i></button>
+            <div class="accordion-content">
+                <ul class="columns-1 md:columns-2 gap-8 space-y-2 mt-4 text-lg">
+                    <li>Best gift you've ever received?</li>
+                    <li>One wish granted this holiday?</li>
+                    <li>Most memorable Christmas?</li>
+                    <li>Favorite movie to watch yearly?</li>
+                    <li>Favorite holiday song?</li>
+                    <li>Funny/embarrassing holiday stories?</li>
+                    <li>Worst gift received?</li>
+                    <li>Dream holiday location?</li>
+                    <li>Favorite holiday food?</li>
+                    <li>Favorite New Year's Eve drink?</li>
+                    <li>Proudest resolution achieved?</li>
+                    <li>Three dinner guests (living/dead)?</li>
+                    <li>Unique family tradition?</li>
+                    <li>Favorite snowy day activity?</li>
+                    <li>How celebrate New Year?</li>
+                    <li>Most creative gift given?</li>
+                    <li>Funny holiday movie scene?</li>
+                    <li>Prefer giving or receiving gifts?</li>
+                    <li>Strategy for family gatherings?</li>
+                    <li>Best holiday party attended?</li>
+                    <li>New tradition to start?</li>
+                    <li>Choose your Christmas name?</li>
+                    <li>Ideal Christmas Day?</li>
+                    <li>First gift bought with own money?</li>
+                    <li>Favorite carol and why?</li>
+                    <li>Surprising place for decoration?</li>
+                    <li>One irresistible cookie?</li>
+                    <li>Favorite childhood memory?</li>
+                    <li>One holiday meal forever?</li>
+                    <li>Funniest thing at holiday event?</li>
+                    <li>Holiday activity as Olympic sport?</li>
+                    <li>Best holiday play/performance?</li>
+                    <li>Secret Santa story?</li>
+                    <li>Wish for someone else?</li>
+                    <li>Holiday miracle?</li>
+                    <li>Holiday gadget wish?</li>
+                    <li>Quirky traditions?</li>
+                    <li>Favorite way to ring in New Year?</li>
+                    <li>Resolutions worth it?</li>
+                    <li>Most thoughtful non-physical gift?</li>
+                    <li>Favorite quote/saying?</li>
+                    <li>Go-to comfort food?</li>
+                    <li>Favorite part of season?</li>
+                    <li>If Santa real?</li>
+                    <li>Holiday book recommendation?</li>
+                    <li>Holiday dish from around world?</li>
+                    <li>Memorable holiday away from home?</li>
+                    <li>Keep spirit alive in tough times?</li>
+                    <li>One thing never gets old?</li>
+                </ul>
+            </div>
+        </div>
 
-            <h4 class="text-xl font-bold mb-4">Educational & Value Topics</h4>
-            <ul class="columns-1 md:columns-2 gap-8 space-y-2 mb-8 text-lg">
-                <!-- All your original educational topics fully preserved -->
-                <li>What Not to Do Before Buy Home</li>
-                <li>How Prepare Home Ownership</li>
-                <li>Mortgage Basics Beginners</li>
-                <li>3 Myths Getting Mortgage</li>
-                <li>Benefits Home Ownership</li>
-                <li>5 Steps Secure Dream Home</li>
-                <li>What Know Apply Mortgage</li>
-                <li>3 Tips Simplify Buying Process</li>
-                <li>First-Time Buyer Know</li>
-                <li>FICO Credit Score Mean</li>
-                <li>Qualify Low Credit Score</li>
-                <li>Own Best Long-Term Wealth</li>
-                <li>Mortgage Investment Not Debt</li>
-                <li>Pre-Approved When</li>
-                <li>5 Questions Ask Lender</li>
-                <li>Choose Best Mortgage</li>
-                <li>10 First-Time Buyer Mistakes Avoid</li>
-                <li>Where How Get Mortgage</li>
-                <li>Type Loan Right You</li>
-                <li>Financing Basics Homebuyers</li>
-                <li>Mortgage Mistakes Selling Home</li>
-                <li>Buy Sell Same Time</li>
-                <li>Own Did Mortgage</li>
-                <li>Escrow Know</li>
-                <li>Bank vs Broker Mortgage</li>
-                <li>Mistakes Apply Mortgage</li>
-                <li>Improve Credit Pay Down Cards</li>
-                <li>Credit Tips Not Do</li>
-                <li>Dos Don'ts Loan Process</li>
-                <li>Rent vs Own</li>
-                <li>VA Financing Benefits</li>
-                <li>DTI Calculate</li>
-                <li>LTV Important</li>
-                <li>Conforming Jumbo Diff</li>
-                <li>Payment History Effects Credit</li>
-                <li>Market Updates Trends</li>
-                <li>First-Time Homebuyer Tips Credit Down Payment</li>
-                <li>Loan Program Spotlights Types Benefits</li>
-                <li>Home Equity Basics Benefits Cash-Out</li>
-                <li>Own First Investment Property Research Financing ROI</li>
-                <li>Pre-Approval vs Pre-Qualification</li>
-                <li>Behind-Scenes Closings</li>
-                <li>Did You Know Rate History Closing Costs</li>
-                <li>Myth-Buster 30 Sec e.g. 20% Down Not True</li>
-                <li>Market Pulse Weekly Local Rates</li>
-                <li>Client Wins e.g. Teacher 3% Down</li>
-                <li>FAQ Common Questions</li>
-                <li>Mortgage Process Infographics</li>
-                <li>Homeownership Milestones Anniversaries</li>
-                <li>Myth Fact e.g. 20% Down</li>
-                <li>Industry Data MBA Sources</li>
-                <li>Home Maintenance Seasonal</li>
-                <li>Mortgage Humor Professional</li>
-                <li>Holiday Recognition Fun</li>
-                <li>Polls Quizzes e.g. Rent Buy</li>
-                <li>Terms Defined Graphics</li>
-                <li>Local Housing Snapshots Trends</li>
-                <li>5 Mistakes Buyers</li>
-                <li>5 Reasons Love Neighborhood</li>
-                <li>Buy Now?</li>
-                <li>Favorite Transaction Story</li>
-                <li>Funniest Strategy</li>
-                <li>Worst Transaction</li>
-                <li>Reasons Love Referrals</li>
-                <li>5 FAQs</li>
-            </ul>
+        <!-- Educational & Value Topics Sub-Accordion -->
+        <div class="accordion mb-6">
+            <button onclick="toggleAccordion(this)" class="w-full text-left text-lg font-semibold py-3 border-b border-gray-300 dark:border-gray-600 flex justify-between items-center">Educational & Value Topics <i class="fas fa-chevron-down"></i></button>
+            <div class="accordion-content">
+                <ul class="columns-1 md:columns-2 gap-8 space-y-2 mt-4 text-lg">
+                    <!-- All your educational topics here — unchanged -->
+                    <li>What Not to Do Before Buying a Home</li>
+    <li>How to Prepare for Home Ownership</li>
+    <li>Mortgage Basics for Beginners</li>
+    <li>3 Common Myths About Getting a Mortgage</li>
+    <li>The Benefits of Home Ownership</li>
+    <li>5 Steps to Secure Your Dream Home</li>
+    <li>What You Need to Know Before Applying for a Mortgage</li>
+    <li>3 Tips to Simplify the Home Buying Process</li>
+    <li>Essential Guide for First-Time Home Buyers</li>
+    <li>What Your FICO Credit Score Really Means</li>
+    <li>How to Qualify for a Mortgage with a Lower Credit Score</li>
+    <li>Why Home Ownership is the Best Long-Term Wealth Builder</li>
+    <li>Why a Mortgage is an Investment, Not Just Debt</li>
+    <li>When to Get Pre-Approved for a Mortgage</li>
+    <li>5 Questions Every Buyer Should Ask Their Lender</li>
+    <li>How to Choose the Best Mortgage for Your Needs</li>
+    <li>10 First-Time Home Buyer Mistakes to Avoid</li>
+    <li>Where and How to Get a Mortgage</li>
+    <li>Which Loan Type is Right for You</li>
+    <li>Financing Basics Every Home Buyer Should Know</li>
+    <li>Mortgage Mistakes to Avoid When Selling Your Home</li>
+    <li>How to Buy and Sell a Home at the Same Time</li>
+    <li>Why You Should Own Before Refinancing</li>
+    <li>What You Need to Know About Escrow</li>
+    <li>Bank vs. Mortgage Broker: Which is Better?</li>
+    <li>Common Mistakes When Applying for a Mortgage</li>
+    <li>How to Improve Your Credit by Paying Down Cards</li>
+    <li>Credit Tips: What Not to Do Before Applying</li>
+    <li>Dos and Don'ts During the Loan Process</li>
+    <li>Rent vs. Own: Making the Right Choice</li>
+    <li>VA Loan Benefits for Eligible Borrowers</li>
+    <li>How to Calculate Your Debt-to-Income Ratio</li>
+    <li>Why Loan-to-Value Ratio is Important</li>
+    <li>Conforming vs. Jumbo Loans: Key Differences</li>
+    <li>How Payment History Affects Your Credit Score</li>
+    <li>Local Market Updates and Trends</li>
+    <li>First-Time Home Buyer Tips: Credit and Down Payment</li>
+    <li>Loan Program Spotlights: Types and Benefits</li>
+    <li>Home Equity Basics and Cash-Out Refinance Benefits</li>
+    <li>Owning Your First Investment Property: Research, Financing, and ROI</li>
+    <li>Pre-Approval vs. Pre-Qualification Explained</li>
+    <li>Behind-the-Scenes of Mortgage Closings</li>
+    <li>Did You Know: Rate History and Closing Cost Facts</li>
+    <li>Myth-Buster in 30 Seconds (e.g., "You Need 20% Down" is Not True)</li>
+    <li>Market Pulse: Weekly Local Rate Updates</li>
+    <li>Client Success Stories (e.g., Teacher Closed with 3% Down)</li>
+    <li>Frequently Asked Questions from Borrowers</li>
+    <li>Mortgage Process Infographics</li>
+    <li>Celebrating Homeownership Milestones and Anniversaries</li>
+    <li>Myth vs. Fact (e.g., "20% Down Required")</li>
+    <li>Industry Data from Trusted Sources</li>
+    <li>Seasonal Home Maintenance Tips for Homeowners</li>
+    <li>Professional Mortgage Humor</li>
+    <li>Holiday Recognition and Fun Ideas</li>
+    <li>Polls and Quizzes (e.g., Rent vs. Buy)</li>
+    <li>Key Mortgage Terms Defined with Graphics</li>
+    <li>Local Housing Market Snapshots and Trends</li>
+    <li>5 Common Mistakes Home Buyers Make</li>
+    <li>5 Reasons to Love Your Neighborhood</li>
+    <li>Is Now a Good Time to Buy?</li>
+    <li>Favorite Transaction Stories</li>
+    <li>Funniest Mortgage Strategies</li>
+    <li>Worst Transaction Lessons Learned</li>
+    <li>Why I Love Referrals from Partners</li>
+    <li>5 Frequently Asked Questions</li>
+                </ul>
+            </div>
+        </div>
 
-            <h4 class="text-xl font-bold mb-4">Recipes, Drinks, Fun Facts, Local & Repeatable Topics</h4>
-            <p class="mb-4">All your original creative banks — perfect for personal + value posts.</p>
-            <!-- Recipes, Drinks, Fun Facts, Local Spotlights, Repeatable Topics fully preserved in columns for readability -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <strong>Recipes & Drinks</strong>
-                    <ul class="list-disc pl-6 space-y-2">
-                        <li>Holiday Treats Home Tie-In: "Bake these cookies for open houses!"</li>
-                        <li>Easy Appetizers Client Events</li>
-                        <li>Seasonal Smoothies Home Wellness</li>
-                        <li>Mortgage-Themed Cocktails Fun Posts</li>
-                        <li>Quick Dinners Busy LOs</li>
-                        <li>Budget-Friendly Meals Homebuyers</li>
-                        <li>Festive Desserts Client Gifts</li>
-                        <li>Healthy Snacks Prospecting Energy</li>
-                        <li>Co-branded Recipe Cards Partners</li>
-                        <li>Seasonal Soups Cozy Homes</li>
-                        <li>Festive Cocktails Client Parties</li>
-                        <li>Non-Alcoholic Punches Events</li>
-                        <li>Coffee Recipes Morning Motivation</li>
-                        <li>Smoothie Ideas Health Homeownership</li>
-                        <li>Seasonal Hot Drinks Cozy Homes</li>
-                        <li>Mocktails First-Time Buyers</li>
-                        <li>Energy Drinks Prospecting Boost</li>
-                        <li>Wine Pairings Home Closings</li>
-                        <li>Healthy Juices Wellness Tips</li>
-                        <li>Themed Drinks Holiday Posts</li>
-                    </ul>
-                </div>
-                <div>
-                    <strong>Fun Facts, Local & Repeatable</strong>
-                    <ul class="list-disc pl-6 space-y-2">
-                        <li>Mortgage Trivia: "Average loan term 30 years?"</li>
-                        <li>Real Estate Oddities: "World's smallest house?"</li>
-                        <li>Finance Fun: "Origin 'mortgage' word?"</li>
-                        <li>Home History: "Famous homes facts"</li>
-                        <li>LO Life: "Average LO closes X loans/year"</li>
-                        <li>Rate Facts: "Lowest historical rate?"</li>
-                        <li>Credit Myths: "Checking score hurts it?"</li>
-                        <li>Home Value Trivia: "Factors affecting appraisal?"</li>
-                        <li>Industry Milestones: "First mortgage date?"</li>
-                        <li>Buyer Stats: "Average age first-time buyer?"</li>
-                        <li>Restaurant Feature: "Best spot for client lunches"</li>
-                        <li>Business Partnership: "Team up with local coffee shop"</li>
-                        <li>Community Event: "Upcoming festival – great networking"</li>
-                        <li>Neighborhood Highlight: "Why this area hot for buyers"</li>
-                        <li>Local Pro Shoutout: "Featured realtor/builder"</li>
-                        <li>Fun Fact Friday</li>
-                        <li>Tip Tuesday</li>
-                        <li>Motivation Monday</li>
-                        <li>Throwback Thursday</li>
-                        <li>Weekend Wins</li>
-                        <li>Question Wednesday</li>
-                        <li>Spotlight Saturday</li>
-                        <li>Self-Care Sunday</li>
-                        <li>Market Monday</li>
-                        <li>Testimonial Tuesday</li>
-                        <li>Wisdom Wednesday</li>
-                        <li>Fun Friday</li>
-                        <li>Success Saturday</li>
-                        <li>Sunday Setup</li>
-                    </ul>
+        <!-- Recipes, Drinks, Fun Facts, Local & Repeatable Sub-Accordion -->
+        <div class="accordion mb-6">
+            <button onclick="toggleAccordion(this)" class="w-full text-left text-lg font-semibold py-3 border-b border-gray-300 dark:border-gray-600 flex justify-between items-center">Recipes, Drinks, Fun Facts, Local & Repeatable <i class="fas fa-chevron-down"></i></button>
+            <div class="accordion-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                    <div>
+                        <strong>Recipes & Drinks</strong>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>Holiday Treats Home Tie-In: "Bake these cookies for open houses!"</li>
+                            <li>Easy Appetizers Client Events</li>
+                            <li>Seasonal Smoothies Home Wellness</li>
+                            <li>Mortgage-Themed Cocktails Fun Posts</li>
+                            <li>Quick Dinners Busy LOs</li>
+                            <li>Budget-Friendly Meals Homebuyers</li>
+                            <li>Festive Desserts Client Gifts</li>
+                            <li>Healthy Snacks Prospecting Energy</li>
+                            <li>Co-branded Recipe Cards Partners</li>
+                            <li>Seasonal Soups Cozy Homes</li>
+                            <li>Festive Cocktails Client Parties</li>
+                            <li>Non-Alcoholic Punches Events</li>
+                            <li>Coffee Recipes Morning Motivation</li>
+                            <li>Smoothie Ideas Health Homeownership</li>
+                            <li>Seasonal Hot Drinks Cozy Homes</li>
+                            <li>Mocktails First-Time Buyers</li>
+                            <li>Energy Drinks Prospecting Boost</li>
+                            <li>Wine Pairings Home Closings</li>
+                            <li>Healthy Juices Wellness Tips</li>
+                            <li>Themed Drinks Holiday Posts</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Fun Facts, Local & Repeatable</strong>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>Mortgage Trivia: "Average loan term 30 years?"</li>
+                            <li>Real Estate Oddities: "World's smallest house?"</li>
+                            <li>Finance Fun: "Origin 'mortgage' word?"</li>
+                            <li>Home History: "Famous homes facts"</li>
+                            <li>LO Life: "Average LO closes X loans/year"</li>
+                            <li>Rate Facts: "Lowest historical rate?"</li>
+                            <li>Credit Myths: "Checking score hurts it?"</li>
+                            <li>Home Value Trivia: "Factors affecting appraisal?"</li>
+                            <li>Industry Milestones: "First mortgage date?"</li>
+                            <li>Buyer Stats: "Average age first-time buyer?"</li>
+                            <li>Restaurant Feature: "Best spot for client lunches"</li>
+                            <li>Business Partnership: "Team up with local coffee shop"</li>
+                            <li>Community Event: "Upcoming festival – great networking"</li>
+                            <li>Neighborhood Highlight: "Why this area hot for buyers"</li>
+                            <li>Local Pro Shoutout: "Featured realtor/builder"</li>
+                            <li>Fun Fact Friday</li>
+                            <li>Tip Tuesday</li>
+                            <li>Motivation Monday</li>
+                            <li>Throwback Thursday</li>
+                            <li>Weekend Wins</li>
+                            <li>Question Wednesday</li>
+                            <li>Spotlight Saturday</li>
+                            <li>Self-Care Sunday</li>
+                            <li>Market Monday</li>
+                            <li>Testimonial Tuesday</li>
+                            <li>Wisdom Wednesday</li>
+                            <li>Fun Friday</li>
+                            <li>Success Saturday</li>
+                            <li>Sunday Setup</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
         <p class="text-2xl font-bold mb-4">Consistency + Authentic Value = Massive Trust & Referrals</p>
@@ -2617,6 +2671,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
                 
                 <optgroup label="Relationship Building">
                     <option value="Follow up after sending pre-approval or quote">Follow up after sending pre-approval or quote</option>
+                    <option value="Response to Experience.com Survey">Response to Experience.com Survey</option>
                     <option value="Offer value to a realtor partner">Offer value to a realtor partner</option>
                     <option value="Thank realtor partner after a closing">Thank realtor partner after a closing</option>
                     <option value="Birthday or home anniversary check-in">Birthday or home anniversary check-in</option>
@@ -2986,6 +3041,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
                 <option value="Professional & Authoritative">Professional & Authoritative</option>
                 <option value="Fun & Lighthearted">Fun & Lighthearted</option>
                 <option value="Motivational & Inspiring">Motivational & Inspiring</option>
+                <option value="Hilarious & Entertaining">Hilarious & Entertaining</option>
             </select>
         </div>
 
@@ -3616,16 +3672,16 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
  <!-- NEWSLETTER GENERATOR TOOL -->
 <section id="newsletter-generator" class="hidden">
     <div class="max-w-5xl mx-auto px-6 py-12">
-        <h2 class="text-4xl md:text-5xl font-bold text-center text-[#F15A29] mb-4">✉️ Newsletter Magic Generator</h2>
+        <h2 class="text-4xl md:text-5xl font-bold text-center text-[#F15A29] mb-4">✉️ Instant Newsletter Generator</h2>
         <p class="text-xl text-center text-gray-700 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
             Create beautiful, personalized newsletters in seconds. Stay top-of-mind with partners, past clients, and your sphere — effortlessly. 
             <button onclick="openNewsletterTips()" class="ml-4 text-[#00A89D] underline hover:text-[#F15A29] font-semibold">Why newsletters crush it →</button>
         </p>
 
-             <!-- Inputs Card -->
+        <!-- Inputs Card -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 mb-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <!-- Audience -->
+            <!-- Row 1: Audience + Frequency -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Audience Focus</label>
                     <select id="nl-audience" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
@@ -3635,8 +3691,6 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
                         <option value="sphere">Sphere of Influence</option>
                     </select>
                 </div>
-
-                <!-- Frequency -->
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Frequency</label>
                     <select id="nl-frequency" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
@@ -3644,8 +3698,10 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
                         <option value="monthly">Monthly</option>
                     </select>
                 </div>
+            </div>
 
-                <!-- Tone -->
+            <!-- Row 2: Tone + Length -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Tone & Style</label>
                     <select id="nl-tone" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
@@ -3654,29 +3710,27 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
                         <option value="fun">Fun & Playful</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Length</label>
+                    <select id="nl-length" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+    <option value="short" selected>Short (balanced, ~600 words)</option>
+    <option value="long">Long (in-depth, ~800+ words)</option>
+</select>
+                </div>
+            </div>
 
-                <!-- NEW INPUT: Newsletter Length -->
-<!-- Add this right after the Tone dropdown (or in the grid) -->
-<div>
-    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Length</label>
-    <select id="nl-length" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
-        <option value="short">Short (quick read, ~400 words)</option>
-        <option value="medium" selected>Medium (balanced, ~600 words)</option>
-        <option value="long">Long (in-depth, ~800 words)</option>
-    </select>
-</div>
+            <!-- Newsletter Title (full width) -->
+            <div class="mb-8">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional — We'll create a great one if blank)</label>
+                <input type="text" id="nl-title" placeholder="e.g., Fort Wayne Mortgage Weekly | January 2026 Insights" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+            </div>
 
-                <!-- ADD THIS INPUT: Newsletter Title (Optional) -->
-<!-- Place it right after the Tone dropdown (or in the first grid row) -->
-<div class="col-span-1 md:col-span-2">
-    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional — Grok creates a great one if blank)</label>
-    <input type="text" id="nl-title" placeholder="e.g., Fort Wayne Mortgage Weekly | January 2026 Insights" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
-</div>
-
-                <!-- Local Market -->
+            <!-- Row 3: Custom Month/Year + Local Market -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
+                
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Local Market (City, State)</label>
-                    <input type="text" id="nl-location" placeholder="e.g., Fort Wayne, Indiana" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    <input type="text" id="nl-location" placeholder="e.g., Fort Wayne, Indiana" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700" value="Fort Wayne, Indiana">
                 </div>
             </div>
 
@@ -3719,31 +3773,95 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
                     <input type="checkbox" id="nl-personal" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
                     <span>Personal Update ❤️</span>
                 </label>
-                 </div>
+            </div>
 
-<div class="mb-8">
-    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Specific Topics/Headlines/Recipes/Links to Include (Optional)</label>
-    <textarea id="nl-specific" rows="5" placeholder="e.g., 'Include this recipe: https://example.com/chili' or 'Headline: Fort Wayne Home Show Jan 24-26' or 'Talk about Komets winning streak' — We'll incorporate it perfectly!" class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+            <div class="mb-8">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Specific Topics/Headlines/Recipes/Links to Include (Optional)</label>
+                <textarea id="nl-specific" rows="5" placeholder="e.g., 'Include this recipe: https://example.com/chili' or 'Headline: Fort Wayne Home Show Jan 24-26' or 'Talk about Komets winning streak' — We'll incorporate it perfectly!" class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+            </div>
+
+            <!-- Personal Update -->
+            <div class="mb-8">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Personal Update (Optional — We'll polish it perfectly)</label>
+                <textarea id="nl-personal-text" rows="6" placeholder="Share a quick life update, recent win, family moment, hobby, or fun story — e.g., 'Just closed my biggest deal yet!' or 'Loving the snowy Fort Wayne winters with family snowball fights!' We'll make it warm, authentic, and newsletter-ready. Personal touches build trust & referrals! ❤️" 
+                          class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+            </div>
+<details class="mb-12 bg-gray-100 dark:bg-gray-900 rounded-3xl p-6">
+    <summary class="text-2xl font-bold text-[#00A89D] cursor-pointer mb-6">Custom Content Choices (Fun Facts, Pro Tips, Quotes — Random by default)</summary>
+    <div class="space-y-8">
+
+        <!-- Fun Fact -->
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-[#F15A29]">Fun Fact</h4>
+                <div class="flex gap-4">
+                    <button onclick="regenerateRandom('funFact')" class="bg-[#00A89D] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Regenerate Random</button>
+                    <button onclick="openModal('funFact')" class="bg-[#002B5C] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Choose Specific</button>
+                    <button onclick="resetUsed('funFacts')" class="text-sm text-gray-500 underline">Start fresh</button>
+                </div>
+            </div>
+            <p id="fun-fact-preview" class="p-6 bg-white dark:bg-gray-800 rounded-2xl text-lg italic">"${selectedFunFact}"</p>
+        </div>
+
+        <!-- Pro Tip -->
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-[#F15A29]">Pro Tip</h4>
+                <div class="flex gap-4">
+                    <button onclick="regenerateRandom('proTip')" class="bg-[#00A89D] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Regenerate Random</button>
+                    <button onclick="openModal('proTip')" class="bg-[#002B5C] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Choose Specific</button>
+                    <button onclick="resetUsed('proTips')" class="text-sm text-gray-500 underline">Start fresh</button>
+                </div>
+            </div>
+            <p id="pro-tip-preview" class="p-6 bg-white dark:bg-gray-800 rounded-2xl text-lg">"${selectedProTip}"</p>
+        </div>
+
+        <!-- Motivational Quote -->
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-[#F15A29]">Motivational Quote</h4>
+                <div class="flex gap-4">
+                    <button onclick="regenerateRandom('quote')" class="bg-[#00A89D] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Regenerate Random</button>
+                    <button onclick="openModal('quote')" class="bg-[#002B5C] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Choose Specific</button>
+                    <button onclick="resetUsed('quotes')" class="text-sm text-gray-500 underline">Start fresh</button>
+                </div>
+            </div>
+            <p id="quote-preview" class="p-6 bg-white dark:bg-gray-800 rounded-2xl text-lg italic">"${selectedQuote}"</p>
+        </div>
+    </div>
+</details>
+
+<!-- Slick Searchable Modal -->
+<!-- Slick Searchable Modal -->
+<div id="content-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-modal">
+        <!-- Header -->
+        <div class="p-8 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <h3 class="text-4xl font-bold text-[#F15A29] modal-title">Choose Item</h3>
+            <button onclick="closeModal()" class="text-5xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">&times;</button>
+        </div>
+
+        <!-- Search -->
+        <div class="p-8">
+            <div class="relative">
+                <input type="text" id="modal-search" placeholder="Search..." class="w-full p-5 pl-14 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-lg focus:outline-none focus:ring-4 focus:ring-[#F15A29]/30">
+                <i class="fas fa-search absolute left-5 top-6 text-gray-400 text-xl"></i>
+            </div>
+        </div>
+
+        <!-- List -->
+        <div class="flex-1 overflow-y-auto px-8 pb-8" id="modal-list">
+            <!-- Items populated by JS -->
+        </div>
+    </div>
 </div>
-            <!-- Personal Update (hidden until checked) -->
-            <!-- UPDATED Personal Update Section (Always Visible, with Guidance) -->
-<!-- Replace your current personal update block with this (makes it always available, not hidden) -->
-<div class="mb-8">
-    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Personal Update (Optional — We'll polish it perfectly)</label>
-    <textarea id="nl-personal-text" rows="6" placeholder="Share a quick life update, recent win, family moment, hobby, or fun story — e.g., 'Just closed my biggest deal yet!' or 'Loving the snowy Fort Wayne winters with family snowball fights!' We'll make it warm, authentic, and newsletter-ready. Personal touches build trust & referrals! ❤️" 
-              class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
-</div>
-
-
             <!-- Optional Branding -->
-<!-- UPDATED Branding Inputs: Add YouTube, X, Google Business -->
-<!-- Replace your current branding <details> with this -->
-<details class="mb-8 bg-gray-100 dark:bg-gray-700 rounded-2xl p-6">
-    <summary class="text-xl font-semibold text-[#00A89D] cursor-pointer mb-4">Optional Branding & Contact Info (auto-saved)</summary>
+            <details class="mb-8 bg-gray-100 dark:bg-gray-700 rounded-2xl p-6">
+    <summary class="text-xl font-semibold text-[#00A89D] cursor-pointer mb-4">Branding & Contact Info (auto-saved)</summary>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <input type="text" id="nl-name" placeholder="Your Name (e.g., Adam Garman)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
         <input type="tel" id="nl-cell" placeholder="Cell Phone (e.g., 260-348-0905)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
-        <input type="email" id="nl-email" placeholder="Email (e.g., adam@ruoff.com)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="email" id="nl-email" placeholder="Email (e.g., loan.officer@ruoff.com)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
         <input type="url" id="nl-headshot" placeholder="Headshot URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
         <input type="url" id="nl-logo" placeholder="Company Logo URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
         <input type="text" id="nl-signature" placeholder="Signature (e.g., NMLS #124792)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
@@ -3752,18 +3870,31 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <input type="url" id="nl-linkedin" placeholder="LinkedIn URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
         <input type="url" id="nl-youtube" placeholder="YouTube URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
         <input type="url" id="nl-x" placeholder="X (Twitter) URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
-        <input type="url" id="nl-google" placeholder="Google Business URL" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+        <input type="url" id="nl-tiktok" placeholder="TikTok URL (optional)" class="p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
     </div>
 </details>
 
             <!-- Generate Button -->
             <div class="text-center">
                 <button id="generate-newsletter-btn" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-6 px-12 rounded-full font-bold text-2xl shadow-2xl hover:opacity-90 transition-all">
-                    <i class="fas fa-magic mr-4"></i> Generate My Magical Newsletter
+                    <i class="fas fa-magic mr-4"></i> Generate My Newsletter
                 </button>
             </div>
         </div>
+    </div>
 
+<!-- EDIT SECTION (button style unchanged from last version) -->
+<div class="mt-12 bg-gray-100 dark:bg-gray-800 p-8 rounded-3xl" id="edit-section">
+    <label class="block text-xl font-semibold text-[#00A89D] mb-4">Feedback / Specific Edits (Optional)</label>
+    <textarea id="nl-feedback" rows="5" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700" 
+              placeholder="e.g., Rewrite the Market Update to focus on affordability. Make the personal note warmer and add a family mention. Change the recipe to a healthy salad."></textarea>
+    <button id="regenerate-with-edits-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl mt-6 flex items-center justify-center gap-3">
+        <i class="fas fa-redo"></i> Regenerate with Edits
+    </button>
+</div>
+
+<!-- Hidden storage for persistence across refreshes (optional) -->
+<input type="hidden" id="last-html-storage">
         <!-- UPDATED Output Section: Download Button + Clean Copy -->
 <!-- Replace your current #newsletter-output block with this (adds download, removes subjects from copy) -->
 <div id="newsletter-output" class="hidden">
@@ -4048,7 +4179,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         </div>
     </div>
 </div>
-    
+   </section> 
 </main>
 <!-- Global Centered Loading Modal — matches Weekly Win Plan style -->
 <div id="global-loading" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
@@ -4495,17 +4626,38 @@ async function generateSocialPost() {
     loading.classList.remove('hidden');
     output.classList.add('hidden');
     output.innerHTML = '';
-    let prompt = `Create a ready-to-post social media caption for a mortgage loan officer.
+
+    let prompt = `Create THREE distinct, ready-to-post social media captions for a mortgage loan officer.
+
 Post type/goal: ${type === 'custom' ? 'Custom idea' : type.replace('-', ' ')}
 ${details ? `Specific details/idea: ${details}` : ''}
-Requirements:
-- Warm, authentic, relationship-focused
+
+Requirements for EACH caption:
+- Warm, authentic, relationship-focused tone
 - Engaging and conversational
-- Never salesy — focus on value and trust
-- Include relevant emojis
-- End with subtle CTA (question, "Comment below", "DM me", "Tag a friend")
+- Never salesy — focus on value, education, and trust
+- Include relevant emojis naturally
+- End with a subtle CTA (question, "Comment below", "DM me", "Tag a friend", etc.)
 - Add 8–10 relevant hashtags at the end
-Make it feel like it comes from a trusted friend who happens to be a mortgage expert.`;
+- Make it feel like it comes from a trusted friend who happens to be a mortgage expert
+
+Make the three options noticeably different from each other (vary phrasing, angle, emoji use, or structure) while all following the same requirements.
+
+Output format (exactly like this — no extra text):
+
+Option 1:
+[caption text here]
+
+---
+
+Option 2:
+[caption text here]
+
+---
+
+Option 3:
+[caption text here]`;
+
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -4515,41 +4667,78 @@ Make it feel like it comes from a trusted friend who happens to be a mortgage ex
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [{ role: "user", content: prompt }],
-                temperature: 0.7,
-                max_tokens: 800
+                temperature: 0.9, // Slightly higher for more variation
+                max_tokens: 1200
             })
         });
+
         if (!response.ok) throw new Error('API error');
+
         const data = await response.json();
-        const post = data.choices[0].message.content.trim();
-        output.innerHTML = `
-            <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
-                ${marked.parse(post)}
+        const fullResponse = data.choices[0].message.content.trim();
+
+        // Split into three options
+        const parts = fullResponse.split('---').map(p => p.trim()).filter(p => p);
+        if (parts.length !== 3) {
+            throw new Error('Unexpected response format');
+        }
+
+        // Clean option labels and extract raw text
+        const posts = parts.map(part => {
+            // Remove "Option X:" header if present
+            return part.replace(/^Option \d+:\s*/i, '').trim();
+        });
+
+        // Render three separate cards with individual copy buttons
+        output.innerHTML = posts.map((post, index) => `
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 border border-gray-200 dark:border-gray-700">
+                <div class="prose prose-lg dark:prose-invert max-w-none mb-6">
+                    ${marked.parse(post)}
+                </div>
+                <div class="text-center">
+                    <button 
+                        onclick="copySpecificPost('${index}')" 
+                        class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md"
+                        data-post-index="${index}">
+                        📋 Copy This Post
+                    </button>
+                </div>
             </div>
-            <div class="text-center">
-                <button onclick="copySocialPost()" class="bg-[#002B5C] hover:bg-[#002B5C]/80 text-white px-8 py-4 rounded-full font-bold transition-all shadow-md">
-                    📋 Copy Post to Clipboard
-                </button>
-            </div>
-        `;
+        `).join('');
+
+        // Store the raw texts on the container for copying
+        output.dataset.post0 = posts[0];
+        output.dataset.post1 = posts[1];
+        output.dataset.post2 = posts[2];
+
         output.classList.remove('hidden');
 
         gtag('event', 'generate_social_post', {
-  event_category: 'Tool Usage',
-  event_label: 'Social Post Generated',
-  value: 1
-});
+            event_category: 'Tool Usage',
+            event_label: 'Social Post Generated (3 Options)',
+            value: 1
+        });
 
     } catch (error) {
-        output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating post. Check console or try again.</p>';
+        console.error(error);
+        output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating posts. Check console or try again.</p>';
         output.classList.remove('hidden');
     } finally {
         loading.classList.add('hidden');
     }
 }
-function copySocialPost() {
-    const text = document.querySelector('#social-output .prose')?.innerText || '';
-    navigator.clipboard.writeText(text).then(() => alert('Post copied!'));
+
+// New function to copy a specific post
+function copySpecificPost(index) {
+    const output = document.getElementById('social-output');
+    const text = output.dataset[`post${index}`] || '';
+    if (text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert(`Option ${parseInt(index) + 1} copied to clipboard!`);
+        }).catch(() => {
+            alert('Copy failed — try manually selecting the text.');
+        });
+    }
 }
 function showSocialPostCreator() {
     // Hide all sections
@@ -4795,29 +4984,35 @@ function getSuggestions(category) {
     let fullPlan = '';
 
     try {
-        const prompt = 'You are an expert mortgage sales coach. Create a detailed, motivational 2026 business plan for a loan officer.' + '\n\n' +
-                       'Plan Style: ' + style + '\n\n' +
-                       'User Inputs (use defaults where blank - avg commission $6500, loan $400k, 30% close ratio):' + '\n' +
-                       '- Target Income: ' + (inputs.income || 'calculated from closings') + '\n' +
-                       '- Avg Commission: ' + (inputs.commission || '6500') + '\n' +
-                       '- Target Closings: ' + (inputs.closings || 'calculated') + '\n' +
-                       '- Avg Loan: ' + (inputs.loanAmount || '400000') + '\n' +
-                       '- Close Ratio: ' + (inputs.ratio || '30') + '%\n' +
-                       '- Current Partners: ' + (inputs.currentPartners || 'default') + '\n' +
-                       '- New Partners Goal: ' + (inputs.newPartners || 'default') + '\n' +
-                       '- Database Size: ' + (inputs.database || 'default') + '\n' +
-                       '- Hobbies/Passions: ' + (hobbiesList.join(', ') || 'none shared') + ' ' + hobbyOther + '\n' +
-                       '- Preferred Prospecting Activities: ' + (activitiesList.join(', ') || 'balanced mix') + '\n\n' +
-                       'Structure the plan:' + '\n' +
-                       '1. Executive Summary with key numbers (closings, volume, income, weekly activities)' + '\n' +
-                       '2. Focus Areas based on style (e.g., Referral Mastery = partner growth strategies)' + '\n' +
-                       '3. Monthly/Quarterly Milestones' + '\n' +
-                       '4. Weekly Scorecard Targets' + '\n' +
-                       '5. Specific Tactics: Pop-bys (ideas), events, objection handlers, database touches, social video ideas' + '\n' +
-                       '6. Accountability Tips & Motivation' + '\n\n' +
-                       'Make it actionable, encouraging, and tied to value-first relationship building. Use clean markdown with headers, bullets, bold for emphasis.';
+    const prompt = `You are an expert mortgage sales coach. Create a detailed, motivational 2026 business plan for a loan officer.
 
-           const response = await fetch('/api/chat', {
+Plan Style: ${style}
+
+User Inputs (use defaults where blank - avg commission $6500, loan $400k, 30% close ratio):
+- Target Income: ${inputs.income || 'calculated from closings'}
+- Avg Commission: ${inputs.commission || '6500'}
+- Target Closings: ${inputs.closings || 'calculated'}
+- Avg Loan: ${inputs.loanAmount || '400000'}
+- Close Ratio: ${inputs.ratio || '30'}%
+- Current Partners: ${inputs.currentPartners || 'default'}
+- New Partners Goal: ${inputs.newPartners || 'default'}
+- Database Size: ${inputs.database || 'default'}
+- Hobbies/Passions: ${hobbiesList.length > 0 ? hobbiesList.join(', ') : 'none shared'}${hobbyOther ? ' ' + hobbyOther : ''}
+- Preferred Prospecting Activities: ${activitiesList.length > 0 ? activitiesList.join(', ') : 'balanced mix'}
+
+Structure the plan:
+1. Executive Summary with key numbers (closings, volume, income, weekly activities)
+2. Focus Areas based on style (e.g., Referral Mastery = partner growth strategies)
+3. Monthly/Quarterly Milestones
+4. Weekly Scorecard Targets
+5. Specific Tactics: Pop-bys (ideas), events, objection handlers, database touches, social video ideas
+6. Accountability Tips & Motivation
+
+Make every section specific, actionable, and motivating. Incorporate hobbies naturally (e.g., golf outings with partners). Include realistic numbers, scripts/examples where helpful, and end with a powerful motivational close. NO EMOJIS.
+
+Output ONLY the Markdown content — no JSON, no extra text.`;
+
+    const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -5012,7 +5207,7 @@ Structure every response:
 let chatHistory = [
     {
         role: "system",
-        content: `You are Grok, the ultimate AI Sales Coach for loan officers. This app is packed with powerful AI tools designed to help LOs close more loans, build stronger relationships, and grow their business.
+        content: `You are the ultimate AI Sales Coach for loan officers. This app is packed with powerful AI tools designed to help LOs close more loans, build stronger relationships, and grow their business.
 When asked what the tool does or about its features, ALWAYS highlight the AI TOOLS first — they are the coolest and most valuable part:
 • Sales Script Generator – Instant objection handlers and conversation scripts
 • Social Media Post Creator – Ready-to-post content that builds trust and engagement
@@ -5495,7 +5690,7 @@ document.getElementById('blog-topic-select').addEventListener('change', function
 async function generateBlog() {
     const topicInput = document.getElementById('blog-topic').value.trim();
     const tone = document.getElementById('blog-tone').value;
-    const lengthSelect = document.getElementById('blog-length')?.value || 'medium';
+    const lengthSelect = document.getElementById('blog-length')?.value || 'short';
     const keywordInput = document.getElementById('blog-keyword')?.value.trim() || '';
 
     if (!topicInput) {
@@ -5510,18 +5705,17 @@ async function generateBlog() {
     loading.classList.remove('hidden');
     output.innerHTML = '';
 
-    const lengthGuide = lengthSelect === 'short' ? '300–500 words' :
-                        lengthSelect === 'long' ? '800–1,200 words' :
-                        '600–1,000 words';
+    const lengthGuide = lengthSelect === 'long' ? '800–1,200 words' : '600–800 words';
 
     const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized blog posts for loan officers that Educate, Empower and Entertain the reader.
 
 Key Requirements:
 - Length: ${lengthGuide}
 - Tone: ${tone}
+${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-out-loud funny! Use clever wordplay, relatable mortgage humor, self-deprecating jokes, exaggerated analogies, and witty observations. Keep it light-hearted and entertaining while still being helpful — never mean-spirited. Sprinkle humor throughout (intro, body, headings, FAQs). Readers should smile or chuckle multiple times.' : ''}
 - Primary SEO keyword/phrase (use naturally throughout, especially in title if it fits, intro, H2s, and body — aim for 1–2% density with semantic variations): ${keywordInput || 'Optimize naturally for the main topic'}
 - Structure:
-  - Engaging, clickable title (incorporate primary keyword if it flows naturally)
+  - Engaging, clickable title (incorporate primary keyword if it fits naturally)
   - Strong intro hook that grabs attention and includes the primary keyword early
   - H2 subheadings for scannability
   - Short paragraphs (3–5 sentences max)
@@ -5600,6 +5794,9 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
                 <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3">
                     <i class="fas fa-copy"></i> Copy Blog (with Formatting)
                 </button>
+                <button id="download-blog-btn" class="bg-[#002B5C] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#001429] flex items-center justify-center gap-3">
+                    <i class="fas fa-download"></i> Download Blog (.doc)
+                </button>
                 <button id="copy-caption-btn" class="bg-[#00A89D] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#00A89D]/80 flex items-center justify-center gap-3">
                     <i class="fas fa-share-alt"></i> Copy Social Caption
                 </button>
@@ -5608,15 +5805,16 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
 
         output.classList.remove('hidden');
 
-        // Attach copy handlers
+        // Attach handlers
         document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
+        document.getElementById('download-blog-btn').onclick = downloadBlogWord;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
 
         gtag('event', 'generate_blog', {
-  event_category: 'Tool Usage',
-  event_label: 'Blog Generated',
-  value: 1
-});
+            event_category: 'Tool Usage',
+            event_label: 'Blog Generated',
+            value: 1
+        });
 
     } catch (error) {
         output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error generating blog. Check console or API key.</p>';
@@ -5650,6 +5848,43 @@ function copyBlogWithFormatting() {
             alert('Copied as plain text (rich formatting not supported)');
         });
     });
+}
+
+// NEW: Download blog as nicely formatted Word doc
+// NEW: Download blog as nicely formatted Word doc (no duplicate header)
+function downloadBlogWord() {
+    const blogEl = document.querySelector('#blog-output .prose');
+    if (!blogEl) {
+        alert('No blog content to download!');
+        return;
+    }
+
+    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Mortgage Blog Post</title><style>
+        body {font-family: Calibri, Arial, sans-serif; margin: 60px; line-height: 1.6; color: #000; background: white;}
+        h1 {color: #002B5C; text-align: center; font-size: 32px; margin-bottom: 40px;}
+        h2 {color: #00A89D; border-bottom: 2px solid #00A89D; padding-bottom: 8px; font-size: 24px; margin-top: 40px;}
+        p {margin: 16px 0; font-size: 16px;}
+        ul, ol {padding-left: 40px; margin: 16px 0;}
+        li {margin: 8px 0;}
+        strong {color: #002B5C;}
+        a {color: #00A89D;}
+    </style></head><body>`;
+
+    const content = blogEl.innerHTML;  // Uses the existing H1 — no duplication
+    const footer = '</body></html>';
+
+    const blob = new Blob([header + content + footer], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+
+    // Use the blog's H1 as filename
+    const titleEl = blogEl.querySelector('h1');
+    const filename = titleEl ? titleEl.innerText.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_blog.doc' : 'mortgage_blog.doc';
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('Blog downloaded as Word doc! Open in Word for best formatting.');
 }
 
 // Copy social caption
@@ -6153,20 +6388,12 @@ function createTipsSheet() {
 document.addEventListener('DOMContentLoaded', () => {
     loadSavedSocialPlan();
 
-    document.getElementById('plan-month')?.addEventListener('change', loadSavedSocialPlan);
-    document.getElementById('plan-year')?.addEventListener('change', loadSavedSocialPlan);
 });
 
 function loadSavedSocialPlan() {
-    const month = document.getElementById('plan-month')?.value;
-    const year = document.getElementById('plan-year')?.value;
-    if (!month || !year) return;
-
-    const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const monthName = monthNames[parseInt(month)];
-
-    const planKey = `savedSocialPlan_${monthName}_${year}`;
-    const savedHTML = localStorage.getItem(planKey);
+    const savedHTML = localStorage.getItem('lastSocialPlanHTML');
+    const savedMonth = localStorage.getItem('lastSocialPlanMonth');
+    const savedYear = localStorage.getItem('lastSocialPlanYear');
 
     const output = document.getElementById('social-plan-output');
     if (!output) return;
@@ -6174,10 +6401,13 @@ function loadSavedSocialPlan() {
     if (savedHTML) {
         output.innerHTML = savedHTML;
 
-        // Restore progress bar from saved count
-        let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
-        const progKey = `${monthName}_${year}`;
-        const copiedCount = progress[progKey]?.copied || 0;
+        // Sync dropdowns to the saved plan's month/year
+        if (savedMonth) document.getElementById('plan-month').value = savedMonth;
+        if (savedYear) document.getElementById('plan-year').value = savedYear;
+
+        // Restore progress
+        const progress = JSON.parse(localStorage.getItem('lastSocialPlanProgress') || '{"copied":0}');
+        const copiedCount = progress.copied || 0;
 
         const copiedEl = document.getElementById('copied-count');
         if (copiedEl) copiedEl.textContent = copiedCount;
@@ -6197,7 +6427,7 @@ function loadSavedSocialPlan() {
             const note = document.createElement('div');
             note.id = 'saved-plan-note';
             note.className = 'text-center text-gray-500 italic mb-12 text-xl';
-            note.textContent = '📅 Showing your previously generated plan for this month — generate again for a fresh one!';
+            note.textContent = '📅 Showing your most recently generated plan — select a new month/year and generate for a fresh one!';
             output.prepend(note);
         }
     } else {
@@ -6255,6 +6485,84 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
 
     if (loading) loading.classList.remove('hidden');
     if (output) output.innerHTML = '';
+
+    // === INJECT TIPS INTO LOADING SPINNER ===
+            // === INJECT TIPS INTO LOADING SPINNER (COMPACT & CENTERED) ===
+        // === INJECT TIPS INTO LOADING SPINNER (COMPACT & OPTIMIZED) ===
+    const loadingContent = `
+        <div class="flex flex-col items-center justify-center min-h-screen p-4">
+            <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-3xl w-full">
+                <div class="text-center mb-8">
+                    <div class="inline-block animate-spin rounded-full h-24 w-24 border-t-8 border-b-8 border-[#F15A29] mb-6"></div>
+                    <h3 class="text-3xl font-black text-[#002B5C] dark:text-white mb-3">Building Your Custom Plan...</h3>
+                    <p class="text-xl text-gray-700 dark:text-gray-300 mb-1">This can take 60 seconds or more — grab a coffee! ☕</p>
+                    <p class="text-base text-gray-600 dark:text-gray-400">We're crafting 120+ tailored post ideas just for you...</p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-inner border border-[#00A89D]/30">
+                    <h4 class="text-2xl font-bold text-[#F15A29] mb-6 text-center">Pro Tips for Maximum Engagement</h4>
+                    <ul class="space-y-4 text-lg text-gray-800 dark:text-gray-200">
+                        <li class="flex flex-col">
+                            <span class="flex items-center mb-1">
+                                <span class="text-[#00A89D] text-2xl mr-4">•</span>
+                                <strong>Educational + Local + Personal + Client Wins + Value</strong>
+                            </span>
+                            <span class="ml-10 text-base text-gray-600 dark:text-gray-400">— these are your 5 content pillars</span>
+                        </li>
+                        <li class="flex flex-col">
+                            <span class="flex items-center mb-1">
+                                <span class="text-[#00A89D] text-2xl mr-4">•</span>
+                                <strong>Ask questions</strong>
+                            </span>
+                            <span class="ml-10 text-base text-gray-600 dark:text-gray-400">— polls, "What do you think?", tag friends</span>
+                        </li>
+                        <li class="flex flex-col">
+                            <span class="flex items-center mb-1">
+                                <span class="text-[#00A89D] text-2xl mr-4">•</span>
+                                <strong>Post consistently</strong>
+                            </span>
+                            <span class="ml-10 text-base text-gray-600 dark:text-gray-400">— follow the weekly schedule (Motivation Monday, Tip Tuesday, etc.)</span>
+                        </li>
+                        <li class="flex flex-col">
+                            <span class="flex items-center mb-1">
+                                <span class="text-[#00A89D] text-2xl mr-4">•</span>
+                                <strong>Use stories daily</strong>
+                            </span>
+                            <span class="ml-10 text-base text-gray-600 dark:text-gray-400">— behind-the-scenes, quick tips, polls</span>
+                        </li>
+                        <li class="flex flex-col">
+                            <span class="flex items-center mb-1">
+                                <span class="text-[#00A89D] text-2xl mr-4">•</span>
+                                <strong>Tag local businesses/partners</strong>
+                            </span>
+                            <span class="ml-10 text-base text-gray-600 dark:text-gray-400">— increases reach exponentially</span>
+                        </li>
+                        <li class="flex flex-col">
+                            <span class="flex items-center mb-1">
+                                <span class="text-[#00A89D] text-2xl mr-4">•</span>
+                                <strong>End with subtle CTA</strong>
+                            </span>
+                            <span class="ml-10 text-base text-gray-600 dark:text-gray-400">— "DM me", "Comment below", "Tag a friend who needs this"</span>
+                        </li>
+                        <li class="flex flex-col">
+                            <span class="flex items-center mb-1">
+                                <span class="text-[#00A89D] text-2xl mr-4">•</span>
+                                <strong>Be human</strong>
+                            </span>
+                            <span class="ml-10 text-base text-gray-600 dark:text-gray-400">— share hobbies, family (with permission), wins, and lessons</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const loadingEl = document.getElementById('global-loading');
+    if (loadingEl) {
+        // Save original content
+        loadingEl.dataset.originalContent = loadingEl.innerHTML;
+        loadingEl.innerHTML = loadingContent;
+    }
 
     try {
         const response = await fetch('/api/chat', {
@@ -6356,13 +6664,8 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
             </div>
         `;
 
-        // Progress tracking (30 posts goal, reset on every generation)
-        let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
-        const planKey = `${monthName}_${year}`;
-        progress[planKey] = { copied: 0, total: 30 };  // Reset copied to 0 every generation
-        localStorage.setItem('socialPlanProgress', JSON.stringify(progress));
-
-        let copiedCount = progress[planKey].copied;
+        // Progress tracking — use global key
+        localStorage.setItem('lastSocialPlanProgress', JSON.stringify({ copied: 0 }));
 
         const progressBar = `
             <div id="progress-container" class="mt-20 p-10 bg-gradient-to-br from-[#002B5C]/50 to-[#00A89D]/30 rounded-3xl shadow-2xl text-center">
@@ -6370,7 +6673,7 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
                 <div class="w-full max-w-2xl mx-auto bg-gray-700 rounded-full h-10 mb-6 overflow-hidden">
                     <div id="progress-fill" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] h-10 rounded-full transition-all duration-1000" style="width: 0%"></div>
                 </div>
-                <p class="text-3xl text-white">Copied <span class="font-black text-[#F15A29]" id="copied-count">${copiedCount}</span> of 30 posts</p>
+                <p class="text-3xl text-white">Copied <span class="font-black text-[#F15A29]" id="copied-count">0</span> of 30 posts</p>
                 <p class="text-xl text-gray-300 mt-6" id="progress-message">Start copying to track progress!</p>
             </div>
         `;
@@ -6383,18 +6686,19 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
             </div>
         `;
 
-        // === PERSIST THE NEW PLAN (overwrites old one for this month/year) ===
-        const savePlanKey = `savedSocialPlan_${monthName}_${year}`;
-        localStorage.setItem(savePlanKey, output.innerHTML);
+        // === PERSIST THE NEW PLAN AS THE LATEST (overwrites everything) ===
+        localStorage.setItem('lastSocialPlanHTML', output.innerHTML);
+        localStorage.setItem('lastSocialPlanMonth', month);
+        localStorage.setItem('lastSocialPlanYear', year);
 
-        // Remove "saved plan" note since this is freshly generated
+        // Remove "saved plan" note since this is fresh
         document.getElementById('saved-plan-note')?.remove();
 
         gtag('event', 'generate_monthly_plan', {
-  event_category: 'Tool Usage',
-  event_label: 'Monthly Social Plan Generated',
-  value: 1
-});
+            event_category: 'Tool Usage',
+            event_label: 'Monthly Social Plan Generated',
+            value: 1
+        });
 
         // Reset progress bar visually
         const fill = document.getElementById('progress-fill');
@@ -6405,6 +6709,12 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
         output.innerHTML = `<p class="text-red-600 text-center text-2xl">Error: ${err.message}</p>`;
     } finally {
         if (loading) loading.classList.add('hidden');
+
+        // === RESTORE ORIGINAL GLOBAL LOADING CONTENT ===
+        if (loadingEl && loadingEl.dataset.originalContent) {
+            loadingEl.innerHTML = loadingEl.dataset.originalContent;
+            delete loadingEl.dataset.originalContent;
+        }
     }
 }
 
@@ -6444,42 +6754,33 @@ window.copySinglePost = function(postId, event) {
             btn.innerHTML = '<i class="fas fa-check"></i>';
             btn.classList.replace('bg-[#00A89D]', 'bg-green-600');
 
-            // Update progress live
-            const month = document.getElementById('plan-month')?.value;
-            const year = document.getElementById('plan-year')?.value;
-            if (!month || !year) return;
+            // === GLOBAL PROGRESS TRACKING ===
+            let progress = JSON.parse(localStorage.getItem('lastSocialPlanProgress') || '{"copied":0}');
+            progress.copied += 1;
+            localStorage.setItem('lastSocialPlanProgress', JSON.stringify(progress));
 
-            const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const monthName = monthNames[parseInt(month)];
-            const planKey = `${monthName}_${year}`;
+            const copiedCount = progress.copied;
 
-            let progress = JSON.parse(localStorage.getItem('socialPlanProgress') || '{}');
-            if (progress[planKey]) {
-                progress[planKey].copied += 1;
-                localStorage.setItem('socialPlanProgress', JSON.stringify(progress));
+            const copiedEl = document.getElementById('copied-count');
+            if (copiedEl) copiedEl.textContent = copiedCount;
 
-                const copiedCount = progress[planKey].copied;
-                const copiedEl = document.getElementById('copied-count');
-                if (copiedEl) copiedEl.textContent = copiedCount;
+            const msgEl = document.getElementById('progress-message');
+            if (msgEl) {
+                msgEl.textContent = copiedCount >= 30 ? '🎉 You crushed it — consistent wins!' 
+                                  : copiedCount >= 21 ? '🔥 On fire — keep posting!' 
+                                  : 'Start copying to track progress!';
+            }
 
-                const msgEl = document.getElementById('progress-message');
-                if (msgEl) {
-                    msgEl.textContent = copiedCount >= 30 ? '🎉 You crushed it — consistent wins!' 
-                                      : copiedCount >= 21 ? '🔥 On fire — keep posting!' 
-                                      : 'Start copying to track progress!';
-                }
+            const fill = document.getElementById('progress-fill');
+            if (fill) fill.style.width = `${(copiedCount / 30) * 100}%`;
 
-                const fill = document.getElementById('progress-fill');
-                if (fill) fill.style.width = `${(copiedCount / 30) * 100}%`;
-
-                // Confetti every 10 copies + big at 30
-                if (copiedCount % 10 === 0 || copiedCount === 30) {
-                    confetti({
-                        particleCount: copiedCount === 30 ? 300 : 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-                }
+            // Confetti every 10 copies + big at 30
+            if (copiedCount % 10 === 0 || copiedCount === 30) {
+                confetti({
+                    particleCount: copiedCount === 30 ? 300 : 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
             }
 
             setTimeout(() => {
@@ -8340,9 +8641,892 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script type="text/javascript">
+let lastGeneratedHTML = '';
+
+// Hero Images (20 pre-approved Midwest homes)
+const heroImages = [
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/b19e864a-dd57-45c4-b14e-4a340bfeb685.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/dd28ca22-d3c4-4daa-9815-daa158b78323.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/ae153c4c-7da5-4986-b17a-ab2acad38494.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/d7053e26-37c7-43eb-b84f-b2ead689cc63.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/7f7d08af-dcc0-4c94-af8d-5ea865ac3313.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/843dcb45-a38c-4a94-8052-23c3a6e91f75.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/b2d7dec1-2c83-4b6f-ba76-f2370a8a12bf.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/b46df8c7-92e5-49ff-af8e-f229a5f3e32e.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/eb140d96-c38a-4b24-a2c7-4f81ae05069c.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/783e9665-be29-4088-8a70-e8ea97f8e486.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/53c05549-9973-4435-b902-5097c8b77ed7.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/562fe8e0-95f9-4046-90f3-0bf32dd878b5.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/33c11766-8905-4a5d-aa4e-a66b42823cc2.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/62808031-ee6d-45e4-b276-2dc4fddfae36.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/568ba73e-1db8-4d5f-808a-bb2c831754c0.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/321ab441-3df2-4218-a41b-0f4277fb11cc.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/8b7a6aa8-56cc-489a-9134-f68f95132e97.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/9af36912-57ff-45f8-aea4-247b44d3b410.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/2e78d336-4725-4151-9f14-773557caa2fd.jpg',
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/6efcde85-497f-4831-b210-1d0f4657c18b.jpg'
+];
+
+// === CURATED CONTENT LISTS ===
+// Fun Facts (374 from your list)
+const funFacts = [
+    "The scientific term for brain freeze is “sphenopalatine ganglioneuralgia.”",
+    "Canadians say “sorry” so much that a law was passed in 2009 declaring an apology can’t be used as evidence of admission of guilt.",
+    "Back when dinosaurs existed, volcanoes were erupting on the moon.",
+    "The only letters that don’t appear on the periodic table are “J” and “Q.”",
+    "If a Polar Bear and a Grizzly Bear mate, their offspring is called a “Pizzy Bear.”",
+    "In 2006, a Coca-Cola employee offered to sell secrets to Pepsi—but Pepsi notified Coca-Cola.",
+    "The ten highest mountain summits in the United States are all in Alaska.",
+    "Nintendo trademarked the phrase “It’s on like Donkey Kong” in 2010.",
+    "A single strand of spaghetti is called a “Spaghetto.”",
+    "Hershey’s Kisses are named after the kissing sound the chocolate makes as it falls onto the conveyor belt.",
+    "Princess Peach didn’t move in early games because designers found it too complicated.",
+    "The famous “I’m king of the world!” line in Titanic was improvised by Leonardo DiCaprio.",
+    "If you point your car keys to your head, it increases the remote’s signal range (your head acts as a conductor).",
+    "Fruit stickers are edible (though wash them first like the fruit).",
+    "The giant anteater’s scientific name means “ant eating with three fingers.”",
+    "“Astronaut” literally means “star sailor” in Ancient Greek.",
+    "The flashes of colored light when you rub your eyes are called “phosphenes.”",
+    "At birth, a baby panda is smaller than a mouse.",
+    "Iceland has no railway system.",
+    "The world’s largest grand piano was built by a 15-year-old in New Zealand—it’s over 18 feet long.",
+    "The tongue is the only muscle attached at just one end.",
+    "There’s a company in Japan that teaches people how to be funny.",
+    "The Bagheera kiplingi spider is the only known vegetarian spider.",
+    "Elvis Presley was naturally blonde and dyed his hair black.",
+    "Ed Sheeran once flew to LA with no contacts and was taken in by Jamie Foxx.",
+    "German chocolate cake is named after an American baker, Samuel German—not the country.",
+    "The first known service animals date back to mid-16th century references.",
+    "An 11-year-old girl suggested the name “Pluto” for the dwarf planet.",
+    "The voice actors for SpongeBob and Plankton’s computer wife have been married since 1995.",
+    "Octopuses have beaks made of keratin, like bird beaks.",
+    "75% of the world’s diet comes from just 12 plants and five animal species.",
+    "The original Star Wars (1977) premiered on only 32 screens.",
+    "The British slogan “Keep Calm and Carry On” was never officially used until rediscovered in 2000.",
+    "Tirana, Albania, is a European capital without a McDonald’s.",
+    "Sour Patch Kids and Swedish Fish are made by the same company—the red ones are essentially the same candy with sour sugar.",
+    "The largest Japanese population outside Japan is in Brazil (1.6 million).",
+    "IKEA stands for the founder’s initials plus his farm and hometown.",
+    "Stephen Hawking once held a party for time travelers but only publicized it afterward—no one showed up.",
+    "Violin bows are commonly made from horse hair.",
+    "There’s an underwater version of rugby played while freediving.",
+    "Standing burns about 114 calories per hour for a 150-pound person.",
+    "GPS costs $2 million a day to operate, funded by U.S. taxes.",
+    "If Earth were flat, you could see a candle flame from 30 miles away on a dark night.",
+    "A cluster of bananas is called a “hand,” and a single banana is a “finger.”",
+    "Swedish meatballs originated from a recipe King Charles XII brought back from Turkey.",
+    "Saint Lucia is the only country named after a woman.",
+    "Cats have furry “ear furnishings” that keep dirt out and help hearing.",
+    "There’s a town in Nebraska with a population of one—she’s the mayor, bartender, and librarian.",
+    "The Ethiopian calendar is 13 months and about 7.5 years behind the Gregorian one.",
+    "China built panda-shaped solar farms to interest young people in renewable energy.",
+    "Mercury and Venus have no moons.",
+    "To write adjectives correctly, order them: amount, value, size, temperature, age, shape, color, origin, material.",
+    "The world’s first motel opened in 1925 in San Luis Obispo, California.",
+    "Sudan has more pyramids than Egypt (around 255).",
+    "The bumblebee bat is the world’s smallest flying mammal.",
+    "The human circulatory system stretches over 60,000 miles.",
+    "Africa spans all four hemispheres.",
+    "Humans can distinguish about 10 million colors.",
+    "The world’s first animated feature film was a 1917 Argentine satire.",
+    "The Philippines has 7,641 islands.",
+    "The Trans-Siberian Railway crosses eight time zones.",
+    "Earth’s core has enough gold to coat the planet’s surface 1.5 feet deep.",
+    "Only 0.007% of Earth’s water is accessible to humans.",
+    "Spam’s name came from a contest, not an acronym.",
+    "A drop of water takes 90 days to travel the Mississippi River.",
+    "Beefalo (cow-bison hybrid) has less fat and more protein than regular beef.",
+    "Johnny Appleseed’s trees produced cider apples, not eating apples.",
+    "Scots have 421 words for snow.",
+    "Samsung tests phone durability with a butt-shaped robot.",
+    "Chicago’s “Windy City” nickname refers to boastful politicians, not weather.",
+    "Peanuts are legumes, not nuts.",
+    "Armadillo shells are bulletproof.",
+    "Firefighters use “wet water” to make it spread better.",
+    "The longest English word (titin) has 189,819 letters.",
+    "Giant Pacific octopuses can lay up to 56,000 eggs.",
+    "Cats have five toes on front paws, four on back.",
+    "Kleenex was originally from WWI gas mask filters.",
+    "Blue whales consume 457,000 calories in one mouthful.",
+    "Jeans’ tiny pocket was for pocket watches.",
+    "Turkeys change head color when excited.",
+    "Disney characters wear gloves to make hands stand out in animation.",
+    "Tim Storms has a 10-octave vocal range.",
+    "The U.S. flag design was a 1958 high school project.",
+    "Cows have no upper front teeth.",
+    "NASA 3D-prints tools on the Space Station.",
+    "Only a quarter of the Sahara is sandy.",
+    "Bananas grow upside down, curving toward the sun.",
+    "Moon volcanoes were active during the dinosaur era.",
+    "Dogs sniff pleasant smells with their left nostril, threats with the right.",
+    "Avocados are named after an Aztec word meaning testicles.",
+    "No number before 1,000 contains the letter “A.”",
+    "The # symbol is technically an octothorpe.",
+    "Movie trailers originally played after films.",
+    "Giraffe tongues are dark to prevent sunburn.",
+    "Montpelier, Vermont, has no McDonald’s.",
+    "Rats dream about their day.",
+    "The Eiffel Tower grows a few millimeters in summer heat.",
+    "Glitter was invented accidentally in 1934.",
+    "Frankenstein’s monster is vegetarian in the novel.",
+    "Three-fingered sloths have more neck bones than giraffes.",
+    "Bees can fly higher than Mount Everest.",
+    "Ancient Egyptians placed onions in pharaohs’ eyes for eternal life symbolism.",
+    "Beethoven introduced the trombone to nonreligious music.",
+    "A Pixar employee’s home backup saved Toy Story 2 from deletion.",
+    "Nike’s waffle sole was inspired by a breakfast waffle iron.",
+    "Wild boars wash sandy food before eating.",
+    "The first commercial flight lasted 23 minutes and cost $400.",
+    "Nigel Richards won the French Scrabble world championship without speaking French.",
+    "Bananas fluoresce blue under black light.",
+    "Tennis balls became neon yellow in 1972 for TV visibility.",
+    "Mister Rogers announced he was feeding his fish for a blind viewer.",
+    "Boring, Oregon, and Dull, Scotland, are sister cities.",
+    "Dolly Parton has donated over 100 million books to children.",
+    "The 100 folds in a chef’s hat represent 100 ways to cook an egg.",
+    "Blood donors in Sweden get a text when their blood is used.",
+    "Kea parrots “laugh” infectiously when happy.",
+    "Melbourne trees with email addresses received love letters.",
+    "An estimated 1 million U.S. dogs are primary beneficiaries in wills.",
+    "Central Park lampposts have codes to help navigation.",
+    "Sleep flushes toxins from the brain.",
+    "The Waffle House Index helps FEMA gauge storm severity.",
+    "Route 66 in New Mexico plays “America the Beautiful” via rumble strips.",
+    "Space smells like diesel, gunpowder, and barbecue.",
+    "The Seven Dwarfs were almost named Chesty, Tubby, Burpy, etc.",
+    "Ben & Jerry split a $5 ice cream course.",
+    "Tootsie Rolls were durable WWII rations.",
+    "Marie Curie is the only person with Nobels in two sciences.",
+    "The ampersand comes from “et” (Latin for “and”).",
+    "Dogs understand up to 250 words.",
+    "Bubbles keep bathwater warmer longer.",
+    "Pompeii had take-out restaurants.",
+    "Fried chicken came to America via Scottish immigrants.",
+    "There are 71 Atlanta streets with “Peachtree” in the name.",
+    "Goats have rectangular pupils.",
+    "The flamingo’s “knee” is actually an ankle.",
+    "A group of pugs is called a grumble.",
+    "Crayola means “oily chalk.”",
+    "A banana is a berry; a strawberry isn’t.",
+    "Continental plates drift as fast as fingernails grow.",
+    "LEGO keeps every set ever made in an underground vault.",
+    "Reindeer eyes turn blue in winter.",
+    "Avocados ripen only after picking—trees act as natural storage.",
+    "Kid volunteers read to shelter dogs to calm them.",
+    "China rents out all giant pandas for $1 million/year.",
+    "Bald eagles mate for life.",
+    "Lobsters have blue blood.",
+    "The liver fully regenerates.",
+    "Babies have more bones than adults (some fuse).",
+    "France has 12 time zones.",
+    "It takes 540 peanuts for a 12-ounce jar of peanut butter.",
+    "Alan Shepard golfed on the moon.",
+    "Isaac Newton invented the color wheel.",
+    "The oldest land animal is a 192-year-old tortoise named Jonathan.",
+    "A group of owls is a parliament.",
+    "Honey never spoils.",
+    "Central Park is larger than Monaco.",
+    "Australia is wider than the moon.",
+    "Venus spins clockwise.",
+    "Lemons float; limes sink.",
+    "The hashtag is officially an octothorpe.",
+    "The jeans pocket was for pocket watches.",
+    "All mammals get goosebumps.",
+    "Japan has one vending machine per 40 people.",
+    "Bottlenose dolphins have individual names.",
+    "Clownfish are born male and can become female.",
+    "The brain burns 400–500 calories daily.",
+    "Tea is the second-most popular beverage after water.",
+    "Fruit flies were the first animals in space.",
+    "A baby kangaroo is a joey.",
+    "A group of hyenas is a cackle.",
+    "Tongue prints are unique.",
+    "An ostrich’s eye is bigger than its brain.",
+    "Octopuses have three hearts.",
+    "The shoelace tip is an aglet.",
+    "Cats sleep 15 hours a day on average.",
+    "Bats are the only flying mammals.",
+    "Watermelon is 92% water.",
+    "Tomatoes are fruits.",
+    "Pineapples take 2–3 years to grow.",
+    "A sheep was the first cloned animal.",
+    "Jupiter is the largest planet.",
+    "Mercury is closest to the sun.",
+    "Platypuses sweat milk.",
+    "Bananas glow blue under black light.",
+    "Vatican City is the smallest country.",
+    "Cap’n Crunch’s full name is Horatio Magellan Crunch.",
+    "The Hollywood sign originally said Hollywoodland.",
+    "Peanuts are legumes.",
+    "The Amazon is the biggest river.",
+    "The Burj Khalifa is the tallest building.",
+    "Asia is the largest continent.",
+    "The Great Barrier Reef is the largest coral reef.",
+    "The blue whale is the largest animal.",
+    "Dogs sweat through paws.",
+    "Butterflies taste with feet.",
+    "The sun’s surface is about 10,000°F.",
+    "One quarter of your bones are in your feet.",
+    "There are over 1 million insect species.",
+    "M&M’s were first eaten in space.",
+    "Lions sleep up to 21 hours.",
+    "The world’s longest bowling alley has 116 lanes.",
+    "Tug-of-war was an Olympic sport 1900–1920.",
+    "The longest concert lasted 453 hours.",
+    "All mammals get goosebumps.",
+    "Japan has one vending machine per 40 people.",
+    "Bottlenose dolphins have individual names.",
+    "Frida Kahlo painted 55 self-portraits.",
+    "NFL referees get Super Bowl rings.",
+    "Four countries have wordless anthems.",
+    "Walt Disney has 26 Oscars.",
+    "Clouds weigh over a million pounds on average.",
+    "Animals can be allergic to humans.",
+    "The average golf ball has 336 dimples.",
+    "The specks on strawberries are seeds.",
+    "The hardest bone is the femur.",
+    "Honey doesn’t spoil.",
+    "Central Park is bigger than Monaco.",
+    "Australia is wider than the moon.",
+    "Venus spins clockwise.",
+    "Human teeth can’t heal themselves.",
+    "Lemons float; limes sink.",
+    "The tiny jeans pocket was for pocket watches.",
+    "Penicillin was once called “mold juice.”",
+    "No number before 1,000 has the letter A.",
+    "Sudan has the most pyramids.",
+    "The circulatory system is 60,000 miles long.",
+    "Africa is in all four hemispheres.",
+    "The first animals in space were fruit flies.",
+    "The longest-named dinosaur is Micropachycephalosaurus.",
+    "A baby kangaroo is a joey.",
+    "A group of hyenas is a cackle.",
+    "An ostrich’s eye is bigger than its brain.",
+    "The shoelace tip is an aglet.",
+    "Cats sleep 15 hours daily.",
+    "Baby hedgehogs are hoglets.",
+    "Watermelon is 92% water.",
+    "Pineapples take 2–3 years to grow.",
+    "Ketchup was once medicine.",
+    "A sheep was the first cloned animal.",
+    "Jupiter is the largest planet.",
+    "Mercury is closest to the sun.",
+    "A mile is 5,280 feet.",
+    "Only male toads croak loudly.",
+    "Bananas glow blue under black light.",
+    "The oldest cat lived to 38 years and 3 days.",
+    "Vatican City is the smallest country.",
+    "Cap’n Crunch’s full name is Horatio Magellan Crunch.",
+    "The Hollywood sign originally said Hollywoodland.",
+    "Peanuts are legumes.",
+    "The Amazon is the biggest river.",
+    "The Burj Khalifa is the tallest building.",
+    "Asia is the largest continent.",
+    "The Great Barrier Reef is the largest coral reef.",
+    "The blue whale is the largest animal.",
+    "Dogs sweat through paws.",
+    "Butterflies taste with feet.",
+    "The sun’s surface is about 10,000°F.",
+    "One quarter of your bones are in your feet.",
+    "There are over 1 million insect species.",
+    "M&M’s were first eaten in space."
+];
+
+// Pro Tips (from your document)
+const proTips = [
+    // Home Maintenance & Care (Prevent Costly Surprises)
+    "Home Maintenance & Care: Winter Gutter Check — Frozen gutters cause ice dams that damage roofs and siding—thousands in repairs. After the next thaw, clear debris from gutters/downspouts. Use a leaf blower extension ($30-50) from the ground if ladders aren’t your thing. 20-30 minutes now saves major headaches.",
+    "Home Maintenance & Care: Change HVAC Filters Every 60-90 Days — Dirty filters raise energy bills 5-15% and shorten system life. Note your filter size, buy a 6-pack online or locally (under $20), and swap it out. You’ll feel the difference in air quality and lower Duke/NIPSCO bills.",
+    "Home Maintenance & Care: Test Your Sump Pump Before Spring Rains — Pour a bucket of water into the pit—if it doesn’t activate and drain, basement flooding is a risk. A new pump + install is $300-600. Test now and avoid emergency calls when storms hit.",
+    "Home Maintenance & Care: Seal Windows and Doors for Winter — Drafts waste 10-20% of heating energy. Feel for leaks, then apply weatherstripping or caulk ($15 total). Your house stays warmer and utility bills drop noticeably.",
+    "Home Maintenance & Care: Flush Your Water Heater Annually — Sediment cuts efficiency and lifespan. Turn off power/gas, attach a hose to the drain valve, flush until clear (10-20 minutes). You’ll heat water faster and delay a $1,000+ replacement.",
+    "Home Maintenance & Care: Clean Dryer Vents Twice a Year — Lint buildup is a top fire hazard and adds drying time (higher bills). Use a $20-30 vent cleaning kit + vacuum. Takes 30 minutes and dramatically improves dryer performance.",
+    "Home Maintenance & Care: Replace Smoke/CO Detector Batteries Yearly — Test monthly; replace batteries on daylight saving time changes. Working detectors are Indiana law and can save lives. Quick habit, huge protection.",
+    "Home Maintenance & Care: Inspect Roof Spring and Fall — Look for missing/curling shingles or moss from the ground (binoculars help). Early fixes prevent leaks costing thousands. Get 2-3 local roofer quotes if needed.",
+    "Home Maintenance & Care: Clean Refrigerator Coils — Dusty coils add $50-100 to yearly electric bills. Unplug, vacuum coils (behind/underneath) twice a year. Fridge runs quieter and lasts longer.",
+    "Home Maintenance & Care: Check Exterior Caulking — Cracked caulk lets water in, causing rot/mold. Reapply exterior caulk to windows/doors/siding gaps on a dry day ($5-10 tube). Weekend project, big protection.",
+    "Home Maintenance & Care: Service Lawn Mower Before Spring — Sharpen blade, change oil, replace air filter. Local shops charge $50-80 or DIY. Better cuts, less gas, longer mower life.",
+    "Home Maintenance & Care: Inspect Attic Insulation — Indiana winters demand R-49 insulation to cut heating 20-30%. Measure depth; add blown-in if needed (DIY kits + utility rebates available).",
+    "Home Maintenance & Care: Clean Range Hood Filters Monthly — Greasy filters reduce airflow and pose fire risk. Soak in hot soapy water. 15 minutes keeps kitchen safer and fresher.",
+    "Home Maintenance & Care: Test GFCI Outlets Monthly — Press “test” button—if it doesn’t trip, replace ($15-20). Protects kitchens/bathrooms from shocks. Meets code and keeps family safe.",
+    "Home Maintenance & Care: Deep Clean Garbage Disposal Monthly — Ice cubes + rock salt, run with cold water, then citrus peels. Prevents buildup/odors—cheaper than plumber visits.",
+    "Home Maintenance & Care: Inspect Foundation for Cracks — Hairline cracks are normal; wider ones may signal settling. Walk around after rain. Seal small cracks yourself ($10 tube); call pro for anything concerning.",
+    "Home Maintenance & Care: Clean or Replace Showerheads — Mineral buildup reduces water pressure and efficiency. Soak in vinegar overnight or replace ($20-40). Better showers, lower water bills.",
+    "Home Maintenance & Care: Check Deck/Patio for Rot — Probe wood with screwdriver—soft spots mean rot. Seal or replace boards early. Prevents collapse and costly rebuilds.",
+    "Home Maintenance & Care: Clean Chimney Annually (If You Have One) — Creosote buildup is a fire hazard. Hire a certified sweep ($150-300). Indiana winters mean more use—don’t skip.",
+    "Home Maintenance & Care: Inspect Trees Near House — Dead branches can fall in storms. Trim or hire arborist if overhanging roof/power lines. Prevents damage and insurance claims.",
+    "Home Maintenance & Care: Clean Washing Machine Monthly — Run empty hot cycle with vinegar or Affresh tablets. Prevents mold/odors and extends machine life.",
+    "Home Maintenance & Care: Check Door Weatherstripping — Worn strips let in drafts/critters. Replace with adhesive strips ($10-20). Quick fix, instant comfort.",
+    "Home Maintenance & Care: Inspect Crawl Space/Basement for Moisture — Look for dampness/mold after heavy rain. Add dehumidifier or vapor barrier if needed. Prevents structural issues.",
+    "Home Maintenance & Care: Clean Outdoor AC Unit Spring/Fall — Hose off fins gently (power off). Improves efficiency and prevents breakdowns during Indiana summers.",
+    "Home Maintenance & Care: Test Garage Door Auto-Reverse — Place broom under door—if it doesn’t reverse, adjust or call pro. Safety feature required by law.",
+    "Home Maintenance & Care: Clean Gutters in Fall AND Spring — Leaves in fall, seeds/pollen in spring. Twice-yearly clears blockages before major seasons.",
+    "Home Maintenance & Care: Inspect Fireplace Damper — Ensure it opens/closes fully. Prevents heat loss and drafts when not in use.",
+    "Home Maintenance & Care: Check Exterior Paint for Peeling — Peeling lets moisture in. Touch up or repaint problem areas early to avoid siding replacement.",
+    "Home Maintenance & Care: Clean Microwave Vent — Grease buildup reduces effectiveness. Wipe interior monthly; clean filter quarterly.",
+    "Home Maintenance & Care: Inspect Septic System (If Applicable) — Pump every 3-5 years ($300-500). Prevents backups costing thousands.",
+
+    // Smart Money Moves for Homeowners
+    "Smart Money Moves: File for Homestead Deduction — Caps taxable value and annual increases—saves hundreds yearly. File online/at county auditor (deadline Dec 31). Claim prior-year savings if you missed it.",
+    "Smart Money Moves: Track Capital Improvements — Receipts for roof/HVAC/additions raise cost basis, reducing capital gains tax at sale. Digital folder by year makes tax time easy.",
+    "Smart Money Moves: Dedicated House Fund — 1-2% of home value yearly ($3-6k on $300k home) in high-yield savings (4-5%). Covers surprises without credit card debt.",
+    "Smart Money Moves: Annual Insurance Audit — Review coverage; bundle auto/home for 15-30% savings. Raise deductible to $2,500-5,000 and ask about new-roof/security discounts.",
+    "Smart Money Moves: Utility Energy Rebates — Duke/NIPSCO rebate thermostats, insulation, HVAC ($100-500). Check provider site—upgrades often pay for themselves fast.",
+    "Smart Money Moves: Extra Principal Payments — $100 extra monthly on $250k loan shaves years and saves thousands in interest. Specify “principal only” in portal.",
+    "Smart Money Moves: Energy Efficient Home Improvement Credit — Federal credit up to $3,200 (2026) for windows/insulation/heat pumps. Keep receipts; stack with Indiana incentives.",
+    "Smart Money Moves: Review Property Tax Assessment — Spring notices—if value seems high, appeal with comps. Many homeowners lower bills successfully.",
+    "Smart Money Moves: Mortgage Interest Deduction Reminder — Still deductible if itemizing. Track payments; software like TurboTax pulls it automatically.",
+    "Smart Money Moves: High-Yield Emergency Fund — 3-6 months expenses (including mortgage) at 4-5% online banks. Grows while staying accessible.",
+    "Smart Money Moves: Veteran/Senior/Disability Deductions — Indiana offers extra property tax breaks. Check county auditor—many qualify and save hundreds.",
+    "Smart Money Moves: Bundle Cable/Internet Annually — Call provider for retention deals—saves $20-50/month. Happens every 12 months like clockwork.",
+    "Smart Money Moves: Smart Thermostat Savings — Programmable ones cut heating/cooling 10-15%. Many utilities rebate full cost.",
+    "Smart Money Moves: LED Bulb Swap — Replace remaining incandescents—saves $50-100 yearly and lasts 10+ years.",
+    "Smart Money Moves: Water Heater Temperature Adjustment — Lower to 120°F—saves 3-5% on water heating. Simple dial tweak.",
+
+    // Equity & Refinance Checkup
+    "Equity & Refinance: Refinance Benchmark — 0.75-1% rate drop + 3+ years in home usually worth it. Use break-even calculator (include closing costs).",
+    "Equity & Refinance: Cash-Out vs. HELOC — Cash-out: fixed rate, new term. HELOC: flexible, variable rate. Match to goal—debt payoff vs. short-term projects.",
+    "Equity & Refinance: Build Equity Faster — Extra payment yearly, recast after lump sum, or value-boosting remodels (kitchen/bath).",
+    "Equity & Refinance: Check Home Value — Free tools for estimate; ask me/agent for accurate broker opinion. Helps plan equity use.",
+    "Equity & Refinance: Pay Down vs. Invest — Low rate (<5%)? Investing often beats extra payments. Compare your rate to market returns.",
+    "Equity & Refinance: Automatic PMI Removal — At 20% equity (based on original value), request removal—saves $50-200/month.",
+    "Equity & Refinance: Rate-and-Term vs. Cash-Out — Rate-and-term lowers payment/rate only. Cash-out pulls equity. Know your goal before shopping.",
+    "Equity & Refinance: Recasting Your Loan — After large principal payment ($5k+), ask lender to re-amortize—lowers monthly without refinancing.",
+
+    // Local Living Perks (Indiana-Focused)
+    "Local Living Perks: Property Tax Caps — Homestead capped at 1% assessed value. Verify bill; contact assessor for corrections/deductions.",
+    "Local Living Perks: Utility Rebates — Duke/NIPSCO cover thermostats, appliances, insulation. Stack for nearly free upgrades.",
+    "Local Living Perks: IHCDA Programs — Grants/assistance for weatherization and energy efficiency—check eligibility online.",
+    "Local Living Perks: Local Library Resources — Many Indiana libraries offer tool lending (e.g., sewer snakes, pressure washers)—save rental fees.",
+    "Local Living Perks: County Fair Home Improvement Discounts — Many summer fairs have vendor days with contractor deals—great timing for projects."
+];
+// Motivational Quotes (placeholder — send your list and I'll add)
+const motivationalQuotes = [
+    "\"The only way to do great work is to love what you do.\" – Steve Jobs",
+    "\"Believe you can and you're halfway there.\" – Theodore Roosevelt",
+    "\"Success is not final, failure is not fatal: It is the courage to continue that counts.\" – Winston Churchill",
+    "\"Your time is limited, so don't waste it living someone else's life.\" – Steve Jobs",
+    "\"The future belongs to those who believe in the beauty of their dreams.\" – Eleanor Roosevelt",
+    "\"It does not matter how slowly you go as long as you do not stop.\" – Confucius",
+    "\"Everything you've ever wanted is on the other side of fear.\" – George Addair",
+    "\"The only limit to our realization of tomorrow will be our doubts of today.\" – Franklin D. Roosevelt",
+    "\"You miss 100% of the shots you don't take.\" – Wayne Gretzky",
+    "\"Whether you think you can or you think you can't, you're right.\" – Henry Ford",
+    "\"I attribute my success to this: I never gave or took any excuse.\" – Florence Nightingale",
+    "\"The best way to predict the future is to create it.\" – Peter Drucker",
+    "\"Fall seven times, stand up eight.\" – Japanese Proverb",
+    "\"Don't watch the clock; do what it does. Keep going.\" – Sam Levenson",
+    "\"The harder the conflict, the greater the triumph.\" – George Washington",
+    "\"What you get by achieving your goals is not as important as what you become by achieving your goals.\" – Zig Ziglar",
+    "\"Success usually comes to those who are too busy to be looking for it.\" – Henry David Thoreau",
+    "\"Opportunities don't happen. You create them.\" – Chris Grosser",
+    "\"Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.\" – Roy T. Bennett",
+    "\"The only person you are destined to become is the person you decide to be.\" – Ralph Waldo Emerson",
+    "\"Start where you are. Use what you have. Do what you can.\" – Arthur Ashe",
+    "\"Dream big and dare to fail.\" – Norman Vaughan",
+    "\"I never dreamed about success. I worked for it.\" – Estée Lauder",
+    "\"Perseverance is not a long race; it is many short races one after the other.\" – Walter Elliot",
+    "\"The secret of getting ahead is getting started.\" – Mark Twain",
+    "\"You are never too old to set another goal or to dream a new dream.\" – C.S. Lewis",
+    "\"It always seems impossible until it's done.\" – Nelson Mandela",
+    "\"Keep your eyes on the stars, and your feet on the ground.\" – Theodore Roosevelt",
+    "\"Act as if what you do makes a difference. It does.\" – William James",
+    "\"Success is getting what you want. Happiness is wanting what you get.\" – Dale Carnegie",
+    "\"Don't wait for opportunity. Create it.\" – George Bernard Shaw",
+    "\"The pessimist sees difficulty in every opportunity. The optimist sees opportunity in every difficulty.\" – Winston Churchill",
+    "\"You don't have to be great to start, but you have to start to be great.\" – Zig Ziglar",
+    "\"Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.\" – Christian D. Larson",
+    "\"Challenges are what make life interesting and overcoming them is what makes life meaningful.\" – Joshua J. Marine",
+    "\"The journey of a thousand miles begins with a single step.\" – Lao Tzu",
+    "\"Things work out best for those who make the best of how things work out.\" – John Wooden",
+    "\"To live a creative life, we must lose our fear of being wrong.\" – Joseph Chilton Pearce",
+    "\"If you are not willing to risk the usual, you will have to settle for the ordinary.\" – Jim Rohn",
+    "\"The best revenge is massive success.\" – Frank Sinatra",
+    "\"People who succeed have momentum. The more they succeed, the more they want to succeed.\" – Tony Robbins",
+    "\"I find that the harder I work, the more luck I seem to have.\" – Thomas Jefferson",
+    "\"Success is walking from failure to failure with no loss of enthusiasm.\" – Winston Churchill",
+    "\"Don't let yesterday take up too much of today.\" – Will Rogers",
+    "\"It's not whether you get knocked down, it's whether you get up.\" – Vince Lombardi",
+    "\"If you can dream it, you can achieve it.\" – Zig Ziglar",
+    "\"The ones who are crazy enough to think they can change the world, are the ones who do.\" – Steve Jobs",
+    "\"Do what you can, with what you have, where you are.\" – Theodore Roosevelt",
+    "\"Never give up on a dream just because of the time it will take to accomplish it. The time will pass anyway.\" – Earl Nightingale",
+    "\"Energy and persistence conquer all things.\" – Benjamin Franklin",
+    "\"The path to success is to take massive, determined action.\" – Tony Robbins",
+    "\"Strength and growth come only through continuous effort and struggle.\" – Napoleon Hill",
+    "\"Once you replace negative thoughts with positive ones, you'll start having positive results.\" – Willie Nelson",
+    "\"Man cannot discover new oceans unless he has the courage to lose sight of the shore.\" – André Gide",
+    "\"Winning isn't everything, but wanting to win is.\" – Vince Lombardi",
+    "\"I failed my way to success.\" – Thomas Edison",
+    "\"Every morning we are born again. What we do today is what matters most.\" – Buddha",
+    "\"Everybody is a genius. But if you judge a fish by its ability to climb a tree, it will live its whole life believing that it is stupid.\" – Albert Einstein",
+    "\"Try not to become a man of success, but rather try to become a man of value.\" – Albert Einstein",
+    "\"If you are going through hell, keep going.\" – Winston Churchill",
+    "\"Life is a succession of lessons which must be lived to be understood.\" – Helen Keller",
+    "\"Success is most often achieved by those who don't know that failure is inevitable.\" – Coco Chanel",
+    "\"Courage doesn't always roar. Sometimes courage is the quiet voice at the end of the day saying, 'I will try again tomorrow.'\" – Mary Anne Radmacher",
+    "\"Every action you take is a vote for the type of person you wish to become.\" – James Clear",
+    "\"The time is always right to do what is right.\" – Martin Luther King, Jr.",
+    "\"Don't be too timid and squeamish about your actions. All life is an experiment.\" – Ralph Waldo Emerson",
+    "\"Give yourself something to work toward—constantly.\" – Mary Kay Ash",
+    "\"Growth is never by mere chance; it is the result of forces working together.\" – James Cash Penney",
+    "\"The nature of life is constant change. The challenge of life is to overcome.\" – William Danforth",
+    "\"The greatest glory in living lies not in never falling, but in rising every time we fall.\" – Nelson Mandela",
+    "\"In the middle of every difficulty lies opportunity.\" – Albert Einstein",
+    "\"Believe in yourself. You are braver than you think, more talented than you know, and capable of more than you imagine.\" – Roy T. Bennett",
+    "\"The only impossible journey is the one you never begin.\" – Tony Robbins",
+    "\"You don't have to see the whole staircase, just take the first step.\" – Martin Luther King, Jr.",
+    "\"Hardships often prepare ordinary people for an extraordinary destiny.\" – C.S. Lewis",
+    "\"Success is not how high you have climbed, but how you make a positive difference to the world.\" – Roy T. Bennett",
+    "\"Doubt kills more dreams than failure ever will.\" – Suzy Kassem",
+    "\"Your limitation—it's only your imagination.\" – Anonymous",
+    "\"Push yourself, because no one else is going to do it for you.\" – Anonymous",
+    "\"Great things never come from comfort zones.\" – Anonymous",
+    "\"Dream it. Believe it. Build it.\" – Anonymous",
+    "\"Wake up with determination. Go to bed with satisfaction.\" – George Lorimer",
+    "\"The harder you work for something, the greater you'll feel when you achieve it.\" – Anonymous",
+    "\"Don't stop when you're tired. Stop when you're done.\" – Anonymous",
+    "\"Little things make big days.\" – Anonymous",
+    "\"It's going to be hard, but hard does not mean impossible.\" – Anonymous",
+    "\"Don't wait for opportunity. Create it.\" – Anonymous",
+    "\"Sometimes we're tested not to show our weaknesses, but to discover our strengths.\" – Anonymous",
+    "\"The key to success is to focus on goals, not obstacles.\" – Anonymous",
+    "\"Dream bigger. Do bigger.\" – Anonymous",
+    "\"Don't limit your challenges. Challenge your limits.\" – Anonymous",
+    "\"The only way to achieve the impossible is to believe it is possible.\" – Charles Kingsleigh",
+    "\"You are the artist of your own life. Don't hand the paintbrush to anyone else.\" – Anonymous",
+    "\"Don't be pushed by your problems. Be led by your dreams.\" – Ralph Waldo Emerson",
+    "\"Turn your wounds into wisdom.\" – Oprah Winfrey",
+    "\"The question isn't who is going to let me; it's who is going to stop me.\" – Ayn Rand",
+    "\"You get what you focus on, so focus on what you want.\" – Anonymous",
+    "\"Your life is as good as your mindset.\" – Anonymous",
+    "\"Success doesn't come from what you do occasionally, it comes from what you do consistently.\" – Marie Forleo",
+    "\"Don't wish it were easier. Wish you were better.\" – Jim Rohn",
+    "\"The comeback is always stronger than the setback.\" – Anonymous",
+    "\"If it doesn't challenge you, it doesn't change you.\" – Fred DeVito",
+    "\"You are stronger than you think.\" – Anonymous",
+    "\"Keep going. Everything you need will come to you at the perfect time.\" – Anonymous",
+    "\"You didn't come this far to only come this far.\" – Anonymous",
+    "\"Be fearless in the pursuit of what sets your soul on fire.\" – Jennifer Lee",
+    "\"Don't downgrade your dream just to fit your reality. Upgrade your conviction to match your destiny.\" – Stuart Scott",
+    "\"The only place where success comes before work is in the dictionary.\" – Vidal Sassoon",
+    "\"You are capable of amazing things.\" – Anonymous",
+    "\"Prove yourself to yourself, not others.\" – Anonymous",
+    "\"Stay patient and trust your journey.\" – Anonymous",
+    "\"Difficult roads often lead to beautiful destinations.\" – Zig Ziglar",
+    "\"Your only limit is your mind.\" – Anonymous",
+    "\"Success is liking yourself, liking what you do, and liking how you do it.\" – Maya Angelou",
+    "\"Do something today that your future self will thank you for.\" – Anonymous",
+    "\"Don't tell people your dreams. Show them.\" – Anonymous",
+    "\"You were born to make an impact.\" – Anonymous",
+    "\"The pain you feel today will be the strength you feel tomorrow.\" – Anonymous",
+    "\"Every champion was once a contender that refused to give up.\" – Rocky Balboa",
+    "\"Make it happen. Shock everyone.\" – Anonymous",
+    "\"You are your only limit.\" – Anonymous",
+    "\"If you want to fly, give up everything that weighs you down.\" – Buddha",
+    "\"The secret to getting ahead is getting started.\" – Sally Berger",
+    "\"Don't decrease the goal. Increase the effort.\" – Tom Coleman",
+    "\"Hustle in silence and let your success make the noise.\" – Anonymous",
+    "\"You don't find willpower. You create it.\" – Anonymous",
+    "\"Your direction is more important than your speed.\" – Richard L. Evans",
+    "\"Don't let small minds convince you that your dreams are too big.\" – Anonymous",
+    "\"Fall in love with the process and the results will come.\" – Eric Thomas",
+    "\"A little progress each day adds up to big results.\" – Satya Nani",
+    "\"If you get tired, learn to rest, not to quit.\" – Banksy",
+    "\"The obstacle is the way.\" – Ryan Holiday",
+    "\"You are the greatest project you'll ever work on.\" – Anonymous",
+    "\"Stop being afraid of what could go wrong and start being excited about what could go right.\" – Tony Robbins",
+    "\"Your future is created by what you do today, not tomorrow.\" – Robert Kiyosaki",
+    "\"Discipline is choosing between what you want now and what you want most.\" – Abraham Lincoln",
+    "\"The moment you give up is the moment you let someone else win.\" – Kobe Bryant",
+    "\"Don't let yesterday use up too much of today.\" – Cherokee Proverb",
+    "\"Success is the sum of small efforts repeated day in and day out.\" – Robert Collier",
+    "\"You are never too old to set a new goal or dream a new dream.\" – Les Brown",
+    "\"Be so good they can't ignore you.\" – Steve Martin",
+    "\"The only bad workout is the one that didn't happen.\" – Anonymous",
+    "\"Never let success get to your head. Never let failure get to your heart.\" – Anonymous",
+    "\"If you can change your mind, you can change your life.\" – William James",
+    "\"You don't have to be extreme, just consistent.\" – Anonymous",
+    "\"What you do today can improve all your tomorrows.\" – Ralph Marston",
+    "\"Your vibe attracts your tribe.\" – Anonymous",
+    "\"Never sacrifice your peace for anyone's approval.\" – Anonymous",
+    "\"The only impossible journey is the one you never begin.\" – Anthony Robbins",
+    "\"Become the hardest worker in every room.\" – Anonymous",
+    "\"You are the author of your own story. If you're stuck on the same page, write a new chapter.\" – Anonymous",
+    "\"Doubt is a dream killer. Don't let it win.\" – Anonymous",
+    "\"Every next level of your life will demand a different you.\" – Leonardo DiCaprio",
+    "\"The best investment you can make is in yourself.\" – Warren Buffett",
+    "\"Your potential is endless. Go do what you were created to do.\" – Anonymous",
+    "\"Don't let yesterday take up too much of today.\" – Will Rogers",
+    "\"Success is found in the courage to continue.\" – Anonymous",
+    "\"You don't have to have it all figured out to move forward.\" – Anonymous",
+    "\"Be the change you wish to see in the world.\" – Mahatma Gandhi",
+    "\"The only person holding you back is you.\" – Anonymous",
+    "\"Work hard in silence. Let success make the noise.\" – Frank Ocean",
+    "\"Your breakthrough is on the other side of consistency.\" – Anonymous",
+    "\"You are never too broken to be fixed.\" – Anonymous",
+    "\"The dream is free. The hustle is sold separately.\" – Anonymous",
+    "\"Stop doubting yourself. Work hard and make it happen.\" – Anonymous",
+    "\"Great things are done by a series of small things brought together.\" – Vincent van Gogh",
+    "\"You are one decision away from a totally different life.\" – Anonymous",
+    "\"Don't look for excuses. Look for results.\" – Anonymous",
+    "\"The moment you choose hope, anything is possible.\" – Christopher Reeve",
+    "\"Success is not about being the best. It's about being better than you were yesterday.\" – Anonymous",
+    "\"Your mindset can take you anywhere you want to go.\" – Anonymous",
+    "\"If it matters to you, you'll find a way.\" – Anonymous",
+    "\"The best way out is always through.\" – Robert Frost",
+    "\"You were made to do hard things. Don't stress about it.\" – Anonymous",
+    "\"Keep your goals away from the trolls.\" – Anonymous",
+    "\"Don't just dream it. Work for it.\" – Anonymous",
+    "\"Your only competition is who you were yesterday.\" – Anonymous",
+    "\"The secret of your future is hidden in your daily routine.\" – Mike Murdock",
+    "\"Do what is right, not what is easy.\" – Anonymous",
+    "\"You don't have to see the whole path. Just take the next step.\" – Anonymous",
+    "\"Success is built on discipline, not motivation.\" – Anonymous",
+    "\"The world makes way for the person who knows where they are going.\" – Ralph Waldo Emerson",
+    "\"You are stronger than your excuses.\" – Anonymous",
+    "\"Don't wait for inspiration. Be the inspiration.\" – Anonymous",
+    "\"Your life changes the moment you make a new, congruent, and committed decision.\" – Tony Robbins",
+    "\"Success is the progressive realization of a worthy goal.\" – Earl Nightingale",
+    "\"Never let a stumble be the end of your journey.\" – Anonymous",
+    "\"You don't rise to the occasion. You rise to your level of preparation.\" – Anonymous",
+    "\"The best revenge is to have enough self-worth not to seek it.\" – Anonymous",
+    "\"Be somebody who makes everybody feel like a somebody.\" – Anonymous",
+    "\"Your passion is waiting for your courage to catch up.\" – Isabelle Lafleche",
+    "\"Don't let perfect be the enemy of good.\" – Voltaire",
+    "\"You are the designer of your destiny.\" – Anonymous",
+    "\"Stay committed to your decisions, but stay flexible in your approach.\" – Tony Robbins",
+    "\"The only failure is not trying.\" – Anonymous",
+    "\"Your worth is not measured by your productivity.\" – Anonymous",
+    "\"Become addicted to constant and never-ending self-improvement.\" – Anthony J. D'Angelo",
+    "\"You don't need a new year to start fresh. Every day is a chance to begin again.\" – Anonymous",
+    "\"The bigger the challenge, the bigger the opportunity for growth.\" – Anonymous",
+    "\"Don't shrink your dreams to fit your fears.\" – Anonymous",
+    "\"Success is created by doing the basics consistently.\" – Anonymous",
+    "\"You are capable of more than you know.\" – Anonymous",
+    "\"Let your faith be bigger than your fear.\" – Anonymous",
+    "\"The only limits in your life are the ones you create in your mind.\" – Anonymous",
+    "\"You were born to stand out. Stop trying to fit in.\" – Anonymous",
+    "\"Every day may not be good, but there is something good in every day.\" – Anonymous",
+    "\"Your journey is yours alone. Own it.\" – Anonymous",
+    "\"Keep moving forward. Your future self is waiting.\" – Anonymous",
+    "\"Success is not the absence of obstacles, but the courage to push through them.\" – Anonymous",
+    "\"The future belongs to those who prepare for it today.\" – Malcolm X",
+    "\"Don't be afraid to fail. Be afraid not to try.\" – Anonymous",
+    "\"Your attitude determines your direction.\" – Anonymous",
+    "\"Rise above the storm and you will find the sunshine.\" – Mario Fernández",
+    "\"The only thing that overcomes hard luck is hard work.\" – Harry Golden",
+    "\"Turn the pain into power.\" – Anonymous",
+    "\"You don't have to be perfect to be amazing.\" – Anonymous",
+    "\"Stay focused, go after your dreams, and keep moving toward your goals.\" – LL Cool J",
+    "\"The expert in anything was once a beginner.\" – Helen Hayes",
+    "\"Don't let fear decide your future.\" – Anonymous",
+    "\"Every morning starts a new page in your story. Make it a great one today.\" – Doe Zantamata",
+    "\"You are braver than you believe, stronger than you seem, and smarter than you think.\" – A.A. Milne",
+    "\"The only time you should ever look back is to see how far you've come.\" – Anonymous",
+    "\"Make your vision so clear that your fears become irrelevant.\" – Anonymous",
+    "\"Success is built on consistency, not luck.\" – Anonymous",
+    "\"Your greatest test is when you are able to bless someone else while going through your own storm.\" – Anonymous",
+    "\"Don't carry your mistakes around with you. Place them on the floor and use them as stepping stones.\" – Anonymous",
+    "\"The harder the battle, the sweeter the victory.\" – Les Brown",
+    "\"You were born with wings. Why prefer to crawl through life?\" – Rumi",
+    "\"One day or day one. You decide.\" – Anonymous",
+    "\"Don't let the noise of others' opinions drown out your own inner voice.\" – Steve Jobs",
+    "\"The distance between dreams and reality is called action.\" – Anonymous",
+    "\"You don't inspire others by being perfect. You inspire them by how you deal with your imperfections.\" – Anonymous",
+    "\"Start where you are. Use what you have. Do what you can.\" – Arthur Ashe",
+    "\"Believe in the person you want to become.\" – Anonymous",
+    "\"The only way out is through.\" – Robert Frost",
+    "\"Your life is your message to the world. Make sure it's inspiring.\" – Anonymous",
+    "\"Success demands singleness of purpose.\" – Vince Lombardi",
+    "\"Don't trade your authenticity for approval.\" – Anonymous",
+    "\"The strongest factor for success is self-esteem: believing you can do it, believing you deserve it, believing you will get it.\" – Anonymous",
+    "\"When you want to succeed as bad as you want to breathe, then you'll be successful.\" – Eric Thomas",
+    "\"You get in life what you have the courage to ask for.\" – Oprah Winfrey",
+    "\"Don't wait for the perfect moment. Take the moment and make it perfect.\" – Anonymous",
+    "\"The oak slept in the acorn. The bird waits in the egg. Dream big.\" – Anonymous",
+    "\"You are the CEO of your own life. Start making executive decisions.\" – Anonymous",
+    "\"Success is a journey, not a destination.\" – Arthur Ashe",
+    "\"What you do today can improve all your tomorrows.\" – Ralph Marston",
+    "\"Your vibe attracts your tribe.\" – Anonymous",
+    "\"Never sacrifice your peace for anyone's approval.\" – Anonymous",
+    "\"The only impossible journey is the one you never begin.\" – Anthony Robbins",
+    "\"Become the hardest worker in every room.\" – Anonymous",
+    "\"You are the author of your own story. If you're stuck on the same page, write a new chapter.\" – Anonymous",
+    "\"Doubt is a dream killer. Don't let it win.\" – Anonymous",
+    "\"Every next level of your life will demand a different you.\" – Leonardo DiCaprio",
+    "\"The best investment you can make is in yourself.\" – Warren Buffett",
+    "\"Your potential is endless. Go do what you were created to do.\" – Anonymous",
+    "\"Don't let yesterday take up too much of today.\" – Will Rogers",
+    "\"Success is found in the courage to continue.\" – Anonymous",
+    "\"You don't have to have it all figured out to move forward.\" – Anonymous",
+    "\"Be the change you wish to see in the world.\" – Mahatma Gandhi",
+    "\"The only person holding you back is you.\" – Anonymous",
+    "\"Work hard in silence. Let success make the noise.\" – Frank Ocean",
+    "\"Your breakthrough is on the other side of consistency.\" – Anonymous",
+    "\"You are never too broken to be fixed.\" – Anonymous",
+    "\"The dream is free. The hustle is sold separately.\" – Anonymous",
+    "\"Stop doubting yourself. Work hard and make it happen.\" – Anonymous",
+    "\"Great things are done by a series of small things brought together.\" – Vincent van Gogh",
+    "\"You are one decision away from a totally different life.\" – Anonymous",
+    "\"Don't look for excuses. Look for results.\" – Anonymous",
+    "\"The moment you choose hope, anything is possible.\" – Christopher Reeve",
+    "\"Success is not about being the best. It's about being better than you were yesterday.\" – Anonymous",
+    "\"Your mindset can take you anywhere you want to go.\" – Anonymous",
+    "\"If it matters to you, you'll find a way.\" – Anonymous",
+    "\"The best way out is always through.\" – Robert Frost",
+    "\"You were made to do hard things. Don't stress about it.\" – Anonymous",
+    "\"Keep your goals away from the trolls.\" – Anonymous",
+    "\"Don't just dream it. Work for it.\" – Anonymous",
+    "\"Your only competition is who you were yesterday.\" – Anonymous",
+    "\"The secret of your future is hidden in your daily routine.\" – Mike Murdock",
+    "\"Do what is right, not what is easy.\" – Anonymous",
+    "\"You don't have to see the whole path. Just take the next step.\" – Anonymous",
+    "\"Success is built on discipline, not motivation.\" – Anonymous",
+    "\"The world makes way for the person who knows where they are going.\" – Ralph Waldo Emerson",
+    "\"You are stronger than your excuses.\" – Anonymous",
+    "\"Don't wait for inspiration. Be the inspiration.\" – Anonymous",
+    "\"Your life changes the moment you make a new, congruent, and committed decision.\" – Tony Robbins",
+    "\"Success is the progressive realization of a worthy goal.\" – Earl Nightingale",
+    "\"Never let a stumble be the end of your journey.\" – Anonymous",
+    "\"You don't rise to the occasion. You rise to your level of preparation.\" – Anonymous",
+    "\"The best revenge is to have enough self-worth not to seek it.\" – Anonymous",
+    "\"Be somebody who makes everybody feel like a somebody.\" – Anonymous",
+    "\"Your passion is waiting for your courage to catch up.\" – Isabelle Lafleche",
+    "\"Don't let perfect be the enemy of good.\" – Voltaire",
+    "\"You are the designer of your destiny.\" – Anonymous",
+    "\"Stay committed to your decisions, but stay flexible in your approach.\" – Tony Robbins",
+    "\"The only failure is not trying.\" – Anonymous",
+    "\"Your worth is not measured by your productivity.\" – Anonymous",
+    "\"Become addicted to constant and never-ending self-improvement.\" – Anthony J. D'Angelo",
+    "\"You don't need a new year to start fresh. Every day is a chance to begin again.\" – Anonymous",
+    "\"The bigger the challenge, the bigger the opportunity for growth.\" – Anonymous",
+    "\"Don't shrink your dreams to fit your fears.\" – Anonymous",
+    "\"Success is created by doing the basics consistently.\" – Anonymous",
+    "\"You are capable of more than you know.\" – Anonymous",
+    "\"Let your faith be bigger than your fear.\" – Anonymous",
+    "\"The only limits in your life are the ones you create in your mind.\" – Anonymous",
+    "\"You were born to stand out. Stop trying to fit in.\" – Anonymous",
+    "\"Every day may not be good, but there is something good in every day.\" – Anonymous",
+    "\"Your journey is yours alone. Own it.\" – Anonymous",
+    "\"Keep moving forward. Your future self is waiting.\" – Anonymous"
+];
+
+// Track used items (no repeats) — separate for each category
+let usedFunFacts = JSON.parse(localStorage.getItem('usedFunFacts') || '[]');
+let usedProTips = JSON.parse(localStorage.getItem('usedProTips') || '[]');
+let usedQuotes = JSON.parse(localStorage.getItem('usedQuotes') || '[]');
+
+// Reset functions
+function resetUsed(category) {
+    if (category === 'funFacts') {
+        usedFunFacts = [];
+        selectedFunFact = getRandomItem(funFacts, usedFunFacts);
+    } else if (category === 'proTips') {
+        usedProTips = [];
+        selectedProTip = getRandomItem(proTips, usedProTips);
+    } else if (category === 'quotes') {
+        usedQuotes = [];
+        selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    }
+
+    // Clear localStorage for that category
+    localStorage.setItem('used' + category.charAt(0).toUpperCase() + category.slice(1), JSON.stringify([]));
+
+    // Update preview and confirm
+    updatePreviews();
+    alert(`"${category === 'funFacts' ? 'Fun Facts' : category === 'proTips' ? 'Pro Tips' : 'Motivational Quotes'}" tracking reset! Random selections refreshed.`);
+}
+function openNewsletterTips() {
+    document.getElementById('newsletter-tips-modal').style.display = 'block';
+}
+
+function closeNewsletterTips() {
+    document.getElementById('newsletter-tips-modal').style.display = 'none';
+}
+// Close modal when clicking outside content
+window.onclick = function(event) {
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (event.target === modal) {
+        closeNewsletterTips();
+    }
+}
+
+// Random selection (no repeats)
+function getRandomItem(list, used) {
+    if (used.length >= list.length) {
+        // All used — reset
+        used = [];
+    }
+    let item;
+    do {
+        item = list[Math.floor(Math.random() * list.length)];
+    } while (used.includes(item));
+    used.push(item);
+    return item;
+}
+
+// Current selections (start with random)
+let selectedFunFact = getRandomItem(funFacts, usedFunFacts);
+let selectedProTip = getRandomItem(proTips, usedProTips);
+let selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+
+// Update localStorage used arrays
+localStorage.setItem('usedFunFacts', JSON.stringify(usedFunFacts));
+localStorage.setItem('usedProTips', JSON.stringify(usedProTips));
+localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
+
+// Update previews
+function updatePreviews() {
+    document.getElementById('fun-fact-preview').innerText = selectedFunFact;
+    document.getElementById('pro-tip-preview').innerText = selectedProTip;
+    document.getElementById('quote-preview').innerText = selectedQuote;
+}
+
+// Regenerate random for a category
+function regenerateRandom(category) {
+    if (category === 'funFact') selectedFunFact = getRandomItem(funFacts, usedFunFacts);
+    if (category === 'proTip') selectedProTip = getRandomItem(proTips, usedProTips);
+    if (category === 'quote') selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    localStorage.setItem('usedFunFacts', JSON.stringify(usedFunFacts));
+    localStorage.setItem('usedProTips', JSON.stringify(usedProTips));
+    localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
+    updatePreviews();
+}
+
+function openModal(category) {
+    const modal = document.getElementById('content-modal');
+    const title = modal.querySelector('.modal-title');
+    const search = modal.querySelector('#modal-search');
+    const list = modal.querySelector('#modal-list');
+
+    let data;
+    if (category === 'funFact') {
+        title.innerText = 'Choose Fun Fact';
+        data = funFacts;
+    } else if (category === 'proTip') {
+        title.innerText = 'Choose Pro Tip';
+        data = proTips;
+    } else {
+        title.innerText = 'Choose Motivational Quote';
+        data = motivationalQuotes;
+    }
+
+    // Populate list
+    list.innerHTML = '';
+    data.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'p-6 bg-gray-50 dark:bg-gray-700 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition';
+        li.innerText = item;
+        li.onclick = () => {
+            if (category === 'funFact') selectedFunFact = item;
+            if (category === 'proTip') selectedProTip = item;
+            if (category === 'quote') selectedQuote = item;
+            updatePreviews();
+            closeModal();
+            search.value = '';
+        };
+        list.appendChild(li);
+    });
+
+    // Search filter
+    search.oninput = () => {
+        const filter = search.value.toLowerCase();
+        Array.from(list.children).forEach(li => {
+            li.style.display = li.innerText.toLowerCase().includes(filter) ? '' : 'none';
+        });
+    };
+
+    modal.style.display = 'flex';
+    search.focus();
+}
+
+// Close modal
+function closeModal() {
+    document.getElementById('content-modal').style.display = 'none';
+    document.getElementById('modal-search').value = '';
+}
+
+// Close on Esc
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// === PERSISTENCE SETUP ===
+const persistentFields = [
+    'nl-audience', 'nl-frequency', 'nl-tone', 'nl-location', 'nl-title', 'nl-length',
+    'nl-name', 'nl-headshot', 'nl-logo', 'nl-cell', 'nl-email', 'nl-signature',
+    'nl-facebook', 'nl-instagram', 'nl-linkedin', 'nl-youtube', 'nl-x', 'nl-tiktok'
+];
+
+// Load saved values on page load
+document.addEventListener('DOMContentLoaded', () => {
+    persistentFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const saved = localStorage.getItem(id);
+            if (saved !== null) el.value = saved;
+        }
+    });
+
+    const savedSections = JSON.parse(localStorage.getItem('nl-sections') || '[]');
+    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
+        cb.checked = savedSections.includes(cb.id);
+    });
+
+    // Load used items and selections
+    usedFunFacts = JSON.parse(localStorage.getItem('usedFunFacts') || '[]');
+    usedProTips = JSON.parse(localStorage.getItem('usedProTips') || '[]');
+    usedQuotes = JSON.parse(localStorage.getItem('usedQuotes') || '[]');
+
+    // Ensure current selections are valid
+    selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
+    selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
+    selectedQuote = motivationalQuotes.includes(selectedQuote) ? selectedQuote : getRandomItem(motivationalQuotes, usedQuotes);
+
+    updatePreviews();
+});
+
+// Auto-save on change
+persistentFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', () => localStorage.setItem(id, el.value));
+        el.addEventListener('change', () => localStorage.setItem(id, el.value));
+    }
+});
+
+// Save checkboxes on change
+document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+        const checked = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked'))
+                             .map(c => c.id);
+        localStorage.setItem('nl-sections', JSON.stringify(checked));
+    });
+});
+
 document.getElementById('generate-newsletter-btn')?.addEventListener('click', async () => {
+    generateNewsletter('');
+});
+
+document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', async () => {
+    const feedback = document.getElementById('nl-feedback')?.value.trim() || '';
+    if (!feedback) {
+        alert('Please enter feedback or specific edits first!');
+        return;
+    }
+    if (!lastGeneratedHTML) {
+        alert('No previous newsletter to edit — generate one first!');
+        return;
+    }
+    generateNewsletter(feedback);
+});
+
+async function generateNewsletter(feedback = '') {
     const loading = document.getElementById('global-loading');
     if (loading) loading.classList.remove('hidden');
+
+    const selectedHero = heroImages[Math.floor(Math.random() * heroImages.length)];
 
     let html = '';
 
@@ -8351,123 +9535,196 @@ document.getElementById('generate-newsletter-btn')?.addEventListener('click', as
                          .map(c => c.id.replace('nl-', ''))
                          .join(', ');
 
-        const promptLines = [
-            'You are a world-class email designer. Create ONE newsletter using this EXACT template — fill content only, NEVER change structure/layout or images.',
-            '',
-            'User Inputs:',
-            '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
-            '- Frequency: ' + (document.getElementById('nl-frequency').value || 'Weekly'),
-            '- Tone: ' + (document.getElementById('nl-tone').value || 'Professional'),
-            '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
-            '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights | January 2026'),
-            '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
-            '- Sections: ' + (sections || 'Market Update, Industry News, Local Spotlight, Quick Recipe'),
-            '- Personal update: "' + (document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!') + '"',
-            '- Specific topics: "' + (document.getElementById('nl-specific').value || 'None') + '"',
-            '',
-            'Branding:',
-            '- Name: ' + (document.getElementById('nl-name').value || 'Your Loan Officer'),
-            '- Headshot URL: ' + (document.getElementById('nl-headshot').value || 'https://via.placeholder.com/120x160/002B5C/FFFFFF?text=Headshot'),
-            '- Logo URL: ' + (document.getElementById('nl-logo').value || ''),
-            '- Cell: ' + (document.getElementById('nl-cell').value || ''),
-            '- Email: ' + (document.getElementById('nl-email').value || ''),
-            '- Signature (NMLS number): ' + (document.getElementById('nl-signature').value || ''),
-            '',
-            'Social Media Links (include icons only if URL is provided — use Font Awesome classes):',
-            '- Facebook: ' + (document.getElementById('nl-facebook').value || 'none'),
-            '- Instagram: ' + (document.getElementById('nl-instagram').value || 'none'),
-            '- LinkedIn: ' + (document.getElementById('nl-linkedin').value || 'none'),
-            '- YouTube: ' + (document.getElementById('nl-youtube').value || 'none'),
-            '- X (Twitter): ' + (document.getElementById('nl-x').value || 'none'),
-            '- Google Reviews: ' + (document.getElementById('nl-google').value || 'none'),
-            '',
-            'CRITICAL RULES: Follow these above all else',
-            '- HERO IMAGE: Find an image of a gorgeous midwestern home with a working link and use that for the header hero image.',
-            '- CONFIRM WORKING HERO IMAGE LINK',
-            '- HEADSHOT: Vertical oval — 120x160px, border-radius 50%/40%, object-fit:cover.',
-            '- PERSONAL UPDATE: Always rewrite/polish the raw input — make it warm, relatable, newsletter-perfect (never raw paste).',
-            '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
-            '- DOUBLE CHECK ALL CONTENT: Accuracy is of utmost importance. Verify content with at least 2 reliable sources.',
-            '- NO separate "Personal Note" or "Referral Time" sections — personal update ALWAYS in signature, referral CTA ALWAYS at bottom.',
-            '- ONLY ONE IMAGE: Hero beautiful winter Midwest home.',
-            '- Always pull new and different Fun Facts, Recipes, Local info and Pro Tips each week to share, NEVER REUSE PRIORS.',
-            '- Compliance: No specific rates, disclaimer in footer.',
-            '- Content: Fresh from the most recent month, ONLY include 1 source link. Content should Educate, Empower and Entertain whenever possible.',
-            '- Do not quote specific mortgage rates, make guarantees, or forecast outcomes.',
-            '',
-            'OUTPUT ONLY complete standalone HTML:',
-            '',
-            '<!DOCTYPE html>',
-            '<html lang="en">',
-            '<head>',
-            '    <meta charset="UTF-8">',
-            '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            '    <title>[Title]</title>',
-            '    <style>',
-            '        body { margin:0; background:#f4f4f4; font-family:Arial,sans-serif; }',
-            '        .container { max-width:600px; margin:0 auto; background:white; }',
-            '        .header { text-align:center; padding:40px 20px; background:white; }',
-            '        .hero img { width:100%; height:auto; display:block; }',
-            '        .section { padding:30px; border-left:8px solid #00A89D; margin:20px; background:#f9f9f9; box-shadow:0 4px 12px rgba(0,0,0,0.05); }',
-            '        .section h2 { color:#002B5C; font-size:26px; margin:0 0 20px; }',
-            '        .signature { padding:20px; background:white; display:flex; align-items:center; gap:50px; flex-wrap:wrap; }',
-            '        .headshot { ',
-            '            width:120px; ',
-            '            height:160px; ',
-            '            border-radius:50%/40%; ',
-            '            border:5px solid #00A89D; ',
-            '            object-fit:cover; ',
-            '        }',
-            '        .signature-text { flex:1; min-width:300px; }',
-            '        .cta { text-align:center; padding:10px 20px 20px; background:white; }',
-            '        .cta-button { background:#F15A29; color:white; padding:20px 44px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block; }',
-            '        .footer { padding:30px; background:#002B5C; color:white; text-align:center; font-size:14px; }',
-            '        a { color:#00A89D; text-decoration:underline; }',
-            '    </style>',
-            '</head>',
-            '<body>',
-            '    <div class="container">',
-            '        <div class="header">',
-            '            [Logo centered if provided]',
-            '            <h1 style="color:#002B5C; font-size:36px;">[Title]</h1>',
-            '            <p style="color:#666;">Weekly Insights from [Location] | January 2026</p>',
-            '        </div>',
-            '        <div class="hero">',
-            '            [ONE beautiful winter Midwest home image full-width]',
-            '        </div>',
-            '        [Main section cards — only the checked sections]',
-            '        <div class="signature">',
-            '            <img src="[Headshot URL]" alt="[Name]" class="headshot">',
-            '            <div class="signature-text">',
-            '                <h2 style="color:#002B5C; font-size:28px; margin:0;">From [Name]</h2>',
-            '                <p style="margin:15px 0; font-size:18px;">[Polished personal update]</p>',
-            '                [If Signature provided: <p>NMLS # [Signature]</p>]',
-            '                <p style="margin:10px 0; font-size:16px;">',
-            '                    <a href="tel:[Cell]">[Cell]</a> | <a href="mailto:[Email]">[Email]</a>',
-            '                </p>',
-            '                <div class="social-icons">',
-            '                    [If Facebook: <a href="[Facebook URL]" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>]',
-            '                    [If Instagram: <a href="[Instagram URL]" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>]',
-            '                    [If LinkedIn: <a href="[LinkedIn URL]" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>]',
-            '                    [If YouTube: <a href="[YouTube URL]" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>]',
-            '                    [If X: <a href="[X URL]" target="_blank"><i class="fab fa-twitter"></i> X</a>]',
-            '                    [If Google: <a href="[Google URL]" target="_blank"><i class="fab fa-google"></i> Google</a>]',
-            '                </div>',
-            '            </div>',
-            '        </div>',
-            '        <div class="cta">',
-            '            <h2 style="color:#002B5C; font-size:28px;">Know Someone Ready to Buy or Refinance?</h2>',
-            '            <p style="font-size:18px; margin:20px 0;">I\'d love to help — forward this or click below!</p>',
-            '            <a href="mailto:[Email]?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi [Name],%0A%0AI\'d like to refer someone who\'s interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey\'re looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A[Sender Name]" class="cta-button">Send Me a Referral</a>',
-            '            <p style="margin-top:20px; font-size:16px;">Or text/call: <a href="tel:[Cell]">[Cell]</a></p>',
-            '        </div>',
-            '        <div class="footer">',
-            '            <p>Rates and programs subject to change. Contact me for personalized quote.</p>',
-            '        </div>',
-            '    </div>',
-            '</bo' + 'dy>',
-            '</ht' + 'ml>'
-        ];
+        let promptLines;
+
+        if (feedback) {
+            promptLines = [
+                'You are a precise newsletter editor. Output ONLY the complete updated HTML with the exact changes requested. NO explanations, NO extra text, NO code blocks.',
+                'Start with <!DOCTYPE html> and end with </html>. ALWAYS return the FULL newsletter HTML — copy the entire previous HTML exactly and modify ONLY the requested section.',
+                'Keep ALL structure, styling, images, and sections identical — do not omit any wrappers or footer.',
+                'You are allowed and encouraged to fully replace the content inside a specific section when asked.',
+                'Intelligently identify the target section based on natural user phrasing — you do NOT need the user to mention the exact <h2> heading.',
+                'Common mappings (be flexible and infer from context):',
+                '- "recipe" or "change the recipe" → Quick Recipe section',
+                '- "quote" or "update the quote" → Quote of the Week or Motivational Quote section',
+                '- "personal note", "personal update", "from [name]" → the signature personal update section',
+                '- "market update" or "market" → Market Update section',
+                '- "local" or "local spotlight" → Local Spotlight section',
+                '- "fun fact" → Fun Fact section',
+                '- "tip" or "pro tip" → Pro Tip section',
+                '- Any other natural reference to content type → match to the closest section heading.',
+                '',
+                'PREVIOUS FULL NEWSLETTER HTML:',
+                lastGeneratedHTML,
+                '',
+                'USER EDIT REQUEST:',
+                feedback
+            ];
+        } else {
+            promptLines = [
+                'You are a world-class email designer and compliance-focused mortgage professional. ACCURACY and HONESTY are your HIGHEST priority — above creativity, engagement, or length.',
+                '',
+                '**ACCURACY RULES (NON-NEGOTIABLE):**',
+                '- EVERY fact, statistic, trend, event, or claim MUST be 100% accurate and verifiable.',
+                '- ACCURACY and SOURCES are critical for Market and Industry sections to maintain credibility and compliance. Always cite real sources there — never guess.',
+                '- NEVER guess, hallucinate, or invent information. If uncertain, OMIT it or use safe evergreen phrasing.',
+                '- Market/Industry: Use ONLY broad, timeless trends. NEVER specific rates, percentages, or time-sensitive claims.',
+                '- Local Spotlight: Use ONLY general, permanent attractions, fun, interesting, or little known facts about the area. NEVER dated events.',
+                '- Fun Facts: If the Fun Fact section is included, output ONLY the heading <h2>Fun Fact</h2> and an empty paragraph <p id="fun-fact-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
+                '- Pro Tip: If the Pro Tip section is included, output ONLY the heading <h2>Pro Tip</h2> and an empty paragraph <p id="pro-tip-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
+                '- Motivational Quote: If the Motivational Quote section is included, output ONLY the heading <h2>Motivational Quote</h2> and an empty paragraph <p id="quote-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
+                '- Prefer safe, educational, evergreen content.',
+                '- Headshot: Use the exact VML conditional code for oval/rounded shape in Outlook, combined with border-radius for other clients. Include the 5px teal border.',
+                '- Social icons: Use PNG images from icons8 CDN (fluency style) with explicit width/height — do NOT use SVG or Font Awesome.',
+                '',
+                'User Inputs:',
+                '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
+                '- Frequency: ' + (document.getElementById('nl-frequency').value || 'Weekly'),
+                '- Tone: ' + (document.getElementById('nl-tone').value || 'Professional'),
+                '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
+                '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
+                '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
+                '- Sections: ' + (sections || 'Market Update, Industry News, Local Spotlight, Quick Recipe'),
+                '- Personal update: "' + (document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!') + '"',
+                '- Specific topics: "' + (document.getElementById('nl-specific').value || 'None') + '"',
+                '',
+                'Branding:',
+                '- Name: ' + (document.getElementById('nl-name').value || 'Your Loan Officer'),
+                '- Headshot URL: ' + (document.getElementById('nl-headshot').value || 'https://via.placeholder.com/120x160/002B5C/FFFFFF?text=Headshot'),
+                '- Logo URL: ' + (document.getElementById('nl-logo').value || ''),
+                '- Cell: ' + (document.getElementById('nl-cell').value || ''),
+                '- Email: ' + (document.getElementById('nl-email').value || ''),
+                '- Signature (NMLS number): ' + (document.getElementById('nl-signature').value || ''),
+                '',
+                'Social Media Links (use the placeholder <div id="social-icons-placeholder"></div> — icons will be injected later):',
+                '- Facebook: ' + (document.getElementById('nl-facebook').value || 'none'),
+                '- Instagram: ' + (document.getElementById('nl-instagram').value || 'none'),
+                '- LinkedIn: ' + (document.getElementById('nl-linkedin').value || 'none'),
+                '- YouTube: ' + (document.getElementById('nl-youtube').value || 'none'),
+                '- X (Twitter): ' + (document.getElementById('nl-x').value || 'none'),
+                '- TikTok: ' + (document.getElementById('nl-tiktok').value || 'none'),
+                '',
+                '- REQUIRED HERO IMAGE URL (MUST USE EXACTLY THIS — DO NOT SEARCH OR CHANGE): ' + selectedHero,
+                '',
+                'CRITICAL RULES:',
+                '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
+                '- HERO IMAGE: Use EXACTLY the REQUIRED URL above.',
+                '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
+                '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
+                '- NO separate "Personal Note" or "Referral Time" sections — personal update in signature, referral CTA at bottom.',
+                '- ALWAYS pull new and different Fun Facts, Recipes, Local info and Pro Tips each week.',
+                '- Compliance: Use the exact footer disclaimer provided below.',
+                '- EMAIL COMPATIBILITY (MANDATORY): Use ONLY inline styles. DO NOT include any <style> tags or class attributes. Use TABLE-BASED LAYOUTS for all structural elements. Avoid flexbox, gap, and box-shadow.',
+                '- Main container: <table width="600" align="center"...> with background white.',
+                '- Images: ALWAYS include width/height attributes AND inline styles. Logo max-width:200px. Headshot: width="120" height="160". Hero: width="600".',
+                '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
+                '- For the Market Update / Market section ONLY: ALWAYS end with a "Sources" paragraph containing 1-2 HYPERLINKED credible sources. REQUIRED FORMAT (use exactly): <p style="font-size:14px; color:#666; margin-top:20px;">Sources: <a href="https://www.freddiemac.com/pmms" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Freddie Mac PMMS</a>, <a href="https://www.mortgagenewsdaily.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage News Daily</a></p>. Use ONLY real, permanent URLs from trusted sites like Freddie Mac, Mortgage News Daily, NAR, HousingWire, or MBA. NEVER plain text names — links are mandatory.',
+                '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
+                '- If no perfect source fits, use one of the examples above as a safe default. Links MUST be clickable with href, target="_blank", and rel="noopener".',
+                '',
+                'OUTPUT ONLY complete standalone HTML using this exact structure:',
+                '',
+               '<!DOCTYPE html>',
+'<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml">',
+'<head>',
+'    <meta charset="UTF-8">',
+'    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+'    <title>[Title]</title>',
+'    <!--[if gte mso 9]>',
+'    <xml>',
+'      <o:OfficeDocumentSettings>',
+'        <o:AllowPNG/>',
+'        <o:PixelsPerInch>96</o:PixelsPerInch>',
+'      </o:OfficeDocumentSettings>',
+'    </xml>',
+'    <![endif]>',
+'    <!--[if gte mso 9]>',
+'    <style type="text/css">',
+'      v\\:* { behavior: url(#default#VML); display:inline-block; }',
+'    </style>',
+'    <![endif]>',
+'</head>',
+'<body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif;">',
+'  <table width="600" align="center" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; margin:20px auto; background:white; border-collapse:collapse;">',
+'    <tr>',
+'      <td style="padding:40px 20px; text-align:center; background:white;">',
+'        [Logo if provided: <img src="[Logo URL]" alt="Ruoff Mortgage" width="200" style="max-width:200px; width:100%; height:auto; display:block; margin:0 auto;">]',
+'        <h1 style="color:#002B5C; font-size:36px; margin:20px 0 10px;">[Title]</h1>',
+'        <p style="color:#666; margin:0;">Weekly Insights from [Location]</p>',
+'      </td>',
+'    </tr>',
+'    <tr>',
+'      <td>',
+'        <img src="[REQUIRED HERO IMAGE URL]" alt="Hero image" width="600" style="width:100%; height:auto; display:block;">',
+'      </td>',
+'    </tr>',
+'    <!-- Spacer -->',
+'    <tr><td height="20"></td></tr>',
+'    <!-- Repeat this block for EACH section (Market, Industry, Local, Recipe, etc.) -->',
+'    <tr>',
+'      <td>',
+'        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
+'          <tr>',
+'            <td style="padding:30px;">',
+'              <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">SECTION TITLE</h2>',
+'              <p>Content paragraphs...</p>',
+'              [Sources only for Market/Industry: <p style="font-size:14px; color:#666; margin-top:20px;">Sources: ... </p>]',
+'            </td>',
+'          </tr>',
+'        </table>',
+'      </td>',
+'    </tr>',
+'    <!-- Spacer between sections -->',
+'    <tr><td height="20"></td></tr>',
+'    <!-- Signature section -->',
+'    <tr>',
+'      <td style="padding:20px; background:white;">',
+'        <table width="100%" cellpadding="0" cellspacing="0">',
+'          <tr>',
+'            <td style="vertical-align:top; padding-right:30px; width:140px;">',
+'              <!--[if mso]><v:oval xmlns:v="urn:schemas-microsoft-com:vml" style="width:140px; height:180px;" fillcolor="#ffffff" stroked="t">',
+'              <v:stroke weight="5pt" color="#00A89D"/>',
+'              <v:fill src="[Headshot URL]" type="frame" size="100%,100%" alignshape="t"/>',
+'              <v:shadow on="f"/>',
+'              <![endif]>',
+'              <!--[if !mso]><!-- -->',
+'              <img src="[Headshot URL]" alt="[Name]" width="120" height="160" style="width:120px; height:160px; max-width:120px; border:5px solid #00A89D; border-radius:40%; object-fit:cover; display:block; outline:none; -ms-interpolation-mode:bicubic;">',
+'              <!--<![endif]>',
+'              <!--[if mso]></v:oval><![endif]>',
+'            </td>',
+'            <td style="vertical-align:top;">',
+'              <h2 style="color:#002B5C; font-size:28px; margin:0;">From [Name]</h2>',
+'              <p style="margin:15px 0; font-size:18px;">[Polished personal update]</p>',
+'              [If Signature provided: <p style="margin:10px 0; font-size:16px;">NMLS # [Signature]</p>]',
+'              <p style="margin:10px 0; font-size:16px;">',
+'                <a href="tel:[Cell]" style="color:#00A89D; text-decoration:underline;">[Cell]</a> | ',
+'                <a href="mailto:[Email]" style="color:#00A89D; text-decoration:underline;">[Email]</a>',
+'              </p>',
+'              <div id="social-icons-placeholder"></div>',
+'            </td>',
+'          </tr>',
+'        </table>',
+'      </td>',
+'    </tr>',
+'    <tr>',
+'      <td style="text-align:center; padding:30px 20px; background:white;">',
+'        <h2 style="color:#002B5C; font-size:28px; margin:0 0 15px;">Know Someone Ready to Buy or Refinance?</h2>',
+'        <p style="font-size:18px; margin:20px 0;">I\'d love to help — forward this or click below!</p>',
+'        <a href="mailto:[Email]?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi [Name],%0A%0AI\'d like to refer someone who\'s interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey\'re looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" style="background:#F15A29; color:white; padding:20px 44px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block;">Send Me a Referral</a>',
+'        <p style="margin-top:20px; font-size:16px;">Or text/call: <a href="tel:[Cell]" style="color:#00A89D; text-decoration:underline;">[Cell]</a></p>',
+'      </td>',
+'    </tr>',
+'    <tr>',
+'      <td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px; line-height:1.25;">',
+'        <p>Ruoff Mortgage Company, Inc., d/b/a Ruoff Mortgage, is an Indiana corporation. For complete licensing information visit <a href="http://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/141868" style="color:#00A89D; text-decoration:underline;">http://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/141868</a>.<br>This is not an offer for extension of credit or a commitment to lend. All loans must satisfy company underwriting guidelines. Information and interest rate are subject to change at any time and without notice. Equal Housing Lender. NMLS#141868.</p>',
+'      </td>',
+'    </tr>',
+'  </table>',
+'</body>',
+'</html>'
+            ];
+        }
+
         const prompt = promptLines.join('\n');
 
         const response = await fetch('/api/chat', {
@@ -8478,8 +9735,8 @@ document.getElementById('generate-newsletter-btn')?.addEventListener('click', as
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [{ role: "user", content: prompt }],
-                temperature: 0.8,
-                max_tokens: 3000
+                temperature: feedback ? 0.7 : 0.8,
+                max_tokens: 4000
             })
         });
 
@@ -8488,126 +9745,115 @@ document.getElementById('generate-newsletter-btn')?.addEventListener('click', as
         const data = await response.json();
         let fullContent = data.choices[0]?.message?.content?.trim() || '';
 
-        const htmlStart = fullContent.search(/<!DOCTYPE html|<html/i);
-        if (htmlStart !== -1) {
-            fullContent = fullContent.substring(htmlStart);
+        let cleaned = fullContent;
+        const start = cleaned.search(/<!DOCTYPE html|<html/i);
+        if (start !== -1) cleaned = cleaned.substring(start);
+        const end = cleaned.toLowerCase().lastIndexOf('</html>');
+        if (end !== -1) cleaned = cleaned.substring(0, end + 7);
+        cleaned = cleaned.replace(/^```html?\s*/i, '').replace(/^```\s*/g, '').replace(/```$/g, '').trim();
+
+        html = cleaned || lastGeneratedHTML || '<p>Generation failed.</p>';
+
+        if (!feedback && !html.includes(selectedHero)) {
+            const heroHTML = '<tr><td><img src="' + selectedHero + '" alt="Beautiful Midwest home" width="600" style="width:100%; height:auto; display:block;"></td></tr><tr><td height="20"></td></tr>';
+            html = html.replace(/<\/table>/i, heroHTML + '</table>');
         }
 
-        const htmlEnd = fullContent.toLowerCase().indexOf('</html>');
-        if (htmlEnd !== -1) {
-            fullContent = fullContent.substring(0, htmlEnd + 7);
-        }
-
-        fullContent = fullContent.replace(/^html\s*/i, '').trim();
-        fullContent = fullContent.replace(/^```html?\s*/i, '').trim();
-        fullContent = fullContent.replace(/^```\s*/g, '').trim();
-        fullContent = fullContent.replace(/```$/g, '').trim();
-
-        if (!fullContent.toLowerCase().startsWith('<!doctype') && !fullContent.toLowerCase().startsWith('<html')) {
-            const wrapperLines = [
-                '<!DOCTYPE html>',
-                '<html lang="en">',
-                '<head>',
-                '    <meta charset="UTF-8">',
-                '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-                '    <title>Newsletter</title>',
-                '</head>',
-                '<body>' + fullContent,
-                '</bo' + 'dy>',
-                '</ht' + 'ml>'
-            ];
-            fullContent = wrapperLines.join('\n');
-        }
-
-        html = fullContent || '<p>Newsletter content coming soon!</p>';
-
-        if (!html.includes('class="hero"')) {
-            const heroHTML = '<div class="hero">' +
-                             '    <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter Midwest home" style="width:100%;height:auto;display:block;">' +
-                             '</div>';
-            html = html.replace(/<\/div>\s*<\/div>/i, '</div></div>' + heroHTML);
+        if (feedback && !html.includes('width="600" align="center"')) {
+            console.warn('Invalid edit output — reverting');
+            html = lastGeneratedHTML;
+            alert('Edit unsuccessful — the AI returned incomplete content. Reverting to previous version. Try rephrasing your request.');
+        } else {
+            lastGeneratedHTML = html;
         }
 
     } catch (err) {
-        console.log('Generation failed — using beautiful fallback');
+        console.error('Generation failed', err);
+        
+        html = '';
+        lastGeneratedHTML = '';
+        
+        const errorMessage = `
+            <div style="padding: 40px 20px; background: #fff3f3; border: 2px solid #ff4d4d; border-radius: 12px; color: #c00; text-align: center; font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto;">
+                <h2 style="margin: 0 0 20px; font-size: 28px; color: #c00;">Generation Failed</h2>
+                <p style="font-size: 18px; margin: 0 0 15px; line-height: 1.5;">
+                    The AI could not generate the newsletter due to an error.<br>
+                    No content was created to avoid using inaccurate or outdated information.
+                </p>
+                <p style="font-size: 14px; color: #555; margin: 0 0 25px;">
+                    Please try again in a moment. If this keeps happening, check your connection,<br>
+                    API status, or contact support.
+                </p>
+                <button onclick="location.reload()" style="padding: 12px 32px; background: #c00; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                    Retry Generation
+                </button>
+            </div>
+        `;
+        
+        const previewEl = document.getElementById('nl-preview');
+        if (previewEl) {
+            previewEl.innerHTML = errorMessage;
+        }
+        
+        const rawEl = document.getElementById('nl-html-raw');
+        if (rawEl) rawEl.value = '';
+        
+        alert('Newsletter generation failed. No content created — please try again.');
+        
+        gtag('event', feedback ? 'edit_newsletter_failed' : 'generate_newsletter_failed', {
+            event_category: 'Tool Usage',
+            event_label: feedback ? 'Newsletter Edit Failed' : 'Newsletter Generation Failed',
+            value: 1
+        });
 
-        const fallbackLines = [
-            '<!DOCTYPE html>',
-            '<html>',
-            '<head>',
-            '    <meta charset="UTF-8">',
-            '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            '    <title>Fort Wayne Mortgage Weekly</title>',
-            '    <style>',
-            '        body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }',
-            '        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }',
-            '        .header { text-align: center; padding: 40px 20px; background: linear-gradient(to bottom, #002B5C, #001429); color: white; }',
-            '        .hero img { width: 100%; height: auto; display: block; }',
-            '        .section { padding: 30px; border-left: 8px solid #00A89D; background: #f9f9f9; margin: 20px; border-radius: 8px; }',
-            '        .section h2 { color: #002B5C; font-size: 26px; margin: 0 0 20px; }',
-            '        .signature { padding: 40px; background: white; display: flex; align-items: center; gap: 30px; }',
-            '        .headshot { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00A89D; }',
-            '        .cta { text-align: center; padding: 40px; background: white; }',
-            '        .cta-button { background: #F15A29; color: white; padding: 18px 40px; border-radius: 30px; font-weight: bold; text-decoration: none; font-size: 18px; }',
-            '        .footer { padding: 30px; background: #002B5C; color: white; text-align: center; font-size: 14px; }',
-            '    </style>',
-            '</head>',
-            '<body>',
-            '    <div class="container">',
-            '        <div class="header">',
-            '            <h1>Fort Wayne Mortgage Weekly</h1>',
-            '            <p>January 2026 | Insights from Adam Garman</p>',
-            '        </div>',
-            '        <div class="hero">',
-            '            <img src="https://images.unsplash.com/photo-1605142619858-7e3c3e0d0e8e?auto=format&fit=crop&w=1200&q=80" alt="Beautiful winter home">',
-            '        </div>',
-            '        <div class="section">',
-            '            <h2>Market Update</h2>',
-            '            <p>Rates trending lower — improved affordability heading into spring. Local inventory steady.</p>',
-            '        </div>',
-            '        <div class="section">',
-            '            <h2>Local Spotlight</h2>',
-            '            <p>Fort Wayne winter events heating up — don\'t miss the ice festival!</p>',
-            '        </div>',
-            '        <div class="section">',
-            '            <h2>Quick Recipe</h2>',
-            '            <p>Cozy chili for cold nights — perfect comfort food.</p>',
-            '        </div>',
-            '        <div class="signature">',
-            '            <img src="https://via.placeholder.com/120?text=Adam" class="headshot" alt="Adam Garman">',
-            '            <div>',
-            '                <h2>From Adam</h2>',
-            '                <p>Excited for a fresh start to 2026 in snowy Fort Wayne!</p>',
-            '                <p>260-348-0905 | adam@ruoff.com</p>',
-            '            </div>',
-            '        </div>',
-            '        <div class="cta">',
-            '            <h2>Know Someone Ready to Buy or Refinance?</h2>',
-            '            <p>I\'d love to help — forward this or click below!</p>',
-            '            <a href="mailto:adam@ruoff.com?subject=Referral" class="cta-button">Send Me a Referral</a>',
-            '        </div>',
-            '        <div class="footer">',
-            '            <p>Rates subject to change. Contact me for details.</p>',
-            '        </div>',
-            '    </div>',
-            '</bo' + 'dy>',
-            '</ht' + 'ml>'
-        ];
-        html = fallbackLines.join('\n');
     } finally {
         if (loading) loading.classList.add('hidden');
 
-        const previewEl = document.getElementById('nl-preview');
-        if (previewEl) {
-            previewEl.innerHTML = '';
-            const iframe = document.createElement('iframe');
-            iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-            iframe.srcdoc = html;
-            previewEl.appendChild(iframe);
-        }
+        if (html && html.trim() !== '') {
+            // Simplified replacements — current prompt uses EMPTY placeholders only
+            html = html.replace(/<p id="fun-fact-placeholder"><\/p>/gi, `<p>${selectedFunFact}</p>`);
+            html = html.replace(/<p id="pro-tip-placeholder"><\/p>/gi, `<p>${selectedProTip}</p>`);
+            html = html.replace(/<p id="quote-placeholder"><\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
+            html = html.replace(/<div id="social-icons-placeholder"><\/div>/gi, buildSocialIcons());
 
-        const rawEl = document.getElementById('nl-html-raw');
-        if (rawEl) rawEl.value = html;
+            const previewEl = document.getElementById('nl-preview');
+            if (previewEl) {
+                previewEl.innerHTML = '';
+                const iframe = document.createElement('iframe');
+                iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
+                iframe.srcdoc = html;
+                previewEl.appendChild(iframe);
+
+                iframe.onload = () => {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                    const funFactP = iframeDoc.querySelector('#fun-fact-placeholder');
+                    if (funFactP) funFactP.innerHTML = selectedFunFact;
+
+                    const proTipP = iframeDoc.querySelector('#pro-tip-placeholder');
+                    if (proTipP) proTipP.innerHTML = selectedProTip;
+
+                    const quoteP = iframeDoc.querySelector('#quote-placeholder');
+                    if (quoteP) quoteP.innerHTML = `<em>${selectedQuote}</em>`;
+
+                    const iconsPlaceholder = iframeDoc.querySelector('#social-icons-placeholder');
+                    if (iconsPlaceholder) iconsPlaceholder.outerHTML = buildSocialIcons();
+                };
+            }
+
+            const rawEl = document.getElementById('nl-html-raw');
+            if (rawEl) rawEl.value = html;
+
+            gtag('event', feedback ? 'edit_newsletter' : 'generate_newsletter', {
+                event_category: 'Tool Usage',
+                event_label: feedback ? 'Newsletter Edited' : 'Newsletter Generated',
+                value: 1
+            });
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            }
+        }
 
         const output = document.getElementById('newsletter-output');
         if (output) {
@@ -8615,17 +9861,33 @@ document.getElementById('generate-newsletter-btn')?.addEventListener('click', as
             output.scrollIntoView({ behavior: 'smooth' });
         }
 
-        gtag('event', 'generate_newsletter', {
-            event_category: 'Tool Usage',
-            event_label: 'Newsletter Generated',
-            value: 1
-        });
-
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        if (feedback && document.getElementById('nl-feedback')) {
+            document.getElementById('nl-feedback').value = '';
         }
     }
-});
+}
+function buildSocialIcons() {
+    const socials = [
+        { id: 'nl-facebook', src: 'https://img.icons8.com/fluency/48/facebook-new.png', label: 'Facebook' },
+        { id: 'nl-instagram', src: 'https://img.icons8.com/fluency/48/instagram-new.png', label: 'Instagram' },
+        { id: 'nl-linkedin', src: 'https://img.icons8.com/fluency/48/linkedin.png', label: 'LinkedIn' },
+        { id: 'nl-youtube', src: 'https://img.icons8.com/fluency/48/youtube-play.png', label: 'YouTube' },
+        { id: 'nl-x', src: 'https://img.icons8.com/fluency/48/twitterx.png', label: 'X' },
+        { id: 'nl-tiktok', src: 'https://img.icons8.com/fluency/48/tiktok.png', label: 'TikTok' }
+    ];
+
+    let iconsHTML = '<div style="margin-top:12px; text-align:left;">';
+    socials.forEach(s => {
+        const url = document.getElementById(s.id)?.value.trim();
+        if (url && url !== 'none' && url !== '') {
+            iconsHTML += `<a href="${url}" target="_blank" rel="noopener" style="text-decoration:none; margin-right:16px; display:inline-block;">
+                <img src="${s.src}" alt="${s.label}" width="32" height="32" style="width:32px; height:32px; display:block;">
+            </a>`;
+        }
+    });
+    iconsHTML += '</div>';
+    return iconsHTML || '<div style="height:12px;"></div>';
+}
 
 function copyNewsletterHTML() {
     navigator.clipboard.writeText(document.getElementById('nl-html-raw').value);
@@ -8642,13 +9904,6 @@ function downloadNewsletterHTML() {
     a.click();
     URL.revokeObjectURL(url);
     alert('Newsletter downloaded! Double-click the file to preview.');
-}
-    function openNewsletterTips() {
-    document.getElementById('newsletter-tips-modal').style.display = 'flex'; // or 'block' if not using flex centering
-}
-
-function closeNewsletterTips() {
-    document.getElementById('newsletter-tips-modal').style.display = 'none';
 }
 </script>
 <script>
@@ -8774,5 +10029,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
