@@ -599,9 +599,9 @@ input[type="range"]:active::-moz-range-thumb {
             <li class="sidebar-group">Planning & Process</li>
             <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li> -->
             <li class="sidebar-group">Tools & Resources</li>
-          <!-- <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
+            <!--<li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
             <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li> -->
-            <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
+            <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li> 
             </ul> 
     </aside>
     <!-- AI Chat Assistant - Persistent on every page -->
@@ -3303,7 +3303,7 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
         <button onclick="sendChatMessage()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-4 rounded-lg font-bold hover:opacity-90">Send</button>
     </div>
     </section>
-                <section id="calculator" class="card bg-white dark:bg-gray-800 pt-8 pb-16 px-10 rounded-3xl shadow-2xl animate-fade-in hidden">
+        <section id="calculator" class="card bg-white dark:bg-gray-800 pt-8 pb-16 px-10 rounded-3xl shadow-2xl animate-fade-in hidden">
     <h2 class="text-4xl font-black mb-4 text-[#F15A29] text-center">Advanced Payment Calculator</h2>
     <p class="text-center text-lg mb-10 text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Estimate monthly payments with taxes, insurance, PMI, extra payments, and biweekly options. See lifetime interest, payoff timeline, and potential savings.</p>
 
@@ -3314,7 +3314,8 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             <button type="button" id="mode-refinance" class="px-10 py-4 rounded-full font-bold text-xl transition-all text-gray-700 dark:text-gray-300">Refinance</button>
         </div>
     </div>
-
+    
+ 
     <form id="calc-form" class="max-w-5xl mx-auto space-y-8">
         <!-- Purchase Mode Inputs -->
         <div id="purchase-inputs" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -3390,8 +3391,40 @@ class="p-6 space-y-8 md:ml-64 lg:ml-72 pt-12 bg-gray-50 dark:bg-gray-900 min-h-s
             <strong>Make Biweekly Payments (26 per year)</strong>
         </label>
     </form>
+<!-- ==================== HOMENOW DPA (NEW COMPACT VERSION AT BOTTOM) ==================== -->
+<div id="homenow-wrapper" class="mt-12 p-6 bg-gradient-to-br from-[#00A89D]/10 to-[#002B5C]/10 rounded-3xl border border-[#00A89D]/30 max-w-5xl mx-auto">
+  <label class="flex items-center cursor-pointer mb-6">
+    <input type="checkbox" id="homenow-checkbox" class="w-6 h-6 accent-[#F15A29] rounded" onchange="toggleHomeNow()">
+    <span class="ml-4 text-xl font-bold text-[#002B5C] dark:text-white">Ruoff HomeNow DPA — 100% Financing</span>
+  </label>
 
-    <div id="calc-output" class="mt-16"></div>
+  <div id="dpa-options" class="hidden">
+    <div class="flex bg-white dark:bg-gray-800 p-1 rounded-2xl shadow-sm w-fit">
+      <button onclick="setDPA(3.5)" id="dpa35-btn" 
+              class="px-8 py-3 rounded-xl font-bold transition-all">3.5% DPA</button>
+      <button onclick="setDPA(5)" id="dpa5-btn" 
+              class="px-8 py-3 rounded-xl font-bold transition-all">5% DPA</button>
+    </div>
+  </div>
+
+  <div id="homenow-breakdown" class="hidden mt-6 p-5 bg-white dark:bg-gray-800 rounded-2xl border border-[#00A89D]/20">
+    <div class="grid grid-cols-3 gap-4 text-center">
+      <div>
+        <p class="text-xs text-gray-500">DPA Loan</p>
+        <p id="dpa-amt" class="text-3xl font-bold text-[#F15A29]">$0</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-500">2nd Rate</p>
+        <p id="second-rate" class="text-3xl font-bold text-[#002B5C] dark:text-white">X.XX%</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-500">2nd Pmt</p>
+        <p id="second-pmt" class="text-3xl font-bold text-[#00A89D]">$0</p>
+      </div>
+    </div>
+  </div>
+</div>
+        <div id="calc-output" class="mt-16 max-w-5xl mx-auto"></div>
 </section>
                 <!-- MISSING SECTION: Value Vault -->
                 <section id="value-vault" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -5315,6 +5348,7 @@ document.getElementById('mode-refinance')?.addEventListener('click', () => {
 
 // === IMPROVED CALCULATOR WITH FULL BIDIRECTIONAL SYNC ===
 function calculateAdvanced() {
+    updatePMIRate();
     const isPurchase = document.getElementById('mode-purchase').classList.contains('bg-gradient-to-r');
 
     let homePrice = 0;
@@ -5330,11 +5364,9 @@ function calculateAdvanced() {
         isPercent = document.getElementById('dp-percent-btn').classList.contains('bg-gradient-to-r');
         loanAmountInput = parseFloat(document.getElementById('loanAmountManual').value) || 0;
 
-        // Determine source of truth based on what was last edited (using activeElement)
         const focusedId = document.activeElement ? document.activeElement.id : '';
 
         if (focusedId === 'loanAmountManual' && loanAmountInput > 0) {
-            // User typed in loan amount — recalc down payment from it
             loanAmount = loanAmountInput;
             downAmount = Math.max(0, homePrice - loanAmount);
             const newDown = isPercent ? (homePrice > 0 ? (downAmount / homePrice * 100) : 0) : downAmount;
@@ -5342,17 +5374,21 @@ function calculateAdvanced() {
                 document.getElementById('downPayment').value = isPercent ? newDown.toFixed(2) : newDown.toFixed(0);
             }
         } else {
-            // Default: calc from home price + down payment
             downAmount = isPercent ? (downPaymentInput / 100 * homePrice) : downPaymentInput;
             loanAmount = Math.max(0, homePrice - downAmount);
-
-            // Update manual loan field if different (but not if it's focused)
             if (focusedId !== 'loanAmountManual' && Math.abs(loanAmount - loanAmountInput) > 1) {
                 document.getElementById('loanAmountManual').value = loanAmount.toFixed(0);
             }
         }
     } else {
         loanAmount = parseFloat(document.getElementById('loanAmountDirect').value) || 0;
+    }
+
+    // ==================== UFMIP FOR HOMENOW ====================
+    const baseLoanAmount = loanAmount;
+    if (isPurchase && homeNowEnabled) {
+        const ufmip = baseLoanAmount * 0.0175;
+        loanAmount = baseLoanAmount + ufmip;
     }
 
     const annualRate = parseFloat(document.getElementById('rate').value) || 0;
@@ -5379,25 +5415,50 @@ function calculateAdvanced() {
 
     let monthlyPMI = 0;
     if (isPurchase) {
-        const downPercent = homePrice > 0 ? ((homePrice - loanAmount) / homePrice * 100) : 0;
-        monthlyPMI = downPercent < 20 ? (loanAmount * pmiRateInput / 100 / 12) : 0;
-        if (downPercent >= 20 && pmiRateInput > 0) {
-            document.getElementById('pmi').value = '0';
+        const downPercent = homePrice > 0 ? ((homePrice - baseLoanAmount) / homePrice * 100) : 0;
+        if (homeNowEnabled) {
+            monthlyPMI = (baseLoanAmount * pmiRateInput / 100 / 12);
+        } else {
+            monthlyPMI = downPercent < 20 ? (baseLoanAmount * pmiRateInput / 100 / 12) : 0;
         }
     } else {
-        monthlyPMI = loanAmount * pmiRateInput / 100 / 12;
+        monthlyPMI = baseLoanAmount * pmiRateInput / 100 / 12;
     }
 
-    const basePITI = standardPI + monthlyTaxes + monthlyInsurance + monthlyPMI;
+    // ==================== HOMENOW SECOND MORTGAGE (ALWAYS MONTHLY) ====================
+    let secondPmt = 0;
+    let homenowHTML = '';
+    if (isPurchase && homeNowEnabled) {
+        const dpaAmount = Math.ceil(homePrice * (selectedDPAPercent / 100));
+        const secondRate = annualRate + 2;
+        secondPmt = calculateMonthlyPayment(dpaAmount, secondRate, 10);
 
-    let principalPayment = standardPI + extraMonthly;
-    let userMonthlyCost = basePITI + extraMonthly;
+        document.getElementById('dpa-amt').textContent = '$' + dpaAmount.toLocaleString();
+        document.getElementById('second-rate').textContent = secondRate.toFixed(3) + '%';
+        document.getElementById('second-pmt').textContent = '$' + Math.round(secondPmt).toLocaleString();
+
+        homenowHTML = `
+            <div class="mt-6 p-4 bg-white dark:bg-gray-800 rounded-2xl border border-[#00A89D]/30">
+                <p class="text-[#00A89D] font-bold">HomeNow 2nd Mortgage Added</p>
+                <p class="text-xl">$${Math.round(secondPmt).toLocaleString()}/mo @ ${secondRate.toFixed(3)}% (10 yr)</p>
+            </div>`;
+    }
+
+    // === PAYMENT LOGIC - Biweekly ONLY accelerates FIRST mortgage ===
+    let basePITI = standardPI + monthlyTaxes + monthlyInsurance + monthlyPMI;
+    let displayPayment = basePITI + extraMonthly;
+    let principalPayment = standardPI + extraMonthly;   // Only first mortgage gets biweekly acceleration
 
     if (biweekly) {
+        displayPayment = (basePITI + extraMonthly) * 13 / 12;
         principalPayment = (standardPI + extraMonthly) * 13 / 12;
-        userMonthlyCost = (basePITI + extraMonthly) * 13 / 12;
     }
 
+    if (isPurchase && homeNowEnabled) {
+        displayPayment += secondPmt;   // Second mortgage always monthly
+    }
+
+    // Payoff calculation (only on first mortgage)
     let monthsToPayoff = totalPayments;
     if (extraMonthly > 0 || biweekly) {
         const r = monthlyRate;
@@ -5412,19 +5473,41 @@ function calculateAdvanced() {
     const yearsToPayoff = Math.floor(monthsToPayoff / 12);
     const remainingMonths = monthsToPayoff % 12;
 
-    const standardInterest = standardPI * totalPayments - loanAmount;
-    const customInterest = principalPayment * monthsToPayoff - loanAmount;
-    const interestDiff = standardInterest - customInterest;
+        // Second mortgage interest (always full 10-year term)
+    let secondInterest = 0;
+    if (isPurchase && homeNowEnabled) {
+        const dpaAmount = Math.ceil(homePrice * (selectedDPAPercent / 100));
+        const secondPmt = calculateMonthlyPayment(dpaAmount, annualRate + 2, 10);
+        secondInterest = (secondPmt * 120) - dpaAmount;
+    }
 
+    // Standard scenario = first mortgage normal + second mortgage full interest
+    const standardInterest = (standardPI * totalPayments - baseLoanAmount) + secondInterest;
+
+    // Custom scenario = first mortgage accelerated + second mortgage full interest
+    const customInterest = (principalPayment * monthsToPayoff - baseLoanAmount) + secondInterest;
+
+    // SAVINGS CALCULATION — ONLY on the FIRST mortgage when HomeNow is checked
+    // This is the fix: savings do not increase when we add the second mortgage
+    let interestDiff = standardInterest - customInterest;
+    if (homeNowEnabled) {
+        const firstMortgageStandardInterest = standardPI * totalPayments - baseLoanAmount;
+        const firstMortgageCustomInterest = principalPayment * monthsToPayoff - baseLoanAmount;
+        interestDiff = firstMortgageStandardInterest - firstMortgageCustomInterest;
+    }
+
+    // ==================== OUTPUT ====================
     document.getElementById('calc-output').innerHTML = `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div class="p-10 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-3xl shadow-2xl border-4 border-[#002B5C]">
             <h4 class="text-3xl font-black mb-8 text-[#002B5C] dark:text-[#00A89D]">Standard ${termYears}-Year Loan</h4>
             <div class="space-y-5 text-xl">
-                <p><strong>Loan Amount:</strong> $${loanAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                <p><strong>Loan Amount:</strong> $${baseLoanAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
                 <p><strong>P&I:</strong> $${standardPI.toFixed(2)}/mo</p>
                 <p><strong>Taxes + Insurance:</strong> $${(monthlyTaxes + monthlyInsurance).toFixed(2)}/mo</p>
                 <p><strong>PMI:</strong> $${monthlyPMI.toFixed(2)}/mo</p>
+                ${homeNowEnabled ? `<p class="text-[#00A89D] text-sm mt-2">incl. 1.75% UFMIP financed</p>` : ''}
+                ${homenowHTML}
                 <p class="text-3xl font-black pt-8 border-t-4 border-[#002B5C]/50 text-[#002B5C] dark:text-[#00A89D]">
                     Total Payment: $${basePITI.toFixed(2)}/mo
                 </p>
@@ -5438,16 +5521,19 @@ function calculateAdvanced() {
             <h4 class="text-3xl font-black mb-8 text-[#F15A29]">Your Custom Plan</h4>
             <div class="space-y-5 text-xl">
                 <p><strong>Extra Principal Payment:</strong> 
-    $${extraMonthly.toFixed(2)}${extraMonthly > 0 ? '/month' : ''} 
-    ${biweekly ? ` (≈ $${(extraMonthly / 2).toFixed(0)} per biweekly payment)` : ''}
-</p>
-                <p><strong>Your Payment:</strong> $${userMonthlyCost.toFixed(2)}/mo</p>
+                    $${extraMonthly.toFixed(2)}${extraMonthly > 0 ? '/month' : ''} 
+                    ${biweekly ? ` (≈ $${(extraMonthly / 2).toFixed(0)} per biweekly payment)` : ''}
+                </p>
+                <p><strong>Your Payment:</strong> $${displayPayment.toFixed(2)}/mo</p>
                 <p><strong>Payoff Time:</strong> ${yearsToPayoff} years${remainingMonths ? `, ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}</p>
                 <p class="text-3xl font-black pt-8 border-t-4 border-[#F15A29]/50 text-[#F15A29]">
                     Total Interest Paid: $${customInterest.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </p>
                 <p class="text-4xl font-black mt-12 ${interestDiff > 0 ? 'text-green-600' : interestDiff < 0 ? 'text-red-600' : 'text-gray-600'}">
                     ${interestDiff > 0 ? 'You Save' : interestDiff < 0 ? 'Extra Cost' : 'No Change'}: $${Math.abs(interestDiff).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </p>
+                <p class="text-xs text-gray-500 mt-6 italic">
+                    * Results are estimates based on standard amortization. Actual savings and payoff date may vary based on lender rounding, payment timing, and servicing rules. Always confirm with your lender.
                 </p>
             </div>
         </div>
@@ -5564,6 +5650,120 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('mode-purchase')?.click();
     document.getElementById('dp-percent-btn')?.click();
 });
+
+// ====================== HOMENOW SUPPORT ======================
+let homeNowEnabled = false;
+let selectedDPAPercent = 3.5;
+
+function toggleHomeNow() {
+  homeNowEnabled = document.getElementById('homenow-checkbox').checked;
+  document.getElementById('dpa-options').classList.toggle('hidden', !homeNowEnabled);
+  document.getElementById('homenow-breakdown').classList.toggle('hidden', !homeNowEnabled);
+
+  if (homeNowEnabled) {
+    setDPA(3.5);
+    autoSetFHA_MIP();
+  }
+
+  calculateAdvanced();
+
+  // Force the clear AFTER the entire calculation finishes
+  if (!homeNowEnabled) {
+    document.getElementById('pmi').value = '';
+  }
+}
+
+function setDPA(pct) {
+  selectedDPAPercent = pct;
+
+  // This line is the key fix — it updates the actual input field
+  document.getElementById('downPayment').value = pct.toFixed(1);
+
+  // Style the buttons (your existing code)
+  document.getElementById('dpa35-btn').classList.toggle('bg-[#00A89D]', pct === 3.5);
+  document.getElementById('dpa35-btn').classList.toggle('text-white', pct === 3.5);
+  document.getElementById('dpa5-btn').classList.toggle('bg-[#00A89D]', pct === 5);
+  document.getElementById('dpa5-btn').classList.toggle('text-white', pct === 5);
+
+  calculateAdvanced();
+}
+function autoSelectDPA() {
+  const price = parseFloat(document.getElementById('homePrice').value) || 0;
+  const loan = parseFloat(document.getElementById('loanAmountManual').value) || 0;
+  if (price > 0 && loan > 0) {
+    const ltv = loan / price;
+    if (ltv >= 0.965) setDPA(3.5);
+    else if (ltv >= 0.95) setDPA(5);
+  }
+}
+function updatePMIRate() {
+    const pmiEl = document.getElementById('pmi');
+    if (!pmiEl) return;
+
+    // ONLY act when HomeNow is ON
+    if (homeNowEnabled) {
+        autoSetFHA_MIP();
+    }
+    // When HomeNow is OFF → do absolutely nothing (this is key for clearing)
+}
+
+function calculateMonthlyPayment(principal, annualRate, years) {
+  const r = annualRate / 100 / 12;
+  const n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+}
+
+// Show HomeNow only on Purchase mode
+document.getElementById('mode-purchase').addEventListener('click', () => {
+  document.getElementById('homenow-wrapper').classList.remove('hidden');
+});
+document.getElementById('mode-refinance').addEventListener('click', () => {
+  document.getElementById('homenow-wrapper').classList.add('hidden');
+  document.getElementById('homenow-checkbox').checked = false;
+  toggleHomeNow();
+});
+// Auto-set correct FHA MIP rate when HomeNow is checked
+// Auto-set correct FHA MIP rate (annual %) when HomeNow is checked
+function autoSetFHA_MIP() {
+    if (!homeNowEnabled) return;
+
+    const homePrice = parseFloat(document.getElementById('homePrice').value) || 0;
+    const termYears = parseFloat(document.getElementById('term').value) || 30;
+
+    if (homePrice === 0) return;
+
+    // Calculate the exact base loan amount based on the currently selected DPA %
+    const downPercent = selectedDPAPercent;
+    const baseLoan = homePrice * (1 - downPercent / 100);
+    const ltv = baseLoan / homePrice;
+
+    let mipBps = 55;   // default for >15yr and >95% LTV
+
+    if (termYears > 15) {
+        // Mortgage Term of More Than 15 Years (most common for HomeNow)
+        if (baseLoan <= 726200) {
+            if (ltv <= 0.95) mipBps = 50;
+            else mipBps = 55;
+        } else {
+            if (ltv <= 0.95) mipBps = 70;
+            else mipBps = 75;
+        }
+    } else {
+        // Mortgage Term of Less than or Equal to 15 Years
+        if (baseLoan <= 726200) {
+            if (ltv <= 0.90) mipBps = 15;
+            else mipBps = 40;
+        } else {
+            if (ltv <= 0.78) mipBps = 15;
+            else if (ltv <= 0.90) mipBps = 15;
+            else mipBps = 40;
+        }
+    }
+
+    const mipAnnualRate = mipBps / 100;
+    document.getElementById('pmi').value = mipAnnualRate.toFixed(2);
+}
    // === DATABASE NURTURING CATEGORY MODALS ===
 function openDatabaseModal(category) {
     const modal = document.getElementById('db-modal');
@@ -10088,5 +10288,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
