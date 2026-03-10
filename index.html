@@ -501,6 +501,11 @@ input[type="range"]:active::-moz-range-thumb {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
+    .close-modal {
+    top: 24px !important;
+    right: 32px !important;
+    font-size: 48px;
+}
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -574,9 +579,9 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-     <!--<li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+     <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Newsletter Generator
-</a></li> -->
+</a></li>
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
@@ -588,7 +593,7 @@ input[type="range"]:active::-moz-range-thumb {
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-           <!-- <li class="sidebar-group">Marketing</li>
+            <li class="sidebar-group">Marketing</li>
             <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
             <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
@@ -597,10 +602,10 @@ input[type="range"]:active::-moz-range-thumb {
             <li><a href="#value-vault" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-gem mr-3"></i>Value Vault</a></li>
             <li><a href="#database" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-database mr-3"></i>Database Nurturing</a></li>
             <li class="sidebar-group">Planning & Process</li>
-            <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li> -->
+            <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li>
             <li class="sidebar-group">Tools & Resources</li>
-         <!-- <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
-            <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li> -->
+            <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
+            <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
             </ul> 
     </aside>
@@ -971,6 +976,10 @@ input[type="range"]:active::-moz-range-thumb {
         </ul>
     </div>
 </div>
+<div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Mindset is 80% of Success</p>
+    <p class="text-xl">Master your thoughts today and everything else in your business will follow.</p>
+</div>
         </section>
                 
         <section id="planning" class="hidden">
@@ -1143,8 +1152,13 @@ input[type="range"]:active::-moz-range-thumb {
         <i class="fas fa-magic mr-4"></i> Generate My Custom 2026 Plan
     </button>
 </div>
+
 <!-- Output Preview -->
 <div id="plan-output" class="hidden mt-12"></div>
+<div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Custom 2026 Business Plan Builder</p>
+    <p class="text-xl">Turn your income goals into a clear, step-by-step roadmap you’ll actually follow and crush.</p>
+</div>
            </section>
               
         <section id="prospecting" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -1171,6 +1185,10 @@ input[type="range"]:active::-moz-range-thumb {
                     <li>Time Blocking Calendar Spreadsheet <a href="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Adam%20Images%20to%20Host/Time%20Blocking%20Calendar%20with%20Clear%20All%20and%20ICS%20Export.xlsm" target="_blank" class="text-[#00A89D] hover:text-[#F15A29] underline">Click Here to Download</a></p></li>
                 </ul>
             </div>
+            <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Prospecting is the Lifeblood of Your Business</p>
+    <p class="text-xl">Do it daily or become obsolete. Block the time and watch your pipeline grow.</p>
+</div>
         </section>
         <!-- MAIN SOCIAL MEDIA TIPS PAGE -->
 <!-- MAIN SOCIAL MEDIA TIPS PAGE -->
@@ -1179,32 +1197,33 @@ input[type="range"]:active::-moz-range-thumb {
     <p class="text-lg mb-12 leading-relaxed">Build genuine relationships, grow your reach organically, and turn followers into referral partners — without ever being salesy. Build strong personal connections by sharing your passions, hobbies, family, pets, vacations, and interests in life.</p>
 
     <!-- Content Pillars – Visual Boxes (UNCHANGED) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-        <div onclick="openModal('Personal')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
-            <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Personal</h3>
-            <p class="text-gray-700 dark:text-gray-300">Behind-the-scenes, hobbies, family (with permission)</p>
-        </div>
-        <div onclick="openModal('Local')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
-            <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Local</h3>
-            <p class="text-gray-700 dark:text-gray-300">Community events, spotlights, neighborhood insights</p>
-        </div>
-        <div onclick="openModal('Educational')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
-            <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Educational</h3>
-            <p class="text-gray-700 dark:text-gray-300">Mortgage tips, rate myths, homebuying process</p>
-        </div>
-        <div onclick="openModal('Client Wins')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
-            <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Client Wins</h3>
-            <p class="text-gray-700 dark:text-gray-300">Just closed stories, testimonials</p>
-        </div>
-        <div onclick="openModal('Value')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
-            <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Value</h3>
-            <p class="text-gray-700 dark:text-gray-300">Checklists, guides, free resources</p>
-        </div>
-        <div onclick="openModal('Engagement')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
-            <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Engagement</h3>
-            <p class="text-gray-700 dark:text-gray-300">Polls, questions, "tag a friend"</p>
-        </div>
+   <!-- Content Pillars – Visual Boxes (UPDATED) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+    <div onclick="openSocialModal('Personal')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
+        <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Personal</h3>
+        <p class="text-gray-700 dark:text-gray-300">Behind-the-scenes, hobbies, family (with permission)</p>
     </div>
+    <div onclick="openSocialModal('Local')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
+        <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Local</h3>
+        <p class="text-gray-700 dark:text-gray-300">Community events, spotlights, neighborhood insights</p>
+    </div>
+    <div onclick="openSocialModal('Educational')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
+        <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Educational</h3>
+        <p class="text-gray-700 dark:text-gray-300">Mortgage tips, rate myths, homebuying process</p>
+    </div>
+    <div onclick="openSocialModal('Client Wins')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
+        <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Client Wins</h3>
+        <p class="text-gray-700 dark:text-gray-300">Just closed stories, testimonials</p>
+    </div>
+    <div onclick="openSocialModal('Value')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
+        <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Value</h3>
+        <p class="text-gray-700 dark:text-gray-300">Checklists, guides, free resources</p>
+    </div>
+    <div onclick="openSocialModal('Engagement')" class="cursor-pointer bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 p-8 rounded-2xl border border-[#00A89D]/30 text-center shadow-md hover:shadow-xl hover:scale-105 transition-all">
+        <h3 class="text-2xl font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Engagement</h3>
+        <p class="text-gray-700 dark:text-gray-300">Polls, questions, "tag a friend"</p>
+    </div>
+</div>
 
     <!-- Big CTA Button to AI Creator (UNCHANGED) -->
     <div class="text-center my-16">
@@ -1578,7 +1597,7 @@ input[type="range"]:active::-moz-range-thumb {
     <li>Home Equity Basics and Cash-Out Refinance Benefits</li>
     <li>Owning Your First Investment Property: Research, Financing, and ROI</li>
     <li>Pre-Approval vs. Pre-Qualification Explained</li>
-    <li>Behind-the-Scenes of Mortgage Closings</li>
+    <li> of Mortgage Closings</li>
     <li>Did You Know: Rate History and Closing Cost Facts</li>
     <li>Myth-Buster in 30 Seconds (e.g., "You Need 20% Down" is Not True)</li>
     <li>Market Pulse: Weekly Local Rate Updates</li>
@@ -2065,8 +2084,8 @@ input[type="range"]:active::-moz-range-thumb {
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Equity & Opportunity Scanner</h2>
     <p class="mb-8 text-lg">Upload your past client spreadsheet → get a prioritized, interactive dashboard showing equity built, refi savings, cash-out potential, move-up power, and personalized outreach scripts. Turn your database into your #1 lead source.</p>
 
-    <!-- Compact Upload Area -->
-    <div id="upload-area" class="border-4 border-dashed border-[#00A89D] rounded-2xl p-8 text-center hover:border-[#F15A29] transition-all mb-8 max-w-3xl mx-auto">
+  <!-- Compact Upload Area -->
+<div id="upload-area" class="border-4 border-dashed border-[#00A89D] rounded-2xl p-8 text-center hover:border-[#F15A29] transition-all mb-8 max-w-3xl mx-auto">
     <i class="fas fa-file-upload text-5xl text-[#00A89D] mb-4"></i>
     <p class="text-2xl mb-4">Drag & drop your spreadsheet here</p>
     <p class="text-lg text-gray-600 dark:text-gray-400">CSV or Excel files only</p>
@@ -2076,9 +2095,18 @@ input[type="range"]:active::-moz-range-thumb {
 <p id="file-status" class="text-sm text-gray-600 dark:text-gray-400 mt-6">No file chosen</p>
         <p id="file-name" class="mt-2 font-bold text-[#F15A29] hidden"></p>
     </div>
+
+<!-- === UPLOAD SUCCESS INDICATOR (this was missing) === -->
+<div id="file-status" class="hidden mt-6 p-5 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-2xl flex items-center gap-4 max-w-3xl mx-auto">
+    <i class="fas fa-check-circle text-3xl text-green-600"></i>
+    <div>
+        <p class="font-medium text-green-700 dark:text-green-400">Successfully uploaded:</p>
+        <p id="file-name" class="font-semibold text-[#002B5C] dark:text-white text-lg"></p>
+    </div>
+</div>
             
-    <!-- Generate Button -->
-    <div class="text-center mb-12">
+<!-- Generate Button -->
+<div class="text-center mb-12">
         <button onclick="generateEquityReport(event)" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-20 py-6 rounded-full hover:opacity-90 transition-all font-bold text-2xl shadow-2xl">
             Generate Equity Report
         </button>
@@ -2145,6 +2173,10 @@ input[type="range"]:active::-moz-range-thumb {
     <div id="no-results" class="hidden text-center text-4xl font-bold text-gray-500 dark:text-gray-400 py-32">
         No opportunities found matching current filters.
     </div>
+</div>
+<div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Equity & Opportunity Scanner</p>
+    <p class="text-xl">Find hidden equity and untapped opportunities in seconds — turn every lead into a closed deal.</p>
 </div>
     </section>
 
@@ -2627,7 +2659,10 @@ input[type="range"]:active::-moz-range-thumb {
             <li><strong>Be human</strong> — share hobbies, family (with permission), wins, and lessons</li>
         </ul>
     </div>
-  
+  <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Social Media Post & Plan Creator</p>
+    <p class="text-xl">Stop staring at a blank screen. Generate authentic, relationship-building posts and full plans in seconds.</p>
+</div>
 </section>
                     
                 <section id="sales-script" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -2737,6 +2772,10 @@ input[type="range"]:active::-moz-range-thumb {
             </button>
         </div>
     </div>
+    <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Sales Script Generator</p>
+    <p class="text-xl">Natural, objection-proof scripts that feel human and help you close more deals with confidence.</p>
+</div>
 </section>
         <section id="eventplanning" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Event Planning – Build Relationships & Generate Referrals</h2>
@@ -2983,6 +3022,10 @@ input[type="range"]:active::-moz-range-thumb {
             </button>
         </div>
     </div>
+    <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Instant Underwriting Guideline Search</p>
+    <p class="text-xl">Get accurate answers in seconds, reduce conditions, and close loans faster than ever.</p>
+</div>
 </section>
               <section id="blog" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Blog Creator – Authority-Building Content in Seconds</h2>
@@ -3197,6 +3240,10 @@ input[type="range"]:active::-moz-range-thumb {
 
     <!-- Output Area - everything gets inserted here dynamically -->
     <div id="blog-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden"></div>
+<div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Blog Creator – Become the Trusted Expert</p>
+    <p class="text-xl">Publish professional blogs that position you as the go-to authority and drive consistent leads.</p>
+</div>
 </section>
 
  <!-- Blog Tips Modal -->
@@ -3222,6 +3269,40 @@ input[type="range"]:active::-moz-range-thumb {
             </div>
         </div>
     </div>
+    <!-- ==================== SOCIAL MEDIA PILLAR MODAL ==================== -->
+<!-- ==================== SOCIAL MEDIA PILLAR MODAL (Clean - No Search) ==================== -->
+<div id="content-modal" class="modal hidden">
+    <div class="modal-content animate-modal max-w-4xl mx-auto">
+        <!-- Header with emoji + close button (fixed spacing) -->
+        <div class="flex justify-between items-center mb-8">
+            <h3 id="modal-title" class="text-4xl font-bold text-[#F15A29] flex items-center gap-4">
+                <!-- Emoji will be added by JS -->
+            </h3>
+            <span onclick="closeModal()" 
+                  class="close-modal text-5xl leading-none cursor-pointer text-gray-400 hover:text-[#F15A29] transition">×</span>
+        </div>
+
+        <ul id="modal-list" class="space-y-4 max-h-[70vh] overflow-y-auto pr-4">
+            <!-- Populated by JavaScript -->
+        </ul>
+    </div>
+</div>
+
+<!-- ==================== REFERRAL PARTNER MODAL ==================== -->
+<div id="referral-modal" class="modal hidden">
+    <div class="modal-content animate-modal max-w-4xl mx-auto">
+        <span onclick="closeReferralModal()" class="close-modal text-6xl leading-none cursor-pointer absolute top-6 right-8">×</span>
+        
+        <div class="modal-header">
+            <h3 id="referral-modal-title" class="text-4xl font-bold text-[#F15A29] mb-6"></h3>
+        </div>
+        
+        <div id="referral-content" class="prose dark:prose-invert text-lg leading-relaxed">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
  <section id="books" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Recommended Books</h2>
             <p class="mb-4">Explore these highly rated books to enhance your skills in sales, networking, and more.</p>
@@ -3324,6 +3405,10 @@ input[type="range"]:active::-moz-range-thumb {
                     </ul>
                 </div>
             </div>
+            <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">The Books That Built Top Producers</p>
+    <p class="text-xl">Read one chapter a day and transform your income and impact in 90 days.</p>
+</div>
         </section>
                        
     <section id="calculator" class="card bg-white dark:bg-gray-800 pt-8 pb-16 px-10 rounded-3xl shadow-2xl animate-fade-in hidden">
@@ -3682,6 +3767,10 @@ input[type="range"]:active::-moz-range-thumb {
             <p><strong>Script:</strong> [Point to map] “Inventory up 10% locally, rates dipping—perfect buyer window! Thinking of moving? Comment your neighborhood.”</p>
         </div>
     </div>
+    <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">The Value Vault: Give More, Get More</p>
+    <p class="text-xl">Share these resources freely and watch your referral pipeline explode.</p>
+</div>
 </section>
 <!-- Full Updated Weekly Win Plan Section -->
  <!-- NEWSLETTER GENERATOR TOOL -->
@@ -4030,6 +4119,10 @@ input[type="range"]:active::-moz-range-thumb {
         </div>
     </div>
 </div>
+<div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Newsletter Generator</p>
+    <p class="text-xl">One click = a beautiful, compliant newsletter your database will actually open and love.</p>
+</div>
 </section>
 
 <section id="weekly-win-plan" class="hidden">
@@ -4267,6 +4360,10 @@ input[type="range"]:active::-moz-range-thumb {
 </button>
         </div>
     </div>
+</div>
+<div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
+    <p class="text-2xl font-bold mb-4">Weekly Win Plan – Your 7-Day Blueprint to Crush It</p>
+    <p class="text-xl">Turn goals into daily actions. Execute this plan and watch your production explode every single week.</p>
 </div>
    </section> 
 </main>
@@ -4925,98 +5022,6 @@ document.getElementById('post-type').addEventListener('change', function() {
     textarea.placeholder = placeholder;
 });
 // Modal functions
-function openModal(category) {
-    document.getElementById('modal-title').innerText = category;
-    document.getElementById('modal-suggestions').innerHTML = getSuggestions(category);
-    document.getElementById('post-modal').style.display = 'block';
-}
-function closeModal() {
-    document.getElementById('post-modal').style.display = 'none';
-}
-// Click outside modal to close
-window.onclick = function(event) {
-    const modal = document.getElementById('post-modal');
-    if (event.target === modal) {
-        closeModal();
-    }
-}
-function getSuggestions(category) {
-    const suggestions = {
-        "Educational": [
-            "Myth-bust a common mortgage misconception (e.g., 'You need 20% down')",
-            "Explain the difference between pre-qualification and pre-approval",
-            "Share '5 costs to expect when buying a home'",
-            "Break down how interest rates are determined",
-            "Post a quick tip on improving credit score before applying",
-            "Explain escrow and why it matters",
-            "Share the benefits of a 15-year vs 30-year mortgage",
-            "Talk about current FHA or VA loan advantages",
-            "Demystify closing costs with a simple infographic idea",
-            "Highlight red flags to watch for in a loan estimate"
-        ],
-        "Local": [
-            "Spotlight a local small business or restaurant",
-            "Share an upcoming community event or festival",
-            "Post about a neighborhood market update or new development",
-            "Celebrate a local school's achievement or sports win",
-            "Recommend a hidden gem park or trail in the area",
-            "Talk about seasonal local activities (e.g., holiday lights tour)",
-            "Shout out a local charity or volunteer opportunity",
-            "Share fun facts about your city's history",
-            "Highlight a new local shop opening",
-            "Post about farmers market or seasonal produce tips"
-        ],
-        "Personal": [
-            "Behind-the-scenes of your day (e.g., 'Coffee run before approvals')",
-            "Share a non-work hobby or weekend activity",
-            "Post a family-friendly outing you enjoyed (with permission)",
-            "Talk about a book/podcast you're loving right now",
-            "Share your morning routine for staying productive",
-            "Celebrate a personal milestone (e.g., years in the industry)",
-            "Post a fun 'day in the life' reel",
-            "Share what you're grateful for this week",
-            "Talk about a lesson learned from a recent challenge",
-            "Show your workspace or home office setup"
-        ],
-        "Client Wins": [
-            "'Just helped another family into their dream home!' (with permission/photo)",
-            "Share a client testimonial or success story",
-            "Celebrate a 'Just Closed' with balloons or keys photo",
-            "Post about overcoming a tough approval for a client",
-            "Highlight a first-time buyer closing milestone",
-            "Share 'From pre-approval to keys in hand' timeline",
-            "Celebrate a refinance that saved a client money",
-            "Post a fun closing table photo or signing moment",
-            "Talk about helping a client buy in a competitive market",
-            "Share an anonymous win: 'Helped a family lower their rate by X%'"
-        ],
-        "Value": [
-            "Free downloadable homebuyer checklist",
-            "Share a 'First-time buyer guide' link or PDF",
-            "Post a mortgage calculator tip or tool",
-            "Offer a free credit review or consultation",
-            "Share a seasonal home maintenance checklist",
-            "Provide a 'Questions to ask your lender' list",
-            "Post a refinance breakeven calculator explanation",
-            "Share a budget worksheet for homebuyers",
-            "Offer a 'Moving checklist' resource",
-            "Give away a local vendor list for new homeowners"
-        ],
-        "Engagement": [
-            "Poll: 'What's your dream home feature?'",
-            "This or That: 'Beach house or mountain cabin?'",
-            "Tag a friend who needs to see this rate tip",
-            "Question: 'What's stopping you from buying right now?'",
-            "Poll: 'Rent or own — what's your plan?'",
-            "Ask: 'What's your favorite part of homeownership?'",
-            "Tag a friend you'd love to help buy a home",
-            "Question: 'How long have you lived in your current home?'",
-            "Poll: 'Fixer-upper or move-in ready?'",
-            "Ask followers to share their home buying stories"
-        ]
-    };
-    return suggestions[category].map(s => `<li>${s}</li>`).join('');
-}
 </script>
 <script type="text/javascript">
     async function generatePlan() {
@@ -6013,11 +6018,11 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
               },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-                messages: [{ role: "user", content: systemPrompt }],
-                temperature: 0.6,
-                max_tokens: 10000
-            })
-        });
+        messages: [{ role: "user", content: systemPrompt }],
+        temperature: 0.6,
+        max_tokens: 10000
+    })
+});
 
         if (!response.ok) throw new Error('API error');
 
@@ -6187,7 +6192,8 @@ function downloadBlogWord() {
     </style></head><body>`;
 
     const content = blogEl.innerHTML;
-    const footer = '</body></html>';
+    // Option A – concatenate pieces (most reliable)
+const fullHtml = header + content + '</bo' + 'dy></html>';
 
     const blob = new Blob([header + content + footer], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
@@ -6218,20 +6224,44 @@ function copyGooglePostWithFormatting() {
         alert('No Google post to copy!');
         return;
     }
-    const html = googleEl.innerHTML;
-    const plainText = googleEl.innerText;
 
+    // Get the rendered HTML (what shows on page)
+    const html = googleEl.innerHTML;
+
+    // Get plain text version (strips HTML tags)
+    let plainText = googleEl.innerText || '';
+
+    // Clean up excessive whitespace for clean pasting
+    // 1. Replace multiple newlines with single newlines (Google likes single breaks)
+    plainText = plainText.replace(/\n\s*\n+/g, '\n\n');  // double newlines → single paragraph break
+
+    // 2. Trim extra spaces around bullets/lists (common Markdown artifact)
+    plainText = plainText.replace(/^\s*([*-])\s*/gm, '$1 ');  // normalize bullets to "* " or "- "
+
+    // 3. Collapse multiple spaces (but preserve intentional ones)
+    plainText = plainText.replace(/ {2,}/g, ' ');
+
+    // 4. Trim leading/trailing whitespace per line and overall
+    plainText = plainText.split('\n').map(line => line.trim()).join('\n').trim();
+
+    // Optional: Remove any leftover "(1,248 characters)" footer if AI added it
+    plainText = plainText.replace(/\(\d+[, ]?characters?\)$/im, '').trim();
+
+    // Create ClipboardItem with:
+    // - Rich HTML for platforms that support it (e.g., Google Docs)
+    // - Clean plain text for Google Business Profile / Experience.com
     const clipboardItem = new ClipboardItem({
         'text/html': new Blob([html], { type: 'text/html' }),
         'text/plain': new Blob([plainText], { type: 'text/plain' })
     });
 
     navigator.clipboard.write([clipboardItem]).then(() => {
-        alert('Google post copied with formatting! Paste directly into Google Business Profile.');
+        alert('Google post copied! Cleaned version ready for pasting into Google Business Profile or Experience.com — spacing should now look great.');
     }).catch(err => {
         console.error('Rich copy failed:', err);
+        // Fallback: copy plain text only
         navigator.clipboard.writeText(plainText).then(() => {
-            alert('Copied as plain text (formatting not supported in this browser)');
+            alert('Copied as clean plain text (formatting not supported) — paste should look neat now!');
         });
     });
 }
@@ -7144,8 +7174,204 @@ window.copySinglePost = function(postId, event) {
         navigator.clipboard.writeText(text);
     });
 };
+
+// Load saved personal info and themes
+document.addEventListener('DOMContentLoaded', () => {
+    const savedPersonal = localStorage.getItem('socialPlanPersonal');
+    if (savedPersonal) {
+        const data = JSON.parse(savedPersonal);
+        if (document.getElementById('plan-areas')) document.getElementById('plan-areas').value = data.areas || '';
+        if (document.getElementById('plan-hobbies')) document.getElementById('plan-hobbies').value = data.hobbies || '';
+        if (document.getElementById('plan-family')) document.getElementById('plan-family').value = data.family || '';
+        if (document.getElementById('custom-plan-prompt')) document.getElementById('custom-plan-prompt').value = data.custom || '';
+    }
+
+    const savedThemes = localStorage.getItem('socialPlanThemes');
+    if (savedThemes) {
+        const themes = JSON.parse(savedThemes);
+        const themeIds = [
+            'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
+            'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
+            'theme-recipes', 'theme-trivia', 'theme-localbusiness'
+        ];
+        themeIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && themes[id] !== undefined) el.checked = themes[id];
+        });
+    }
+});
+
+// Save personal info on change
+['plan-areas', 'plan-hobbies', 'plan-family', 'custom-plan-prompt'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', () => {
+            const data = {
+                areas: document.getElementById('plan-areas')?.value || '',
+                hobbies: document.getElementById('plan-hobbies')?.value || '',
+                family: document.getElementById('plan-family')?.value || '',
+                custom: document.getElementById('custom-plan-prompt')?.value || ''
+            };
+            localStorage.setItem('socialPlanPersonal', JSON.stringify(data));
+        });
+    }
+});
+
+// Save themes on change
+const themeIds = [
+    'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
+    'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
+    'theme-recipes', 'theme-trivia', 'theme-localbusiness'
+];
+
+themeIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('change', () => {
+            const saved = JSON.parse(localStorage.getItem('socialPlanThemes') || '{}');
+            saved[id] = el.checked;
+            localStorage.setItem('socialPlanThemes', JSON.stringify(saved));
+        });
+    }
+});
 </script>
 <script>
+
+
+// Theme Toggle + Persistence (dark/light)
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const label = toggleBtn?.querySelector('span');
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+        if (icon) {
+            icon.classList.replace('fa-moon', 'fa-sun');
+            icon.classList.replace('text-yellow-400', 'text-yellow-500');
+        }
+        if (label) label.textContent = 'Light Mode';
+    } else {
+        document.documentElement.classList.add('dark');
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (icon) {
+                    icon.classList.replace('fa-moon', 'fa-sun');
+                    icon.classList.replace('text-yellow-400', 'text-yellow-500');
+                }
+                if (label) label.textContent = 'Light Mode';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (icon) {
+                    icon.classList.replace('fa-sun', 'fa-moon');
+                    icon.classList.replace('text-yellow-500', 'text-yellow-400');
+                }
+                if (label) label.textContent = 'Dark Mode';
+            }
+        });
+    }
+});
+
+
+</script>
+<script>
+// === FULL EQUITY SCANNER — CLEAN & FIXED (REPLACE ALL OLD CODE WITH THIS) ===
+
+const CURRENT_DATE = new Date();
+
+// Upload Listeners + Success Indicator (fixed)
+const uploadArea = document.getElementById('upload-area');
+const fileInput = document.getElementById('database-upload');
+const fileStatus = document.getElementById('file-status');
+const fileNameDisplay = document.getElementById('file-name');
+
+// Single clean listener for file selection + drag/drop feedback
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+
+    // User canceled / no file selected
+    if (!file) {
+        if (fileStatus) fileStatus.textContent = 'No file selected';
+        if (fileNameDisplay) fileNameDisplay.textContent = '';
+        if (fileStatus) fileStatus.classList.add('hidden'); // optional: hide status area
+        return;
+    }
+
+    // File was actually selected — show UI feedback immediately
+    if (fileNameDisplay) {
+        fileNameDisplay.textContent = file.name;
+        fileNameDisplay.classList.remove('hidden');
+    }
+    if (fileStatus) {
+        fileStatus.textContent = 'File selected — processing...';
+        fileStatus.classList.remove('hidden');
+    }
+    console.log('✅ File selected:', file.name);
+
+    // Start reading the file
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+        // ── YOUR FULL XLSX PARSING LOGIC GOES HERE ──
+        // Example structure (replace with your actual code from generateEquityReport):
+        try {
+            const workbook = XLSX.read(event.target.result, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            // ... rest of your parsing, column mapping, processing rows, etc. ...
+
+            if (fileStatus) fileStatus.textContent = 'File processed successfully!';
+            // Optionally: auto-call generateEquityReport() or buildDashboard() here
+            // if you want processing to happen automatically on upload
+        } catch (err) {
+            console.error('File processing error:', err);
+            if (fileStatus) fileStatus.textContent = 'Error processing file — try again';
+            if (fileStatus) fileStatus.classList.add('text-red-600');
+        }
+    };
+
+    reader.onerror = () => {
+        if (fileStatus) {
+            fileStatus.textContent = 'Error reading file';
+            fileStatus.classList.add('text-red-600');
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+
+    // Optional: Reset input so user can re-select the same file later
+    // e.target.value = '';
+});
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('border-[#F15A29]', 'bg-[#F15A29]/10');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
+    if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        const file = e.dataTransfer.files[0];
+        fileStatus.textContent = 'File selected:';
+        fileNameDisplay.textContent = file.name;
+        fileNameDisplay.classList.remove('hidden');
+    }
+});
+
 function syncRateControls() {
     const slider = document.getElementById('new-rate-slider');
     const input = document.getElementById('new-rate-input');
@@ -7255,164 +7481,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // FIX: Force a second recalc after mode switch (especially critical for remaining term sync)
         setTimeout(() => updateDashboardWithNewRate(currentRate), 100);
     });
-});
-
-// Theme Toggle + Persistence (dark/light)
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleBtn = document.getElementById('theme-toggle');
-    const icon = document.getElementById('theme-icon');
-    const label = toggleBtn?.querySelector('span');
-
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.documentElement.classList.remove('dark');
-        if (icon) {
-            icon.classList.replace('fa-moon', 'fa-sun');
-            icon.classList.replace('text-yellow-400', 'text-yellow-500');
-        }
-        if (label) label.textContent = 'Light Mode';
-    } else {
-        document.documentElement.classList.add('dark');
-    }
-
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                if (icon) {
-                    icon.classList.replace('fa-moon', 'fa-sun');
-                    icon.classList.replace('text-yellow-400', 'text-yellow-500');
-                }
-                if (label) label.textContent = 'Light Mode';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                if (icon) {
-                    icon.classList.replace('fa-sun', 'fa-moon');
-                    icon.classList.replace('text-yellow-500', 'text-yellow-400');
-                }
-                if (label) label.textContent = 'Dark Mode';
-            }
-        });
-    }
-});
-
-// Load saved personal info and themes
-document.addEventListener('DOMContentLoaded', () => {
-    const savedPersonal = localStorage.getItem('socialPlanPersonal');
-    if (savedPersonal) {
-        const data = JSON.parse(savedPersonal);
-        if (document.getElementById('plan-areas')) document.getElementById('plan-areas').value = data.areas || '';
-        if (document.getElementById('plan-hobbies')) document.getElementById('plan-hobbies').value = data.hobbies || '';
-        if (document.getElementById('plan-family')) document.getElementById('plan-family').value = data.family || '';
-        if (document.getElementById('custom-plan-prompt')) document.getElementById('custom-plan-prompt').value = data.custom || '';
-    }
-
-    const savedThemes = localStorage.getItem('socialPlanThemes');
-    if (savedThemes) {
-        const themes = JSON.parse(savedThemes);
-        const themeIds = [
-            'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
-            'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
-            'theme-recipes', 'theme-trivia', 'theme-localbusiness'
-        ];
-        themeIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && themes[id] !== undefined) el.checked = themes[id];
-        });
-    }
-});
-
-// Save personal info on change
-['plan-areas', 'plan-hobbies', 'plan-family', 'custom-plan-prompt'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener('input', () => {
-            const data = {
-                areas: document.getElementById('plan-areas')?.value || '',
-                hobbies: document.getElementById('plan-hobbies')?.value || '',
-                family: document.getElementById('plan-family')?.value || '',
-                custom: document.getElementById('custom-plan-prompt')?.value || ''
-            };
-            localStorage.setItem('socialPlanPersonal', JSON.stringify(data));
-        });
-    }
-});
-
-// Save themes on change
-const themeIds = [
-    'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
-    'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
-    'theme-recipes', 'theme-trivia', 'theme-localbusiness'
-];
-
-themeIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener('change', () => {
-            const saved = JSON.parse(localStorage.getItem('socialPlanThemes') || '{}');
-            saved[id] = el.checked;
-            localStorage.setItem('socialPlanThemes', JSON.stringify(saved));
-        });
-    }
-});
-</script>
-<script>
-// === FULL EQUITY SCANNER — CLEAN & FIXED (REPLACE ALL OLD CODE WITH THIS) ===
-
-const CURRENT_DATE = new Date();
-
-// Upload Listeners
-const uploadArea = document.getElementById('upload-area');
-const fileInput = document.getElementById('database-upload');
-const fileStatus = document.getElementById('file-status');
-const fileNameDisplay = document.getElementById('file-name');
-
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-
-    if (!file) {
-        // User canceled the picker — do NOTHING (prevents re-opening)
-        fileStatus.textContent = 'No file selected';
-        fileNameDisplay.textContent = '';
-        return;
-    }
-
-    // Your normal file processing code here...
-    fileStatus.textContent = 'File selected — processing...';
-    fileNameDisplay.textContent = file.name;
-
-    // Example: read/process the file (your existing code)
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        // Your XLSX/parsing logic here...
-    };
-    reader.readAsArrayBuffer(file);
-
-    // Optional: Reset input after successful load (allows re-upload same file)
-    // e.target.value = '';
-});
-
-uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.classList.add('border-[#F15A29]', 'bg-[#F15A29]/10');
-});
-
-uploadArea.addEventListener('dragleave', () => {
-    uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
-});
-
-uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
-    if (e.dataTransfer.files.length > 0) {
-        fileInput.files = e.dataTransfer.files;
-        const file = e.dataTransfer.files[0];
-        fileStatus.textContent = 'File selected:';
-        fileNameDisplay.textContent = file.name;
-        fileNameDisplay.classList.remove('hidden');
-    }
 });
 
 // Helpers
@@ -8275,7 +8343,6 @@ function resetEquityTool() {
     fileInput.value = '';
     window.currentOpportunities = null;
 }
-
 
 </script>
 <!-- Post Ideas Modal -->
@@ -9792,7 +9859,149 @@ function openModal(category) {
     modal.style.display = 'flex';
     search.focus();
 }
+// === SOCIAL MEDIA PILLAR MODAL (Improved - Rich Content) ===
+// === SOCIAL MEDIA PILLAR MODAL (Beefed Up - No Search Bar) ===
+function openSocialModal(category) {
+    const modal = document.getElementById('content-modal');
+    const titleEl = document.getElementById('modal-title');
+    const list = document.getElementById('modal-list');
 
+    list.innerHTML = '';
+
+    let emoji = '';
+    let title = '';
+    let content = [];
+
+    switch(category) {
+        case 'Personal':
+            emoji = '💡';
+            title = 'Personal Content Ideas';
+            content = [
+                "Behind-the-scenes of my morning coffee run before approvals ☕",
+                "Weekend family hike in Indiana — who else loves getting outdoors?",
+                "My favorite hobby right now: [golf/poker/cooking] — what’s yours?",
+                "Quick kitchen hack I used this week (recipe in comments)",
+                "Throwback to my very first closing — 5 years ago today!",
+                "Pet photo Friday! Meet my dog [name] 🐶",
+                "What I’m grateful for this week as a loan officer",
+                "My non-work passion project I’ve been working on",
+                "A funny story from a recent client meeting",
+                "How I stay productive on busy days",
+                "Favorite local restaurant I took a client to this week",
+                "Quick update on my family/kids/pets"
+            ];
+            break;
+
+        case 'Local':
+            emoji = '🏠';
+            title = 'Local Spotlight Ideas';
+            content = [
+                "Why homes in [your city] are selling faster than ever",
+                "Hidden gem coffee shop perfect for client meetings",
+                "This weekend’s best community events in our area",
+                "Neighborhood highlight: [your city] parks & trails",
+                "Local school spotlight — huge congratulations to [school]!",
+                "Indiana fall colors are here — best viewing spots",
+                "New development coming to [neighborhood] — what it means for buyers",
+                "Shoutout to a local small business we love working with",
+                "Farmers market season is back — my favorite finds",
+                "Local charity I’m supporting this month",
+                "Why [your city] is one of the best places to raise a family",
+                "Upcoming festival or event you don’t want to miss"
+            ];
+            break;
+
+        case 'Educational':
+            emoji = '📚';
+            title = 'Educational Mortgage Tips';
+            content = [
+                "3% down programs available right now in Indiana",
+                "Why buying now vs waiting could save you $28k+",
+                "How to boost your credit score 40+ points in 30 days",
+                "Buydown explained in 60 seconds (super simple)",
+                "First-time buyer checklist (free download link)",
+                "Rate myths busted: You do NOT need 20% down",
+                "FHA vs Conventional — which is better for you?",
+                "What escrow really is and why it matters",
+                "Closing costs explained with real numbers",
+                "VA loan benefits every veteran should know",
+                "How to get pre-approved in under 24 hours",
+                "Refinance breakeven calculator — when it actually makes sense"
+            ];
+            break;
+
+        case 'Client Wins':
+            emoji = '🎉';
+            title = 'Client Success Stories';
+            content = [
+                "Just helped the Smith family buy their first home in [city]!",
+                "Refinanced Sarah & Mike — saving them $312/month",
+                "Teacher closed with only 3.5% down using DPA program",
+                "Veteran client got 0% down VA loan in 21 days",
+                "Client testimonial: “Best decision we ever made!”",
+                "Another happy family got their keys this week 🗝️",
+                "Helped a young couple beat 7 other offers",
+                "First-time buyer closed with rate buydown — huge savings",
+                "Client went from renter to homeowner in 38 days",
+                "Refinance success story — lowered payment by $450/month",
+                "Helped a family move closer to grandparents",
+                "Just closed another veteran with 100% financing"
+            ];
+            break;
+
+        case 'Value':
+            emoji = '📋';
+            title = 'Free Value Resources';
+            content = [
+                "Free Homebuyer Checklist (download link)",
+                "2026 Mortgage Rate Forecast Guide",
+                "Credit Repair Checklist — boost your score fast",
+                "Closing Cost Calculator (free tool)",
+                "First-Time Buyer Webinar Replay",
+                "Home Maintenance Calendar (printable)",
+                "Refinance Breakeven Calculator",
+                "Questions to Ask Your Lender checklist",
+                "Moving Checklist for new homeowners",
+                "Local Vendor List (painters, inspectors, movers)",
+                "Budget Worksheet for homebuyers",
+                "Down Payment Assistance Guide for Indiana"
+            ];
+            break;
+
+        case 'Engagement':
+            emoji = '🔥';
+            title = 'Engagement & Poll Ideas';
+            content = [
+                "Poll: Renting or Buying in 2026?",
+                "Would you rather: Lower rate or lower monthly payment?",
+                "Tag a friend who needs to see this rate tip!",
+                "Quick question: What’s your biggest homebuying fear?",
+                "This or That: Beach house or mountain cabin?",
+                "Poll: Fixer-upper or move-in ready?",
+                "Ask: How long have you lived in your current home?",
+                "Comment your city below — I’ll share local stats!",
+                "Poll: What’s your dream home feature?",
+                "Tag someone who’s thinking about buying soon",
+                "Question: What’s stopping you from buying right now?",
+                "This or That: Backyard or basement?"
+            ];
+            break;
+    }
+
+    titleEl.innerHTML = `${emoji} ${title}`;
+    content.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'p-6 bg-white dark:bg-gray-800 rounded-3xl cursor-pointer hover:bg-[#00A89D]/10 transition-all border border-transparent hover:border-[#00A89D] text-lg';
+        li.innerHTML = `→ ${item}`;
+        li.onclick = () => {
+            alert(`✅ Great choice!\n\n"${item}"\n\nCopy and paste this into your next post!`);
+            closeModal();
+        };
+        list.appendChild(li);
+    });
+
+    modal.style.display = 'flex';
+}
 // Close modal
 function closeModal() {
     document.getElementById('content-modal').style.display = 'none';
@@ -10141,9 +10350,10 @@ async function generateNewsletter(feedback = '') {
 '        <p>Ruoff Mortgage Company, Inc., d/b/a Ruoff Mortgage, is an Indiana corporation. For complete licensing information visit <a href="http://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/141868" style="color:#00A89D; text-decoration:underline;">http://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/141868</a>.<br>This is not an offer for extension of credit or a commitment to lend. All loans must satisfy company underwriting guidelines. Information and interest rate are subject to change at any time and without notice. Equal Housing Lender. NMLS#141868.</p>',
 '      </td>',
 '    </tr>',
+// Most reliable — same as your previous Option A
 '  </table>',
-'</body>',
-'</html>'
+'</bo' + 'dy>',
+'</ht' + 'ml>'
             ];
         }
 
@@ -10510,7 +10720,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('🔄 Weekly Win Plan auto-save enabled — changes save instantly');
 })();
+
 </script>
+
 <script type="text/javascript">
 (function addSocialPostListener() {
     document.addEventListener('DOMContentLoaded', () => {
@@ -10528,5 +10740,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
