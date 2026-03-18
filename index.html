@@ -154,17 +154,20 @@
         color: #F15A29;
     }
     .close-modal {
-        color: #aaa;
-        float: right;
-        font-size: 48px;
-        font-weight: bold;
-        cursor: pointer;
-        position: absolute;
-        top: 16px;
-        right: 32px;
-    }
-    .close-modal:hover { color: #F15A29; }
-    .dark .close-modal { color: #cbd5e1; }
+    position: absolute;
+    top: 12px;           /* ← This is the only line changed (was 20px) */
+    right: 24px;
+    font-size: 42px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+}
+ .close-modal:hover {
+    color: #F15A29;
+    transform: scale(1.15);
+}
+.dark .close-modal { color: #64748b; }
     .dark .close-modal:hover { color: #F15A29; }
 
     /* Fixed: Use @apply correctly */
@@ -485,27 +488,29 @@ input[type="range"]:active::-moz-range-thumb {
     .animate-modal {
         animation: modalFadeIn 0.3s ease-out forwards;
     }
-    #modal-list li {
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        background: #f8f9fa;
-        dark:bg-gray-700;
-        border-radius: 1rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    #modal-list li:hover {
-        background: #e9ecef;
-        dark:bg-gray-600;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    .close-modal {
-    top: 24px !important;
-    right: 32px !important;
-    font-size: 48px;
+#modal-list li {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: #f8f9fa;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+#modal-list li:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+/* DARK MODE OVERRIDES (now proper CSS + Tailwind classes) */
+.dark #modal-list li {
+    background: #1f2937;
+    color: #f3f4f6;
+}
+.dark #modal-list li:hover {
+    background: #374151;
+}
+ 
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -579,7 +584,7 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-   <!--  <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+    <!-- <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Newsletter Generator
 </a></li> -->
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
@@ -593,7 +598,7 @@ input[type="range"]:active::-moz-range-thumb {
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-         <!--   <li class="sidebar-group">Marketing</li>
+           <!-- <li class="sidebar-group">Marketing</li>
             <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
             <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
@@ -604,8 +609,8 @@ input[type="range"]:active::-moz-range-thumb {
             <li class="sidebar-group">Planning & Process</li>
             <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li> -->
             <li class="sidebar-group">Tools & Resources</li>
-        <!--    <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
-            <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li> -->
+           <!-- <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
+            <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>-->
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
             </ul> 
     </aside>
@@ -3935,32 +3940,36 @@ input[type="range"]:active::-moz-range-thumb {
     </div>
 </details>
 
-<!-- Slick Searchable Modal -->
-<!-- Slick Searchable Modal -->
-<div id="content-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-modal">
+<!-- Slick Searchable Modal - Always Light Box Like Blog Tips Modal -->
+<!-- Content Selection Modal - Exact Same Structure as Working Blog Tips Modal -->
+<div id="content-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-5xl">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+
         <!-- Header -->
-        <div class="p-8 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h3 class="text-4xl font-bold text-[#F15A29] modal-title">Choose Item</h3>
-            <button onclick="closeModal()" class="text-5xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">&times;</button>
+        <div class="modal-header">
+            <h3 class="modal-title text-4xl font-bold text-[#F15A29]">Choose Item</h3>
         </div>
 
         <!-- Search -->
         <div class="p-8">
             <div class="relative">
-                <input type="text" id="modal-search" placeholder="Search..." class="w-full p-5 pl-14 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-lg focus:outline-none focus:ring-4 focus:ring-[#F15A29]/30">
+                <input 
+                    type="text" 
+                    id="modal-search" 
+                    placeholder="Search..." 
+                    class="w-full p-5 pl-14 rounded-2xl border-2 border-[#00A89D] bg-white text-lg focus:outline-none focus:ring-4 focus:ring-[#F15A29]/30 text-gray-900 placeholder-gray-500"
+                >
                 <i class="fas fa-search absolute left-5 top-6 text-gray-400 text-xl"></i>
             </div>
         </div>
 
         <!-- List -->
-        <div class="flex-1 overflow-y-auto px-8 pb-8" id="modal-list">
+        <div class="px-8 pb-8 overflow-y-auto" id="modal-list" style="max-height: 60vh;">
             <!-- Items populated by JS -->
         </div>
     </div>
 </div>
-          <!-- Optional Branding -->
-<!-- Optional Branding -->
 <!-- Optional Branding -->
 <details class="mb-8 bg-gray-100 dark:bg-gray-700 rounded-2xl p-6">
     <summary class="text-xl font-semibold text-[#00A89D] cursor-pointer mb-4">Branding & Contact Info (auto-saved)</summary>
@@ -5980,7 +5989,7 @@ async function generateBlog() {
     const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized blog posts for loan officers that Educate, Empower and Entertain the reader.
 
 Key Requirements:
-- Length: Exactly aim for the middle of ${lengthGuide} range (e.g., ~1,750 words for 1,500–2,000). Do not generate shorter—expand with more detailed explanations, additional examples, sub-sections, or relevant anecdotes to reach the word count while keeping it engaging and reader-focused. Count words in your output to ensure compliance.
+- Length: Exactly aim for the middle of ${lengthGuide} range (e.g., ~1,750 words for 1,500–2,000). Do not generate shorter—expand with more detailed explanations, additional examples, sub-sections, or relevant anecdotes to reach the word count while keeping it engaging and reader-focused. 
 - Tone: ${tone}
 ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-out-loud funny! Use clever wordplay, relatable mortgage humor, self-deprecating jokes, exaggerated analogies, and witty observations. Keep it light-hearted and entertaining while still being helpful — never mean-spirited. Sprinkle humor throughout (intro, body, headings, FAQs). Readers should smile or chuckle multiple times.' : ''}
 - Primary SEO keyword/phrase (use naturally throughout, especially in title if it fits, intro, H2s, and body — aim for 1–2% density with semantic variations): ${keywordInput || 'Optimize naturally for the main topic'}
@@ -6000,12 +6009,11 @@ ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-ou
 - Never mention lenders other than Ruoff Mortgage. 
 - Voice: Helpful, trustworthy, conversational — never salesy
 
-At the end of the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**) to share with a link to the blog. Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags.
+At the end of the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**). Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags. **Do NOT include any character count at the end — output clean caption text only.**
 
-Add another separator (---) followed by a clearly labeled Google Business Profile post (e.g., **Suggested Google Post:**) optimized for SEO/GEO. This must be under 1400 characters total (aim for minimum of 1200 for readability). Make it a standalone teaser/summary of the blog that can be copied/pasted directly into Google Business Profile. Maximize SEO/GEO by naturally incorporating the primary keyword, local area references (if provided), related terms, and calls-to-action. Use engaging language, emojis if fitting the tone, and end with a link placeholder like [Link to full blog]. Ensure it's formatted in plain text with bold (**text**) where emphasis helps, as Google supports basic Markdown-like formatting on paste.
+Add another separator (---) followed by a clearly labeled Google Business Profile post (e.g., **Suggested Google Post:**) optimized for SEO/GEO. This must be under 1400 characters total. Make it a standalone teaser/summary of the blog that can be copied/pasted directly into Google Business Profile. Maximize SEO/GEO by naturally incorporating the primary keyword, local area references (if provided), related terms, and calls-to-action. Use engaging language, emojis if fitting the tone. **Do NOT include any character count at the end — output clean post text only.** Ensure it's formatted in plain text with bold (**text**) where emphasis helps, as Google supports basic Markdown-like formatting on paste.
 
-- When determining the word count, ONLY count actual words, no extra whitespace, list bullets, or repeated subheadings. Be as accurate with the actual word count as possible. 
-- Do NOT include any word count, character count, or length estimate at the end of the blog, caption, or Google post — output clean content only.
+ABSOLUTE RULE: NEVER include any word count, character count, or length estimate at the end of the blog, caption, or Google post — output clean content only.
 
 Write a complete blog post on: ${topicInput}
 
@@ -6020,7 +6028,7 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
                 model: "grok-4-1-fast-reasoning",
         messages: [{ role: "user", content: systemPrompt }],
         temperature: 0.6,
-        max_tokens: 10000
+        max_tokens: 12000
     })
 });
 
@@ -6049,6 +6057,7 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
             blogMarkdown = parts[0].trim();
             captionText = parts[1].trim().replace(/^\*\*Suggested Social Media Caption:\*\*\s*/i, '').trim();
         }
+        
 
         // === IMPROVED WORD COUNT FOR BLOG ===
         const blogDiv = document.createElement('div');
@@ -6208,16 +6217,27 @@ const fullHtml = header + content + '</bo' + 'dy></html>';
     alert('Blog downloaded as Word doc! Open in Word for best formatting.');
 }
 
-// Copy social caption (plain text)
 function copySocialCaption() {
     const captionEl = document.getElementById('social-caption');
     if (!captionEl) return alert('No caption to copy!');
-    navigator.clipboard.writeText(captionEl.innerText).then(() => {
-        alert('Social caption copied!');
+
+    let text = captionEl.innerText || '';
+
+    // Remove leading indentation/tabs/spaces from each line
+    text = text
+        .split('\n')
+        .map(line => line.trimStart())  // Remove leading whitespace per line
+        .join('\n')
+        .trim();  // Remove overall leading/trailing
+
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Social caption copied! Starts flush left — ready to paste.');
+    }).catch(err => {
+        console.error('Copy failed:', err);
+        alert('Copy failed — try manually selecting the text.');
     });
 }
 
-// Copy Google post (rich formatting where possible)
 function copyGooglePostWithFormatting() {
     const googleEl = document.getElementById('google-post');
     if (!googleEl) {
@@ -6225,43 +6245,40 @@ function copyGooglePostWithFormatting() {
         return;
     }
 
-    // Get the rendered HTML (what shows on page)
+    // Get rendered HTML (for rich copy)
     const html = googleEl.innerHTML;
 
-    // Get plain text version (strips HTML tags)
+    // Get plain text and clean it
     let plainText = googleEl.innerText || '';
 
-    // Clean up excessive whitespace for clean pasting
-    // 1. Replace multiple newlines with single newlines (Google likes single breaks)
-    plainText = plainText.replace(/\n\s*\n+/g, '\n\n');  // double newlines → single paragraph break
+    // Step 1: Remove common character count patterns at the end
+    plainText = plainText
+        .replace(/\(\d+[, ]?characters?\)$/im, '')     // (1,248 characters)
+        .replace(/\(\d+ characters\)$/im, '')          // (1248 characters)
+        .replace(/\(1,248 characters\)$/im, '')        // exact match for your example
+        .replace(/1,248 characters$/im, '')            // without parentheses
+        .replace(/\d+ characters?$/im, '')             // any number + "characters"
+        .trim();
 
-    // 2. Trim extra spaces around bullets/lists (common Markdown artifact)
-    plainText = plainText.replace(/^\s*([*-])\s*/gm, '$1 ');  // normalize bullets to "* " or "- "
+    // Step 2: Remove extra leading/trailing whitespace and collapse multiple newlines
+    plainText = plainText
+        .replace(/\s*\n\s*\n+/g, '\n\n')               // double newlines → single paragraph break
+        .replace(/^\s+|\s+$/gm, '')                    // trim each line
+        .trim();
 
-    // 3. Collapse multiple spaces (but preserve intentional ones)
-    plainText = plainText.replace(/ {2,}/g, ' ');
-
-    // 4. Trim leading/trailing whitespace per line and overall
-    plainText = plainText.split('\n').map(line => line.trim()).join('\n').trim();
-
-    // Optional: Remove any leftover "(1,248 characters)" footer if AI added it
-    plainText = plainText.replace(/\(\d+[, ]?characters?\)$/im, '').trim();
-
-    // Create ClipboardItem with:
-    // - Rich HTML for platforms that support it (e.g., Google Docs)
-    // - Clean plain text for Google Business Profile / Experience.com
+    // Create ClipboardItem with cleaned plain text + original rich HTML
     const clipboardItem = new ClipboardItem({
         'text/html': new Blob([html], { type: 'text/html' }),
         'text/plain': new Blob([plainText], { type: 'text/plain' })
     });
 
     navigator.clipboard.write([clipboardItem]).then(() => {
-        alert('Google post copied! Cleaned version ready for pasting into Google Business Profile or Experience.com — spacing should now look great.');
+        alert('Google post copied! Cleaned version (no character count) ready for pasting.');
     }).catch(err => {
         console.error('Rich copy failed:', err);
-        // Fallback: copy plain text only
+        // Fallback: copy cleaned plain text
         navigator.clipboard.writeText(plainText).then(() => {
-            alert('Copied as clean plain text (formatting not supported) — paste should look neat now!');
+            alert('Copied as clean plain text (no character count) — paste should be perfect now!');
         });
     });
 }
@@ -7821,8 +7838,7 @@ function buildDashboard() {
 
         <div class="text-center mt-12 space-x-8">
             <button onclick="copyDashboard()" class="bg-[#002B5C] text-white px-12 py-6 rounded-full font-bold text-xl shadow-2xl">📋 Copy All Data</button>
-            <button onclick="window.print()" class="bg-[#00A89D] text-white px-12 py-6 rounded-full font-bold text-xl shadow-2xl">🖨️ Print Dashboard</button>
-        </div>
+         </div>
     </div>
 `;
 
@@ -9749,32 +9765,33 @@ function resetUsed(category) {
         selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
     }
 
-    // Clear localStorage for that category
     localStorage.setItem('used' + category.charAt(0).toUpperCase() + category.slice(1), JSON.stringify([]));
 
-    // Update preview and confirm
     updatePreviews();
     alert(`"${category === 'funFacts' ? 'Fun Facts' : category === 'proTips' ? 'Pro Tips' : 'Motivational Quotes'}" tracking reset! Random selections refreshed.`);
 }
+
 function openNewsletterTips() {
-    document.getElementById('newsletter-tips-modal').style.display = 'block';
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (modal) modal.style.display = 'block';
 }
 
 function closeNewsletterTips() {
-    document.getElementById('newsletter-tips-modal').style.display = 'none';
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (modal) modal.style.display = 'none';
 }
+
 // Close modal when clicking outside content
 window.onclick = function(event) {
     const modal = document.getElementById('newsletter-tips-modal');
-    if (event.target === modal) {
+    if (modal && event.target === modal) {
         closeNewsletterTips();
     }
-}
+};
 
 // Random selection (no repeats)
 function getRandomItem(list, used) {
     if (used.length >= list.length) {
-        // All used — reset
         used = [];
     }
     let item;
@@ -9795,11 +9812,15 @@ localStorage.setItem('usedFunFacts', JSON.stringify(usedFunFacts));
 localStorage.setItem('usedProTips', JSON.stringify(usedProTips));
 localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
 
-// Update previews
+// Update previews (safe version)
 function updatePreviews() {
-    document.getElementById('fun-fact-preview').innerText = selectedFunFact;
-    document.getElementById('pro-tip-preview').innerText = selectedProTip;
-    document.getElementById('quote-preview').innerText = selectedQuote;
+    const funFactEl = document.getElementById('fun-fact-preview');
+    const proTipEl = document.getElementById('pro-tip-preview');
+    const quoteEl = document.getElementById('quote-preview');
+
+    if (funFactEl) funFactEl.innerText = selectedFunFact || 'No fun fact selected';
+    if (proTipEl) proTipEl.innerText = selectedProTip || 'No pro tip selected';
+    if (quoteEl) quoteEl.innerText = selectedQuote || 'No quote selected';
 }
 
 // Regenerate random for a category
@@ -9807,64 +9828,104 @@ function regenerateRandom(category) {
     if (category === 'funFact') selectedFunFact = getRandomItem(funFacts, usedFunFacts);
     if (category === 'proTip') selectedProTip = getRandomItem(proTips, usedProTips);
     if (category === 'quote') selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+
     localStorage.setItem('usedFunFacts', JSON.stringify(usedFunFacts));
     localStorage.setItem('usedProTips', JSON.stringify(usedProTips));
     localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
+
     updatePreviews();
 }
 
 function openModal(category) {
     const modal = document.getElementById('content-modal');
+    if (!modal) return;
+
     const title = modal.querySelector('.modal-title');
     const search = modal.querySelector('#modal-search');
     const list = modal.querySelector('#modal-list');
 
-    let data;
+    let data = [];
+    let modalTitleText = '';
+
     if (category === 'funFact') {
-        title.innerText = 'Choose Fun Fact';
-        data = funFacts;
+        modalTitleText = 'Choose Fun Fact';
+        data = funFacts || [];
     } else if (category === 'proTip') {
-        title.innerText = 'Choose Pro Tip';
-        data = proTips;
-    } else {
-        title.innerText = 'Choose Motivational Quote';
-        data = motivationalQuotes;
+        modalTitleText = 'Choose Pro Tip';
+        data = proTips || [];
+    } else if (category === 'quote') {
+        modalTitleText = 'Choose Motivational Quote';
+        data = motivationalQuotes || [];
     }
 
-    // Populate list
-    list.innerHTML = '';
-    data.forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'p-6 bg-gray-50 dark:bg-gray-700 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition';
-        li.innerText = item;
-        li.onclick = () => {
-            if (category === 'funFact') selectedFunFact = item;
-            if (category === 'proTip') selectedProTip = item;
-            if (category === 'quote') selectedQuote = item;
-            updatePreviews();
-            closeModal();
-            search.value = '';
-        };
-        list.appendChild(li);
-    });
+    if (title) title.innerText = modalTitleText;
 
-    // Search filter
-    search.oninput = () => {
-        const filter = search.value.toLowerCase();
-        Array.from(list.children).forEach(li => {
-            li.style.display = li.innerText.toLowerCase().includes(filter) ? '' : 'none';
+    if (list) {
+        list.innerHTML = '';
+        data.forEach(item => {
+            const li = document.createElement('li');
+            // 🔥 SEXY PREMIUM STYLING (light + dark)
+            li.className = 'p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#00A89D] hover:shadow-xl hover:-translate-y-1';
+            li.innerText = item;
+            li.onclick = () => {
+                if (category === 'funFact') selectedFunFact = item;
+                if (category === 'proTip') selectedProTip = item;
+                if (category === 'quote') selectedQuote = item;
+                updatePreviews();
+                closeModal();
+                if (search) search.value = '';
+            };
+            list.appendChild(li);
         });
-    };
+    }
 
+    if (search) {
+        search.oninput = () => {
+            const filter = search.value.toLowerCase();
+            Array.from(list.children).forEach(li => {
+                li.style.display = li.innerText.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        };
+        search.focus();
+    }
+
+    // === PREMIUM OPEN + CLICK ANYWHERE OUTSIDE TO CLOSE ===
     modal.style.display = 'flex';
-    search.focus();
+    modal.onclick = function(e) {
+        if (e.target === modal) closeModal();   // clicks on dark backdrop close it
+    };
 }
-// === SOCIAL MEDIA PILLAR MODAL (Improved - Rich Content) ===
-// === SOCIAL MEDIA PILLAR MODAL (Beefed Up - No Search Bar) ===
+
+// Close modal
+function closeModal() {
+    const modal = document.getElementById('content-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.onclick = null;   // clean up event listener
+    }
+    const search = document.getElementById('modal-search');
+    if (search) search.value = '';
+}
+
+// Close on Esc key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// === SOCIAL MEDIA PILLAR MODAL (Improved - Rich Content, No Search Bar) ===
 function openSocialModal(category) {
     const modal = document.getElementById('content-modal');
+    if (!modal) {
+        console.error('Social modal #content-modal not found!');
+        return;
+    }
+
     const titleEl = document.getElementById('modal-title');
     const list = document.getElementById('modal-list');
+    if (!titleEl || !list) {
+        console.error('Missing modal-title or modal-list in social modal');
+        return;
+    }
 
     list.innerHTML = '';
 
@@ -9988,7 +10049,8 @@ function openSocialModal(category) {
             break;
     }
 
-    titleEl.innerHTML = `${emoji} ${title}`;
+    if (titleEl) titleEl.innerHTML = `${emoji} ${title}`;
+
     content.forEach(item => {
         const li = document.createElement('li');
         li.className = 'p-6 bg-white dark:bg-gray-800 rounded-3xl cursor-pointer hover:bg-[#00A89D]/10 transition-all border border-transparent hover:border-[#00A89D] text-lg';
@@ -10002,13 +10064,16 @@ function openSocialModal(category) {
 
     modal.style.display = 'flex';
 }
+
 // Close modal
 function closeModal() {
-    document.getElementById('content-modal').style.display = 'none';
-    document.getElementById('modal-search').value = '';
+    const modal = document.getElementById('content-modal');
+    if (modal) modal.style.display = 'none';
+    const search = document.getElementById('modal-search');
+    if (search) search.value = '';
 }
 
-// Close on Esc
+// Close on Esc key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
 });
@@ -10018,8 +10083,8 @@ const persistentFields = [
     'nl-audience', 'nl-frequency', 'nl-tone', 'nl-location', 'nl-title', 'nl-length',
     'nl-name', 'nl-headshot', 'nl-logo', 'nl-cell', 'nl-email', 'nl-signature',
     'nl-facebook', 'nl-instagram', 'nl-linkedin', 'nl-youtube', 'nl-x', 'nl-tiktok',
-    'nl-blog-url', 'nl-blog-title',          // NEW: persist blog link fields
-    'nl-include-blog'                        // NEW: also save checkbox state
+    'nl-blog-url', 'nl-blog-title',
+    'nl-include-blog'
 ];
 
 // Load saved values on page load
@@ -10029,12 +10094,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) {
             const saved = localStorage.getItem(id);
             if (saved !== null) {
-                // Special case for nl-logo: only restore if saved value exists and is NOT empty
                 if (id === 'nl-logo') {
                     if (saved && saved.trim() !== '') {
                         el.value = saved;
                     }
-                    // Otherwise, leave the default value from HTML
                 } else {
                     el.value = saved;
                 }
@@ -10052,7 +10115,6 @@ document.addEventListener('DOMContentLoaded', () => {
     usedProTips = JSON.parse(localStorage.getItem('usedProTips') || '[]');
     usedQuotes = JSON.parse(localStorage.getItem('usedQuotes') || '[]');
 
-    // Ensure current selections are valid
     selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
     selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
     selectedQuote = motivationalQuotes.includes(selectedQuote) ? selectedQuote : getRandomItem(motivationalQuotes, usedQuotes);
@@ -10094,7 +10156,6 @@ document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', 
     }
     generateNewsletter(feedback);
 });
-
 async function generateNewsletter(feedback = '') {
     const loading = document.getElementById('global-loading');
     if (loading) loading.classList.remove('hidden');
@@ -10740,4 +10801,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
