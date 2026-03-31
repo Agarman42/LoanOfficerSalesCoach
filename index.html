@@ -21,7 +21,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-          <!-- SWITCH TO CLASS MODE -->
+    <!-- === PDF.js — REQUIRED for Blog Document Upload === -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // This tells pdf.js where to find its worker file (most common reason it fails)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>      
+    <!-- SWITCH TO CLASS MODE -->
     <script>
       tailwind.config = {
         darkMode: 'class'
@@ -584,9 +590,9 @@ input[type="range"]:active::-moz-range-thumb {
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-    <!-- <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+     <!--<li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Newsletter Generator
-</a></li> -->
+</a></li>-->
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
@@ -598,18 +604,18 @@ input[type="range"]:active::-moz-range-thumb {
                       <li><a href="#ai-chat" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-robot mr-3"></i> AI Chat Assistant
 </a></li>
-           <!-- <li class="sidebar-group">Marketing</li>
-            <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting</a></li>
-            <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
+            <li class="sidebar-group">Marketing</li>
+            <li><a href="#prospecting" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Prospecting/Time Blocking</a></li>
+           <!-- <li><a href="#social" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-share-alt mr-3"></i>Social Media</a></li>
             <li><a href="#eventplanning" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-search mr-3"></i>Event Planning</a></li>
             <li class="sidebar-group">Partners & Nurturing</li>
             <li><a href="#referrals" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-handshake mr-3"></i>Referral Partners</a></li>
             <li><a href="#value-vault" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-gem mr-3"></i>Value Vault</a></li>
             <li><a href="#database" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-database mr-3"></i>Database Nurturing</a></li>
             <li class="sidebar-group">Planning & Process</li>
-            <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li> -->
+            <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li>-->
             <li class="sidebar-group">Tools & Resources</li>
-           <!-- <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
+            <!--<li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
             <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>-->
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
             </ul> 
@@ -1174,9 +1180,9 @@ input[type="range"]:active::-moz-range-thumb {
                 <label class="block text-lg">Frequency: <select id="frequency" class="p-3 rounded-lg border border-[#00A89D] bg-white dark:bg-gray-800 w-full focus:ring-[#F15A29]">
                     <option>Daily</option><option>Weekly</option><option>Monthly</option><option>Quarterly</option><option>Yearly</option>
                 </select></label>
-                <button type="button" onclick="generateTimeBlock()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full font-semibold">Generate Full List</button>
                 <button type="button" onclick="cycleActivities()" class="bg-gradient-to-r from-[#F15A29] to-[#00A89D] text-white px-6 py-3 rounded-full hover:opacity-90 w-full font-semibold">Cycle New Ideas (Random 5-10)</button>
-            </form>
+                <button type="button" onclick="generateTimeBlock()" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full hover:opacity-90 w-full font-semibold">Generate Full List</button>
+                 </form>
             <div id="time-block-output" class="mt-6 p-6 bg-gradient-to-br from-[#002B5C]/10 to-[#00A89D]/10 rounded-2xl shadow-inner"></div>
             <div class="mt-6 p-6 bg-gradient-to-br from-[#F15A29]/10 to-[#00A89D]/10 rounded-2xl shadow-md">
                 <h3 class="text-xl font-semibold mb-4 flex items-center"><i class="fas fa-clock mr-2 text-[#F15A29]"></i>Time Blocking Tips & Strategies</h3>
@@ -3209,7 +3215,27 @@ input[type="range"]:active::-moz-range-thumb {
                    class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Select or type a topic → choose tone → click Generate to create your blog post!</p>
         </div>
+<!-- NEW: Additional Context -->
+    <div>
+        <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Additional Context / Key Details to Include (optional)</label>
+        <textarea id="blog-additional-context" rows="3" placeholder="Example: Mention Indiana DPA programs, Fort Wayne market stats, first-time buyer tips, a recent client success story, or any specific product details you want highlighted..." class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+    </div>
 
+    <!-- NEW: Document Upload -->
+    <div>
+        <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Upload Document (PDF or TXT) – Optional</label>
+        <div id="blog-upload-area" class="border-2 border-dashed border-[#00A89D] rounded-3xl p-10 text-center hover:bg-[#00A89D]/5 transition-all cursor-pointer">
+            <i class="fas fa-cloud-upload-alt text-5xl text-[#00A89D] mb-4"></i>
+            <p class="text-lg font-medium">Drag & drop a PDF or TXT file here</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">or</p>
+            <label class="inline-flex items-center px-8 py-3 bg-[#00A89D] text-white rounded-2xl cursor-pointer hover:bg-[#00887A] transition-all">
+                <i class="fas fa-folder-open mr-2"></i>Browse Files
+                <input type="file" id="blog-file-upload" accept=".pdf,.txt" class="hidden">
+            </label>
+            <p id="blog-file-name" class="mt-4 text-sm font-medium text-[#00A89D] hidden"></p>
+        </div>
+        <button onclick="removeBlogUploadedFile()" class="text-red-500 text-sm mt-3 hidden" id="blog-remove-file-btn">Remove file</button>
+    </div>
         <div class="mb-8">
             <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Primary Search Phrase (Optional)</label>
             <input type="text" id="blog-keyword" placeholder="e.g., Fort Wayne first-time home buyer" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
@@ -4093,11 +4119,6 @@ input[type="range"]:active::-moz-range-thumb {
     </button>
 </div>
         </div>
-
-        <p class="text-lg mb-6 text-gray-700 dark:text-gray-300">
-            <strong>How to use:</strong> Copy HTML → paste into Mailchimp/Constant Contact. Or download the .html file, double-click to preview in browser, then upload to your email platform.
-        </p>
-
         <!-- Preview -->
         <div id="nl-preview" class="border-2 border-gray-300 dark:border-gray-600 rounded-2xl overflow-hidden min-h-96 bg-gray-50 dark:bg-gray-900"></div>
 
@@ -4537,11 +4558,136 @@ if (quoteDisplay) {
 
 // Activities (full)
 const activities = {
-    daily: ["Write two personal notes or thank-you cards to clients, referral partners, or prospects.", "Make at least five outbound calls to past clients or referral partners.", "Send personalized birthday messages using video to your past clients.", "Engage on social media by commenting on or liking 10 posts from realtors, clients, and referral partners.", "Record and post one short-form video or story about mortgage tips, market updates, or client success stories.", "Follow up with any new online or social media leads received in the past 24 hours.", "Reach out to a past client just to check in—no sales pitch, just relationship-building.", "Send a text or video message to a referral partner to stay top of mind.", "Knock on one local business door to introduce yourself (title companies, insurance agents, CPAs, etc.).", "Spend time reviewing and updating CRM with notes, follow-ups, and next actions."],
-    weekly: ["Pipeline review with referral partners—discuss upcoming deals and potential new clients.", "Pipeline review with active clients—touch base with a weekly update, even if nothing new.", "Host a 15-minute coaching call (Zoom or Teams) for realtors on mortgage trends or strategies.", "Attend at least one networking event (chamber of commerce, BNI, or real estate meetup).", "Send a “Who do you know?” text to 5+ referral partners asking for warm introductions.", "Create and send a value-packed email to your database (market updates, home tips, etc.).", "Record and send a personalized video email to new leads or referral partners.", "Reach out to 3 new real estate agents via social media or in person.", "Host a casual coffee meeting with a referral partner or past client.", "Review past closed loans and follow up with clients who may benefit from refinancing."],
-    monthly: ["Deliver pop-by gifts to your top 10 referral partners or your A+ past clients.", "Host an Ask YOUR Lender Zoom call for realtors and referral partners.", "Host a first-time homebuyer seminar (online or in person).", "Send out handwritten birthday and anniversary cards to past clients.", "Record and post a long-form video covering a trending mortgage topic.", "Partner with a real estate agent for a co-branded marketing campaign.", "Run a targeted Facebook or Instagram ad to generate leads.", "Check in on past pre-approved clients who haven’t bought yet.", "Attend a local community event and network with homeowners and business owners.", "Review and update your Google Business Profile with new content and reviews."],
-    quarterly: ["Host a Lunch & Learn for real estate agents and referral partners.", "Run a local market update webinar for homebuyers and realtors.", "Send a personalized video message to past clients about market trends.", "Organize a Realtor Mastermind event to discuss business growth strategies.", "Sponsor a local event or charity drive to gain visibility in the community.", "Mail out a homeowner equity review letter to past clients.", "Host a networking happy hour for realtors, attorneys, and financial planners.", "Run a contest or giveaway for clients and referral partners.", "Send a direct mail campaign targeting renters or move-up buyers.", "Set up a strategy session with a key referral partner to refine your co-marketing plan."],
-    yearly: ["Host a Client Appreciation Party for past clients and referral partners.", "Review and optimize your annual marketing plan and business goals.", "Plan and execute a major branding campaign (e.g., billboards, radio ads, podcast sponsorship).", "Attend at least one national or regional mortgage conference for networking and education.", "Run a VIP dinner for your top referral partners. (Great around the holidays)", "Organize a major community service project under your brand.", "Launch an exclusive mastermind group for elite real estate agents.", "Record a professional brand video to use in marketing.", "Schedule a business planning retreat to evaluate and set goals for the next year.", "Build and refresh your contact database, ensuring all referral partners and clients are engaged."]
+    daily: [
+        "Write two personal handwritten notes or thank-you cards to clients, referral partners, or prospects (Ruoff standard — mail or hand-deliver).",
+        "Make at least five outbound relationship calls to past clients or referral partners — no pitch, just check-in.",
+        "Send personalized birthday or anniversary video messages to past clients in your database.",
+        "Engage on social media by commenting on or liking 10 posts from realtors, clients, and referral partners (75% personal rule).",
+        "Record and post one short-form video or story about mortgage tips, market updates, or client success stories — tag everyone.",
+        "Follow up with any new online or social media leads within 24 hours using a value-first video or text.",
+        "Reach out to one past client for a pure relationship check-in (no sales talk).",
+        "Send a quick text or video message to a referral partner with a helpful market nugget to stay top of mind.",
+        "Knock on one local business door (title company, insurance agent, CPA, attorney) with a small pop-by bag.",
+        "Spend 10 minutes reviewing and updating CRM notes, follow-ups, and next actions for every touch.",
+        "Post one 75% personal life story on social (family, golf, poker, kids, etc.) and tag a referral partner.",
+        "Review one past client’s file for a refinance opportunity and send a quick equity update text.",
+        "Time-block 15 minutes to plan or invite someone to a passion activity (golf tee time, Euchre night, etc.).",
+        "Like and comment publicly on every team or personal closing photo posted that day.",
+        "Send a milestone update text to one active client (appraisal ordered, underwriting submitted, etc.).",
+        "Drop a quick video thank-you to the realtor on a recent closing.",
+        "Engage with 5 local real estate posts on social and add a helpful mortgage insight.",
+        "Update your Google Business Profile with a fresh review response or new photo.",
+        "Record a 30-second voice note to a referral partner celebrating their latest win.",
+        "Nurture database: send one quick social DM to a past client just saying hi.",
+        "Review yesterday’s CRM tasks and knock out any overdue follow-ups.",
+        "Post a client success story carousel and tag the realtor + client.",
+        "Time-block your next passion-blended event (driving range, Top Golf, wine & canvas).",
+        "Send one handwritten card for a recent life event (new baby, promotion, etc.)."
+    ],
+    weekly: [
+        "Conduct pipeline review with key referral partners — discuss deals and potential new clients.",
+        "Pipeline review with active clients — send weekly updates even if nothing new.",
+        "Host a 15-minute coaching Zoom for realtors on current mortgage trends or strategies.",
+        "Attend at least one networking event (chamber, BNI, real estate meetup, or local association).",
+        "Send a value-first “Who do you know?” text to 5+ referral partners asking for warm intros.",
+        "Create and send a value-packed email or newsletter to your full database (market update + home tips).",
+        "Record and send personalized video emails to new leads or referral partners.",
+        "Reach out to 3 new real estate agents via social or in person with a genuine compliment first.",
+        "Host a casual coffee or lunch meeting with a referral partner or past client.",
+        "Review past closed loans and follow up with clients who may benefit from refinancing.",
+        "Host or join a small passion-blended activity (driving range, poker night, Top Golf with 2-3 realtors).",
+        "Run a 10-minute roundtable Zoom with your top 5 referral partners to swap best practices.",
+        "Send 10–15 birthday/anniversary video messages to database contacts for the week.",
+        "Post a client success story or testimonial carousel on social and tag everyone.",
+        "Respond personally to every new Google Business Profile review received.",
+        "Host a quick “Ask Your Lender” office hours session via Zoom or Teams.",
+        "Nurture database with 20 social engagements or DMs to past clients.",
+        "Plan and schedule one upcoming passion event (Euchre tournament, manicure/pedicure night, wine & canvas).",
+        "Review CRM for any dormant contacts and send a re-engagement text with value.",
+        "Attend or host a small mastermind call with 3–4 realtors on business growth.",
+        "Send milestone updates to every active loan in process (keeps everyone in the loop).",
+        "Create one co-branded social post with a top realtor and tag them.",
+        "Review last week’s production and celebrate wins publicly on social.",
+        "Drop by one real estate office unannounced with donuts or coffee for the team."
+    ],
+    monthly: [
+        "Deliver pop-by gifts (donut bags, coffee, branded swag) to your top 10 referral partners and A+ clients.",
+        "Host an Ask YOUR Lender Zoom call open to realtors and all referral partners.",
+        "Host a first-time homebuyer seminar (virtual or in-person).",
+        "Send handwritten birthday and anniversary cards to all past clients turning the age that month.",
+        "Record and post a long-form video on a trending mortgage topic (YouTube + social).",
+        "Partner with one real estate agent for a co-branded marketing campaign or event.",
+        "Run a targeted, value-first Facebook/Instagram ad campaign to generate leads.",
+        "Check in on all past pre-approved clients who haven’t purchased yet.",
+        "Attend a local community event and network with homeowners and business owners.",
+        "Review and update Google Business Profile with fresh photos, posts, and review responses.",
+        "Host a passion-blended event (wine & canvas night, manicure/pedicure outing, or poker night) with top partners.",
+        "Organize a small Euchre tournament or golf scramble for realtors and clients.",
+        "Mail a “Just Because” value pack (market report + local gift card) to 20–30 database contacts.",
+        "Run a referral partner survey: “What’s one thing I can do to make your life easier this month?”",
+        "Create and share your monthly “LO Insider” newsletter with team wins, tips, and market intel.",
+        "Host a client appreciation pop-up event (ice cream truck, coffee truck) at a real estate office.",
+        "Sponsor a local youth sports team or charity event under your brand.",
+        "Record personalized video updates for your top 20 referral partners.",
+        "Review and optimize your social media content calendar for the next 30 days.",
+        "Conduct a mini CRM audit and re-engage 10 dormant contacts with a passion invite.",
+        "Partner with an insurance agent or CPA for a joint Lunch & Learn.",
+        "Post a monthly “Top 5 Mortgage Tips” carousel and tag all referral partners.",
+        "Host a driving range or Top Golf meetup for realtors only.",
+        "Send equity review reports to 15 past clients who could benefit.",
+        "Celebrate all closings of the month with public social shout-outs and tags."
+    ],
+    quarterly: [
+        "Host a full Lunch & Learn for real estate agents and referral partners.",
+        "Run a local market update webinar for homebuyers and realtors.",
+        "Send personalized video messages to your entire past-client database about market trends.",
+        "Organize a Realtor Mastermind event focused on business growth strategies.",
+        "Sponsor a local event, charity drive, or festival for community visibility.",
+        "Mail homeowner equity review letters to all past clients from the last 12 months.",
+        "Host a networking happy hour for realtors, attorneys, financial planners, and CPAs.",
+        "Run a contest or giveaway (gift cards, golf outings, wine tastings) for clients and partners.",
+        "Send a targeted direct-mail campaign to renters or move-up buyers in your farm area.",
+        "Schedule strategy sessions with your top 5 referral partners to refine co-marketing plans.",
+        "Host a full-day golf outing or Top Golf scramble with top referral partners (C5 Celebration).",
+        "Plan and execute a group trip (wine tasting tour, golf cart adventure, etc.) for A+ partners.",
+        "Review every closed loan from the past 90 days and send handwritten thank-you cards + gifts.",
+        "Launch a quarterly “Referral Partner Spotlight” social campaign tagging and celebrating them.",
+        "Conduct a full 90-day CRM audit and re-engage every dormant contact with a personal invite.",
+        "Host a co-branded first-time homebuyer fair with 3–5 realtors.",
+        "Organize a poker night or Euchre tournament for 20+ referral partners.",
+        "Run a “Rate Watch” email series to past clients and partners.",
+        "Attend a regional real estate or mortgage networking summit.",
+        "Create and mail a quarterly “Mortgage & Lifestyle” newsletter with passion content.",
+        "Host a VIP client appreciation dinner or event.",
+        "Review team or personal production metrics and adjust the next quarter’s passion calendar.",
+        "Sponsor a local school or nonprofit event and invite referral partners to join."
+    ],
+    yearly: [
+        "Host a large Client Appreciation Party for all past clients and referral partners.",
+        "Review and optimize your full annual marketing plan and personal/business production goals.",
+        "Plan and execute a major branding campaign (billboards, radio, podcast sponsorship, etc.).",
+        "Attend at least one national or regional mortgage conference for education and networking.",
+        "Host a VIP dinner for your top referral partners (perfect around holidays).",
+        "Organize a major community service project under your personal brand.",
+        "Launch an exclusive mastermind group for your top 10–15 elite real estate agents.",
+        "Record a professional brand video series for use across all marketing.",
+        "Schedule a full business planning retreat (personal or team) to set goals for next year.",
+        "Complete a full database refresh — clean, update, and re-engage every contact.",
+        "Host an annual “Ruoff Family & Friends” golf tournament or poker championship.",
+        "Plan and execute a multi-day group trip (Vegas, Florida, lake house, etc.) for your top 10 partners and spouses.",
+        "Create and distribute a full-year “Mortgage Milestone” calendar to every database contact.",
+        "Host a year-end “State of the Market” VIP dinner series for realtors and financial partners.",
+        "Personally recognize every top-performing LO on the team with a custom passion experience.",
+        "Review and refresh all marketing assets (website, social banners, one-sheets).",
+        "Launch a new co-branded initiative with your top 3 referral partners for the coming year.",
+        "Host a massive client appreciation golf outing or wine festival.",
+        "Create an annual “Top Producer” recognition program for referral partners.",
+        "Plan and budget for next year’s passion-blended events calendar (monthly golf, quarterly trips, etc.).",
+        "Conduct a full-year CRM deep dive and send personalized “Year in Review” videos to every client.",
+        "Sponsor a major local charity or community event at the highest level.",
+        "Record and release a year-end market recap video series with guest realtors.",
+        "Celebrate all 12 months of closings at one big end-of-year blowout."
+    ]
 };
 
 // Generate time block
@@ -4645,7 +4791,7 @@ Focus on building connection and trust — not closing the deal.`;
         console.log('[Sales Script] Starting generation...');
         console.log('[Sales Script] Prompt length:', prompt.length);
 
-        const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -4854,7 +5000,7 @@ Option 3:
 [caption text here]`;
 
     try {
-        const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -5115,7 +5261,7 @@ Make every section specific, actionable, and motivating. Incorporate hobbies nat
 
 Output ONLY the Markdown content — no JSON, no extra text.`;
 
-    const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -5252,7 +5398,7 @@ Structure every response:
 4. Confidence level (emphasize) + brief explanation
 4. Final disclaimer: Double check all answers and be cautious before relying strictly on this response.`;
     try {
-        const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -5368,7 +5514,7 @@ async function sendChatMessage() {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
     chatHistory.push({ role: "user", content: userMessage });
     try {
-        const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -5923,6 +6069,60 @@ document.getElementById('blog-topic-select').addEventListener('change', function
         document.getElementById('blog-topic').value = this.value;
     }
 });
+// ==================== LOAN OFFICER BLOG DOCUMENT UPLOAD ====================
+let blogUploadedFileText = '';
+
+const blogUploadArea = document.getElementById('blog-upload-area');
+const blogFileInput = document.getElementById('blog-file-upload');
+
+if (blogUploadArea && blogFileInput) {
+    // Click to browse
+    blogUploadArea.addEventListener('click', () => blogFileInput.click());
+
+    // Drag & Drop
+    blogUploadArea.addEventListener('dragover', e => { e.preventDefault(); blogUploadArea.classList.add('dragover'); });
+    blogUploadArea.addEventListener('dragleave', () => blogUploadArea.classList.remove('dragover'));
+    blogUploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        blogUploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) processBlogFile(file);
+    });
+
+    blogFileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) processBlogFile(file);
+    });
+}
+
+async function processBlogFile(file) {
+    document.getElementById('blog-file-name').classList.remove('hidden');
+    document.getElementById('blog-file-name').textContent = file.name;
+    document.getElementById('blog-remove-file-btn').classList.remove('hidden');
+
+    if (file.type === "application/pdf") {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            fullText += textContent.items.map(item => item.str).join(' ') + '\n\n';
+        }
+        blogUploadedFileText = fullText.trim();
+    } else {
+        const reader = new FileReader();
+        reader.onload = ev => blogUploadedFileText = ev.target.result.trim();
+        reader.readAsText(file);
+    }
+}
+
+window.removeBlogUploadedFile = function() {
+    blogUploadedFileText = '';
+    document.getElementById('blog-file-upload').value = '';
+    document.getElementById('blog-file-name').classList.add('hidden');
+    document.getElementById('blog-remove-file-btn').classList.add('hidden');
+};
 
 async function generateBlog() {
     const topicInput = document.getElementById('blog-topic').value.trim();
@@ -5930,6 +6130,9 @@ async function generateBlog() {
     const lengthSelect = document.getElementById('blog-length')?.value || 'short';
     const keywordInput = document.getElementById('blog-keyword')?.value.trim() || '';
     const localArea = document.getElementById('blog-local-area')?.value.trim() || '';
+
+    const additionalContext = document.getElementById('blog-additional-context')?.value.trim() || '';
+    const fileContext = blogUploadedFileText || '';   // ← This contains the full text from your uploaded PDF
 
     if (!topicInput) {
         alert('Please select or type a blog topic');
@@ -5945,7 +6148,7 @@ async function generateBlog() {
     }
 
     // === INJECT BLOG-SPECIFIC LOADING CONTENT ===
-    const blogLoadingContent = `
+const blogLoadingContent = `
         <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
             <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-3xl w-full border border-[#00A89D]/30">
                 <div class="text-center mb-8">
@@ -6007,6 +6210,7 @@ ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-ou
 - SEO/GEO: Reader-first writing, natural keywords, local relevance where it fits the topic
 - Avoid: Any "trigger terms" that could lead to compliance issues
 - Never mention lenders other than Ruoff Mortgage. 
+- Do not start the blog with Imagine this or Picture this. 
 - Voice: Helpful, trustworthy, conversational — never salesy
 
 At the end of the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**). Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags. **Do NOT include any character count at the end — output clean caption text only.**
@@ -6018,33 +6222,37 @@ ABSOLUTE RULE: NEVER include any word count, character count, or length estimate
 Write a complete blog post on: ${topicInput}
 
 Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *italic*, - bullets, etc.) followed by the separators, caption, and Google post — no HTML tags, no extra commentary, no code fences, no explanations.`;
+    // === STRONG DOCUMENT INJECTION (this is the fix) ===
+    let finalPrompt = systemPrompt;
+
+    if (fileContext) {
+        finalPrompt += `\n\n=== IMPORTANT: UPLOADED DOCUMENT ATTACHED ===\nYou have an uploaded document. Use ONLY the information contained in this document for any company-specific programs, offers, rates, features, or details. Do not add, invent, or hallucinate any facts not explicitly stated in the document.\n\nDOCUMENT CONTENT:\n${fileContext}\n\n=== END OF UPLOADED DOCUMENT ===\n`;
+    }
+
+    if (additionalContext) {
+        finalPrompt += `\n\nAdditional user instructions: ${additionalContext}`;
+    }
+
     try {
-        const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
               },
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
-        messages: [{ role: "user", content: systemPrompt }],
-        temperature: 0.6,
-        max_tokens: 12000
-    })
-});
+                messages: [{ role: "user", content: finalPrompt }],
+                temperature: 0.4,     // Lower = much more literal and faithful to the document
+                max_tokens: 14000
+            })
+        });
 
         if (!response.ok) throw new Error('API error');
 
         const data = await response.json();
         let fullContent = data.choices[0].message.content.trim();
 
-        // Humanize quotes/dashes
-        fullContent = fullContent
-            .replace(/—/g, '-')
-            .replace(/–/g, '-')
-            .replace(/“|”/g, '"')
-            .replace(/‘|’/g, "'");
-
-        // Split into blog, social caption, google post
+        // Split sections (same as you already have)
         let blogMarkdown = fullContent;
         let captionText = '';
         let googlePostText = '';
@@ -6057,39 +6265,22 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
             blogMarkdown = parts[0].trim();
             captionText = parts[1].trim().replace(/^\*\*Suggested Social Media Caption:\*\*\s*/i, '').trim();
         }
-        
 
-        // === IMPROVED WORD COUNT FOR BLOG ===
-        const blogDiv = document.createElement('div');
-        blogDiv.innerHTML = marked.parse(blogMarkdown);
-        let blogPlain = (blogDiv.textContent || blogDiv.innerText || '').replace(/\s+/g, ' ').trim();
-        const wordCount = blogPlain.split(' ').filter(w => w.length > 0).length;
-        const readTime = Math.max(1, Math.ceil(wordCount / 225));
-
-        // === IMPROVED CHARACTER COUNT FOR GOOGLE POST ===
-        const googleDiv = document.createElement('div');
-        googleDiv.innerHTML = marked.parse(googlePostText);
-        let googlePlain = (googleDiv.textContent || googleDiv.innerText || '').replace(/\s+/g, ' ').trim();
-        const googleCharCount = googlePlain.length;
-
-        // Optional debug (remove after testing)
-        console.log('Blog word count:', wordCount);
-        console.log('Google rendered chars:', googleCharCount);
-        console.log('Google raw length (for comparison):', googlePostText.length);
-
-        // Build output HTML
+        // === Render output (exactly as you had it) ===
         output.innerHTML = `
     <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
         ${marked.parse(blogMarkdown)}
     </div>
 
-    <!-- Blog buttons -->
     <div class="flex flex-col md:flex-row gap-6 justify-center mb-16">
-        <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3">
+        <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3 flex-1 md:flex-none">
             <i class="fas fa-copy"></i> Copy Blog (with Formatting)
         </button>
-        <button id="download-blog-btn" class="bg-[#002B5C] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#001429] flex items-center justify-center gap-3">
+        <button id="download-blog-btn" class="bg-[#002B5C] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#001429] flex items-center justify-center gap-3 flex-1 md:flex-none">
             <i class="fas fa-download"></i> Download Blog (.doc)
+        </button>
+        <button id="jump-publish-btn" class="bg-[#00A89D] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#00A89D]/80 flex items-center justify-center gap-3 flex-1 md:flex-none">
+            <i class="fas fa-external-link-alt"></i> Jump to Blog Publisher &amp; Post It Live
         </button>
     </div>
 
@@ -6109,8 +6300,8 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
         ${googlePostText ? marked.parse(googlePostText) : 'No Google post generated — try a different topic or regenerate.'}
     </div>
 
-    <div class="flex justify-center">
-        <button id="copy-google-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3">
+    <div class="flex flex-col md:flex-row gap-6 justify-center">
+        <button id="copy-google-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3 flex-1 md:flex-none">
             <i class="fas fa-copy"></i> Copy Google Post (with Formatting)
         </button>
     </div>
@@ -6118,11 +6309,11 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
 
         output.classList.remove('hidden');
 
-        // Attach event listeners
         document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
         document.getElementById('download-blog-btn').onclick = downloadBlogWord;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
         document.getElementById('copy-google-btn').onclick = copyGooglePostWithFormatting;
+        document.getElementById('jump-publish-btn').onclick = copyBlogAndJumpToPublisher;
 
         gtag('event', 'generate_blog', {
             event_category: 'Tool Usage',
@@ -6135,7 +6326,6 @@ Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *ita
         output.classList.remove('hidden');
         console.error(error);
     } finally {
-        // Restore original modal content for other tools
         if (loadingEl && loadingEl.dataset.originalContent) {
             loadingEl.innerHTML = loadingEl.dataset.originalContent;
         }
@@ -6172,13 +6362,21 @@ function copyBlogWithFormatting() {
     });
 
     navigator.clipboard.write([clipboardItem]).then(() => {
-        alert('Blog copied with formatting! Paste into WordPress, email, Google Docs, etc.');
+        alert('Blog copied with formatting!');
     }).catch(err => {
         console.error('Rich copy failed:', err);
         navigator.clipboard.writeText(plainText).then(() => {
             alert('Copied as plain text (rich formatting not supported in this browser)');
         });
     });
+}
+function copyBlogAndJumpToPublisher() {
+    copyBlogWithFormatting();   // Runs the exact same rich copy + shows your alert
+
+    // Tiny delay so the clipboard finishes before we open the tab (feels instant)
+    setTimeout(() => {
+        window.open('https://sales.ruoff.com/blog', '_blank');
+    }, 250);
 }
 
 // Download blog as .doc
@@ -6964,7 +7162,7 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
     }
 
     try {
-        const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -8880,7 +9078,7 @@ Output ONLY valid JSON:
   ]
 }`;
 
-            const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -10214,27 +10412,23 @@ async function generateNewsletter(feedback = '') {
         let promptLines;
 
         if (feedback) {
+            // === STRONGER, MORE RELIABLE EDIT PROMPT ===
             promptLines = [
-                'You are a precise newsletter editor. Output ONLY the complete updated HTML with the exact changes requested. NO explanations, NO extra text, NO code blocks.',
-                'Start with <!DOCTYPE html> and end with </html>. ALWAYS return the FULL newsletter HTML — copy the entire previous HTML exactly and modify ONLY the requested section.',
-                'Keep ALL structure, styling, images, and sections identical — do not omit any wrappers or footer.',
-                'You are allowed and encouraged to fully replace the content inside a specific section when asked.',
-                'Intelligently identify the target section based on natural user phrasing — you do NOT need the user to mention the exact <h2> heading.',
-                'Common mappings (be flexible and infer from context):',
-                '- "recipe" or "change the recipe" → Quick Recipe section',
-                '- "quote" or "update the quote" → Quote of the Week or Motivational Quote section',
-                '- "personal note", "personal update", "from [name]" → the signature personal update section',
-                '- "market update" or "market" → Market Update section',
-                '- "local" or "local spotlight" → Local Spotlight section',
-                '- "fun fact" → Fun Fact section',
-                '- "tip" or "pro tip" → Pro Tip section',
-                '- Any other natural reference to content type → match to the closest section heading.',
+                'You are a precise newsletter editor. Your ONLY job is to return the COMPLETE, VALID, STANDALONE HTML document with the exact changes requested.',
+                'CRITICAL RULES (never break these):',
+                '1. Output ONLY the full HTML — start with <!DOCTYPE html> and end with </html>. NOTHING else. No explanations, no code blocks, no "Here is the updated version".',
+                '2. Copy the PREVIOUS FULL NEWSLETTER exactly and modify ONLY the section(s) the user asked for.',
+                '3. Keep EVERY section, every table, every image, every placeholder, and every closing tag intact.',
+                '4. If the edit request is short, still return the ENTIRE document — do not shorten anything.',
+                '5. Never truncate. If you feel the response is getting long, prioritize completing the full structure first.',
                 '',
-                'PREVIOUS FULL NEWSLETTER HTML:',
+                'PREVIOUS FULL NEWSLETTER HTML (use this as your base):',
                 lastGeneratedHTML,
                 '',
-                'USER EDIT REQUEST:',
-                feedback
+                'USER EDIT REQUEST (apply this intelligently):',
+                feedback,
+                '',
+                'Output the complete updated HTML now.'
             ];
         } else {
             promptLines = [
@@ -10245,8 +10439,8 @@ async function generateNewsletter(feedback = '') {
                 '- ACCURACY and SOURCES are critical for Market and Industry sections to maintain credibility and compliance. Always cite real sources there — never guess.',
                 '- NEVER guess, hallucinate, or invent information. If uncertain, OMIT it or use safe evergreen phrasing.',
                 '- Rate Watch: If the Rate Watch section is included, output ONLY the heading <h2>Rate Watch</h2> followed by 1-2 paragraphs of evergreen commentary (e.g., "Mortgage rates fluctuate daily based on economic factors. Here\'s the latest data:") and an empty paragraph <p id="rate-watch-link-placeholder"></p>. Do NOT mention any specific rates, percentages, or time-sensitive claims — keep it general and link-focused.',
-                '- Market/Industry: Use ONLY broad, timeless trends. NEVER specific rates, percentages, or time-sensitive claims.',
-                '- Local Spotlight: Use ONLY general, permanent attractions, fun, interesting, or little known facts about the area. NEVER dated events.',
+                '- Market/Industry: Use recent, verified and accurate news. NEVER specific rates, percentages, or time-sensitive claims.',
+                '- Local Spotlight: Use ONLY fun, interesting, or little known facts about the area. NEVER dated events. Verify and confirm accuracy above all else.',
                 '- Fun Facts: If the Fun Fact section is included, output ONLY the heading <h2>Fun Fact</h2> and an empty paragraph <p id="fun-fact-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
                 '- Pro Tip: If the Pro Tip section is included, output ONLY the heading <h2>Pro Tip</h2> and an empty paragraph <p id="pro-tip-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
                 '- Motivational Quote: If the Motivational Quote section is included, output ONLY the heading <h2>Motivational Quote</h2> and an empty paragraph <p id="quote-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
@@ -10420,7 +10614,7 @@ async function generateNewsletter(feedback = '') {
 
         const prompt = promptLines.join('\n');
 
-        const response = await fetch('/api/chat', {
+const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -10429,7 +10623,7 @@ async function generateNewsletter(feedback = '') {
                 model: "grok-4-1-fast-reasoning",
                 messages: [{ role: "user", content: prompt }],
                 temperature: feedback ? 0.7 : 0.8,
-                max_tokens: 4000
+                max_tokens: 12000
             })
         });
 
