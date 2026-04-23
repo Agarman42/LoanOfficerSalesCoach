@@ -584,15 +584,26 @@ input[type="range"]:active::-moz-range-thumb {
             <li><a href="#equity-scanner" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Equity & Opportunity Scanner
 </a></li>
+<!--<li>
+    <a href="https://ruofflorefinancecalculator.onrender.com/" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       onclick="event.stopImmediatePropagation();"
+       class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center text-white">
+        <i class="fas fa-calculator mr-3"></i> 
+        Ruoff Smart Savings Calculator
+        <span class="ml-auto text-xs bg-[#F15A29]/30 hover:bg-[#F15A29]/50 text-white px-2.5 py-0.5 rounded font-medium">Opens in new tab</span>
+    </a>
+</li> -->
 <li><a href="#social-post" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-share-alt mr-3"></i> Social Media Post/Plan Creator
 </a></li>
 <li><a href="#blog" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Blog Creator
 </a></li>
-     <!--<li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
+     <li><a href="#newsletter-generator" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-pen-fancy mr-3"></i> Newsletter Generator
-</a></li>-->
+</a></li>
 <li><a href="#sales-script" class="block py-3 px-6 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center">
     <i class="fas fa-comment-dots mr-3"></i> Sales Script Generator
 </a></li>
@@ -615,8 +626,8 @@ input[type="range"]:active::-moz-range-thumb {
             <li class="sidebar-group">Planning & Process</li>
             <li><a href="#process" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-cogs mr-3"></i>Loan Process</a></li>-->
             <li class="sidebar-group">Tools & Resources</li>
-            <!--<li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
-            <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li>-->
+           <!-- <li><a href="#mindset-motivation" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-brain mr-3"></i>Mindset & Motivation</a></li>
+            <li><a href="#books" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-book mr-3"></i>Book Recommendations</a></li> -->
             <li><a href="#calculator" class="block py-3 px-4 hover:bg-[#F15A29]/20 rounded-lg transition-colors flex items-center"><i class="fas fa-calculator mr-3"></i>Calculator</a></li>
             </ul> 
     </aside>
@@ -3807,19 +3818,37 @@ input[type="range"]:active::-moz-range-thumb {
  <!-- NEWSLETTER GENERATOR TOOL -->
 <section id="newsletter-generator" class="hidden">
     <div class="max-w-5xl mx-auto px-6 py-12">
+        
+        <!-- Header -->
         <h2 class="text-4xl md:text-5xl font-bold text-center text-[#F15A29] mb-4">✉️ Instant Newsletter Generator</h2>
         <p class="text-xl text-center text-gray-700 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
-            Create beautiful, personalized newsletters in seconds. Stay top-of-mind with partners, past clients, and your sphere — effortlessly. 
+            Create beautiful, personalized newsletters in seconds. Stay top-of-mind with partners, past clients, and your sphere — effortlessly.
             <button onclick="openNewsletterTips()" class="ml-4 text-[#00A89D] underline hover:text-[#F15A29] font-semibold">Why newsletters crush it →</button>
         </p>
 
-        <!-- Inputs Card -->
+              <!-- Main Form Card -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 mb-12">
-            <!-- Row 1: Audience + Frequency -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
+  <!-- Branding (Collapsed by default) -->
+        <details class="mb-8 bg-gray-100 dark:bg-gray-700 rounded-2xl p-6">
+            <summary class="text-xl font-semibold text-[#00A89D] cursor-pointer">Branding & Contact Info (auto-saved)</summary>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Your Name</label>
+                    <input type="text" id="nl-name" placeholder="Your Name" 
+                           class="w-full p-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Email Address</label>
+                    <input type="email" id="nl-email" placeholder="youremail@ruoff.com" 
+                           class="w-full p-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/50">
+                </div>
+            </div>
+        </details>
+            <!-- Row 1: Audience + Location -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Audience Focus</label>
-                    <select id="nl-audience" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                    <select id="nl-audience" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         <option value="full">Full Database</option>
                         <option value="partners">Referral Partners</option>
                         <option value="past">Past Clients</option>
@@ -3827,142 +3856,203 @@ input[type="range"]:active::-moz-range-thumb {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Frequency</label>
-                    <select id="nl-frequency" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                    </select>
+                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Local Market</label>
+                    <input type="text" id="nl-location" value="Fort Wayne, Indiana" 
+                           class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 </div>
             </div>
 
             <!-- Row 2: Tone + Length -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Tone & Style</label>
-                    <select id="nl-tone" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
-                        <option value="friendly">Casual & Friendly</option>
-                        <option value="professional">Professional & Polished</option>
-                        <option value="fun">Fun & Playful</option>
+                    <select id="nl-tone" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="warm-professional" selected>Warm & Professional (Recommended)</option>
+                        <option value="casual-friendly">Casual & Friendly</option>
+                        <option value="fun-playful">Fun & Playful</option>
+                        <option value="conversational">Conversational & Relatable</option>
+                        <option value="local-neighbor">Local Neighbor / Community-Focused</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Length</label>
-                    <select id="nl-length" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
-    <option value="short" selected>Short (balanced, ~600 words)</option>
-    <option value="long">Long (in-depth, ~800+ words)</option>
-</select>
+                    <select id="nl-length" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="short" selected>Short (~600 words)</option>
+                        <option value="long">Long (~800+ words)</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Newsletter Title (full width) -->
+            <!-- Title -->
             <div class="mb-8">
-                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional — We'll create a great one if blank)</label>
-                <input type="text" id="nl-title" placeholder="e.g., Fort Wayne Mortgage Weekly | January 2026 Insights" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional)</label>
+                <input type="text" id="nl-title" placeholder="e.g., The Lending Edge | January 2026" 
+                       class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             </div>
 
-            <!-- Row 3: Custom Month/Year + Local Market -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
-                
-                <div>
-                    <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Local Market (City, State)</label>
-                    <input type="text" id="nl-location" placeholder="e.g., Fort Wayne, Indiana" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700" value="Fort Wayne, Indiana">
+            <!-- Sections -->
+            <div class="mb-8">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-4">Sections to Include</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <label class="flex items-center gap-3 text-lg cursor-pointer"><input type="checkbox" id="nl-market" checked class="w-6 h-6 text-[#F15A29]"> Market Updates 📈</label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer"><input type="checkbox" id="nl-industry" checked class="w-6 h-6 text-[#F15A29]"> Industry News 📰</label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer"><input type="checkbox" id="nl-local" checked class="w-6 h-6 text-[#F15A29]"> Local Update 🎉</label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer"><input type="checkbox" id="nl-recipes" class="w-6 h-6 text-[#F15A29]"> Recipes 🍳</label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer"><input type="checkbox" id="nl-fun" checked class="w-6 h-6 text-[#F15A29]"> Fun Facts 🤓</label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer"><input type="checkbox" id="nl-tip" checked class="w-6 h-6 text-[#F15A29]"> Homeownership Tip 🏡</label>
+                    <label class="flex items-center gap-3 text-lg cursor-pointer"><input type="checkbox" id="nl-quote" class="w-6 h-6 text-[#F15A29]"> Motivational Quote 💪</label>
                 </div>
             </div>
 
-            <!-- Sections Checkboxes -->
-            <label class="block text-xl font-semibold text-[#00A89D] mb-4">Sections to Include</label>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-market" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Market Updates 📈</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-industry" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Industry News 📰</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-local" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Local Events 🎉</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-recipes" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Recipes 🍳</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-fun" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Fun Facts 🤓</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-tip" checked class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Homeownership Tip 🏡</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-quote" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Motivational Quote 💪</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-rate" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Rate Watch 📊</span>
-                </label>
-                <label class="flex items-center gap-3 text-lg cursor-pointer">
-                    <input type="checkbox" id="nl-personal" class="w-6 h-6 text-[#F15A29] rounded focus:ring-[#00A89D]">
-                    <span>Personal Update ❤️</span>
-                </label>
+            <!-- Personal Update (Conditional) -->
+<div class="mb-8">
+    <div class="flex items-center mb-3">
+        <input type="checkbox" id="nl-personal" class="mr-3 h-5 w-5 text-[#00A89D]">
+        <label for="nl-personal" class="text-lg font-semibold text-[#00A89D]">Personal Update ❤️ (Highly Recommended)</label>
+    </div>
+
+    <!-- Fields that only show when checkbox is checked -->
+    <div id="personal-fields" class="hidden ml-8 space-y-6">
+
+        <!-- Personal Update Textarea -->
+        <div>
+            <textarea id="nl-personal-text" rows="5" placeholder="Share a quick life update, recent win, family moment, hobby, or fun story..." 
+                      class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
+        </div>
+
+<!-- Personal Note Photo -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+    <div>
+        <div class="flex items-center mb-3">
+            <input type="checkbox" id="nl-include-photo" class="mr-3 h-5 w-5 text-[#00A89D] focus:ring-[#F15A29]" checked>
+            <label for="nl-include-photo" class="text-xl font-semibold text-[#00A89D]">Include Personal Photo</label>
+        </div>
+        <input type="text" id="nl-personal-photo" placeholder="Paste direct image URL" 
+               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+        <p class="text-xs text-gray-500 mt-2">Photo will appear below your personal note.</p>
+    </div>
+
+    <div>
+        <div class="flex items-center mb-3">
+            <input type="checkbox" id="nl-include-video" class="mr-3 h-5 w-5 text-[#00A89D] focus:ring-[#F15A29]">
+            <label for="nl-include-video" class="text-xl font-semibold text-[#00A89D]">Include Personal Video</label>
+        </div>
+        <input type="text" id="nl-personal-video" placeholder="Paste YouTube or Vimeo URL" 
+               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+        <p class="text-xs text-gray-500 mt-2">Video will appear below your personal note (or below the photo if both are checked).</p>
+    </div>
+</div>
+</div>
+<!-- Blog Section (Conditional) -->
+<div class="mb-8">
+    <div class="flex items-center mb-3">
+        <input type="checkbox" id="nl-include-blog" class="mr-3 h-5 w-5 text-[#00A89D]">
+        <label for="nl-include-blog" class="text-lg font-semibold text-[#00A89D]">Include Recent Blog Link</label>
+    </div>
+    
+    <div id="blog-fields" class="hidden ml-8 space-y-4">
+        <div>
+            <input type="url" id="nl-blog-url" 
+                   placeholder="Blog post or blog page URL (e.g., https://yourblog.com/latest-post)" 
+                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-4 focus:ring-[#F15A29]/50">
+        </div>
+        <div>
+            <input type="text" id="nl-blog-title" placeholder="Blog Title (optional – shown in newsletter)" 
+                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-4 focus:ring-[#F15A29]/50">
+        </div>
+    </div>
+</div>
+
+            <!-- Specific Topics -->
+            <div class="mb-8">
+                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Specific Topics / Headlines / Recipes (Optional)</label>
+                <textarea id="nl-specific" rows="4" placeholder="e.g., Include this recipe or talk about the Komets winning streak" 
+                          class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700"></textarea>
             </div>
 
-            <div class="mb-8">
-                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Specific Topics/Headlines/Recipes/Links to Include (Optional)</label>
-                <textarea id="nl-specific" rows="5" placeholder="e.g., 'Include this recipe: https://example.com/chili' or 'Headline: Fort Wayne Home Show' or 'Talk about Komets winning streak' — We'll incorporate it perfectly!" class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
-            </div>
 
-            <!-- Personal Update -->
-            <div class="mb-8">
-                <label class="block text-xl font-semibold text-[#00A89D] mb-3">Your Personal Update (Optional — We'll polish it perfectly)</label>
-                <textarea id="nl-personal-text" rows="6" placeholder="Share a quick life update, recent win, family moment, hobby, or fun story — e.g., 'Just closed my biggest deal yet!' or 'Loving the snowy Fort Wayne winters with family snowball fights!' We'll make it warm, authentic, and newsletter-ready. Personal touches build trust & referrals! ❤️" 
-                          class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
-            </div>
-<details class="mb-12 bg-gray-100 dark:bg-gray-900 rounded-3xl p-6">
-    <summary class="text-2xl font-bold text-[#00A89D] cursor-pointer mb-6">Custom Content Choices (Fun Facts, Pro Tips, Quotes — Random by default)</summary>
+</div>
+    
+<details class="mb-12 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 border-2 border-[#00A89D]/40">
+    <summary class="text-2xl font-bold text-[#00A89D] cursor-pointer mb-6 flex items-center gap-3">
+        <span>▶</span> 
+        <span>Custom Content Choices (Fun Facts, Pro Tips, Quotes — Random by default)</span>
+    </summary>
+    
     <div class="space-y-8">
 
         <!-- Fun Fact -->
         <div>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <h4 class="text-xl font-semibold text-[#F15A29]">Fun Fact</h4>
-                <div class="flex gap-4">
-                    <button onclick="regenerateRandom('funFact')" class="bg-[#00A89D] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Regenerate Random</button>
-                    <button onclick="openModal('funFact')" class="bg-[#002B5C] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Choose Specific</button>
-                    <button onclick="resetUsed('funFacts')" class="text-sm text-gray-500 underline">Start fresh</button>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="regenerateRandom('funFact')" 
+                            class="bg-[#00A89D] hover:bg-[#008F85] text-white px-5 py-2 rounded-full font-medium text-sm transition-all">
+                        Regenerate Random
+                    </button>
+                    <button onclick="openModal('funFact')" 
+                            class="bg-[#002B5C] hover:bg-[#001F44] text-white px-5 py-2 rounded-full font-medium text-sm transition-all">
+                        Choose Specific
+                    </button>
+                    <button onclick="resetUsed('funFacts')" 
+                            class="text-sm text-gray-400 hover:text-gray-300 underline transition-all">
+                        Start fresh
+                    </button>
                 </div>
             </div>
-            <p id="fun-fact-preview" class="p-6 bg-white dark:bg-gray-800 rounded-2xl text-lg italic">"${selectedFunFact}"</p>
+            <div class="p-6 bg-gray-50 dark:bg-gray-700 rounded-2xl text-lg">
+                <p id="fun-fact-preview" class="italic">"${selectedFunFact}"</p>
+            </div>
         </div>
 
         <!-- Pro Tip -->
         <div>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <h4 class="text-xl font-semibold text-[#F15A29]">Pro Tip</h4>
-                <div class="flex gap-4">
-                    <button onclick="regenerateRandom('proTip')" class="bg-[#00A89D] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Regenerate Random</button>
-                    <button onclick="openModal('proTip')" class="bg-[#002B5C] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Choose Specific</button>
-                    <button onclick="resetUsed('proTips')" class="text-sm text-gray-500 underline">Start fresh</button>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="regenerateRandom('proTip')" 
+                            class="bg-[#00A89D] hover:bg-[#008F85] text-white px-5 py-2 rounded-full font-medium text-sm transition-all">
+                        Regenerate Random
+                    </button>
+                    <button onclick="openModal('proTip')" 
+                            class="bg-[#002B5C] hover:bg-[#001F44] text-white px-5 py-2 rounded-full font-medium text-sm transition-all">
+                        Choose Specific
+                    </button>
+                    <button onclick="resetUsed('proTips')" 
+                            class="text-sm text-gray-400 hover:text-gray-300 underline transition-all">
+                        Start fresh
+                    </button>
                 </div>
             </div>
-            <p id="pro-tip-preview" class="p-6 bg-white dark:bg-gray-800 rounded-2xl text-lg">"${selectedProTip}"</p>
+            <div class="p-6 bg-gray-50 dark:bg-gray-700 rounded-2xl text-lg">
+                <p id="pro-tip-preview">"${selectedProTip}"</p>
+            </div>
         </div>
 
         <!-- Motivational Quote -->
         <div>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <h4 class="text-xl font-semibold text-[#F15A29]">Motivational Quote</h4>
-                <div class="flex gap-4">
-                    <button onclick="regenerateRandom('quote')" class="bg-[#00A89D] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Regenerate Random</button>
-                    <button onclick="openModal('quote')" class="bg-[#002B5C] text-white px-6 py-2 rounded-full font-medium hover:opacity-90">Choose Specific</button>
-                    <button onclick="resetUsed('quotes')" class="text-sm text-gray-500 underline">Start fresh</button>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="regenerateRandom('quote')" 
+                            class="bg-[#00A89D] hover:bg-[#008F85] text-white px-5 py-2 rounded-full font-medium text-sm transition-all">
+                        Regenerate Random
+                    </button>
+                    <button onclick="openModal('quote')" 
+                            class="bg-[#002B5C] hover:bg-[#001F44] text-white px-5 py-2 rounded-full font-medium text-sm transition-all">
+                        Choose Specific
+                    </button>
+                    <button onclick="resetUsed('quotes')" 
+                            class="text-sm text-gray-400 hover:text-gray-300 underline transition-all">
+                        Start fresh
+                    </button>
                 </div>
             </div>
-            <p id="quote-preview" class="p-6 bg-white dark:bg-gray-800 rounded-2xl text-lg italic">"${selectedQuote}"</p>
+            <div class="p-6 bg-gray-50 dark:bg-gray-700 rounded-2xl text-lg italic">
+                <p id="quote-preview">"${selectedQuote}"</p>
+            </div>
         </div>
+
     </div>
 </details>
 
@@ -3996,84 +4086,6 @@ input[type="range"]:active::-moz-range-thumb {
         </div>
     </div>
 </div>
-<!-- Optional Branding -->
-<details class="mb-8 bg-gray-100 dark:bg-gray-700 rounded-2xl p-6">
-    <summary class="text-xl font-semibold text-[#00A89D] cursor-pointer mb-4">Branding & Contact Info (auto-saved)</summary>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <!-- Name -->
-        <input type="text" id="nl-name" placeholder="Your Name (e.g., Adam Garman)" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- Cell -->
-        <input type="tel" id="nl-cell" placeholder="Cell Phone (e.g., 260-348-0905)" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- Email -->
-        <input type="email" id="nl-email" placeholder="Email (e.g., loan.officer@ruoff.com)" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- Signature (NMLS) -->
-        <input type="text" id="nl-signature" placeholder="Signature (e.g., NMLS #124792)" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- Facebook -->
-        <input type="url" id="nl-facebook" placeholder="Facebook URL" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- Instagram -->
-        <input type="url" id="nl-instagram" placeholder="Instagram URL" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- LinkedIn -->
-        <input type="url" id="nl-linkedin" placeholder="LinkedIn URL" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- YouTube -->
-        <input type="url" id="nl-youtube" placeholder="YouTube URL" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- X (Twitter) -->
-        <input type="url" id="nl-x" placeholder="X (Twitter) URL" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- TikTok -->
-        <input type="url" id="nl-tiktok" placeholder="TikTok URL (optional)" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- Headshot URL (same styling as all others) -->
-        <input type="url" id="nl-headshot" placeholder="Headshot URL" 
-               class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all">
-
-        <!-- Company Logo URL (with tooltip instead of visible note) -->
-<div class="relative">
-    <input type="url" id="nl-logo" 
-           placeholder="Company Logo URL (optional)" 
-           value="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png" 
-           class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#F15A29]/50 focus:border-[#F15A29] transition-all pr-10">
-    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 cursor-help group">
-        <span class="text-xl">?</span>
-        <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded-lg p-3 shadow-lg w-64 z-10">
-            Default: Ruoff Mortgage logo<br>
-            (clear the field to remove or use your own custom URL)
-        </div>
-    </div>
-</div>
-</details>
-        <!-- NEW: Recent Blog Link Fields -->
-        <div class="md:col-span-2 mt-4">
-            <div class="flex items-center mb-3">
-                <input type="checkbox" id="nl-include-blog" class="mr-3 h-5 w-5 text-[#00A89D] focus:ring-[#F15A29]">
-                <label for="nl-include-blog" class="text-lg font-semibold text-[#00A89D]">Include Recent Blog Link (optional)</label>
-            </div>
-            <input type="url" id="nl-blog-url" placeholder="Blog post or blog page URL (e.g., https://yourblog.com/latest-post)" 
-                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 mb-3">
-            <input type="text" id="nl-blog-title" placeholder="Blog Title (optional – shown in newsletter)" 
-                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Add your latest blog post or blog page URL. It will appear as a styled "My Recent Blogs" section near the end of the newsletter.
-            </p>
-        </div>
-    </div>
 </details>
 
             <!-- Generate Button -->
@@ -4085,15 +4097,6 @@ input[type="range"]:active::-moz-range-thumb {
         </div>
     </div>
 
-<!-- EDIT SECTION (button style unchanged from last version) -->
-<div class="mt-12 bg-gray-100 dark:bg-gray-800 p-8 rounded-3xl" id="edit-section">
-    <label class="block text-xl font-semibold text-[#00A89D] mb-4">Feedback / Specific Edits (Optional)</label>
-    <textarea id="nl-feedback" rows="5" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700" 
-              placeholder="e.g., Rewrite the Market Update to focus on affordability. Make the personal note warmer and add a family mention. Change the recipe to a healthy salad."></textarea>
-    <button id="regenerate-with-edits-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl mt-6 flex items-center justify-center gap-3">
-        <i class="fas fa-redo"></i> Regenerate with Edits
-    </button>
-</div>
 
 <!-- Hidden storage for persistence across refreshes (optional) -->
 <input type="hidden" id="last-html-storage">
@@ -4110,13 +4113,10 @@ input[type="range"]:active::-moz-range-thumb {
     <button onclick="downloadNewsletterHTML()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold transition-all shadow-md flex items-center gap-2">
         Download .html File
     </button>
-    <button onclick="copyLivePreview()" class="bg-[#00A89D] hover:bg-[#00887A] text-white px-6 py-3 rounded-full font-bold transition-all shadow-md flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 008 5.5V6h8.5A2.5 2.5 0 0119 8.5v7a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 013 15.5v-7A2.5 2.5 0 015.5 6H7V5.5A2.5 2.5 0 019.5 3h-4z" clip-rule="evenodd" />
-            <path d="M11 8.5a.5.5 0 00-1 0v5.793l-1.146-1.147a.5.5 0 00-.708.708l2 2a.5.5 0 00.708 0l2-2a.5.5 0 00-.708-.708L11 14.293V8.5z" />
-        </svg>
-        Copy from Live Preview (Recommended!)
-    </button>
+    <button onclick="copyForOutlook()" 
+        class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white px-8 py-4 rounded-full font-bold transition-all shadow-md hover:shadow-xl">
+    📋 Copy for Outlook 
+</button>
 </div>
         </div>
         <!-- Preview -->
@@ -4125,6 +4125,18 @@ input[type="range"]:active::-moz-range-thumb {
         <!-- Raw HTML (hidden) -->
         <textarea id="nl-html-raw" class="hidden"></textarea>
     </div>
+    <!-- EDIT SECTION (button style unchanged from last version) -->
+<div class="mt-12 bg-gray-100 dark:bg-gray-800 p-8 rounded-3xl" id="edit-section">
+    <label class="block text-xl font-semibold text-[#00A89D] mb-4">Feedback / Specific Edits (Optional)</label>
+    <textarea id="nl-feedback" rows="5" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700" 
+              placeholder="e.g., Rewrite the Market Update to focus on affordability. Make the personal note warmer and add a family mention. Change the recipe to a healthy salad."></textarea>
+    <button id="regenerate-with-edits-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl mt-6 flex items-center justify-center gap-3">
+        <i class="fas fa-redo"></i> Regenerate with Edits
+    </button>
+    <p class="text-sm text-gray-500 mt-3 text-center">
+            Use this after viewing your newsletter to make specific changes.
+        </p>
+</div>
 </div>
    <!-- Newsletter Tips Modal -->
 <div id="newsletter-tips-modal" class="modal" style="display: none;">
@@ -6125,14 +6137,33 @@ window.removeBlogUploadedFile = function() {
 };
 
 async function generateBlog() {
-    const topicInput = document.getElementById('blog-topic').value.trim();
+    let topicInput = document.getElementById('blog-topic').value;
+
+    // === DEBUG: Show exactly what came from the input field ===
+    console.log('=== DEBUG START ===');
+    console.log('Raw topicInput (length):', topicInput.length);
+    console.log('Raw topicInput (JSON):', JSON.stringify(topicInput));
+
+    // Aggressive sanitization (this fixes the invisible character issue)
+    topicInput = topicInput
+        .replace(/[\u2018\u2019\u201C\u201D]/g, "'")   // smart quotes
+        .replace(/[\u2013\u2014]/g, '-')               // en/em dashes
+        .replace(/\u00A0/g, ' ')                       // non-breaking spaces
+        .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')   // zero-width characters
+        .replace(/\s+/g, ' ')                          // collapse all whitespace
+        .trim();
+
+    console.log('Sanitized topicInput:', topicInput);
+    console.log('Sanitized length:', topicInput.length);
+    console.log('=== DEBUG END ===');
+
     const tone = document.getElementById('blog-tone').value;
     const lengthSelect = document.getElementById('blog-length')?.value || 'short';
     const keywordInput = document.getElementById('blog-keyword')?.value.trim() || '';
     const localArea = document.getElementById('blog-local-area')?.value.trim() || '';
 
     const additionalContext = document.getElementById('blog-additional-context')?.value.trim() || '';
-    const fileContext = blogUploadedFileText || '';   // ← This contains the full text from your uploaded PDF
+    const fileContext = blogUploadedFileText || '';
 
     if (!topicInput) {
         alert('Please select or type a blog topic');
@@ -6142,10 +6173,7 @@ async function generateBlog() {
     const output = document.getElementById('blog-output');
     const loadingEl = document.getElementById('global-loading');
 
-    // === SAVE ORIGINAL LOADING CONTENT ===
-    if (loadingEl) {
-        loadingEl.dataset.originalContent = loadingEl.innerHTML;
-    }
+    if (loadingEl) loadingEl.dataset.originalContent = loadingEl.innerHTML;
 
     // === INJECT BLOG-SPECIFIC LOADING CONTENT ===
 const blogLoadingContent = `
@@ -6179,22 +6207,20 @@ const blogLoadingContent = `
         </div>
     `;
 
-    if (loadingEl) {
-        loadingEl.innerHTML = blogLoadingContent;
-    }
+if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
 
     output.classList.add('hidden');
     loadingEl.classList.remove('hidden');
     output.innerHTML = '';
 
     const lengthGuide = lengthSelect === 'long' ? '1,500–2,000 words' : lengthSelect === 'medium' ? '1,000-1,500 words' : '600-1,000 words';
-
     const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized blog posts for loan officers that Educate, Empower and Entertain the reader.
 
 Key Requirements:
 - Length: Exactly aim for the middle of ${lengthGuide} range (e.g., ~1,750 words for 1,500–2,000). Do not generate shorter—expand with more detailed explanations, additional examples, sub-sections, or relevant anecdotes to reach the word count while keeping it engaging and reader-focused. 
 - Tone: ${tone}
 ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-out-loud funny! Use clever wordplay, relatable mortgage humor, self-deprecating jokes, exaggerated analogies, and witty observations. Keep it light-hearted and entertaining while still being helpful — never mean-spirited. Sprinkle humor throughout (intro, body, headings, FAQs). Readers should smile or chuckle multiple times.' : ''}
+- Write a complete blog post on: ${topicInput}
 - Primary SEO keyword/phrase (use naturally throughout, especially in title if it fits, intro, H2s, and body — aim for 1–2% density with semantic variations): ${keywordInput || 'Optimize naturally for the main topic'}
 - Local Area (incorporate relevant local insights, programs, statistics, or examples if applicable to the topic and it fits naturally; otherwise, keep general/US-wide): ${localArea || 'None provided'}
 - Structure:
@@ -6219,19 +6245,19 @@ Add another separator (---) followed by a clearly labeled Google Business Profil
 
 ABSOLUTE RULE: NEVER include any word count, character count, or length estimate at the end of the blog, caption, or Google post — output clean content only.
 
-Write a complete blog post on: ${topicInput}
-
 Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *italic*, - bullets, etc.) followed by the separators, caption, and Google post — no HTML tags, no extra commentary, no code fences, no explanations.`;
     // === STRONG DOCUMENT INJECTION (this is the fix) ===
-    let finalPrompt = systemPrompt;
+let finalPrompt = systemPrompt;
 
     if (fileContext) {
-        finalPrompt += `\n\n=== IMPORTANT: UPLOADED DOCUMENT ATTACHED ===\nYou have an uploaded document. Use ONLY the information contained in this document for any company-specific programs, offers, rates, features, or details. Do not add, invent, or hallucinate any facts not explicitly stated in the document.\n\nDOCUMENT CONTENT:\n${fileContext}\n\n=== END OF UPLOADED DOCUMENT ===\n`;
+        finalPrompt += `\n\n=== CRITICAL REFERENCE DOCUMENT — USE ONLY THESE FACTS ===\n${fileContext}\n=== END DOCUMENT ===`;
     }
 
     if (additionalContext) {
-        finalPrompt += `\n\nAdditional user instructions: ${additionalContext}`;
+        finalPrompt += `\n\nAdditional instructions: ${additionalContext}`;
     }
+
+    finalPrompt += `\n\nTopic: ${topicInput}`;
 
     try {
 const response = await fetch('/api/chat', {
@@ -6242,8 +6268,8 @@ const response = await fetch('/api/chat', {
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [{ role: "user", content: finalPrompt }],
-                temperature: 0.4,     // Lower = much more literal and faithful to the document
-                max_tokens: 14000
+                temperature: 0.25,
+                max_tokens: 18000
             })
         });
 
@@ -6252,18 +6278,33 @@ const response = await fetch('/api/chat', {
         const data = await response.json();
         let fullContent = data.choices[0].message.content.trim();
 
-        // Split sections (same as you already have)
+        // === SPLIT + AGGRESSIVE CLEANING (removes stray **) ===
         let blogMarkdown = fullContent;
         let captionText = '';
         let googlePostText = '';
-        const parts = fullContent.split('---');
+
+        const parts = fullContent.split(/---\s*/);
+
         if (parts.length >= 3) {
             blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim().replace(/^\*\*Suggested Social Media Caption:\*\*\s*/i, '').trim();
-            googlePostText = parts[2].trim().replace(/^\*\*Suggested Google Post:\*\*\s*/i, '').trim();
+            captionText = parts[1].trim()
+                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')   // remove label
+                .replace(/^\*\*\s*/, '')                                        // remove any leftover **
+                .replace(/^\s+/, '')                                            // remove leading whitespace
+                .trim();
+            
+            googlePostText = parts[2].trim()
+                .replace(/^\**Suggested Google Post:?\**?\s*/i, '')            // remove label
+                .replace(/^\*\*\s*/, '')                                        // remove any leftover **
+                .replace(/^\s+/, '')                                            // remove leading whitespace
+                .trim();
         } else if (parts.length === 2) {
             blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim().replace(/^\*\*Suggested Social Media Caption:\*\*\s*/i, '').trim();
+            captionText = parts[1].trim()
+                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')
+                .replace(/^\*\*\s*/, '')
+                .replace(/^\s+/, '')
+                .trim();
         }
 
         // === Render output (exactly as you had it) ===
@@ -6272,17 +6313,17 @@ const response = await fetch('/api/chat', {
         ${marked.parse(blogMarkdown)}
     </div>
 
-    <div class="flex flex-col md:flex-row gap-6 justify-center mb-16">
-        <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3 flex-1 md:flex-none">
-            <i class="fas fa-copy"></i> Copy Blog (with Formatting)
-        </button>
-        <button id="download-blog-btn" class="bg-[#002B5C] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#001429] flex items-center justify-center gap-3 flex-1 md:flex-none">
-            <i class="fas fa-download"></i> Download Blog (.doc)
-        </button>
-        <button id="jump-publish-btn" class="bg-[#00A89D] text-white px-10 py-5 rounded-full font-bold text-2xl shadow-2xl hover:bg-[#00A89D]/80 flex items-center justify-center gap-3 flex-1 md:flex-none">
-            <i class="fas fa-external-link-alt"></i> Jump to Blog Publisher &amp; Post It Live
-        </button>
-    </div>
+<div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+    <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-8 py-5 rounded-full font-bold text-xl shadow-2xl hover:bg-[#F15A29]/80 flex items-center justify-center gap-3 flex-1">
+        <i class="fas fa-copy"></i> Copy Blog (with Formatting)
+    </button>
+    <button id="download-blog-btn" class="bg-[#002B5C] text-white px-8 py-5 rounded-full font-bold text-xl shadow-2xl hover:bg-[#001429] flex items-center justify-center gap-3 flex-1">
+        <i class="fas fa-download"></i> Download Blog (.doc)
+    </button>
+    <button id="jump-publish-btn" class="bg-[#00A89D] text-white px-8 py-5 rounded-full font-bold text-xl shadow-2xl hover:bg-[#00A89D]/80 flex items-center justify-center gap-3 flex-1">
+        <i class="fas fa-external-link-alt"></i> Jump to Blog Publisher &amp; Post It Live
+    </button>
+</div>
 
     <h4 class="text-3xl font-bold text-[#F15A29] mb-6">Suggested Social Media Caption</h4>
     <div id="social-caption" class="bg-gray-100 dark:bg-gray-700 p-8 rounded-2xl text-lg mb-8 whitespace-pre-wrap font-medium">
@@ -6321,10 +6362,10 @@ const response = await fetch('/api/chat', {
             value: 1
         });
 
-    } catch (error) {
-        output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error generating content. Check console or API key.</p>';
-        output.classList.remove('hidden');
+} catch (error) {
         console.error(error);
+        output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error generating content. Check console.</p>';
+        output.classList.remove('hidden');
     } finally {
         if (loadingEl && loadingEl.dataset.originalContent) {
             loadingEl.innerHTML = loadingEl.dataset.originalContent;
@@ -9567,71 +9608,180 @@ const funFacts = [
 
 // Pro Tips (from your document)
 const proTips = [
-    // Home Maintenance & Care (Prevent Costly Surprises)
-    "Home Maintenance & Care: Winter Gutter Check — Frozen gutters cause ice dams that damage roofs and siding—thousands in repairs. After the next thaw, clear debris from gutters/downspouts. Use a leaf blower extension ($30-50) from the ground if ladders aren’t your thing. 20-30 minutes now saves major headaches.",
-    "Home Maintenance & Care: Change HVAC Filters Every 60-90 Days — Dirty filters raise energy bills 5-15% and shorten system life. Note your filter size, buy a 6-pack online or locally (under $20), and swap it out. You’ll feel the difference in air quality and lower Duke/NIPSCO bills.",
-    "Home Maintenance & Care: Test Your Sump Pump Before Spring Rains — Pour a bucket of water into the pit—if it doesn’t activate and drain, basement flooding is a risk. A new pump + install is $300-600. Test now and avoid emergency calls when storms hit.",
-    "Home Maintenance & Care: Seal Windows and Doors for Winter — Drafts waste 10-20% of heating energy. Feel for leaks, then apply weatherstripping or caulk ($15 total). Your house stays warmer and utility bills drop noticeably.",
-    "Home Maintenance & Care: Flush Your Water Heater Annually — Sediment cuts efficiency and lifespan. Turn off power/gas, attach a hose to the drain valve, flush until clear (10-20 minutes). You’ll heat water faster and delay a $1,000+ replacement.",
-    "Home Maintenance & Care: Clean Dryer Vents Twice a Year — Lint buildup is a top fire hazard and adds drying time (higher bills). Use a $20-30 vent cleaning kit + vacuum. Takes 30 minutes and dramatically improves dryer performance.",
-    "Home Maintenance & Care: Replace Smoke/CO Detector Batteries Yearly — Test monthly; replace batteries on daylight saving time changes. Working detectors are Indiana law and can save lives. Quick habit, huge protection.",
-    "Home Maintenance & Care: Inspect Roof Spring and Fall — Look for missing/curling shingles or moss from the ground (binoculars help). Early fixes prevent leaks costing thousands. Get 2-3 local roofer quotes if needed.",
-    "Home Maintenance & Care: Clean Refrigerator Coils — Dusty coils add $50-100 to yearly electric bills. Unplug, vacuum coils (behind/underneath) twice a year. Fridge runs quieter and lasts longer.",
-    "Home Maintenance & Care: Check Exterior Caulking — Cracked caulk lets water in, causing rot/mold. Reapply exterior caulk to windows/doors/siding gaps on a dry day ($5-10 tube). Weekend project, big protection.",
-    "Home Maintenance & Care: Service Lawn Mower Before Spring — Sharpen blade, change oil, replace air filter. Local shops charge $50-80 or DIY. Better cuts, less gas, longer mower life.",
-    "Home Maintenance & Care: Inspect Attic Insulation — Indiana winters demand R-49 insulation to cut heating 20-30%. Measure depth; add blown-in if needed (DIY kits + utility rebates available).",
-    "Home Maintenance & Care: Clean Range Hood Filters Monthly — Greasy filters reduce airflow and pose fire risk. Soak in hot soapy water. 15 minutes keeps kitchen safer and fresher.",
-    "Home Maintenance & Care: Test GFCI Outlets Monthly — Press “test” button—if it doesn’t trip, replace ($15-20). Protects kitchens/bathrooms from shocks. Meets code and keeps family safe.",
-    "Home Maintenance & Care: Deep Clean Garbage Disposal Monthly — Ice cubes + rock salt, run with cold water, then citrus peels. Prevents buildup/odors—cheaper than plumber visits.",
-    "Home Maintenance & Care: Inspect Foundation for Cracks — Hairline cracks are normal; wider ones may signal settling. Walk around after rain. Seal small cracks yourself ($10 tube); call pro for anything concerning.",
-    "Home Maintenance & Care: Clean or Replace Showerheads — Mineral buildup reduces water pressure and efficiency. Soak in vinegar overnight or replace ($20-40). Better showers, lower water bills.",
-    "Home Maintenance & Care: Check Deck/Patio for Rot — Probe wood with screwdriver—soft spots mean rot. Seal or replace boards early. Prevents collapse and costly rebuilds.",
-    "Home Maintenance & Care: Clean Chimney Annually (If You Have One) — Creosote buildup is a fire hazard. Hire a certified sweep ($150-300). Indiana winters mean more use—don’t skip.",
-    "Home Maintenance & Care: Inspect Trees Near House — Dead branches can fall in storms. Trim or hire arborist if overhanging roof/power lines. Prevents damage and insurance claims.",
-    "Home Maintenance & Care: Clean Washing Machine Monthly — Run empty hot cycle with vinegar or Affresh tablets. Prevents mold/odors and extends machine life.",
-    "Home Maintenance & Care: Check Door Weatherstripping — Worn strips let in drafts/critters. Replace with adhesive strips ($10-20). Quick fix, instant comfort.",
-    "Home Maintenance & Care: Inspect Crawl Space/Basement for Moisture — Look for dampness/mold after heavy rain. Add dehumidifier or vapor barrier if needed. Prevents structural issues.",
-    "Home Maintenance & Care: Clean Outdoor AC Unit Spring/Fall — Hose off fins gently (power off). Improves efficiency and prevents breakdowns during Indiana summers.",
-    "Home Maintenance & Care: Test Garage Door Auto-Reverse — Place broom under door—if it doesn’t reverse, adjust or call pro. Safety feature required by law.",
-    "Home Maintenance & Care: Clean Gutters in Fall AND Spring — Leaves in fall, seeds/pollen in spring. Twice-yearly clears blockages before major seasons.",
-    "Home Maintenance & Care: Inspect Fireplace Damper — Ensure it opens/closes fully. Prevents heat loss and drafts when not in use.",
-    "Home Maintenance & Care: Check Exterior Paint for Peeling — Peeling lets moisture in. Touch up or repaint problem areas early to avoid siding replacement.",
-    "Home Maintenance & Care: Clean Microwave Vent — Grease buildup reduces effectiveness. Wipe interior monthly; clean filter quarterly.",
-    "Home Maintenance & Care: Inspect Septic System (If Applicable) — Pump every 3-5 years ($300-500). Prevents backups costing thousands.",
+    // ==================== HOME MAINTENANCE & CARE (Prevent Costly Surprises) ====================
+    "Home Maintenance & Care: Winter Gutter Check — Frozen gutters cause ice dams that damage roofs and siding—thousands in repairs. After the next thaw, clear debris from gutters/downspouts. Use a leaf blower extension from the ground if ladders aren’t your thing. Works great in IN, OH, MI, and KY.",
+    "Home Maintenance & Care: Change HVAC Filters Every 60-90 Days — Dirty filters raise energy bills 5-15% and shorten system life. Buy a 6-pack and swap them out regularly for better air quality and lower bills from Duke, NIPSCO, AEP, DTE, or Consumers Energy.",
+    "Home Maintenance & Care: Test Your Sump Pump Before Spring Rains — Pour a bucket of water into the pit. If it doesn’t activate and drain, basement flooding is a real risk. Test now to avoid emergency calls during Midwest storms.",
+    "Home Maintenance & Care: Seal Windows and Doors for Winter — Drafts waste 10-20% of heating energy. Feel for leaks and apply weatherstripping or caulk for noticeable savings.",
+    "Home Maintenance & Care: Flush Your Water Heater Annually — Remove sediment to improve efficiency and extend the life of the unit. Simple 15-20 minute task that can delay a $1,000+ replacement.",
+    "Home Maintenance & Care: Clean Dryer Vents Twice a Year — Lint buildup is a leading cause of home fires and makes dryers less efficient. Clean it yourself with a kit or hire a pro.",
+    "Home Maintenance & Care: Replace Smoke & CO Detector Batteries Yearly — Do it when you change clocks for daylight saving time. Working detectors are required by law in Indiana, Ohio, Michigan, and Kentucky.",
+    "Home Maintenance & Care: Inspect Roof Spring and Fall — Look for missing shingles or moss from the ground using binoculars. Early repairs prevent major leaks during storms.",
+    "Home Maintenance & Care: Clean Refrigerator Coils Twice a Year — Dusty coils add $50–100 to your yearly electric bill. Unplug and vacuum them for better efficiency.",
+    "Home Maintenance & Care: Check Exterior Caulking — Cracked caulk lets water in, causing rot and mold. Reapply on a dry day to protect your home.",
+    "Home Maintenance & Care: Service Lawn Mower Before Spring — Sharpen blade, change oil, and replace air filter. Better cuts, less gas, and longer mower life.",
+    "Home Maintenance & Care: Inspect Attic Insulation — Midwest winters demand good insulation. Measure depth and add more if needed — many utilities offer rebates.",
+    "Home Maintenance & Care: Clean Range Hood Filters Monthly — Greasy filters reduce airflow and increase fire risk. Soak in hot soapy water.",
+    "Home Maintenance & Care: Test GFCI Outlets Monthly — Especially in kitchens and bathrooms. Press the test button to keep your family safe.",
+    "Home Maintenance & Care: Deep Clean Garbage Disposal Monthly — Use ice cubes, rock salt, and citrus peels to prevent odors and buildup.",
+    "Home Maintenance & Care: Inspect Foundation for Cracks — Walk around after heavy rain. Seal small cracks yourself; call a pro for larger ones.",
+    "Home Maintenance & Care: Clean or Replace Showerheads — Mineral buildup reduces water pressure. Soak in vinegar overnight or replace for better showers.",
+    "Home Maintenance & Care: Check Deck/Patio for Rot — Probe wood with a screwdriver. Seal or replace boards early to prevent collapse.",
+    "Home Maintenance & Care: Clean Chimney Annually (If You Have One) — Creosote buildup is a fire hazard. Hire a certified sweep before winter.",
+    "Home Maintenance & Care: Inspect Trees Near House — Trim dead or overhanging branches before storm season to protect your roof and power lines.",
+    "Home Maintenance & Care: Clean Washing Machine Monthly — Run an empty hot cycle with vinegar or Affresh tablets to prevent mold and odors.",
+    "Home Maintenance & Care: Check Door Weatherstripping — Replace worn strips to stop drafts and keep critters out.",
+    "Home Maintenance & Care: Inspect Crawl Space/Basement for Moisture — Look for dampness after heavy rain. Add a dehumidifier if needed.",
+    "Home Maintenance & Care: Clean Outdoor AC Unit Spring/Fall — Hose off fins gently (power off first) to improve efficiency during hot summers.",
+    "Home Maintenance & Care: Test Garage Door Auto-Reverse — Place a broom under the door. If it doesn’t reverse, adjust or call a pro — safety first.",
+    "Home Maintenance & Care: Clean Gutters in Fall AND Spring — Leaves in fall, pollen and seeds in spring. Prevents blockages and ice dams.",
+    "Home Maintenance & Care: Inspect Fireplace Damper — Ensure it opens and closes fully to prevent heat loss when not in use.",
+    "Home Maintenance & Care: Check Exterior Paint for Peeling — Touch up peeling areas early to prevent wood rot and siding damage.",
+    "Home Maintenance & Care: Clean Microwave Vent — Grease buildup reduces effectiveness. Wipe interior monthly and clean filter quarterly.",
+    "Home Maintenance & Care: Inspect Septic System (If Applicable) — Pump every 3-5 years to prevent expensive backups.",
+    "Home Maintenance & Care: Test Backup Sump Pump Battery — Make sure it works when power goes out during heavy Midwest storms.",
+    "Home Maintenance & Care: Test Radon Levels — Especially important in basements. Inexpensive test kits are available at hardware stores across IN, OH, MI, KY.",
+    "Home Maintenance & Care: Lubricate Door Hinges and Locks — A quick spray of WD-40 stops squeaks and extends hardware life.",
+    "Home Maintenance & Care: Clean Dishwasher Filter Monthly — Prevents odors and keeps dishes sparkling without extra cycles.",
+    "Home Maintenance & Care: Inspect Siding and Trim for Damage — Look for cracks or gaps after winter. Seal early to prevent water intrusion.",
+    "Home Maintenance & Care: Check for Pest Entry Points — Seal gaps around pipes, vents, and doors with steel wool and caulk.",
+    "Home Maintenance & Care: Clean or Replace Furnace Filter — Dirty filters strain your system and raise bills. Replace every 1-3 months.",
+    "Home Maintenance & Care: Inspect Garage Door Springs and Cables — Worn parts can cause sudden failure. Have a pro check annually.",
+    "Home Maintenance & Care: Clean Bathroom Exhaust Fans — Dust and lint buildup reduces airflow. Clean quarterly for better moisture control.",
+    "Home Maintenance & Care: Check for Leaking Faucets — A slow drip can waste hundreds of gallons of water per year. Fix or replace washers.",
+    "Home Maintenance & Care: Inspect Caulking Around Bathtubs and Showers — Re-caulk to prevent water damage behind walls.",
+    "Home Maintenance & Care: Test All Ground Fault Circuit Interrupters (GFCIs) — Reset if needed in wet areas.",
+    "Home Maintenance & Care: Clean Range Hood Filter — Greasy buildup reduces effectiveness and increases fire risk.",
+    "Home Maintenance & Care: Inspect Water Softener Salt Levels — Keep it filled to prevent hard water damage to pipes and appliances.",
+    "Home Maintenance & Care: Check for Ice Dams on Roof After Heavy Snow — Remove safely or hire a pro to prevent water backup into attic.",
+    "Home Maintenance & Care: Clean Leaf Debris from Window Wells — Prevents water from entering basements during heavy rain.",
+    "Home Maintenance & Care: Lubricate Garage Door Tracks and Rollers — Smooth operation prevents premature wear.",
+    "Home Maintenance & Care: Inspect Downspout Extensions — Make sure they direct water away from the foundation.",
+    "Home Maintenance & Care: Clean Refrigerator Door Gaskets — Dirty gaskets cause your fridge to work harder and raise energy bills.",
+    "Home Maintenance & Care: Check for Termite Activity — Look for mud tubes or discarded wings, especially in humid Midwest summers.",
+    "Home Maintenance & Care: Inspect Soffits and Fascia for Rot — Early detection prevents costly repairs to roofline.",
+    "Home Maintenance & Care: Clean Window Tracks — Dirt and debris can cause windows to stick and let in drafts.",
+    "Home Maintenance & Care: Test Carbon Monoxide Detectors — Replace batteries and units older than 7-10 years.",
+    "Home Maintenance & Care: Clean Pet Hair from Dryer Vent — Extra buildup from pets increases fire risk and drying time.",
+    "Home Maintenance & Care: Inspect Fence Posts for Rot — Replace or reinforce before they fail in storms.",
+    "Home Maintenance & Care: Clean Gutters After Leaf Drop and Again in Spring — Twice yearly is ideal in the Midwest.",
+    "Home Maintenance & Care: Check for Bird Nests in Vents — Remove safely to maintain proper airflow and prevent fire hazards.",
+    "Home Maintenance & Care: Clean Ceiling Fans — Dust buildup makes them less efficient and can spread allergens.",
+    "Home Maintenance & Care: Inspect Chimney Crown for Cracks — Prevents water from entering the chimney structure.",
+    "Home Maintenance & Care: Clean Outdoor Light Fixtures — Dirt reduces brightness and wastes energy.",
+    "Home Maintenance & Care: Check for Proper Grading Around Foundation — Ensure water flows away from the house.",
+    "Home Maintenance & Care: Clean Kitchen Cabinet Tops — Dust and grease buildup attracts pests.",
+    "Home Maintenance & Care: Check for Proper Ventilation in Attic — Prevents moisture buildup and ice dams.",
+    "Home Maintenance & Care: Clean Pet Hair from HVAC Registers — Improves airflow and reduces allergens.",
+    "Home Maintenance & Care: Inspect for Proper Sump Pump Discharge — Make sure water is directed far from the foundation.",
 
-    // Smart Money Moves for Homeowners
-    "Smart Money Moves: File for Homestead Deduction — Caps taxable value and annual increases—saves hundreds yearly. File online/at county auditor (deadline Dec 31). Claim prior-year savings if you missed it.",
-    "Smart Money Moves: Track Capital Improvements — Receipts for roof/HVAC/additions raise cost basis, reducing capital gains tax at sale. Digital folder by year makes tax time easy.",
-    "Smart Money Moves: Dedicated House Fund — 1-2% of home value yearly ($3-6k on $300k home) in high-yield savings (4-5%). Covers surprises without credit card debt.",
-    "Smart Money Moves: Annual Insurance Audit — Review coverage; bundle auto/home for 15-30% savings. Raise deductible to $2,500-5,000 and ask about new-roof/security discounts.",
-    "Smart Money Moves: Utility Energy Rebates — Duke/NIPSCO rebate thermostats, insulation, HVAC ($100-500). Check provider site—upgrades often pay for themselves fast.",
-    "Smart Money Moves: Extra Principal Payments — $100 extra monthly on $250k loan shaves years and saves thousands in interest. Specify “principal only” in portal.",
-    "Smart Money Moves: Energy Efficient Home Improvement Credit — Federal credit up to $3,200 (2026) for windows/insulation/heat pumps. Keep receipts; stack with Indiana incentives.",
-    "Smart Money Moves: Review Property Tax Assessment — Spring notices—if value seems high, appeal with comps. Many homeowners lower bills successfully.",
-    "Smart Money Moves: Mortgage Interest Deduction Reminder — Still deductible if itemizing. Track payments; software like TurboTax pulls it automatically.",
-    "Smart Money Moves: High-Yield Emergency Fund — 3-6 months expenses (including mortgage) at 4-5% online banks. Grows while staying accessible.",
-    "Smart Money Moves: Veteran/Senior/Disability Deductions — Indiana offers extra property tax breaks. Check county auditor—many qualify and save hundreds.",
-    "Smart Money Moves: Bundle Cable/Internet Annually — Call provider for retention deals—saves $20-50/month. Happens every 12 months like clockwork.",
-    "Smart Money Moves: Smart Thermostat Savings — Programmable ones cut heating/cooling 10-15%. Many utilities rebate full cost.",
-    "Smart Money Moves: LED Bulb Swap — Replace remaining incandescents—saves $50-100 yearly and lasts 10+ years.",
-    "Smart Money Moves: Water Heater Temperature Adjustment — Lower to 120°F—saves 3-5% on water heating. Simple dial tweak.",
+    // ==================== SMART MONEY MOVES FOR HOMEOWNERS ====================
+    "Smart Money Moves: File for Homestead Deduction — Available in Indiana, Ohio, Michigan, and Kentucky. Caps taxable value increases and can save you hundreds per year.",
+    "Smart Money Moves: Track Capital Improvements — Keep receipts for roof, HVAC, kitchen, or bath upgrades. This raises your cost basis and reduces capital gains tax when you sell.",
+    "Smart Money Moves: Build a Dedicated House Fund — Set aside 1–2% of your home’s value each year in a high-yield savings account for repairs and emergencies.",
+    "Smart Money Moves: Annual Homeowners Insurance Review — Shop every 2–3 years and bundle with auto. Many families save 15–30%.",
+    "Smart Money Moves: Take Advantage of Utility Rebates — Duke Energy, AEP, NIPSCO, DTE, Consumers Energy, and Kentucky utilities offer rebates for energy upgrades.",
+    "Smart Money Moves: Make Extra Principal Payments — Even $50–100 extra per month can shave years off your mortgage and save thousands in interest.",
+    "Smart Money Moves: Energy Efficiency Tax Credits — Federal credits up to $3,200+ for windows, insulation, and heat pumps. Stack with state incentives.",
+    "Smart Money Moves: Review Your Property Tax Assessment — If it seems high, appeal with recent comparable sales.",
+    "Smart Money Moves: High-Yield Emergency Fund — Keep 3–6 months of expenses (including mortgage) in an online savings account earning 4–5%.",
+    "Smart Money Moves: Bundle Cable/Internet Annually — Call your provider for retention deals — many save $20–50 per month.",
+    "Smart Money Moves: Install a Smart Thermostat — Cuts heating/cooling costs by 10–15%. Many utilities offer rebates.",
+    "Smart Money Moves: LED Bulb Swap — Saves $50–100 yearly and lasts 10+ years.",
+    "Smart Money Moves: Lower Water Heater to 120°F — Simple adjustment that saves 3–5% on water heating.",
+    "Smart Money Moves: Create a Home Inventory — Photograph valuables and store in the cloud for faster insurance claims.",
+    "Smart Money Moves: Review Escrow Account Annually — Overpayments can be refunded by your mortgage servicer.",
+    "Smart Money Moves: Over 65 Circuit Breaker Credit — Protects qualifying seniors from large property tax increases in all four states.",
+    "Smart Money Moves: Veteran Property Tax Exemptions — Additional relief available in IN, OH, MI, and KY for qualifying veterans.",
+    "Smart Money Moves: Shop Homeowners Insurance Every 2-3 Years — Switching can save 10-25% with the same or better coverage.",
+    "Smart Money Moves: Take Advantage of Federal Energy Credits — Up to $3,200 for qualifying home improvements in 2026.",
+    "Smart Money Moves: Annual Mortgage Escrow Review — Make sure you're not overpaying into escrow.",
+    "Smart Money Moves: Consider a Home Equity Line of Credit (HELOC) — Flexible access to equity for home projects or emergencies.",
+    "Smart Money Moves: Track Utility Usage Monthly — Spot unusual spikes early and address them before bills get out of hand.",
+    "Smart Money Moves: Use Cash-Back Credit Cards for Home Purchases — Earn rewards on tools, materials, and repairs.",
+    "Smart Money Moves: Set Up Automatic Bill Pay for Utilities — Avoid late fees and keep your credit score strong.",
+    "Smart Money Moves: Review Credit Report Annually — Free once per year at AnnualCreditReport.com. Fix errors that could affect mortgage rates.",
+    "Smart Money Moves: Consider Mortgage Recasting — After a large principal payment, ask your lender to re-amortize to lower monthly payments.",
+    "Smart Money Moves: Compare Mortgage Rates Every Year — Even if you don't refinance, knowing current rates helps you plan.",
+    "Smart Money Moves: Use Tax Software to Maximize Deductions — Tools like TurboTax pull mortgage interest and property taxes automatically.",
+    "Smart Money Moves: Build Equity Through Home Improvements — Kitchen and bath updates often give the best return on investment.",
+    "Smart Money Moves: Pay Bi-Weekly Instead of Monthly — Makes one extra payment per year and reduces interest significantly.",
 
-    // Equity & Refinance Checkup
-    "Equity & Refinance: Refinance Benchmark — 0.75-1% rate drop + 3+ years in home usually worth it. Use break-even calculator (include closing costs).",
-    "Equity & Refinance: Cash-Out vs. HELOC — Cash-out: fixed rate, new term. HELOC: flexible, variable rate. Match to goal—debt payoff vs. short-term projects.",
-    "Equity & Refinance: Build Equity Faster — Extra payment yearly, recast after lump sum, or value-boosting remodels (kitchen/bath).",
-    "Equity & Refinance: Check Home Value — Free tools for estimate; ask me/agent for accurate broker opinion. Helps plan equity use.",
-    "Equity & Refinance: Pay Down vs. Invest — Low rate (<5%)? Investing often beats extra payments. Compare your rate to market returns.",
-    "Equity & Refinance: Automatic PMI Removal — At 20% equity (based on original value), request removal—saves $50-200/month.",
-    "Equity & Refinance: Rate-and-Term vs. Cash-Out — Rate-and-term lowers payment/rate only. Cash-out pulls equity. Know your goal before shopping.",
-    "Equity & Refinance: Recasting Your Loan — After large principal payment ($5k+), ask lender to re-amortize—lowers monthly without refinancing.",
+    // ==================== EQUITY & REFINANCE CHECKUP ====================
+    "Equity & Refinance: Refinance Benchmark — A 0.75–1% rate drop plus staying in the home 3+ years often makes refinancing worthwhile.",
+    "Equity & Refinance: Cash-Out vs HELOC — Cash-out gives a fixed rate and new term. HELOC offers flexibility. Choose based on your specific goal.",
+    "Equity & Refinance: Build Equity Faster — Make extra payments, recast after a large lump sum, or complete value-adding projects.",
+    "Equity & Refinance: Automatic PMI Removal — Once you reach 20% equity, request cancellation to save $50–200 per month.",
+    "Equity & Refinance: Annual Equity Review — Pull a free home value estimate and compare it to your remaining mortgage balance.",
+    "Equity & Refinance: Shop Multiple Lenders — Getting quotes from at least 3 lenders can save you thousands over the life of the loan.",
+    "Equity & Refinance: Rate-and-Term Refinance — Lowers your interest rate or shortens the term without taking cash out.",
+    "Equity & Refinance: Cash-Out Refinance — Pull equity for debt consolidation, home improvements, or other needs.",
+    "Equity & Refinance: HELOC for Ongoing Projects — Great for renovations because you only pay interest on what you draw.",
+    "Equity & Refinance: Check Your Credit Score Before Refinancing — Higher scores often qualify for better rates.",
+    "Equity & Refinance: Compare Closing Costs Carefully — Shop lenders not just on rate but on total fees.",
+    "Equity & Refinance: Consider a 15-Year Mortgage — Pay off faster and save tens of thousands in interest if your budget allows.",
 
-    // Local Living Perks (Indiana-Focused)
-    "Local Living Perks: Property Tax Caps — Homestead capped at 1% assessed value. Verify bill; contact assessor for corrections/deductions.",
-    "Local Living Perks: Utility Rebates — Duke/NIPSCO cover thermostats, appliances, insulation. Stack for nearly free upgrades.",
-    "Local Living Perks: IHCDA Programs — Grants/assistance for weatherization and energy efficiency—check eligibility online.",
-    "Local Living Perks: Local Library Resources — Many Indiana libraries offer tool lending (e.g., sewer snakes, pressure washers)—save rental fees.",
-    "Local Living Perks: County Fair Home Improvement Discounts — Many summer fairs have vendor days with contractor deals—great timing for projects."
+    // ==================== LOCAL LIVING PERKS (4-State Focused) ====================
+    "Local Living Perks: Homestead Exemptions — Available in Indiana, Ohio, Michigan, and Kentucky. Reduces your taxable assessed value and can save hundreds annually.",
+    "Local Living Perks: Utility Energy Rebates — Check Duke Energy, AEP, NIPSCO, DTE, Consumers Energy, and Kentucky utilities for rebates on energy-efficient upgrades.",
+    "Local Living Perks: State Weatherization Assistance — Programs in IN, OH, MI, and KY can help with insulation and efficiency improvements.",
+    "Local Living Perks: Senior / Veteran / Disability Property Tax Relief — Additional deductions or credits available in all four states.",
+    "Local Living Perks: Public Library Tool Lending — Many libraries across IN, OH, MI, and KY lend tools like pressure washers and tile cutters for free.",
+    "Local Living Perks: County Fair Vendor Deals — Many summer fairs in the four states have contractor discount days for home projects.",
+    "Local Living Perks: Indiana Energy Saver Program — Up to $8,000 in rebates for heat pumps and whole-home efficiency upgrades.",
+    "Local Living Perks: Michigan Home Energy Assistance — Help with weatherization and utility bill assistance for eligible residents.",
+    "Local Living Perks: Ohio Home Energy Assistance Program — Grants and rebates for energy efficiency improvements.",
+    "Local Living Perks: Kentucky Weatherization Assistance — Free or low-cost home upgrades for qualifying low-income households.",
+
+    // ==================== ADDITIONAL HIGH-VALUE TIPS ====================
+    "Smart Money Moves: Create a Home Inventory — Photograph valuables and store in the cloud. Makes insurance claims much faster after storms or theft.",
+    "Smart Money Moves: Review Escrow Account Annually — Overpayments in escrow can be refunded by your mortgage servicer.",
+    "Home Maintenance & Care: Test Backup Sump Pump Battery — Make sure it works when power goes out during heavy Midwest storms.",
+    "Smart Money Moves: Over 65 Circuit Breaker Credit — Protects qualifying seniors from large property tax increases in all four states.",
+    "Home Maintenance & Care: Clean Pet Hair from Dryer Vent — Extra buildup from pets increases fire risk and drying time.",
+    "Smart Money Moves: Use Cash-Back Credit Cards for Home Purchases — Earn rewards on tools, materials, and repairs.",
+    "Home Maintenance & Care: Inspect Soffits and Fascia for Rot — Early detection prevents costly repairs to roofline.",
+    "Smart Money Moves: Set Up Automatic Bill Pay for Utilities — Avoid late fees and keep your credit score strong.",
+    "Home Maintenance & Care: Check for Bird Nests in Vents — Remove safely to maintain proper airflow and prevent fire hazards.",
+    "Smart Money Moves: Review Credit Report Annually — Free once per year. Fix errors that could affect future mortgage rates.",
+    "Home Maintenance & Care: Lubricate Garage Door Tracks and Rollers — Smooth operation prevents premature wear.",
+    "Smart Money Moves: Compare Mortgage Rates Every Year — Even if you don't refinance, knowing current rates helps you plan.",
+    "Home Maintenance & Care: Clean Window Tracks — Dirt and debris can cause windows to stick and let in drafts.",
+    "Smart Money Moves: Use Tax Software to Maximize Deductions — Tools like TurboTax pull mortgage interest and property taxes automatically.",
+    "Home Maintenance & Care: Inspect for Termite Activity — Look for mud tubes or discarded wings, especially in humid Midwest summers.",
+    "Smart Money Moves: Build Equity Through Home Improvements — Kitchen and bath updates often give the best return on investment.",
+    "Home Maintenance & Care: Check for Ice Dams on Roof After Heavy Snow — Remove safely or hire a pro to prevent water backup into attic.",
+    "Smart Money Moves: Pay Bi-Weekly Instead of Monthly — Makes one extra payment per year and reduces interest significantly.",
+    "Home Maintenance & Care: Clean Leaf Debris from Window Wells — Prevents water from entering basements during heavy rain.",
+    "Smart Money Moves: Consider Mortgage Recasting — After a large principal payment, ask your lender to re-amortize to lower monthly payments.",
+    "Home Maintenance & Care: Inspect Downspout Extensions — Make sure they direct water away from the foundation.",
+    "Smart Money Moves: Track Utility Usage Monthly — Spot unusual spikes early and address them before bills get out of hand.",
+    "Home Maintenance & Care: Clean Refrigerator Door Gaskets — Dirty gaskets cause your fridge to work harder and raise energy bills.",
+    "Smart Money Moves: Shop Homeowners Insurance Every 2-3 Years — Loyalty discounts fade. Switching can save 10-25%.",
+    "Home Maintenance & Care: Check for Pest Entry Points — Seal gaps around pipes, vents, and doors.",
+    "Smart Money Moves: Annual Mortgage Statement Review — Make sure your escrow is accurate and you're not overpaying.",
+    "Home Maintenance & Care: Clean Bathroom Exhaust Fans — Dust and lint buildup reduces airflow. Clean quarterly.",
+    "Smart Money Moves: Consider a 15-Year Mortgage — Pay off faster and save tens of thousands in interest if your budget allows.",
+    "Home Maintenance & Care: Inspect Fence Posts for Rot — Replace or reinforce before they fail in storms.",
+    "Smart Money Moves: HELOC for Home Projects — Flexible line of credit for renovations or emergencies.",
+    "Home Maintenance & Care: Clean Microwave Vent Filter — Grease buildup reduces effectiveness and increases fire risk.",
+    "Smart Money Moves: Compare Closing Costs Carefully When Refinancing — Shop lenders not just on rate but on total fees.",
+    "Home Maintenance & Care: Check for Leaking Faucets — A slow drip can waste hundreds of gallons of water per year.",
+    "Smart Money Moves: Use Tax-Advantaged Accounts for Home Repairs — HSA or FSA if eligible for certain medical-related home modifications.",
+    "Home Maintenance & Care: Review Flood Insurance Needs — Especially important in flood-prone areas of the four states.",
+    "Home Maintenance & Care: Clean Ceiling Fans — Dust buildup makes them less efficient and can spread allergens.",
+    "Smart Money Moves: Compare Internet Providers Annually — Switching can save money and improve speeds.",
+    "Home Maintenance & Care: Inspect Garage Door Springs and Cables — Have a pro check annually for safety.",
+    "Smart Money Moves: Use Apps to Track Home Maintenance — Reminders for filter changes, gutter cleaning, etc.",
+    "Home Maintenance & Care: Check for Proper Sump Pump Discharge — Make sure water is directed far from the foundation.",
+    "Smart Money Moves: Consider Title Insurance Review — Especially if you’ve owned the home for many years.",
+    "Home Maintenance & Care: Clean Kitchen Cabinet Tops — Dust and grease buildup attracts pests.",
+    "Smart Money Moves: Set a Home Maintenance Budget — 1% of home value per year is a good rule of thumb.",
+    "Smart Money Moves: Review Life Insurance Needs After Buying a Home — Ensure coverage protects your family and mortgage.",
+    "Home Maintenance & Care: Inspect Chimney Crown for Cracks — Prevents water from entering the chimney structure.",
+    "Smart Money Moves: Take Photos of Major Repairs — Document work for insurance and future buyers.",
+    "Home Maintenance & Care: Check for Proper Grading Around Foundation — Ensure water flows away from the house.",
+    "Smart Money Moves: Consider Energy Audits — Many utilities offer free or low-cost audits to identify savings opportunities."
 ];
 // Motivational Quotes (placeholder — send your list and I'll add)
 const motivationalQuotes = [
@@ -10278,11 +10428,13 @@ document.addEventListener('keydown', (e) => {
 
 // === PERSISTENCE SETUP ===
 const persistentFields = [
-    'nl-audience', 'nl-frequency', 'nl-tone', 'nl-location', 'nl-title', 'nl-length',
-    'nl-name', 'nl-headshot', 'nl-logo', 'nl-cell', 'nl-email', 'nl-signature',
-    'nl-facebook', 'nl-instagram', 'nl-linkedin', 'nl-youtube', 'nl-x', 'nl-tiktok',
+    'nl-audience', 'nl-tone', 'nl-location', 'nl-title', 'nl-length',
+    'nl-name',                    // keep
+    'nl-email',                   // keep
     'nl-blog-url', 'nl-blog-title',
-    'nl-include-blog'
+    'nl-include-blog',
+    'nl-personal-photo',
+    'nl-personal-video'
 ];
 
 // Load saved values on page load
@@ -10354,6 +10506,7 @@ document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', 
     }
     generateNewsletter(feedback);
 });
+
 async function generateNewsletter(feedback = '') {
     const loading = document.getElementById('global-loading');
     if (loading) loading.classList.remove('hidden');
@@ -10368,7 +10521,7 @@ async function generateNewsletter(feedback = '') {
         loadingEl.dataset.originalContent = loadingEl.innerHTML;
     }
 
-        // === INJECT TIPS MODAL CONTENT INTO LOADING SPINNER ===
+    // === INJECT TIPS MODAL CONTENT INTO LOADING SPINNER ===
     const loadingTipsContent = `
         <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
             <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-3xl w-full border border-[#00A89D]/30">
@@ -10409,10 +10562,12 @@ async function generateNewsletter(feedback = '') {
                          .map(c => c.id.replace('nl-', ''))
                          .join(', ');
 
+        const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
+        const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
+
         let promptLines;
 
         if (feedback) {
-            // === STRONGER, MORE RELIABLE EDIT PROMPT ===
             promptLines = [
                 'You are a precise newsletter editor. Your ONLY job is to return the COMPLETE, VALID, STANDALONE HTML document with the exact changes requested.',
                 'CRITICAL RULES (never break these):',
@@ -10421,6 +10576,7 @@ async function generateNewsletter(feedback = '') {
                 '3. Keep EVERY section, every table, every image, every placeholder, and every closing tag intact.',
                 '4. If the edit request is short, still return the ENTIRE document — do not shorten anything.',
                 '5. Never truncate. If you feel the response is getting long, prioritize completing the full structure first.',
+                '6. COMPLIANCE (NON-NEGOTIABLE): NEVER add, change, or include ANY mention of specific mortgage rates, interest rates, APRs, or "current rates" anywhere in the document.',
                 '',
                 'PREVIOUS FULL NEWSLETTER HTML (use this as your base):',
                 lastGeneratedHTML,
@@ -10430,186 +10586,95 @@ async function generateNewsletter(feedback = '') {
                 '',
                 'Output the complete updated HTML now.'
             ];
-        } else {
+                } else {
             promptLines = [
                 'You are a world-class email designer and compliance-focused mortgage professional. ACCURACY and HONESTY are your HIGHEST priority — above creativity, engagement, or length.',
                 '',
+                '**CRITICAL TITLE RULE (very important):**',
+                '- If the user provided a title in the Title field, use it exactly as written.',
+                '- If the Title field is blank or only contains something generic like "Mortgage Insights", you MUST create a short, catchy, professional title in the style of "The Lending Edge".',
+                '- Titles should be mortgage or lending related, 4–7 words maximum, confident, and benefit-focused.',
+                '- Create a unique title for every newsletter — never repeat the same title.',
+                '- Good style examples: "The Lending Edge", "Closing Strong", "Your Mortgage Advantage", "Lending Smarter", "The Home Loan Edge", "Mortgage Mastery", "Borrow Better", "Rate & Relationship".',
+                '',
                 '**ACCURACY RULES (NON-NEGOTIABLE):**',
                 '- EVERY fact, statistic, trend, event, or claim MUST be 100% accurate and verifiable.',
-                '- ACCURACY and SOURCES are critical for Market and Industry sections to maintain credibility and compliance. Always cite real sources there — never guess.',
                 '- NEVER guess, hallucinate, or invent information. If uncertain, OMIT it or use safe evergreen phrasing.',
-                '- Rate Watch: If the Rate Watch section is included, output ONLY the heading <h2>Rate Watch</h2> followed by 1-2 paragraphs of evergreen commentary (e.g., "Mortgage rates fluctuate daily based on economic factors. Here\'s the latest data:") and an empty paragraph <p id="rate-watch-link-placeholder"></p>. Do NOT mention any specific rates, percentages, or time-sensitive claims — keep it general and link-focused.',
-                '- Market/Industry: Use recent, verified and accurate news. NEVER specific rates, percentages, or time-sensitive claims.',
                 '- Local Spotlight: Use ONLY fun, interesting, or little known facts about the area. NEVER dated events. Verify and confirm accuracy above all else.',
-                '- Fun Facts: If the Fun Fact section is included, output ONLY the heading <h2>Fun Fact</h2> and an empty paragraph <p id="fun-fact-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
-                '- Pro Tip: If the Pro Tip section is included, output ONLY the heading <h2>Pro Tip</h2> and an empty paragraph <p id="pro-tip-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
-                '- Motivational Quote: If the Motivational Quote section is included, output ONLY the heading <h2>Motivational Quote</h2> and an empty paragraph <p id="quote-placeholder"></p> — do NOT add any content or placeholder text inside the p tag.',
+                '- Fun Facts: If the Fun Fact section is included, output ONLY the heading <h2>Fun Fact</h2> and an empty paragraph <p id="fun-fact-placeholder"></p>.',
+                '- Pro Tip: If the Pro Tip section is included, output ONLY the heading <h2>Pro Tip</h2> and an empty paragraph <p id="pro-tip-placeholder"></p>.',
+                '- Motivational Quote: If the Motivational Quote section is included, output ONLY the heading <h2>Motivational Quote</h2> and an empty paragraph <p id="quote-placeholder"></p>.',
                 '- Prefer safe, educational, evergreen content.',
-                '- Headshot: Use the exact VML conditional code for oval/rounded shape in Outlook, combined with border-radius for other clients. Include the 5px teal border.',
-                '- Social icons: Use PNG images from icons8 CDN (fluency style) with explicit width/height — do NOT use SVG or Font Awesome.',
                 '',
                 'User Inputs:',
                 '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
-                '- Frequency: ' + (document.getElementById('nl-frequency').value || 'Weekly'),
-                '- Tone: ' + (document.getElementById('nl-tone').value || 'Professional'),
+                '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
                 '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
                 '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
                 '- Sections: ' + (sections || 'Market Update, Industry News, Local Spotlight, Quick Recipe'),
                 '- Personal update: "' + (document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!') + '"',
+                '- Personal photo URL: "' + personalPhotoUrl + '"',
+                '- Personal video URL: "' + personalVideoUrl + '"',
                 '- Specific topics: "' + (document.getElementById('nl-specific').value || 'None') + '"',
                 '',
                 'Branding:',
-                '- Name: ' + (document.getElementById('nl-name').value || 'Your Loan Officer'),
-                '- Headshot URL: ' + (document.getElementById('nl-headshot').value || 'https://via.placeholder.com/120x160/002B5C/FFFFFF?text=Headshot'),
-                '- Logo URL: ' + (document.getElementById('nl-logo').value || ''),
-                '- Cell: ' + (document.getElementById('nl-cell').value || ''),
+                '- Name: ' + (document.getElementById('nl-name').value || 'Adam'),
                 '- Email: ' + (document.getElementById('nl-email').value || ''),
-                '- Signature (NMLS number): ' + (document.getElementById('nl-signature').value || ''),
                 '',
-                'Social Media Links (use the placeholder <div id="social-icons-placeholder"></div> — icons will be injected later):',
-                '- Facebook: ' + (document.getElementById('nl-facebook').value || 'none'),
-                '- Instagram: ' + (document.getElementById('nl-instagram').value || 'none'),
-                '- LinkedIn: ' + (document.getElementById('nl-linkedin').value || 'none'),
-                '- YouTube: ' + (document.getElementById('nl-youtube').value || 'none'),
-                '- X (Twitter): ' + (document.getElementById('nl-x').value || 'none'),
-                '- TikTok: ' + (document.getElementById('nl-tiktok').value || 'none'),
-                '',
-                '- REQUIRED HERO IMAGE URL (MUST USE EXACTLY THIS — DO NOT SEARCH OR CHANGE): ' + selectedHero,
+                '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
                 'CRITICAL RULES:',
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
                 '- HERO IMAGE: Use EXACTLY the REQUIRED URL above.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
+                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly.',
+                '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
-                '- NO separate "Personal Note" or "Referral Time" sections — personal update in signature, referral CTA at bottom.',
-                '- ALWAYS pull new and different Fun Facts, Recipes, Local info and Pro Tips each week.',
-                '- Compliance: Use the exact footer disclaimer provided below.',
+                '- After all main content sections, add a new section titled "A Note From Adam" with the polished personal update. Only use the first name.',
+                '- If a personal photo URL is provided, place the image BELOW the personal note text (centered, max-width 500px, rounded corners). If no photo, the section flows cleanly with no extra space.',
+                '- Compliance: Use the exact footer disclaimer provided below. NEVER quote specific rates anywhere.',
+                '- COMPLIANCE (CRITICAL - NEVER BREAK): NEVER quote, mention, suggest, or imply ANY specific mortgage interest rates, APRs, current rates, or loan rates in ANY section (Market Update, Industry News, Current News, or elsewhere). Use only general language like "rates have fluctuated recently" WITHOUT any numbers or quotes. Violation = compliance risk.',
                 '- EMAIL COMPATIBILITY (MANDATORY): Use ONLY inline styles. DO NOT include any <style> tags or class attributes. Use TABLE-BASED LAYOUTS for all structural elements. Avoid flexbox, gap, and box-shadow.',
                 '- Main container: <table width="600" align="center"...> with background white.',
                 '- Images: ALWAYS include width/height attributes AND inline styles. Logo max-width:200px. Headshot: width="120" height="160". Hero: width="600".',
                 '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
                 '- For the Market Update / Market section ONLY: ALWAYS end with a "Sources" paragraph containing 1-2 HYPERLINKED credible sources. REQUIRED FORMAT (use exactly): <p style="font-size:14px; color:#666; margin-top:20px;">Sources: <a href="https://www.freddiemac.com/pmms" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Freddie Mac PMMS</a>, <a href="https://www.mortgagenewsdaily.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage News Daily</a></p>. Use ONLY real, permanent URLs from trusted sites like Freddie Mac, Mortgage News Daily, NAR, HousingWire, or MBA. NEVER plain text names — links are mandatory.',
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
-                '- If no perfect source fits, use one of the examples above as a safe default. Links MUST be clickable with href, target="_blank", and rel="noopener".',
+                '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box. Never output a blog section on your own.',
                 '',
                 'OUTPUT ONLY complete standalone HTML using this exact structure:',
                 '',
-               '<!DOCTYPE html>',
-'<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml">',
-'<head>',
-'    <meta charset="UTF-8">',
-'    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-'    <title>[Title]</title>',
-'    <!--[if gte mso 9]>',
-'    <xml>',
-'      <o:OfficeDocumentSettings>',
-'        <o:AllowPNG/>',
-'        <o:PixelsPerInch>96</o:PixelsPerInch>',
-'      </o:OfficeDocumentSettings>',
-'    </xml>',
-'    <![endif]>',
-'    <!--[if gte mso 9]>',
-'    <style type="text/css">',
-'      v\\:* { behavior: url(#default#VML); display:inline-block; }',
-'    </style>',
-'    <![endif]>',
-'</head>',
-'<body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif;">',
-'  <table width="600" align="center" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; margin:20px auto; background:white; border-collapse:collapse;">',
-'    <tr>',
-'      <td style="padding:40px 20px; text-align:center; background:white;">',
-'        [Logo if provided: <img src="[Logo URL]" alt="Ruoff Mortgage" width="200" style="max-width:200px; width:100%; height:auto; display:block; margin:0 auto;">]',
-'        <h1 style="color:#002B5C; font-size:36px; margin:20px 0 10px;">[Title]</h1>',
-'        <p style="color:#666; margin:0;">Weekly Insights from [Location]</p>',
-'      </td>',
-'    </tr>',
-'    <tr>',
-'      <td>',
-'        <img src="[REQUIRED HERO IMAGE URL]" alt="Hero image" width="600" style="width:100%; height:auto; display:block;">',
-'      </td>',
-'    </tr>',
-'    <!-- Spacer -->',
-'    <tr><td height="20"></td></tr>',
-'    <!-- Repeat this block for EACH section (Market, Industry, Local, Recipe, etc.) -->',
-'    <tr>',
-'      <td>',
-'        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
-'          <tr>',
-'            <td style="padding:30px;">',
-'              <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">SECTION TITLE</h2>',
-'              <p>Content paragraphs...</p>',
-'              [Sources only for Market/Industry: <p style="font-size:14px; color:#666; margin-top:20px;">Sources: ... </p>]',
-'            </td>',
-'          </tr>',
-'        </table>',
-'      </td>',
-'    </tr>',
-'    <!-- Rate Watch section if checked -->',
-'    <tr>',
-'      <td>',
-'        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
-'          <tr>',
-'            <td style="padding:30px;">',
-'              <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">Rate Watch</h2>',
-'              <p>Mortgage rates fluctuate daily based on economic factors. Here\'s the latest data:</p>',
-'              <p id="rate-watch-link-placeholder"></p>',
-'              <p style="font-size:14px; color:#666; margin-top:20px;">Source: Federal Reserve Economic Data (FRED)</p>',
-'            </td>',
-'          </tr>',
-'        </table>',
-'      </td>',
-'    </tr>',
-'    <!-- Spacer between sections -->',
-'    <tr><td height="20"></td></tr>',
-'    <!-- Signature section -->',
-'    <tr>',
-'      <td style="padding:20px; background:white;">',
-'        <table width="100%" cellpadding="0" cellspacing="0">',
-'          <tr>',
-'            <td style="vertical-align:top; padding-right:30px; width:140px;">',
-'              <!--[if mso]><v:oval xmlns:v="urn:schemas-microsoft-com:vml" style="width:140px; height:180px;" fillcolor="#ffffff" stroked="t">',
-'              <v:stroke weight="5pt" color="#00A89D"/>',
-'              <v:fill src="[Headshot URL]" type="frame" size="100%,100%" alignshape="t"/>',
-'              <v:shadow on="f"/>',
-'              <![endif]>',
-'              <!--[if !mso]><!-- -->',
-'              <img src="[Headshot URL]" alt="[Name]" width="120" height="160" style="width:120px; height:160px; max-width:120px; border:5px solid #00A89D; border-radius:40%; object-fit:cover; display:block; outline:none; -ms-interpolation-mode:bicubic;">',
-'              <!--<![endif]>',
-'              <!--[if mso]></v:oval><![endif]>',
-'            </td>',
-'            <td style="vertical-align:top;">',
-'              <h2 style="color:#002B5C; font-size:28px; margin:0;">From [Name]</h2>',
-'              <p style="margin:15px 0; font-size:18px;">[Polished personal update]</p>',
-'              [If Signature provided: <p style="margin:10px 0; font-size:16px;">NMLS # [Signature]</p>]',
-'              <p style="margin:10px 0; font-size:16px;">',
-'                <a href="tel:[Cell]" style="color:#00A89D; text-decoration:underline;">[Cell]</a> | ',
-'                <a href="mailto:[Email]" style="color:#00A89D; text-decoration:underline;">[Email]</a>',
-'              </p>',
-'              <div id="social-icons-placeholder"></div>',
-'            </td>',
-'          </tr>',
-'        </table>',
-'      </td>',
-'    </tr>',
-'    <tr>',
-'      <td style="text-align:center; padding:30px 20px; background:white;">',
-'        <h2 style="color:#002B5C; font-size:28px; margin:0 0 15px;">Know Someone Ready to Buy or Refinance?</h2>',
-'        <p style="font-size:18px; margin:20px 0;">I\'d love to help — forward this or click below!</p>',
-'        <a href="mailto:[Email]?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi [Name],%0A%0AI\'d like to refer someone who\'s interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey\'re looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" style="background:#F15A29; color:white; padding:20px 44px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block;">Send Me a Referral</a>',
-'        <p style="margin-top:20px; font-size:16px;">Or text/call: <a href="tel:[Cell]" style="color:#00A89D; text-decoration:underline;">[Cell]</a></p>',
-'      </td>',
-'    </tr>',
-'    <tr>',
-'      <td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px; line-height:1.25;">',
-'        <p>Ruoff Mortgage Company, Inc., d/b/a Ruoff Mortgage, is an Indiana corporation. For complete licensing information visit <a href="http://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/141868" style="color:#00A89D; text-decoration:underline;">http://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/141868</a>.<br>This is not an offer for extension of credit or a commitment to lend. All loans must satisfy company underwriting guidelines. Information and interest rate are subject to change at any time and without notice. Equal Housing Lender. NMLS#141868.</p>',
-'      </td>',
-'    </tr>',
-// Most reliable — same as your previous Option A
-'  </table>',
-'</bo' + 'dy>',
-'</ht' + 'ml>'
-            ];
+'<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head><meta charset="UTF-8"><title>[Title]</title></head>',
+    '<body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif;">',
+    '  <table width="600" align="center" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; margin:20px auto; background:white; border-collapse:collapse;">',
+    '    <tr><td style="padding:40px 20px; text-align:center; background:white;">',
+    '      <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png" alt="Ruoff Mortgage" width="200" style="max-width:200px; width:100%; height:auto; display:block; margin:0 auto;">',
+    '      <h1 style="color:#002B5C; font-size:36px; margin:20px 0 10px;">[Title]</h1>',
+    '      <p style="color:#666; margin:0;">Insights from [Location]</p>',
+    '    </td></tr>',
+    '    <tr><td><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:100%; height:auto; display:block;"></td></tr>',
+    '    <tr><td height="20"></td></tr>',
+    '    <!-- Sections (Market, Industry, Local, etc.) go here -->',
+    '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
+    '    <tr><td height="20"></td></tr>',
+    '    <!-- Personal Note Section -->',
+    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
+    '      <tr><td style="padding:30px;">',
+    '        <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">A Note From Adam</h2>',
+    '        <p style="margin:15px 0 25px; font-size:18px; line-height:1.6;">[Polished personal update]</p>',
+    '        [PERSONAL PHOTO PLACEHOLDER]',
+    '      </td></tr>',
+    '    </table></td></tr>',
+    '    <tr><td height="20"></td></tr>',
+    '    <!-- REFERRAL CTA PLACEHOLDER -->',
+    '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
+    '  </table>',
+    '</body>',
+    '</html>'
+];
         }
 
         const prompt = promptLines.join('\n');
@@ -10694,142 +10759,198 @@ const response = await fetch('/api/chat', {
         });
 
     } finally {
-    if (loading) loading.classList.add('hidden');
+        if (loading) loading.classList.add('hidden');
 
-    // === RESTORE ORIGINAL GLOBAL LOADING CONTENT ===
-    if (loadingEl && loadingEl.dataset.originalContent) {
-        loadingEl.innerHTML = loadingEl.dataset.originalContent;
-        delete loadingEl.dataset.originalContent;
-    }
+        // === RESTORE ORIGINAL GLOBAL LOADING CONTENT ===
+        if (loadingEl && loadingEl.dataset.originalContent) {
+            loadingEl.innerHTML = loadingEl.dataset.originalContent;
+            delete loadingEl.dataset.originalContent;
+        }
 
-    if (html && html.trim() !== '') {
-        // Simplified replacements — current prompt uses EMPTY placeholders only
-        html = html.replace(/<p id="fun-fact-placeholder"><\/p>/gi, `<p>${selectedFunFact}</p>`);
-        html = html.replace(/<p id="pro-tip-placeholder"><\/p>/gi, `<p>${selectedProTip}</p>`);
-        html = html.replace(/<p id="quote-placeholder"><\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
-        html = html.replace(/<div id="social-icons-placeholder"><\/div>/gi, buildSocialIcons());
+        if (html && html.trim() !== '') {
+            // Core replacements
+            html = html.replace(/<p id="fun-fact-placeholder"><\/p>/gi, `<p>${selectedFunFact}</p>`);
+            html = html.replace(/<p id="pro-tip-placeholder"><\/p>/gi, `<p>${selectedProTip}</p>`);
+            html = html.replace(/<p id="quote-placeholder"><\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
+         
+            // === PERSONAL PHOTO AND VIDEO - Extra spacing for Outlook ===
+            const includePersonal = document.getElementById('nl-personal')?.checked || false;
+            const includePhoto = document.getElementById('nl-include-photo')?.checked || false;
+            const includeVideo = document.getElementById('nl-include-video')?.checked || false;
+            const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
+            const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
 
-        // Rate Watch link injection
-        html = html.replace(/<p id="rate-watch-link-placeholder"><\/p>/gi, `<p style="font-size:18px; margin:20px 0;"><a href="https://fred.stlouisfed.org/series/MORTGAGE30US" target="_blank" rel="noopener" style="color:#00A89D; font-weight:bold; text-decoration:underline;">View Latest 30-Year Fixed Rate Mortgage Average on FRED</a></p>`);
+            let mediaHTML = '';
 
-        // === Recent Blog Link Injection (right above signature) ===
-        const includeBlog = document.getElementById('nl-include-blog')?.checked || false;
-        if (includeBlog) {
-            const blogUrl = document.getElementById('nl-blog-url')?.value.trim();
-            const blogTitle = document.getElementById('nl-blog-title')?.value.trim() || 'Latest Blog Post';
-
-            if (blogUrl) {
-                // Ensure URL starts with http/https
-                const fullBlogUrl = blogUrl.startsWith('http') ? blogUrl : 'https://' + blogUrl;
-
-                const blogSection = `
+            if (includePersonal) {
+                // Photo first (if checked)
+                if (includePhoto && personalPhotoUrl) {
+                    const photoHTML = `
+                    <table align="center" width="408" cellpadding="0" cellspacing="0" style="margin:40px auto 30px; max-width:100%;">
                     <tr>
-                        <td>
-                            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
-                                <tr>
-                                    <td style="padding:30px;">
-                                        <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">My Recent Blog</h2>
-                                        <p style="font-size:18px; font-weight:bold; margin-bottom:10px;">${blogTitle}</p>
-                                        <p style="margin-bottom:15px;">Discover the latest insights on homeownership and mortgage strategies in this recent article.</p>
-                                        <a href="${fullBlogUrl}" target="_blank" rel="noopener" style="color:#00A89D; font-weight:bold; text-decoration:underline; display:inline-block;">Read full article →</a>
-                                    </td>
-                                </tr>
-                            </table>
+                        <td bgcolor="#00A89D" style="padding:4px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                            <tr>
+                            <td style="padding:0;">
+                                <img src="${personalPhotoUrl}" alt="Personal photo" width="400" style="width:100%; height:auto; display:block; border-radius:12px;">
+                            </td>
+                            </tr>
+                        </table>
                         </td>
                     </tr>
-                    <tr><td height="20"></td></tr>
-                `;
+                    </table>`;
+                    mediaHTML += photoHTML;
+                }
 
-                // Insert right before the signature block
-                html = html.replace(
-                    /<tr>\s*<td style="padding:20px; background:white;">\s*<table width="100%" cellpadding="0" cellspacing="0">\s*<tr>\s*<td style="vertical-align:top; padding-right:30px; width:140px;">/,
-                    blogSection + '$&'
-                );
+                // Video section with extra spacing
+                if (includeVideo && personalVideoUrl) {
+                    let videoId = '';
+                    let thumbnailUrl = 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
+
+                    if (personalVideoUrl.includes('youtu.be') || personalVideoUrl.includes('youtube.com')) {
+                        videoId = personalVideoUrl.split('youtu.be/')[1] || 
+                                 personalVideoUrl.split('v=')[1]?.split('&')[0];
+                        if (videoId) thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    }
+
+                    mediaHTML += `
+                    <table align="center" width="560" cellpadding="0" cellspacing="0" style="margin:45px auto 30px; max-width:100%;">
+                    <tr>
+                        <td align="center" style="padding-bottom:16px;">
+                            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center">
+                            <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none;">
+                                <img src="${thumbnailUrl}" 
+                                     alt="Watch Personal Video" 
+                                     width="560" 
+                                     style="width:100%; max-width:560px; height:auto; border-radius:12px; display:block; margin:0 auto;">
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding-top:18px;">
+                            <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
+                               style="background:#F15A29; color:white; padding:16px 40px; border-radius:30px; font-weight:bold; font-size:19px; text-decoration:none; display:inline-block;">
+                                ▶ Watch Video
+                            </a>
+                        </td>
+                    </tr>
+                    </table>`;
+                }
+            }
+
+            html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, mediaHTML);
+            }
+// Blog injection - FIXED: strip any AI-created blog section first, then inject only one clean version
+const includeBlog = document.getElementById('nl-include-blog')?.checked || false;
+if (includeBlog) {
+    // Remove any blog-like section the AI might have created
+    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>\s*<tr>\s*<td[^>]*>\s*<h2[^>]*>(?:From the Blog|Blog Highlight|My Recent Blog|Recent Blog)[^<]*<\/h2>[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
+    html = html.replace(/<tr><td height="20"><\/td><\/tr>\s*<tr>\s*<td>\s*<table[^>]*>\s*<tr>\s*<td[^>]*>\s*<h2[^>]*>(?:From the Blog|Blog Highlight|My Recent Blog)[^<]*<\/h2>[\s\S]*?<\/table>[\s\S]*?<\/tr>/gi, '');
+
+    const blogUrl = document.getElementById('nl-blog-url')?.value.trim();
+    const blogTitle = document.getElementById('nl-blog-title')?.value.trim() || 'Latest Blog Post';
+    if (blogUrl) {
+        const fullBlogUrl = blogUrl.startsWith('http') ? blogUrl : 'https://' + blogUrl;
+        const blogSection = `
+            <tr>
+                <td>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+                        <tr>
+                            <td style="padding:30px;">
+                                <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">My Recent Blog</h2>
+                                <p style="font-size:18px; font-weight:bold; margin-bottom:10px;">${blogTitle}</p>
+                                <p style="margin-bottom:15px;">Discover the latest insights on homeownership and mortgage strategies in this recent article.</p>
+                                <a href="${fullBlogUrl}" target="_blank" rel="noopener" style="color:#00A89D; font-weight:bold; text-decoration:underline; display:inline-block;">Read full article →</a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr><td height="20"></td></tr>
+        `;
+        html = html.replace(
+            /<tr><td height="20"><\/td><\/tr>\s*<!-- Personal Note Section -->/i,
+            '$&' + blogSection
+        );
+    }
+}
+
+// === PERSONAL NOTE HEADLINE - Now hardcoded "A Note From Adam" ===
+html = html.replace(/A Note From \[Name\]/gi, 'A Note From Adam');
+
+// === REFERRAL - Updated (no phone number) ===
+const simpleReferralHTML = `
+<tr>
+  <td>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+      <tr>
+        <td style="padding:30px; text-align:center;">
+          <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">Know Someone Ready to Buy or Refinance?</h2>
+          <p style="margin:0 0 25px; font-size:18px; line-height:1.6; color:#002B5C;">I'd love to help — forward this or click below!</p>
+          <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${document.getElementById('nl-name').value || 'Adam'},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
+             style="background:#F15A29; color:white; padding:18px 40px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block;">Send Me a Referral</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>`;
+
+html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
+html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
+html = html.replace(/\[Name\]/g, document.getElementById('nl-name').value || 'Adam');
+            // Preview & raw output
+            const previewEl = document.getElementById('nl-preview');
+            if (previewEl) {
+                previewEl.innerHTML = '';
+                const iframe = document.createElement('iframe');
+                iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
+                iframe.srcdoc = html;
+                previewEl.appendChild(iframe);
+
+                iframe.onload = () => {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                    const funFactP = iframeDoc.querySelector('#fun-fact-placeholder');
+                    if (funFactP) funFactP.innerHTML = selectedFunFact;
+
+                    const proTipP = iframeDoc.querySelector('#pro-tip-placeholder');
+                    if (proTipP) proTipP.innerHTML = selectedProTip;
+
+                    const quoteP = iframeDoc.querySelector('#quote-placeholder');
+                    if (quoteP) quoteP.innerHTML = `<em>${selectedQuote}</em>`;
+
+                };
+            }
+
+            const rawEl = document.getElementById('nl-html-raw');
+            if (rawEl) rawEl.value = html;
+
+            gtag('event', feedback ? 'edit_newsletter' : 'generate_newsletter', {
+                event_category: 'Tool Usage',
+                event_label: feedback ? 'Newsletter Edited' : 'Newsletter Generated',
+                value: 1
+            });
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             }
         }
 
-        const previewEl = document.getElementById('nl-preview');
-        if (previewEl) {
-            previewEl.innerHTML = '';
-            const iframe = document.createElement('iframe');
-            iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-            iframe.srcdoc = html;
-            previewEl.appendChild(iframe);
-
-            iframe.onload = () => {
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-                const funFactP = iframeDoc.querySelector('#fun-fact-placeholder');
-                if (funFactP) funFactP.innerHTML = selectedFunFact;
-
-                const proTipP = iframeDoc.querySelector('#pro-tip-placeholder');
-                if (proTipP) proTipP.innerHTML = selectedProTip;
-
-                const quoteP = iframeDoc.querySelector('#quote-placeholder');
-                if (quoteP) quoteP.innerHTML = `<em>${selectedQuote}</em>`;
-
-                const iconsPlaceholder = iframeDoc.querySelector('#social-icons-placeholder');
-                if (iconsPlaceholder) iconsPlaceholder.outerHTML = buildSocialIcons();
-
-                // Rate Watch backup
-                const rateWatchP = iframeDoc.querySelector('#rate-watch-link-placeholder');
-                if (rateWatchP) rateWatchP.outerHTML = `<p style="font-size:18px; margin:20px 0;"><a href="https://fred.stlouisfed.org/series/MORTGAGE30US" target="_blank" rel="noopener" style="color:#00A89D; font-weight:bold; text-decoration:underline;">View Latest 30-Year Fixed Rate Mortgage Average on FRED</a></p>`;
-
-                // Blog link backup (if injected)
-                const blogSection = iframeDoc.querySelector('table[style*="My Recent Blog"]');
-                if (blogSection) {
-                    // Optional: any dynamic backup if needed
-                }
-            };
+        const output = document.getElementById('newsletter-output');
+        if (output) {
+            output.classList.remove('hidden');
+            output.scrollIntoView({ behavior: 'smooth' });
         }
 
-        const rawEl = document.getElementById('nl-html-raw');
-        if (rawEl) rawEl.value = html;
-
-        gtag('event', feedback ? 'edit_newsletter' : 'generate_newsletter', {
-            event_category: 'Tool Usage',
-            event_label: feedback ? 'Newsletter Edited' : 'Newsletter Generated',
-            value: 1
-        });
-
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        if (feedback && document.getElementById('nl-feedback')) {
+            document.getElementById('nl-feedback').value = '';
         }
     }
 
-    const output = document.getElementById('newsletter-output');
-    if (output) {
-        output.classList.remove('hidden');
-        output.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    if (feedback && document.getElementById('nl-feedback')) {
-        document.getElementById('nl-feedback').value = '';
-    }
-}
-}
-function buildSocialIcons() {
-    const socials = [
-        { id: 'nl-facebook', src: 'https://img.icons8.com/fluency/48/facebook-new.png', label: 'Facebook' },
-        { id: 'nl-instagram', src: 'https://img.icons8.com/fluency/48/instagram-new.png', label: 'Instagram' },
-        { id: 'nl-linkedin', src: 'https://img.icons8.com/fluency/48/linkedin.png', label: 'LinkedIn' },
-        { id: 'nl-youtube', src: 'https://img.icons8.com/fluency/48/youtube-play.png', label: 'YouTube' },
-        { id: 'nl-x', src: 'https://img.icons8.com/fluency/48/twitterx.png', label: 'X' },
-        { id: 'nl-tiktok', src: 'https://img.icons8.com/fluency/48/tiktok.png', label: 'TikTok' }
-    ];
-
-    let iconsHTML = '<div style="margin-top:12px; text-align:left;">';
-    socials.forEach(s => {
-        const url = document.getElementById(s.id)?.value.trim();
-        if (url && url !== 'none' && url !== '') {
-            iconsHTML += `<a href="${url}" target="_blank" rel="noopener" style="text-decoration:none; margin-right:16px; display:inline-block;">
-                <img src="${s.src}" alt="${s.label}" width="32" height="32" style="width:32px; height:32px; display:block;">
-            </a>`;
-        }
-    });
-    iconsHTML += '</div>';
-    return iconsHTML || '<div style="height:12px;"></div>';
-}
 
 function copyNewsletterHTML() {
     navigator.clipboard.writeText(document.getElementById('nl-html-raw').value);
@@ -10847,27 +10968,42 @@ function downloadNewsletterHTML() {
     URL.revokeObjectURL(url);
     alert('Newsletter downloaded! Double-click the file to preview.');
 }
-function copyLivePreview() {
-    const iframe = document.querySelector('#nl-preview iframe');
-    if (!iframe) {
-        alert('Preview not ready yet — generate the newsletter first!');
+
+function copyForOutlook() {
+    const rawEl = document.getElementById('nl-html-raw');
+    if (!rawEl || !rawEl.value) {
+        alert('Generate the newsletter first!');
         return;
     }
 
-    try {
-        // Focus the iframe and select all content
-        iframe.contentWindow.focus();
-        const sel = iframe.contentWindow.getSelection();
-        sel.selectAllChildren(iframe.contentDocument.body);
-        
-        // Copy the selection
-        iframe.contentWindow.document.execCommand('copy');
-        
-        alert('Live preview copied! Now paste (Ctrl+V) into your email editor (HubSpot, Mailchimp, etc.)');
-    } catch (e) {
-        console.error('Auto-copy failed:', e);
-        alert('Could not auto-copy. Click inside the preview area, then press Ctrl+A (select all) and Ctrl+C (copy) manually.');
-    }
+    let cleanHTML = rawEl.value;
+
+    cleanHTML = cleanHTML.replace(
+        /<img src="([^"]+)" alt="Personal photo"[^>]*>/gi,
+        `<table align="center" width="408" cellpadding="0" cellspacing="0" style="margin:30px auto 25px; max-width:100%;">
+  <tr>
+    <td bgcolor="#00A89D" style="padding:4px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr>
+          <td style="padding:0;">
+            <img src="$1" alt="Personal photo" width="400" style="width:100%; height:auto; display:block; border-radius:12px;">
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`
+    );
+
+    const blob = new Blob([cleanHTML], { type: 'text/html' });
+    const data = [new ClipboardItem({ 'text/html': blob })];
+
+    navigator.clipboard.write(data).then(() => {
+        alert('✅ Outlook-optimized HTML copied!\n\nPaste instructions:\n1. Open a NEW email in Outlook\n2. Click in the body\n3. Press Ctrl + V');
+    }).catch(err => {
+        console.error(err);
+        alert('Clipboard issue — use the regular "Copy HTML" button and paste instead.');
+    });
 }
 </script>
 <script>
@@ -10976,6 +11112,65 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🔄 Weekly Win Plan auto-save enabled — changes save instantly');
 })();
 
+</script>
+<script>
+// === Blog Toggle (click event) ===
+const blogCheckbox = document.getElementById('nl-include-blog');
+const blogFields = document.getElementById('blog-fields');
+const blogUrl = document.getElementById('nl-blog-url');
+const blogTitle = document.getElementById('nl-blog-title');
+
+if (blogCheckbox && blogFields) {
+    blogCheckbox.addEventListener('change', () => {
+        if (blogCheckbox.checked) {
+            blogFields.classList.remove('hidden');
+            if (blogUrl) blogUrl.setAttribute('required', 'true');
+        } else {
+            blogFields.classList.add('hidden');
+            if (blogUrl) {
+                blogUrl.removeAttribute('required');
+                blogUrl.value = '';
+            }
+            if (blogTitle) blogTitle.value = '';
+        }
+    });
+}
+
+// === Personal Update Toggle (click event) ===
+const personalCheckbox = document.getElementById('nl-personal');
+const personalFields = document.getElementById('personal-fields');
+const personalText = document.getElementById('nl-personal-text');
+
+if (personalCheckbox && personalFields) {
+    personalCheckbox.addEventListener('change', () => {
+        if (personalCheckbox.checked) {
+            personalFields.classList.remove('hidden');
+            if (personalText) personalText.setAttribute('required', 'true');
+        } else {
+            personalFields.classList.add('hidden');
+            if (personalText) {
+                personalText.removeAttribute('required');
+                personalText.value = '';
+            }
+        }
+    });
+}
+
+// === Run on page load (fixes initial state) ===
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Blog - show fields if already checked on load
+    if (blogCheckbox && blogCheckbox.checked && blogFields) {
+        blogFields.classList.remove('hidden');
+        if (blogUrl) blogUrl.setAttribute('required', 'true');
+    }
+
+    // Personal Update - show fields if already checked on load
+    if (personalCheckbox && personalCheckbox.checked && personalFields) {
+        personalFields.classList.remove('hidden');
+        if (personalText) personalText.setAttribute('required', 'true');
+    }
+});
 </script>
 
 <script type="text/javascript">
