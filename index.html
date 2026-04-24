@@ -10619,7 +10619,7 @@ async function generateNewsletter(feedback = '') {
                 '- Specific topics: "' + (document.getElementById('nl-specific').value || 'None') + '"',
                 '',
                 'Branding:',
-                '- Name: ' + (document.getElementById('nl-name').value || 'Adam'),
+                '- Name: ' + (document.getElementById('nl-name').value || 'Your Loan Officer'),
                 '- Email: ' + (document.getElementById('nl-email').value || ''),
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
@@ -10628,6 +10628,7 @@ async function generateNewsletter(feedback = '') {
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
                 '- HERO IMAGE: Use EXACTLY the REQUIRED URL above.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
+                '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" using the exact value from the Name field above. NEVER output "A Note From Adam" or any other hardcoded name. Only use the provided Name value (or "Your Loan Officer" if the field is empty). Do not invent or default to any specific first name.',
                 '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly.',
                 '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
@@ -10663,7 +10664,7 @@ async function generateNewsletter(feedback = '') {
     '    <!-- Personal Note Section -->',
     '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
     '      <tr><td style="padding:30px;">',
-    '        <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">A Note From Adam</h2>',
+    '        <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">A Note From [Name]</h2>',
     '        <p style="margin:15px 0 25px; font-size:18px; line-height:1.6;">[Polished personal update]</p>',
     '        [PERSONAL PHOTO PLACEHOLDER]',
     '      </td></tr>',
@@ -10676,8 +10677,6 @@ async function generateNewsletter(feedback = '') {
     '</html>'
 ];
         }
-
-        const prompt = promptLines.join('\n');
 
 const response = await fetch('/api/chat', {
             method: 'POST',
@@ -10879,8 +10878,11 @@ if (includeBlog) {
     }
 }
 
-// === PERSONAL NOTE HEADLINE - Now hardcoded "A Note From Adam" ===
-html = html.replace(/A Note From \[Name\]/gi, 'A Note From Adam');
+// === PERSONAL NOTE HEADLINE - Use actual name from branding field ===
+const actualName = document.getElementById('nl-name').value || 'Your Loan Officer';
+html = html.replace(/A Note From \[Name\]/gi, `A Note From ${actualName}`);
+html = html.replace(/A Note From Adam/gi, `A Note From ${actualName}`);
+html = html.replace(/A Note from Adam/gi, `A Note From ${actualName}`);
 
 // === REFERRAL - Updated (no phone number) ===
 const simpleReferralHTML = `
@@ -10901,7 +10903,7 @@ const simpleReferralHTML = `
 
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
-html = html.replace(/\[Name\]/g, document.getElementById('nl-name').value || 'Adam');
+html = html.replace(/\[Name\]/g, document.getElementById('nl-name').value || 'Your Loan Officer');
             // Preview & raw output
             const previewEl = document.getElementById('nl-preview');
             if (previewEl) {
@@ -10950,7 +10952,6 @@ html = html.replace(/\[Name\]/g, document.getElementById('nl-name').value || 'Ad
             document.getElementById('nl-feedback').value = '';
         }
     }
-
 
 function copyNewsletterHTML() {
     navigator.clipboard.writeText(document.getElementById('nl-html-raw').value);
