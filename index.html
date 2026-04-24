@@ -10676,6 +10676,8 @@ async function generateNewsletter(feedback = '') {
     '</html>'
 ];
         }
+        
+const prompt = promptLines.join('\n');
 
 const response = await fetch('/api/chat', {
             method: 'POST',
