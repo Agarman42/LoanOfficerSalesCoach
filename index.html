@@ -10632,7 +10632,6 @@ async function generateNewsletter(feedback = '') {
                 '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly.',
                 '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
-                '- After all main content sections, add a new section titled "A Note From Adam" with the polished personal update. Only use the first name.',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text (centered, max-width 500px, rounded corners). If no photo, the section flows cleanly with no extra space.',
                 '- Compliance: Use the exact footer disclaimer provided below. NEVER quote specific rates anywhere.',
                 '- COMPLIANCE (CRITICAL - NEVER BREAK): NEVER quote, mention, suggest, or imply ANY specific mortgage interest rates, APRs, current rates, or loan rates in ANY section (Market Update, Industry News, Current News, or elsewhere). Use only general language like "rates have fluctuated recently" WITHOUT any numbers or quotes. Violation = compliance risk.',
@@ -10893,7 +10892,7 @@ const simpleReferralHTML = `
         <td style="padding:30px; text-align:center;">
           <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">Know Someone Ready to Buy or Refinance?</h2>
           <p style="margin:0 0 25px; font-size:18px; line-height:1.6; color:#002B5C;">I'd love to help — forward this or click below!</p>
-          <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${document.getElementById('nl-name').value || 'Adam'},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
+          <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${document.getElementById('nl-name').value || 'Your Loan Officer'},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
              style="background:#F15A29; color:white; padding:18px 40px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block;">Send Me a Referral</a>
         </td>
       </tr>
