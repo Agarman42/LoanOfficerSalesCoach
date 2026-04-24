@@ -10515,6 +10515,10 @@ async function generateNewsletter(feedback = '') {
 
     let html = '';
 
+    // === FIRST NAME EXTRACTION (moved to top for safety) ===
+    const fullName = document.getElementById('nl-name').value || 'Your Loan Officer';
+    const firstName = fullName.split(' ')[0].trim();
+
     // === SAVE ORIGINAL LOADING CONTENT ===
     const loadingEl = document.getElementById('global-loading');
     if (loadingEl) {
@@ -10565,6 +10569,8 @@ async function generateNewsletter(feedback = '') {
         const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
         const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
 
+
+
         let promptLines;
 
         if (feedback) {
@@ -10586,7 +10592,7 @@ async function generateNewsletter(feedback = '') {
                 '',
                 'Output the complete updated HTML now.'
             ];
-                } else {
+        } else {
             promptLines = [
                 'You are a world-class email designer and compliance-focused mortgage professional. ACCURACY and HONESTY are your HIGHEST priority — above creativity, engagement, or length.',
                 '',
@@ -10628,7 +10634,7 @@ async function generateNewsletter(feedback = '') {
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
                 '- HERO IMAGE: Use EXACTLY the REQUIRED URL above.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
-                '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" using the exact value from the Name field above. NEVER output "A Note From Adam" or any other hardcoded name. Only use the provided Name value (or "Your Loan Officer" if the field is empty). Do not invent or default to any specific first name.',
+                '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" where [Name] is replaced with ONLY THE FIRST NAME from the Name field (e.g. if Name is "Adam Garman", use "Adam" only — NEVER use the last name or full name in the title). NEVER output "A Note From Adam" or any other hardcoded name unless it exactly matches the first name. Use only the first name.',
                 '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly.',
                 '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
@@ -10676,8 +10682,8 @@ async function generateNewsletter(feedback = '') {
     '</html>'
 ];
         }
-        
-const prompt = promptLines.join('\n');
+
+        const prompt = promptLines.join('\n');
 
 const response = await fetch('/api/chat', {
             method: 'POST',
@@ -10879,11 +10885,12 @@ if (includeBlog) {
     }
 }
 
-// === PERSONAL NOTE HEADLINE - Use actual name from branding field ===
-const actualName = document.getElementById('nl-name').value || 'Your Loan Officer';
-html = html.replace(/A Note From \[Name\]/gi, `A Note From ${actualName}`);
-html = html.replace(/A Note From Adam/gi, `A Note From ${actualName}`);
-html = html.replace(/A Note from Adam/gi, `A Note From ${actualName}`);
+// === PERSONAL NOTE HEADLINE - Force ONLY first name (no last name) ===
+html = html.replace(/A Note From \[Name\]/gi, `A Note From ${firstName}`);
+html = html.replace(/A Note From Adam/gi, `A Note From ${firstName}`);
+html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
+// Force personal note title to ALWAYS use only the first name (no last name allowed)
+html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 
 // === REFERRAL - Updated (no phone number) ===
 const simpleReferralHTML = `
@@ -10894,7 +10901,7 @@ const simpleReferralHTML = `
         <td style="padding:30px; text-align:center;">
           <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">Know Someone Ready to Buy or Refinance?</h2>
           <p style="margin:0 0 25px; font-size:18px; line-height:1.6; color:#002B5C;">I'd love to help — forward this or click below!</p>
-          <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${document.getElementById('nl-name').value || 'Your Loan Officer'},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
+          <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${firstName},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
              style="background:#F15A29; color:white; padding:18px 40px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block;">Send Me a Referral</a>
         </td>
       </tr>
@@ -10904,7 +10911,7 @@ const simpleReferralHTML = `
 
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
-html = html.replace(/\[Name\]/g, document.getElementById('nl-name').value || 'Your Loan Officer');
+html = html.replace(/\[Name\]/g, firstName);
             // Preview & raw output
             const previewEl = document.getElementById('nl-preview');
             if (previewEl) {
