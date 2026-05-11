@@ -3937,9 +3937,9 @@ input[type="range"]:active::-moz-range-thumb {
             <input type="checkbox" id="nl-include-video" class="mr-3 h-5 w-5 text-[#00A89D] focus:ring-[#F15A29]">
             <label for="nl-include-video" class="text-xl font-semibold text-[#00A89D]">Include Personal Video</label>
         </div>
-        <input type="text" id="nl-personal-video" placeholder="Paste YouTube or Vimeo URL" 
+        <input type="text" id="nl-personal-video" placeholder="Paste YouTube video or Shorts URL" 
                class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
-        <p class="text-xs text-gray-500 mt-2">Video will appear below your personal note (or below the photo if both are checked).</p>
+        <p class="text-xs text-gray-500 mt-2">YouTube videos and Shorts are fully supported. Video appears below your personal note (or below the photo if both are checked).</p>
     </div>
 </div>
 </div>
@@ -4107,9 +4107,7 @@ input[type="range"]:active::-moz-range-thumb {
         <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
             <h3 class="text-3xl font-bold text-[#F15A29]">Your Newsletter Preview ✨</h3>
             <div class="flex gap-4 flex-wrap justify-center md:justify-start">
-    <button onclick="copyNewsletterHTML()" class="bg-[#00A89D] hover:bg-[#00887A] text-white px-6 py-3 rounded-full font-bold transition-all shadow-md flex items-center gap-2">
-        Copy HTML
-    </button>
+
     <button onclick="downloadNewsletterHTML()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold transition-all shadow-md flex items-center gap-2">
         Download .html File
     </button>
@@ -4528,7 +4526,12 @@ const quotes = [
     "Intentionality today keeps regret away tomorrow.",
     "Consistency isn’t sexy until you see the scoreboard.",
     "Be relentlessly intentional about the activities that pay.",
-    "Consistency is the silent closer that never takes a day off"
+    "Consistency is the silent closer that never takes a day off.",
+    "Real self-confidence comes from giving the world irrefutable proof you are who you say you are.",
+    "Everyone is jealous of what you’ve got, nobody is jealous of how you got there.", 
+    "The hard thing to do and the right thing to do, are almost always the same thing.", 
+    "You grow in proportion to the weight you take on voluntarily.", 
+    "It’s nice to be important, but it’s more important to be nice." 
 ];
 
 let currentQuoteIndex = Math.floor(Math.random() * quotes.length);
@@ -10437,6 +10440,12 @@ const persistentFields = [
     'nl-personal-video'
 ];
 
+// === GLOBAL EMAIL / CRM SETTINGS ===
+const EMAIL_WIDTH = 600;
+const BODY_PADDING = 90;        // left + right padding for centering
+const MODULE_PADDING = 20;      // consistent spacing between modules
+const HEADER_HEIGHT = 60;       // recommended for headers (used if needed)
+
 // Load saved values on page load
 document.addEventListener('DOMContentLoaded', () => {
     persistentFields.forEach(id => {
@@ -10632,10 +10641,9 @@ async function generateNewsletter(feedback = '') {
                 '',
                 'CRITICAL RULES:',
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
-                '- HERO IMAGE: Use EXACTLY the REQUIRED URL above.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
                 '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" where [Name] is replaced with ONLY THE FIRST NAME from the Name field (e.g. if Name is "Adam Garman", use "Adam" only — NEVER use the last name or full name in the title). NEVER output "A Note From Adam" or any other hardcoded name unless it exactly matches the first name. Use only the first name.',
-                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly.',
+                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
                 '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text (centered, max-width 500px, rounded corners). If no photo, the section flows cleanly with no extra space.',
@@ -10643,7 +10651,7 @@ async function generateNewsletter(feedback = '') {
                 '- COMPLIANCE (CRITICAL - NEVER BREAK): NEVER quote, mention, suggest, or imply ANY specific mortgage interest rates, APRs, current rates, or loan rates in ANY section (Market Update, Industry News, Current News, or elsewhere). Use only general language like "rates have fluctuated recently" WITHOUT any numbers or quotes. Violation = compliance risk.',
                 '- EMAIL COMPATIBILITY (MANDATORY): Use ONLY inline styles. DO NOT include any <style> tags or class attributes. Use TABLE-BASED LAYOUTS for all structural elements. Avoid flexbox, gap, and box-shadow.',
                 '- Main container: <table width="600" align="center"...> with background white.',
-                '- Images: ALWAYS include width/height attributes AND inline styles. Logo max-width:200px. Headshot: width="120" height="160". Hero: width="600".',
+                '- Use consistent module spacing of 20px between sections. Main content tables should be width="600".',
                 '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
                 '- For the Market Update / Market section ONLY: ALWAYS end with a "Sources" paragraph containing 1-2 HYPERLINKED credible sources. REQUIRED FORMAT (use exactly): <p style="font-size:14px; color:#666; margin-top:20px;">Sources: <a href="https://www.freddiemac.com/pmms" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Freddie Mac PMMS</a>, <a href="https://www.mortgagenewsdaily.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage News Daily</a></p>. Use ONLY real, permanent URLs from trusted sites like Freddie Mac, Mortgage News Daily, NAR, HousingWire, or MBA. NEVER plain text names — links are mandatory.',
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
@@ -10653,15 +10661,26 @@ async function generateNewsletter(feedback = '') {
                 '',
 '<!DOCTYPE html>',
     '<html lang="en">',
-    '<head><meta charset="UTF-8"><title>[Title]</title></head>',
+    '<head><meta charset="UTF-8"></head>',
     '<body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif;">',
-    '  <table width="600" align="center" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; margin:20px auto; background:white; border-collapse:collapse;">',
-    '    <tr><td style="padding:40px 20px; text-align:center; background:white;">',
-    '      <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png" alt="Ruoff Mortgage" width="200" style="max-width:200px; width:100%; height:auto; display:block; margin:0 auto;">',
-    '      <h1 style="color:#002B5C; font-size:36px; margin:20px 0 10px;">[Title]</h1>',
-    '      <p style="color:#666; margin:0;">Insights from [Location]</p>',
+    '    <tr><td style="padding:40px 20px; text-align:center; background:#f9f9f9;">',
+    '      <table align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;">',
+    '        <tr>',
+    '          <td align="center">',
+    '            <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png" alt="Ruoff Mortgage" width="200" style="width:200px; max-width:200px; height:auto; display:block;">',
+    '          </td>',
+    '        </tr>',
+    '      </table>',
+    '      <h1 style="color:#002B5C; font-size:36px; margin:20px 0 8px; text-align:center;">[Title]</h1>',
+    '      <p style="color:#666; margin:0 0 25px; text-align:center;">Insights from [Location]</p>',
+    '      <!-- Teal accent bar under header to tie it together -->',
+    '      <table width="100%" cellpadding="0" cellspacing="0">',
+    '        <tr>',
+    '          <td height="6" bgcolor="#00A89D" style="background:#00A89D;"></td>',
+    '        </tr>',
+    '      </table>',
     '    </td></tr>',
-    '    <tr><td><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:100%; height:auto; display:block;"></td></tr>',
+    '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
     '    <!-- Sections (Market, Industry, Local, etc.) go here -->',
     '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
@@ -10711,19 +10730,9 @@ const response = await fetch('/api/chat', {
         cleaned = cleaned.replace(/^```html?\s*/i, '').replace(/^```\s*/g, '').replace(/```$/g, '').trim();
 
         html = cleaned || lastGeneratedHTML || '<p>Generation failed.</p>';
-
-        if (!feedback && !html.includes(selectedHero)) {
-            const heroHTML = '<tr><td><img src="' + selectedHero + '" alt="Beautiful Midwest home" width="600" style="width:100%; height:auto; display:block;"></td></tr><tr><td height="20"></td></tr>';
-            html = html.replace(/<\/table>/i, heroHTML + '</table>');
-        }
-
-        if (feedback && !html.includes('width="600" align="center"')) {
-            console.warn('Invalid edit output — reverting');
-            html = lastGeneratedHTML;
-            alert('Edit unsuccessful — the AI returned incomplete content. Reverting to previous version. Try rephrasing your request.');
-        } else {
-            lastGeneratedHTML = html;
-        }
+        
+        html = html.replace(/<head>[\s\S]*?<\/head>/gi, '<head><meta charset="UTF-8"></head>');
+               // === OUTLOOK-PROOF FULL-WIDTH HERO ===
 
     } catch (err) {
         console.error('Generation failed', err);
@@ -10779,7 +10788,7 @@ const response = await fetch('/api/chat', {
             html = html.replace(/<p id="pro-tip-placeholder"><\/p>/gi, `<p>${selectedProTip}</p>`);
             html = html.replace(/<p id="quote-placeholder"><\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
          
-            // === PERSONAL PHOTO AND VIDEO - Extra spacing for Outlook ===
+            // === PERSONAL PHOTO AND VIDEO - CRM / HubSpot Friendly ===
             const includePersonal = document.getElementById('nl-personal')?.checked || false;
             const includePhoto = document.getElementById('nl-include-photo')?.checked || false;
             const includeVideo = document.getElementById('nl-include-video')?.checked || false;
@@ -10789,16 +10798,16 @@ const response = await fetch('/api/chat', {
             let mediaHTML = '';
 
             if (includePersonal) {
-                // Photo first (if checked)
+                // Photo first (if checked) - restored thin border for Outlook
                 if (includePhoto && personalPhotoUrl) {
                     const photoHTML = `
-                    <table align="center" width="408" cellpadding="0" cellspacing="0" style="margin:40px auto 30px; max-width:100%;">
+                    <table align="center" width="${EMAIL_WIDTH}" cellpadding="0" cellspacing="0" style="margin:40px auto ${MODULE_PADDING}px; max-width:100%;">
                     <tr>
-                        <td bgcolor="#00A89D" style="padding:4px;">
+                        <td bgcolor="#00A89D" style="padding:3px;">   <!-- 3px keeps it thin like before -->
                         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
                             <tr>
                             <td style="padding:0;">
-                                <img src="${personalPhotoUrl}" alt="Personal photo" width="400" style="width:100%; height:auto; display:block; border-radius:12px;">
+                                <img src="${personalPhotoUrl}" alt="Personal photo" width="${EMAIL_WIDTH - 6}" style="width:100%; height:auto; display:block; border-radius:12px;">
                             </td>
                             </tr>
                         </table>
@@ -10808,44 +10817,67 @@ const response = await fetch('/api/chat', {
                     mediaHTML += photoHTML;
                 }
 
-                // Video section with extra spacing
+                // Video section with teal border (matching the photo)
                 if (includeVideo && personalVideoUrl) {
                     let videoId = '';
                     let thumbnailUrl = 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
 
-                    if (personalVideoUrl.includes('youtu.be') || personalVideoUrl.includes('youtube.com')) {
-                        videoId = personalVideoUrl.split('youtu.be/')[1] || 
-                                 personalVideoUrl.split('v=')[1]?.split('&')[0];
-                        if (videoId) thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    const url = personalVideoUrl.trim();
+
+                    if (url.includes('youtube.com/shorts/')) {
+                        videoId = url.split('shorts/')[1]?.split(/[?&]/)[0];
+                    } else if (url.includes('youtu.be/')) {
+                        videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+                    } else if (url.includes('v=')) {
+                        videoId = url.split('v=')[1]?.split('&')[0];
+                    } else if (url.includes('embed/')) {
+                        videoId = url.split('embed/')[1]?.split(/[?&]/)[0];
+                    }
+
+                    if (videoId && videoId.length === 11) {
+                        thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
                     }
 
                     mediaHTML += `
-                    <table align="center" width="560" cellpadding="0" cellspacing="0" style="margin:45px auto 30px; max-width:100%;">
+    <table align="center" width="600" cellpadding="0" cellspacing="0" style="margin:45px auto ${MODULE_PADDING}px; max-width:100%;">
+    <tr>
+        <td align="center" style="padding-bottom:16px;">
+            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none;">
+                <table align="center" width="560" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden;">
                     <tr>
-                        <td align="center" style="padding-bottom:16px;">
-                            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
+                        <td style="padding:0;">
+                            <img src="${thumbnailUrl}" 
+                                 alt="Watch Personal Video" 
+                                 width="560" 
+                                 style="width:560px; height:auto; display:block; border:0;">
                         </td>
                     </tr>
-                    <tr>
-                        <td align="center">
-                            <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none;">
-                                <img src="${thumbnailUrl}" 
-                                     alt="Watch Personal Video" 
-                                     width="560" 
-                                     style="width:100%; max-width:560px; height:auto; border-radius:12px; display:block; margin:0 auto;">
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="padding-top:18px;">
-                            <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
-                               style="background:#F15A29; color:white; padding:16px 40px; border-radius:30px; font-weight:bold; font-size:19px; text-decoration:none; display:inline-block;">
-                                ▶ Watch Video
-                            </a>
-                        </td>
-                    </tr>
-                    </table>`;
-                }
+                </table>
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding-top:18px;">
+            <!-- Outlook-friendly button -->
+            <table align="center" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                    <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
+                        <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
+                           style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
+                            ▶ Watch Video
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    </table>`;
+}
             }
 
             html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, mediaHTML);
@@ -10900,9 +10932,19 @@ const simpleReferralHTML = `
       <tr>
         <td style="padding:30px; text-align:center;">
           <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">Know Someone Ready to Buy or Refinance?</h2>
-          <p style="margin:0 0 25px; font-size:18px; line-height:1.6; color:#002B5C;">I'd love to help — forward this or click below!</p>
-          <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${firstName},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
-             style="background:#F15A29; color:white; padding:18px 40px; border-radius:30px; font-weight:bold; text-decoration:none; font-size:20px; display:inline-block;">Send Me a Referral</a>
+          <p style="margin:0 0 25px; font-size:18px; line-height:1.6; color:#002B5C;">Hook me up – forward this or smash the button, I'll make 'em laugh all the way to closing!</p>
+          
+          <!-- Outlook-friendly button -->
+          <table align="center" cellpadding="0" cellspacing="0" role="presentation">
+            <tr>
+              <td align="center" bgcolor="#F15A29" style="border-radius:30px; padding:4px;">
+                <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${firstName},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
+                   style="display:inline-block; padding:18px 40px; color:white; font-weight:bold; font-size:20px; text-decoration:none; border-radius:26px;">
+                    Send Me a Referral
+                </a>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>
@@ -10912,6 +10954,9 @@ const simpleReferralHTML = `
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
+
+    lastGeneratedHTML = html;
+
             // Preview & raw output
             const previewEl = document.getElementById('nl-preview');
             if (previewEl) {
@@ -10961,11 +11006,6 @@ html = html.replace(/\[Name\]/g, firstName);
         }
     }
 
-function copyNewsletterHTML() {
-    navigator.clipboard.writeText(document.getElementById('nl-html-raw').value);
-    alert('HTML copied! Paste into your email platform.');
-}
-
 function downloadNewsletterHTML() {
     const html = document.getElementById('nl-html-raw').value;
     const blob = new Blob([html], { type: 'text/html' });
@@ -10987,31 +11027,44 @@ function copyForOutlook() {
 
     let cleanHTML = rawEl.value;
 
+    // === PERSONAL PHOTO - Thin teal border (matches preview) ===
     cleanHTML = cleanHTML.replace(
         /<img src="([^"]+)" alt="Personal photo"[^>]*>/gi,
-        `<table align="center" width="408" cellpadding="0" cellspacing="0" style="margin:30px auto 25px; max-width:100%;">
-  <tr>
-    <td bgcolor="#00A89D" style="padding:4px;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-        <tr>
-          <td style="padding:0;">
-            <img src="$1" alt="Personal photo" width="400" style="width:100%; height:auto; display:block; border-radius:12px;">
-          </td>
+        `<table align="center" width="600" cellpadding="0" cellspacing="0" style="margin:40px auto 20px; max-width:100%;">
+            <tr>
+                <td bgcolor="#00A89D" style="padding:3px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                        <tr>
+                            <td style="padding:0;">
+                                <img src="$1" alt="Personal photo" width="594" style="width:100%; height:auto; display:block; border-radius:12px;">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>`
+    );
+
+    // === HERO IMAGE - Light gray background on sides + centered ===
+    cleanHTML = cleanHTML.replace(
+        /<tr>\s*<td[^>]*>\s*<img src="([^"]+)"[^>]*alt=["']Hero[^>]*>[\s\S]*?<\/td>\s*<\/tr>/gi,
+        `<tr>
+            <td style="background:#f9f9f9; padding:0; text-align:center;">
+                <img src="$1" alt="Hero Image" width="600" 
+                     style="width:600px; max-width:600px; height:auto; display:block; border:0;">
+            </td>
         </tr>
-      </table>
-    </td>
-  </tr>
-</table>`
+        <tr><td height="20"></td></tr>`
     );
 
     const blob = new Blob([cleanHTML], { type: 'text/html' });
     const data = [new ClipboardItem({ 'text/html': blob })];
 
     navigator.clipboard.write(data).then(() => {
-        alert('✅ Outlook-optimized HTML copied!\n\nPaste instructions:\n1. Open a NEW email in Outlook\n2. Click in the body\n3. Press Ctrl + V');
+        alert('✅ Outlook-optimized HTML copied!\n\nPaste into a NEW email in Outlook.');
     }).catch(err => {
         console.error(err);
-        alert('Clipboard issue — use the regular "Copy HTML" button and paste instead.');
+        alert('Clipboard issue — try the regular Copy HTML button instead.');
     });
 }
 </script>
