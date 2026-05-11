@@ -10799,23 +10799,18 @@ const response = await fetch('/api/chat', {
 
             if (includePersonal) {
                 // Photo first (if checked) - restored thin border for Outlook
-                if (includePhoto && personalPhotoUrl) {
-                    const photoHTML = `
-                    <table align="center" width="${EMAIL_WIDTH}" cellpadding="0" cellspacing="0" style="margin:40px auto ${MODULE_PADDING}px; max-width:100%;">
-                    <tr>
-                        <td bgcolor="#00A89D" style="padding:3px;">   <!-- 3px keeps it thin like before -->
-                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-                            <tr>
-                            <td style="padding:0;">
-                                <img src="${personalPhotoUrl}" alt="Personal photo" width="${EMAIL_WIDTH - 6}" style="width:100%; height:auto; display:block; border-radius:12px;">
-                            </td>
-                            </tr>
-                        </table>
-                        </td>
-                    </tr>
-                    </table>`;
-                    mediaHTML += photoHTML;
-                }
+ if (includePhoto && personalPhotoUrl) {
+    const photoHTML = `
+    <table align="center" width="600" cellpadding="0" cellspacing="0" style="margin:25px auto 15px; max-width:100%;">
+        <tr>
+            <td style="padding:4px; background:#00A89D; text-align:center;">
+                <img src="${personalPhotoUrl}" alt="Personal photo" 
+                     style="width:100%; max-width:592px; height:auto; display:block; border-radius:12px;">
+            </td>
+        </tr>
+    </table>`;
+    mediaHTML += photoHTML;
+}
 
                 // Video section with teal border (matching the photo)
                 if (includeVideo && personalVideoUrl) {
