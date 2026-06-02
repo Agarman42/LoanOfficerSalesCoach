@@ -1526,116 +1526,91 @@
         <div class="flex items-center justify-between mb-4">
             <div>
                 <h3 class="text-2xl font-bold">Partner Type Playbooks</h3>
-                <p class="text-gray-600 dark:text-gray-400">Deep strategies, scripts, and plays for each major referral source.</p>
+                <p class="text-gray-600 dark:text-gray-400">Deep strategies, scripts, and plays for each major referral source. Click any for full rich playbooks with ready-to-use language.</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Realtors - Primary -->
-            <div onclick="openReferralModal('Realtors')" class="group cursor-pointer bg-white dark:bg-gray-900 border-2 border-[#00A89D] hover:border-[#F15A29] p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all flex flex-col">
+            <div onclick="openReferralModal('Realtors')" class="group cursor-pointer bg-white dark:bg-gray-900 border-2 border-[#00A89D] hover:border-[#F15A29] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center text-[#00A89D]">
-                        <i class="fas fa-home text-xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold">Realtors</h4>
-                    <span class="ml-auto text-xs px-2.5 py-0.5 rounded-full bg-[#00A89D] text-white font-medium">PRIMARY</span>
+                    <div class="w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center text-[#00A89D]"><i class="fas fa-home text-xl"></i></div>
+                    <div><h4 class="text-xl font-bold">Realtors</h4><span class="text-xs px-2 py-0.5 rounded-full bg-[#00A89D] text-white font-medium">PRIMARY</span></div>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Your highest-volume, highest-potential referral source. Deep outreach scripts, nurturing sequences, co-marketing plays, and objection handlers.</p>
-                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:text-[#F15A29] transition flex items-center gap-1">
-                    Open Full Playbook <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Your highest-volume source. Full outreach sequences, 60-day onboarding, co-marketing ideas, weekly value cadence, and natural referral ask scripts.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">Open Full Playbook + Scripts →</div>
             </div>
 
-            <div onclick="openReferralModal('Builders')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all flex flex-col">
+            <div onclick="openReferralModal('Builders')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]">
-                        <i class="fas fa-hard-hat text-xl"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]"><i class="fas fa-hard-hat text-xl"></i></div>
                     <h4 class="text-xl font-bold">Builders</h4>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">New construction, preferred lender status, and model home opportunities. Scripts and co-marketing ideas tailored for builders.</p>
-                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:text-[#F15A29] transition flex items-center gap-1">
-                    Open Playbook <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">New construction, preferred lender programs, model home opportunities. Scripts for sales team training and co-branded marketing.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">Open Full Playbook + Scripts →</div>
             </div>
 
-            <div onclick="openReferralModal('Financial Planners')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all flex flex-col">
+            <div onclick="openReferralModal('Financial Planners')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]">
-                        <i class="fas fa-chart-line text-xl"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]"><i class="fas fa-chart-line text-xl"></i></div>
                     <h4 class="text-xl font-bold">Financial Planners &amp; CPAs</h4>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">High-net-worth clients, investment properties, and retirement planning referrals. Cross-referral and education strategies.</p>
-                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:text-[#F15A29] transition flex items-center gap-1">
-                    Open Playbook <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">HNW clients, investment properties, retirement moves. Cross-referral protocols and education-first sequences that feel natural.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">Open Full Playbook + Scripts →</div>
             </div>
 
-            <div onclick="openReferralModal('Attorneys')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all flex flex-col">
+            <div onclick="openReferralModal('Attorneys')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]">
-                        <i class="fas fa-balance-scale text-xl"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]"><i class="fas fa-balance-scale text-xl"></i></div>
                     <h4 class="text-xl font-bold">Attorneys</h4>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Divorce, probate, estate planning, and real estate attorneys. Clean communication and referral protocols.</p>
-                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:text-[#F15A29] transition flex items-center gap-1">
-                    Open Playbook <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Divorce, probate, estate, and real estate attorneys. Clean handoff language and referral protocols that respect their clients.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">Open Full Playbook + Scripts →</div>
             </div>
 
-            <div onclick="openReferralModal('Insurance Agents')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all flex flex-col">
+            <div onclick="openReferralModal('Insurance Agents')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]">
-                        <i class="fas fa-shield-alt text-xl"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]"><i class="fas fa-shield-alt text-xl"></i></div>
                     <h4 class="text-xl font-bold">Insurance Agents</h4>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Home + auto bundling and joint client appreciation opportunities. Scripts that create natural handoffs.</p>
-                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:text-[#F15A29] transition flex items-center gap-1">
-                    Open Playbook <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Home/auto bundling and joint appreciation events. Scripts for natural introductions and shared client touches.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">Open Full Playbook + Scripts →</div>
             </div>
 
-            <div onclick="openReferralModal('Other')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all flex flex-col">
+            <div onclick="openReferralModal('Other')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]">
-                        <i class="fas fa-users text-xl"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D]"><i class="fas fa-users text-xl"></i></div>
                     <h4 class="text-xl font-bold">Other Professionals</h4>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">HR directors, relocation companies, title agents, and other high-potential sources. Adaptable outreach frameworks.</p>
-                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:text-[#F15A29] transition flex items-center gap-1">
-                    Open Playbook <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">HR, relocation, title, and other sources. Adaptable frameworks and low-pressure ask language for any professional partner.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">Open Full Playbook + Scripts →</div>
             </div>
         </div>
     </div>
 
     <!-- Tiered System + Touch Strategy -->
     <div class="mb-10">
-        <h3 class="text-2xl font-bold mb-4">Tiered Partner System &amp; Touch Strategy</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">Focus your limited time on the partners who deliver the most. Here’s exactly how top producers allocate their energy.</p>
+        <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">Tiered Partner System &amp; Touch Strategy <span class="text-xs px-2 py-0.5 rounded bg-[#002B5C] text-white font-normal">FOCUS YOUR TIME</span></h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Focus your limited time on the partners who deliver the most. Exact cadences, scripts, and growth plays for each tier.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div onclick="openTierModal('A+')" class="cursor-pointer border border-[#002B5C]/30 hover:border-[#002B5C] rounded-3xl p-6 transition-all hover:shadow-md">
+            <div onclick="openTierModal('A+')" class="cursor-pointer border border-[#002B5C]/30 hover:border-[#002B5C] rounded-3xl p-6 transition-all hover:shadow-md bg-white dark:bg-gray-900">
                 <div class="font-bold text-lg mb-1">A+ Partners <span class="text-xs font-normal px-2 py-0.5 rounded bg-[#002B5C] text-white">Top 10–20</span></div>
-                <div class="text-sm text-[#002B5C] dark:text-[#00A89D] mb-3">5+ referrals per year</div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Click for the full white-glove playbook: exact cadence, scripts, gifts, reviews, and how to protect these relationships.</p>
-                <div class="text-xs text-[#002B5C] font-medium">View Detailed Playbook →</div>
+                <div class="text-sm text-[#002B5C] dark:text-[#00A89D] mb-2">5+ referrals per year • White-glove</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Full playbook: exact weekly/monthly cadence, personal gifts, review asks, co-marketing, and how to protect these relationships for life.</p>
+                <div class="mt-3 text-xs text-[#002B5C] font-medium">View Detailed Playbook + Scripts →</div>
             </div>
-            <div onclick="openTierModal('B')" class="cursor-pointer border border-[#00A89D]/30 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md">
+            <div onclick="openTierModal('B')" class="cursor-pointer border border-[#00A89D]/30 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md bg-white dark:bg-gray-900">
                 <div class="font-bold text-lg mb-1">B Partners <span class="text-xs font-normal px-2 py-0.5 rounded bg-[#00A89D] text-white">Growing</span></div>
-                <div class="text-sm text-[#00A89D] mb-3">1–4 referrals per year</div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Click for the growth playbook: how to move these partners toward A+ status with the right touches and asks.</p>
-                <div class="text-xs text-[#00A89D] font-medium">View Detailed Playbook →</div>
+                <div class="text-sm text-[#00A89D] mb-2">1–4 referrals per year • Growth focus</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Growth playbook: how to move these partners to A+ with the right touches, education, and light asks without burning them out.</p>
+                <div class="mt-3 text-xs text-[#00A89D] font-medium">View Detailed Playbook + Scripts →</div>
             </div>
-            <div onclick="openTierModal('C')" class="cursor-pointer border border-[#F15A29]/30 hover:border-[#F15A29] rounded-3xl p-6 transition-all hover:shadow-md">
+            <div onclick="openTierModal('C')" class="cursor-pointer border border-[#F15A29]/30 hover:border-[#F15A29] rounded-3xl p-6 transition-all hover:shadow-md bg-white dark:bg-gray-900">
                 <div class="font-bold text-lg mb-1">C Partners <span class="text-xs font-normal px-2 py-0.5 rounded bg-[#F15A29] text-white">Prospects / New</span></div>
-                <div class="text-sm text-[#F15A29] mb-3">Potential</div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Click for the prospecting and conversion playbook: how to turn C partners into reliable B or A sources efficiently.</p>
-                <div class="text-xs text-[#F15A29] font-medium">View Detailed Playbook →</div>
+                <div class="text-sm text-[#F15A29] mb-2">Potential • Efficient conversion</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Prospecting playbook: how to turn C partners into reliable B or A sources with low-time, high-impact sequences and first-file over-delivery.</p>
+                <div class="mt-3 text-xs text-[#F15A29] font-medium">View Detailed Playbook + Scripts →</div>
             </div>
         </div>
     </div>
@@ -3143,63 +3118,62 @@
 
     <!-- 2. High-Impact Event Types -->
     <div class="mb-10">
-        <h3 class="text-2xl font-bold mb-4 text-[#002B5C] dark:text-white">High-Impact Event Types</h3>
+        <h3 class="text-2xl font-bold mb-4 text-[#002B5C] dark:text-white flex items-center gap-2">
+            <i class="fas fa-star text-[#F15A29]"></i> High-Impact Event Types
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">Four proven formats that generate referrals, deepen loyalty, and create shareable moments. Click any for the complete playbook with scripts, timelines, and exact execution steps.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Client Appreciation -->
-            <div class="border border-gray-200 dark:border-gray-600 rounded-2xl p-5">
-                <h4 class="font-bold mb-3">Client Appreciation Events</h4>
-                <ul class="text-sm space-y-2">
-                    <li><strong>Pie Day or Ice Cream Social</strong> – Low cost, high warmth</li>
-                    <li><strong>Holiday Cookie Exchange</strong> or Pumpkin Giveaway</li>
-                    <li><strong>Family Movie Night</strong> or Wine Tasting</li>
-                    <li><strong>Shredding Day</strong> – Partner with a shred company (often free)</li>
-                </ul>
-                <p class="text-xs mt-3 text-gray-500">Invite past clients + 1 guest. Photos and social sharing = free marketing.</p>
-                <button onclick="openEventModal('client-appreciation')" 
-                        class="mt-3 text-sm text-[#00A89D] hover:underline font-medium">View Guide →</button>
+            <div onclick="openEventModal('client-appreciation')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-2xl bg-[#F15A29]/10 flex items-center justify-center text-[#F15A29] shrink-0"><i class="fas fa-heart"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">Client Appreciation Events</h4>
+                        <div class="text-xs text-[#F15A29] font-medium">HIGHEST WARMTH • LOWEST COST</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Turn past clients into raving fans who bring guests and send referrals for years. Pie socials, cookie exchanges, movie nights, shred days — fun, emotional, and incredibly shareable.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">View Full Playbook + Invite Scripts →</div>
             </div>
 
             <!-- Partner Masterminds -->
-            <div class="border border-gray-200 dark:border-gray-600 rounded-2xl p-5">
-                <h4 class="font-bold mb-3">Partner Masterminds</h4>
-                <ul class="text-sm space-y-2">
-                    <li>Quarterly roundtable for top 15–20 realtors</li>
-                    <li>Topic: “Winning Offers in Today’s Market” or “How to Stand Out in 2026”</li>
-                    <li>Provide food + your market insights</li>
-                    <li>End with: “Who do you have coming up that I can help?”</li>
-                </ul>
-                <p class="text-xs mt-3 text-gray-500">Positions you as the go-to expert. Agents refer to avoid looking uninformed.</p>
-                <button onclick="openEventModal('partner-mastermind')" 
-                        class="mt-3 text-sm text-[#00A89D] hover:underline font-medium">View Guide →</button>
+            <div onclick="openEventModal('partner-mastermind')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center text-[#00A89D] shrink-0"><i class="fas fa-users"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">Partner Masterminds &amp; Roundtables</h4>
+                        <div class="text-xs text-[#00A89D] font-medium">POSITIONING + REFERRAL ENGINE</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Quarterly education events for your top 15–20 realtors. You become the indispensable market expert. Agents refer you to protect their own reputation with clients.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">View Full Playbook + Market Scripts →</div>
             </div>
 
             <!-- Social Networking -->
-            <div class="border border-gray-200 dark:border-gray-600 rounded-2xl p-5">
-                <h4 class="font-bold mb-3">Social Networking Events</h4>
-                <ul class="text-sm space-y-2">
-                    <li>Happy Hour at a local spot (casual & low pressure)</li>
-                    <li>Breakfast networking for busy professionals</li>
-                    <li>Charity 5K or Golf Outing team</li>
-                    <li>Back-to-School Supply Drive or Holiday Toy Drive</li>
-                </ul>
-                <p class="text-xs mt-3 text-gray-500">Great for meeting new people and staying top of mind in your community.</p>
-                <button onclick="openEventModal('social-networking')" 
-                        class="mt-3 text-sm text-[#00A89D] hover:underline font-medium">View Guide →</button>
+            <div onclick="openEventModal('social-networking')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center text-[#002B5C] dark:text-[#00A89D] shrink-0"><i class="fas fa-handshake"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">Social &amp; Community Networking</h4>
+                        <div class="text-xs text-[#002B5C] dark:text-[#00A89D] font-medium">VISIBILITY + NEW RELATIONSHIPS</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Happy hours, charity 5Ks, breakfast mixers, toy drives. Low-pressure ways to meet new people, support the community, and generate authentic content that makes you memorable.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">View Full Playbook + Follow-Up Scripts →</div>
             </div>
 
             <!-- Community & Charity -->
-            <div class="border border-gray-200 dark:border-gray-600 rounded-2xl p-5">
-                <h4 class="font-bold mb-3">Community & Charity Events</h4>
-                <ul class="text-sm space-y-2">
-                    <li>Sponsor a local youth sports team</li>
-                    <li>Host a food or clothing drive</li>
-                    <li>Partner on a charity golf outing or 5K</li>
-                    <li>Back-to-School or Holiday drives with realtor partners</li>
-                </ul>
-                <p class="text-xs mt-3 text-gray-500">Builds local reputation and gives you authentic content to share.</p>
-                <button onclick="openEventModal('community-charity')" 
-                        class="mt-3 text-sm text-[#00A89D] hover:underline font-medium">View Guide →</button>
+            <div onclick="openEventModal('community-charity')" class="group cursor-pointer bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-md flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-2xl bg-[#F15A29]/10 flex items-center justify-center text-[#F15A29] shrink-0"><i class="fas fa-globe"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">Community &amp; Charity Events</h4>
+                        <div class="text-xs text-[#F15A29] font-medium">REPUTATION + CONTENT GOLDMINE</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Sponsor youth sports, host food drives, title a local 5K with realtor partners. Builds deep local goodwill and gives you weeks of high-engagement social content.</p>
+                <div class="mt-4 text-sm font-medium text-[#00A89D] group-hover:underline flex items-center gap-1">View Full Playbook + Co-Host Scripts →</div>
             </div>
         </div>
     </div>
@@ -3505,23 +3479,27 @@
     <div class="h-4 md:h-6"></div>
 
     <!-- 4. Post-Event Follow-Up System -->
-    <div class="mb-10 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 bg-white dark:bg-gray-800/60">
+    <div class="mb-10 border border-gray-200 dark:border-gray-700 hover:border-[#F15A29] rounded-3xl p-6 bg-white dark:bg-gray-900 transition-all hover:shadow-md">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-9 h-9 rounded-xl bg-[#F15A29]/10 flex items-center justify-center">
                 <i class="fas fa-redo text-[#F15A29]"></i>
             </div>
-            <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white">Post-Event Follow-Up System</h3>
-        </div>
-        <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
-            <div class="space-y-3 text-sm">
-                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Day 1</strong> Thank-you email with photo collage + “Who should I invite next time?”</div>
-                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Day 3</strong> Post highlights on social and tag attendees</div>
-                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Week 1</strong> Personal calls or texts to top partners and VIP guests</div>
-                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Week 2</strong> Send printed photos or small thank-you gift to key people</div>
-                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Month 1</strong> “Saw this and thought of you” touch referencing the event</div>
+            <div>
+                <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white">Post-Event Follow-Up System</h3>
+                <p class="text-xs text-[#F15A29] font-medium -mt-0.5">THE 80% OF THE ROI MOST PEOPLE MISS</p>
             </div>
         </div>
-        <p class="mt-3 pl-1 text-sm font-semibold text-[#00A89D]">The follow-up is where events turn into long-term referrals.</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">The event is the deposit. The follow-up is the compound interest. Most LOs stop at “thanks for coming.” The ones who win turn every event into a 12-month referral engine with a disciplined, multi-touch system.</p>
+        <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 mb-4">
+            <div class="space-y-2 text-sm">
+                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Day 1</strong> Thank-you email + photo collage + “Who should I invite next time?”</div>
+                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Day 3</strong> Social highlights + tag every attendee + partner</div>
+                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Week 1</strong> Personal calls/texts to top 5–10 VIPs &amp; partners</div>
+                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Week 2</strong> Printed photos or small gift to key people</div>
+                <div class="flex gap-4"><strong class="w-20 shrink-0 text-[#00A89D]">Month 1</strong> “Saw this and thought of you” personal touch referencing a moment from the night</div>
+            </div>
+        </div>
+        <button onclick="openEventModal('post-event-followup')" class="w-full text-sm px-4 py-2.5 border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white rounded-2xl font-medium transition">View Full Post-Event Mastery Playbook + Scripts →</button>
     </div>
 
     <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-10">
@@ -3805,19 +3783,22 @@
 </div>
 
 <!-- ==================== REFERRAL PARTNER MODAL ==================== -->
-<div id="referral-modal" class="modal hidden">
-    <div class="modal-content animate-modal max-w-4xl mx-auto">
-        <!-- Header with close button (absolute to prevent overlap) -->
-        <div class="relative mb-8 pr-12">
-            <h3 id="referral-modal-title" class="text-3xl md:text-4xl font-bold text-[#F15A29] pr-4">
-                <!-- Title populated by JS -->
-            </h3>
-            <span onclick="closeReferralModal()" 
-                  class="absolute -top-1 right-2 text-5xl leading-none cursor-pointer text-gray-400 hover:text-[#F15A29] transition select-none">×</span>
+<div id="referral-modal" class="modal hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
+    <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+            <div>
+                <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Referral Partners Playbooks</div>
+                <h3 id="referral-modal-title" class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">
+                    <!-- Title populated by JS -->
+                </h3>
+            </div>
+            <button onclick="closeReferralModal()" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
         </div>
-        
-        <div id="referral-content" class="prose dark:prose-invert text-lg leading-relaxed">
-            <!-- Populated by JavaScript -->
+        <div id="referral-content" class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+            <!-- Populated by JavaScript (rich Why + scripts + Pro Tips) -->
+        </div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
+            <button onclick="closeReferralModal()" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
         </div>
     </div>
 </div>
@@ -12789,133 +12770,232 @@ window.openEventModal = function(type) {
       return;
     }
 
-    // If still not found, create a temporary working modal with the actual content
+    // If still not found, create a temporary working modal with the actual content (rich premium fallback)
     console.warn('[Event] Static modal not found for type:', type, '— using rich fallback modal');
     const contentMap = {
       'client-appreciation': `
-        <div class="mb-4">
-          <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#F15A29]/10 text-[#F15A29]">CLIENT APPRECIATION</span>
-        </div>
-        <h3 class="text-2xl font-bold mb-2">Client Appreciation Events</h3>
-        <p class="text-base text-gray-600 dark:text-gray-300">Turn past clients into lifelong raving fans who actively send you referrals.</p>
+        <div class="px-1">
+          <div class="flex items-center gap-2 mb-1"><span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#F15A29]/10 text-[#F15A29]">CLIENT APPRECIATION</span></div>
+          <h3 class="text-2xl md:text-3xl font-bold mb-1 text-[#002B5C] dark:text-white">Client Appreciation Events</h3>
+          <p class="text-[15px] text-gray-600 dark:text-gray-400 mb-4">Turn past clients into lifelong raving fans who actively send you referrals and bring their friends.</p>
 
-        <div class="mt-5 p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl">
-          <div class="font-semibold text-[#00A89D] text-sm mb-1.5">Why These Events Work</div>
-          <p class="text-[15px]">These events feel like a genuine thank-you rather than a sales pitch. Clients love bringing a guest (+1), which creates natural lead flow while you stay top-of-mind in the most positive, emotional way possible.</p>
-        </div>
-
-        <div class="mt-5">
-          <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Great Formats</div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Pie Day / Ice Cream Social</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Holiday Cookie Exchange</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Family Movie Night</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Pumpkin Giveaway or Shred Day</div>
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why These Events Crush ROI</span></div>
+            <p class="text-[15px]">These feel like a genuine thank-you, not a sales pitch. The +1 policy turns every guest into a potential new lead while you stay top-of-mind in the most positive, emotional way. One great event can generate 5–20+ referrals over 12 months through the emotional connection and social proof.</p>
           </div>
-        </div>
 
-        <div class="mt-5 p-4 bg-[#F15A29]/5 border-l-4 border-[#F15A29] rounded-r-2xl">
-          <div class="font-semibold text-sm mb-1 text-[#F15A29]">Pro Tips</div>
-          <ul class="text-sm space-y-1 mt-1">
-            <li>Always allow guests to bring a +1 — this is where new leads come from</li>
-            <li>Take lots of photos and videos for social proof</li>
-            <li>Send a personal thank-you text or handwritten note within 48 hours</li>
-          </ul>
+          <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Proven Formats That Work</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 text-sm">
+            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600">Pie Day / Ice Cream Social</div>
+            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600">Holiday Cookie Exchange</div>
+            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600">Family Movie Night or Wine Tasting</div>
+            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600">Pumpkin Giveaway or Free Shred Day</div>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Ready-to-Use Scripts &amp; Invites (Copy + Save)</h4>
+          <div class="space-y-3 mb-6">
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="You’re invited! As a thank you for trusting me with your home, I’d love to celebrate with you and a guest at our annual Pie Day Social on [Date] from 2-4pm at [Location]. Food, drinks, and good company on me — bring someone you love! RSVP by [date] so I can plan for everyone.">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Client +1 Invitation (Text/Email)</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“You’re invited! As a thank you for trusting me with your home, I’d love to celebrate with you and a guest at our annual Pie Day Social on [Date] from 2-4pm at [Location]. Food, drinks, and good company on me — bring someone you love! RSVP by [date] so I can plan for everyone.”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Client Appreciation Invite', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Hey [Name] — just a quick personal text. I’m hosting a small client appreciation event next month and would love to have you there. It’s low-key, great food, and you can bring a friend or spouse. No pitches, just a thank you from me. Let me know if you’re in!">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Personal Warm Text to VIPs</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“Hey [Name] — just a quick personal text. I’m hosting a small client appreciation event next month and would love to have you there. It’s low-key, great food, and you can bring a friend or spouse. No pitches, just a thank you from me. Let me know if you’re in!”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: VIP Personal Text', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm">
+            <strong>Pro Tips for Max Impact:</strong> Always allow +1 — this is your lead gen engine. Take 100+ photos and post for weeks after (tag everyone). Send a personal thank-you text or note within 48h. Ask “Who should I invite next time?” in every follow-up. Track how many referrals come from event guests in the next 90 days.
+          </div>
         </div>
       `,
       'partner-mastermind': `
-        <div class="mb-4">
-          <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PARTNER MASTERMIND</span>
-        </div>
-        <h3 class="text-2xl font-bold mb-2">Realtor & Partner Masterminds</h3>
-        <p class="text-base text-gray-600 dark:text-gray-300">Become the indispensable local mortgage expert that top-producing agents actively refer to.</p>
+        <div class="px-1">
+          <div class="flex items-center gap-2 mb-1"><span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PARTNER MASTERMIND</span></div>
+          <h3 class="text-2xl md:text-3xl font-bold mb-1 text-[#002B5C] dark:text-white">Realtor &amp; Partner Masterminds</h3>
+          <p class="text-[15px] text-gray-600 dark:text-gray-400 mb-4">Become the indispensable local mortgage expert that top-producing agents actively refer to — and protect with their reputation.</p>
 
-        <div class="mt-5 p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl">
-          <div class="font-semibold text-[#F15A29] text-sm mb-1.5">Why These Events Work</div>
-          <p class="text-[15px]">Realtors crave education and networking opportunities. When you host a high-value, non-salesy roundtable, they view you as the trusted expert — and they refer you to avoid looking uninformed to their own clients.</p>
-        </div>
-
-        <div class="mt-5">
-          <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Great Formats</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">“Winning Offers in Today’s Market”</div>
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">“How to Stand Out in 2026”</div>
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Quarterly Market Update + Strategy</div>
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">“Navigating Rate & Inventory Challenges”</div>
+          <div class="bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-3xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#F15A29]"></i><span class="font-bold text-[#F15A29] uppercase tracking-wider text-sm">Why Masterminds Convert So Well</span></div>
+            <p class="text-[15px]">Realtors crave education, networking, and ways to look smart in front of their clients. When you host a high-value, non-salesy roundtable with real insights, they view you as the expert and send you business to avoid looking uninformed to their own clients. Over-communicate on the first one and you lock in the relationship.</p>
           </div>
-        </div>
 
-        <div class="mt-5 p-4 bg-[#00A89D]/5 border-l-4 border-[#00A89D] rounded-r-2xl">
-          <div class="font-semibold text-sm mb-1 text-[#00A89D]">Pro Tips</div>
-          <ul class="text-sm space-y-1 mt-1">
-            <li>Keep it to 60–90 minutes maximum</li>
-            <li>End with a soft, natural ask: “Who do you have coming up that I can help?”</li>
-            <li>Always send a recap email with your best current market stats and insights</li>
-          </ul>
+          <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Ready-to-Run Topics + Scripts</h4>
+          <div class="space-y-3 mb-6">
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Join me for an exclusive evening with top producers. “Winning Offers in Today’s Market” on [Date] — great food, fresh data on what’s actually working right now, and open discussion. Limited to 15 agents. RSVP to [your email/phone].">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Mastermind Invitation to Top Realtors</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“Join me for an exclusive evening with top producers. “Winning Offers in Today’s Market” on [Date] — great food, fresh data on what’s actually working right now, and open discussion. Limited to 15 agents. RSVP to [your email/phone].”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Mastermind Invite', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Thanks again for coming last night. Here’s the one-page market snapshot I promised with the current absorption rates and days-on-market by neighborhood. The biggest takeaway from the group: the agents who are winning right now are the ones over-communicating with their buyer clients about realistic timelines. Who do you have coming up that I can help look like a hero for?">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Post-Mastermind Recap + Soft Ask</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“Thanks again for coming last night. Here’s the one-page market snapshot I promised with the current absorption rates and days-on-market by neighborhood. The biggest takeaway from the group: the agents who are winning right now are the ones over-communicating with their buyer clients about realistic timelines. Who do you have coming up that I can help look like a hero for?”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Mastermind Recap Ask', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm">
+            <strong>Pro Tips:</strong> Keep it 60–90 min max. End every session with the natural ask. Always send a recap with stats within 24h. Over-deliver on the first event with a new group — it earns you the spot on their “go-to” list faster than anything else.
+          </div>
         </div>
       `,
       'social-networking': `
-        <div class="mb-4">
-          <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#002B5C]/10 text-[#002B5C]">NETWORKING & COMMUNITY</span>
-        </div>
-        <h3 class="text-2xl font-bold mb-2">Social & Community Events</h3>
-        <p class="text-base text-gray-600 dark:text-gray-300">Meet new people, stay visible in your market, and generate authentic content without ever feeling salesy.</p>
+        <div class="px-1">
+          <div class="flex items-center gap-2 mb-1"><span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#002B5C]/10 text-[#002B5C]">NETWORKING &amp; COMMUNITY</span></div>
+          <h3 class="text-2xl md:text-3xl font-bold mb-1 text-[#002B5C] dark:text-white">Social &amp; Community Networking Events</h3>
+          <p class="text-[15px] text-gray-600 dark:text-gray-400 mb-4">Meet new people, stay visible, support local causes, and create weeks of authentic content — without ever feeling salesy.</p>
 
-        <div class="mt-5 p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl">
-          <div class="font-semibold text-[#00A89D] text-sm mb-1.5">Why These Events Work</div>
-          <p class="text-[15px]">These are low-pressure ways to be visible in the community. People remember the person who shows up consistently to support local causes and socialize, not the one who only appears when they want a referral.</p>
-        </div>
-
-        <div class="mt-5">
-          <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Great Formats</div>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Happy Hour at a local spot</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Charity 5K or Golf Outing Team</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Trivia Night / Pickleball Mixer</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Back-to-School Supply Drive</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Holiday Toy or Food Drive</div>
-            <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Local Brewery or Winery Night</div>
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Showing Up Matters</span></div>
+            <p class="text-[15px]">People remember the person who consistently supports the community and shows up to socialize, not the one who only appears when they want a referral. These events give you real relationships + endless content that positions you as a genuine member of the town.</p>
           </div>
-        </div>
 
-        <div class="mt-5 p-4 bg-[#F15A29]/5 border-l-4 border-[#F15A29] rounded-r-2xl">
-          <div class="font-semibold text-sm mb-1 text-[#F15A29]">Pro Tips</div>
-          <ul class="text-sm space-y-1 mt-1">
-            <li>Be genuinely helpful — don’t lead with your business</li>
-            <li>Take photos and post them (with permission) to create social proof</li>
-            <li>Follow up personally within 48 hours with people you connected with</li>
-          </ul>
+          <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">High-ROI Formats + Follow-Up Scripts</h4>
+          <div class="space-y-3 mb-6">
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Hey [Name] — I’m putting together a small group for happy hour at [Local Spot] next Thursday to celebrate the end of summer. No agenda, just good people and good conversation. Would love to have you there if you’re free. First round on me.">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Casual Happy Hour Invite</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“Hey [Name] — I’m putting together a small group for happy hour at [Local Spot] next Thursday to celebrate the end of summer. No agenda, just good people and good conversation. Would love to have you there if you’re free. First round on me.”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Happy Hour Invite', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm">
+            <strong>Pro Tips:</strong> Be genuinely helpful — don’t lead with business. Take photos (with permission) and post for weeks. Personally follow up within 48 hours with anyone new you connected with. Use the event as content gold for the next month.
+          </div>
         </div>
       `,
       'community-charity': `
-        <div class="mb-4">
-          <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#00A89D]/10 text-[#00A89D]">COMMUNITY IMPACT</span>
-        </div>
-        <h3 class="text-2xl font-bold mb-2">Community & Charity Events</h3>
-        <p class="text-base text-gray-600 dark:text-gray-300">Build authentic local reputation while creating excellent content and goodwill in your market.</p>
+        <div class="px-1">
+          <div class="flex items-center gap-2 mb-1"><span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#00A89D]/10 text-[#00A89D]">COMMUNITY IMPACT</span></div>
+          <h3 class="text-2xl md:text-3xl font-bold mb-1 text-[#002B5C] dark:text-white">Community &amp; Charity Events</h3>
+          <p class="text-[15px] text-gray-600 dark:text-gray-400 mb-4">Build authentic local reputation, create shareable content, and deepen partnerships with realtors while doing real good.</p>
 
-        <div class="mt-5 p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl">
-          <div class="font-semibold text-[#00A89D] text-sm mb-1.5">Why These Events Work</div>
-          <p class="text-[15px]">People remember who shows up for the community. These events give you real, authentic content and position you as someone who cares about the area — not just as a lender looking for business.</p>
-        </div>
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why This Builds Long-Term Trust</span></div>
+            <p class="text-[15px]">People remember who shows up for the community when it counts. These events give you real, authentic content and position you as someone who cares about the area — not just as a lender looking for business. Co-hosting with realtors multiplies reach and cements partnerships.</p>
+          </div>
 
-        <div class="mt-5">
-          <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Strong, Repeatable Plays</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Youth sports team sponsorship</div>
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Large food or clothing drive</div>
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Title sponsor of a local 5K or golf outing</div>
-            <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Back-to-school supply drive with a school</div>
+          <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Strong Repeatable Plays + Scripts</h4>
+          <div class="space-y-3 mb-6">
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="We’re teaming up with [Realtor Partner Name] to sponsor the local youth soccer league this season. If you have a kid in the program or just want to support the community, come out to the first game [date]. We’ll have snacks and info on how families can get involved.">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Co-Hosted Youth Sports Invite</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“We’re teaming up with [Realtor Partner Name] to sponsor the local youth soccer league this season. If you have a kid in the program or just want to support the community, come out to the first game [date]. We’ll have snacks and info on how families can get involved.”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Charity Co-Host Invite', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm">
+            <strong>Pro Tips:</strong> Partner with 1–2 realtors or title companies — share cost and spotlight. Take lots of photos and post (tag everyone). Use the event as content for the next 2–4 weeks. These create the best “real person” social proof you can get.
           </div>
         </div>
+      `,
+      'post-event-followup': `
+        <div class="px-1">
+          <div class="flex items-center gap-2 mb-1"><span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#F15A29]/10 text-[#F15A29]">POST-EVENT MASTERY</span></div>
+          <h3 class="text-2xl md:text-3xl font-bold mb-1 text-[#002B5C] dark:text-white">Post-Event Follow-Up System</h3>
+          <p class="text-[15px] text-gray-600 dark:text-gray-400 mb-4">The event gets their attention. The follow-up turns it into referrals for the next 12 months. This is where 80% of the ROI lives — and where most LOs drop the ball.</p>
 
-        <div class="mt-5 p-4 bg-[#F15A29]/5 border-l-4 border-[#F15A29] rounded-r-2xl">
-          <div class="font-semibold text-sm mb-1 text-[#F15A29]">Pro Tips</div>
-          <ul class="text-sm space-y-1 mt-1">
-            <li>Partner with 1–2 realtors or title companies — share the cost and spotlight</li>
-            <li>Take lots of photos and post them (tag everyone)</li>
-            <li>Use the event as content for the next 2–4 weeks</li>
-          </ul>
+          <div class="bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-3xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#F15A29]"></i><span class="font-bold text-[#F15A29] uppercase tracking-wider text-sm">Why the Follow-Up Is Everything</span></div>
+            <p class="text-[15px]">Clients and partners are emotionally high right after a great event. Strike while the memory is warm. A disciplined 5-phase system (photos + personal + social + gift + long-tail) creates attribution, deepens loyalty, and generates measurable referrals. Batch your touches — it takes less time than you think and compounds massively.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">The 5-Phase Mastery Playbook + Scripts</h4>
+          <div class="space-y-3 mb-6">
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Thank you for joining us at [Event Name]! It was so good to see you and [Guest or +1 if known]. Here are some of my favorite photos from the night: [Link or attached collage]. Who should I invite next time? I’d love to keep growing this group with people like you.">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Day 1 Thank-You Email / Text (All Attendees)</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“Thank you for joining us at [Event Name]! It was so good to see you and [Guest or +1 if known]. Here are some of my favorite photos from the night: [Link or attached collage]. Who should I invite next time? I’d love to keep growing this group with people like you.”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Day 1 Thank You', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="What a night! Huge thanks to everyone who came out for [Event Name]. Tagging some of my favorite moments and the amazing people who made it special. If you missed it, I’ll be doing another one soon — who should I make sure gets an invite? [3-5 photos]">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Day 3 Social Highlights Post (Tag Everyone)</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“What a night! Huge thanks to everyone who came out for [Event Name]. Tagging some of my favorite moments and the amazing people who made it special. If you missed it, I’ll be doing another one soon — who should I make sure gets an invite? [3-5 photos]”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Social Highlights', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Hey [Name] — quick personal note after [Event Name]. Loved catching up with you and [spouse/guest]. The story you told about [specific detail from conversation] had me laughing all week. If you ever need anything on the mortgage side (or just want to grab coffee), I’m here. And seriously — who else should I have at the next one?">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <strong class="text-sm font-semibold">Week 1 Personal Call/Text to VIPs &amp; Partners</strong>
+                  <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“Hey [Name] — quick personal note after [Event Name]. Loved catching up with you and [spouse/guest]. The story you told about [specific detail from conversation] had me laughing all week. If you ever need anything on the mortgage side (or just want to grab coffee), I’m here. And seriously — who else should I have at the next one?”</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Week 1 VIP Personal', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Your Post-Event Batching Ritual (Do This Every Time)</h4>
+          <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-6 text-[15px]">
+            Day 1 morning: Send mass thank-you + upload photos. Day 3: Schedule 3–5 social posts tagging everyone. Week 1: Block 45 minutes for personal calls/texts to the top 8–10 people (use your notes from the night). Week 2: Order 5–10 small printed photo gifts or local treats for key partners. Month 1: One personal “saw this and thought of you” text referencing a real moment. Log every new contact + referral attribution in CRM.
+          </div>
+
+          <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm">
+            <strong>Key Insight &amp; Measurement:</strong> The follow-up is where events become systems. Track: # of +1 guests who became leads, referrals attributed to event attendees in 90 days, repeat event attendees. One well-run event + follow-up system can be worth 5–10 loans per year in referrals alone.
+          </div>
         </div>
       `
     };
@@ -12927,11 +13007,19 @@ window.openEventModal = function(type) {
     fallback.onclick = () => fallback.remove();
 
     fallback.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-8 shadow-2xl" onclick="event.stopImmediatePropagation()">
-        <button onclick="this.closest('.fixed').remove()" class="float-right text-3xl text-gray-400 hover:text-gray-600 leading-none">&times;</button>
-        ${guideContent}
-        <div class="mt-6 text-right">
-          <button onclick="this.closest('.fixed').remove()" class="px-5 py-2 bg-[#00A89D] text-white rounded-2xl text-sm">Close</button>
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" onclick="event.stopImmediatePropagation()">
+        <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+          <div>
+            <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Planning Playbooks</div>
+            <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Event Guide</h3>
+          </div>
+          <button onclick="this.closest('.fixed').remove()" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">&times;</button>
+        </div>
+        <div class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+          ${guideContent}
+        </div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
+          <button onclick="this.closest('.fixed').remove()" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
         </div>
       </div>
     `;
@@ -12952,6 +13040,116 @@ window.closeEventModal = function(type) {
       modal.style.display = 'none';
     }
   } catch (e) {}
+};
+
+// =====================================================
+// REFERRAL PARTNERS RICH MODALS (polished playbooks, tiers, high-impact sequences)
+// Self-contained rich content with Why, multiple Copy+Save scripts, Pro Tips. Uses 'partner' save type.
+// =====================================================
+const REFERRAL_PLAYBOOKS = {
+  'Realtors': {
+    title: "Realtors — Primary Partner Playbook",
+    content: `
+      <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Realtors Are Your #1 Engine</span></div>
+        <p class="text-[15px]">70-90% of top producer business comes from realtors. Become the lender who makes them look like heroes to their clients and you become indispensable. Consistency on the first file + weekly value cadence = preferred lender status for life.</p>
+      </div>
+      <h4 class="font-bold text-lg mb-3">Ready-to-Use Scripts &amp; Sequences (Copy + Save)</h4>
+      <div class="space-y-3 mb-6">
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Hey [Realtor], [Client Name] just reached out for pre-approval on the [address]. I’ve already sent a personal welcome video and timeline. I’ll keep you in the loop on every step — what’s the best way for us to stay in sync on this one?">
+          <div class="flex justify-between"><div class="flex-1"><strong class="text-sm">Same-Hour Realtor Handoff</strong><div class="text-[15px] mt-1">“Hey [Realtor], [Client Name] just reached out for pre-approval on the [address]. I’ve already sent a personal welcome video and timeline. I’ll keep you in the loop on every step — what’s the best way for us to stay in sync on this one?”</div></div><div class="flex flex-col gap-1"><button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Copy</button><button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Partner: Realtor Handoff', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'partner');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29]">Save</button></div></div>
+        </div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="[Client] file update: Appraisal received and clean. One condition still outstanding (paystub). Targeting full clear by Thursday. I’ll keep you posted the moment anything moves.">
+          <div class="flex justify-between"><div class="flex-1"><strong class="text-sm">Weekly Thursday Update</strong><div class="text-[15px] mt-1">“[Client] file update: Appraisal received and clean. One condition still outstanding (paystub). Targeting full clear by Thursday. I’ll keep you posted the moment anything moves.”</div></div><div class="flex flex-col gap-1"><button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Copy</button><button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Partner: Thursday Update', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'partner');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29]">Save</button></div></div>
+        </div>
+      </div>
+      <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tip:</strong> Over-communicate on the first file. It earns the preferred spot faster than any lunch. Never go dark on future files.</div>
+    `
+  },
+  'Builders': {
+    title: "Builders — New Construction Playbook",
+    content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Builders Are High-Leverage</span></div><p class="text-[15px]">Preferred lender status with a builder gives you volume and predictability. Focus on making their sales team look good and solving problems fast.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Key Plays:</strong> Sales team training sequence, model home co-marketing, fast pre-approval turnaround promise, joint client events. Save the scripts inside the full playbook.</div>`
+  },
+  'Financial Planners': {
+    title: "Financial Planners &amp; CPAs — HNW Playbook",
+    content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">These partners refer high-net-worth and complex clients. Lead with education, tax strategy conversations, and smooth investment property financing.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tip:</strong> Offer joint client workshops on “Mortgage Strategies for High-Net-Worth Families.” Co-branded value wins trust fast.</div>`
+  },
+  'Attorneys': {
+    title: "Attorneys — Trust &amp; Referral Protocol Playbook",
+    content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">Divorce, probate, and estate attorneys value clean communication and protecting their clients’ timelines. Have simple handoff packets and fast responses.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Key Script:</strong> “I’ll treat your client like family and keep you copied on every major update. Here’s my direct line if anything comes up.”</div>`
+  },
+  'Insurance Agents': {
+    title: "Insurance Agents — Bundling &amp; Joint Touches Playbook",
+    content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">Natural bundling conversations and joint client appreciation events create easy cross-referrals. Keep it relationship-first.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tip:</strong> Co-host a small client appreciation or “Home Protection Night” — low cost, high warmth, shared leads.</div>`
+  },
+  'Other': {
+    title: "Other Professionals — Adaptable Outreach Playbook",
+    content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">HR directors, relocation managers, title pros. The framework is the same: value first, fast reliable execution, and a simple ask once trust is earned.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Universal Ask:</strong> “If you ever have someone who needs a smooth, low-stress mortgage experience, I’d be honored to help them the way I help the people you send me.”</div>`
+  }
+};
+
+const TIER_PLAYBOOKS = {
+  'A+': { title: "A+ Partners — White-Glove Playbook", content: `<div class="bg-[#002B5C]/10 border border-[#002B5C]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">Your top 10–20. 5+ referrals/year. Weekly or bi-weekly personal touches, quarterly gifts, direct cell access, review asks after every close, co-marketing support. Protect these relationships like gold.</p></div><h4 class="font-bold mb-2">Sample A+ Touch Cadence</h4><div class="text-sm">Personal call or coffee every 3–4 weeks • Handwritten note or small local gift quarterly • Birthday + home anniversary video • Immediate same-hour updates on any file • Year-end “thank you for the business” personalized video + small gift.</div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm mt-4"><strong>Pro Tip:</strong> These partners should feel like you have 5 clients total. Everything else is secondary.</div>` },
+  'B': { title: "B Partners — Growth Playbook", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">The rising  partners you want to promote to A+. Consistent but scalable touches: monthly value email or short video, quarterly personal note, invite to 1–2 events/year, fast execution on every file, light referral asks after smooth closings.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Goal:</strong> Move 3–5 B partners to A+ every year through over-delivery and relationship building.</div>` },
+  'C': { title: "C Partners — Efficient Conversion Playbook", content: `<div class="bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">New or low-volume. Low-time, high-impact: Add to CRM + newsletter, send 60-day onboarding sequence on first file, over-communicate on that first closing, then move to automated + social + occasional personal if they respond.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tip:</strong> The first file is the audition. Deliver white-glove on it and many C’s become B’s or better.</div>` }
+};
+
+const HIGH_IMPACT_PLAYS = {
+  'first-30-days-checklist': { title: "First 30 Days with a New Partner", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">Day 0: Personal welcome video + “How I Work With Partners” one-pager. Day 1-2: 15-min intro call (ask their pain points and preferred cadence). Within 48h: Written cadence recap + 2-3 co-branded tools. Week 1: First Thursday update without fail. Post-first close: Testimonial ask + preferred list request.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Save the sequence and run it on every new partner.</strong></div>` },
+  'referral-objections': { title: "Referral Partner Objection Playbook", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">“I already have a lender I like” → “Totally understand. The agents who work with me usually keep 2–3 options. I’d love to be the backup who makes you look like a hero when timelines are tight or files get complicated.” “I don’t want to send you my clients” → “My only goal is to make you look brilliant to them. If I ever don’t, you should stop sending me people.”</p></div>` },
+  '60-day-realtor-onboarding': { title: "60-Day Realtor Onboarding Sequence", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">The exact 8-touch sequence that turns a new realtor into a consistent partner in under 60 days. Includes scripts for each touch.</p></div><div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Core idea:</strong> Over-communicate on the first file. Consistency beats gifts.</div>` },
+  'weekly-value-cadence': { title: "Weekly Value Cadence for Any Partner", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">8-week rotation: Monday market stat share (text), Thursday file update (if active), one personal note or coffee per month, event invite quarterly, birthday/anniversary video, “saw this and thought of you” when relevant.</p></div>` },
+  'relationship-management': { title: "Relationship Management &amp; Asking for More", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">After a smooth close or great event: “The clients you send me always have the best experience. If you have anyone else on the horizon I can help the same way, I’d be honored.” Never transactional — always after value delivered.</p></div>` },
+  'co-marketing-assets': { title: "Co-Marketing Asset Ideas", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">Offer: Co-branded buyer guides, open house flyers with your photo + theirs, joint “first-time buyer night” invites, social shoutouts after closings, shared client event sponsorships. Low cost, high perceived value.</p></div>` },
+  'open-house-domination': { title: "Open House Domination Play", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">Bring branded water/snacks, a simple one-page “What Buyers Need to Know” sheet with your contact, offer to pre-qual on site, collect cards and follow up same day with “Loved meeting you at the open house — here’s what I can do to help.” Turn the realtor’s open house into your lead + relationship machine.</p></div>` },
+  'realtor-to-5-more': { title: "Turning One Strong Realtor Into 5 More", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">After a great closing: “Who else on your team or in your network would benefit from the same white-glove experience?” Ask for intros to 1–2 colleagues. Host a small “bring a friend” mastermind. Your best realtors become your best recruiters.</p></div>` },
+  'builder-training': { title: "Builder Sales Team Training Sequence", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">Offer a 30-min lunch-and-learn on “Current Financing Options That Help Your Buyers Win.” Provide simple one-pagers for their desk. Be the fastest to return calls on builder deals. Become the default for the whole sales floor.</p></div>` },
+  'professional-referral-request': { title: "Professional Partner Referral Request", content: `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6"><p class="text-[15px]">After delivering value (smooth close or helpful consult): “If you ever have a client or colleague who needs a low-stress mortgage experience, I’d be honored to help them the way I helped the people you’ve already sent me.” Simple, confident, non-pushy.</p></div>` }
+};
+
+window.openReferralModal = function(partnerType) {
+  const modal = document.getElementById('referral-modal');
+  const titleEl = document.getElementById('referral-modal-title');
+  const contentEl = document.getElementById('referral-content');
+  const data = REFERRAL_PLAYBOOKS[partnerType] || { title: partnerType, content: `<p>Full playbook for ${partnerType} coming soon. Focus on value-first touches and over-delivery on the first file.</p>` };
+  titleEl.textContent = data.title;
+  contentEl.innerHTML = data.content;
+  modal.style.display = '';
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+};
+
+window.openTierModal = function(tier) {
+  const modal = document.getElementById('referral-modal');
+  const titleEl = document.getElementById('referral-modal-title');
+  const contentEl = document.getElementById('referral-content');
+  const data = TIER_PLAYBOOKS[tier] || { title: tier + ' Partners', content: `<p>Detailed ${tier} playbook with cadence and scripts.</p>` };
+  titleEl.textContent = data.title;
+  contentEl.innerHTML = data.content;
+  modal.style.display = '';
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+};
+
+window.openHighImpactPlay = function(playKey) {
+  const modal = document.getElementById('referral-modal');
+  const titleEl = document.getElementById('referral-modal-title');
+  const contentEl = document.getElementById('referral-content');
+  const data = HIGH_IMPACT_PLAYS[playKey] || { title: playKey.replace(/-/g, ' '), content: `<p>Ready-to-run guidance and scripts for ${playKey}.</p>` };
+  titleEl.textContent = data.title;
+  contentEl.innerHTML = data.content;
+  modal.style.display = '';
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+};
+
+window.closeReferralModal = function() {
+  const modal = document.getElementById('referral-modal');
+  if (modal) {
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
 };
 
 // One-time diagnostic (helps catch future DOM issues with event modals)
@@ -13539,151 +13737,127 @@ if (document.readyState === 'loading') {
 </div>
 
 <!-- ===================================================== -->
-<!-- EVENT PLANNING VIEW GUIDE MODALS (placed at end of body for reliability) -->
+<!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
 <!-- ===================================================== -->
 <div id="modal-client-appreciation" onclick="closeEventModal('client-appreciation')" class="hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-8 shadow-2xl">
-    <button onclick="closeEventModal('client-appreciation')" class="float-right text-3xl text-gray-400 hover:text-gray-600 leading-none">&times;</button>
-    
-    <div class="mb-4">
-      <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#F15A29]/10 text-[#F15A29]">CLIENT APPRECIATION</span>
-    </div>
-    <h3 class="text-2xl font-bold mb-2">Client Appreciation Events</h3>
-    <p class="text-base text-gray-600 dark:text-gray-300">Turn past clients into lifelong raving fans who actively send you referrals.</p>
-
-    <div class="mt-5 p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl">
-      <div class="font-semibold text-[#00A89D] text-sm mb-1.5">Why These Events Work</div>
-      <p class="text-[15px]">These events feel like a genuine thank-you rather than a sales pitch. Clients love bringing a guest (+1), which creates natural lead flow while you stay top-of-mind in the most positive, emotional way possible.</p>
-    </div>
-
-    <div class="mt-5">
-      <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Great Formats</div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Pie Day / Ice Cream Social</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Holiday Cookie Exchange</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Family Movie Night</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Pumpkin Giveaway or Shred Day</div>
+  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] font-bold tracking-[1.5px] text-[#F15A29] uppercase mb-0.5">Event Planning Playbooks</div>
+        <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Client Appreciation Events</h3>
       </div>
+      <button onclick="closeEventModal('client-appreciation')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">&times;</button>
     </div>
-
-    <div class="mt-5 p-4 bg-[#F15A29]/5 border-l-4 border-[#F15A29] rounded-r-2xl">
-      <div class="font-semibold text-sm mb-1 text-[#F15A29]">Pro Tips</div>
-      <ul class="text-sm space-y-1 mt-1">
-        <li>Always allow guests to bring a +1 — this is where new leads come from</li>
-        <li>Take lots of photos and videos for social proof</li>
-        <li>Send a personal thank-you text or handwritten note within 48 hours</li>
-      </ul>
+    <div class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+      <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why These Events Crush ROI</span></div>
+        <p class="text-[15px]">These feel like a genuine thank-you, not a sales pitch. The +1 policy turns every guest into a potential new lead while you stay top-of-mind in the most positive, emotional way. One great event can generate 5–20+ referrals over 12 months through the emotional connection and social proof.</p>
+      </div>
+      <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Ready-to-Use Scripts &amp; Invites (Copy + Save)</h4>
+      <div class="space-y-3 mb-6">
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="You’re invited! As a thank you for trusting me with your home, I’d love to celebrate with you and a guest at our annual Pie Day Social on [Date] from 2-4pm at [Location]. Food, drinks, and good company on me — bring someone you love! RSVP by [date] so I can plan for everyone.">
+          <div class="flex justify-between items-start gap-3">
+            <div class="flex-1"><strong class="text-sm font-semibold">Client +1 Invitation</strong><div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1">“You’re invited! As a thank you for trusting me with your home, I’d love to celebrate with you and a guest at our annual Pie Day Social on [Date] from 2-4pm at [Location]. Food, drinks, and good company on me — bring someone you love! RSVP by [date] so I can plan for everyone.”</div></div>
+            <div class="flex flex-col gap-1"><button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button><button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Client Appreciation Invite', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tips:</strong> Always allow +1. Take 100+ photos. Personal thank-you within 48h. Ask “Who should I invite next time?” Track referrals from guests in next 90 days.</div>
     </div>
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end"><button onclick="closeEventModal('client-appreciation')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button></div>
   </div>
 </div>
 
 <div id="modal-partner-mastermind" onclick="closeEventModal('partner-mastermind')" class="hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-8 shadow-2xl">
-    <button onclick="closeEventModal('partner-mastermind')" class="float-right text-3xl text-gray-400 hover:text-gray-600 leading-none">&times;</button>
-    
-    <div class="mb-4">
-      <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PARTNER MASTERMIND</span>
-    </div>
-    <h3 class="text-2xl font-bold mb-2">Realtor & Partner Masterminds</h3>
-    <p class="text-base text-gray-600 dark:text-gray-300">Become the indispensable local mortgage expert that top-producing agents actively refer to.</p>
-
-    <div class="mt-5 p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl">
-      <div class="font-semibold text-[#F15A29] text-sm mb-1.5">Why These Events Work</div>
-      <p class="text-[15px]">Realtors crave education and networking opportunities. When you host a high-value, non-salesy roundtable, they view you as the trusted expert — and they refer you to avoid looking uninformed to their own clients.</p>
-    </div>
-
-    <div class="mt-5">
-      <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Great Formats</div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">“Winning Offers in Today’s Market”</div>
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">“How to Stand Out in 2026”</div>
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Quarterly Market Update + Strategy</div>
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">“Navigating Rate & Inventory Challenges”</div>
+  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Planning Playbooks</div>
+        <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Partner Masterminds &amp; Roundtables</h3>
       </div>
+      <button onclick="closeEventModal('partner-mastermind')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">&times;</button>
     </div>
-
-    <div class="mt-5 p-4 bg-[#00A89D]/5 border-l-4 border-[#00A89D] rounded-r-2xl">
-      <div class="font-semibold text-sm mb-1 text-[#00A89D]">Pro Tips</div>
-      <ul class="text-sm space-y-1 mt-1">
-        <li>Keep it to 60–90 minutes maximum</li>
-        <li>End with a soft, natural ask: “Who do you have coming up that I can help?”</li>
-        <li>Always send a recap email with your best current market stats and insights</li>
-      </ul>
+    <div class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+      <div class="bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-3xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#F15A29]"></i><span class="font-bold text-[#F15A29] uppercase tracking-wider text-sm">Why Masterminds Convert So Well</span></div>
+        <p class="text-[15px]">Realtors crave education and ways to look smart. Host high-value roundtables and they view you as the expert — and send business to protect their reputation.</p>
+      </div>
+      <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Ready-to-Use Scripts</h4>
+      <div class="space-y-3 mb-6">
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Join me for an exclusive evening with top producers. “Winning Offers in Today’s Market” on [Date] — great food, fresh data, open discussion. Limited to 15 agents. RSVP to [your contact].">
+          <div class="flex justify-between items-start gap-3"><div class="flex-1"><strong class="text-sm font-semibold">Mastermind Invite</strong><div class="text-[15px] mt-1">“Join me for an exclusive evening with top producers. “Winning Offers in Today’s Market” on [Date] — great food, fresh data, open discussion. Limited to 15 agents. RSVP to [your contact].”</div></div><div class="flex flex-col gap-1"><button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button><button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Mastermind Invite', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button></div></div>
+        </div>
+      </div>
+      <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tips:</strong> 60–90 min max. End with the natural ask. Send recap with stats in 24h. Over-deliver on the first one.</div>
     </div>
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end"><button onclick="closeEventModal('partner-mastermind')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button></div>
   </div>
 </div>
 
 <div id="modal-social-networking" onclick="closeEventModal('social-networking')" class="hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-8 shadow-2xl">
-    <button onclick="closeEventModal('social-networking')" class="float-right text-3xl text-gray-400 hover:text-gray-600 leading-none">&times;</button>
-    
-    <div class="mb-4">
-      <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#002B5C]/10 text-[#002B5C]">NETWORKING & COMMUNITY</span>
-    </div>
-    <h3 class="text-2xl font-bold mb-2">Social & Community Events</h3>
-    <p class="text-base text-gray-600 dark:text-gray-300">Meet new people, stay visible in your market, and generate authentic content without ever feeling salesy.</p>
-
-    <div class="mt-5 p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl">
-      <div class="font-semibold text-[#00A89D] text-sm mb-1.5">Why These Events Work</div>
-      <p class="text-[15px]">These are low-pressure ways to be visible in the community. People remember the person who shows up consistently to support local causes and socialize, not the one who only appears when they want a referral.</p>
-    </div>
-
-    <div class="mt-5">
-      <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Great Formats</div>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Happy Hour at a local spot</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Charity 5K or Golf Outing Team</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Trivia Night / Pickleball Mixer</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Back-to-School Supply Drive</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Holiday Toy or Food Drive</div>
-        <div class="text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Local Brewery or Winery Night</div>
+  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Planning Playbooks</div>
+        <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Social &amp; Community Networking</h3>
       </div>
+      <button onclick="closeEventModal('social-networking')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">&times;</button>
     </div>
-
-    <div class="mt-5 p-4 bg-[#F15A29]/5 border-l-4 border-[#F15A29] rounded-r-2xl">
-      <div class="font-semibold text-sm mb-1 text-[#F15A29]">Pro Tips</div>
-      <ul class="text-sm space-y-1 mt-1">
-        <li>Be genuinely helpful — don’t lead with your business</li>
-        <li>Take photos and post them (with permission) to create social proof</li>
-        <li>Follow up personally within 48 hours with people you connected with</li>
-      </ul>
+    <div class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+      <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Showing Up Matters</span></div>
+        <p class="text-[15px]">People remember who consistently supports the community. These give real relationships + endless authentic content.</p>
+      </div>
+      <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tips:</strong> Be genuinely helpful. Photos + posts for weeks. Personal follow-up in 48h with new connections.</div>
     </div>
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end"><button onclick="closeEventModal('social-networking')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button></div>
   </div>
 </div>
 
 <div id="modal-community-charity" onclick="closeEventModal('community-charity')" class="hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-8 shadow-2xl">
-    <button onclick="closeEventModal('community-charity')" class="float-right text-3xl text-gray-400 hover:text-gray-600 leading-none">&times;</button>
-    
-    <div class="mb-4">
-      <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-[#00A89D]/10 text-[#00A89D]">COMMUNITY IMPACT</span>
-    </div>
-    <h3 class="text-2xl font-bold mb-2">Community & Charity Events</h3>
-    <p class="text-base text-gray-600 dark:text-gray-300">Build authentic local reputation while creating excellent content and goodwill in your market.</p>
-
-    <div class="mt-5 p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl">
-      <div class="font-semibold text-[#00A89D] text-sm mb-1.5">Why These Events Work</div>
-      <p class="text-[15px]">People remember who shows up for the community. These events give you real, authentic content and position you as someone who cares about the area — not just as a lender looking for business.</p>
-    </div>
-
-    <div class="mt-5">
-      <div class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Strong, Repeatable Plays</div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Youth sports team sponsorship</div>
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Large food or clothing drive</div>
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Title sponsor of a local 5K or golf outing</div>
-        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-xl">Back-to-school supply drive with a school</div>
+  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Planning Playbooks</div>
+        <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Community &amp; Charity Events</h3>
       </div>
+      <button onclick="closeEventModal('community-charity')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">&times;</button>
     </div>
+    <div class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+      <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why This Builds Long-Term Trust</span></div>
+        <p class="text-[15px]">People remember who shows up when it counts. Co-host with realtors to multiply reach and cement partnerships. Content for weeks.</p>
+      </div>
+      <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Pro Tips:</strong> Share cost/spotlight with 1–2 partners. Tag everyone in photos. Use as content for 2–4 weeks.</div>
+    </div>
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end"><button onclick="closeEventModal('community-charity')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button></div>
+  </div>
+</div>
 
-    <div class="mt-5 p-4 bg-[#F15A29]/5 border-l-4 border-[#F15A29] rounded-r-2xl">
-      <div class="font-semibold text-sm mb-1 text-[#F15A29]">Pro Tips</div>
-      <ul class="text-sm space-y-1 mt-1">
-        <li>Partner with 1–2 realtors or title companies — share the cost and spotlight</li>
-        <li>Take lots of photos and post them (tag everyone)</li>
-        <li>Use the event as content for the next 2–4 weeks</li>
-      </ul>
+<!-- Post-Event Follow-Up Static Modal (premium) -->
+<div id="modal-post-event-followup" onclick="closeEventModal('post-event-followup')" class="hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
+  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] font-bold tracking-[1.5px] text-[#F15A29] uppercase mb-0.5">Event Planning Playbooks</div>
+        <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Post-Event Follow-Up Mastery</h3>
+      </div>
+      <button onclick="closeEventModal('post-event-followup')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">&times;</button>
     </div>
+    <div class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
+      <div class="bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-3xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#F15A29]"></i><span class="font-bold text-[#F15A29] uppercase tracking-wider text-sm">Why the Follow-Up Is Everything</span></div>
+        <p class="text-[15px]">Clients and partners are emotionally high right after a great event. Strike while the memory is warm. A disciplined 5-phase system creates attribution and generates measurable referrals. Batch your touches.</p>
+      </div>
+      <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">5-Phase Playbook + Scripts</h4>
+      <div class="space-y-3 mb-6">
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Thank you for joining us at [Event Name]! It was so good to see you and [Guest or +1 if known]. Here are some of my favorite photos from the night: [Link or attached collage]. Who should I invite next time? I’d love to keep growing this group with people like you.">
+          <div class="flex justify-between items-start gap-3"><div class="flex-1"><strong class="text-sm font-semibold">Day 1 Thank-You (All)</strong><div class="text-[15px] mt-1">“Thank you for joining us at [Event Name]! It was so good to see you and [Guest or +1 if known]. Here are some of my favorite photos from the night: [Link or attached collage]. Who should I invite next time? I’d love to keep growing this group with people like you.”</div></div><div class="flex flex-col gap-1"><button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button><button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Event: Day 1 Thank You', this.closest('[data-copy-text]').getAttribute('data-copy-text'), this, 'event');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold whitespace-nowrap">Save</button></div></div>
+        </div>
+      </div>
+      <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong>Key Insight:</strong> Track +1 leads and 90-day referrals from the event. Batch everything. One great event + follow-up = 5–10 loans/year in referrals.</div>
+    </div>
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end"><button onclick="closeEventModal('post-event-followup')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button></div>
   </div>
 </div>
 
