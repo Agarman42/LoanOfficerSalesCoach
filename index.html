@@ -510,23 +510,26 @@
                     <!-- Populated by JS: either empty state or 7 day cards -->
                 </div>
 
-                <!-- Best Practices Accordion -->
-                <div class="accordion mt-10 border border-gray-200 dark:border-gray-600 rounded-3xl overflow-hidden bg-white dark:bg-gray-800">
-                    <button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-900/50 font-semibold border-b border-gray-200 dark:border-gray-600">
-                        <span>Time Blocking Best Practices</span>
-                        <i class="fas fa-chevron-down text-gray-400"></i>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="p-6 text-sm text-gray-600 dark:text-gray-300 space-y-3">
-                            <p>• Do prospecting early in the day before the world interrupts you.</p>
-                            <p>• Protect your blocks like real client appointments.</p>
-                            <p>• Use smaller 30–45 minute blocks — easier to protect than 2-hour blocks.</p>
-                            <p>• Color-code prospecting blocks in your calendar so they stand out.</p>
-                            <p>• Review and adjust your blocks every Sunday evening.</p>
-                            <p class="pt-2 border-t border-gray-200 dark:border-gray-600">
-                                <a href="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Adam%20Images%20to%20Host/Time%20Blocking%20Calendar%20with%20Clear%20All%20and%20ICS%20Export.xlsm" 
-                                   target="_blank" class="text-[#00A89D] hover:underline">Download the original Time Blocking Spreadsheet →</a>
-                            </p>
+                <!-- Prominent Time Blocking Best Practices Trigger (pops so it doesn't get lost) -->
+                <div onclick="if(typeof closeAllModals==='function') closeAllModals(); if(typeof showDetailModal==='function'){showDetailModal('time-blocking','best-practices')}else{console.error('showDetailModal not defined - hard refresh the page')}" class="cursor-pointer mt-8 border-2 border-[#00A89D] bg-gradient-to-br from-[#00A89D]/10 via-white to-white dark:via-gray-800 dark:to-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl hover:border-[#008f85] transition-all group">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#00A89D] text-white flex items-center justify-center text-2xl">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-bold text-xl text-[#002B5C] dark:text-white group-hover:text-[#00A89D] transition">Time Blocking Best Practices</div>
+                                    <div class="text-sm text-[#00A89D] font-semibold">The #1 habit that separates producers who actually hit their numbers from everyone else</div>
+                                </div>
+                                <div class="text-right hidden sm:block">
+                                    <span class="text-xs px-3 py-1 rounded-full bg-[#00A89D] text-white font-bold tracking-wider">ESSENTIAL</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">Early blocks • Protect like client appointments • 30–45 min chunks • Color code • Weekly review • Download the original spreadsheet</div>
+                            <div class="mt-3 text-sm font-semibold text-[#00A89D] group-hover:underline flex items-center gap-1">
+                                Open the full rich guide with sample schedules, common pitfalls &amp; pro tips →
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1777,27 +1780,27 @@
         <h3 class="text-xl font-bold mb-5 text-[#002B5C] dark:text-white">The 6 Core Pillars of Your Database</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- A+ VIPs first as requested -->
-            <div onclick="openDatabaseModal('A+ VIPs')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
+            <div onclick="openDatabaseModal('a-plus-vips')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
                 <div class="font-bold text-lg mb-1 group-hover:text-[#00A89D]">A+ VIPs</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Your top 50 most influential people. Platinum-level personal touches.</div>
             </div>
-            <div onclick="openDatabaseModal('Past Clients')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
+            <div onclick="openDatabaseModal('past-clients')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
                 <div class="font-bold text-lg mb-1 group-hover:text-[#00A89D]">Past Clients</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Your highest ROI relationships. Systematic anniversary, birthday, and equity touches.</div>
             </div>
-            <div onclick="openDatabaseModal('Sphere of Influence')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
+            <div onclick="openDatabaseModal('sphere-of-influence')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
                 <div class="font-bold text-lg mb-1 group-hover:text-[#00A89D]">Sphere of Influence</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Friends & family who already trust you. Authentic, low-pressure nurturing.</div>
             </div>
-            <div onclick="openDatabaseModal('Referral Partners')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
+            <div onclick="openDatabaseModal('referral-partners')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
                 <div class="font-bold text-lg mb-1 group-hover:text-[#00A89D]">Referral Partners</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Realtors, builders, CPAs. Value-first systems that make you indispensable.</div>
             </div>
-            <div onclick="openDatabaseModal('Community Connections')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
+            <div onclick="openDatabaseModal('community-connections')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
                 <div class="font-bold text-lg mb-1 group-hover:text-[#00A89D]">Community Connections</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Local network. Become the obvious mortgage expert in your market.</div>
             </div>
-            <div onclick="openDatabaseModal('Prospects')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
+            <div onclick="openDatabaseModal('prospects')" class="cursor-pointer group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-6 transition-all hover:shadow-lg">
                 <div class="font-bold text-lg mb-1 group-hover:text-[#00A89D]">Prospects</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Leads who didn’t close yet. Stay helpful until the timing is right.</div>
             </div>
@@ -6675,83 +6678,124 @@ window.openExpandedSocialExamplesModal = function(pillar) {
     modal.classList.add('flex');
   };
 
-  // Nurturing Scripts & Templates Data
+  // Nurturing Scripts & Templates Data (beefed up with even more content, examples, value, and structure)
   const NURTURE_TEMPLATES = {
     'anniversary': {
       title: "Home Anniversary Touch Script",
       content: `
-        <h4 class="font-bold text-[#00A89D]">Why This Touch Works So Well</h4>
-        <p>The anniversary of their home purchase is one of the most powerful touches in your entire database strategy. It feels personal, relevant, and positions you as someone who cares about their life — not just the transaction.</p>
+        <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+          <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why This Touch Works So Well</span></div>
+          <p class="text-sm">The anniversary of their home purchase is one of the most powerful touches in your entire database strategy. It feels personal, relevant, and positions you as someone who cares about their life — not just the transaction. It’s the one day of the year that is 100% about them and their home.</p>
+        </div>
 
-        <h4 class="font-bold mt-6">Recommended Approach</h4>
-        <ul class="space-y-2">
-          <li><strong>Format options:</strong> Handwritten card + small gift (cutting board, doormat, plant, local treat) OR a short personal video.</li>
-          <li><strong>Include:</strong> A quick equity snapshot or market update specific to their neighborhood.</li>
+        <h4 class="font-bold text-lg mb-3">Recommended Approach</h4>
+        <ul class="space-y-2 text-sm mb-6">
+          <li><strong>Format options:</strong> Handwritten card + small gift (cutting board, doormat, plant, local treat, bottle of wine with custom label) OR a short personal video (30–60 seconds).</li>
+          <li><strong>Include:</strong> A quick equity snapshot or market update specific to their neighborhood (pull 3 comps or a simple value trend). This adds massive perceived value.</li>
           <li><strong>Soft referral ask:</strong> “If anyone you know is thinking about buying or selling, I’d be honored to help them the same way I helped you.”</li>
+          <li><strong>Timing:</strong> Send 7–10 days before the actual anniversary so it lands on or near the day.</li>
         </ul>
 
-        <h4 class="font-bold mt-6">Sample Message (Card or Video)</h4>
-        <p class="italic">“[Name], it’s hard to believe it’s already been [X] years since you closed on your home! I hope it’s still treating you well. I pulled a quick update on values in your neighborhood — happy to hop on a quick call if you’re ever curious what your equity position looks like these days. No pressure at all.”</p>
+        <h4 class="font-bold text-lg mb-3">Sample Message (Card or Video)</h4>
+        <p class="italic text-sm mb-2">“[Name], it’s hard to believe it’s already been [X] years since you closed on your home! I hope it’s still treating you well and that the neighborhood feels like home. I pulled a quick update on values in your area — happy to hop on a quick call if you’re ever curious what your equity position looks like these days. No pressure at all.”</p>
+        <p class="text-xs text-gray-500 mb-6">Add a P.S. with one specific memory: “Still remember how excited the kids were on closing day!”</p>
+
+        <h4 class="font-bold text-lg mb-3">Pro Tips for Maximum Impact</h4>
+        <ul class="text-sm space-y-1">
+          <li>Always reference something personal from their file or a previous conversation.</li>
+          <li>Take a photo of the gift + note before you send it — post it on social (with permission) as “Client love in action.”</li>
+          <li>Follow up 10–14 days later with a short text: “Hope the [gift] is getting some use! Let me know if I can ever be a resource.”</li>
+          <li>Do this for every past client who closed with you. The ones who respond are your best referral sources.</li>
+        </ul>
       `
     },
     'birthday-video': {
       title: "Birthday Video Message Template",
       content: `
-        <h4 class="font-bold text-[#00A89D]">Script for 45-Second Video</h4>
-        <p>“Hey [First Name], it’s [Your Name] — I just wanted to wish you a happy birthday! Hope you’re doing something fun today. I’ve been thinking about you and your family and how much I enjoyed helping you with your home. If there’s ever anything I can do for you or anyone you know, just let me know. Have an amazing day!”</p>
+        <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+          <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Birthday Videos Crush It</span></div>
+          <p class="text-sm">A 30–60 second personal video on someone’s birthday feels incredibly thoughtful in 2026. Almost no one does it. It takes 2 minutes to record and creates a huge emotional deposit.</p>
+        </div>
 
-        <h4 class="font-bold mt-6">Delivery Tips</h4>
-        <ul>
-          <li>Send via text or DM on their actual birthday (or the day before).</li>
-          <li>Keep it under 60 seconds — genuine and warm, not scripted-sounding.</li>
-          <li>Follow up with a short text: “Just sent you a quick birthday video — hope you liked it!”</li>
-          <li>Do this for A+ VIPs and Past Clients at minimum.</li>
+        <h4 class="font-bold text-lg mb-3">Script for 45-Second Video (Memorize the Structure)</h4>
+        <p class="italic text-sm mb-2">“Hey [First Name], it’s [Your Name] — I just wanted to wish you a happy birthday! Hope you’re doing something fun today with the people you love. I’ve been thinking about you and your family and how much I enjoyed helping you get into your home. If there’s ever anything I can do for you or anyone you know, just let me know. Have an amazing day!”</p>
+
+        <h4 class="font-bold text-lg mb-3">Delivery &amp; Follow-Up Tips</h4>
+        <ul class="text-sm space-y-1 mb-6">
+          <li>Send via text or DM on their actual birthday (or the evening before).</li>
+          <li>Keep it under 60 seconds — genuine, warm, slightly smiling, good lighting.</li>
+          <li>Follow up 2–3 hours later with a short text: “Just sent you a quick birthday video — hope you liked it!”</li>
+          <li>Do this for A+ VIPs and Past Clients at minimum. Bonus: do it for Sphere who are close.</li>
+          <li>Save the video template in your phone notes so you can record quickly.</li>
+        </ul>
+
+        <h4 class="font-bold text-lg mb-3">Pro Tips</h4>
+        <ul class="text-sm space-y-1">
+          <li>Mention one specific detail: “Hope the new deck is getting a lot of use this summer!”</li>
+          <li>If you know their spouse/kids, include them: “Tell the kids happy birthday from me too!”</li>
+          <li>These often lead to “Can we talk about our equity?” conversations 4–8 weeks later.</li>
         </ul>
       `
     },
     'referral-ask': {
       title: "Natural Referral Ask Script",
       content: `
-        <h4 class="font-bold text-[#00A89D]">Best Timing</h4>
-        <p>Only after you’ve delivered consistent value for several months (especially after a strong home anniversary or life event touch).</p>
+        <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+          <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Best Timing &amp; Mindset</span></div>
+          <p class="text-sm">Only after you’ve delivered consistent value for several months (especially after a strong home anniversary, life event touch, or they’ve raved about you). The ask should feel like a natural extension of the relationship, never transactional.</p>
+        </div>
 
-        <h4 class="font-bold mt-6">Low-Pressure Script (After a Positive Touch)</h4>
-        <p>“[Name], I’m really glad I was able to help you with your home. If you ever come across anyone who’s thinking about buying, selling, or refinancing, I’d be honored if you’d think of me. I promise I’ll take great care of them the same way I took care of you.”</p>
+        <h4 class="font-bold text-lg mb-3">Low-Pressure Script (After a Positive Touch)</h4>
+        <p class="italic text-sm mb-2">“[Name], I’m really glad I was able to help you with your home. If you ever come across anyone who’s thinking about buying, selling, or refinancing, I’d be honored if you’d think of me. I promise I’ll take great care of them the same way I took care of you.”</p>
 
-        <h4 class="font-bold mt-6">Even Better Version (After They’ve Raved)</h4>
-        <p>“That means a lot — thank you. If you know anyone else who might be in a similar situation, I’d love the opportunity to help them too. No pressure at all — only if it feels natural.”</p>
+        <h4 class="font-bold text-lg mb-3">Even Better Version (After They’ve Raved or Sent a Referral)</h4>
+        <p class="italic text-sm mb-2">“That means a lot — thank you. If you know anyone else who might be in a similar situation, I’d love the opportunity to help them too. No pressure at all — only if it feels natural for you.”</p>
 
-        <p class="mt-4 text-sm text-gray-500">The key: Make it about helping their people, not about you needing business.</p>
+        <h4 class="font-bold text-lg mb-3">Pro Tips for Getting More Referrals</h4>
+        <ul class="text-sm space-y-1">
+          <li>Make the ask about helping <em>their</em> people, not about you needing business.</li>
+          <li>Give them an easy way to refer: “Just text me their name and number and I’ll reach out gently.”</li>
+          <li>After they refer someone, send a high-quality thank-you (gift + note) within 48 hours and keep them updated on the file (with client permission).</li>
+          <li>The best referral sources are the ones you’ve helped solve a problem for (tough closing, rate lock drama, etc.). Remind them how you made their life easier.</li>
+        </ul>
       `
     },
     'scalable-touches': {
-      title: "21 Scalable Touches – Full List",
+      title: "21 Scalable Touches – Full List + How to Use Them",
       content: `
-        <p class="mb-4">Here are 21 practical, low-effort touches you can rotate to stay visible without burning out:</p>
-        <ol class="list-decimal pl-5 space-y-1 text-sm">
-          <li>Monthly email newsletter</li>
+        <p class="mb-4">Here are 21 practical, low-effort touches you can rotate to stay visible without burning out. Mix 4–6 of these per month on top of your high-touch personal touches for A+ VIPs and Past Clients.</p>
+        <ol class="list-decimal pl-5 space-y-1 text-sm mb-6">
+          <li>Monthly email newsletter (value-first, never salesy)</li>
           <li>Quarterly market update video (shared on social + email)</li>
           <li>Like/comment on 10 client/realtor posts per week</li>
           <li>Post photos from client events or local happenings</li>
-          <li>Share one useful article or tool per week</li>
+          <li>Share one useful article or tool per week with a short note</li>
           <li>Quarterly “just checking in” text to B-tier contacts</li>
           <li>Tag people in relevant local posts</li>
-          <li>Send “Just Sold in your neighborhood” postcards</li>
-          <li>Share client success stories (with permission)</li>
+          <li>Send “Just Sold in your neighborhood” postcards or emails</li>
+          <li>Share client success stories (with permission, anonymized)</li>
           <li>Post “day in the life” or behind-the-scenes content</li>
-          <li>Forward relevant rate/market news with a short note</li>
-          <li>Host or co-host a small quarterly lunch & learn</li>
-          <li>Send holiday / seasonal value emails</li>
-          <li>Comment thoughtfully on realtor posts</li>
+          <li>Forward relevant rate/market news with a short personal note</li>
+          <li>Host or co-host a small quarterly lunch &amp; learn or first-time buyer workshop</li>
+          <li>Send holiday / seasonal value emails (recipes, local events, maintenance tips)</li>
+          <li>Comment thoughtfully on realtor posts (they notice)</li>
           <li>Share your own home projects or local recommendations</li>
-          <li>Quarterly “equity snapshot” email to past clients</li>
-          <li>Invite people to open houses you’re supporting</li>
-          <li>Post fun polls (“Beach house or mountain cabin?”)</li>
-          <li>Send a quick voice note instead of text occasionally</li>
-          <li>Share local business spotlights</li>
-          <li>End-of-year “thank you + looking ahead” video</li>
+          <li>Quarterly “equity snapshot” email to past clients (simple 1-pager)</li>
+          <li>Invite people to open houses you’re supporting (with the listing agent’s blessing)</li>
+          <li>Post fun, engaging polls (“Beach house or mountain cabin?”)</li>
+          <li>Send a quick voice note instead of text occasionally — stands out</li>
+          <li>Share local business spotlights (tag the business — huge goodwill)</li>
+          <li>End-of-year “thank you + looking ahead” video to your top 100</li>
         </ol>
-        <p class="mt-4 text-xs text-gray-500">Mix 4–6 of these per month on top of your high-touch personal touches.</p>
+
+        <h4 class="font-bold text-lg mb-3">How to Actually Use This List</h4>
+        <ul class="text-sm space-y-1">
+          <li>Pick 6–8 that feel natural to you and rotate them on a simple content calendar.</li>
+          <li>Batch record 8–10 videos in one 90-minute session once a month.</li>
+          <li>Always add one personal sentence when you share something automated.</li>
+          <li>Track which ones get the most engagement and double down on those.</li>
+        </ul>
+        <p class="mt-4 text-xs text-gray-500">These keep you top-of-mind with the 80% of your database that doesn’t need (or want) a personal call every quarter.</p>
       `
     }
   };
@@ -6833,6 +6877,70 @@ window.openExpandedSocialExamplesModal = function(pillar) {
       }
     } catch (err) {
       console.error('Error in showNurtureTemplateModal:', err);
+      alert('Could not open the modal. Please use the "Close Modals" button or press Escape, then try again.');
+    }
+  };
+
+  // Database Nurturing Pillar Modals (beefed up with rich, high-value content matching the rest of the tool)
+  window.openDatabaseModal = function(pillar) {
+    try {
+      if (typeof closeAllModals === 'function') {
+        closeAllModals();
+      }
+
+      let modal = document.getElementById('detail-modal');
+      let titleEl = document.getElementById('detail-modal-title');
+      let contentEl = document.getElementById('detail-modal-content');
+
+      // Defensive recreation (matches patterns used elsewhere)
+      if (!modal || !titleEl || !contentEl) {
+        if (modal) modal.remove();
+        modal = document.createElement('div');
+        modal.id = 'detail-modal';
+        modal.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[9999]';
+        modal.innerHTML = `
+          <div class="bg-white dark:bg-gray-800 w-full max-w-3xl mx-4 rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+              <h3 id="detail-modal-title" class="text-2xl font-bold"></h3>
+              <button onclick="if(typeof closeDetailModal==='function') closeDetailModal(); else this.closest('#detail-modal').classList.add('hidden');" class="text-3xl text-gray-400 hover:text-red-500">×</button>
+            </div>
+            <div id="detail-modal-content" class="p-6 overflow-y-auto flex-1 prose prose-sm dark:prose-invert"></div>
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 flex justify-end">
+              <button onclick="if(typeof closeDetailModal==='function') closeDetailModal(); else this.closest('#detail-modal').classList.add('hidden');" class="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-100">Close</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        titleEl = document.getElementById('detail-modal-title');
+        contentEl = document.getElementById('detail-modal-content');
+      }
+
+      const data = DETAIL_CONTENT['database'] && DETAIL_CONTENT['database'][pillar];
+      if (!data) {
+        console.warn('No database pillar content for', pillar);
+        alert('Detailed content for this pillar is being expanded — check back after refresh or contact support.');
+        return;
+      }
+
+      if (titleEl) titleEl.textContent = data.title;
+      if (contentEl) contentEl.innerHTML = data.content;
+
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.zIndex = '9999';
+
+      // Backdrop close
+      if (!modal._backdropHandlerAttached) {
+        modal.addEventListener('click', function(e) {
+          if (e.target.id === 'detail-modal' && typeof closeDetailModal === 'function') {
+            closeDetailModal();
+          }
+        });
+        modal._backdropHandlerAttached = true;
+      }
+    } catch (err) {
+      console.error('Error in openDatabaseModal:', err);
       alert('Could not open the modal. Please use the "Close Modals" button or press Escape, then try again.');
     }
   };
@@ -6980,6 +7088,240 @@ window.openExpandedSocialExamplesModal = function(pillar) {
 
           <h4 class="font-bold mt-4">Rule of Thumb</h4>
           <p>Double down on whatever generates the most referrals and engagement. Cut or reduce what doesn’t move the needle.</p>
+        `
+      }
+    },
+    'time-blocking': {
+      'best-practices': {
+        title: "Time Blocking Best Practices",
+        content: `
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why This Works</span></div>
+            <p class="text-sm">Prospecting is the only activity that directly creates new business. Without protected, non-negotiable time on your calendar, it gets squeezed out by “urgent” but less important tasks (emails, admin, putting out fires). Top producers treat their prospecting blocks like they would a client appointment with a $50k commission on the line — because it is.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">The Core Rules (Print This)</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <strong class="block mb-1">1. Early in the Day</strong>
+              <p>Do prospecting first thing — before emails, before calls from agents, before the world wakes up. Your energy and focus are highest. Interruptions are lowest.</p>
+            </div>
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <strong class="block mb-1">2. Protect Like Appointments</strong>
+              <p>Block it in your calendar in a distinct color (bright teal or orange). Do not move it for anything short of a true emergency or closing. Reschedule the block, don’t cancel it.</p>
+            </div>
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <strong class="block mb-1">3. Use 30–45 Minute Chunks</strong>
+              <p>Smaller blocks are psychologically easier to protect and schedule. 4 x 30-minute blocks = 2 focused hours. Far better than one 2-hour block that gets broken.</p>
+            </div>
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <strong class="block mb-1">4. Color-Code &amp; Label Clearly</strong>
+              <p>“PROSPECTING — Realtors”, “PROSPECTING — Past Clients”, “PROSPECTING — Sphere”. The visual cue makes it sacred.</p>
+            </div>
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <strong class="block mb-1">5. Review &amp; Adjust Every Sunday</strong>
+              <p>Look at what actually happened last week. Did you hit your blocks? What interrupted you? Adjust the next week’s blocks accordingly (move to earlier, add buffer, batch similar tasks).</p>
+            </div>
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <strong class="block mb-1">6. Batch Admin &amp; Follow-Up</strong>
+              <p>Never do admin or follow-up inside your prospecting block. Prospecting = new conversations or touches only. Admin goes in a separate block later.</p>
+            </div>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Sample Weekly Blocks (Adapt to Your Schedule)</h4>
+          <div class="text-sm mb-6 space-y-2">
+            <p><strong>High-Availability LO (3+ hrs/day):</strong> 7:30–8:00 Realtor calls • 8:00–8:30 Past client touches • 10:00–10:30 Sphere / Open House invites • 4:00–4:30 Equity reviews &amp; refi outreach</p>
+            <p><strong>Busy LO (90–120 min/day):</strong> 6:45–7:15 Realtor prospecting (before office opens) • 7:15–7:45 Past clients &amp; sphere (texts + short calls) • One 30-min block mid-week for follow-ups on warm leads</p>
+            <p><strong>Part-Time or New LO:</strong> 3 focused 30-min blocks: Mon/Wed/Fri 7am sharp. Consistency > volume when you’re building the habit.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Common Pitfalls (and Fixes)</h4>
+          <ul class="text-sm space-y-1 mb-6">
+            <li>• <strong>Scheduling too late in the day</strong> — Fix: Move the first block to before 8am. Protect the second as “make-up” if morning gets destroyed.</li>
+            <li>• <strong>Letting “quick emails” eat the block</strong> — Fix: Close email and CRM notifications during the block. Use a physical timer or phone Do Not Disturb with a 30-min focus mode.</li>
+            <li>• <strong>No buffer between blocks</strong> — Fix: Add 5–10 min buffer so one overrun doesn’t kill the next.</li>
+            <li>• <strong>Never reviewing</strong> — Fix: Sunday 15-min review is non-negotiable. Treat it like a meeting with your future self.</li>
+          </ul>
+
+          <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm mb-4">
+            <strong class="text-[#F15A29]">Pro Move:</strong> Put your prospecting blocks on a recurring calendar invite that you send to yourself with the subject “This is how I pay my mortgage.” Make it impossible to ignore.
+          </div>
+
+          <p class="text-sm"><a href="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Adam%20Images%20to%20Host/Time%20Blocking%20Calendar%20with%20Clear%20All%20and%20ICS%20Export.xlsm" target="_blank" class="text-[#00A89D] hover:underline font-semibold">Download the original Time Blocking Spreadsheet →</a></p>
+        `
+      }
+    },
+    'database': {
+      'a-plus-vips': {
+        title: "A+ VIPs — Your Platinum Tier",
+        content: `
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-6 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why This Segment Is Everything</span></div>
+            <p class="text-sm">Your top 50 people (influential past clients, power realtors, family/friends who refer, community leaders) will generate more business than the other 950 combined if nurtured at the highest level. These are the relationships that send you 2–5 referrals per year without you asking.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Identification Criteria (Be Ruthless)</h4>
+          <ul class="text-sm space-y-1 mb-6 pl-4 list-disc">
+            <li>Have referred you at least once in the last 24 months</li>
+            <li>Are in a position of influence (top-producing realtors, business owners, community connectors)</li>
+            <li>Have sent you multiple clients historically</li>
+            <li>Personal relationship exists beyond the transaction (you know their kids’ names, hobbies, etc.)</li>
+          </ul>
+
+          <h4 class="font-bold text-lg mb-3">Platinum Touch Cadence (Minimum)</h4>
+          <div class="text-sm mb-6">
+            <ul class="space-y-2">
+              <li><strong>Quarterly personal call or coffee</strong> (15–20 min, no agenda other than “how are you and how can I help you?”)</li>
+              <li><strong>Handwritten note on anniversary + small meaningful gift</strong> (cutting board with their last name, local honey, plant, etc.)</li>
+              <li><strong>Birthday video or card</strong> (personal, 30–45 seconds)</li>
+              <li><strong>Annual equity review offer</strong> (in person or short video call — this one converts extremely well)</li>
+              <li><strong>Invite to 1–2 client appreciation events per year</strong> (plus +1)</li>
+              <li><strong>Immediate response to any life event</strong> (baby, job change, loss, move)</li>
+            </ul>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Sample Platinum Call Script</h4>
+          <p class="italic text-sm mb-2">“Hey [Name], it’s [Your Name]. I was thinking about you this morning and realized it’s been way too long since we caught up. No mortgage stuff — I just wanted to hear how you and the family are doing. Got 10 minutes?”</p>
+          <p class="text-sm mb-6">Then listen 80% of the time. At the end: “If anything real estate related ever comes up for you or anyone you know, I’m always here. No pressure ever.”</p>
+
+          <h4 class="font-bold text-lg mb-3">Pro Tips for A+ VIPs</h4>
+          <ul class="text-sm space-y-1">
+            <li>Keep a private note in your CRM with their kids’ names, favorite sports team, last vacation, etc. Reference it before every touch.</li>
+            <li>Send them client appreciation event invites even if they’re not “clients” — they love being included.</li>
+            <li>Give them first access to any new tools or market reports before you send to the broader database.</li>
+            <li>After they refer someone, send a high-end thank you (not cheap) + personal note within 48 hours.</li>
+          </ul>
+        `
+      },
+      'past-clients': {
+        title: "Past Clients — Your Highest-ROI Goldmine",
+        content: `
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-6 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Past Clients Convert So Well</span></div>
+            <p class="text-sm">They already trust you. They’ve seen you deliver. They know your name when the topic of real estate comes up with friends and family. Systematic, relevant touches here beat almost any other lead source on ROI.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Non-Negotiable Annual Touches</h4>
+          <ul class="text-sm space-y-2 mb-6">
+            <li><strong>Home Anniversary (most powerful)</strong> — Handwritten card + small gift + quick neighborhood equity/market snapshot. Offer to run numbers “just for fun, no pressure.”</li>
+            <li><strong>Birthday</strong> — Short personal video or nice card.</li>
+            <li><strong>2–3 additional personal touches</strong> (handwritten notes for life events, “just because” pop-by or mailed item, holiday gift).</li>
+            <li><strong>Annual Equity Review</strong> — Even if rates aren’t amazing, people love knowing their position. Many will refi or move-up when they see the number.</li>
+          </ul>
+
+          <h4 class="font-bold text-lg mb-3">Sample Anniversary Message</h4>
+          <p class="italic text-sm mb-6">“[Name], I can’t believe it’s already [X] years since you got the keys! Hope the house is still treating you well. I pulled a quick update on values in your neighborhood — happy to hop on a 10-minute call if you’re ever curious what your equity looks like these days. No strings attached.”</p>
+
+          <h4 class="font-bold text-lg mb-3">Pro Tips</h4>
+          <ul class="text-sm space-y-1">
+            <li>Segment past clients by how long ago they closed and by potential (move-up, investor, refi candidates).</li>
+            <li>Never send the same generic “happy anniversary” card to everyone — reference something specific from their file or last conversation.</li>
+            <li>After any touch, log it and set a reminder for the next logical follow-up.</li>
+            <li>These people are also perfect for client appreciation events and to receive your best value content.</li>
+          </ul>
+        `
+      },
+      'sphere-of-influence': {
+        title: "Sphere of Influence — Warm &amp; Authentic",
+        content: `
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-6 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Your Sphere Still Matters</span></div>
+            <p class="text-sm">Friends, family, old coworkers, neighbors, parents from kids’ sports — they already like and trust you as a person. They just don’t always think of you when real estate comes up. Keep the relationship warm and the association top-of-mind without being salesy.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Touch Strategy (Lower Pressure)</h4>
+          <ul class="text-sm space-y-2 mb-6">
+            <li>2–3 personal touches per year (handwritten notes, short videos, social comments + DMs)</li>
+            <li>Share personal content on social that they see (family, hobbies, local life)</li>
+            <li>Occasional value shares (market update that’s genuinely useful, not “rates are low!”)</li>
+            <li>Invite to 1 client appreciation event per year</li>
+            <li>Life event responses when you hear about them</li>
+          </ul>
+
+          <h4 class="font-bold text-lg mb-3">Sample Low-Pressure Message</h4>
+          <p class="italic text-sm mb-6">“Hey [Name]! Saw your post about the new job — huge congrats! If housing or real estate questions ever come up as you settle in, I’m always happy to be a resource (no pitch, just here if you need me).”</p>
+
+          <h4 class="font-bold text-lg mb-3">Pro Tips</h4>
+          <ul class="text-sm space-y-1">
+            <li>Post consistently on social with personal + local content — this is free nurturing for your entire sphere.</li>
+            <li>Remember birthdays and send a quick text or voice note — it stands out massively.</li>
+            <li>Never hard-sell your sphere. The goal is “when they or someone they know needs a lender, they think of you first.”</li>
+          </ul>
+        `
+      },
+      'referral-partners': {
+        title: "Referral Partners — Make Them Indispensable",
+        content: `
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-6 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why This Is Your Growth Engine</span></div>
+            <p class="text-sm">Realtors, builders, financial planners, attorneys, etc. who regularly send you business. Treat them like the A+ VIPs of your business — because they are. Value-first, consistent, and make their life easier.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Core System</h4>
+          <ul class="text-sm space-y-2 mb-6">
+            <li>Quarterly high-value touch (gift, co-marketing piece, lunch, mastermind invite)</li>
+            <li>Immediate thank-you + update when they send a client</li>
+            <li>Regular value (market reports, buyer/seller tips they can forward, co-branded content)</li>
+            <li>Personal relationship building (remember their kids, their goals, their challenges)</li>
+          </ul>
+
+          <h4 class="font-bold text-lg mb-3">Sample “Just Because” Note to a Top Realtor</h4>
+          <p class="italic text-sm mb-6">“[Name] — saw you closed that tricky one on Maple. You handled it like a pro. Dropping off a little something to celebrate. Let me know how I can make the next one even smoother for you.”</p>
+
+          <h4 class="font-bold text-lg mb-3">Pro Tips</h4>
+          <ul class="text-sm space-y-1">
+            <li>Focus 80% of your partner energy on the top 10–15 who actually send you business consistently.</li>
+            <li>Offer to do joint open houses, co-host first-time buyer workshops, or create simple one-pagers they can give their clients.</li>
+            <li>Never ask for referrals in the first 3–6 months of the relationship. Earn it first.</li>
+          </ul>
+        `
+      },
+      'community-connections': {
+        title: "Community Connections — Become the Local Expert",
+        content: `
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-6 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why Local Network Pays Off</span></div>
+            <p class="text-sm">Small business owners, school parents, HOA leaders, charity organizers, local real estate-adjacent pros. When you become known as the helpful, generous mortgage person in your town, business flows to you without you chasing it.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">How to Nurture</h4>
+          <ul class="text-sm space-y-2 mb-6">
+            <li>Local business spotlights on social (tag them — they often repost)</li>
+            <li>Attend and support 2–3 community events per quarter (with photos and genuine engagement)</li>
+            <li>Offer simple value (first-time buyer workshop for a local group, “what your home is worth” lunch &amp; learn for a neighborhood)</li>
+            <li>Occasional handwritten notes or small gifts to key connectors</li>
+          </ul>
+
+          <h4 class="font-bold text-lg mb-3">Pro Tips</h4>
+          <ul class="text-sm space-y-1">
+            <li>Pick 3–5 organizations or neighborhoods and go deep instead of spreading thin.</li>
+            <li>Always give more than you take at events (answer questions, make introductions, be helpful).</li>
+            <li>Turn your best local content into evergreen pieces you can re-use.</li>
+          </ul>
+        `
+      },
+      'prospects': {
+        title: "Prospects — Stay Helpful Until They’re Ready",
+        content: `
+          <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-6 mb-6">
+            <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why You Must Nurture Prospects</span></div>
+            <p class="text-sm">People who inquired but didn’t move forward yet. Timing wasn’t right, credit needed work, life got in the way. If you disappear, they’ll use whoever is in front of them when they’re ready. Stay the helpful expert and you win when the time comes.</p>
+          </div>
+
+          <h4 class="font-bold text-lg mb-3">Light, Valuable Cadence</h4>
+          <ul class="text-sm space-y-2 mb-6">
+            <li>Monthly or quarterly value email / newsletter (market update, buyer tips, “what’s happening in your price range”)</li>
+            <li>Occasional personal check-in if you had a real conversation (text or short video: “Hey, just thinking about you — rates moved a bit, happy to run fresh numbers if the timing feels better now.”)</li>
+            <li>Invite to any first-time buyer or educational events you host</li>
+            <li>Respond to any life event you hear about</li>
+          </ul>
+
+          <h4 class="font-bold text-lg mb-3">Pro Tips</h4>
+          <ul class="text-sm space-y-1">
+            <li>Never sound salesy. The message should always be “I’m still here and still happy to help when the time is right.”</li>
+            <li>Segment by where they were in the process (pre-approval stage, just browsing, credit issue, etc.) and tailor the value.</li>
+            <li>Track last touch date so no one falls through the cracks for 9+ months.</li>
+          </ul>
         `
       }
     }
