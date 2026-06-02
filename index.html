@@ -3783,7 +3783,7 @@
 </div>
 
 <!-- ==================== REFERRAL PARTNER MODAL ==================== -->
-<div id="referral-modal" class="modal hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
+<div id="referral-modal" class="modal hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
     <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -13108,48 +13108,84 @@ const HIGH_IMPACT_PLAYS = {
 };
 
 window.openReferralModal = function(partnerType) {
-  const modal = document.getElementById('referral-modal');
-  const titleEl = document.getElementById('referral-modal-title');
-  const contentEl = document.getElementById('referral-content');
-  const data = REFERRAL_PLAYBOOKS[partnerType] || { title: partnerType, content: `<p>Full playbook for ${partnerType} coming soon. Focus on value-first touches and over-delivery on the first file.</p>` };
-  titleEl.textContent = data.title;
-  contentEl.innerHTML = data.content;
-  modal.style.display = '';
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+  try {
+    const modal = document.getElementById('referral-modal');
+    const titleEl = document.getElementById('referral-modal-title');
+    const contentEl = document.getElementById('referral-content');
+    if (!modal || !titleEl || !contentEl) {
+      console.error('[Referral Modal] Required elements not found in DOM for', partnerType);
+      alert('Referral modal elements missing — please hard refresh the page (Ctrl/Cmd+Shift+R) and try again.');
+      return;
+    }
+    const data = REFERRAL_PLAYBOOKS[partnerType] || { title: partnerType + ' Playbook', content: `<p>Full playbook for ${partnerType} coming soon. Focus on value-first touches and over-delivery on the first file.</p>` };
+    titleEl.textContent = data.title;
+    contentEl.innerHTML = data.content;
+    // Force visibility (same proven pattern as journey stages, process templates, communication, events)
+    modal.style.display = '';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modal.style.zIndex = '99999';
+  } catch (e) {
+    console.error('[Referral] openReferralModal error', e);
+    alert('Could not open referral playbook. Hard refresh the page and try again.');
+  }
 };
 
 window.openTierModal = function(tier) {
-  const modal = document.getElementById('referral-modal');
-  const titleEl = document.getElementById('referral-modal-title');
-  const contentEl = document.getElementById('referral-content');
-  const data = TIER_PLAYBOOKS[tier] || { title: tier + ' Partners', content: `<p>Detailed ${tier} playbook with cadence and scripts.</p>` };
-  titleEl.textContent = data.title;
-  contentEl.innerHTML = data.content;
-  modal.style.display = '';
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+  try {
+    const modal = document.getElementById('referral-modal');
+    const titleEl = document.getElementById('referral-modal-title');
+    const contentEl = document.getElementById('referral-content');
+    if (!modal || !titleEl || !contentEl) {
+      console.error('[Referral Modal] Required elements not found for tier', tier);
+      alert('Referral modal elements missing — please hard refresh the page (Ctrl/Cmd+Shift+R) and try again.');
+      return;
+    }
+    const data = TIER_PLAYBOOKS[tier] || { title: tier + ' Partners Playbook', content: `<p>Detailed ${tier} playbook with cadence and scripts.</p>` };
+    titleEl.textContent = data.title;
+    contentEl.innerHTML = data.content;
+    modal.style.display = '';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modal.style.zIndex = '99999';
+  } catch (e) {
+    console.error('[Referral] openTierModal error', e);
+    alert('Could not open tier playbook. Hard refresh the page and try again.');
+  }
 };
 
 window.openHighImpactPlay = function(playKey) {
-  const modal = document.getElementById('referral-modal');
-  const titleEl = document.getElementById('referral-modal-title');
-  const contentEl = document.getElementById('referral-content');
-  const data = HIGH_IMPACT_PLAYS[playKey] || { title: playKey.replace(/-/g, ' '), content: `<p>Ready-to-run guidance and scripts for ${playKey}.</p>` };
-  titleEl.textContent = data.title;
-  contentEl.innerHTML = data.content;
-  modal.style.display = '';
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+  try {
+    const modal = document.getElementById('referral-modal');
+    const titleEl = document.getElementById('referral-modal-title');
+    const contentEl = document.getElementById('referral-content');
+    if (!modal || !titleEl || !contentEl) {
+      console.error('[Referral Modal] Required elements not found for play', playKey);
+      alert('Referral modal elements missing — please hard refresh the page (Ctrl/Cmd+Shift+R) and try again.');
+      return;
+    }
+    const data = HIGH_IMPACT_PLAYS[playKey] || { title: playKey.replace(/-/g, ' '), content: `<p>Ready-to-run guidance and scripts for ${playKey}.</p>` };
+    titleEl.textContent = data.title;
+    contentEl.innerHTML = data.content;
+    modal.style.display = '';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modal.style.zIndex = '99999';
+  } catch (e) {
+    console.error('[Referral] openHighImpactPlay error', e);
+    alert('Could not open play. Hard refresh the page and try again.');
+  }
 };
 
 window.closeReferralModal = function() {
-  const modal = document.getElementById('referral-modal');
-  if (modal) {
-    modal.classList.remove('flex');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
-  }
+  try {
+    const modal = document.getElementById('referral-modal');
+    if (modal) {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  } catch (e) {}
 };
 
 // One-time diagnostic (helps catch future DOM issues with event modals)
