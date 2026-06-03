@@ -1,0 +1,8 @@
+{
+    "name": "Ruoff Elite Sales Coach",
+    "short_name": "Ruoff Coach",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#002B5C",
+    "theme_color": "#002B5C"
+    }

@@ -1,0 +1,94 @@
+# Grok Proxy Setup (Required for All AI Features)
+
+The Loan Officer Coach app uses a **local proxy server** for all Grok/xAI API calls (Newsletter Generator, Blog Creator, 2026 Business Plan, Weekly Win Plan, Sales Scripts, AI Coach, etc.).
+
+**"Failed to fetch" or network errors when generating = the proxy is not running or you opened the wrong URL.**
+
+## One-Time Setup (Linux / macOS / WSL)
+
+1. Make sure you have Node.js + npm:
+   ```bash
+   node --version
+   npm --version
+   ```
+   If missing:
+   ```bash
+   sudo apt update && sudo apt install -y nodejs npm
+   ```
+
+2. `cd` into this project folder (the one containing `proxy.js`, `index.html`, and `start-proxy.sh`).
+
+3. Run the launcher (it auto-installs deps if needed):
+   ```bash
+   bash start-proxy.sh
+   ```
+   Or make it executable once:
+   ```bash
+   chmod +x start-proxy.sh
+   ./start-proxy.sh
+   ```
+
+4. **Keep the terminal window open** (the proxy runs in it).
+
+## How to Open the App (MOST IMPORTANT STEP)
+
+- **Always** open your browser to:  
+  **http://localhost:3000**
+
+- **Never** double-click `index.html` in your file manager or paste a `file:///.../index.html` URL.
+
+Why? 
+- `file://` protocol has restrictions on `fetch()` calls to localhost in many browsers.
+- The proxy also serves the giant `index.html` with no-cache headers (prevents stale v2 UI after edits).
+- Hard-refresh tip: DevTools (F12) → Network tab → check "Disable cache" → then Ctrl/Cmd+Shift+R.
+
+## API Key
+
+- The app will prompt the first time you click any "Generate" button (Newsletter, Blog, Plans, etc.).
+- Paste your key (it must start with `xai-`).
+- Or click the **API Key** button (top bar) to manage it anytime.
+- Key is saved only in your browser (localStorage) and sent **only** to your own `localhost:3000` proxy.
+
+Alternative (server-side fallback):
+Create/edit `.env` in this folder:
+```
+XAI_API_KEY=xai-your-full-key-here
+```
+The proxy will use it if the browser doesn't send one.
+
+Get a key at: https://x.ai (console → API keys)
+
+## Stopping
+
+Press `Ctrl+C` in the proxy terminal.
+
+To restart later: just run `bash start-proxy.sh` again and re-open http://localhost:3000 .
+
+## Windows Users
+
+Use `start-proxy.bat` instead (double-click it). Same rules apply: keep the black window open and use http://localhost:3000 .
+
+## Troubleshooting "Failed to fetch"
+
+- Proxy not running? → Run the start script.
+- Using file:// URL? → Switch to http://localhost:3000 .
+- Port conflict (3000 in use)? → Kill other node processes or edit PORT in proxy.js + PROXY_URL in js/api.js (advanced).
+- Firewall/antivirus blocking localhost? → Allow node or try `http://127.0.0.1:3000`.
+- After code changes: hard refresh with cache disabled in DevTools.
+- Still stuck? Check the proxy terminal for errors (e.g. "EADDRINUSE" means something else is on port 3000).
+
+## What the Proxy Does
+
+- Runs a tiny Express server on port 3000.
+- Serves your `index.html` + assets (with no-cache for the main file).
+- Forwards AI requests from the browser to `https://api.x.ai/v1/chat/completions`, adding your key.
+- Handles CORS so the browser is happy.
+- Your real xAI key never leaves your machine except to xAI (via the local proxy).
+
+This setup is only needed while developing/running the tool locally. The final deployed version would use a hosted proxy or serverless functions.
+
+---
+
+**Save this file** (PROXY-SETUP.md) next to your project for quick reference later. The `start-proxy.sh` also prints most of these instructions every time you launch.
+
+Happy generating!

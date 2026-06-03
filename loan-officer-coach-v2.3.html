@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Loan Officer Sales Coach • v2.3</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(to right, #001429, #002b5c);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Sidebar */
+        #sidebar {
+            background: linear-gradient(to bottom, #001429, #001f3f);
+            box-shadow: 8px 0 30px rgba(0, 0, 0, 0.6);
+            scrollbar-width: thin;
+            scrollbar-color: #00A89D #001f3f;
+        }
+
+        #sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        #sidebar::-webkit-scrollbar-thumb {
+            background-color: #00A89D;
+            border-radius: 20px;
+        }
+
+        .sidebar-group {
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            background-color: rgba(0, 31, 63, 0.85);
+            border-radius: 12px;
+            margin: 16px 20px 10px;
+            padding: 11px 16px;
+            text-align: center;
+            border: 2px solid rgba(0, 168, 157, 0.5);
+            font-size: 0.85rem;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+        .sidebar-link:hover {
+            background-color: rgba(241, 90, 41, 0.12);
+            transform: translateX(3px);
+        }
+
+        /* Static Quote Bar */
+        .quote-container {
+            position: relative;
+        }
+        .quote-text {
+            min-height: 32px;
+            padding: 0 55px;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quote-arrows {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            pointer-events: none;
+        }
+        .quote-arrows button {
+            pointer-events: all;
+            width: 34px;
+            height: 34px;
+            background: rgba(255,255,255,0.12);
+            border: none;
+            color: white;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: background 0.2s;
+        }
+        .quote-arrows button:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Proper spacing so sidebar doesn't overlap content */
+        main {
+            padding-left: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            main {
+                margin-left: 16rem; /* 64 * 0.25rem = 16rem */
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            main {
+                margin-left: 18rem; /* 72 * 0.25rem = 18rem */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+    <!-- HEADER -->
+    <header class="text-white">
+        <div class="max-w-7xl mx-auto px-6 py-5">
+            <div class="flex items-center justify-between">
+                <!-- Mobile Menu -->
+                <button id="menu-toggle" class="md:hidden text-3xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Title -->
+                <div class="flex-1 text-center md:text-left md:pl-2">
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Ultimate Loan Officer Sales Coach</h1>
+                    <p class="text-[#00A89D] text-sm mt-1 hidden md:block">Your complete system for consistent growth</p>
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle"
+                        class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-all">
+                    <i id="theme-icon" class="fas fa-moon"></i>
+                    <span class="hidden md:inline">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quote Bar -->
+        <div class="bg-gradient-to-r from-[#001429] to-[#00A89D] py-3">
+            <div class="max-w-4xl mx-auto px-6 quote-container">
+                <div id="quote-display" class="quote-text text-white font-medium text-center">
+                    "Value first. Always."
+                </div>
+                <div class="quote-arrows">
+                    <button id="quote-prev">‹</button>
+                    <button id="quote-next">›</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed left-[-300px] md:left-0 top-0 bottom-0 w-64 lg:w-72 bg-[#001f3f] text-white overflow-y-auto z-50 shadow-2xl transition-all duration-300">
+        <div class="p-5">
+            <div class="mb-5 px-3">
+                <div class="text-[#00A89D] text-xs tracking-[2px] font-semibold">RUOFF MORTGAGE</div>
+                <div class="text-2xl font-bold">Sales Coach</div>
+            </div>
+
+            <!-- AI Tools -->
+            <div class="sidebar-group">AI TOOLS</div>
+            <ul class="space-y-0.5 px-2 text-sm">
+                <li><a href="#weekly-win-plan" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-fire w-5"></i> Weekly Win Plan</a></li>
+                <li><a href="#equity-scanner" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-search-dollar w-5"></i> Equity Scanner</a></li>
+                <li><a href="#newsletter-generator" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-envelope w-5"></i> Newsletter Generator</a></li>
+                <li><a href="#blog-creator" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-pen-fancy w-5"></i> Blog Creator</a></li>
+                <li><a href="#social-post" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-share-alt w-5"></i> Social Post Creator</a></li>
+            </ul>
+
+            <!-- Marketing -->
+            <div class="sidebar-group mt-5">MARKETING</div>
+            <ul class="space-y-0.5 px-2 text-sm">
+                <li><a href="#prospecting" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-search w-5"></i> Prospecting &amp; Time Blocking</a></li>
+                <li><a href="#social" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-share-alt w-5"></i> Social Media Strategy</a></li>
+            </ul>
+
+            <!-- Growth -->
+            <div class="sidebar-group mt-5">GROWTH</div>
+            <ul class="space-y-0.5 px-2 text-sm">
+                <li><a href="#referrals" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-handshake w-5"></i> Referral Partners</a></li>
+                <li><a href="#planning" class="sidebar-link flex items-center gap-3 px-4 py-2.5"><i class="fas fa-chart-line w-5"></i> Business Planning</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto p-6 md:p-8">
+
+        <!-- Welcome -->
+        <div class="mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm">
+                <h2 class="text-3xl font-bold mb-2">Welcome back, Adam.</h2>
+                <p class="text-gray-600 dark:text-gray-400">v2.3 — Sidebar overlap fixed + Dark Mode working properly.</p>
+            </div>
+        </div>
+
+        <!-- Mindset -->
+        <section class="mb-10">
+            <h2 class="text-3xl font-bold mb-6 text-[#F15A29]">Mindset &amp; Motivation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-brain text-[#00A89D]"></i> Core Pillars</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><strong>Relationship-Building:</strong> Treat every interaction as a chance to build trust.</li>
+                        <li><strong>Value-First:</strong> Help others get what they want without expectation.</li>
+                        <li><strong>Consistency:</strong> Small daily actions create massive results.</li>
+                    </ul>
+                </div>
+                <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-[#F15A29]"></i> Key Stats</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>80% of sales require 5–12 follow-ups</li>
+                        <li>67% of clients forget their lender within 18 months</li>
+                        <li>Consistency is one of the highest-leverage activities</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="text-center py-8 text-sm text-gray-500">
+            v2.3 is stable.<br>
+            Ready to bring back the Blog Creator and Newsletter Generator.
+        </div>
+
+    </main>
+
+    <script>
+        // === DARK MODE (Fixed & Reliable) ===
+        function setupDarkMode() {
+            const toggleBtn = document.getElementById('theme-toggle');
+            const icon = document.getElementById('theme-icon');
+
+            if (!toggleBtn || !icon) return;
+
+            // Apply saved theme on load
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+
+                if (document.documentElement.classList.contains('dark')) {
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+        }
+
+        // Mobile Sidebar Toggle
+        function setupMobileMenu() {
+            const toggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (!toggle || !sidebar) return;
+
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('left-[-300px]');
+                sidebar.classList.toggle('left-0');
+            });
+        }
+
+        // Static Quote Rotator
+        function setupQuoteRotator() {
+            const quotes = [
+                "Value first. Always.",
+                "The harder you work, the luckier you get.",
+                "Consistency beats intensity.",
+                "Relationships are the currency of this business."
+            ];
+
+            let current = 0;
+            const display = document.getElementById('quote-display');
+
+            function showQuote(index) {
+                display.style.opacity = '0';
+                setTimeout(() => {
+                    display.textContent = `"${quotes[index]}"`;
+                    display.style.opacity = '1';
+                }, 150);
+            }
+
+            document.getElementById('quote-prev')?.addEventListener('click', () => {
+                current = (current - 1 + quotes.length) % quotes.length;
+                showQuote(current);
+            });
+
+            document.getElementById('quote-next')?.addEventListener('click', () => {
+                current = (current + 1) % quotes.length;
+                showQuote(current);
+            });
+        }
+
+        function init() {
+            setupDarkMode();
+            setupMobileMenu();
+            setupQuoteRotator();
+            console.log('%c[v2.3] Layout fixed + Dark Mode working.', 'color:#00A89D');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
