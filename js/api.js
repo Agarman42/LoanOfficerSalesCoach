@@ -129,13 +129,10 @@
     console.log('[Grok API] Using PROXY_URL:', getProxyUrl());
     const apiKey = ensureApiKey();
 
-    if (!apiKey) {
-      const hosted = isProductionHosted();
-      if (hosted) {
-        // This should rarely happen in true hosted mode because the server should have the key.
-        // But if the server key is missing, give a clean message.
-        throw new Error('The hosted API service is not configured with a key. Please contact the site owner.');
-      }
+    // In hosted mode we intentionally allow apiKey to be null here.
+    // The proxy will use its own server-side key (XAI_API_KEY or GROK_API_KEY).
+    // We only error early for non-hosted cases.
+    if (!apiKey && !isProductionHosted()) {
       throw new Error('No Grok API key available. AI features are disabled until a valid key is provided.');
     }
 
@@ -186,7 +183,11 @@
         console.error('[Grok API] HTTP error', response.status, errorText);
 
         if (response.status === 401 || response.status === 403) {
-          // Bad key – clear it so user is prompted again next time
+          if (isProductionHosted()) {
+            // Server-side key is missing or invalid on the hosted proxy
+            throw new Error('The hosted API service is not configured with a key. Please contact the site owner.');
+          }
+          // Bad client key in local/dev mode
           localStorage.removeItem(STORAGE_KEY);
           throw new Error('Invalid or expired Grok API key. Please refresh and re-enter your key.');
         }
