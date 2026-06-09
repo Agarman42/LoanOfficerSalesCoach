@@ -2050,19 +2050,24 @@ function getCleanOutlookHTML() {
         }
     );
 
-    // === VIDEO: swap any legacy 560, then flatten inner centering tables ===
-    // The video card itself is now forced to 600px above. Its inner "max-width:560/600 + margin:0 auto" table
-    // used to make the thumbnail + button area look narrower/different than plain text cards.
-    // Unwrap those inners in cleaned so title / thumbnail / button sit directly in the 30px padded td (same as AI cards).
+    // === VIDEO: swap any legacy 560, then flatten the *constraining inner wrapper* only ===
+    // The video card itself is forced to 600px + uniform padding (above). The inner layout table that had
+    // max-width + margin:0 auto was making the video/thumbnail/button area render narrower or misaligned vs text cards.
+    // We swap its max-widths to 100%, then *unwrap only that wrapper table*. 
+    // IMPORTANT: We deliberately do NOT strip align="center" or margin:0 auto globally.
+    // Those are required for:
+    //   - Ruoff logo + title in the header (align="center" + margin:0 auto on the logo table)
+    //   - "▶ Watch Video" button (its wrapper table + td use align="center")
+    //   - "Send Me a Referral" button (same)
+    //   - Hero image row
+    // The unwrap pulls the inner content (which already contains the correct align="center" tds/tables for title, thumbnail, and buttons)
+    // directly into the video card's padded <td>, so buttons center under the video while the whole card is uniformly 600px wide.
     cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:100%');
     cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="100%"');
     cleanHTML = cleanHTML.replace(/max-width:\s*600px/gi, 'max-width:100%');
 
-    // Remove centering constraints from video sub-elements
-    cleanHTML = cleanHTML.replace(/align="center"/gi, '');
-    cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto;?/gi, 'margin:0;');
-
-    // Unwrap any remaining nested max-width tables that were only for centering video content (now 100%)
+    // Unwrap the video's (now 100%) constraining inner layout table so its centered content fills the full padded card area.
+    // The pulled content keeps its own align="center" attributes on the title, thumbnail, and button elements.
     cleanHTML = cleanHTML.replace(/<table[^>]*max-width:\s*100%;[^>]*margin:\s*0\s*auto;[^>]*>([\s\S]*?)<\/table>/gi, '$1');
     cleanHTML = cleanHTML.replace(/<table[^>]*margin:\s*0\s*auto;[^>]*max-width:[^>]*>([\s\S]*?)<\/table>/gi, '$1');
 
