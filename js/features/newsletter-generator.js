@@ -1502,8 +1502,7 @@ async function generateNewsletter(feedback = '') {
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
                 '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" where [Name] is replaced with ONLY THE FIRST NAME from the Name field (e.g. if Name is "Adam Garman", use "Adam" only — NEVER use the last name or full name in the title). NEVER output "A Note From Adam" or any other hardcoded name unless it exactly matches the first name. Use only the first name.',
-                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player in the <!-- PERSONAL VIDEO PLACEHOLDER --> section. Otherwise use the photo if provided (in [PERSONAL PHOTO PLACEHOLDER]). Leave the exact placeholders [PERSONAL PHOTO PLACEHOLDER] and <!-- PERSONAL VIDEO PLACEHOLDER --> untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
-                '- PERSONAL VIDEO PLACEHOLDER: Leave the exact <!-- PERSONAL VIDEO PLACEHOLDER --> untouched. Post-processing will replace it with the video section if a video URL is provided.',
+                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
                 '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
@@ -1517,7 +1516,7 @@ async function generateNewsletter(feedback = '') {
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. Leave the exact placeholder <!-- BLOG SECTION PLACEHOLDER --> untouched (it goes right before the Personal Note Section). The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box and provided a URL. Never output a blog section on your own.',
                 '',
-                'OUTPUT ONLY complete standalone HTML following this skeleton exactly for the header, placeholders, personal note, video, referral and footer. CRITICAL: You MUST generate 4 or more distinct main content sections (Market Update, Industry Insights, Local Flavor, Client Story/Win or similar) as full teal card blocks IMMEDIATELY after the hero spacer and BEFORE the blog/personal placeholders. Each must follow the exact teal card format: <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;"><tr><td style="padding:30px 30px 30px 30px;"> with <h2>, paragraphs, lists, and Sources links where required. Use the CRITICAL RULES above for content. Do not skip sections or output only placeholders/comments for them. Generate real content based on the user\'s profile, location, and the rules.',
+                'OUTPUT ONLY complete standalone HTML using this exact structure:',
                 '',
 '<!DOCTYPE html>',
     '<html lang="en">',
@@ -1542,12 +1541,8 @@ async function generateNewsletter(feedback = '') {
     '    </td></tr>',
     '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
-    '    <!-- MAIN CONTENT SECTIONS: generate 4+ full cards here (Market Update, Industry, Local, etc.) -->',
-    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;"><tr><td style="padding:30px 30px 30px 30px;"><h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Market Update</h2><p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Generate real market content here per rules, end with Sources links]</p></td></tr></table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;"><tr><td style="padding:30px 30px 30px 30px;"><h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Industry Insights</h2><p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Generate real industry content here per rules, end with Sources links]</p></td></tr></table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;"><tr><td style="padding:30px 30px 30px 30px;"><h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Local Flavor</h2><p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Generate real local content here per rules]</p></td></tr></table></td></tr>',
+    '    <!-- Sections (Market, Industry, Local, etc.) go here -->',
+    '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
     '    <tr><td height="20"></td></tr>',
     '    <!-- BLOG SECTION PLACEHOLDER -->',
     '    <!-- Personal Note Section -->',
@@ -1558,8 +1553,6 @@ async function generateNewsletter(feedback = '') {
     '        [PERSONAL PHOTO PLACEHOLDER]',
     '      </td></tr>',
     '    </table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <!-- PERSONAL VIDEO PLACEHOLDER -->',
     '    <tr><td height="20"></td></tr>',
     '    <!-- REFERRAL CTA PLACEHOLDER -->',
     '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
@@ -1702,27 +1695,41 @@ async function generateNewsletter(feedback = '') {
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
   <tr>
     <td style="padding:30px;">
-      <p style="margin:0 0 16px; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
-      <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none; display:block; margin-bottom:16px;">
-        <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:540px; margin:0 auto;">
-          <tr>
-            <td style="padding:0;">
-              <img src="${thumbnailUrl}" 
-                   alt="Watch Personal Video" 
-                   width="540" 
-                   style="width:100%; max-width:540px; height:auto; display:block; border:0;">
-            </td>
-          </tr>
-        </table>
-      </a>
-      <!-- Outlook-friendly button -->
-      <table align="center" cellpadding="0" cellspacing="0" role="presentation">
+      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto;">
         <tr>
-          <td align="center" bgcolor="#F15A29" style="border-radius:30px; padding:4px;">
-            <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
-               style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
-                ▶ Watch Video
+          <td align="center" style="padding-bottom:16px;">
+            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center">
+            <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none;">
+              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:560px;">
+                <tr>
+                  <td style="padding:0;">
+                    <img src="${thumbnailUrl}" 
+                         alt="Watch Personal Video" 
+                         width="560" 
+                         style="width:100%; max-width:560px; height:auto; display:block; border:0;">
+                  </td>
+                </tr>
+              </table>
             </a>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding-top:18px;">
+            <!-- Outlook-friendly button -->
+            <table align="center" cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
+                  <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
+                     style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
+                      ▶ Watch Video
+                  </a>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
@@ -1809,7 +1816,9 @@ html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
 // Force personal note title to ALWAYS use only the first name (no last name allowed)
 html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 
-// Insert video section using dedicated placeholder for reliability (post-processing always controls it).
+// Insert video section (when checked) right before referral. Uses placeholder if AI left it,
+// otherwise inserts before footer as fallback. This + the later referral ensure guarantees
+// the sections are at the bottom whenever the video checkbox is checked.
 if (includeVideo && personalVideoUrl) {
     const videoSection = `
 <tr><td height="20"></td></tr>
@@ -1819,10 +1828,14 @@ ${videoTable}
   </td>
 </tr>
 <tr><td height="20"></td></tr>`;
-    // Replace the explicit placeholder the AI was instructed to leave
-    html = html.replace(/<!-- PERSONAL VIDEO PLACEHOLDER -->/i, videoSection);
-    // Strip any AI-generated duplicate video section (in case the model ignored the instruction)
-    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
+    if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
+        html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/i, videoSection + '[REFERRAL CTA PLACEHOLDER]');
+    } else if (!html.includes('Personal Video Update')) {
+        html = html.replace(
+            /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
+            videoSection + '\n<tr><td height="20"></td></tr>\n$1'
+        );
+    }
 }
 
 // === REFERRAL - Updated (no phone number) ===
@@ -2012,6 +2025,12 @@ function getCleanOutlookHTML() {
         </tr>
         <tr><td height="20"></td></tr>`
     );
+
+    // === VIDEO SECTION - force consistent width in cleaned Outlook/vault copies ===
+    // Raw/preview keeps the original 560px for thumbnail ratio (which looked fine).
+    // Cleaned versions adjust to 600px so the video card matches the width of other sections.
+    cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:600px');
+    cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="600"');
 
     return cleanHTML;
 }
