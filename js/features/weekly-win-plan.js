@@ -58,6 +58,7 @@
     return {
       ...local,
       name: central.name || local.name || "Loan Officer",
+      email: central.email || '',
       // Unit goal (number of loans) — this is what the Weekly Win Plan cares about for "Monthly Target"
       monthlyUnits: central.monthlyUnits || local.monthlyGoal || local.monthlyUnits || 8,
       // Dollar volume goal (for future use)
@@ -90,7 +91,7 @@
     const personalityDisplay = personalityParts.length ? personalityParts.join(' • ') : '—';
 
     const html = `
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 min-w-0">
           <div class="flex items-center gap-2 text-[#00A89D] mb-1"><i class="fas fa-user text-sm"></i> <span class="text-xs font-bold tracking-wider">NAME</span></div>
           <div class="font-semibold text-gray-900 dark:text-white text-[15px] break-words leading-tight">${p.name || eff.name || '—'}</div>
@@ -138,7 +139,7 @@
 
     async function generatePlan(targetOutputId = 'plan-output') {
     // 2026 BUSINESS PLAN ONLY - see top of file for separation from generateWeeklyPlan / Weekly Win Plan
-    console.log('%c[weekly-win-plan] generatePlan() called', 'color: #00A89D', 'target:', targetOutputId);
+
 
     // ABSOLUTE FIRST ACTION: force the progress modal visible with the rich overlay (enrich panel + cycling tips).
     // This must happen before ANY DOM writes to output areas so the user NEVER sees a "generating" note in the page.
@@ -146,7 +147,6 @@
       window.forceShowGlobalLoading('Crafting Your 2026 Business Plan...');
     }
 
-    // Extra legacy defensive forces (kept for belt-and-suspenders; the helper above is the primary)
     const le0 = document.getElementById('global-loading');
     if (le0) {
       le0.classList.remove('hidden');
@@ -321,6 +321,7 @@ Plan Style Chosen: ${style}
 
 DEEP PERSONALIZATION FROM PROFILE (use this heavily — make the plan feel written just for them):
 - Name: ${richProfile.name}
+- Email: ${richProfile.email || profile.email || 'not specified'}
 - Years in business: ${profile.years || 'not specified'}
 - Personality / Voice / Lifestyle: ${profile.personality || richProfile.personality || 'not specified'}
 - Preferred Tone for communication: ${profile.tone || richProfile.tone || 'warm and professional'}
@@ -615,6 +616,9 @@ function restoreSavedWeeklyPlan() {
         const generateWrapper = document.getElementById('generate-plan-wrapper');
         if (generateWrapper) generateWrapper.classList.add('hidden');
 
+        const pregen = document.getElementById('weekly-pregen-guidance');
+        if (pregen) pregen.classList.add('hidden');
+
         renderWeeklyTiles(savedWeeklyPlan.days, container);
         // Ensure progress UI is in sync on restore
         const checked = JSON.parse(localStorage.getItem('weeklyCheckedTasks') || '[]');
@@ -622,6 +626,18 @@ function restoreSavedWeeklyPlan() {
     } else {
         // Show helpful empty state on first visit
         showWeeklyPlanEmptyState(container);
+
+        // Defensively ensure the rich pre-gen guidance + generate wrapper are visible
+        // (prevents any stale 'hidden' state from prior saves or partial clears, and makes the
+        // "top of the section before a plan is generated" always look rich as designed).
+        const generateWrapper = document.getElementById('generate-plan-wrapper');
+        if (generateWrapper) generateWrapper.classList.remove('hidden');
+
+        const pregen = document.getElementById('weekly-pregen-guidance');
+        if (pregen) pregen.classList.remove('hidden');
+
+        const resultsWrapper = document.getElementById('weekly-plan-results');
+        if (resultsWrapper) resultsWrapper.classList.add('hidden');
     }
 }
 
@@ -696,7 +712,6 @@ async function generateWeeklyPlan() {
       window.forceShowGlobalLoading('Building Your Weekly Win Plan...');
     }
 
-    // Force immediately in case handler force missed (belt and suspenders)
     const le0 = document.getElementById('global-loading');
     if (le0) {
       le0.classList.remove('hidden');
@@ -811,9 +826,12 @@ async function generateWeeklyPlan() {
     const resultsWrapper = document.getElementById('weekly-plan-results');
     if (resultsWrapper) resultsWrapper.classList.remove('hidden');
 
-    // Hide the generate button
+    // Hide the generate button + pre-gen explanatory guidance (now that we have a plan)
     const generateWrapper = document.getElementById('generate-plan-wrapper');
     if (generateWrapper) generateWrapper.classList.add('hidden');
+
+    const pregen = document.getElementById('weekly-pregen-guidance');
+    if (pregen) pregen.classList.add('hidden');
 
     // Clear previous week's checked tasks when generating a fresh plan.
     // IMPORTANT: Do NOT put any "Generating..." placeholder text into the container. The custom rich content we injected into #global-loading (the full "Building Your Weekly Win Plan..." card with Why it Works + Reminders) is the progress UI the user sees.
@@ -824,12 +842,13 @@ async function generateWeeklyPlan() {
     const prompt = `You are an expert mortgage sales coach. Create a practical, motivating 7-day prospecting plan for a loan officer.
 
 User Profile:
-- Name: ${userSetup.name}
-- Monthly loan goal: ${userSetup.monthlyGoal}
-- Focus area: ${userSetup.focus}
-- Weekly prospecting hours available: ${userSetup.hours}
-- Hobbies/Passions: ${[...(userSetup.hobbies || []), userSetup.hobbiesOther].filter(Boolean).join(', ') || 'none specified'}
-- Preferred prospecting activities: ${ (userSetup.preferredActivities || []).join(', ') || 'balanced mix' }
+- Name: ${getCentralProfile().name || userSetup.name || ''}
+- Email: ${getCentralProfile().email || ''}
+- Monthly loan goal (units): ${getCentralProfile().monthlyUnits || getCentralProfile().monthlyGoal || userSetup.monthlyGoal || 8}
+- Focus area: ${getCentralProfile().focus || userSetup.focus || ''}
+- Weekly prospecting hours available: ${getCentralProfile().hours || userSetup.hours || ''}
+- Hobbies/Passions: ${[...(getCentralProfile().hobbies || []), getCentralProfile().hobbiesOther].filter(Boolean).join(', ') || [...(userSetup.hobbies || []), userSetup.hobbiesOther].filter(Boolean).join(', ') || 'none specified'}
+- Preferred prospecting activities: ${ (getCentralProfile().activities || getCentralProfile().preferredActivities || userSetup.preferredActivities || []).join(', ') || 'balanced mix' }
 
 Create exactly 7 days (Monday through Sunday). For each day give 2-4 specific, actionable prospecting or relationship tasks that fit the user's available time and preferred style. Weave in their hobbies naturally when it makes sense (e.g. golf with a realtor partner).
 
@@ -875,6 +894,9 @@ Return ONLY valid JSON in this exact format:
         const generateWrapper = document.getElementById('generate-plan-wrapper');
         if (generateWrapper) generateWrapper.classList.add('hidden');
 
+        const pregen = document.getElementById('weekly-pregen-guidance');
+        if (pregen) pregen.classList.add('hidden');
+
         renderWeeklyTiles(data.days, container);
 
     } catch (error) {
@@ -885,6 +907,13 @@ Return ONLY valid JSON in this exact format:
                 <p class="text-sm mt-2">Please make sure the local Grok proxy is running (bash start-proxy.sh) and try again. API proxy on 3000 (HTML serve port like 8080 is fine; use CUSTOM_PROXY_URL if proxy port differs). You can also use the Business Planning section for a full 2026 plan.</p>
             </div>
         `;
+        // On failure, restore the pre-gen UI so user can retry easily
+        const gw = document.getElementById('generate-plan-wrapper');
+        if (gw) gw.classList.remove('hidden');
+        const pg = document.getElementById('weekly-pregen-guidance');
+        if (pg) pg.classList.remove('hidden');
+        const rw = document.getElementById('weekly-plan-results');
+        if (rw) rw.classList.add('hidden');
     } finally {
         // Restore the original #global-loading markup (the standard spinner + title + message) then hide via the shared helper
         const loadingEl = document.getElementById('global-loading');
@@ -1027,6 +1056,17 @@ function renderWeeklyTiles(days, container) {
                                 <span class="font-semibold text-[#00A89D] mr-1">💡</span> ${t.tip}
                             </div>
                         ` : ''}
+
+                        <div class="mt-1.5 ml-6">
+                            <button onclick="if(typeof window.saveWeeklyTask==='function') window.saveWeeklyTask(this)"
+                                    data-day="${day.day}"
+                                    data-task="${(t.task || '').replace(/"/g, '&quot;')}"
+                                    data-tip="${(t.tip || '').replace(/"/g, '&quot;')}"
+                                    class="text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-gray-700 text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition flex items-center gap-1">
+                                <i class="far fa-bookmark text-[9px]"></i>
+                                <span>Save</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1104,9 +1144,12 @@ function clearWeeklyPlan() {
     const resultsWrapper = document.getElementById('weekly-plan-results');
     if (resultsWrapper) resultsWrapper.classList.add('hidden');
 
-    // Show generate button again
+    // Show generate button + pre-gen guidance again
     const generateWrapper = document.getElementById('generate-plan-wrapper');
     if (generateWrapper) generateWrapper.classList.remove('hidden');
+
+    const pregen = document.getElementById('weekly-pregen-guidance');
+    if (pregen) pregen.classList.remove('hidden');
 }
 
 // Updates the progress numbers, bar, and message in the new polished layout
@@ -1166,6 +1209,56 @@ function copyWeeklyPlan() {
         prompt('Copy this weekly plan:', text.trim());
     });
 }
+
+// Save the current weekly plan (full) to the unified vault as type 'plan' (rich saved items library)
+function saveWeeklyPlanToVault() {
+    if (!currentWeeklyDays || !currentWeeklyDays.length) {
+        if (window.showToast) window.showToast('No weekly plan to save yet.');
+        return;
+    }
+    let richHtml = `<div class="plan-saved">
+  <div class="mb-3">
+    <span class="text-xs uppercase tracking-widest font-bold text-[#F15A29]">Weekly Win Plan</span>
+  </div>`;
+    currentWeeklyDays.forEach(day => {
+        richHtml += `<div class="mb-3">
+  <div class="font-bold text-[#F15A29]">${day.day}</div>`;
+        (day.tasks || []).forEach(t => {
+            richHtml += `<div class="ml-2 text-sm">• ${t.task}${t.tip ? ` <span class="text-gray-500">— ${t.tip}</span>` : ''}</div>`;
+        });
+        richHtml += `</div>`;
+    });
+    richHtml += `<div class="text-xs text-gray-500 mt-2">Personalized weekly plan • Check off tasks in the Weekly Win Plan tool</div></div>`;
+    const title = `Weekly Win Plan — ${new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+    if (typeof window.toggleSaveIdea === 'function') {
+        window.toggleSaveIdea(title, richHtml, null, 'plan');
+        if (typeof window.showSavedFeedback === 'function') {
+            window.showSavedFeedback('Weekly plan saved to My Saved Items');
+        } else if (typeof window.showToast === 'function') {
+            window.showToast('Weekly plan saved to My Saved Items');
+        } else {
+            const fb = document.createElement('div');
+            fb.textContent = '✓ Weekly plan saved to My Saved Items';
+            fb.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#00A89D;color:white;padding:10px 18px;border-radius:9999px;font-size:13px;z-index:999999;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1)';
+            document.body.appendChild(fb);
+            setTimeout(() => fb.remove(), 2200);
+        }
+    }
+}
+
+// Per-task save helper (used by buttons injected in renderWeeklyTiles)
+window.saveWeeklyTask = function(btn) {
+    if (!btn) return;
+    const day = btn.dataset.day || '';
+    const task = btn.dataset.task || '';
+    const tip = btn.dataset.tip || '';
+    if (!task) return;
+    const title = `Weekly Task: ${day} — ${task}`;
+    const content = task + (tip ? ' — ' + tip : '');
+    if (typeof window.toggleSaveIdea === 'function') {
+        window.toggleSaveIdea(title, content, btn, 'plan');
+    }
+};
 
 function addCustomTaskToDay(dayName, buttonElement) {
     if (!currentWeeklyDays) return;
@@ -1295,13 +1388,12 @@ function saveFullPlanToVault() {
             return;
         }
 
-        // Save a *cleaner* version for My Saved Items: prefer the core AI content (preview).
-        // Strip heavy orange branding / large v2 accents / prose classes so it's readable as plain-ish formatted text (bold, headings, lists kept; no huge orange letters).
-        // User requested: some formatting ok (bold etc), but not the big orange from the tool UI.
+        // Save a *cleaner*, polished version for My Saved Items.
+        // Produce a self-contained .plan-saved card with nice header, controlled typography (no huge orange headings, no big blocks of text), good spacing, and preserved structure (headings, lists, bold).
         let raw = (preview ? preview.innerHTML : (output ? (output.querySelector('#plan-preview') ? output.querySelector('#plan-preview').innerHTML : output.innerHTML) : '')) || 'Custom 2026 Business Plan';
 
-        // Sanitize: replace orange accents with neutral dark, remove large prose / shadow / border-2 orange wrappers if leaked, keep structure.
-        let cleanContent = raw
+        // Sanitize: neutralize orange accents, remove generator-specific chrome/headers, keep useful formatting.
+        let cleaned = raw
           .replace(/text-\[#F15A29\]/g, 'text-[#002B5C]')
           .replace(/bg-\[#F15A29\][^\s"']*/g, 'bg-gray-100')
           .replace(/border-\[#F15A29\][^\s"']*/g, 'border-gray-200')
@@ -1309,12 +1401,39 @@ function saveFullPlanToVault() {
           .replace(/prose-lg|prose-xl|prose-2xl/g, 'prose prose-base')
           .replace(/shadow-2xl|shadow-xl/g, 'shadow-sm')
           .replace(/border-2 border-\[#F15A29\]\/30/g, 'border border-gray-200')
-          .replace(/YOUR 2026 ROADMAP IS READY|Your Custom 2026 Business Plan|Bring This Plan to Life/g, '') // strip hero chrome if present in fallback
+          .replace(/YOUR 2026 ROADMAP IS READY|Your Custom 2026 Business Plan|Bring This Plan to Life/g, '')
           .replace(/<div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-\[#F15A29\] text-white text-xs[^>]*>.*?<\/div>/gi, '')
-          .replace(/<h3 class="text-3xl[^>]*>.*?<\/h3>/gi, ''); // remove the big orange h3 if in full output
+          .replace(/<h3 class="text-3xl[^>]*>.*?<\/h3>/gi, '');
 
-        // Add a small neutral header note
-        cleanContent = '<div style="margin-bottom:12px;font-size:12px;color:#666;border-bottom:1px solid #eee;padding-bottom:6px;">2026 Business Plan (clean view — original formatting preserved where helpful)</div>' + cleanContent;
+        // Build rich, polished saved structure (matches quality of blog bundles, equity, etc.)
+        const planStyle = document.querySelector('input[name="plan-style"]:checked')?.value || 'Custom';
+        const cleanContent = `
+<div class="plan-saved border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden bg-white dark:bg-gray-900">
+  <div class="px-5 py-4 bg-gradient-to-r from-[#F15A29]/5 via-white to-white dark:via-gray-900 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
+    <div class="flex items-center gap-2">
+      <span class="inline-block px-3 py-0.5 text-[10px] font-bold tracking-[1.5px] rounded-full bg-[#F15A29] text-white">2026 BUSINESS PLAN</span>
+      <span class="text-[10px] text-gray-400">${planStyle}</span>
+    </div>
+    <div class="mt-1 text-lg font-bold text-[#002B5C] dark:text-white">Your 2026 Business Plan</div>
+  </div>
+
+  <div class="p-5">
+    <div class="plan-content prose prose-sm dark:prose-invert max-w-none p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl leading-relaxed overflow-auto max-h-[380px]
+      [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-[#002B5C] dark:[&_h1]:text-white [&_h1]:mt-0 [&_h1]:mb-2
+      [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-1.5
+      [&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-3
+      [&_p]:mb-3 [&_p]:text-gray-700 dark:[&_p]:text-gray-300
+      [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1
+      [&_strong]:font-semibold
+    ">
+      ${cleaned}
+    </div>
+  </div>
+
+  <div class="px-5 py-2.5 bg-gray-50 dark:bg-gray-800 border-t text-[10px] text-gray-400">
+    Saved 2026 Business Plan • Regenerate with updated inputs or profile anytime for a fresh version.
+  </div>
+</div>`;
 
         const title = '2026 Business Plan — ' + (document.querySelector('input[name="plan-style"]:checked')?.value || 'Custom');
 
@@ -1376,6 +1495,7 @@ function clearBusinessPlan() {
 // Setup & Persistence
 let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
     name: "Loan Officer",
+    email: "",
     monthlyGoal: 8,
     focus: "Balanced",
     lastMonth: 0,
@@ -1618,11 +1738,8 @@ window.syncPlanningFormFromProfile = function() {
   if (typeof window.updateHobbyTactics === 'function') window.updateHobbyTactics();
   if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
 
-  // Only toast if the planning section is currently visible (avoids spam toast on every page load from init call)
-  const planningSection = document.getElementById('planning');
-  if (typeof window.showToast === 'function' && planningSection && !planningSection.classList.contains('hidden')) {
-    window.showToast('Synced your full profile (goals, hobbies, activities, challenges) into the plan form');
-  }
+  // Silent sync — no toast to prevent corner popups saying "something was loaded"
+
 
   // Populate extended relevant profile info visibly on the planning page (so user sees all valuable profile data is being used)
   renderExtendedProfileInfo();
@@ -1717,10 +1834,8 @@ window.applyPlanPreset = function(preset) {
     if (typeof window.updateHobbyTactics === 'function') window.updateHobbyTactics();
   }, 80);
 
-  // Gentle toast
-  if (typeof window.showToast === 'function') {
-    window.showToast('Preset loaded — tweak anything you want (vision style left as you chose)');
-  }
+  // No toast — the visual highlight on the preset button is sufficient and cleaner
+
 
   // Highlight the selected preset button (similar to Your 2026 Vision cards) so selection is obvious
   highlightActivePreset(preset);
@@ -1810,9 +1925,7 @@ window.loadPlanBaseline = function() {
   if (typeof window.updateHobbyTactics === 'function') window.updateHobbyTactics();
   if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
 
-  if (typeof window.showToast === 'function') {
-    window.showToast('Baseline loaded into the form.');
-  }
+  // No toast for baseline load — UI update + highlight is enough
 };
 
 // === Hobby-Tied Tactics (richer, live suggestions based on selected hobbies) ===
@@ -2206,7 +2319,6 @@ function initWeeklyWinPlan() {
             if (typeof window.forceShowGlobalLoading === 'function') {
               window.forceShowGlobalLoading('Building Your Weekly Win Plan...');
             }
-            // Extra defensive force for the container itself
             const le = document.getElementById('global-loading');
             if (le) {
               le.classList.remove('hidden');
@@ -2223,6 +2335,7 @@ function initWeeklyWinPlan() {
     restoreSavedWeeklyPlan();
 
     window.generateWeeklyPlan = generateWeeklyPlan;
+    window.saveWeeklyPlanToVault = saveWeeklyPlanToVault;
 
     console.log('%c[weekly-win-plan.js] Weekly Win Plan / Business Planning initialized', 'color:#00A89D');
 

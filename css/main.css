@@ -855,3 +855,69 @@ html.dark body.sidebar-collapsed #menu-toggle:hover {
     hyphens: auto;
   }
 }
+
+/* Referral Partners micro-strategies chevron rotation */
+details[open] .details-arrow {
+  transform: rotate(180deg);
+}
+
+/* Hide native details marker since we use custom chevron */
+details summary::-webkit-details-marker,
+details summary::marker {
+  display: none;
+}
+
+/* ============================================
+   Mobile UI/UX Polish & Overflow Guards
+   ============================================ */
+@media (max-width: 640px) {
+  /* Reduce generous desktop px-8 padding on tool cards so content doesn't feel cramped or cause horizontal issues on small phones */
+  .card {
+    padding-left: 1rem !important;   /* 16px */
+    padding-right: 1rem !important;
+  }
+  section.card {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Prevent any button text from overflowing or looking huge */
+  button {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Tighter gaps in 2-col metric grids inside cards on tiny screens */
+  .grid.grid-cols-2 {
+    gap: 0.5rem 0.75rem;
+  }
+
+  /* Make sure form labels and long text in small containers wrap instead of forcing overflow */
+  label, .text-sm, .text-xs {
+    word-break: break-word;
+  }
+
+  /* Scale down large headings slightly on tiny screens to avoid crowding */
+  h2.text-3xl, .text-3xl.font-bold {
+    font-size: 1.5rem !important; /* ~24px */
+    line-height: 1.25;
+  }
+
+  /* Slightly tighter sidebar internals on mobile overlay */
+  #sidebar .sidebar-group {
+    padding: 12px 16px;
+    margin: 12px 12px 8px 12px;
+    font-size: 0.95rem;
+  }
+  #sidebar ul {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Vault copy buttons: allow wrap/shrink on very small screens */
+  .vault-copy-btn {
+    white-space: normal;
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}

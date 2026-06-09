@@ -825,26 +825,6 @@ function resetUsed(category) {
     alert(`"${category === 'funFacts' ? 'Fun Facts' : category === 'proTips' ? 'Pro Tips' : 'Motivational Quotes'}" tracking reset! Random selections refreshed.`);
 }
 
-function openNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        // click outside to close (scoped)
-        modal.onclick = function(e) {
-            if (e.target === modal) closeNewsletterTips();
-        };
-    }
-}
-
-function closeNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        modal.onclick = null;
-    }
-}
 
 // Random selection (no repeats)
 function getRandomItem(list, used) {
@@ -1324,10 +1304,32 @@ document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', 
 });
 
 async function generateNewsletter(feedback = '') {
-    const loading = document.getElementById('global-loading');
-    if (loading) loading.classList.remove('hidden');
+    const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
+    const displayTitle = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
+
+    // Use the shared robust force helper (matches Weekly Win Plan, Social Calendar, Blog Creator, etc.)
+    // so the progress modal appears immediately and survives cache / timing issues.
+    if (typeof window.forceShowGlobalLoading === 'function') {
+        window.forceShowGlobalLoading(titleText);
+    }
+
+    // Belt-and-suspenders force visibility (exact pattern from weekly-win-plan.js)
+    const le0 = document.getElementById('global-loading');
+    if (le0) {
+        le0.classList.remove('hidden');
+        le0.style.setProperty('display', 'flex', 'important');
+        le0.style.setProperty('z-index', '99999', 'important');
+        le0.style.setProperty('visibility', 'visible', 'important');
+        le0.style.setProperty('opacity', '1', 'important');
+        le0.style.setProperty('position', 'fixed', 'important');
+        le0.style.setProperty('inset', '0', 'important');
+    }
 
     const selectedHero = heroImages[Math.floor(Math.random() * heroImages.length)];
+
+    // Pull central profile so the *entire* newsletter generation prompt (not just the pre-filled personal note) can use rich voice, hobbies, challenges, tone, focus etc.
+    // (consistent with weekly, blog, social, sales-scripts, PTB, ai-chat)
+    const p = getCentralProfile();
 
     let html = '';
 
@@ -1335,46 +1337,78 @@ async function generateNewsletter(feedback = '') {
     const fullName = document.getElementById('nl-name').value || 'Your Loan Officer';
     const firstName = fullName.split(' ')[0].trim();
 
-    // === SAVE ORIGINAL LOADING CONTENT ===
+    // === SAVE ORIGINAL LOADING CONTENT (after force so we capture the clean base card) ===
     const loadingEl = document.getElementById('global-loading');
     if (loadingEl) {
         loadingEl.dataset.originalContent = loadingEl.innerHTML;
     }
 
-    // === INJECT TIPS MODAL CONTENT INTO LOADING SPINNER ===
+    // === INJECT RICH PROGRESS CONTENT — styled to exactly match the Weekly/Social/Blog loading cards ===
     const loadingTipsContent = `
         <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
-            <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-3xl w-full border border-[#00A89D]/30">
+            <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border border-gray-200 dark:border-gray-700">
+                
                 <div class="text-center mb-8">
-                    <div class="inline-block animate-spin rounded-full h-24 w-24 border-t-8 border-b-8 border-[#F15A29] mb-6"></div>
-                    <h3 class="text-3xl font-black text-[#002B5C] dark:text-white mb-4">Building Your Newsletter...</h3>
-                    <p class="text-xl text-gray-700 dark:text-gray-300 mb-2">This can take 30–60 seconds — grab coffee! ☕</p>
-                    <p class="text-base text-gray-600 dark:text-gray-400">Crafting your personalized edition right now...</p>
+                    <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
+                    <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">
+                        ${displayTitle}
+                    </h3>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">
+                        This usually takes 30–60 seconds — grab coffee! ☕
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Crafting your personalized, compliant edition with your voice + curated gems.
+                    </p>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-inner border border-[#00A89D]/30">
-                    <h4 class="text-2xl font-bold text-[#F15A29] mb-6 text-center">Why Newsletters Are Pure Gold 💰</h4>
-                    <div class="space-y-5 text-base sm:text-lg text-gray-800 dark:text-gray-200">
-                        <p><strong>Stay Top-of-Mind:</strong> Consistent touchpoints = more referrals without cold outreach.</p>
-                        <p><strong>Build Trust:</strong> Mix value (market updates, tips) with personal (life updates) = genuine relationships.</p>
-                        <p><strong>People Love Them:</strong> Recipes, local events, fun facts — your audience actually opens and enjoys these.</p>
-                        <p class="font-semibold mt-4">Pro Tips:</p>
-                        <ul class="list-disc pl-6 space-y-3">
+                <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                    <h4 class="text-xl font-bold text-[#F15A29] mb-5 text-center">
+                        Why Newsletters Are Pure Gold
+                    </h4>
+                    <div class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                        <div class="flex gap-3">
+                            <i class="fas fa-broadcast-tower text-[#F15A29] mt-0.5"></i>
+                            <div><strong>Stay Top-of-Mind:</strong> Consistent touchpoints = more referrals without cold outreach.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-handshake text-[#00A89D] mt-0.5"></i>
+                            <div><strong>Build Real Trust:</strong> Mix value (market updates, tips) with personal updates = genuine relationships that convert.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-heart text-[#002B5C] mt-0.5"></i>
+                            <div><strong>People Actually Love Them:</strong> Recipes, local events, fun facts, wins — your audience opens, reads, and engages.</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-semibold text-[#F15A29] mb-2">Pro Tips for Maximum Impact:</p>
+                        <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc pl-5">
                             <li>Send consistently (weekly or monthly) — momentum compounds.</li>
-                            <li>Keep it short & scannable — bold headers, emojis, short paragraphs.</li>
+                            <li>Keep it short &amp; scannable — bold headers, emojis, short paragraphs.</li>
                             <li>End with a soft CTA: "Know anyone thinking about buying/refinancing? I'm here to help!"</li>
-                            <li>Use tools like Mailchimp/Constant Contact for pretty delivery & tracking.</li>
+                            <li>Use tools like Mailchimp/Constant Contact for pretty delivery &amp; tracking.</li>
                             <li>Personal updates are magic — share wins, family, hobbies to humanize yourself.</li>
                         </ul>
-                        <p class="font-bold text-[#F15A29] text-center mt-6">You got this — one newsletter at a time, you're building an unstoppable network! 🔥</p>
                     </div>
                 </div>
+
+                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5">
+                    You got this — one newsletter at a time, you're building an unstoppable network! 🔥
+                </p>
             </div>
         </div>
     `;
 
     if (loadingEl) {
         loadingEl.innerHTML = loadingTipsContent;
+        // Re-force after replacing innerHTML (custom card has no original title/message children)
+        loadingEl.classList.remove('hidden');
+        loadingEl.style.setProperty('display', 'flex', 'important');
+        loadingEl.style.setProperty('z-index', '99999', 'important');
+        loadingEl.style.setProperty('visibility', 'visible', 'important');
+        loadingEl.style.setProperty('opacity', '1', 'important');
+        loadingEl.style.setProperty('position', 'fixed', 'important');
+        loadingEl.style.setProperty('inset', '0', 'important');
     }
 
     try {
@@ -1419,6 +1453,11 @@ async function generateNewsletter(feedback = '') {
                 '- Create a unique title for every newsletter — never repeat the same title.',
                 '- Good style examples: "The Lending Edge", "Closing Strong", "Your Mortgage Advantage", "Lending Smarter", "The Home Loan Edge", "Mortgage Mastery", "Borrow Better", "Rate & Relationship".',
                 '',
+                '**LANGUAGE RULE (important):**',
+                '- Check the "Specific Topics" field (and any other instructions). If the user requests a different language there (e.g. "Prepare the full newsletter in Spanish", "Generate in French", "in German", "en español", "tout en français"), output the **entire newsletter HTML** (all sections, personal note, headlines, body text, etc.) fully in that requested language.',
+                '- Translate naturally while keeping the exact required structure, teal accents, tables, placeholders, and compliance disclaimers.',
+                '- If no language is requested, default to English.',
+                '',
                 '**ACCURACY RULES (NON-NEGOTIABLE):**',
                 '- EVERY fact, statistic, trend, event, or claim MUST be 100% accurate and verifiable.',
                 '- NEVER guess, hallucinate, or invent information. If uncertain, OMIT it or use safe evergreen phrasing.',
@@ -1431,6 +1470,7 @@ async function generateNewsletter(feedback = '') {
                 'User Inputs:',
                 '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
+                '- Match the full "LO PROFILE & VOICE CONTEXT" section above for this specific loan officer (use their personality, voice traits, hobbies, and challenges to make the personal note + any relatable language feel authentic to them — blend naturally, never salesy).',
                 '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
                 '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
@@ -1438,13 +1478,25 @@ async function generateNewsletter(feedback = '') {
                 '- Personal update: "' + (document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!') + '"',
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
-                '- Specific topics: "' + (document.getElementById('nl-specific').value || 'None') + '"',
+                '- Specific topics / special requests (including any language requests such as "in Spanish" or "prepare the newsletter in French"): "' + (document.getElementById('nl-specific').value || 'None') + '"',
                 '',
                 'Branding:',
                 '- Name: ' + (document.getElementById('nl-name').value || 'Your Loan Officer'),
                 '- Email: ' + (document.getElementById('nl-email').value || ''),
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
+                '',
+                'LO PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* loan officer. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
+                '- Name: ' + (p.name || document.getElementById('nl-name').value || ''),
+                '- Email: ' + (p.email || document.getElementById('nl-email').value || ''),
+                '- Personality / lifestyle: ' + (p.personality || ''),
+                '- Voice traits: ' + ((p.voiceTraits && p.voiceTraits.length) ? p.voiceTraits.join(', ') : ''),
+                '- Preferred tone: ' + (p.tone || document.getElementById('nl-tone').value || 'warm and professional'),
+                '- Hobbies & passions (weave naturally for authenticity in personal note or relatable examples): ' + ((p.hobbies && p.hobbies.length) ? p.hobbies.join(', ') : (p.hobbiesOther || p['hobbies-other'] || '')),
+                '- Key challenges they help clients with: ' + ((p.challenges && p.challenges.length) ? p.challenges.join(', ') : ''),
+                '- Primary focus style: ' + (p.focus || ''),
+                '- Years in business / team: ' + (p.years || '') + (p.team ? ' / ' + p.team : ''),
+                '',
                 '',
                 'CRITICAL RULES:',
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
@@ -1462,7 +1514,7 @@ async function generateNewsletter(feedback = '') {
                 '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
                 '- For the Market Update / Market section ONLY: ALWAYS end with a "Sources" paragraph containing 1-2 HYPERLINKED credible sources. REQUIRED FORMAT (use exactly): <p style="font-size:14px; color:#666; margin-top:20px;">Sources: <a href="https://www.freddiemac.com/pmms" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Freddie Mac PMMS</a>, <a href="https://www.mortgagenewsdaily.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage News Daily</a></p>. Use ONLY real, permanent URLs from trusted sites like Freddie Mac, Mortgage News Daily, NAR, HousingWire, or MBA. NEVER plain text names — links are mandatory.',
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
-                '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box. Never output a blog section on your own.',
+                '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. Leave the exact placeholder <!-- BLOG SECTION PLACEHOLDER --> untouched (it goes right before the Personal Note Section). The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box and provided a URL. Never output a blog section on your own.',
                 '',
                 'OUTPUT ONLY complete standalone HTML using this exact structure:',
                 '',
@@ -1492,6 +1544,7 @@ async function generateNewsletter(feedback = '') {
     '    <!-- Sections (Market, Industry, Local, etc.) go here -->',
     '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
     '    <tr><td height="20"></td></tr>',
+    '    <!-- BLOG SECTION PLACEHOLDER -->',
     '    <!-- Personal Note Section -->',
     '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
     '      <tr><td style="padding:30px;">',
@@ -1571,119 +1624,133 @@ async function generateNewsletter(feedback = '') {
         });
 
     } finally {
-        if (loading) loading.classList.add('hidden');
-
-        // === RESTORE ORIGINAL GLOBAL LOADING CONTENT ===
-        if (loadingEl && loadingEl.dataset.originalContent) {
-            loadingEl.innerHTML = loadingEl.dataset.originalContent;
-            delete loadingEl.dataset.originalContent;
+        // Restore the original #global-loading markup (standard spinner + title + message) then hide via the shared helper.
+        // Matches the finally pattern used by weekly-win-plan.js and other feature modules.
+        const loadingElFinal = document.getElementById('global-loading');
+        if (loadingElFinal && loadingElFinal.dataset.originalContent) {
+            loadingElFinal.innerHTML = loadingElFinal.dataset.originalContent;
+            delete loadingElFinal.dataset.originalContent;
+        }
+        if (typeof window.hideLoading === 'function') {
+            window.hideLoading();
+        } else if (loadingElFinal) {
+            loadingElFinal.classList.add('hidden');
+            loadingElFinal.style.setProperty('display', 'none', 'important');
         }
 
         if (html && html.trim() !== '') {
             // Core replacements
-            html = html.replace(/<p id="fun-fact-placeholder"><\/p>/gi, `<p>${selectedFunFact}</p>`);
-            html = html.replace(/<p id="pro-tip-placeholder"><\/p>/gi, `<p>${selectedProTip}</p>`);
-            html = html.replace(/<p id="quote-placeholder"><\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
+            // More robust placeholder replacement to handle slight variations in AI output (whitespace, self-closing, extra attrs)
+            html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
+            html = html.replace(/<p[^>]*id=["']?pro-tip-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedProTip}</p>`);
+            html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
          
             // === PERSONAL PHOTO AND VIDEO - CRM / HubSpot Friendly ===
-            const includePersonal = document.getElementById('nl-personal')?.checked || false;
+            // FIXED: Do not nest the media tables inside the Personal Note's inner <td style="padding:30px">.
+            // Previously, 600px-wide tables (photo + video) inside a padded cell caused width overflows in email clients,
+            // breaking the personal note box, slicing the video thumbnail into strips, and mis-aligning later sections.
+            // Now: photo (if any) is inserted cleanly *inside* the note (fitted to ~540px to respect padding + left border).
+            // Video (if any) is inserted as its own top-level peer section (like referral/others) right before the referral.
+            // This keeps the flat <tr><td><table teal...> structure intact for all email clients.
             const includePhoto = document.getElementById('nl-include-photo')?.checked || false;
             const includeVideo = document.getElementById('nl-include-video')?.checked || false;
             const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
             const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
 
-            let mediaHTML = '';
+            let photoInsert = '';
+            if (includePhoto && personalPhotoUrl) {
+                photoInsert = `
+<table align="center" width="100%" cellpadding="0" cellspacing="0" style="margin:15px 0; max-width:100%;">
+    <tr>
+        <td align="center" style="padding:4px; background:#00A89D; text-align:center; border-radius:12px;">
+            <img src="${personalPhotoUrl}" alt="Personal photo" 
+                 style="width:100%; max-width:540px; height:auto; display:block; border-radius:8px;">
+        </td>
+    </tr>
+</table>`;
+            }
 
-            if (includePersonal) {
-                // Photo first (if checked) - restored thin border for Outlook
-if (includePhoto && personalPhotoUrl) {
-    const photoHTML = `
-    <table align="center" width="600" cellpadding="0" cellspacing="0" style="margin:25px auto 15px; max-width:100%;">
+            let videoTable = '';
+            if (includeVideo && personalVideoUrl) {
+                let videoId = '';
+                let thumbnailUrl = 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
+
+                const url = personalVideoUrl.trim();
+
+                if (url.includes('youtube.com/shorts/')) {
+                    videoId = url.split('shorts/')[1]?.split(/[?&]/)[0];
+                } else if (url.includes('youtu.be/')) {
+                    videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+                } else if (url.includes('v=')) {
+                    videoId = url.split('v=')[1]?.split('&')[0];
+                } else if (url.includes('embed/')) {
+                    videoId = url.split('embed/')[1]?.split(/[?&]/)[0];
+                }
+
+                if (videoId && videoId.length === 11) {
+                    thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+                }
+
+                videoTable = `
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+  <tr>
+    <td style="padding:30px;">
+      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto;">
         <tr>
-            <td style="padding:4px; background:#00A89D; text-align:center;">
-                <img src="${personalPhotoUrl}" alt="Personal photo" 
-                     style="width:100%; max-width:592px; height:auto; display:block; border-radius:12px;">
-            </td>
-        </tr>
-    </table>`;
-    mediaHTML += photoHTML;
-}
-
-                // Video section with teal border (matching the photo)
-                if (includeVideo && personalVideoUrl) {
-                    let videoId = '';
-                    let thumbnailUrl = 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
-
-                    const url = personalVideoUrl.trim();
-
-                    if (url.includes('youtube.com/shorts/')) {
-                        videoId = url.split('shorts/')[1]?.split(/[?&]/)[0];
-                    } else if (url.includes('youtu.be/')) {
-                        videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
-                    } else if (url.includes('v=')) {
-                        videoId = url.split('v=')[1]?.split('&')[0];
-                    } else if (url.includes('embed/')) {
-                        videoId = url.split('embed/')[1]?.split(/[?&]/)[0];
-                    }
-
-                    if (videoId && videoId.length === 11) {
-                        thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-                    }
-
-                    mediaHTML += `
-    <table align="center" width="600" cellpadding="0" cellspacing="0" style="margin:45px auto ${MODULE_PADDING}px; max-width:100%;">
-    <tr>
-        <td align="center" style="padding-bottom:16px;">
+          <td align="center" style="padding-bottom:16px;">
             <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
-        </td>
-    </tr>
-    <tr>
-        <td align="center">
+          </td>
+        </tr>
+        <tr>
+          <td align="center">
             <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none;">
-                <table align="center" width="560" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden;">
-                    <tr>
-                        <td style="padding:0;">
-                            <img src="${thumbnailUrl}" 
-                                 alt="Watch Personal Video" 
-                                 width="560" 
-                                 style="width:560px; height:auto; display:block; border:0;">
-                        </td>
-                    </tr>
-                </table>
+              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:560px;">
+                <tr>
+                  <td style="padding:0;">
+                    <img src="${thumbnailUrl}" 
+                         alt="Watch Personal Video" 
+                         width="560" 
+                         style="width:100%; max-width:560px; height:auto; display:block; border:0;">
+                  </td>
+                </tr>
+              </table>
             </a>
-        </td>
-    </tr>
-    <tr>
-        <td align="center" style="padding-top:18px;">
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding-top:18px;">
             <!-- Outlook-friendly button -->
             <table align="center" cellpadding="0" cellspacing="0" role="presentation">
-                <tr>
-                    <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
-                        <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
-                           style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
-                            ▶ Watch Video
-                        </a>
-                    </td>
-                </tr>
+              <tr>
+                <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
+                  <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
+                     style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
+                      ▶ Watch Video
+                  </a>
+                </td>
+              </tr>
             </table>
-        </td>
-    </tr>
-    </table>`;
-}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
             }
 
-            html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, mediaHTML);
-            }
-// Blog injection - FIXED: strip any AI-created blog section first, then inject only one clean version
+            // Clean placeholder inside personal note (photo goes here if provided; keeps note + photo together)
+            html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, photoInsert);
+
+// Blog injection - robust version using dedicated placeholder + fallbacks
 const includeBlog = document.getElementById('nl-include-blog')?.checked || false;
 if (includeBlog) {
-    // Remove any blog-like section the AI might have created
+    // Remove any blog-like section the AI might have (defensively) created
     html = html.replace(/<tr>\s*<td>\s*<table[^>]*>\s*<tr>\s*<td[^>]*>\s*<h2[^>]*>(?:From the Blog|Blog Highlight|My Recent Blog|Recent Blog)[^<]*<\/h2>[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
     html = html.replace(/<tr><td height="20"><\/td><\/tr>\s*<tr>\s*<td>\s*<table[^>]*>\s*<tr>\s*<td[^>]*>\s*<h2[^>]*>(?:From the Blog|Blog Highlight|My Recent Blog)[^<]*<\/h2>[\s\S]*?<\/table>[\s\S]*?<\/tr>/gi, '');
 
-    const blogUrl = document.getElementById('nl-blog-url')?.value.trim();
-    const blogTitle = document.getElementById('nl-blog-title')?.value.trim() || 'Latest Blog Post';
-    if (blogUrl) {
+    const blogUrl = (document.getElementById('nl-blog-url')?.value || '').trim();
+    const blogTitle = (document.getElementById('nl-blog-title')?.value || '').trim() || 'Latest Blog Post';
+    if (blogUrl && blogUrl.length > 3) {
         const fullBlogUrl = blogUrl.startsWith('http') ? blogUrl : 'https://' + blogUrl;
         const blogSection = `
             <tr>
@@ -1702,12 +1769,45 @@ if (includeBlog) {
             </tr>
             <tr><td height="20"></td></tr>
         `;
-        html = html.replace(
-            /<tr><td height="20"><\/td><\/tr>\s*<!-- Personal Note Section -->/i,
-            '$&' + blogSection
-        );
+
+        let injected = false;
+
+        // 1. Preferred: explicit placeholder we put in the prompt structure
+        if (html.includes('<!-- BLOG SECTION PLACEHOLDER -->')) {
+            html = html.replace('<!-- BLOG SECTION PLACEHOLDER -->', blogSection);
+            injected = true;
+        }
+
+        // 2. Fallback: the old spacer + comment pattern (handles older generations)
+        if (!injected) {
+            const spacerComment = /<tr><td height="20"><\/td><\/tr>\s*<!-- Personal Note Section -->/i;
+            if (spacerComment.test(html)) {
+                html = html.replace(spacerComment, '$&' + blogSection);
+                injected = true;
+            }
+        }
+
+        // 3. Last-resort fallback: insert right before the Personal Note table or its heading
+        if (!injected) {
+            const noteHeading = /(<tr><td[^>]*>\s*<table[^>]*>[\s\S]{0,80}?A Note From)/i;
+            if (noteHeading.test(html)) {
+                html = html.replace(noteHeading, blogSection + '$1');
+                injected = true;
+            }
+        }
+
+        // 4. Absolute last resort: shove it in before the footer/disclaimer area so it doesn't get lost
+        if (!injected && !html.includes('My Recent Blog')) {
+            html = html.replace(
+                /(<tr><td style="padding:20px; background:#002B5C; color:white;)/i,
+                blogSection + '\n<tr><td height="20"></td></tr>\n$1'
+            );
+        }
     }
 }
+
+// Clean up the placeholder if it wasn't used (e.g. user had the box unchecked or no URL)
+html = html.replace(/<!--\s*BLOG SECTION PLACEHOLDER\s*-->/gi, '');
 
 // === PERSONAL NOTE HEADLINE - Force ONLY first name (no last name) ===
 html = html.replace(/A Note From \[Name\]/gi, `A Note From ${firstName}`);
@@ -1715,6 +1815,28 @@ html = html.replace(/A Note From Adam/gi, `A Note From ${firstName}`);
 html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
 // Force personal note title to ALWAYS use only the first name (no last name allowed)
 html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
+
+// Insert video section (when checked) right before referral. Uses placeholder if AI left it,
+// otherwise inserts before footer as fallback. This + the later referral ensure guarantees
+// the sections are at the bottom whenever the video checkbox is checked.
+if (includeVideo && personalVideoUrl) {
+    const videoSection = `
+<tr><td height="20"></td></tr>
+<tr>
+  <td>
+${videoTable}
+  </td>
+</tr>
+<tr><td height="20"></td></tr>`;
+    if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
+        html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/i, videoSection + '[REFERRAL CTA PLACEHOLDER]');
+    } else if (!html.includes('Personal Video Update')) {
+        html = html.replace(
+            /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
+            videoSection + '\n<tr><td height="20"></td></tr>\n$1'
+        );
+    }
+}
 
 // === REFERRAL - Updated (no phone number) ===
 const simpleReferralHTML = `
@@ -1746,6 +1868,16 @@ const simpleReferralHTML = `
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
+
+// === ROBUST FALLBACK ENSURE: Always include referral section at the bottom ===
+// The AI occasionally omits the [REFERRAL CTA PLACEHOLDER] or generates its own version.
+// This (combined with the pre-referral video insert) guarantees video (when checked) + referral.
+if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
+    html = html.replace(
+        /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
+        simpleReferralHTML + '\n<tr><td height="20"></td></tr>\n$1'
+    );
+}
 
     // Normalize before saving the raw HTML (for downloads/copying)
     lastGeneratedHTML = normalizeRawNewsletterHTML(html);
@@ -1795,6 +1927,12 @@ html = html.replace(/\[Name\]/g, firstName);
             const rawEl = document.getElementById('nl-html-raw');
             if (rawEl) rawEl.value = html;
 
+            // Persist the final generated newsletter HTML so the last version (preview + content) survives page refresh
+            // until the user either Clears it or generates a new version.
+            try {
+              localStorage.setItem('lastNewsletterHTML', html);
+            } catch (e) {}
+
             gtag('event', feedback ? 'edit_newsletter' : 'generate_newsletter', {
                 event_category: 'Tool Usage',
                 event_label: feedback ? 'Newsletter Edited' : 'Newsletter Generated',
@@ -1810,12 +1948,21 @@ html = html.replace(/\[Name\]/g, firstName);
         if (output) {
             output.classList.remove('hidden');
             output.scrollIntoView({ behavior: 'smooth' });
+            // Add a visible Clear button (premium pill style) so user can discard the persisted last version
+            if (!output.querySelector('.nl-clear-btn')) {
+              const clr = document.createElement('button');
+              clr.className = 'nl-clear-btn mt-3 text-xs px-4 py-2 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition flex items-center gap-2';
+              clr.innerHTML = '<i class="fas fa-trash"></i> Clear this newsletter';
+              clr.onclick = () => { if (window.clearSavedNewsletter) window.clearSavedNewsletter(); };
+              output.appendChild(clr);
+            }
         }
 
         if (feedback && document.getElementById('nl-feedback')) {
             document.getElementById('nl-feedback').value = '';
         }
     }
+    }  // additional close for if (html && ...) to fix brace count after personal media insertion refactor (old block had extra closes)
 
 function downloadNewsletterHTML() {
     const html = document.getElementById('nl-html-raw').value;
@@ -1836,6 +1983,18 @@ function getCleanOutlookHTML() {
     }
 
     let cleanHTML = rawEl.value;
+
+    // === BRAND COLOR NORMALIZATION for clean Outlook / vault copies ===
+    // Replaces obnoxious orange (#F15A29) headers/buttons with professional navy (#002B5C)
+    // so the saved-to-vault version (and what Copy for Outlook copies) has subdued, email-appropriate styling.
+    // The full branded orange version is still available via raw download if desired.
+    cleanHTML = cleanHTML.replace(/#F15A29/gi, '#002B5C');
+    cleanHTML = cleanHTML.replace(/F15A29/gi, '002B5C');
+    // Also catch in style/bgcolor attrs etc.
+    cleanHTML = cleanHTML.replace(/color\s*:\s*#?F15A29/gi, 'color:#002B5C');
+    cleanHTML = cleanHTML.replace(/background\s*:\s*#?F15A29/gi, 'background:#002B5C');
+    cleanHTML = cleanHTML.replace(/background-color\s*:\s*#?F15A29/gi, 'background-color:#002B5C');
+    cleanHTML = cleanHTML.replace(/bgcolor\s*=\s*["']?#?F15A29["']?/gi, 'bgcolor="#002B5C"');
 
     // === PERSONAL PHOTO - Thin teal border (matches preview) ===
     cleanHTML = cleanHTML.replace(
@@ -1894,9 +2053,69 @@ function copyForOutlook() {
   window.generateNewsletter = generateNewsletter;
   window.downloadNewsletterHTML = downloadNewsletterHTML;
   window.copyForOutlook = copyForOutlook;
-  window.openNewsletterTips = openNewsletterTips;
-  window.closeNewsletterTips = closeNewsletterTips;
   window.getCleanOutlookHTML = getCleanOutlookHTML;
+
+  // Centralized save for newsletter that ALWAYS uses the exact same cleaned Outlook version
+  // as what copyForOutlook() would copy to clipboard. This ensures "Save to Vault" never
+  // has the orange headers that the raw/preview might.
+  window.saveNewsletterToVault = function() {
+    if (typeof window.toggleSaveIdea !== 'function') {
+      alert('Saved Items system not ready yet. Please try again in a moment.');
+      return;
+    }
+    const clean = getCleanOutlookHTML();
+    if (!clean) {
+      alert('Generate the newsletter first!');
+      return;
+    }
+    const title = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter';
+    window.toggleSaveIdea(title, clean, null, 'newsletter');
+    if (window.showToast) {
+      window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success');
+    } else {
+      alert('Newsletter (Outlook version) saved to My Saved Items!');
+    }
+  };
+
+  // Clear the last persisted newsletter (tool preview + raw). Vault copies in My Saved Items are unaffected.
+  window.clearSavedNewsletter = function() {
+    try { localStorage.removeItem('lastNewsletterHTML'); } catch (e) {}
+    const preview = document.getElementById('nl-preview');
+    if (preview) preview.innerHTML = '';
+    const raw = document.getElementById('nl-html-raw');
+    if (raw) raw.value = '';
+    const output = document.getElementById('newsletter-output');
+    if (output) output.classList.add('hidden');
+  };
+
+  // Restore last newsletter HTML into raw + preview iframe (called from init).
+  function restoreLastNewsletter() {
+    try {
+      const last = localStorage.getItem('lastNewsletterHTML');
+      if (!last) return;
+      const rawEl = document.getElementById('nl-html-raw');
+      const previewEl = document.getElementById('nl-preview');
+      const outEl = document.getElementById('newsletter-output');
+      if (rawEl) rawEl.value = last;
+      if (previewEl) {
+        previewEl.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
+        iframe.srcdoc = last;
+        previewEl.appendChild(iframe);
+      }
+      if (outEl) outEl.classList.remove('hidden');
+      // Ensure a Clear button is present after restore (same as generate path)
+      if (outEl && !outEl.querySelector('.nl-clear-btn')) {
+        const clr = document.createElement('button');
+        clr.className = 'nl-clear-btn mt-3 text-xs px-4 py-2 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition flex items-center gap-2';
+        clr.innerHTML = '<i class="fas fa-trash"></i> Clear this newsletter';
+        clr.onclick = () => { if (window.clearSavedNewsletter) window.clearSavedNewsletter(); };
+        outEl.appendChild(clr);
+      }
+    } catch (e) {}
+  }
+
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
   window.fillPersonalFromProfile = fillPersonalFromProfile;
 
@@ -1966,9 +2185,40 @@ function copyForOutlook() {
   // =====================================================
   // INITIALIZATION
   // =====================================================
+  // =====================================================
+  // CENTRAL PROFILE HELPERS (for prompt injection + sync, matching pattern in weekly/blog/social/sales/PTB/ai-chat)
+  // =====================================================
+  function getCentralProfile() {
+    try {
+      if (window.getUserProfile) return window.getUserProfile();
+      return JSON.parse(localStorage.getItem('userProfile') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function getEffectiveSetup() {
+    const central = getCentralProfile();
+    return {
+      ...central,
+      name: central.name || '',
+      email: central.email || central.workEmail || '',
+      localArea: central.localArea || central.market || central.location || '',
+      voiceTraits: central.voiceTraits || [],
+      personality: central.personality || '',
+      tone: central.tone || '',
+      hobbies: central.hobbies || [],
+      hobbiesOther: central.hobbiesOther || '',
+      challenges: central.challenges || [],
+      focus: central.focus || '',
+      years: central.years || '',
+      team: central.team || ''
+    };
+  }
+
   function syncNewsletterFromProfile() {
     try {
-      const p = (window.getUserProfile && window.getUserProfile()) || JSON.parse(localStorage.getItem('userProfile') || '{}');
+      const p = getCentralProfile();
       const nameEl = document.getElementById('nl-name');
       const emailEl = document.getElementById('nl-email');
       const locEl = document.getElementById('nl-location');
@@ -1977,9 +2227,8 @@ function copyForOutlook() {
       if (locEl && (p.localArea || p.market) && (!locEl.value || locEl.value === 'Fort Wayne, Indiana')) {
         locEl.value = p.localArea || p.market || locEl.value;
       }
-      if (window.showToast) {
-        window.showToast('Synced name, email & market from your profile.', 'success');
-      }
+      // Silent profile sync — no toast to avoid corner popups on load
+
     } catch (e) {
       console.warn('[newsletter] profile sync failed', e);
     }
@@ -1994,7 +2243,7 @@ function copyForOutlook() {
     if (personalFields) {
       personalFields.classList.remove('hidden');
     }
-    const p = (window.getUserProfile && window.getUserProfile()) || JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const p = getCentralProfile();
     const textEl = document.getElementById('nl-personal-text');
     if (!textEl) return;
 
@@ -2040,7 +2289,7 @@ function copyForOutlook() {
     if (!silent) {
       textEl.focus();
       textEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      if (window.showToast) window.showToast('Personal update filled from your profile!', 'success');
+      // No toast for auto-fill — keeps UI clean
     }
   }
 
@@ -2080,6 +2329,12 @@ function copyForOutlook() {
         try { fillPersonalFromProfile(true); } catch(e){ console.warn('auto fill personal failed', e); }
       }
     }, 120);
+
+    // Restore last generated newsletter (raw + visual preview) so the previous version is present after refresh
+    // until the user Clears or generates a replacement.
+    if (typeof restoreLastNewsletter === 'function') {
+      try { restoreLastNewsletter(); } catch (e) {}
+    }
 
     console.log('%c[newsletter-generator.js] Newsletter Generator initialized', 'color:#00A89D');
   }

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Build / temp
+dist/
+build/
+*.bak
+*.backup
+
+# Backups folder (optional - you may want to keep some)
+# backups/
+
+# Large or sensitive
+*.pem
+*.key
+private/
+
+# Misc
+.cache/
+tmp/
+temp/

@@ -34,6 +34,7 @@
     return {
       ...central,
       name: central.name || '',
+      email: central.email || '',
       localArea: central.localArea || central.market || '',
       voiceTraits: central.voiceTraits || [],
       personality: central.personality || '',
@@ -77,19 +78,58 @@ async function generateSocialPost() {
     output.classList.add('hidden');
     output.innerHTML = '';
 
-    // Use the standard global loading helper (prevents conflicts with the 30-day calendar loader)
-    const socialTips = [
-      "Lead with personality or a local hook — people scroll for you, not rates.",
-      "End every post with a real question to drive comments.",
-      "70-80% personal/local/engagement builds real relationships.",
-      "Use Stories and Reels daily — they get dramatically higher reach."
-    ];
-    if (typeof window.showLoadingWithTips === 'function') {
-      window.showLoadingWithTips(socialTips, 'Creating Your Authentic Social Posts...');
-    } else {
-      // Fallback
-      const loadingEl = document.getElementById('global-loading');
-      if (loadingEl) loadingEl.classList.remove('hidden');
+    // Use centralized force + rich custom loading for premium consistent progress modal (refreshed like 30-day, sales, blog)
+    if (typeof window.forceShowGlobalLoading === 'function') {
+      window.forceShowGlobalLoading('Creating Your Authentic Social Posts...');
+    }
+
+    const loadingEl = document.getElementById('global-loading');
+    let originalLoadingHTML = loadingEl ? loadingEl.innerHTML : '';
+    if (loadingEl) {
+      loadingEl.innerHTML = `
+        <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
+            <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border border-gray-200 dark:border-gray-700">
+                <div class="text-center mb-8">
+                    <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
+                    <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">
+                        Creating Your Authentic Social Posts...
+                    </h3>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">
+                        This usually takes 15–40 seconds
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Generating 3 distinct, ready-to-post options tailored to your voice and market.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                    <h4 class="text-xl font-bold text-[#F15A29] mb-5 text-center">
+                        Why Authentic Social Posts Win
+                    </h4>
+                    <div class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                        <div class="flex gap-3">
+                            <i class="fas fa-heart text-[#F15A29] mt-0.5"></i>
+                            <div><strong>Build real relationships</strong> — 70%+ personal/local/engagement content creates trust and referrals, not just likes.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-comments text-[#00A89D] mt-0.5"></i>
+                            <div><strong>Drive engagement</strong> — End with real questions; comments and saves beat vanity metrics every time.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-bullseye text-[#002B5C] mt-0.5"></i>
+                            <div><strong>Profile-powered</strong> — Uses your hobbies, voice, local market so it actually sounds like you wrote it.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5">
+                    People follow the human, not the lender. These posts are designed to make you memorable.
+                </p>
+            </div>
+        </div>
+      `;
+      loadingEl.classList.remove('hidden');
+      loadingEl.style.display = 'flex';
     }
 
     let prompt = `You are creating social media content for a specific mortgage loan officer.
@@ -190,6 +230,10 @@ Option 3:
         output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating posts. Check console or try again.</p>';
         output.classList.remove('hidden');
     } finally {
+        if (loadingEl && originalLoadingHTML) {
+            loadingEl.innerHTML = originalLoadingHTML;
+            delete loadingEl.dataset.originalContent; // if any
+        }
         if (typeof window.hideLoading === 'function') {
             try { window.hideLoading(); } catch(e) {}
         }
@@ -254,9 +298,20 @@ function saveGeneratedPost(index, btnEl) {
         return;
     }
 
+    const richContent = `
+<div class="social-saved">
+  <div class="mb-2">
+    <span class="text-xs uppercase tracking-widest font-bold text-[#00A89D]">Social Post</span>
+    <span class="ml-2 text-xs text-gray-500">${shortType}</span>
+  </div>
+  <div class="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm leading-relaxed">
+    ${text.replace(/\n/g, '<br>')}
+  </div>
+  <div class="mt-2 text-[10px] text-gray-500">Generated via Social Post Creator • Ready to copy &amp; post</div>
+</div>`;
     saved.push({
         title,
-        content: text.substring(0, 800),
+        content: richContent,
         savedAt: new Date().toISOString(),
         type: 'social'   // For the unified My Saved Items library
     });
@@ -278,9 +333,13 @@ function saveGeneratedPost(index, btnEl) {
     const countEl = document.getElementById('social-saved-count');
     if (countEl) countEl.textContent = saved.length;
 
-    // Refresh the generator's own saved ideas list immediately
-    if (typeof window.refreshGeneratorSavedIdeas === 'function') {
-        window.refreshGeneratorSavedIdeas();
+    // Update global top bar count directly for reliability
+    const globalCount = document.getElementById('global-saved-count');
+    if (globalCount) globalCount.textContent = saved.length;
+
+    // Also try the centralized function
+    if (typeof window.updateSavedCount === 'function') {
+        try { window.updateSavedCount(); } catch(e) {}
     }
 
     // Optional toast
@@ -554,6 +613,10 @@ async function generateMonthlyPlan() {
     const localArea = document.getElementById('plan-areas')?.value.trim() || 'your area';
     const customPrompt = document.getElementById('custom-plan-prompt')?.value.trim() || '';
 
+    // Pull rich profile for the monthly calendar prompt (consistent with single-post gen + other tools)
+    const personalization = buildSocialPersonalization();
+    const eff = getEffectiveSetup();
+
     // Collect checked themes (null-safe)
     const themes = [];
     if (document.getElementById('theme-family')?.checked) themes.push('family and personal life');
@@ -583,6 +646,10 @@ Weave in these themes naturally: ${themes.length ? themes.join(', ') : 'balanced
 
 Custom instructions: ${customPrompt || 'None — use best judgment'}.
 
+LO PROFILE & VOICE (make the overview + every single post idea feel like it was written by *this exact loan officer* — use their personality, voice traits, tone, hobbies, challenges, and target partners for authentic, personal, non-generic content):
+${personalization}
+${eff.localArea ? `Primary market: ${eff.localArea}.` : ''}
+
 CRITICAL: Output EXACTLY ${daysInMonth} days (Day 1 to Day ${daysInMonth}). For EVERY day, provide EXACTLY 4 varied post ideas.
 
 Output as clean Markdown with:
@@ -593,6 +660,11 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
 
     const loading = document.getElementById('global-loading');
     const output = document.getElementById('social-plan-output');
+
+    // Use centralized force for consistent premium progress modal
+    if (typeof window.forceShowGlobalLoading === 'function') {
+      window.forceShowGlobalLoading('Building Your 30-Day Social Media Plan...');
+    }
 
     if (loading) loading.classList.remove('hidden');
     if (output) output.innerHTML = '';
@@ -778,7 +850,7 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
                 <div class="w-full max-w-2xl mx-auto bg-gray-700 rounded-full h-10 mb-6 overflow-hidden">
                     <div id="progress-fill" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] h-10 rounded-full transition-all duration-1000" style="width: 0%"></div>
                 </div>
-                <p class="text-3xl text-white">Copied <span class="font-black text-[#F15A29]" id="copied-count">0</span> of 30 posts</p>
+                <p class="text-3xl text-white">Copied ideas for <span class="font-black text-[#F15A29]" id="copied-count">0</span> of 30 days</p>
                 <p class="text-xl text-gray-300 mt-6" id="progress-message">Start copying to track progress!</p>
             </div>
         `;
@@ -1108,139 +1180,3 @@ themeIds.forEach(id => {
   // =====================================================
   // SAVED IDEAS — Visible inside the Generator page
   // =====================================================
-  const SAVED_IDEAS_KEY = 'socialSavedIdeas';
-
-  function getSavedIdeasForGenerator() {
-    try {
-      return JSON.parse(localStorage.getItem(SAVED_IDEAS_KEY) || '[]');
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function renderGeneratorSavedIdeas() {
-    const listEl = document.getElementById('generator-saved-ideas-list');
-    const emptyEl = document.getElementById('generator-saved-ideas-empty');
-    if (!listEl) return;
-
-    const saved = getSavedIdeasForGenerator();
-
-    if (saved.length === 0) {
-      listEl.innerHTML = '';
-      if (emptyEl) emptyEl.classList.remove('hidden');
-      const countBadge = document.getElementById('generator-saved-count');
-      if (countBadge) countBadge.textContent = '(0)';
-      return;
-    }
-
-    if (emptyEl) emptyEl.classList.add('hidden');
-
-    // Show the most recent 6
-    const toShow = saved.slice(0, 6);
-
-    listEl.innerHTML = toShow.map((item, idx) => {
-      const shortContent = (item.content || '').substring(0, 140);
-      const safeTitle = item.title.replace(/'/g, "\\'");
-      return `
-        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-5 bg-white dark:bg-gray-800 hover:border-[#00A89D]/40 transition flex flex-col">
-          <div class="flex-1">
-            <div class="font-semibold text-[#002B5C] dark:text-white mb-2 text-sm leading-tight">${item.title}</div>
-            <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-3">${shortContent || 'Saved idea'}</p>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button onclick="useSavedIdeaAsInspiration(${idx})" 
-                    class="flex-1 text-xs font-semibold px-3 py-2 rounded-xl bg-[#00A89D] text-white hover:bg-[#008F85] transition flex items-center justify-center gap-1">
-              <i class="fas fa-magic text-xs"></i>
-              <span>Use for Inspiration</span>
-            </button>
-            <button onclick="copySavedIdeaToClipboard(${idx}, this)" 
-                    class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-              <i class="fas fa-copy"></i>
-            </button>
-            <button onclick="removeGeneratorSavedIdea('${safeTitle}', this)" 
-                    class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    const countBadge = document.getElementById('generator-saved-count');
-    if (countBadge) countBadge.textContent = `(${saved.length})`;
-  }
-
-  // Use a saved idea to populate the quick generator
-  window.useSavedIdeaAsInspiration = function(index) {
-    const saved = getSavedIdeasForGenerator();
-    const item = saved[index];
-    if (!item) return;
-
-    const typeSelect = document.getElementById('post-type');
-    const details = document.getElementById('post-details');
-
-    if (typeSelect) typeSelect.value = ' '; // "Use Custom Idea"
-    if (details) {
-      details.value = item.content || item.title;
-      details.focus();
-    }
-
-    // Scroll user to the form area
-    const formArea = document.getElementById('social-post');
-    if (formArea) {
-      formArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    // Optional subtle feedback
-    if (typeof window.showToast === 'function') {
-      window.showToast('Idea loaded into the generator');
-    }
-  };
-
-  window.copySavedIdeaToClipboard = function(index, btn) {
-    const saved = getSavedIdeasForGenerator();
-    const item = saved[index];
-    if (!item) return;
-
-    const text = `${item.title}\n\n${item.content || ''}`;
-    navigator.clipboard.writeText(text).then(() => {
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check text-green-600"></i>';
-      setTimeout(() => { btn.innerHTML = original; }, 1400);
-    });
-  };
-
-  window.removeGeneratorSavedIdea = function(title, btn) {
-    let saved = getSavedIdeasForGenerator();
-    saved = saved.filter(i => i.title !== title);
-    localStorage.setItem(SAVED_IDEAS_KEY, JSON.stringify(saved));
-
-    // Refresh both the generator list and the global count if present
-    renderGeneratorSavedIdeas();
-    const countEl = document.getElementById('social-saved-count');
-    if (countEl) countEl.textContent = saved.length;
-
-    // If the full modal is open, close & reopen it to refresh (simple approach)
-    const openModal = document.querySelector('.fixed.inset-0 .bg-white');
-    if (openModal) {
-      openModal.closest('.fixed').remove();
-      if (typeof window.showSocialSavedIdeas === 'function') {
-        setTimeout(() => window.showSocialSavedIdeas(), 50);
-      }
-    }
-  };
-
-  // Expose refresh so other parts of the app can call it
-  window.refreshGeneratorSavedIdeas = renderGeneratorSavedIdeas;
-
-  // Initial render + re-render after the page is ready
-  function initGeneratorSavedIdeas() {
-    renderGeneratorSavedIdeas();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initGeneratorSavedIdeas);
-  } else {
-    initGeneratorSavedIdeas();
-  }
-

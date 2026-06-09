@@ -388,6 +388,17 @@
     const modal = document.getElementById('api-key-modal');
     if (!apiBtn || !modal) return;
 
+    // In production hosted mode the server manages the key — adjust the UI
+    const hosted = (typeof window.isProductionHosted === 'function' && window.isProductionHosted()) ||
+                   (typeof window !== 'undefined' && window.location && !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname));
+
+    if (hosted) {
+      // Change button to be informative instead of "enter your key"
+      apiBtn.innerHTML = `<i class="fas fa-shield-alt"></i> <span class="hidden md:inline">API Managed</span>`;
+      apiBtn.title = 'API key is managed server-side for this hosted version. No user key required.';
+      // Still allow opening the modal for transparency / status
+    }
+
     const statusEl = document.getElementById('api-key-status');
     const inputEl = document.getElementById('api-key-input');
     const saveBtn = document.getElementById('api-key-save');
@@ -416,7 +427,32 @@
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       updateStatus();
-      if (inputEl) {
+
+      const hosted = (typeof window.isProductionHosted === 'function' && window.isProductionHosted()) ||
+                     (typeof window !== 'undefined' && window.location && !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname));
+
+      if (hosted) {
+        // Hosted production: server has the key. Make the modal informative.
+        if (statusEl) {
+          statusEl.textContent = 'Managed by server (no user key needed)';
+          statusEl.className = 'font-mono text-sm px-3 py-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200';
+        }
+        const hint = modal.querySelector('#api-hosted-hint');
+        if (hint) hint.classList.remove('hidden');
+
+        if (inputEl) inputEl.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = 'none';
+        if (clearBtn) clearBtn.style.display = 'none';
+      } else {
+        const hint = modal.querySelector('#api-hosted-hint');
+        if (hint) hint.classList.add('hidden');
+
+        if (inputEl) inputEl.style.display = '';
+        if (saveBtn) saveBtn.style.display = '';
+        if (clearBtn) clearBtn.style.display = '';
+      }
+
+      if (inputEl && inputEl.style.display !== 'none') {
         inputEl.value = '';
         inputEl.focus();
       }
@@ -954,7 +990,7 @@
       // The card (exact structure expected by enrichPlanLoading which does .querySelector('div') for the white card,
       // and by title/message getters)
       const card = document.createElement('div');
-      card.className = 'bg-white dark:bg-gray-800 p-10 md:p-12 rounded-3xl shadow-2xl text-center w-full max-w-lg mx-4 border border-gray-200 dark:border-gray-700';
+      card.className = 'bg-white dark:bg-gray-900 p-8 md:p-10 rounded-3xl shadow-2xl text-center w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700';
       card.innerHTML = GLOBAL_LOADING_CARD_INNER;
 
       loadingEl.appendChild(card);

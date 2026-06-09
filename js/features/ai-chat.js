@@ -22,11 +22,11 @@
   const BASE_SYSTEM_PROMPT = `You are the ultimate AI Sales Coach for loan officers. This app is packed with powerful AI tools designed to help LOs close more loans, build stronger relationships, and grow their business.
 When asked what the tool does or about its features, ALWAYS highlight the AI TOOLS first — they are the coolest and most valuable part:
 • Sales Script Generator – Instant objection handlers and conversation scripts
-• Social Media Post & Calendar Creator – Ready-to-post content + full monthly plans (6 pillars, 14 Reels, 121+ Evergreen)
+• Social Media Post & Calendar Creator – Ready-to-post content + full monthly plans (6 pillars, 14 Reels, 120+ Evergreen)
 • Blog Creator – Full SEO + GEO optimized blog posts with matching social + Google + Reel assets in seconds
 • Value Vault – Save and organize your best ideas
 • 2026 Business Plan + Weekly Win Plan Creators – Anxiety-reducing, profile-powered planning
-• Mindset Lab – 150+ principles for resilience
+• Mindset Lab – 100+ principles for resilience
 • Prospecting Time Blocks, Event Planning (4 high-impact + post-event), Referral Partners (6 playbooks + tiers), Database Nurturing (A+/B/C cadences), Loan Process stages + templates, Pop-Bys & Giftology, 7-Day Post-Closing
 • Underwriting Guideline Search – Fast accurate answers
 • AI Chat Assistant – Your always-on coach
@@ -44,7 +44,6 @@ let chatHistory = [
 ];
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
-    const loading = document.getElementById('global-loading');
     const userMessage = input.value.trim();
     if (!userMessage) return;
 
@@ -59,7 +58,26 @@ async function sendChatMessage() {
     addMessage('user', userMessage, false);
     input.value = '';
 
-    if (loading) loading.classList.remove('hidden');
+    // Lightweight chat-only loading indicator (no heavy global modal)
+    const messagesDiv = document.getElementById('chat-messages');
+    const thinkingId = 'chat-thinking-indicator';
+    let thinkingEl = document.getElementById(thinkingId);
+    if (!thinkingEl && messagesDiv) {
+      thinkingEl = document.createElement('div');
+      thinkingEl.id = thinkingId;
+      thinkingEl.className = 'flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 px-3 py-2 mt-1 bg-gray-100 dark:bg-gray-800 rounded-2xl w-fit';
+      thinkingEl.innerHTML = `
+        <i class="fas fa-spinner fa-spin text-[#00A89D]"></i>
+        <span>Coach is thinking...</span>
+      `;
+      messagesDiv.appendChild(thinkingEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Disable input while processing for better UX
+    input.disabled = true;
+    const sendButton = input.parentElement ? input.parentElement.querySelector('button') : null;
+    if (sendButton) sendButton.disabled = true;
 
     // Personalize every time
     injectProfileContext();
@@ -86,7 +104,15 @@ async function sendChatMessage() {
         console.error(error);
         addMessage('assistant', 'Error: Could not get response. Check console or try again.', false);
     } finally {
-        if (loading) loading.classList.add('hidden');
+        // Remove thinking indicator
+        if (thinkingEl && thinkingEl.parentNode) {
+            thinkingEl.parentNode.removeChild(thinkingEl);
+        }
+        // Re-enable input
+        input.disabled = false;
+        if (sendButton) sendButton.disabled = false;
+        // Ensure we scroll to bottom
+        if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 }
 // Chat input Enter key (attached defensively in init)
@@ -175,6 +201,7 @@ function getProfileContext() {
     const p = (window.getUserProfile && window.getUserProfile()) || JSON.parse(localStorage.getItem('userProfile') || '{}');
     const parts = [];
     if (p.name) parts.push(`Name: ${p.name}`);
+    if (p.email) parts.push(`Email: ${p.email}`);
     if (p.localArea || p.market) parts.push(`Primary market: ${p.localArea || p.market}`);
     if (p.personality) parts.push(`Personality/voice: ${p.personality}`);
     if (p.hobbies && p.hobbies.length) parts.push(`Hobbies & activities: ${p.hobbies.join(', ')}`);
@@ -271,7 +298,12 @@ function saveChatMessage(btn) {
   let text = contentEl.innerText || contentEl.textContent || '';
   text = text.replace(/Copy|Save to Vault|To Social/g, '').trim();
   if (window.toggleSaveIdea) {
-    window.toggleSaveIdea('AI Coach Response', text, null, 'coach');
+    const content = `
+<div class="coach-saved">
+  <div class="text-xs uppercase tracking-widest text-[#00A89D] font-bold mb-1">AI Coach Response</div>
+  <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm whitespace-pre-wrap border border-gray-100 dark:border-gray-700">${text}</div>
+</div>`;
+    window.toggleSaveIdea('AI Coach Response', content, null, 'coach');
     if (window.showToast) window.showToast('Saved to My Saved Items!', 'success');
     else alert('Saved!');
   }

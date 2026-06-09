@@ -9,97 +9,65 @@
 (function () {
   'use strict';
 
-  // === ORIGINAL EQUITY SCANNER CODE BEGINS ===
+  // =====================================================
+  // CENTRAL PROFILE INTEGRATION (to match other polished tools)
+  // =====================================================
+  function getCentralProfile() {
+    try {
+      if (window.getUserProfile) return window.getUserProfile();
+      return JSON.parse(localStorage.getItem('userProfile') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // =====================================================
+  // ORIGINAL EQUITY SCANNER CODE BEGINS ===
   // (verbatim from the monolithic version, minus the outer <script> tags)
 
 
 const CURRENT_DATE = new Date();
 
-// Upload Listeners + Success Indicator (fixed)
+// Assign elements immediately (script is at end of body, DOM is ready)
 const uploadArea = document.getElementById('upload-area');
 const fileInput = document.getElementById('database-upload');
 const fileStatus = document.getElementById('file-status');
 const fileNameDisplay = document.getElementById('file-name');
 
-// Single clean listener for file selection + drag/drop feedback
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+// Premium drag & drop + click upload wiring
+if (uploadArea && fileInput) {
+  uploadArea.addEventListener('click', () => fileInput.click());
 
-    // User canceled / no file selected
-    if (!file) {
-        if (fileStatus) fileStatus.textContent = 'No file selected';
-        if (fileNameDisplay) fileNameDisplay.textContent = '';
-        if (fileStatus) fileStatus.classList.add('hidden'); // optional: hide status area
-        return;
-    }
-
-    // File was actually selected — show UI feedback immediately
-    if (fileNameDisplay) {
-        fileNameDisplay.textContent = file.name;
-        fileNameDisplay.classList.remove('hidden');
-    }
-    if (fileStatus) {
-        fileStatus.textContent = 'File selected — processing...';
-        fileStatus.classList.remove('hidden');
-    }
-    console.log('✅ File selected:', file.name);
-
-    // Start reading the file
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-        // ── YOUR FULL XLSX PARSING LOGIC GOES HERE ──
-        // Example structure (replace with your actual code from generateEquityReport):
-        try {
-            const workbook = XLSX.read(event.target.result, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-            // ... rest of your parsing, column mapping, processing rows, etc. ...
-
-            if (fileStatus) fileStatus.textContent = 'File processed successfully!';
-            // Optionally: auto-call generateEquityReport() or buildDashboard() here
-            // if you want processing to happen automatically on upload
-        } catch (err) {
-            console.error('File processing error:', err);
-            if (fileStatus) fileStatus.textContent = 'Error processing file — try again';
-            if (fileStatus) fileStatus.classList.add('text-red-600');
-        }
-    };
-
-    reader.onerror = () => {
-        if (fileStatus) {
-            fileStatus.textContent = 'Error reading file';
-            fileStatus.classList.add('text-red-600');
-        }
-    };
-
-    reader.readAsArrayBuffer(file);
-
-    // Optional: Reset input so user can re-select the same file later
-    // e.target.value = '';
-});
-
-uploadArea.addEventListener('dragover', (e) => {
+  uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
     uploadArea.classList.add('border-[#F15A29]', 'bg-[#F15A29]/10');
-});
-
-uploadArea.addEventListener('dragleave', () => {
+  });
+  uploadArea.addEventListener('dragleave', () => {
     uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
-});
-
-uploadArea.addEventListener('drop', (e) => {
+  });
+  uploadArea.addEventListener('drop', (e) => {
     e.preventDefault();
     uploadArea.classList.remove('border-[#F15A29]', 'bg-[#F15A29]/10');
     if (e.dataTransfer.files.length > 0) {
-        fileInput.files = e.dataTransfer.files;
-        const file = e.dataTransfer.files[0];
-        fileStatus.textContent = 'File selected:';
+      fileInput.files = e.dataTransfer.files;
+      const file = e.dataTransfer.files[0];
+      if (fileNameDisplay) {
         fileNameDisplay.textContent = file.name;
         fileNameDisplay.classList.remove('hidden');
+      }
+      if (fileStatus) fileStatus.classList.remove('hidden');
     }
-});
+  });
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file && fileNameDisplay) {
+      fileNameDisplay.textContent = file.name;
+      fileNameDisplay.classList.remove('hidden');
+    }
+    if (file && fileStatus) fileStatus.classList.remove('hidden');
+  });
+}
 
 function syncRateControls() {
     const slider = document.getElementById('new-rate-slider');
@@ -111,6 +79,22 @@ function syncRateControls() {
     }
 
     const clamp = (val) => Math.max(3.0, Math.min(8.0, parseFloat(val) || 6.0));
+
+    // Load persisted preferences (rate + mode) for continuity
+    try {
+        const savedRate = localStorage.getItem('equityLastRate');
+        if (savedRate) {
+            const r = parseFloat(savedRate);
+            if (!isNaN(r) && r >= 3 && r <= 8) {
+                slider.value = r;
+                input.value = r.toFixed(3);
+            }
+        }
+        const savedMode = localStorage.getItem('equitySavingsMode');
+        if (savedMode === 'full' || savedMode === 'remaining') {
+            savingsMode = savedMode;
+        }
+    } catch (e) {}
 
     // Initial sync
     let currentVal = clamp(slider.value);
@@ -130,6 +114,8 @@ function syncRateControls() {
     freshSlider.addEventListener('change', () => {
         let val = parseFloat(freshSlider.value);
         input.value = val.toFixed(3);
+
+        try { localStorage.setItem('equityLastRate', val); } catch (e) {}
 
         updateDashboardWithNewRate(val);
 
@@ -159,6 +145,8 @@ function syncRateControls() {
         freshSlider.value = val;
         input.value = val.toFixed(3);
 
+        try { localStorage.setItem('equityLastRate', val); } catch (e) {}
+
         updateDashboardWithNewRate(val);
 
         console.log('Rate changed to:', val, '— recalculating savings...');
@@ -170,35 +158,48 @@ function syncRateControls() {
     });
 }
 
-// Run on page load
-document.addEventListener('DOMContentLoaded', syncRateControls);
+// Run immediately (script at end of body)
+syncRateControls();
+initSavingsModeToggle(); // safe no-op if toggle not present yet (appears after Generate)
 
-// Savings Mode Toggle
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('savings-mode-toggle')?.addEventListener('click', () => {
+// Savings Mode Toggle wiring (called on load + after dashboard is injected since toggle now lives in results)
+function syncSavingsToggleVisual() {
+    const thumb = document.getElementById('toggle-thumb');
+    const toggleBtn = document.getElementById('savings-mode-toggle');
+    const modeLabel = document.getElementById('mode-label');
+    if (!thumb || !toggleBtn) return;
+
+    if (savingsMode === 'full') {
+        thumb.classList.remove('translate-x-7', 'translate-x-11', 'translate-x-1');
+        thumb.classList.add('translate-x-0.5');
+        toggleBtn.classList.remove('bg-orange-500');
+        toggleBtn.classList.add('bg-[#00A89D]');
+        // base gray classes stay; accent color class wins for bg
+    } else {
+        thumb.classList.remove('translate-x-0.5', 'translate-x-1', 'translate-x-11');
+        thumb.classList.add('translate-x-7');
+        toggleBtn.classList.remove('bg-[#00A89D]');
+        toggleBtn.classList.add('bg-orange-500');
+        // base gray classes stay; accent color class wins for bg
+    }
+
+    if (modeLabel) {
+        modeLabel.textContent = savingsMode === 'full' ? 'Full Term Reset' : 'Remaining Term';
+    }
+}
+
+function initSavingsModeToggle() {
+    const savingsToggle = document.getElementById('savings-mode-toggle');
+    if (!savingsToggle || savingsToggle.dataset.listenerAttached === 'true') return;
+    savingsToggle.dataset.listenerAttached = 'true';
+
+    savingsToggle.addEventListener('click', () => {
         savingsMode = savingsMode === 'full' ? 'remaining' : 'full';
 
-        const thumb = document.getElementById('toggle-thumb');
-        if (thumb) {
-            if (savingsMode === 'full') {
-                thumb.classList.remove('translate-x-11');
-                thumb.classList.add('translate-x-1');
-            } else {
-                thumb.classList.remove('translate-x-1');
-                thumb.classList.add('translate-x-11');
-            }
-        }
+        try { localStorage.setItem('equitySavingsMode', savingsMode); } catch (e) {}
 
-        const toggleBtn = document.getElementById('savings-mode-toggle');
-        if (toggleBtn) {
-            toggleBtn.classList.toggle('bg-[#00A89D]', savingsMode === 'full');
-            toggleBtn.classList.toggle('bg-orange-500', savingsMode === 'remaining');
-        }
-
-        const modeLabel = document.getElementById('mode-label');
-        if (modeLabel) {
-            modeLabel.textContent = savingsMode === 'full' ? 'Full Term Reset' : 'Remaining Term';
-        }
+        // update visuals immediately
+        syncSavingsToggleVisual();
 
         const currentRate = parseFloat(
             document.getElementById('new-rate-input')?.value ||
@@ -210,7 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // FIX: Force a second recalc after mode switch (especially critical for remaining term sync)
         setTimeout(() => updateDashboardWithNewRate(currentRate), 100);
     });
-});
+
+    // Set initial visual state to match current savingsMode
+    syncSavingsToggleVisual();
+}
 
 // Helpers
 function excelSerialToDate(serial) {
@@ -273,16 +277,84 @@ function formatMoney(num) {
 let savingsMode = 'full';  // 'full' = Full Term Reset (Option 2, default), 'remaining' = Remaining Term (Option 1)
 // Generate Report
 function generateEquityReport() {
-    if (!fileInput.files.length) {
+    if (!fileInput || !fileInput.files.length) {
         alert('Please upload a file');
         return;
     }
 
     const file = fileInput.files[0];
-    const loading = document.getElementById('global-loading');
+    const loadingEl = document.getElementById('global-loading');
     const output = document.getElementById('equity-output');
 
-    if (loading) loading.classList.remove('hidden');
+    // === CUSTOM RICH PROGRESS MODAL (match premium style of Newsletter, Underwriting, Weekly Win, etc.) ===
+    if (loadingEl) {
+        loadingEl.dataset.originalContent = loadingEl.innerHTML;
+
+        const customLoadingHTML = `
+            <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border border-gray-200 dark:border-gray-700">
+                    
+                    <div class="text-center mb-8">
+                        <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
+                        <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">
+                            Scanning Your Database for Equity &amp; Opportunities...
+                        </h3>
+                        <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">
+                            This usually takes a few seconds for typical files.
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Parsing loans, calculating current equity (5% annual appreciation), refi savings, cash-out, move-up power, and PMI eligibility.
+                        </p>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                        <h4 class="text-xl font-bold text-[#F15A29] mb-5 text-center">
+                            While we crunch the numbers
+                        </h4>
+                        <div class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                            <div class="flex gap-3">
+                                <i class="fas fa-home text-[#F15A29] mt-0.5"></i>
+                                <div><strong>Equity Model:</strong> Home value grown at conservative 5% compounded annually since closing.</div>
+                            </div>
+                            <div class="flex gap-3">
+                                <i class="fas fa-calculator text-[#00A89D] mt-0.5"></i>
+                                <div><strong>Savings Calc:</strong> Current P&amp;I + MI vs. new loan at your selected rate (plus ~$4k costs).</div>
+                            </div>
+                            <div class="flex gap-3">
+                                <i class="fas fa-chart-line text-[#002B5C] mt-0.5"></i>
+                                <div><strong>Opportunity Flags:</strong> Refi ready (savings &gt;$100/mo), Cash-out (&gt;$50k), Move-up (&gt;$100k equity), PMI removal (LTV ≤80%).</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <p class="text-xs font-semibold text-[#F15A29] mb-2">Pro Tips:</p>
+                            <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc pl-5">
+                                <li>Use the rate slider after results to instantly model different scenarios live.</li>
+                                <li>Toggle "Remaining Term" vs "Full Term Reset" to compare realistic (shorter remaining) vs. full-term savings.</li>
+                                <li>Filter by opportunity type or closing date to focus your outreach.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5">
+                        All calculations are client-side. Your data never leaves your browser.
+                    </p>
+                </div>
+            </div>
+        `;
+
+        loadingEl.innerHTML = customLoadingHTML;
+        loadingEl.classList.remove('hidden');
+        loadingEl.style.setProperty('display', 'flex', 'important');
+        loadingEl.style.setProperty('z-index', '99999', 'important');
+        loadingEl.style.setProperty('visibility', 'visible', 'important');
+        loadingEl.style.setProperty('opacity', '1', 'important');
+        loadingEl.style.setProperty('position', 'fixed', 'important');
+        loadingEl.style.setProperty('inset', '0', 'important');
+    } else if (typeof window.forceShowGlobalLoading === 'function') {
+        window.forceShowGlobalLoading('Scanning Your Database for Equity &amp; Opportunities...');
+    }
+
     if (output) {
         output.classList.add('hidden');
         output.innerHTML = '';
@@ -408,18 +480,23 @@ for (let i = 1; i < rawRows.length; i++) {
     });
 }
 
-// Normalize address for duplicate key (removes punctuation, standardizes spacing)
-const normalizeAddress = (addr) => addr
-    .toLowerCase()
-    .replace(/\./g, '')  // Remove periods (E. -> E)
-    .replace(/,/g, '')   // Remove commas
-    .replace(/\s+/g, ' ') // Multiple spaces to single
-    .trim();
+// Normalize address for duplicate key (removes punctuation, standardizes spacing, strips units if present)
+const normalizeAddress = (addr) => {
+    if (!addr) return '';
+    return addr
+        .toLowerCase()
+        .replace(/\./g, '')  // Remove periods (E. -> E)
+        .replace(/,/g, '')   // Remove commas
+        .replace(/\s+(apt|unit|#|ste|suite)\s*\w*/gi, '') // strip common unit/apt numbers
+        .replace(/\s+/g, ' ') // Multiple spaces to single
+        .trim();
+};
 
-// De-duplication: Keep only newest loan per name + address
+// De-duplication: Keep only the *newest* loan per address.
+// Older loans at the same address are previous mortgages that have been refinanced/paid off and are irrelevant.
 const seen = new Map();
 tempRows.forEach(row => {
-    const key = `${row.fullName.toLowerCase()}|${normalizeAddress(row.fullAddress)}`;
+    const key = normalizeAddress(row.fullAddress);
     const existing = seen.get(key);
 
     if (!existing || row.closingDateObj > existing.closingDateObj) {
@@ -427,7 +504,7 @@ tempRows.forEach(row => {
     }
 });
 
-// Final unique clients (newest loans only)
+// Final unique clients (newest loans only per address)
 const clients = Array.from(seen.values());
 
 window.currentOpportunities = clients;
@@ -444,7 +521,18 @@ updateDashboardWithNewRate(currentRate);
                 output.classList.remove('hidden');
             }
         } finally {
-            if (loading) loading.classList.add('hidden');
+            // Restore original loading content + hide
+            const loadingElFinal = document.getElementById('global-loading');
+            if (loadingElFinal && loadingElFinal.dataset.originalContent) {
+                loadingElFinal.innerHTML = loadingElFinal.dataset.originalContent;
+                delete loadingElFinal.dataset.originalContent;
+            }
+            if (typeof window.hideLoading === 'function') {
+                window.hideLoading();
+            } else if (loadingElFinal) {
+                loadingElFinal.classList.add('hidden');
+                loadingElFinal.style.setProperty('display', 'none', 'important');
+            }
         }
     };
 
@@ -453,7 +541,18 @@ updateDashboardWithNewRate(currentRate);
             output.innerHTML = '<p class="text-red-600 text-center py-20 text-xl font-bold">Error reading file.</p>';
             output.classList.remove('hidden');
         }
-        if (loading) loading.classList.add('hidden');
+        // Restore + hide
+        const loadingElFinal = document.getElementById('global-loading');
+        if (loadingElFinal && loadingElFinal.dataset.originalContent) {
+            loadingElFinal.innerHTML = loadingElFinal.dataset.originalContent;
+            delete loadingElFinal.dataset.originalContent;
+        }
+        if (typeof window.hideLoading === 'function') {
+            window.hideLoading();
+        } else if (loadingElFinal) {
+            loadingElFinal.classList.add('hidden');
+            loadingElFinal.style.setProperty('display', 'none', 'important');
+        }
     };
 
     reader.readAsBinaryString(file);
@@ -465,96 +564,147 @@ function buildDashboard() {
     const output = document.getElementById('equity-output');
     if (!output) return;
 
-    // Get current slider rate for initial recalc
-    const currentRate = parseFloat(document.getElementById('new-rate-input')?.value || 
-                                   document.getElementById('new-rate-slider')?.value || '6.0');
+    // Default rate; actual elements injected below so we init after
+    let currentRate = 6.0;
 
     output.innerHTML = `
     <div class="max-w-7xl mx-auto">
-        <div class="bg-gradient-to-r from-[#F15A29] to-[#7c3aed] text-white p-8 rounded-3xl shadow-2xl mb-10 text-center relative">
-            <button onclick="resetEquityTool()" class="absolute top-4 left-4 bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-full font-bold transition-all shadow-md text-lg">
-                ← New Scan
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl mb-8 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#00A89D]/10 to-transparent rounded-full -mr-8 -mt-8"></div>
+            <button onclick="resetEquityTool()" class="absolute top-4 left-4 text-sm px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-2">
+                <i class="fas fa-redo"></i> <span>New Scan</span>
             </button>
-            <h3 class="text-4xl font-bold mb-3">Equity Opportunity Dashboard</h3>
-            <p class="text-xl mb-6">Analyzed ${opps.length} clients</p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="bg-white/20 p-6 rounded-2xl">
-                    <p class="text-5xl font-bold" id="count-refi">0</p>
-                    <p class="text-xl mt-2">Refi Ready</p>
+            <!-- Savings Mode toggle at far right of dashboard, directly above its mode indicator text -->
+            <div class="absolute top-3 right-4 text-right">
+                <label class="block text-[10px] font-semibold text-[#002B5C] dark:text-[#00A89D] mb-0.5">Savings Mode</label>
+                <button id="savings-mode-toggle" class="relative inline-flex h-8 w-14 items-center rounded-full bg-gray-200 dark:bg-gray-700 border border-[#00A89D] px-0.5 focus:outline-none focus:ring-2 focus:ring-[#00A89D]/50 transition-all">
+                    <span id="toggle-thumb" class="inline-block h-6 w-6 transform rounded-full bg-white shadow transition-all duration-200 ease-out translate-x-0.5"></span>
+                </button>
+                <div class="text-[10px] text-gray-500 leading-none mt-0.5">
+                    <span id="mode-label" class="font-bold text-[#00A89D]">Full Term Reset</span>
                 </div>
-                <div class="bg-white/20 p-6 rounded-2xl">
-                    <p class="text-5xl font-bold" id="count-cash">0</p>
-                    <p class="text-xl mt-2">Cash-Out</p>
+            </div>
+            <div class="text-center pt-8">
+                <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-1">Equity Opportunity Dashboard</h3>
+                <p class="text-[#00A89D] font-medium">Analyzed <span class="font-bold">${opps.length}</span> clients from your database</p>
+            </div>
+
+            <!-- Live rate controls inside dashboard header (only visible after generate, matching savings toggle) -->
+            <div class="mt-4 flex flex-col items-center w-full max-w-full">
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-[#002B5C] dark:text-[#00A89D]">New Refi Rate</label>
+                <input 
+                    id="new-rate-input" 
+                    type="number" 
+                    step="0.125" 
+                    min="3.0" 
+                    max="8.0" 
+                    value="6.000" 
+                    class="w-16 sm:w-20 p-1 text-center text-base sm:text-lg font-bold border border-[#00A89D] rounded-lg bg-white dark:bg-gray-800 text-[#F15A29] focus:outline-none focus:ring-2 focus:ring-[#F15A29]/30"
+                >
+                <span class="text-base sm:text-lg font-bold text-[#F15A29]">%</span>
+              </div>
+              <input 
+                id="new-rate-slider" 
+                type="range" 
+                min="3.0" 
+                max="8.0" 
+                step="0.125" 
+                value="6.0" 
+                class="w-full max-w-[200px] sm:max-w-[240px] h-2 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-[#F15A29] mt-1"
+              >
+              <div class="flex justify-between text-[7px] sm:text-[8px] text-gray-400 w-full max-w-[200px] sm:max-w-[240px] px-0.5 mt-0.5">
+                <span>3.0%</span><span>8.0%</span>
+              </div>
+              <div class="text-[8px] sm:text-[9px] text-gray-400 mt-0.5">live — updates tiles &amp; modal instantly</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div class="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 text-center">
+                    <p class="text-4xl font-black text-[#00A89D]" id="count-refi">0</p>
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-1">Refi Ready</p>
                 </div>
-                <div class="bg-white/20 p-6 rounded-2xl">
-                    <p class="text-5xl font-bold" id="count-move">0</p>
-                    <p class="text-xl mt-2">Move-Up Ready</p>
+                <div class="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 text-center">
+                    <p class="text-4xl font-black text-green-600" id="count-cash">0</p>
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-1">Cash-Out Goldmine</p>
                 </div>
-                <div class="bg-white/20 p-6 rounded-2xl">
-                    <p class="text-5xl font-bold" id="count-pmi">0</p>
-                    <p class="text-xl mt-2">PMI Removal</p>
+                <div class="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 text-center">
+                    <p class="text-4xl font-black text-blue-600" id="count-move">0</p>
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-1">Move-Up Ready</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 text-center">
+                    <p class="text-4xl font-black text-purple-600" id="count-pmi">0</p>
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-1">PMI Removal</p>
                 </div>
             </div>
         </div>
 
-        <div class="flex flex-wrap gap-6 my-8 items-end justify-start">
-            <div class="flex gap-4 items-center">
-                <label class="text-xl font-semibold text-[#00A89D]">Sort by:</label>
-                <select id="sort-select" class="p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
-                    <option value="savings">Highest Savings</option>
-                    <option value="equity">Most Equity</option>
-                    <option value="cash">Most Cash-Out</option>
-                    <option value="move">Most Move-Up</option>
-                    <option value="name">Name A–Z</option>
-                </select>
-            </div>
-
-            <div class="flex gap-4 items-center">
-                <label class="text-xl font-semibold text-[#00A89D]">Transaction Type:</label>
-                <select id="filter-transaction-type" class="p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
-                    <option value="All">All</option>
-                    <option value="Purchase">Purchase</option>
-                    <option value="Refinance">Refinance</option>
-                </select>
-            </div>
-
-            <div class="flex gap-4 items-center">
-                <label class="text-xl font-semibold text-[#00A89D]">Opportunity Type:</label>
-                <select id="filter-opportunity-type" class="p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
-                    <option value="All">All</option>
-                    <option value="Refi Ready">Refi Ready</option>
-                    <option value="Cash-Out Goldmine">Cash-Out Goldmine</option>
-                    <option value="Move-Up Ready">Move-Up Ready</option>
-                    <option value="PMI Removal">PMI Removal</option>
-                </select>
-            </div>
-
-            <div class="flex flex-nowrap items-center gap-8">
-                <div class="flex gap-4 items-center">
-                    <label class="text-xl font-semibold text-[#00A89D]">Closing Date From:</label>
-                    <input type="date" id="filter-closing-from" class="p-3 w-48 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 mb-8">
+            <div class="flex flex-wrap gap-x-6 gap-y-4 items-end">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">SORT BY</label>
+                    <select id="sort-select" class="p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
+                        <option value="savings">Highest Monthly Savings</option>
+                        <option value="equity">Most Equity Built</option>
+                        <option value="cash">Most Cash-Out Potential</option>
+                        <option value="move">Most Move-Up Equity</option>
+                        <option value="name">Name (A–Z)</option>
+                    </select>
                 </div>
-                <div class="flex gap-4 items-center">
-                    <label class="text-xl font-semibold text-[#00A89D]">Closing Date To:</label>
-                    <input type="date" id="filter-closing-to" class="p-3 w-48 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
-                </div>
-            </div>
 
-            <div class="flex gap-4 items-center flex-1 max-w-lg ml-auto">
-                <label class="text-xl font-semibold text-[#00A89D]">Search:</label>
-                <input type="search" id="opportunity-search" placeholder="Name, address, city, phone, email..." class="flex-1 p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">TRANSACTION</label>
+                    <select id="filter-transaction-type" class="p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
+                        <option value="All">All</option>
+                        <option value="Purchase">Purchase</option>
+                        <option value="Refinance">Refinance</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">OPPORTUNITY TYPE</label>
+                    <select id="filter-opportunity-type" class="p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
+                        <option value="All">All Types</option>
+                        <option value="Refi Ready">Refi Ready</option>
+                        <option value="Cash-Out Goldmine">Cash-Out</option>
+                        <option value="Move-Up Ready">Move-Up</option>
+                        <option value="PMI Removal">PMI Removal</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">CLOSED FROM</label>
+                        <input type="date" id="filter-closing-from" class="p-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">TO</label>
+                        <input type="date" id="filter-closing-to" class="p-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
+                    </div>
+                </div>
+
+                <div class="flex-1 min-w-[220px]">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">SEARCH CLIENTS</label>
+                    <input type="search" id="opportunity-search" placeholder="Name, address, phone..." class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
+                </div>
             </div>
         </div>
 
-        <div id="opportunity-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12"></div>
-
-        <div class="text-center mt-12 space-x-8">
-            <button onclick="copyDashboard()" class="bg-[#002B5C] text-white px-12 py-6 rounded-full font-bold text-xl shadow-2xl">📋 Copy All Data</button>
-         </div>
+        <div id="opportunity-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12"></div>
     </div>
 `;
 
     output.classList.remove('hidden');
+
+    // Rate controls are now inside the injected dashboard header (like the savings mode toggle)
+    // so initialize the slider/input listeners here (static ones were removed)
+    syncRateControls();
+
+    const rateInputEl = document.getElementById('new-rate-input');
+    currentRate = rateInputEl ? parseFloat(rateInputEl.value) || 6.0 : 6.0;
+
+    // Now that dashboard (incl. savings toggle) is injected, wire up the toggle (far right)
+    initSavingsModeToggle();
 
     // Recalculate savings/flags/counts consistently (respects toggle mode and Math.abs)
     updateDashboardWithNewRate(currentRate);
@@ -634,8 +784,37 @@ function updateDashboardWithNewRate(newRate) {
         document.getElementById('count-cash').textContent = cashOutCount;
         document.getElementById('count-move').textContent = moveUpCount;
         document.getElementById('count-pmi').textContent = pmiCount;
+
+        // Polish: make count cards clickable to instantly filter the tiles
+        const countFilters = [
+            {id: 'count-refi', val: 'Refi Ready'},
+            {id: 'count-cash', val: 'Cash-Out Goldmine'},
+            {id: 'count-move', val: 'Move-Up Ready'},
+            {id: 'count-pmi', val: 'PMI Removal'}
+        ];
+        countFilters.forEach(({id, val}) => {
+            const p = document.getElementById(id);
+            if (p) {
+                const container = p.parentElement;
+                container.style.cursor = 'pointer';
+                container.onclick = (e) => {
+                    e.stopPropagation();
+                    const sel = document.getElementById('filter-opportunity-type');
+                    if (sel) {
+                        sel.value = val;
+                        sel.dispatchEvent(new Event('change'));
+                    }
+                };
+            }
+        });
+    }
+
+    // Keep open modal comparison in sync when rate or mode changes (was previously only in legacy rate block)
+    if (window.currentOpenClient) {
+        updateRefiComparison(window.currentOpenClient);
     }
 }
+
 // Render Cards (badges, no fallback)
 function renderCards(opps) {
     const container = document.getElementById('opportunity-cards');
@@ -644,57 +823,148 @@ function renderCards(opps) {
 
     opps.forEach(c => {
         const card = document.createElement('div');
-        card.className = 'bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 cursor-pointer hover:translate-y-[-8px] transition-all';
+        let leftAccent = 'border-l-4 border-transparent';
+        if (c.isRefiReady) leftAccent = 'border-l-4 border-[#00A89D]';
+        else if (c.isCashOut) leftAccent = 'border-l-4 border-green-600';
+        else if (c.isMoveUpReady) leftAccent = 'border-l-4 border-blue-600';
+        else if (c.pmiEligible) leftAccent = 'border-l-4 border-purple-600';
+        card.className = `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-lg p-4 sm:p-6 hover:shadow-2xl hover:border-[#00A89D] hover:-translate-y-0.5 transition-all group cursor-pointer relative overflow-hidden ${leftAccent}`;
         card.innerHTML = `
-            <h3 class="text-2xl font-bold text-[#00A89D] mb-2">${c.fullName}</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">${c.fullAddress}</p>
-            <div class="grid grid-cols-2 gap-4 text-lg mb-6">
-    <div><strong>Est. Value:</strong> ${formatMoney(c.currentValue)}</div>
-    <div><strong>Est. Balance:</strong> ${formatMoney(c.estimatedBalance)}</div>
-    <div><strong>Equity:</strong> ${formatMoney(c.equity)}</div>
-    <div><strong>Savings/mo:</strong> <span class="text-green-600 font-bold">${formatMoney(c.monthlySavings)}</span></div>
-    
-    <!-- NEW: Conditional Cash-Out Amount -->
-    ${c.cashOut > 50000 ? `<div><strong>Cash-Out Potential:</strong> <span class="text-green-600 font-bold text-xl">${formatMoney(c.cashOut)}</span></div>` : ''}
-    
-    <!-- NEW: Conditional Move-Up Amount -->
-    ${c.moveUp > 100000 ? `<div><strong>Move-Up Equity:</strong> <span class="text-blue-600 font-bold text-xl">${formatMoney(c.moveUp)}</span></div>` : ''}
-</div>
-            <div class="flex flex-wrap gap-3">
-                ${c.isRefiReady ? '<span class="px-5 py-2.5 rounded-full text-white font-bold bg-teal-600 shadow-md">Refi Ready</span>' : ''}
-                ${c.isCashOut ? '<span class="px-5 py-2.5 rounded-full text-white font-bold bg-green-600 shadow-md">Cash-Out</span>' : ''}
-                ${c.isMoveUpReady ? '<span class="px-5 py-2.5 rounded-full text-white font-bold bg-blue-600 shadow-md">Move-Up Ready</span>' : ''}
-                ${c.pmiEligible ? '<span class="px-5 py-2.5 rounded-full text-white font-bold bg-purple-600 shadow-md">PMI Removal</span>' : ''}
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex-1 min-w-0 pr-2">
+                    <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white group-hover:text-[#00A89D] transition-colors truncate">${c.fullName}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">${c.fullAddress}</p>
+                </div>
+                <button class="save-opp-btn flex-shrink-0 ml-2 text-xs px-2 py-1 sm:px-3 sm:py-1.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold flex items-center gap-1">
+                    <i class="far fa-bookmark"></i> Save
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-xs sm:text-sm mb-4">
+                <div class="flex items-center"><i class="fas fa-home text-gray-400 w-4 mr-1.5"></i><span class="text-gray-500">Est. Value:</span> <span class="font-semibold ml-1">${formatMoney(c.currentValue)}</span></div>
+                <div class="flex items-center"><i class="fas fa-wallet text-gray-400 w-4 mr-1.5"></i><span class="text-gray-500">Est. Balance:</span> <span class="font-semibold ml-1">${formatMoney(c.estimatedBalance)}</span></div>
+                <div class="flex items-center"><i class="fas fa-piggy-bank text-[#00A89D] w-4 mr-1.5"></i><span class="text-gray-500">Equity:</span> <span class="font-bold text-[#00A89D] ml-1">${formatMoney(c.equity)}</span></div>
+                <div class="flex items-center bg-green-50 dark:bg-green-900/20 -mx-1 px-1 py-0.5 rounded"><i class="fas fa-dollar-sign text-green-600 w-4 mr-1.5"></i><span class="text-gray-500">Savings/mo:</span> <span class="font-bold text-green-600 ml-1">${formatMoney(c.monthlySavings)}</span></div>
+                ${c.cashOut > 50000 ? `<div class="col-span-2 flex items-center min-w-0"><i class="fas fa-hand-holding-usd text-green-600 w-4 mr-1.5 flex-shrink-0"></i><span class="text-gray-500 truncate">Cash-Out Potential:</span> <span class="font-bold text-green-600 text-xs sm:text-base ml-1 flex-shrink-0">${formatMoney(c.cashOut)}</span></div>` : ''}
+                ${c.moveUp > 100000 ? `<div class="col-span-2 flex items-center min-w-0"><i class="fas fa-arrow-up text-blue-600 w-4 mr-1.5 flex-shrink-0"></i><span class="text-gray-500 truncate">Move-Up Equity:</span> <span class="font-bold text-blue-600 text-xs sm:text-base ml-1 flex-shrink-0">${formatMoney(c.moveUp)}</span></div>` : ''}
+            </div>
+
+            <div class="flex flex-wrap gap-1 sm:gap-2">
+                ${c.isRefiReady ? '<span class="px-3 py-1 text-xs rounded-full text-white font-bold bg-[#00A89D]">Refi Ready</span>' : ''}
+                ${c.isCashOut ? '<span class="px-3 py-1 text-xs rounded-full text-white font-bold bg-green-600">Cash-Out</span>' : ''}
+                ${c.isMoveUpReady ? '<span class="px-3 py-1 text-xs rounded-full text-white font-bold bg-blue-600">Move-Up Ready</span>' : ''}
+                ${c.pmiEligible ? '<span class="px-3 py-1 text-xs rounded-full text-white font-bold bg-purple-600">PMI Removal</span>' : ''}
+            </div>
+
+            <div class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-[10px] sm:text-xs">
+                <span class="text-gray-400 group-hover:text-[#00A89D] transition-colors flex items-center gap-1"><i class="fas fa-info-circle"></i> Click for full details &amp; scripts</span>
+                <span class="text-[#00A89D]/70">→</span>
             </div>
         `;
-        card.onclick = () => openDetailModal(c);
+        card.addEventListener('click', (e) => {
+          console.log('[equity] Tile clicked for client:', c.fullName, 'target:', e.target.tagName, e.target.className);
+          const fn = window.openDetailModal || openDetailModal;
+          if (fn) {
+            fn(c);
+          } else {
+            console.error('openDetailModal not available');
+          }
+        });
+
+        const saveBtn = card.querySelector('.save-opp-btn');
+        if (saveBtn) {
+            saveBtn.onclick = (e) => {
+                e.stopImmediatePropagation();
+                const originalHTML = saveBtn.innerHTML;
+                saveOpportunityToVault(c);
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                saveBtn.disabled = true;
+                setTimeout(() => {
+                    if (saveBtn && saveBtn.parentNode) {
+                        saveBtn.innerHTML = originalHTML;
+                        saveBtn.disabled = false;
+                    }
+                }, 1600);
+            };
+        }
+
         container.appendChild(card);
     });
 }
 function sortAndRenderCards() {
+    // Re-apply current UI filters + sort (so rate/mode tweaks don't nuke user's filter state)
     let filtered = window.currentOpportunities || [];
 
+    const search = document.getElementById('opportunity-search');
+    const sortSel = document.getElementById('sort-select');
+    const filterTransaction = document.getElementById('filter-transaction-type');
+    const filterOpportunity = document.getElementById('filter-opportunity-type');
+    const filterFrom = document.getElementById('filter-closing-from');
+    const filterTo = document.getElementById('filter-closing-to');
+
     // Search
-    const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
-    if (searchQuery) {
-        filtered = filtered.filter(o => 
-            (o.fullName || '').toLowerCase().includes(searchQuery) ||
-            (o.fullAddress || '').toLowerCase().includes(searchQuery)
+    const term = (search?.value || '').toLowerCase();
+    if (term) {
+        filtered = filtered.filter(c =>
+            (c.fullName || '').toLowerCase().includes(term) ||
+            (c.fullAddress || '').toLowerCase().includes(term) ||
+            (c.phone || '').includes(term) ||
+            (c.email || '').toLowerCase().includes(term)
         );
     }
 
-    // Filter type
-    const filterType = document.getElementById('filter-type')?.value || 'All';
-    if (filterType !== 'All') {
-        if (filterType === 'Refi Ready') filtered = filtered.filter(o => o.isRefiReady);
-        else if (filterType === 'Cash-Out Goldmine') filtered = filtered.filter(o => o.isCashOut);
-        else if (filterType === 'Move-Up Ready') filtered = filtered.filter(o => o.isMoveUpReady);
-        else if (filterType === 'PMI Removal Eligible') filtered = filtered.filter(o => o.pmiEligible);
+    // Transaction filter
+    const transType = filterTransaction?.value || 'All';
+    if (transType !== 'All') {
+        if (transType === 'Purchase') {
+            filtered = filtered.filter(c => c.transactionType && c.transactionType.toLowerCase().includes('purchase'));
+        } else if (transType === 'Refinance') {
+            filtered = filtered.filter(c => c.transactionType && c.transactionType.toLowerCase().includes('refinance'));
+        }
     }
 
-    // Sort
-    const sortBy = document.getElementById('sort-by')?.value || 'score';
-    filtered.sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
+    // Opportunity type
+    const oppType = filterOpportunity?.value || 'All';
+    if (oppType !== 'All') {
+        if (oppType === 'Refi Ready') filtered = filtered.filter(c => c.isRefiReady);
+        else if (oppType === 'Cash-Out Goldmine') filtered = filtered.filter(c => c.isCashOut);
+        else if (oppType === 'Move-Up Ready') filtered = filtered.filter(c => c.isMoveUpReady);
+        else if (oppType === 'PMI Removal') filtered = filtered.filter(c => c.pmiEligible);
+    }
+
+    // Date range (simplified, same as attach)
+    const fromDateStr = filterFrom?.value;
+    const toDateStr = filterTo?.value;
+    if (fromDateStr || toDateStr) {
+        filtered = filtered.filter(c => {
+            if (!c.closingDate) return false;
+            const parts = c.closingDate.split('/');
+            if (parts.length !== 3) return false;
+            const clientDate = new Date(`${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`);
+            if (isNaN(clientDate.getTime())) return false;
+            if (fromDateStr) {
+                const fromDate = new Date(fromDateStr);
+                if (clientDate < fromDate) return false;
+            }
+            if (toDateStr) {
+                const toDate = new Date(toDateStr);
+                toDate.setHours(23, 59, 59, 999);
+                if (clientDate > toDate) return false;
+            }
+            return true;
+        });
+    }
+
+    // Sort (match attach)
+    const val = sortSel?.value || 'savings';
+    filtered.sort((a, b) => {
+        if (val === 'savings') return b.monthlySavings - a.monthlySavings;
+        if (val === 'equity') return b.equity - a.equity;
+        if (val === 'cash') return b.cashOut - a.cashOut;
+        if (val === 'move') return b.moveUp - a.moveUp;
+        if (val === 'name') return a.fullName.localeCompare(b.fullName);
+        return 0;
+    });
 
     renderCards(filtered);
 }
@@ -789,51 +1059,6 @@ function attachSearchAndSort() {
     refresh();  // Initial render
 }
 
-// Live Rate Updates (tiles savings match modal Option 2, badges/counts live)
-document.addEventListener('DOMContentLoaded', () => {
-    const rateSlider = document.getElementById('new-rate-slider');
-    const rateInput = document.getElementById('new-rate-input');
-
-    if (!rateSlider || !rateInput) return;
-
-    const updateLive = () => {
-        let rate = parseFloat(rateInput.value) || parseFloat(rateSlider.value) || 6.0;
-        rate = Math.max(3.0, Math.min(8.0, rate));
-
-        rateSlider.value = rate;
-        rateInput.value = rate.toFixed(3);
-
-        const opps = window.currentOpportunities;
-        if (opps) {
-            let refiCount = 0;
-            opps.forEach(c => {
-                const padded = c.estimatedBalance + 4000;
-                const newPI = pmt(rate, c.termMonths, padded); // Match modal Option 2
-                const newLTV = c.currentValue ? (padded / c.currentValue) * 100 : 100;
-                const newMI = newLTV > 80 ? c.originalMI : 0;
-                const savings = Math.max(0, Math.round(c.originalPI + c.originalMI - newPI - newMI));
-
-                c.monthlySavings = savings;
-                c.isRefiReady = savings > 100;
-
-                if (c.isRefiReady) refiCount++;
-            });
-
-            document.getElementById('count-refi').textContent = refiCount;
-        }
-
-        renderCards(opps);
-        if (window.currentOpenClient) updateRefiComparison(window.currentOpenClient);
-    };
-
-    rateSlider.addEventListener('input', updateLive);
-    rateSlider.addEventListener('change', updateLive);
-    rateInput.addEventListener('input', updateLive);
-    rateInput.addEventListener('change', updateLive);
-
-    updateLive();
-});
-
 // Dual Refi Comparison
 function updateRefiComparison(client) {
     if (!client) return;
@@ -876,117 +1101,115 @@ function updateRefiComparison(client) {
 
     const note2 = `Savings calculated as: Current P&I (${currentPIFormatted}) - New P&I (${formatMoney(newPIOpt2)}) based on current balance (${balanceFormatted}), assuming $4,000 added for closing costs, new rate (${newRate.toFixed(3)}%), and reset to original term (${client.termMonths} months).`;
 
-    document.getElementById('refi-comparison-grid').innerHTML = `
+    const gridEl = document.getElementById('refi-comparison-grid');
+    if (gridEl) {
+        gridEl.innerHTML = `
         <div class="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-300 dark:border-gray-600">
-            <h5 class="text-2xl font-extrabold text-[#002B5C] dark:text-[#00A89D]">Option 1: Keep Remaining Term (~${remainingMonths} months)</h5>
-            <p class="text-lg"><strong>Current Est. LTV:</strong> <span class="font-bold text-blue-600 text-xl">${currentLTV}%</span></p>
-            <p class="text-lg"><strong>Current P&I:</strong> <span class="text-xl font-bold">${formatMoney(currentPI)}</span></p>
-            <p class="text-lg"><strong>New P&I @ ${newRate.toFixed(3)}%:</strong> <span class="text-xl font-bold text-green-600">${formatMoney(newPIOpt1)}</span></p>
-            <p class="text-lg"><strong>Monthly Savings:</strong> <span class="text-2xl font-extrabold text-green-600">${formatMoney(savingsOpt1)}</span></p>
+            <div class="flex items-center gap-2">
+                <i class="fas fa-clock text-[#00A89D]"></i>
+                <h5 class="text-2xl font-extrabold text-[#002B5C] dark:text-[#00A89D]">Option 1: Keep Remaining Term (~${remainingMonths} months)</h5>
+            </div>
+            <p class="text-lg"><span class="text-gray-500">Current Est. LTV:</span> <span class="font-bold text-blue-600 text-xl">${currentLTV}%</span></p>
+            <p class="text-lg"><span class="text-gray-500">Current P&I:</span> <span class="text-xl font-bold">${formatMoney(currentPI)}</span></p>
+            <p class="text-lg"><span class="text-gray-500">New P&I @ ${newRate.toFixed(3)}%:</span> <span class="text-xl font-bold text-green-600">${formatMoney(newPIOpt1)}</span></p>
+            <p class="text-lg"><span class="text-gray-500">Monthly Savings:</span> <span class="text-2xl font-extrabold text-green-600">${formatMoney(savingsOpt1)}</span></p>
             <p class="text-sm text-gray-500 italic mt-4">${note1}</p>
         </div>
 
         <div class="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-300 dark:border-gray-600">
-            <h5 class="text-2xl font-extrabold text-[#002B5C] dark:text-[#00A89D]">Option 2: Reset to Original Term (${client.termMonths} months)</h5>
-            <p class="text-lg"><strong>Current Est. LTV:</strong> <span class="font-bold text-blue-600 text-xl">${currentLTV}%</span></p>
-            <p class="text-lg"><strong>Current P&I:</strong> <span class="text-xl font-bold">${formatMoney(currentPI)}</span></p>
-            <p class="text-lg"><strong>New P&I @ ${newRate.toFixed(3)}%:</strong> <span class="text-xl font-bold text-green-600">${formatMoney(newPIOpt2)}</span></p>
-            <p class="text-lg"><strong>Monthly Savings:</strong> <span class="text-2xl font-extrabold text-green-600">${formatMoney(savingsOpt2)}</span></p>
+            <div class="flex items-center gap-2">
+                <i class="fas fa-sync-alt text-[#00A89D]"></i>
+                <h5 class="text-2xl font-extrabold text-[#002B5C] dark:text-[#00A89D]">Option 2: Reset to Original Term (${client.termMonths} months)</h5>
+            </div>
+            <p class="text-lg"><span class="text-gray-500">Current Est. LTV:</span> <span class="font-bold text-blue-600 text-xl">${currentLTV}%</span></p>
+            <p class="text-lg"><span class="text-gray-500">Current P&I:</span> <span class="text-xl font-bold">${formatMoney(currentPI)}</span></p>
+            <p class="text-lg"><span class="text-gray-500">New P&I @ ${newRate.toFixed(3)}%:</span> <span class="text-xl font-bold text-green-600">${formatMoney(newPIOpt2)}</span></p>
+            <p class="text-lg"><span class="text-gray-500">Monthly Savings:</span> <span class="text-2xl font-extrabold text-green-600">${formatMoney(savingsOpt2)}</span></p>
             <p class="text-sm text-gray-500 italic mt-4">${note2}</p>
         </div>
     `;
+    }
 }
 // Open Modal
 function openDetailModal(client) {
     window.currentOpenClient = client;
+    window.currentClientForModal = client; // for vault save from modal
 
-    document.getElementById('modal-client-name').textContent = client.fullName || 'N/A';
-    document.getElementById('modal-address').textContent = client.fullAddress || 'N/A';
+    const nameEl = document.getElementById('modal-client-name');
+    if (nameEl) nameEl.textContent = client.fullName || 'N/A';
+    const addrEl = document.getElementById('modal-address');
+    if (addrEl) addrEl.textContent = client.fullAddress || 'N/A';
 
     const phoneLink = document.getElementById('modal-phone-link');
-    if (client.phone) {
-        phoneLink.href = 'tel:' + client.phone.replace(/\D/g, '');
-        phoneLink.textContent = client.phone;
-        document.getElementById('modal-phone-na').classList.add('hidden');
-    } else {
-        document.getElementById('modal-phone-na').classList.remove('hidden');
+    const phoneNa = document.getElementById('modal-phone-na');
+    if (phoneLink && phoneNa) {
+        if (client.phone) {
+            phoneLink.href = 'tel:' + client.phone.replace(/\D/g, '');
+            phoneLink.textContent = client.phone;
+            phoneNa.classList.add('hidden');
+        } else {
+            phoneNa.classList.remove('hidden');
+        }
     }
 
     const emailLink = document.getElementById('modal-email-link');
-    if (client.email) {
-        emailLink.href = 'mailto:' + client.email;
-        emailLink.textContent = client.email;
-        document.getElementById('modal-email-na').classList.add('hidden');
-    } else {
-        document.getElementById('modal-email-na').classList.remove('hidden');
+    const emailNa = document.getElementById('modal-email-na');
+    if (emailLink && emailNa) {
+        if (client.email) {
+            emailLink.href = 'mailto:' + client.email;
+            emailLink.textContent = client.email;
+            emailNa.classList.add('hidden');
+        } else {
+            emailNa.classList.remove('hidden');
+        }
     }
 
-    document.getElementById('modal-program').textContent = client.loanProgram || 'N/A';
-    document.getElementById('modal-closing-date').textContent = client.closingDate || 'N/A';
-    document.getElementById('modal-current-rate').textContent = client.rate.toFixed(3) + '%';
-    document.getElementById('modal-term').textContent = Math.round(client.termMonths / 12) + ' years';
-    document.getElementById('modal-original-ltv').textContent = client.originalLTV.toFixed(2) + '%';
-    document.getElementById('modal-balance').textContent = formatMoney(client.estimatedBalance);
-    document.getElementById('modal-value').textContent = formatMoney(client.currentValue);
-    document.getElementById('modal-original-pi').textContent = formatMoney(client.originalPI);
-    document.getElementById('modal-original-mi').textContent = formatMoney(client.originalMI);
-    document.getElementById('modal-original-insurance').textContent = formatMoney(client.originalInsurance);
-    document.getElementById('modal-original-taxes').textContent = formatMoney(client.originalTaxes);
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setText('modal-program', client.loanProgram || 'N/A');
+    setText('modal-closing-date', client.closingDate || 'N/A');
+    setText('modal-current-rate', client.rate.toFixed(3) + '%');
+    setText('modal-term', Math.round(client.termMonths / 12) + ' years');
+    setText('modal-original-ltv', client.originalLTV.toFixed(2) + '%');
+    setText('modal-balance', formatMoney(client.estimatedBalance));
+    setText('modal-value', formatMoney(client.currentValue));
+    setText('modal-original-pi', formatMoney(client.originalPI));
+    setText('modal-original-mi', formatMoney(client.originalMI));
+    setText('modal-original-insurance', formatMoney(client.originalInsurance));
+    setText('modal-original-taxes', formatMoney(client.originalTaxes));
     
-    document.getElementById('modal-pmi-alert').style.display = client.pmiEligible ? 'flex' : 'none';
-// Add Equity Opportunities section (clean, high-impact, no duplicates)
-let equitySection = document.getElementById('equity-opportunities-section');
-if (equitySection) equitySection.remove();  // Remove previous if exists
-
-equitySection = document.createElement('div');
-equitySection.id = 'equity-opportunities-section';
-equitySection.className = 'mt-10 p-8 bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900 dark:to-blue-900 rounded-2xl shadow-inner';
-
-equitySection.innerHTML = `
-    <h4 class="text-2xl font-bold text-[#002B5C] dark:text-[#00A89D] mb-6 flex items-center">
-        <i class="fas fa-coins mr-3 text-[#F15A29]"></i>Equity Opportunities
-    </h4>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-lg">
-        <div>
-            <p class="text-4xl font-black text-green-600">${formatMoney(client.cashOut)}</p>
-            <p class="mt-3 text-gray-700 dark:text-gray-300">Cash-Out Potential<br><span class="text-sm">(80% LTV)</span></p>
-        </div>
-        <div>
-            <p class="text-4xl font-black text-blue-600">${formatMoney(client.moveUp)}</p>
-            <p class="mt-3 text-gray-700 dark:text-gray-300">Move-Up Equity<br><span class="text-sm">(95% net proceeds)</span></p>
-        </div>
-        <div>
-            <p class="text-4xl font-black text-purple-600">${formatMoney(client.equity)}</p>
-            <p class="mt-3 text-gray-700 dark:text-gray-300">Total Current Equity</p>
-        </div>
-    </div>
-`;
-
-// Insert after Original Loan Details (before Refinance Comparison)
-const originalDetailsDiv = document.querySelector('.mt-10.p-8.bg-gradient-to-br.from-gray-100');  // Targets Original Loan Details div
-if (originalDetailsDiv) {
-    originalDetailsDiv.parentNode.insertBefore(equitySection, originalDetailsDiv.nextElementSibling.nextElementSibling);  // Adjusts for any siblings; safe placement before refi
-} else {
-    // Fallback: append to modal content if selector fails
-    document.querySelector('#detail-modal .p-10').appendChild(equitySection);
-}
+    const pmiEl = document.getElementById('modal-pmi-alert');
+    if (pmiEl) pmiEl.style.display = client.pmiEligible ? 'flex' : 'none';
 
     const agentSection = document.getElementById('modal-buyers-agent-section');
-    agentSection.style.display = client.buyersAgent ? 'block' : 'none';
-    if (client.buyersAgent) document.getElementById('modal-buyers-agent').textContent = client.buyersAgent;
+    if (agentSection) agentSection.style.display = client.buyersAgent ? 'block' : 'none';
+    const buyersAgentEl = document.getElementById('modal-buyers-agent');
+    if (client.buyersAgent && buyersAgentEl) buyersAgentEl.textContent = client.buyersAgent;
 
-    document.getElementById('modal-transaction-type').textContent = client.transactionType || 'N/A';
+    const transTypeEl = document.getElementById('modal-transaction-type');
+    if (transTypeEl) transTypeEl.textContent = client.transactionType || 'N/A';
 
     const types = [];
     if (client.monthlySavings > 100) types.push('Refi Ready');
     if (client.cashOut > 50000) types.push('Cash-Out');
     if (client.moveUp > 100000) types.push('Move-Up Ready');
     if (client.pmiEligible) types.push('PMI Removal');
-    document.getElementById('modal-type-badge').innerHTML = types.length ? types.map(t => `<span class="bg-[#F15A29] text-white px-4 py-2 rounded-full mr-2">${t}</span>`).join('') : '';
+
+    const badgeColorMap = {
+      'Refi Ready': 'bg-[#00A89D]',
+      'Cash-Out': 'bg-green-600',
+      'Move-Up Ready': 'bg-blue-600',
+      'PMI Removal': 'bg-purple-600'
+    };
+    const typeBadgeEl = document.getElementById('modal-type-badge');
+    if (typeBadgeEl) {
+      typeBadgeEl.innerHTML = types.length ? types.map(t => `<span class="${badgeColorMap[t] || 'bg-[#F15A29]'} text-white px-4 py-2 rounded-full mr-2">${t}</span>`).join('') : '';
+    }
 
     updateRefiComparison(client);
 
     let scriptContent = '';
+    const profile = getCentralProfile();
+    const userFirst = (profile.name || '').split(' ')[0] || 'there';
     const firstName = client.fullName.split(' ')[0] || 'there';
     const refiSavings = client.savingsOpt2 || 0;
 
@@ -995,13 +1218,13 @@ if (originalDetailsDiv) {
         if (client.pmiEligible && client.originalMI > 0) {
             scriptContent += `, **including removing your $${Math.round(client.originalMI)} monthly PMI** since your equity has grown significantly.`;
         }
-        scriptContent += `\n\nThis is one of the strongest opportunities I've seen for you right now. No pressure — just wanted to offer a free review and see if this makes sense for your goals.\n\nWhen's a good time for a quick chat?\n\nBest,\n[Your Name]`;
+        scriptContent += `\n\nThis is one of the strongest opportunities I've seen for you right now. No pressure — just wanted to offer a free review and see if this makes sense for your goals.\n\nWhen's a good time for a quick chat?\n\nBest,\n${userFirst}`;
     } else if (client.cashOut > 50000) {
-        scriptContent = `Hi ${firstName},\n\nYour home has built up **$${Math.round(client.cashOut)} in potential cash-out equity** — perfect for home improvements, debt consolidation, or any big plans you have.\n\nWith rates where they are, this could be a great time to access that equity. Interested in exploring your options?\n\nBest,\n[Your Name]`;
+        scriptContent = `Hi ${firstName},\n\nYour home has built up **$${Math.round(client.cashOut)} in potential cash-out equity** — perfect for home improvements, debt consolidation, or any big plans you have.\n\nWith rates where they are, this could be a great time to access that equity. Interested in exploring your options?\n\nBest,\n${userFirst}`;
     } else if (client.moveUp > 100000) {
-        scriptContent = `Hi ${firstName},\n\nWith **$${Math.round(client.moveUp)} in equity**, you're in a fantastic position to move up to your next dream home with a strong down payment.\n\nI'd love to help you explore what's possible in today's market. When can we chat?\n\nBest,\n[Your Name]`;
+        scriptContent = `Hi ${firstName},\n\nWith **$${Math.round(client.moveUp)} in equity**, you're in a fantastic position to move up to your next dream home with a strong down payment.\n\nI'd love to help you explore what's possible in today's market. When can we chat?\n\nBest,\n${userFirst}`;
     } else {
-        scriptContent = `Hi ${firstName},\n\nJust checking in on your loan from ${client.closingDate}. Your home has built solid equity since then — wanted to see if there's anything we can do to improve your situation or prepare for your next steps.\n\nNo rush — just let me know if you'd like a quick review!\n\nBest,\n[Your Name]`;
+        scriptContent = `Hi ${firstName},\n\nJust checking in on your loan from ${client.closingDate}. Your home has built solid equity since then — wanted to see if there's anything we can do to improve your situation or prepare for your next steps.\n\nNo rush — just let me know if you'd like a quick review!\n\nBest,\n${userFirst}`;
     }
 
         const scriptsSection = document.getElementById('modal-scripts');
@@ -1010,9 +1233,17 @@ if (originalDetailsDiv) {
             <div class="mt-12 p-8 bg-gradient-to-br from-[#00A89D]/10 to-[#F15A29]/10 rounded-2xl">
                 <div class="flex justify-between items-center mb-6">
                     <h4 class="text-2xl font-bold text-[#002B5C] dark:text-[#00A89D]">Personalized Outreach Script</h4>
-                    <button id="copy-script-btn" class="bg-[#00A89D] hover:bg-[#00887A] text-white px-6 py-3 rounded-full font-bold flex items-center gap-3 shadow-lg transition-all">
-                        <i class="fas fa-copy"></i> Copy Script
-                    </button>
+                    <div class="flex gap-3">
+                        <button id="copy-script-btn" class="bg-[#00A89D] hover:bg-[#00887A] text-white px-6 py-3 rounded-full font-bold flex items-center gap-3 shadow-lg transition-all">
+                            <i class="fas fa-copy"></i> Copy Script
+                        </button>
+                        <button onclick="saveOpportunityToVault(window.currentClientForModal)" class="bg-[#002B5C] hover:bg-black text-white px-6 py-3 rounded-full font-bold flex items-center gap-3 shadow-lg transition-all">
+                            <i class="far fa-bookmark"></i> Save to My Saved Items
+                        </button>
+                        <button id="ai-enhance-script-btn" class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white px-5 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg transition-all text-sm">
+                            <i class="fas fa-magic"></i> Enhance with AI
+                        </button>
+                    </div>
                 </div>
                 <div id="script-content" class="whitespace-pre-wrap text-lg bg-gray-50 dark:bg-gray-900 p-6 rounded-xl">${scriptContent}</div>
             </div>
@@ -1049,13 +1280,84 @@ if (originalDetailsDiv) {
                 });
             });
         }
+
+        // AI Enhance button (restored per user preference - liked this feature)
+        const aiBtn = document.getElementById('ai-enhance-script-btn');
+        if (aiBtn && scriptText) {
+            aiBtn.addEventListener('click', async () => {
+                const profile = getCentralProfile();
+                const origText = scriptText.textContent;
+                aiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enhancing...';
+                aiBtn.disabled = true;
+
+                // Pull LO voice/profile so the enhanced message actually matches how *this* LO speaks (consistent with sales scripts, social, blog, etc.)
+                const loVoice = [
+                    profile.personality ? `Personality: ${profile.personality}` : '',
+                    (profile.voiceTraits && profile.voiceTraits.length) ? `Voice traits: ${profile.voiceTraits.join(', ')}` : '',
+                    profile.tone ? `Preferred tone: ${profile.tone}` : '',
+                    profile.hobbies && profile.hobbies.length ? `Hobbies (use for natural warmth): ${profile.hobbies.slice(0,3).join(', ')}` : ''
+                ].filter(Boolean).join('. ');
+
+                try {
+                    const enhancePrompt = `You are an expert mortgage loan officer known for warm, authentic, non-salesy communication that builds real relationships.
+
+LO PROFILE & VOICE (match this exact style and personality — make it sound like this specific person wrote it):
+- Name: ${profile.name || 'the loan officer'}
+${loVoice ? loVoice + '\n' : ''}
+
+Client details:
+- Name: ${client.fullName}
+- Opportunity: ${types.join(', ') || 'General follow-up'}
+- Key numbers: Equity ~$${Math.round(client.currentValue - client.estimatedBalance)}, Monthly savings potential ~$${client.monthlySavings}, Cash-out ~$${Math.round(client.cashOut)}
+
+Original script:
+${origText}
+
+Rewrite this as a warmer, more personalized, relationship-first outreach message. Keep it under 120 words. Match the LO's natural voice from the profile above (helpful, low-pressure, focused on client's goals, weave personality/hobbies if it fits naturally). End with a soft, easy next step. Do not add rates or specific promises. Just the message body.`;
+
+                    const enhanced = await window.callGrokAPI(enhancePrompt, { temperature: 0.7, max_tokens: 400 });
+                    scriptText.textContent = enhanced.trim();
+                    aiBtn.innerHTML = '<i class="fas fa-magic"></i> Enhanced!';
+                    setTimeout(() => {
+                        if (aiBtn) {
+                            aiBtn.innerHTML = '<i class="fas fa-magic"></i> Enhance with AI';
+                            aiBtn.disabled = false;
+                        }
+                    }, 1800);
+                } catch (e) {
+                    console.error(e);
+                    alert('AI enhance failed — using original.');
+                    aiBtn.innerHTML = '<i class="fas fa-magic"></i> Enhance with AI';
+                    aiBtn.disabled = false;
+                }
+            });
+        }
     }
 
-    document.getElementById('detail-modal').style.display = 'flex';
+    // Force the equity modal (prefer it over the generic detail-modal which has different content)
+    const equityModal = document.getElementById('equity-detail-modal');
+    const detailModal = document.getElementById('detail-modal');
+    if (equityModal) {
+        equityModal.style.display = 'flex';
+        equityModal.classList.remove('hidden');
+    }
+    if (detailModal) {
+        detailModal.style.display = 'none';
+        detailModal.classList.add('hidden');
+    }
 }
 
 function closeDetailModal() {
-    document.getElementById('detail-modal').style.display = 'none';
+    const equityModal = document.getElementById('equity-detail-modal');
+    if (equityModal) {
+        equityModal.style.display = 'none';
+        equityModal.classList.add('hidden');
+    }
+    const detailModal = document.getElementById('detail-modal');
+    if (detailModal) {
+        detailModal.style.display = 'none';
+        detailModal.classList.add('hidden');
+    }
 }
 
 function copyDashboard() {
@@ -1072,15 +1374,146 @@ function resetEquityTool() {
     window.currentOpportunities = null;
 }
 
+// Demo data for pre-report polish / testing (realistic numbers, client-side only)
+function loadDemoEquityData() {
+    const demoClients = [
+        { fullName: "Sarah Thompson", fullAddress: "142 Oak Lane, Austin, TX 78701", phone: "(512) 555-0142", email: "sarah.t@email.com", loanProgram: "30 Yr Fixed", closingDate: "2019-03-15", rate: 4.25, termMonths: 360, remainingMonths: 240, estimatedBalance: 248500, currentValue: 412000, equity: 163500, cashOut: 81200, moveUp: 142900, yearsInHome: 5, originalPI: 1680, originalMI: 0, originalInsurance: 142, originalTaxes: 385, originalLTV: 78.5, currentLTV: 60.3, pmiEligible: false, buyersAgent: "", transactionType: "Refinance", monthlySavings: 285, isRefiReady: true, isCashOut: true, isMoveUpReady: true },
+        { fullName: "Marcus Chen", fullAddress: "88 Pine Street, Denver, CO 80203", phone: "(303) 555-0198", email: "mchen@workmail.com", loanProgram: "15 Yr Fixed", closingDate: "2021-08-22", rate: 3.1, termMonths: 180, remainingMonths: 95, estimatedBalance: 187200, currentValue: 295000, equity: 107800, cashOut: 48800, moveUp: 92750, yearsInHome: 3, originalPI: 1425, originalMI: 95, originalInsurance: 98, originalTaxes: 265, originalLTV: 82.4, currentLTV: 63.5, pmiEligible: true, buyersAgent: "Lisa Rivera", transactionType: "Purchase", monthlySavings: 192, isRefiReady: true, isCashOut: false, isMoveUpReady: true },
+        { fullName: "Elena Rodriguez", fullAddress: "215 Maple Ave, Phoenix, AZ 85004", phone: "(602) 555-0234", email: "elena.r@family.net", loanProgram: "30 Yr Fixed", closingDate: "2018-11-05", rate: 4.75, termMonths: 360, remainingMonths: 195, estimatedBalance: 312800, currentValue: 478000, equity: 165200, cashOut: 69500, moveUp: 141100, yearsInHome: 6, originalPI: 1895, originalMI: 210, originalInsurance: 165, originalTaxes: 410, originalLTV: 89.2, currentLTV: 65.4, pmiEligible: true, buyersAgent: "", transactionType: "Refinance", monthlySavings: 340, isRefiReady: true, isCashOut: true, isMoveUpReady: true }
+    ];
+    window.currentOpportunities = demoClients;
+    const output = document.getElementById('equity-output');
+    if (output) {
+        output.innerHTML = `<div class="max-w-7xl mx-auto"><div class="text-center text-sm text-amber-600 mb-3">Demo data loaded (3 sample clients). All numbers are simulated for illustration.</div></div>`;
+    }
+    buildDashboard();
+    const currentRate = parseFloat(document.getElementById('new-rate-input')?.value || document.getElementById('new-rate-slider')?.value || '6.0');
+    updateDashboardWithNewRate(currentRate);
+    renderCards(demoClients);
+    attachSearchAndSort();
+    // No toast for demo load — the inline note in output is sufficient and less intrusive
+}
+
+function saveOpportunityToVault(client) {
+    if (!client || typeof window.toggleSaveIdea !== 'function') {
+        alert('Unable to save — vault not ready or no client data.');
+        return;
+    }
+
+    const profile = getCentralProfile();
+    const userName = profile.name ? profile.name.split(' ')[0] : '[Your Name]';
+
+    const title = `Equity Opportunity: ${client.fullName} — ${client.fullAddress.substring(0, 40)}`;
+    const equityNum = Math.round(client.currentValue - client.estimatedBalance);
+    const oppTypes = [];
+    if (client.monthlySavings > 100) oppTypes.push('Refi Ready');
+    if (client.cashOut > 50000) oppTypes.push('Cash-Out');
+    if (client.moveUp > 100000) oppTypes.push('Move-Up Ready');
+    if (client.pmiEligible) oppTypes.push('PMI Removal');
+
+    let content = `
+<div class="equity-saved">
+  <div class="mb-3">
+    <strong class="text-lg">${client.fullName}</strong><br>
+    <span class="text-sm text-gray-600 dark:text-gray-400">${client.fullAddress}</span>
+  </div>
+  <div class="text-sm mb-3">
+    <span class="text-gray-500">Phone:</span> <strong>${client.phone || 'N/A'}</strong> &nbsp;|&nbsp; 
+    <span class="text-gray-500">Email:</span> <strong>${client.email || 'N/A'}</strong>
+  </div>
+  <div class="mb-3">
+    <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Opportunity Types</span><br>
+    <span class="font-medium">${oppTypes.length ? oppTypes.join(' • ') : 'General follow-up'}</span>
+  </div>
+  <div class="grid grid-cols-2 gap-2 text-sm mb-3 bg-gray-50 dark:bg-gray-900 p-3 rounded-xl">
+    <div><span class="text-gray-500">Est. Equity:</span> <strong class="text-[#00A89D]">$${equityNum.toLocaleString()}</strong></div>
+    <div><span class="text-gray-500">Monthly Savings:</span> <strong class="text-green-600">$${client.monthlySavings}</strong></div>
+    <div><span class="text-gray-500">Cash-Out Potential:</span> <strong>$${Math.round(client.cashOut).toLocaleString()}</strong></div>
+    <div><span class="text-gray-500">Move-Up Equity:</span> <strong>$${Math.round(client.moveUp).toLocaleString()}</strong></div>
+  </div>
+  <div class="mb-3">
+    <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Suggested Script</span>
+    <div class="mt-1 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm whitespace-pre-wrap font-sans leading-snug">${document.getElementById('script-content') ? document.getElementById('script-content').textContent : 'See detail modal for script.'}</div>
+  </div>
+  <div class="text-xs text-gray-500">Generated for ${userName} • All calcs client-side using current rate/mode assumptions. Verify with latest data.</div>
+</div>`;
+
+    window.toggleSaveIdea(title, content, null, 'equity-opportunity');
+
+    if (window.showToast) {
+        window.showToast('Opportunity saved to My Saved Items!', 'success');
+    } else {
+        alert('Saved to My Saved Items');
+    }
+}
+
+function saveFullReportToVault() {
+    const opps = window.currentOpportunities || [];
+    if (opps.length === 0 || typeof window.toggleSaveIdea !== 'function') {
+        alert('No report to save or vault not ready.');
+        return;
+    }
+
+    const profile = getCentralProfile();
+    const userName = profile.name ? profile.name.split(' ')[0] : '[Your Name]';
+
+    const title = `Full Equity Scan — ${opps.length} Opportunities`;
+    const counts = { refi: 0, cash: 0, move: 0, pmi: 0 };
+    opps.forEach(o => {
+        if (o.monthlySavings > 100) counts.refi++;
+        if (o.cashOut > 50000) counts.cash++;
+        if (o.moveUp > 100000) counts.move++;
+        if (o.pmiEligible) counts.pmi++;
+    });
+
+    let topList = opps.slice(0, 5).map((o, i) => {
+      const eq = Math.round(o.currentValue - o.estimatedBalance);
+      return `<li>${i+1}. <strong>${o.fullName}</strong> — Equity ~$${eq.toLocaleString()}, Savings $${o.monthlySavings}/mo</li>`;
+    }).join('');
+
+    let content = `
+<div class="equity-saved">
+  <div class="mb-3">
+    <strong class="text-lg">Full Equity Scan</strong><br>
+    <span class="text-sm">Analyzed ${opps.length} clients • Generated for ${userName}</span>
+  </div>
+  <div class="mb-3 bg-gray-50 dark:bg-gray-900 p-3 rounded-xl text-sm">
+    <div class="font-semibold mb-1">Opportunities Found</div>
+    <div class="grid grid-cols-2 gap-x-4 text-xs">
+      <div>Refi Ready: <strong>${counts.refi}</strong></div>
+      <div>Cash-Out: <strong>${counts.cash}</strong></div>
+      <div>Move-Up Ready: <strong>${counts.move}</strong></div>
+      <div>PMI Removal: <strong>${counts.pmi}</strong></div>
+    </div>
+  </div>
+  <div class="mb-3">
+    <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Top Opportunities</div>
+    <ul class="text-sm list-decimal pl-4 space-y-0.5">${topList || '<li>No opportunities</li>'}</ul>
+  </div>
+  <div class="text-xs text-gray-500">Full interactive dashboard available in the Equity Scanner. Use filters and rate slider for what-if modeling. All calcs use 5% annual appreciation model + $4k costs.</div>
+</div>`;
+
+    window.toggleSaveIdea(title, content, null, 'equity-scan');
+
+    if (window.showToast) {
+        window.showToast('Full report saved to My Saved Items!', 'success');
+    } else {
+        alert('Saved to My Saved Items');
+    }
+}
+
 
   // === ORIGINAL EQUITY SCANNER CODE ENDS ===
 
   // Expose functions that may be referenced from HTML onclick or other modules
   if (typeof openDetailModal === 'function') window.openDetailModal = openDetailModal;
+  if (typeof saveOpportunityToVault === 'function') window.saveOpportunityToVault = saveOpportunityToVault;
+  if (typeof saveFullReportToVault === 'function') window.saveFullReportToVault = saveFullReportToVault;
   if (typeof closeDetailModal === 'function') window.closeDetailModal = closeDetailModal;
   if (typeof resetEquityTool === 'function') window.resetEquityTool = resetEquityTool;
   if (typeof generateEquityReport === 'function') window.generateEquityReport = generateEquityReport;
   if (typeof formatMoney === 'function') window.formatMoney = formatMoney;
+  if (typeof loadDemoEquityData === 'function') window.loadDemoEquityData = loadDemoEquityData;
 
   console.log('%c[equity-scanner.js] Equity Scanner module loaded and ready', 'color:#00A89D');
 })();

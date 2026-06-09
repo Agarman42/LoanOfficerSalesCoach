@@ -36,6 +36,7 @@
       ...central,
       // Provide safe defaults
       name: central.name || '',
+      email: central.email || '',
       localArea: central.localArea || central.market || '',
       voiceTraits: central.voiceTraits || [],
       personality: central.personality || '',
@@ -176,12 +177,17 @@ async function generateBlog() {
     const output = document.getElementById('blog-output');
     const loadingEl = document.getElementById('global-loading');
 
+    // Use centralized force for consistent premium progress modal
+    if (typeof window.forceShowGlobalLoading === 'function') {
+      window.forceShowGlobalLoading('Building Your Authority Blog Post...');
+    }
+
     if (loadingEl) loadingEl.dataset.originalContent = loadingEl.innerHTML;
 
     // === INJECT BLOG-SPECIFIC LOADING CONTENT ===
 const blogLoadingContent = `
         <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
-            <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border-2 border-[#F15A29]/30">
+            <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border border-gray-200 dark:border-gray-700">
                 <div class="text-center mb-8">
                     <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
                     <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">Building Your Authority Blog Post...</h3>
@@ -189,32 +195,33 @@ const blogLoadingContent = `
                     <p class="text-sm text-gray-500 dark:text-gray-400">Full SEO/GEO-optimized blog + social caption + Google Business post + 30-45s Reel script</p>
                 </div>
 
-                <div class="bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl p-6 mb-6">
-                    <div class="text-[#F15A29] font-semibold text-sm tracking-wider mb-3 text-center">WHAT WE'RE BUILDING RIGHT NOW</div>
-                    <div class="space-y-2.5 text-sm text-gray-700 dark:text-gray-300">
-                        <div class="flex gap-3"><i class="fas fa-check text-[#00A89D] mt-1"></i> <div><strong>Analyzing your profile</strong> — voice, tone, local market, goals &amp; challenges</div></div>
-                        <div class="flex gap-3"><i class="fas fa-check text-[#00A89D] mt-1"></i> <div><strong>Researching fresh angles</strong> — local stats, programs, and timely hooks for 2026</div></div>
-                        <div class="flex gap-3"><i class="fas fa-check text-[#00A89D] mt-1"></i> <div><strong>Drafting the full post</strong> — 600-2,000 words, H2 structure, SEO keywords, FAQ, soft CTA</div></div>
-                        <div class="flex gap-3"><i class="fas fa-check text-[#00A89D] mt-1"></i> <div><strong>Creating the 4-asset bundle</strong> — blog + ready-to-post social caption + Google post + film-ready Reel script</div></div>
-                        <div class="flex gap-3"><i class="fas fa-check text-[#00A89D] mt-1"></i> <div><strong>Final polish</strong> — natural flow, compliance-safe language, your authentic voice</div></div>
+                <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                    <h4 class="text-xl font-bold text-[#F15A29] mb-5 text-center">
+                        What Makes This Blog Post Powerful
+                    </h4>
+                    <div class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                        <div class="flex gap-3">
+                            <i class="fas fa-search text-[#F15A29] mt-0.5"></i>
+                            <div><strong>Ranks for months:</strong> SEO-optimized long-form content drives inbound leads on autopilot long after you post.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-share-alt text-[#00A89D] mt-0.5"></i>
+                            <div><strong>Multiplies across channels:</strong> Becomes the foundation for 5–10 social posts, Reels, and newsletter features.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-user-tie text-[#002B5C] mt-0.5"></i>
+                            <div><strong>Positions you as expert:</strong> Clients and realtors remember and refer the LO who publishes thoughtful local content.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-cogs text-[#F15A29] mt-0.5"></i>
+                            <div><strong>Feeds your whole system:</strong> One strong piece fuels weeks of content with minimal extra effort.</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
-                    <div class="text-sm font-semibold text-[#002B5C] dark:text-white mb-2 flex items-center gap-2">
-                        <i class="fas fa-lightbulb text-[#F15A29]"></i> 
-                        Why this single blog post is high-leverage
-                    </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
-                        <div>• Ranks on Google for months and drives inbound leads on autopilot</div>
-                        <div>• Becomes the foundation for 5–10 social posts, Reels, and newsletter features</div>
-                        <div>• Positions you as the local expert — clients and realtors remember and refer you</div>
-                        <div>• One strong piece of content can feed your whole content system for weeks</div>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-[10px] text-[#00A89D] font-medium">
-                        Pro move: While you wait, think about one recent client win or local stat you can add after generation.
-                    </div>
-                </div>
+                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5">
+                    Pro move: While you wait, think about one recent client win or local stat you can weave in after generation.
+                </p>
             </div>
         </div>
     `;
@@ -258,6 +265,7 @@ ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-ou
 - Never mention lenders other than Ruoff Mortgage. 
 - Do not start the blog with Imagine this or Picture this. 
 - Voice: Match the loan officer's personality and voice traits above — helpful, trustworthy, conversational, and authentic — never salesy.
+- Language: Check the "Additional instructions" / additional context field. If the user requests a different language there (e.g. "Prepare the full blog in Spanish", "Generate in French", "in German", "en español"), produce the **entire output** — the blog post, the social media caption, the Google Business post, **and** the Reel script — fully in that requested language. Translate everything naturally and accurately while preserving the exact required structure, headings, SEO intent, and professional tone.
 
 After the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**). Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags. **Do NOT include any character count at the end — output clean caption text only.**
 
@@ -290,7 +298,7 @@ let finalPrompt = systemPrompt;
         if (additionalContext.length > MAX_ADDITIONAL) {
             safeAdditional = additionalContext.substring(0, MAX_ADDITIONAL) + ' [...] (truncated for size)';
         }
-        finalPrompt += `\n\nAdditional instructions: ${safeAdditional}`;
+        finalPrompt += `\n\nAdditional instructions / special requests (including any language requests such as "in Spanish" or "prepare in French"): ${safeAdditional}`;
     }
 
     finalPrompt += `\n\nTopic: ${topicInput}`;
@@ -381,6 +389,12 @@ let finalPrompt = systemPrompt;
         <button id="jump-publish-btn" class="bg-[#00A89D] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#008F85] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-external-link-alt"></i> Publish on Site
         </button>
+        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
+            <i class="fas fa-bookmark"></i> Save Bundle to Vault
+        </button>
+        <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="bg-red-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-red-600 transition-all flex items-center justify-center gap-2 flex-1">
+            <i class="fas fa-trash"></i> Clear
+        </button>
     </div>
 
     <!-- Social Caption Card - consistent premium card style (matching 2026 Plan supporting cards) -->
@@ -461,6 +475,15 @@ let finalPrompt = systemPrompt;
             };
         }
 
+        // Persist the full generated output (blog + action buttons + supporting assets)
+        // so the last version survives page refresh until the user Clears or generates a new one.
+        try {
+          localStorage.setItem('lastBlogOutput', output.innerHTML);
+        } catch (e) {}
+
+        // Re-attach listeners for id-based buttons (safe to call on fresh gen)
+        attachBlogOutputListeners();
+
         gtag('event', 'generate_blog', {
             event_category: 'Tool Usage',
             event_label: 'Blog Generated',
@@ -503,27 +526,6 @@ let finalPrompt = systemPrompt;
         window.hideLoading?.();   // extra safety in case global helper is used elsewhere
     }
 }
-function openBlogTips() {
-    const modal = document.getElementById('blog-tips-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-
-        // Close when clicking outside the modal content (on the dark backdrop)
-        modal.onclick = function(e) {
-            if (e.target === modal) {
-                closeBlogTips();
-            }
-        };
-    }
-}
-
-function closeBlogTips() {
-    const modal = document.getElementById('blog-tips-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        modal.onclick = null;   // clean up the outside-click handler
-    }
-}
 
 // Rich copy for blog
 function copyBlogWithFormatting() {
@@ -556,6 +558,152 @@ function copyBlogAndJumpToPublisher() {
     setTimeout(() => {
         window.open('https://sales.ruoff.com/blog', '_blank');
     }, 250);
+}
+
+window.saveBlogToVault = function() {
+    if (typeof window.toggleSaveIdea !== 'function') {
+        alert('Saved Items system not ready yet.');
+        return;
+    }
+    const output = document.getElementById('blog-output');
+    if (!output || !output.innerHTML.trim()) {
+        alert('Generate a blog first.');
+        return;
+    }
+
+    // Collect the pieces
+    let blogTitle = output.querySelector('h3') ? output.querySelector('h3').innerText : 'Custom Blog Post';
+    let blogHtml = output.querySelector('.prose') ? output.querySelector('.prose').innerHTML : '';
+    const captionEl = document.getElementById('social-caption');
+    const caption = captionEl ? captionEl.innerText : '';
+    const googleEl = document.getElementById('google-post');
+    const google = googleEl ? googleEl.innerText : '';
+    const reelEl = document.getElementById('reel-script');
+    const reel = reelEl ? reelEl.innerText : '';
+
+    // Extract the real blog post title from the first heading in the content (better than the generic "Your Custom Blog Post")
+    const proseEl = output.querySelector('.prose');
+    if (proseEl) {
+      const firstHead = proseEl.querySelector('h1, h2');
+      if (firstHead) {
+        blogTitle = firstHead.innerText.trim();
+        // Remove the first heading from the HTML so we don't duplicate the big title inside the saved view
+        blogHtml = blogHtml.replace(/<h[12][^>]*>.*?<\/h[12]>/i, '').trim();
+      }
+    }
+
+    const title = `Blog: ${blogTitle.substring(0, 60)}${blogTitle.length > 60 ? '...' : ''}`;
+
+    // Polished, self-contained saved bundle with controlled typography so huge headings don't dominate or overlap
+    const richContent = `
+<div class="blog-saved border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden bg-white dark:bg-gray-900">
+  <div class="px-5 py-4 bg-gradient-to-r from-[#F15A29]/5 via-white to-white dark:via-gray-900 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
+    <div class="flex items-center gap-2">
+      <span class="inline-block px-3 py-0.5 text-[10px] font-bold tracking-[1.5px] rounded-full bg-[#F15A29] text-white">BLOG + MULTI-CHANNEL BUNDLE</span>
+      <span class="text-[10px] text-gray-400">Social • Google • Reel</span>
+    </div>
+    <div class="mt-2 text-xl font-bold text-[#002B5C] dark:text-white leading-tight">${blogTitle}</div>
+  </div>
+
+  <div class="p-5">
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-xs uppercase font-semibold tracking-wider text-gray-500">Full Blog Post</span>
+        <button onclick="const c=this.closest('.blog-saved').querySelector('.blog-post-content'); navigator.clipboard.writeText(c.innerText.trim()); const o=this.innerHTML; this.innerHTML='✓ Copied'; setTimeout(()=>this.innerHTML=o,1400);" class="text-[10px] px-2 py-px rounded border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-medium">Copy Post</button>
+      </div>
+      <div class="blog-post-content p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm prose prose-sm dark:prose-invert max-w-none overflow-auto max-h-[340px] leading-relaxed
+        [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-[#002B5C] dark:[&_h1]:text-white [&_h1]:mt-0 [&_h1]:mb-2
+        [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-1.5
+        [&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-3
+        [&_p]:mb-3 [&_p]:text-gray-700 dark:[&_p]:text-gray-300
+        [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1
+      ">
+        ${blogHtml}
+      </div>
+    </div>
+
+    <div class="text-xs uppercase font-semibold tracking-wider text-gray-500 mb-2">Supporting Assets</div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-3 bg-white dark:bg-gray-800">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-semibold text-[#F15A29]">Social Caption</span>
+          <button onclick="navigator.clipboard.writeText(this.closest('div').querySelector('.asset-content').innerText.trim()); const o=this.innerHTML; this.innerHTML='✓'; setTimeout(()=>this.innerHTML=o,1200);" class="text-[9px] text-[#00A89D] hover:underline">copy</button>
+        </div>
+        <div class="asset-content text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 p-2 rounded border leading-snug">${caption || '—'}</div>
+      </div>
+      <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-3 bg-white dark:bg-gray-800">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-semibold text-[#F15A29]">Google Business Post</span>
+          <button onclick="navigator.clipboard.writeText(this.closest('div').querySelector('.asset-content').innerText.trim()); const o=this.innerHTML; this.innerHTML='✓'; setTimeout(()=>this.innerHTML=o,1200);" class="text-[9px] text-[#00A89D] hover:underline">copy</button>
+        </div>
+        <div class="asset-content text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 p-2 rounded border leading-snug">${google || '—'}</div>
+      </div>
+      <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-3 bg-white dark:bg-gray-800">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-semibold text-[#F15A29]">Reel / Video Script</span>
+          <button onclick="navigator.clipboard.writeText(this.closest('div').querySelector('.asset-content').innerText.trim()); const o=this.innerHTML; this.innerHTML='✓'; setTimeout(()=>this.innerHTML=o,1200);" class="text-[9px] text-[#00A89D] hover:underline">copy</button>
+        </div>
+        <div class="asset-content text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 p-2 rounded border leading-snug">${reel || '—'}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-5 py-2.5 bg-gray-50 dark:bg-gray-800 border-t text-[10px] text-gray-400">One asset, 4+ channels. Repurpose the post and supporting pieces freely.</div>
+</div>`;
+
+    window.toggleSaveIdea(title, richContent, null, 'blog');
+    if (window.showToast) {
+        window.showToast('Full blog bundle saved to My Saved Items', 'success');
+    } else {
+        alert('Saved to My Saved Items');
+    }
+};
+
+// Clear the last persisted blog output (tool UI only — the rich blog + assets reappear on reload until this or a new generate).
+// My Saved Items (Vault) copies are independent and stay until the user deletes them from the library.
+window.clearSavedBlog = function() {
+  try { localStorage.removeItem('lastBlogOutput'); } catch (e) {}
+  const out = document.getElementById('blog-output');
+  if (out) {
+    out.innerHTML = '';
+    out.classList.add('hidden');
+  }
+};
+
+// Re-attach onclick handlers for the buttons that use element ids (the ones inside the persisted HTML).
+// Called after fresh generate and after restoring lastBlogOutput on init.
+function attachBlogOutputListeners() {
+  const copyBtn = document.getElementById('copy-blog-btn');
+  if (copyBtn) copyBtn.onclick = copyBlogWithFormatting;
+  const dlBtn = document.getElementById('download-blog-btn');
+  if (dlBtn) dlBtn.onclick = downloadBlogWord;
+  const capBtn = document.getElementById('copy-caption-btn');
+  if (capBtn) capBtn.onclick = copySocialCaption;
+  const googBtn = document.getElementById('copy-google-btn');
+  if (googBtn) googBtn.onclick = copyGooglePostWithFormatting;
+  const jumpBtn = document.getElementById('jump-publish-btn');
+  if (jumpBtn) jumpBtn.onclick = copyBlogAndJumpToPublisher;
+
+  const copyReelBtn = document.getElementById('copy-reel-btn');
+  if (copyReelBtn) {
+    copyReelBtn.onclick = () => {
+      const reelEl = document.getElementById('reel-script');
+      if (!reelEl) return;
+      const text = reelEl.innerText || reelEl.textContent || '';
+      navigator.clipboard.writeText(text.trim()).then(() => {
+        alert('Reel script & video idea copied!');
+      }).catch(() => {
+        const range = document.createRange();
+        range.selectNodeContents(reelEl);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand('copy');
+        sel.removeAllRanges();
+        alert('Reel script & video idea copied!');
+      });
+    };
+  }
 }
 
 // Download blog as .doc
@@ -652,8 +800,6 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   // =====================================================
   window.generateBlog = generateBlog;
   window.processBlogFile = processBlogFile;
-  window.openBlogTips = openBlogTips;
-  window.closeBlogTips = closeBlogTips;
   window.copyBlogWithFormatting = copyBlogWithFormatting;
   window.copyBlogAndJumpToPublisher = copyBlogAndJumpToPublisher;
   window.downloadBlogWord = downloadBlogWord;
@@ -743,6 +889,18 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
     } else {
         console.warn('[blog-creator] generate-blog-btn not found in DOM');
     }
+
+    // Restore last generated blog bundle (the full output with post + assets + action buttons) so it survives refresh.
+    // Stays until the user clicks Clear (in the output area) or generates a fresh version.
+    try {
+      const last = localStorage.getItem('lastBlogOutput');
+      const out = document.getElementById('blog-output');
+      if (last && out && !out.innerHTML.trim()) {
+        out.innerHTML = last;
+        out.classList.remove('hidden');
+        attachBlogOutputListeners();
+      }
+    } catch (e) {}
 
     console.log('%c[blog-creator.js] Blog Creator initialized', 'color:#00A89D');
   }

@@ -397,6 +397,10 @@
         } else {
           addToFavorites(itemData);
           btn.innerHTML = '<i class="fas fa-heart text-lg text-[#F15A29]"></i>';
+          // Also save to central My Saved Items
+          if (typeof window.toggleSaveIdea === 'function') {
+            window.toggleSaveIdea(`${itemData.category}: ${itemData.title}`, itemData.content, btn, 'value-vault');
+          }
         }
       });
 
@@ -581,14 +585,15 @@
     // Update save button
     if (saveBtn) {
       saveBtn.onclick = () => {
-        const itemData = {
-          id: 'idea-' + Date.now(),
-          category: currentIdea.category,
-          title: currentIdea.title,
-          content: currentIdea.content
-        };
-        if (typeof addToFavorites === 'function') addToFavorites(itemData);
-        saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+        const title = `${currentIdea.category}: ${currentIdea.title}`;
+        const content = currentIdea.content;
+        if (typeof window.toggleSaveIdea === 'function') {
+          window.toggleSaveIdea(title, content, saveBtn, 'value-vault');
+        } else if (typeof addToFavorites === 'function') {
+          const itemData = { id: 'idea-' + Date.now(), category: currentIdea.category, title: currentIdea.title, content: currentIdea.content };
+          addToFavorites(itemData);
+        }
+        saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved to My Saved Items!';
         setTimeout(() => {
           if (saveBtn && saveBtn.isConnected) saveBtn.innerHTML = '<i class="fas fa-heart"></i> Save This Idea';
         }, 1500);

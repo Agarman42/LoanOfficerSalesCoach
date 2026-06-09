@@ -21,7 +21,23 @@
     const hn = (typeof window !== 'undefined' ? (window.location.hostname || 'localhost') : 'localhost');
     return `http://${hn}:3000/api/v1/chat/completions`;
   };
-  const DEFAULT_MODEL = 'grok-4-1-fast-reasoning';
+
+  /**
+   * Detect if we are running against a hosted/production proxy (not localhost).
+   * In this mode we can rely on a server-side XAI_API_KEY in the proxy and
+   * should NOT prompt the end user for their own key.
+   */
+  function isProductionHosted() {
+    if (typeof window !== 'undefined' && window.FORCE_HOSTED_MODE === true) return true;
+    if (typeof window === 'undefined') return false;
+    const host = (window.location && window.location.hostname) || '';
+    if (!host) return false;
+    // Local dev / self-hosted dev cases
+    if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host.endsWith('.local')) return false;
+    // Anything else (your Render URL, custom domain, Netlify, etc.) = hosted production
+    return true;
+  }
+  const DEFAULT_MODEL = 'grok-4-1-fast-reasoning';  // Only underwriting overrides this for better factual accuracy on guideline questions (all other tools must use this model)
 
   /**
    * Get the current API key from localStorage.
@@ -54,7 +70,9 @@
       'Please paste your API key below.',
       '',
       'You can get one at https://x.ai (or use your existing xai-... key).',
-      'The key will be saved in your browser (localStorage) and never sent anywhere except the local proxy.'
+      'The key will be saved in your browser (localStorage) and never sent anywhere except the local proxy.',
+      '',
+      'Note: If you are using a publicly hosted version of this tool, the server may provide the key automatically and you should not be seeing this prompt.'
     ].join('\n');
 
     const key = prompt(msg);
@@ -81,10 +99,17 @@
 
   /**
    * Ensure we have a valid API key. Prompts the user if missing.
+   * In production hosted mode (non-localhost proxy), we skip prompting
+   * and let the server-side proxy use its own XAI_API_KEY env var.
    */
   function ensureApiKey() {
     let key = getGrokApiKey();
     if (!key) {
+      if (isProductionHosted()) {
+        // Hosted production build: the proxy server has the key in its environment.
+        // Do not prompt users. We will send the request without a client key.
+        return null;
+      }
       key = promptForApiKey();
     }
     return key;
@@ -105,6 +130,12 @@
     const apiKey = ensureApiKey();
 
     if (!apiKey) {
+      const hosted = isProductionHosted();
+      if (hosted) {
+        // This should rarely happen in true hosted mode because the server should have the key.
+        // But if the server key is missing, give a clean message.
+        throw new Error('The hosted API service is not configured with a key. Please contact the site owner.');
+      }
       throw new Error('No Grok API key available. AI features are disabled until a valid key is provided.');
     }
 
@@ -134,12 +165,19 @@
     };
 
     try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      // Only send the client key if we actually have one.
+      // In hosted production mode the proxy falls back to its own server env key.
+      if (apiKey) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
+
       const response = await fetch(getProxyUrl(), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
+        headers,
         body: JSON.stringify(payload)
       });
 
@@ -167,6 +205,10 @@
     } catch (err) {
       console.error('[Grok API] callGrokAPI failed to ' + getProxyUrl() + ':', err);
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+        const hosted = isProductionHosted();
+        if (hosted) {
+          throw new Error(`Could not reach the API service at ${getProxyUrl()}. The hosted service may be starting up or temporarily unavailable. Please try again in a moment.`);
+        }
         throw new Error(`Failed to fetch from proxy at ${getProxyUrl()}. Ensure the proxy is running (bash start-proxy.sh or start-proxy.bat). You can serve the HTML from port 8080 (or any), but the proxy/API must be reachable at 3000 (or set window.CUSTOM_PROXY_URL if you changed the proxy port). Check proxy terminal for errors. Use console: window.testProxyConnection()`);
       }
       // Re-throw so each caller can show nice UI error
@@ -179,6 +221,7 @@
   window.setGrokApiKey = setGrokApiKey;
   window.callGrokAPI = callGrokAPI;
   window.ensureGrokApiKey = ensureApiKey;
+  window.isProductionHosted = isProductionHosted;
 
   // Optional helper for debugging / settings UI later
   window.clearGrokApiKey = () => {
@@ -189,9 +232,10 @@
 
   // Helper to test if proxy is reachable (use from console: window.testProxyConnection() )
   window.testProxyConnection = async function() {
-    console.log('[Proxy Test] Testing connection to', getProxyUrl());
+    const url = getProxyUrl();
+    console.log('[Proxy Test] Testing connection to', url);
     try {
-      const resp = await fetch(PROXY_URL, {
+      const resp = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

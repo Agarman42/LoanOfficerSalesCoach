@@ -32,6 +32,7 @@
     return {
       ...central,
       name: central.name || '',
+      email: central.email || '',
       localArea: central.localArea || central.market || '',
       voiceTraits: central.voiceTraits || [],
       personality: central.personality || '',
@@ -179,6 +180,19 @@
         { value: "Offer to co-host a first-time buyer seminar", label: "Co-host first-time buyer event", contextTip: "Useful details: Has this realtor done any educational events before? Do they have a specific target audience (first-time buyers, move-up, investors)?" }
       ]
     },
+    "post-closing-surveys": {
+      label: "Post-Closing Survey Responses",
+      icon: "fa-star",
+      color: "#00A89D",
+      scenarios: [
+        { value: "Perfect score survey response (10/10 or 5/5 stars)", label: "Perfect score (10/10 or 5 stars)", contextTip: "Excellent context: What exact things did they rave about (speed, communication, hand-holding through stress, your team)? Any personal details or wins you can warmly reference to make the thank-you feel genuine?" },
+        { value: "Just shy of perfect (8-9/10 or 4/5 stars, minor notes)", label: "Just shy of perfect (minor feedback)", contextTip: "Helpful details: What small thing did they mention? Was it something you can easily acknowledge or improve on next time? Balance the thank-you with addressing the note positively." },
+        { value: "Low score or negative feedback (service recovery)", label: "Low score / didn't go well", contextTip: "Critical context: What specifically went wrong from their perspective? Have you already spoken with them? Focus on genuine ownership, empathy, and a clear path forward without being defensive." },
+        { value: "Neutral or average score with little feedback", label: "Neutral / average score", contextTip: "Useful: Did they mention anything positive or negative at all, or was it completely generic? A warm, specific thank-you that invites more feedback can turn it into a relationship win." },
+        { value: "Positive survey from realtor partner", label: "Positive realtor survey response", contextTip: "Great context: What did the realtor specifically appreciate about working with you or the process on this file? Keep it professional yet warm and relationship-building." },
+        { value: "Thank you after great survey + soft ask for public review/testimonial", label: "Thank you + ask for testimonial", contextTip: "Nice touch: Reference the specific praise they gave in the survey. Ask if they'd be willing to share a short public Google/Experience review or testimonial you can use." }
+      ]
+    },
     "relationship-nurturing": {
       label: "Relationship Nurturing & Follow-Up",
       icon: "fa-heart",
@@ -222,7 +236,21 @@
 async function generateSalesScript() {
     const output = document.getElementById('script-output');
 
-    // Rich custom loading (premium long-wait experience)
+    // Get scenario from the new premium card UI (validate early, before showing loading)
+    const context = document.getElementById('script-context')?.value.trim() || '';
+    let scenario = currentSelectedScenario || '';
+
+    if (!scenario) {
+        alert('Please select or type a scenario');
+        return;
+    }
+
+    // Use centralized force show for consistent premium progress modal (fixes lost modal)
+    if (typeof window.forceShowGlobalLoading === 'function') {
+      window.forceShowGlobalLoading('Crafting Your Personalized Scripts...');
+    }
+
+    // Rich custom loading (premium long-wait experience) - replaces card content after force ensures visibility
     const loadingEl = document.getElementById('global-loading');
     let originalLoadingHTML = '';
     if (loadingEl) {
@@ -276,17 +304,6 @@ async function generateSalesScript() {
     if (output) {
         output.innerHTML = '';
         output.classList.add('hidden');
-    }
-
-    // Get scenario from the new premium card UI
-    const context = document.getElementById('script-context')?.value.trim() || '';
-
-    let scenario = currentSelectedScenario || '';
-
-    if (!scenario) {
-        alert('Please select or type a scenario');
-        window.hideLoading();
-        return;
     }
 
     const personalization = buildSalesPersonalization();
@@ -521,9 +538,20 @@ function saveSalesScript(title, scriptId, btnEl) {
         return;
     }
 
+    const richContent = `
+<div class="script-saved">
+  <div class="mb-2">
+    <span class="text-xs uppercase tracking-widest font-bold text-[#F15A29]">Sales Script</span>
+  </div>
+  <div class="text-sm mb-2"><strong>Scenario:</strong> ${title.replace('Sales Script: ', '')}</div>
+  <div class="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm leading-relaxed whitespace-pre-wrap">
+    ${text}
+  </div>
+  <div class="mt-2 text-[10px] text-gray-500">Saved from Sales Script Generator • Personalized to your voice &amp; profile</div>
+</div>`;
     saved.push({
         title: fullTitle,
-        content: text.substring(0, 1200),
+        content: richContent,
         savedAt: new Date().toISOString(),
         type: 'script'   // Important for the unified Saved Items library
     });
@@ -548,6 +576,10 @@ function saveSalesScript(title, scriptId, btnEl) {
 
     const countEl = document.getElementById('social-saved-count');
     if (countEl) countEl.textContent = saved.length;
+
+    // Update global top bar count directly for reliability across all saves
+    const globalCount = document.getElementById('global-saved-count');
+    if (globalCount) globalCount.textContent = saved.length;
 
     // Try to notify the global saved ideas system
     if (typeof window.updateSavedCount === 'function') {
