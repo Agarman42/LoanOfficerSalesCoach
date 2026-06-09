@@ -2050,36 +2050,62 @@ function getCleanOutlookHTML() {
         }
     );
 
-    // === VIDEO: swap any legacy 560, then flatten the *constraining inner wrapper* only ===
-    // The video card itself is forced to 600px + uniform padding (above). The inner layout table that had
-    // max-width + margin:0 auto was making the video/thumbnail/button area render narrower or misaligned vs text cards.
-    // We swap its max-widths to 100%, then *unwrap only that wrapper table*. 
-    // IMPORTANT: We deliberately do NOT strip align="center" or margin:0 auto globally.
-    // Those are required for:
-    //   - Ruoff logo + title in the header (align="center" + margin:0 auto on the logo table)
-    //   - "▶ Watch Video" button (its wrapper table + td use align="center")
-    //   - "Send Me a Referral" button (same)
-    //   - Hero image row
-    // The unwrap pulls the inner content (which already contains the correct align="center" tds/tables for title, thumbnail, and buttons)
-    // directly into the video card's padded <td>, so buttons center under the video while the whole card is uniformly 600px wide.
+    // === VIDEO: swap legacy sizes, then DE-CONSTRAIN the inner layout table IN PLACE (critical: do not unwrap) ===
+    // The video teal card is forced to 600px + uniform 30px padding (earlier).
+    // The inner layout table (the one wrapping title + green-bordered thumbnail + "Watch Video" button) originally had
+    // max-width + margin:0 auto (plus align=center). That made the video area narrower than other cards.
+    // PREVIOUS UNWRAP APPROACH (replacing the table with its raw <tr><td> contents) broke table nesting.
+    // Bare rows injected into the padded <td> caused parsers (Outlook, vault iframe) to mis-nest, making the green
+    // 3px border (on the thumbnail's own table) visually wrap around the button too, with lines coming down around it.
+    // Raw HTML is fine because full proper nesting is preserved.
+    //
+    // FIX (cleaned only): 
+    // - Keep the 560->100% swaps (lets the framed video breathe wider, consistent with card).
+    // - Leave the layout *table and its rows* completely intact for valid HTML structure.
+    // - Only strip the *constraining* max-width + margin:0 auto from *its style* so it fills the card's padded area.
+    // - Strip align="center" from the layout table itself (so it doesn't narrow itself).
+    // Result: the self-contained green-bordered thumbnail table only frames the picture. The button row follows it
+    // cleanly *under* the video (in the next <tr> of the layout table), and centers via its own child <td align="center">.
+    // This matches the raw HTML visual (button under the framed video, no border enclosing the button).
     cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:100%');
     cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="100%"');
     cleanHTML = cleanHTML.replace(/max-width:\s*600px/gi, 'max-width:100%');
 
-    // Unwrap the video's (now 100%) constraining inner layout table so its centered content fills the full padded card area.
-    // The pulled content keeps its own align="center" attributes on the title, thumbnail, and button elements.
-    cleanHTML = cleanHTML.replace(/<table[^>]*max-width:\s*100%;[^>]*margin:\s*0\s*auto;[^>]*>([\s\S]*?)<\/table>/gi, '$1');
-    cleanHTML = cleanHTML.replace(/<table[^>]*margin:\s*0\s*auto;[^>]*max-width:[^>]*>([\s\S]*?)<\/table>/gi, '$1');
+    // De-constrain only the video layout table's style (the one that contains "Personal Video Update" right after opening).
+    // Matches tables having both max-width:100% and margin:0 auto after the swaps above. Teal cards use 600px so they are skipped.
+    // Thumbnail's green border table has max-width:100% but no margin:0 auto, so it is left alone (good - we want its frame).
+    cleanHTML = cleanHTML.replace(
+      /(<table\b[^>]*?style=")([^"]*?max-width:\s*100%;?[^"]*?margin:\s*0\s*auto;?[^"]*)("[^>]*>)/gi,
+      (m, pre, styleVal, post) => {
+        let cleaned = styleVal
+          .replace(/max-width:\s*100%;?/gi, '')
+          .replace(/margin:\s*0\s*auto;?/gi, '')
+          .replace(/;\s*;/g, ';')
+          .trim();
+        if (!cleaned) cleaned = 'width:100%';
+        if (!/;$/.test(cleaned)) cleaned += ';';
+        return pre + cleaned + post;
+      }
+    );
 
-    // === PERSONAL PHOTO - ensure the framed photo inside the Personal Note does not introduce extra width ===
-    // Match the whole generated photo wrapper table (safer than just the img) and emit a clean fitted frame.
-    // Uses max-width on the img so it respects the personal note card's content area (after we forced the card to 600px).
-    // This runs in cleaned only; raw keeps whatever the generator emitted.
+    // Remove align="center" from the video *layout wrapper table* only (targeted by proximity to the title text).
+    // This lets the layout stretch full width of the padded card. Its child <td align="center"> elements (title, video frame container, button)
+    // keep their align so the button centers nicely *under* the video.
+    // The thumbnail bordered table and button wrapper keep their own align attributes (deeper in source, safe from this limited match).
+    cleanHTML = cleanHTML.replace(
+      /(<table\b[^>]*?)(align="center")([^>]*>[\s\S]{0,80}?<p[^>]*>Personal Video Update)/gi,
+      '$1$3'
+    );
+
+    // === PERSONAL PHOTO FRAME (cleaned only) - tighten the teal border a bit ===
+    // The frame around the personal photo (the "picture" that can appear above the video section) uses a teal bg + padding
+    // to create a thin border. Raw keeps generation's 4px. Cleaned was using 3px; tighten to 2px to address the
+    // "slightly thicker border" in Outlook/vault copies.
     cleanHTML = cleanHTML.replace(
         /<table[^>]*?style="[^"]*margin:\s*15px\s*0[^"]*max-width:\s*100%[^"]*"[^>]*>[\s\S]*?<img[^>]*?src="([^"]+)"[^>]*?alt="Personal photo"[\s\S]*?<\/table>/gi,
         `<table width="100%" cellpadding="0" cellspacing="0" style="margin:15px 0; max-width:100%;">
             <tr>
-                <td style="padding:3px; background:#00A89D; border-radius:12px;">
+                <td style="padding:2px; background:#00A89D; border-radius:12px;">
                     <img src="$1" alt="Personal photo" width="100%" style="width:100%; max-width:540px; height:auto; display:block; border-radius:8px;">
                 </td>
             </tr>
