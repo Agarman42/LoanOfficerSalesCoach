@@ -1502,7 +1502,8 @@ async function generateNewsletter(feedback = '') {
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
                 '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" where [Name] is replaced with ONLY THE FIRST NAME from the Name field (e.g. if Name is "Adam Garman", use "Adam" only — NEVER use the last name or full name in the title). NEVER output "A Note From Adam" or any other hardcoded name unless it exactly matches the first name. Use only the first name.',
-                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
+                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player in the <!-- PERSONAL VIDEO PLACEHOLDER --> section. Otherwise use the photo if provided (in [PERSONAL PHOTO PLACEHOLDER]). Leave the exact placeholders [PERSONAL PHOTO PLACEHOLDER] and <!-- PERSONAL VIDEO PLACEHOLDER --> untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
+                '- PERSONAL VIDEO PLACEHOLDER: Leave the exact <!-- PERSONAL VIDEO PLACEHOLDER --> untouched. Post-processing will replace it with the video section if a video URL is provided.',
                 '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
@@ -1553,6 +1554,8 @@ async function generateNewsletter(feedback = '') {
     '        [PERSONAL PHOTO PLACEHOLDER]',
     '      </td></tr>',
     '    </table></td></tr>',
+    '    <tr><td height="20"></td></tr>',
+    '    <!-- PERSONAL VIDEO PLACEHOLDER -->',
     '    <tr><td height="20"></td></tr>',
     '    <!-- REFERRAL CTA PLACEHOLDER -->',
     '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
@@ -1802,9 +1805,7 @@ html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
 // Force personal note title to ALWAYS use only the first name (no last name allowed)
 html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 
-// Insert video section (when checked) right before referral. Uses placeholder if AI left it,
-// otherwise inserts before footer as fallback. This + the later referral ensure guarantees
-// the sections are at the bottom whenever the video checkbox is checked.
+// Insert video section using dedicated placeholder for reliability (post-processing always controls it).
 if (includeVideo && personalVideoUrl) {
     const videoSection = `
 <tr><td height="20"></td></tr>
@@ -1814,14 +1815,10 @@ ${videoTable}
   </td>
 </tr>
 <tr><td height="20"></td></tr>`;
-    if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
-        html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/i, videoSection + '[REFERRAL CTA PLACEHOLDER]');
-    } else if (!html.includes('Personal Video Update')) {
-        html = html.replace(
-            /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
-            videoSection + '\n<tr><td height="20"></td></tr>\n$1'
-        );
-    }
+    // Replace the explicit placeholder the AI was instructed to leave
+    html = html.replace(/<!-- PERSONAL VIDEO PLACEHOLDER -->/i, videoSection);
+    // Strip any AI-generated duplicate video section (in case the model ignored the instruction)
+    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
 }
 
 // === REFERRAL - Updated (no phone number) ===
