@@ -2048,16 +2048,9 @@ function getCleanOutlookHTML() {
     cleanHTML = cleanHTML.replace(/align="center"/gi, '');
     cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto/gi, 'margin:0');
 
-    // Rebuild video content as exact standard card in cleaned (to match AI sections 600px + padding exactly).
-    // Captures dynamic href/src, puts title + 540px player + button inside a standard padded td.
-    cleanHTML = cleanHTML.replace(
-        /<p style="margin:0 0 16px; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update<\/p>\s*<a href="([^"]+)" target="_blank" rel="noopener" style="text-decoration:none; display:block; margin-bottom:16px;">\s*<table[^>]*max-width:600px[^>]*>\s*<tr>\s*<td[^>]*>\s*<img src="([^"]+)"[^>]*>\s*<\/td>\s*<\/tr>\s*<\/table>\s*<\/a>\s*(<table[^>]*>[\s\S]*?<\/table>)/i,
-        '<p style="margin:0 0 16px; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>' +
-        '<a href="$1" target="_blank" rel="noopener" style="text-decoration:none; display:block; margin-bottom:16px;">' +
-        '<table width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden;">' +
-        '<tr><td style="padding:0;"><img src="$2" alt="Watch Personal Video" width="540" style="width:100%; max-width:540px; height:auto; display:block; border:0;"></td></tr>' +
-        '</table></a>$3'
-    );
+    // Flexible unwrap of any constraining max-width tables in video for cleaned, so content fills the full padded td of the outer teal card (matching AI sections structure/width/padding).
+    cleanHTML = cleanHTML.replace(/<table[^>]*max-width:600px;[^>]*margin:0 auto;[^>]*>([\s\S]*?)<\/table>/gi, '$1');
+    cleanHTML = cleanHTML.replace(/<table[^>]*max-width:600px;[^>]*>([\s\S]*?)<\/table>/gi, '$1');
 
     return cleanHTML;
 }
