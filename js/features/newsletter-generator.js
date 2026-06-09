@@ -1695,41 +1695,27 @@ async function generateNewsletter(feedback = '') {
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
   <tr>
     <td style="padding:30px;">
-      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto;">
+      <p style="margin:0 0 16px; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
+      <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none; display:block; margin-bottom:16px;">
+        <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:540px; margin:0 auto;">
+          <tr>
+            <td style="padding:0;">
+              <img src="${thumbnailUrl}" 
+                   alt="Watch Personal Video" 
+                   width="540" 
+                   style="width:100%; max-width:540px; height:auto; display:block; border:0;">
+            </td>
+          </tr>
+        </table>
+      </a>
+      <!-- Outlook-friendly button -->
+      <table align="center" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
-          <td align="center" style="padding-bottom:16px;">
-            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
-          </td>
-        </tr>
-        <tr>
-          <td align="center">
-            <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none;">
-              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:560px;">
-                <tr>
-                  <td style="padding:0;">
-                    <img src="${thumbnailUrl}" 
-                         alt="Watch Personal Video" 
-                         width="560" 
-                         style="width:100%; max-width:560px; height:auto; display:block; border:0;">
-                  </td>
-                </tr>
-              </table>
+          <td align="center" bgcolor="#F15A29" style="border-radius:30px; padding:4px;">
+            <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
+               style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
+                ▶ Watch Video
             </a>
-          </td>
-        </tr>
-        <tr>
-          <td align="center" style="padding-top:18px;">
-            <!-- Outlook-friendly button -->
-            <table align="center" cellpadding="0" cellspacing="0" role="presentation">
-              <tr>
-                <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
-                  <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
-                     style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
-                      ▶ Watch Video
-                  </a>
-                </td>
-              </tr>
-            </table>
           </td>
         </tr>
       </table>

@@ -113,7 +113,7 @@
       } else {
         // Mobile overlay
         const isOpen = sidebar.classList.contains('left-0');
-        applyCollapsedState(!isOpen, false);
+        applyCollapsedState(isOpen, false);
       }
     });
 
