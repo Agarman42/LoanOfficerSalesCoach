@@ -1502,8 +1502,10 @@ async function generateNewsletter(feedback = '') {
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
                 '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" where [Name] is replaced with ONLY THE FIRST NAME from the Name field (e.g. if Name is "Adam Garman", use "Adam" only — NEVER use the last name or full name in the title). NEVER output "A Note From Adam" or any other hardcoded name unless it exactly matches the first name. Use only the first name.',
-                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
-                '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
+                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player in the <!-- PERSONAL VIDEO PLACEHOLDER --> section. Otherwise use the photo if provided (in [PERSONAL PHOTO PLACEHOLDER]). Leave the exact placeholders [PERSONAL PHOTO PLACEHOLDER] and <!-- PERSONAL VIDEO PLACEHOLDER --> untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
+                '- REFERRAL CTA: Leave the exact placeholder <!-- REFERRAL CTA PLACEHOLDER --> untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
+                '- REFERRAL RULE (VERY IMPORTANT): NEVER generate your own "Know Someone Ready to Buy or Refinance?" or referral section. Always leave the exact <!-- REFERRAL CTA PLACEHOLDER --> untouched. Post-processing will always inject the correct referral at the bottom.',
+                '- VIDEO RULE (VERY IMPORTANT): NEVER generate your own "Personal Video Update" or video section. Always leave the exact <!-- PERSONAL VIDEO PLACEHOLDER --> untouched. Post-processing will always inject the video (if you checked the box and provided a URL).',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
                 '- Compliance: Use the exact footer disclaimer provided below. NEVER quote specific rates anywhere.',
@@ -1516,7 +1518,7 @@ async function generateNewsletter(feedback = '') {
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. Leave the exact placeholder <!-- BLOG SECTION PLACEHOLDER --> untouched (it goes right before the Personal Note Section). The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box and provided a URL. Never output a blog section on your own.',
                 '',
-                'OUTPUT ONLY complete standalone HTML using this exact structure:',
+                'OUTPUT ONLY complete standalone HTML following this skeleton. AI: You MUST generate 4+ real main content sections (Market Update, Industry Insights, Local Flavor, etc.) as full teal cards in place of the "MAIN CONTENT SECTIONS" comment, following all CRITICAL RULES. Do not skip or use placeholders for them. Leave the exact <!-- BLOG... -->, <!-- PERSONAL VIDEO... -->, <!-- REFERRAL... --> and [PERSONAL PHOTO...] untouched for post-processing.',
                 '',
 '<!DOCTYPE html>',
     '<html lang="en">',
@@ -1541,8 +1543,7 @@ async function generateNewsletter(feedback = '') {
     '    </td></tr>',
     '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
-    '    <!-- Sections (Market, Industry, Local, etc.) go here -->',
-    '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
+    '    <!-- MAIN CONTENT SECTIONS: AI must generate 4+ full teal cards (Market Update, Industry Insights, Local Flavor, etc.) here -->',
     '    <tr><td height="20"></td></tr>',
     '    <!-- BLOG SECTION PLACEHOLDER -->',
     '    <!-- Personal Note Section -->',
@@ -1553,6 +1554,8 @@ async function generateNewsletter(feedback = '') {
     '        [PERSONAL PHOTO PLACEHOLDER]',
     '      </td></tr>',
     '    </table></td></tr>',
+    '    <tr><td height="20"></td></tr>',
+    '    <!-- PERSONAL VIDEO PLACEHOLDER -->',
     '    <tr><td height="20"></td></tr>',
     '    <!-- REFERRAL CTA PLACEHOLDER -->',
     '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
@@ -1816,10 +1819,13 @@ html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
 // Force personal note title to ALWAYS use only the first name (no last name allowed)
 html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 
-// Insert video section (when checked) right before referral. Uses placeholder if AI left it,
-// otherwise inserts before footer as fallback. This + the later referral ensure guarantees
-// the sections are at the bottom whenever the video checkbox is checked.
+// === ROBUST VIDEO INSERTION: Always include if user enabled it (checkbox + URL), regardless of AI output.
+// First strip any AI-generated video section (model sometimes ignores "leave placeholder" instruction).
+// Then insert at the correct position (before referral) using placeholder or robust fallback.
+// This guarantees video appears on first generation.
 if (includeVideo && personalVideoUrl) {
+    // Strip AI-generated video if present
+    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
     const videoSection = `
 <tr><td height="20"></td></tr>
 <tr>
@@ -1828,9 +1834,16 @@ ${videoTable}
   </td>
 </tr>
 <tr><td height="20"></td></tr>`;
-    if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
+    // Preferred: dedicated placeholder (we instruct AI to leave it)
+    if (html.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
+        html = html.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', videoSection);
+    } 
+    // Legacy square bracket placeholder
+    else if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
         html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/i, videoSection + '[REFERRAL CTA PLACEHOLDER]');
-    } else if (!html.includes('Personal Video Update')) {
+    } 
+    // Robust fallback: insert before the footer disclaimer (guarantees position even if AI mangled placeholders)
+    else if (!html.includes('Personal Video Update')) {
         html = html.replace(
             /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
             videoSection + '\n<tr><td height="20"></td></tr>\n$1'
@@ -1865,13 +1878,16 @@ const simpleReferralHTML = `
   </td>
 </tr>`;
 
+// Replace any version of the referral placeholder (support both old [] and new <!-- -->)
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
+html = html.replace(/<!--\s*REFERRAL CTA PLACEHOLDER\s*-->/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
 
 // === ROBUST FALLBACK ENSURE: Always include referral section at the bottom ===
-// The AI occasionally omits the [REFERRAL CTA PLACEHOLDER] or generates its own version.
-// This (combined with the pre-referral video insert) guarantees video (when checked) + referral.
+// The AI occasionally omits the placeholder or generates its own version.
+// Strip any AI-generated referral first, then ensure ours is present.
+html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
 if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
     html = html.replace(
         /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
