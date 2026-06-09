@@ -18,6 +18,15 @@
   // Default always :3000 for the API proxy (even if you serve HTML from 8080).
   const getProxyUrl = () => {
     if (typeof window !== 'undefined' && window.CUSTOM_PROXY_URL) return window.CUSTOM_PROXY_URL;
+
+    if (typeof window !== 'undefined' && isProductionHosted()) {
+      // In production hosted mode (Render, etc.), the proxy and static files
+      // are served from the exact same origin. Use a relative URL so it
+      // automatically uses the correct protocol (HTTPS) and port.
+      return '/api/v1/chat/completions';
+    }
+
+    // Local development: proxy runs on :3000
     const hn = (typeof window !== 'undefined' ? (window.location.hostname || 'localhost') : 'localhost');
     return `http://${hn}:3000/api/v1/chat/completions`;
   };
