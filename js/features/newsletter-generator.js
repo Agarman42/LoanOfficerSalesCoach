@@ -1518,8 +1518,33 @@ async function generateNewsletter(feedback = '') {
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. Leave the exact placeholder <!-- BLOG SECTION PLACEHOLDER --> untouched (it goes right before the Personal Note Section). The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box and provided a URL. Never output a blog section on your own.',
                 '',
-                'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate 4 or more full main content sections (Market Update, Industry Insights, Local Flavor, Client Story/Win, etc.) as complete teal cards using the EXACT format shown in the 3 example cards below (width 100%, padding 30px, border-left teal, etc.). Fill with real content per the CRITICAL RULES above. Do not leave the comment or output placeholders for sections — expand them. After the sections, follow the skeleton for the blog/personal/video/referral placeholders and footer exactly. Leave the <!-- ... PLACEHOLDER --> and [PERSONAL PHOTO PLACEHOLDER] untouched for post-processing.',
-                '',
+                'First, generate the main content sections as a series of full teal card blocks. Generate at least 4 different ones (Market Update, Industry Insights, Local Flavor, and one more relevant to the profile like Client Win or Community). Each must follow this exact format and be separated by <tr><td height="20"></td></tr> :
+
+<tr><td>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+<tr>
+<td style="padding:30px 30px 30px 30px;">
+<h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Section Title</h2>
+<p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Your real content here. For market/industry end with the exact Sources paragraph with links as specified in the rules.]</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr><td height="20"></td></tr>
+
+Use real, relevant content based on the profile, location, and CRITICAL RULES. Do not use placeholder text.
+
+Then, after your generated sections, append *exactly* this footer skeleton (do not modify it, just append):
+
+[the full header + hero is already to be included at the start, but since the model is to generate full, better to say generate full but use the format.
+
+To make it simple: Generate the full HTML. Start with the header exactly as in the example below. Then insert your generated sections. Then append the personal note skeleton, video placeholder, referral placeholder, and footer exactly.
+
+The example structure below shows the full thing with the sections area to be replaced by your generated cards.
+
+Use this full output format:
+
 '<!DOCTYPE html>',
     '<html lang="en">',
     '<head><meta charset="UTF-8"></head>',
@@ -1543,13 +1568,7 @@ async function generateNewsletter(feedback = '') {
     '    </td></tr>',
     '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
-    '    <!-- MAIN CONTENT SECTIONS: replace this comment with 4+ full teal cards using the format of the examples below -->',
-    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;"><tr><td style="padding:30px 30px 30px 30px;"><h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Market Update</h2><p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Generate real market content here per rules, with Sources links at end]</p></td></tr></table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;"><tr><td style="padding:30px 30px 30px 30px;"><h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Industry Insights</h2><p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Generate real industry content here per rules, with Sources links]</p></td></tr></table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;"><tr><td style="padding:30px 30px 30px 30px;"><h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Local Flavor</h2><p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Generate real local content here per rules]</p></td></tr></table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
+    '    [YOUR GENERATED SECTIONS GO HERE - at least 4 full cards as described above]',
     '    <!-- BLOG SECTION PLACEHOLDER -->',
     '    <!-- Personal Note Section -->',
     '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
