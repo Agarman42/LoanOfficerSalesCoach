@@ -2032,6 +2032,24 @@ function getCleanOutlookHTML() {
     cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:600px');
     cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="600"');
 
+    // === STANDARDIZE ALL TEAL CARDS IN CLEANED VERSION FOR CONSISTENT WIDTHS ===
+    // Ensures injected video/photo sections don't make middle content sections appear narrower
+    // or header/footer wider in Outlook/vault. Forces uniform padding and removes constraining aligns/margins.
+    cleanHTML = cleanHTML.replace(
+        /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*>)([\s\S]*?<td[^>]*?)(style="[^"]*?")/gi,
+        (match, tableStart, tdBeforeStyle, styleAttr) => {
+            let newStyle = styleAttr.replace(/padding\s*:\s*[^;"]+/i, 'padding:30px 30px 30px 30px');
+            if (!/padding/i.test(newStyle)) {
+                newStyle = newStyle.replace(/"$/, ' padding:30px 30px 30px 30px"');
+            }
+            return tableStart + tdBeforeStyle + newStyle;
+        }
+    );
+
+    // Remove align="center" and margin:0 auto from video/inner tables in cleaned to let them fill full width consistently
+    cleanHTML = cleanHTML.replace(/align="center"/gi, '');
+    cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto/gi, 'margin:0');
+
     return cleanHTML;
 }
 
