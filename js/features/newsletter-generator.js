@@ -1502,10 +1502,8 @@ async function generateNewsletter(feedback = '') {
                 '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
                 '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
                 '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" where [Name] is replaced with ONLY THE FIRST NAME from the Name field (e.g. if Name is "Adam Garman", use "Adam" only — NEVER use the last name or full name in the title). NEVER output "A Note From Adam" or any other hardcoded name unless it exactly matches the first name. Use only the first name.',
-                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player in the <!-- PERSONAL VIDEO PLACEHOLDER --> section. Otherwise use the photo if provided (in [PERSONAL PHOTO PLACEHOLDER]). Leave the exact placeholders [PERSONAL PHOTO PLACEHOLDER] and <!-- PERSONAL VIDEO PLACEHOLDER --> untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
-                '- REFERRAL CTA: Leave the exact placeholder <!-- REFERRAL CTA PLACEHOLDER --> untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
-                '- REFERRAL RULE (VERY IMPORTANT): NEVER generate your own "Know Someone Ready to Buy or Refinance?" or referral section. Always leave the exact <!-- REFERRAL CTA PLACEHOLDER --> untouched. Post-processing will always inject the correct referral at the bottom.',
-                '- VIDEO RULE (VERY IMPORTANT): NEVER generate your own "Personal Video Update" or video section. Always leave the exact <!-- PERSONAL VIDEO PLACEHOLDER --> untouched. Post-processing will always inject the video (if you checked the box and provided a URL).',
+                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
+                '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
                 '- Compliance: Use the exact footer disclaimer provided below. NEVER quote specific rates anywhere.',
@@ -1518,33 +1516,8 @@ async function generateNewsletter(feedback = '') {
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. Leave the exact placeholder <!-- BLOG SECTION PLACEHOLDER --> untouched (it goes right before the Personal Note Section). The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box and provided a URL. Never output a blog section on your own.',
                 '',
-                'First, generate the main content sections as a series of full teal card blocks. Generate at least 4 different ones (Market Update, Industry Insights, Local Flavor, and one more relevant to the profile like Client Win or Community). Each must follow this exact format and be separated by <tr><td height="20"></td></tr> :
-
-<tr><td>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
-<tr>
-<td style="padding:30px 30px 30px 30px;">
-<h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">Section Title</h2>
-<p style="font-size:18px; line-height:1.6; color:#002B5C; margin:0;">[Your real content here. For market/industry end with the exact Sources paragraph with links as specified in the rules.]</p>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-<tr><td height="20"></td></tr>
-
-Use real, relevant content based on the profile, location, and CRITICAL RULES. Do not use placeholder text.
-
-Then, after your generated sections, append *exactly* this footer skeleton (do not modify it, just append):
-
-[the full header + hero is already to be included at the start, but since the model is to generate full, better to say generate full but use the format.
-
-To make it simple: Generate the full HTML. Start with the header exactly as in the example below. Then insert your generated sections. Then append the personal note skeleton, video placeholder, referral placeholder, and footer exactly.
-
-The example structure below shows the full thing with the sections area to be replaced by your generated cards.
-
-Use this full output format:
-
+                'OUTPUT ONLY complete standalone HTML using this exact structure:',
+                '',
 '<!DOCTYPE html>',
     '<html lang="en">',
     '<head><meta charset="UTF-8"></head>',
@@ -1568,7 +1541,9 @@ Use this full output format:
     '    </td></tr>',
     '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
-    '    [YOUR GENERATED SECTIONS GO HERE - at least 4 full cards as described above]',
+    '    <!-- Sections (Market, Industry, Local, etc.) go here -->',
+    '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
+    '    <tr><td height="20"></td></tr>',
     '    <!-- BLOG SECTION PLACEHOLDER -->',
     '    <!-- Personal Note Section -->',
     '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
@@ -1578,8 +1553,6 @@ Use this full output format:
     '        [PERSONAL PHOTO PLACEHOLDER]',
     '      </td></tr>',
     '    </table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <!-- PERSONAL VIDEO PLACEHOLDER -->',
     '    <tr><td height="20"></td></tr>',
     '    <!-- REFERRAL CTA PLACEHOLDER -->',
     '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
@@ -1843,13 +1816,10 @@ html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
 // Force personal note title to ALWAYS use only the first name (no last name allowed)
 html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 
-// === ROBUST VIDEO INSERTION: Always include if user enabled it (checkbox + URL), regardless of AI output.
-// First strip any AI-generated video section (model sometimes ignores "leave placeholder" instruction).
-// Then insert at the correct position (before referral) using placeholder or robust fallback.
-// This guarantees video appears on first generation.
+// Insert video section (when checked) right before referral. Uses placeholder if AI left it,
+// otherwise inserts before footer as fallback. This + the later referral ensure guarantees
+// the sections are at the bottom whenever the video checkbox is checked.
 if (includeVideo && personalVideoUrl) {
-    // Strip AI-generated video if present
-    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
     const videoSection = `
 <tr><td height="20"></td></tr>
 <tr>
@@ -1858,16 +1828,9 @@ ${videoTable}
   </td>
 </tr>
 <tr><td height="20"></td></tr>`;
-    // Preferred: dedicated placeholder (we instruct AI to leave it)
-    if (html.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
-        html = html.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', videoSection);
-    } 
-    // Legacy square bracket placeholder
-    else if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
+    if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
         html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/i, videoSection + '[REFERRAL CTA PLACEHOLDER]');
-    } 
-    // Robust fallback: insert before the footer disclaimer (guarantees position even if AI mangled placeholders)
-    else if (!html.includes('Personal Video Update')) {
+    } else if (!html.includes('Personal Video Update')) {
         html = html.replace(
             /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
             videoSection + '\n<tr><td height="20"></td></tr>\n$1'
@@ -1902,16 +1865,13 @@ const simpleReferralHTML = `
   </td>
 </tr>`;
 
-// Replace any version of the referral placeholder (support both old [] and new <!-- -->)
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
-html = html.replace(/<!--\s*REFERRAL CTA PLACEHOLDER\s*-->/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
 
 // === ROBUST FALLBACK ENSURE: Always include referral section at the bottom ===
-// The AI occasionally omits the placeholder or generates its own version.
-// Strip any AI-generated referral first, then ensure ours is present.
-html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
+// The AI occasionally omits the [REFERRAL CTA PLACEHOLDER] or generates its own version.
+// This (combined with the pre-referral video insert) guarantees video (when checked) + referral.
 if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
     html = html.replace(
         /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
@@ -2071,24 +2031,6 @@ function getCleanOutlookHTML() {
     // Cleaned versions adjust to 600px so the video card matches the width of other sections.
     cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:600px');
     cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="600"');
-
-    // === STANDARDIZE ALL TEAL CARDS IN CLEANED VERSION FOR CONSISTENT WIDTHS ===
-    // Ensures injected video/photo sections don't make middle content sections appear narrower
-    // or header/footer wider in Outlook/vault. Forces uniform padding and removes constraining aligns/margins.
-    cleanHTML = cleanHTML.replace(
-        /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*>)([\s\S]*?<td[^>]*?)(style="[^"]*?")/gi,
-        (match, tableStart, tdBeforeStyle, styleAttr) => {
-            let newStyle = styleAttr.replace(/padding\s*:\s*[^;"]+/i, 'padding:30px 30px 30px 30px');
-            if (!/padding/i.test(newStyle)) {
-                newStyle = newStyle.replace(/"$/, ' padding:30px 30px 30px 30px"');
-            }
-            return tableStart + tdBeforeStyle + newStyle;
-        }
-    );
-
-    // Remove align="center" and margin:0 auto from video/inner tables in cleaned to let them fill full width consistently
-    cleanHTML = cleanHTML.replace(/align="center"/gi, '');
-    cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto/gi, 'margin:0');
 
     return cleanHTML;
 }
