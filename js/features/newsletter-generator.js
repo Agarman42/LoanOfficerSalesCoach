@@ -1997,25 +1997,7 @@ function getCleanOutlookHTML() {
     cleanHTML = cleanHTML.replace(/background-color\s*:\s*#?F15A29/gi, 'background-color:#002B5C');
     cleanHTML = cleanHTML.replace(/bgcolor\s*=\s*["']?#?F15A29["']?/gi, 'bgcolor="#002B5C"');
 
-    // === PERSONAL PHOTO - Thin teal border (matches preview) ===
-    cleanHTML = cleanHTML.replace(
-        /<img src="([^"]+)" alt="Personal photo"[^>]*>/gi,
-        `<table align="center" width="600" cellpadding="0" cellspacing="0" style="margin:40px auto 20px; max-width:100%;">
-            <tr>
-                <td bgcolor="#00A89D" style="padding:3px;">
-                    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-                        <tr>
-                            <td style="padding:0;">
-                                <img src="$1" alt="Personal photo" width="594" style="width:100%; height:auto; display:block; border-radius:12px;">
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>`
-    );
-
-    // === HERO IMAGE - Light gray background on sides + centered ===
+    // === HERO IMAGE - Light gray background on sides + centered (cleaned only) ===
     cleanHTML = cleanHTML.replace(
         /<tr>\s*<td[^>]*>\s*<img src="([^"]+)"[^>]*alt=["']Hero[^>]*>[\s\S]*?<\/td>\s*<\/tr>/gi,
         `<tr>
@@ -2027,30 +2009,77 @@ function getCleanOutlookHTML() {
         <tr><td height="20"></td></tr>`
     );
 
-    // === VIDEO SECTION - force consistent width and structure in cleaned Outlook/vault copies only ===
-    // Raw/preview keeps original (looked fine). Cleaned normalizes to match standard 600px teal card with padding 30px.
-    cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:600px');
-    cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="600"');
+    // === FORCE ALL TEAL CARDS (AI sections + injected blog + personal note + video + referral) TO IDENTICAL 600px WIDTH ===
+    // This is the key for Outlook copy + vault viewer: without an outer constraining table in some renderers,
+    // width="100%" cards can size differently. Forcing width="600" on the teal tables themselves
+    // makes every section render at exactly the same width regardless of container (iframe, paste target, etc).
+    // Raw/preview/download untouched (they keep the full skeleton + 100% inners which look correct inside the 600 wrapper).
+    cleanHTML = cleanHTML.replace(
+        /(<table\b[^>]*?border-left:\s*8px solid #00A89D[^>]*?)(width="100%"|width='100%')/gi,
+        '$1width="600"'
+    );
+    // Add width=600 to any teal card table that lacks an explicit width attribute
+    cleanHTML = cleanHTML.replace(
+        /(<table\b(?![^>]*\bwidth=)[^>]*?border-left:\s*8px solid #00A89D[^>]*?)>/gi,
+        '$1 width="600">'
+    );
+    // If the table has a style attribute, inject max-width + margin inside the style value (email clients vary on attr vs style)
+    cleanHTML = cleanHTML.replace(
+        /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*?style=")([^"]*)(")/gi,
+        (m, pre, styleVal, post) => {
+            let s = styleVal;
+            if (!/max-width\s*:/i.test(s)) {
+                s += (s.trim().endsWith(';') ? '' : ';') + ' max-width:600px; margin:0 auto';
+            }
+            return pre + s + post;
+        }
+    );
 
-    // Standardize padding on all teal cards (video + others) in cleaned to prevent width inconsistencies.
+    // === UNIFORM PADDING ON EVERY TEAL CARD'S CONTENT TD (cleaned only) ===
     cleanHTML = cleanHTML.replace(
         /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*>)([\s\S]*?<td[^>]*?)(style="[^"]*?")/gi,
         (match, tableStart, tdBeforeStyle, styleAttr) => {
             let newStyle = styleAttr.replace(/padding\s*:\s*[^;"]+/i, 'padding:30px 30px 30px 30px');
             if (!/padding/i.test(newStyle)) {
-                newStyle = newStyle.replace(/"$/, ' padding:30px 30px 30px 30px"');
+                newStyle = newStyle.replace(/"$/, '; padding:30px 30px 30px 30px"');
+            }
+            if (!/box-sizing/i.test(newStyle)) {
+                newStyle = newStyle.replace(/"$/, '; box-sizing:border-box"');
             }
             return tableStart + tdBeforeStyle + newStyle;
         }
     );
 
-    // Remove align/margin from video inners in cleaned so it fills full width like other sections.
-    cleanHTML = cleanHTML.replace(/align="center"/gi, '');
-    cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto/gi, 'margin:0');
+    // === VIDEO: swap any legacy 560, then flatten inner centering tables ===
+    // The video card itself is now forced to 600px above. Its inner "max-width:560/600 + margin:0 auto" table
+    // used to make the thumbnail + button area look narrower/different than plain text cards.
+    // Unwrap those inners in cleaned so title / thumbnail / button sit directly in the 30px padded td (same as AI cards).
+    cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:100%');
+    cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="100%"');
+    cleanHTML = cleanHTML.replace(/max-width:\s*600px/gi, 'max-width:100%');
 
-    // Flexible unwrap of any constraining max-width tables in video for cleaned, so content fills the full padded td of the outer teal card (matching AI sections structure/width/padding).
-    cleanHTML = cleanHTML.replace(/<table[^>]*max-width:600px;[^>]*margin:0 auto;[^>]*>([\s\S]*?)<\/table>/gi, '$1');
-    cleanHTML = cleanHTML.replace(/<table[^>]*max-width:600px;[^>]*>([\s\S]*?)<\/table>/gi, '$1');
+    // Remove centering constraints from video sub-elements
+    cleanHTML = cleanHTML.replace(/align="center"/gi, '');
+    cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto;?/gi, 'margin:0;');
+
+    // Unwrap any remaining nested max-width tables that were only for centering video content (now 100%)
+    cleanHTML = cleanHTML.replace(/<table[^>]*max-width:\s*100%;[^>]*margin:\s*0\s*auto;[^>]*>([\s\S]*?)<\/table>/gi, '$1');
+    cleanHTML = cleanHTML.replace(/<table[^>]*margin:\s*0\s*auto;[^>]*max-width:[^>]*>([\s\S]*?)<\/table>/gi, '$1');
+
+    // === PERSONAL PHOTO - ensure the framed photo inside the Personal Note does not introduce extra width ===
+    // Match the whole generated photo wrapper table (safer than just the img) and emit a clean fitted frame.
+    // Uses max-width on the img so it respects the personal note card's content area (after we forced the card to 600px).
+    // This runs in cleaned only; raw keeps whatever the generator emitted.
+    cleanHTML = cleanHTML.replace(
+        /<table[^>]*?style="[^"]*margin:\s*15px\s*0[^"]*max-width:\s*100%[^"]*"[^>]*>[\s\S]*?<img[^>]*?src="([^"]+)"[^>]*?alt="Personal photo"[\s\S]*?<\/table>/gi,
+        `<table width="100%" cellpadding="0" cellspacing="0" style="margin:15px 0; max-width:100%;">
+            <tr>
+                <td style="padding:3px; background:#00A89D; border-radius:12px;">
+                    <img src="$1" alt="Personal photo" width="100%" style="width:100%; max-width:540px; height:auto; display:block; border-radius:8px;">
+                </td>
+            </tr>
+        </table>`
+    );
 
     return cleanHTML;
 }
