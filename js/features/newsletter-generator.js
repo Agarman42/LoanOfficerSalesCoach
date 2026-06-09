@@ -1516,7 +1516,7 @@ async function generateNewsletter(feedback = '') {
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. Leave the exact placeholder <!-- BLOG SECTION PLACEHOLDER --> untouched (it goes right before the Personal Note Section). The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box and provided a URL. Never output a blog section on your own.',
                 '',
-                'OUTPUT ONLY complete standalone HTML using this exact structure:',
+                'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate 4 or more full main content sections (Market Update, Industry Insights, Local Flavor, Client Story/Win, etc.) as complete teal cards using the exact format shown in the example cards below. Fill with real content per the CRITICAL RULES. Do not leave the comment or output placeholders for sections - expand them. After the sections, append exactly the skeleton for the placeholders and footer (do not change it). Leave the placeholders untouched for post-processing.',
                 '',
 '<!DOCTYPE html>',
     '<html lang="en">',
@@ -1541,7 +1541,7 @@ async function generateNewsletter(feedback = '') {
     '    </td></tr>',
     '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
-    '    <!-- Sections (Market, Industry, Local, etc.) go here -->',
+    '    <!-- MAIN CONTENT SECTIONS: generate 4+ full teal cards here (copy the format of the example cards below, but use real generated content per rules) -->',
     '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
     '    <tr><td height="20"></td></tr>',
     '    <!-- BLOG SECTION PLACEHOLDER -->',
@@ -1816,9 +1816,9 @@ html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
 // Force personal note title to ALWAYS use only the first name (no last name allowed)
 html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 
-// === ROBUST VIDEO INCLUSION (always if UI enabled, strip AI version first) ===
+// === ROBUST VIDEO INCLUSION: always force if UI enabled (checkbox + URL), strip any AI version first ===
 if (includeVideo && personalVideoUrl) {
-    // Strip any AI-generated video section
+    // Strip AI-generated video
     html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
     const videoSection = `
 <tr><td height="20"></td></tr>
@@ -1828,22 +1828,14 @@ ${videoTable}
   </td>
 </tr>
 <tr><td height="20"></td></tr>`;
-    // Try placeholder
-    if (html.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
-        html = html.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', videoSection);
-    } else if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
-        html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/i, videoSection + '[REFERRAL CTA PLACEHOLDER]');
+    // Insert before referral text if present, else before footer
+    if (html.includes('Know Someone Ready to Buy or Refinance?')) {
+        html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/i, videoSection + '$&');
     } else {
-        // Force before the referral block if present, else before footer
-        const referralBlock = html.match(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/i);
-        if (referralBlock) {
-            html = html.replace(referralBlock[0], videoSection + referralBlock[0]);
-        } else if (!html.includes('Personal Video Update')) {
-            html = html.replace(
-                /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
-                videoSection + '\n<tr><td height="20"></td></tr>\n$1'
-            );
-        }
+        html = html.replace(
+            /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
+            videoSection + '\n<tr><td height="20"></td></tr>\n$1'
+        );
     }
 }
 
@@ -1874,16 +1866,13 @@ const simpleReferralHTML = `
   </td>
 </tr>`;
 
-// Replace placeholder (support both formats)
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
-html = html.replace(/<!--\s*REFERRAL CTA PLACEHOLDER\s*-->/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
 
-// Strip any AI-generated referral
-html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
-
-// === ROBUST FALLBACK: Always include referral ===
+// === ROBUST FALLBACK ENSURE: Always include referral section at the bottom ===
+// The AI occasionally omits the [REFERRAL CTA PLACEHOLDER] or generates its own version.
+// This (combined with the pre-referral video insert) guarantees video (when checked) + referral.
 if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
     html = html.replace(
         /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
@@ -2038,15 +2027,12 @@ function getCleanOutlookHTML() {
         <tr><td height="20"></td></tr>`
     );
 
-    // === VIDEO SECTION - force consistent width in cleaned Outlook/vault copies ===
-    // Raw/preview keeps the original 560px for thumbnail ratio (which looked fine).
-    // Cleaned versions adjust to 600px so the video card matches the width of other sections.
+    // === VIDEO SECTION - force consistent width and structure in cleaned Outlook/vault copies only ===
+    // Raw/preview keeps original (looked fine). Cleaned normalizes to match standard 600px teal card with padding 30px.
     cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:600px');
     cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="600"');
 
-    // === STANDARDIZE PADDING ON ALL TEAL CARDS IN CLEANED VERSION ===
-    // This makes injected video (and photo inside personal note) have identical padding to AI-generated sections.
-    // Prevents middle sections looking narrower or inconsistent widths when media is injected.
+    // Standardize padding on all teal cards (video + others) in cleaned to prevent width inconsistencies.
     cleanHTML = cleanHTML.replace(
         /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*>)([\s\S]*?<td[^>]*?)(style="[^"]*?")/gi,
         (match, tableStart, tdBeforeStyle, styleAttr) => {
@@ -2058,14 +2044,9 @@ function getCleanOutlookHTML() {
         }
     );
 
-    // Remove align="center" and margin:0 auto from video inner tables in cleaned only, so content fills the full card width consistently with other sections.
+    // Remove align/margin from video inners in cleaned so it fills full width like other sections.
     cleanHTML = cleanHTML.replace(/align="center"/gi, '');
     cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto/gi, 'margin:0');
-
-    // Unwrap the constraining inner table in video for cleaned, to make the player and button full width of the card.
-    cleanHTML = cleanHTML.replace(/<table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; margin:0 auto;">([\s\S]*?)<\/table>/gi, '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0;">$1</table>');
-
-    cleanHTML = cleanHTML.replace(/<table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:600px;">/gi, '<table width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden;">');
 
     return cleanHTML;
 }
