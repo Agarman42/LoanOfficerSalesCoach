@@ -1816,10 +1816,10 @@ html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
 // Force personal note title to ALWAYS use only the first name (no last name allowed)
 html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 
-// Insert video section (when checked) right before referral. Uses placeholder if AI left it,
-// otherwise inserts before footer as fallback. This + the later referral ensure guarantees
-// the sections are at the bottom whenever the video checkbox is checked.
+// === ROBUST VIDEO INCLUSION (always if UI enabled, strip AI version first) ===
 if (includeVideo && personalVideoUrl) {
+    // Strip any AI-generated video section
+    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
     const videoSection = `
 <tr><td height="20"></td></tr>
 <tr>
@@ -1828,13 +1828,22 @@ ${videoTable}
   </td>
 </tr>
 <tr><td height="20"></td></tr>`;
-    if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
+    // Try placeholder
+    if (html.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
+        html = html.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', videoSection);
+    } else if (html.includes('[REFERRAL CTA PLACEHOLDER]')) {
         html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/i, videoSection + '[REFERRAL CTA PLACEHOLDER]');
-    } else if (!html.includes('Personal Video Update')) {
-        html = html.replace(
-            /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
-            videoSection + '\n<tr><td height="20"></td></tr>\n$1'
-        );
+    } else {
+        // Force before the referral block if present, else before footer
+        const referralBlock = html.match(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/i);
+        if (referralBlock) {
+            html = html.replace(referralBlock[0], videoSection + referralBlock[0]);
+        } else if (!html.includes('Personal Video Update')) {
+            html = html.replace(
+                /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
+                videoSection + '\n<tr><td height="20"></td></tr>\n$1'
+            );
+        }
     }
 }
 
@@ -1865,13 +1874,16 @@ const simpleReferralHTML = `
   </td>
 </tr>`;
 
+// Replace placeholder (support both formats)
 html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
+html = html.replace(/<!--\s*REFERRAL CTA PLACEHOLDER\s*-->/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
 
-// === ROBUST FALLBACK ENSURE: Always include referral section at the bottom ===
-// The AI occasionally omits the [REFERRAL CTA PLACEHOLDER] or generates its own version.
-// This (combined with the pre-referral video insert) guarantees video (when checked) + referral.
+// Strip any AI-generated referral
+html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
+
+// === ROBUST FALLBACK: Always include referral ===
 if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
     html = html.replace(
         /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
@@ -2049,6 +2061,11 @@ function getCleanOutlookHTML() {
     // Remove align="center" and margin:0 auto from video inner tables in cleaned only, so content fills the full card width consistently with other sections.
     cleanHTML = cleanHTML.replace(/align="center"/gi, '');
     cleanHTML = cleanHTML.replace(/margin:\s*0\s*auto/gi, 'margin:0');
+
+    // Unwrap the constraining inner table in video for cleaned, to make the player and button full width of the card.
+    cleanHTML = cleanHTML.replace(/<table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; margin:0 auto;">([\s\S]*?)<\/table>/gi, '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0;">$1</table>');
+
+    cleanHTML = cleanHTML.replace(/<table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:600px;">/gi, '<table width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden;">');
 
     return cleanHTML;
 }
