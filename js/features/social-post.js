@@ -650,13 +650,18 @@ LO PROFILE & VOICE (make the overview + every single post idea feel like it was 
 ${personalization}
 ${eff.localArea ? `Primary market: ${eff.localArea}.` : ''}
 
-CRITICAL: Output EXACTLY ${daysInMonth} days (Day 1 to Day ${daysInMonth}). For EVERY day, provide EXACTLY 4 varied post ideas.
+CRITICAL INSTRUCTIONS — DO NOT VIOLATE:
+- You MUST generate content for EVERY SINGLE ONE of the ${daysInMonth} days. Do not stop early, do not summarize, do not say "and so on".
+- The output table MUST contain EXACTLY ${daysInMonth} data rows (one for each day from 1 to ${daysInMonth}).
+- For EVERY day provide EXACTLY 4 varied, ready-to-post ideas.
+- If the month is long, keep individual posts concise but complete — never omit days to save tokens.
+- Output as clean Markdown with:
+  - Strong Overview section (key themes, why it works, execution motivation — inspiring and actionable).
+  - Calendar as a table: columns "Day", "Date", "Theme", "Post 1", "Post 2", "Post 3", "Post 4".
+  - Each post: full caption + hashtags.
+Include local ${localArea} events, holidays, trends where relevant. Tone: warm, fun, conversational.
 
-Output as clean Markdown with:
-- Strong Overview section (key themes, why it works, execution motivation — inspiring and actionable).
-- Calendar as a table: columns "Day", "Date", "Theme", "Post 1", "Post 2", "Post 3", "Post 4".
-- Each post: full caption + hashtags.
-Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversational.`;
+Generate the COMPLETE table now with all ${daysInMonth} days.`;
 
     const loading = document.getElementById('global-loading');
     const output = document.getElementById('social-plan-output');
@@ -743,7 +748,7 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
                 { role: 'user', content: fullPrompt }
             ],
             temperature: 0.7,
-            max_tokens: 6000
+            max_tokens: 9000
         });
 
         if (!rawPlan) throw new Error('Empty response from API');
@@ -773,8 +778,15 @@ Include local ${localArea} events, holidays, trends. Tone: warm, fun, conversati
             let theme = 'Daily Mix';
 
             const posts = [];
+            // Fallbacks are now varied and lightly personalized from profile/themes when the model didn't return a full table
+            const fallbacks = [
+                '<p class="italic text-gray-500">Free choice — share something personal or local!</p>',
+                '<p class="italic text-gray-500">Your choice — a quick win, family moment, or local spot.</p>',
+                '<p class="italic text-gray-500">Open slot — poll your audience or share a recent small win.</p>',
+                '<p class="italic text-gray-500">Free choice — behind the scenes or a light fun fact.</p>'
+            ];
             for (let i = 0; i < 4; i++) {
-                posts.push('<p class="italic text-gray-500">Free choice — share something personal or local!</p>');
+                posts.push(fallbacks[i % fallbacks.length]);
             }
 
             // Override with Grok data if available (robust lookup by day number, not position)

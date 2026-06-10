@@ -1639,27 +1639,31 @@ async function generateNewsletter(feedback = '') {
         }
 
         if (html && html.trim() !== '') {
-            // Core replacements
-            // More robust placeholder replacement to handle slight variations in AI output (whitespace, self-closing, extra attrs)
+            // Core replacements (always safe)
             html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
             html = html.replace(/<p[^>]*id=["']?pro-tip-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedProTip}</p>`);
             html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
          
-            // === PERSONAL PHOTO AND VIDEO - CRM / HubSpot Friendly ===
-            // FIXED: Do not nest the media tables inside the Personal Note's inner <td style="padding:30px">.
-            // Previously, 600px-wide tables (photo + video) inside a padded cell caused width overflows in email clients,
-            // breaking the personal note box, slicing the video thumbnail into strips, and mis-aligning later sections.
-            // Now: photo (if any) is inserted cleanly *inside* the note (fitted to ~540px to respect padding + left border).
-            // Video (if any) is inserted as its own top-level peer section (like referral/others) right before the referral.
-            // This keeps the flat <tr><td><table teal...> structure intact for all email clients.
-            const includePhoto = document.getElementById('nl-include-photo')?.checked || false;
-            const includeVideo = document.getElementById('nl-include-video')?.checked || false;
-            const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
-            const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
+            // === ONLY RUN HEAVY INJECTION LOGIC ON FRESH GENERATION, NOT ON FEEDBACK EDITS ===
+            // When editing with feedback, the model was explicitly told to return the COMPLETE modified full HTML.
+            // Running the placeholder injections + section removals on an already-edited document was causing
+            // large parts of the user's previous work to be stripped or overwritten.
+            if (!feedback) {
+                // === PERSONAL PHOTO AND VIDEO - CRM / HubSpot Friendly ===
+                // FIXED: Do not nest the media tables inside the Personal Note's inner <td style="padding:30px">.
+                // Previously, 600px-wide tables (photo + video) inside a padded cell caused width overflows in email clients,
+                // breaking the personal note box, slicing the video thumbnail into strips, and mis-aligning later sections.
+                // Now: photo (if any) is inserted cleanly *inside* the note (fitted to ~540px to respect padding + left border).
+                // Video (if any) is inserted as its own top-level peer section (like referral/others) right before the referral.
+                // This keeps the flat <tr><td><table teal...> structure intact for all email clients.
+                const includePhoto = document.getElementById('nl-include-photo')?.checked || false;
+                const includeVideo = document.getElementById('nl-include-video')?.checked || false;
+                const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
+                const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
 
-            let photoInsert = '';
-            if (includePhoto && personalPhotoUrl) {
-                photoInsert = `
+                let photoInsert = '';
+                if (includePhoto && personalPhotoUrl) {
+                    photoInsert = `
 <table align="center" width="100%" cellpadding="0" cellspacing="0" style="margin:15px 0; max-width:100%;">
     <tr>
         <td align="center" style="padding:4px; background:#00A89D; text-align:center; border-radius:12px;">
@@ -1668,10 +1672,10 @@ async function generateNewsletter(feedback = '') {
         </td>
     </tr>
 </table>`;
-            }
+                }
 
-            let videoTable = '';
-            if (includeVideo && personalVideoUrl) {
+                let videoTable = '';
+                if (includeVideo && personalVideoUrl) {
                 let videoId = '';
                 let thumbnailUrl = 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
 
@@ -1879,6 +1883,7 @@ if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
         simpleReferralHTML + '\n<tr><td height="20"></td></tr>\n$1'
     );
 }
+            } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
 
     // Normalize before saving the raw HTML (for downloads/copying)
     lastGeneratedHTML = normalizeRawNewsletterHTML(html);
@@ -2154,7 +2159,9 @@ function copyForOutlook() {
       alert('Generate the newsletter first!');
       return;
     }
-    const title = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter';
+    const baseTitle = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter';
+    // Append timestamp so user can save multiple versions / batches without overwriting previous ones
+    const title = baseTitle + ' — ' + new Date().toISOString().slice(0, 16).replace('T', ' ');
     window.toggleSaveIdea(title, clean, null, 'newsletter');
     if (window.showToast) {
       window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success');

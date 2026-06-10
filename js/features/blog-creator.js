@@ -592,7 +592,9 @@ window.saveBlogToVault = function() {
       }
     }
 
-    const title = `Blog: ${blogTitle.substring(0, 60)}${blogTitle.length > 60 ? '...' : ''}`;
+    const baseTitle = `Blog: ${blogTitle.substring(0, 60)}${blogTitle.length > 60 ? '...' : ''}`;
+    // Append timestamp so multiple blogs can be saved in batches without overwriting previous saves
+    const title = baseTitle + ' — ' + new Date().toISOString().slice(0, 16).replace('T', ' ');
 
     // Polished, self-contained saved bundle with controlled typography so huge headings don't dominate or overlap
     const richContent = `

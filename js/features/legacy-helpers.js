@@ -1501,6 +1501,9 @@
     }
   }
 
+  window.saveBook = saveBook;
+  window.isBookSaved = isBookSaved;
+
   function initBookVault() {
     const grid = document.getElementById('book-grid');
     const search = document.getElementById('book-search');
