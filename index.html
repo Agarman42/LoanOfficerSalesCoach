@@ -13495,6 +13495,35 @@ window.openExpandedSocialExamplesModal = function(pillar) {
   // =====================================================
   // NEW UNIFIED SAVED ITEMS LIBRARY (accessible from anywhere)
   // =====================================================
+
+  window.clearAllSavedItems = function(btn) {
+    if (!confirm('Clear ALL saved items from your vault? This cannot be undone and will remove plans, newsletters, scripts, social ideas, etc.')) return;
+
+    try {
+      localStorage.removeItem('socialSavedIdeas');
+      // Defensive cleanup for any legacy per-tool keys
+      localStorage.removeItem('savedBusinessPlan');
+      localStorage.removeItem('savedWeeklyPlan');
+    } catch (e) {}
+
+    // Close the current library modal
+    const modal = btn ? btn.closest('.fixed') || btn.closest('#my-saved-items-library') : document.getElementById('my-saved-items-library');
+    if (modal) modal.remove();
+
+    // Update global saved count badges if they exist
+    document.querySelectorAll('#global-saved-count, #social-saved-count').forEach(el => {
+      if (el) el.textContent = '0';
+    });
+
+    if (typeof window.updateSavedCount === 'function') {
+      try { window.updateSavedCount(); } catch (e) {}
+    }
+
+    if (window.showToast) {
+      window.showToast('All saved items cleared.');
+    }
+  };
+
   window.showSavedItemsLibrary = function(initialFilter = 'all') {
     // Aggressive cleanup: remove any prior library panels, viewers, or legacy saved modals.
     // Prevents items from visually overlapping/stacking when opening My Saved Items multiple times
@@ -13603,11 +13632,11 @@ window.openExpandedSocialExamplesModal = function(pillar) {
           <div class="group border border-gray-200 dark:border-gray-700 rounded-3xl p-5 bg-white dark:bg-gray-800 hover:border-[#00A89D]/40 hover:shadow-md transition-all">
             <div class="flex justify-between items-start gap-4">
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="px-2.5 py-0.5 text-xs font-medium rounded-full ${typeColor}">${typeLabel}</span>
-                  <strong class="text-base font-semibold leading-tight truncate">${item.title}</strong>
+                <div class="mb-1">
+                  <span class="inline-block px-2 py-0.5 text-[10px] font-medium rounded-2xl ${typeColor} max-w-full break-words">${typeLabel}</span>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">${shortContent}</p>
+                <strong class="text-base font-semibold leading-tight truncate block">${item.title}</strong>
+                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">${shortContent}</p>
               </div>
               <div class="flex flex-col gap-1.5 flex-shrink-0">
                 <button onclick="viewSavedItem(${index}, this)" 
@@ -13638,35 +13667,35 @@ window.openExpandedSocialExamplesModal = function(pillar) {
 
         <!-- Filters -->
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-2 items-center bg-gray-50 dark:bg-gray-800/50">
-          <div class="flex gap-1.5">
-            <button data-filter="all" class="filter-btn active px-4 py-1.5 text-sm rounded-full bg-[#00A89D] text-white font-medium flex items-center gap-2">
+          <div class="flex gap-1.5 overflow-x-auto flex-nowrap pb-1" style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
+            <button data-filter="all" class="filter-btn active px-3 py-1 text-xs rounded-full bg-[#00A89D] text-white font-medium flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-layer-group"></i> <span>All</span>
             </button>
-            <button data-filter="social" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="social" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-share-alt text-[#00A89D]"></i> <span>Social</span>
             </button>
-            <button data-filter="script" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="script" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-comment-dots text-[#F15A29]"></i> <span>Scripts</span>
             </button>
-            <button data-filter="mindset" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="mindset" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-brain text-[#00A89D]"></i> <span>Mindset</span>
             </button>
-            <button data-filter="partner" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="partner" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-handshake text-purple-600"></i> <span>Partners</span>
             </button>
-            <button data-filter="book" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="book" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-book text-amber-600"></i> <span>Books</span>
             </button>
-            <button data-filter="plan" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="plan" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-chart-line text-[#F15A29]"></i> <span>Plans</span>
             </button>
-            <button data-filter="blog" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="blog" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-pen-fancy text-[#F15A29]"></i> <span>Blogs</span>
             </button>
-            <button data-filter="newsletter" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="newsletter" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-envelope text-[#00A89D]"></i> <span>Newsletters</span>
             </button>
-            <button data-filter="custom" class="filter-btn px-4 py-1.5 text-sm rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-2">
+            <button data-filter="custom" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
               <i class="fas fa-edit text-[#002B5C]"></i> <span>Custom</span>
             </button>
           </div>
@@ -13685,6 +13714,11 @@ window.openExpandedSocialExamplesModal = function(pillar) {
           <div class="flex flex-col gap-4">
             ${renderItems(initialFilter)}
           </div>
+        </div>
+
+        <!-- Clear All footer, always at bottom right below the list -->
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-white dark:bg-gray-800">
+          <button onclick="clearAllSavedItems(this)" class="text-xs px-4 py-2 rounded-full border border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition font-medium">Clear All</button>
         </div>
       </div>
     `;

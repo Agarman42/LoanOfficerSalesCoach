@@ -315,11 +315,11 @@
     let fullPlan = '';
 
     try {
-    const prompt = `You are a world-class, empathetic mortgage business coach who makes planning feel exciting and doable instead of stressful. Create a warm, specific, motivating, and realistic 2026 Business Plan for this loan officer. The tone should feel like a supportive mentor who knows their real life — use their hobbies, personality, and challenges to make it personal and fun where it makes sense, but always practical and grounded. NO EMOJIS. Use encouraging language that reduces anxiety ("You don't have to be perfect", "small consistent moves win", "this is built around what already works for you").
+    const prompt = `You are an elite mortgage business strategist and former top producer who has scaled multiple high-performing teams. You create 2026 Business Plans that are simultaneously world-class strategic documents and deeply personal roadmaps. The final output must feel like something a serious loan officer would proudly print, share with their team or spouse, and actually run their business from — complete with clear strategy, rigorous numbers, and a scaling framework — while being warm, motivating, and unmistakably built around this specific person's real life, hobbies, family, personality, and preferred style. NO EMOJIS.
 
 Plan Style Chosen: ${style}
 
-DEEP PERSONALIZATION FROM PROFILE (use this heavily — make the plan feel written just for them):
+DEEP PERSONALIZATION FROM PROFILE (make every section feel written exclusively for this person — hobbies, family, and personality must be woven naturally and specifically into tactics, motivation, and examples):
 - Name: ${richProfile.name}
 - Email: ${richProfile.email || profile.email || 'not specified'}
 - Years in business: ${profile.years || 'not specified'}
@@ -327,11 +327,11 @@ DEEP PERSONALIZATION FROM PROFILE (use this heavily — make the plan feel writt
 - Preferred Tone for communication: ${profile.tone || richProfile.tone || 'warm and professional'}
 - Key Challenges they face: ${(profile.challenges || []).join(', ') || 'general growth and consistency'}
 - Target Partner Types: ${(profile.partnerTypes || []).join(', ') || 'realtors and local businesses'}
-- Hobbies & Passions (weave these naturally into motivation, content ideas, and relationship building — this is key for authenticity and stickiness): ${[...(profile.hobbies || []), profile.hobbiesOther].filter(Boolean).join(', ') || (hobbiesList.length ? hobbiesList.join(', ') : 'not specified')}
-- Preferred Prospecting Activities (prioritize and expand on these): ${[...(profile.activities || []), ...(richProfile.preferredActivities || [])].filter(Boolean).join(', ') || (activitiesList.length ? activitiesList.join(', ') : 'balanced mix')}
+- Hobbies & Passions (integrate these authentically into relationship-building tactics, content ideas, motivation, and workarounds — this is critical for the plan to feel alive and stickable): ${[...(profile.hobbies || []), profile.hobbiesOther].filter(Boolean).join(', ') || (hobbiesList.length ? hobbiesList.join(', ') : 'not specified')}
+- Preferred Prospecting Activities (build the plan around these where possible): ${[...(profile.activities || []), ...(richProfile.preferredActivities || [])].filter(Boolean).join(', ') || (activitiesList.length ? activitiesList.join(', ') : 'balanced mix')}
 - Family / Life notes: ${profile.family || 'not specified'}
 
-BUSINESS NUMBERS (calculate realistically, be honest but inspiring):
+BUSINESS NUMBERS (be precise with the math, show realistic lead/partner requirements, and ground everything in their actual situation):
 - Target Income: ${inputs.income || 'user will calculate from closings'}
 - Target Closings / Units: ${inputs.closings || closings}
 - Avg Loan Size: ${inputs.loanAmount || '400000'}
@@ -342,58 +342,68 @@ BUSINESS NUMBERS (calculate realistically, be honest but inspiring):
 - Weekly Prospecting Hours available: ${richProfile.hours || 'not specified'}
 - Additional notes/priorities: ${document.getElementById('plan-notes')?.value || 'none provided'}
 
-REQUIRED STRUCTURE (use clear markdown headings exactly like this so it renders beautifully):
+REQUIRED STRUCTURE — Use these exact markdown headings in this order. The plan must read like a premium, team-ready business document while preserving the human elements that make it special and executable:
 
 # Your 2026 Power Theme
-Give them one short, memorable, fun-yet-powerful theme phrase or "power word" (e.g. "The Connector Era" or "Steady Fire") inspired directly by their hobbies + personality + style. Explain in 2-3 sentences why this theme fits them perfectly and will keep them motivated.
+One memorable, powerful theme phrase inspired by their hobbies + personality + style. 2-3 sentences explaining exactly why it fits them and will keep them motivated.
 
 ## Executive Snapshot
-Big inspiring numbers: target closings, volume, income, key ratios/leads needed. 1-2 sentences of "you've got this" realism.
+Clear, inspiring summary of the year: target closings, volume, income. Include the key math (leads, partners, conversion needed). Grounded encouragement.
 
-## Your 2026 Focus (Tailored to ${style})
-2-3 paragraphs specific to the chosen style, their challenges, personality, and how their hobbies will actually help them execute (e.g. if they love golf, how that becomes natural relationship building).
+## Revenue Model & Unit Economics
+Show the actual economics. How many conversations, applications, and partners are required? What does gross revenue, marketing investment, and net look like? Make the math transparent and specific to them.
+
+## Your 2026 Strategic Focus & Scaling Path
+Strategic overview tailored to their style, challenges, and real life. Then a dedicated "Scaling Path" paragraph that maps their current reality to the next level (solo → 8-12 units, 15-25 with support, 25+ with team structure) and what that transition requires.
 
 ## Quarterly Milestones
-4 simple, achievable quarterly targets with 2-3 concrete moves per quarter. Make them feel doable, not overwhelming.
+Four ambitious yet achievable quarterly targets. For each: 3-5 specific, measurable moves (mix of results and leading activities like "run X High-Impact Plays" or "add Y new partners"). Include both lagging and leading indicators.
 
 ## Weekly Rhythm & Scorecard
-Realistic weekly targets for prospecting touches, partner touches, database touches, personal brand. Blend in 1-2 hobby mentions so it feels human. Include a simple "non-negotiable 3" list.
+Sustainable weekly operating system: prospecting touches, partner touches, database touches, personal brand activity. Weave in 1-2 natural references to their hobbies or life. End with 3 non-negotiables they will protect every single week.
 
 ## Tactics That Actually Fit You
-Bullet list of 6-8 very specific tactics. For each, tie it to their preferred activities, hobbies, or personality. Make them copy-paste ready where possible.
+10 highly specific, copy-paste-ready tactics. Every single one must feel custom-designed for their hobbies, personality, preferred activities, family situation, or challenges. Prioritize quality and relevance over quantity. This is a star section.
 
-## Low-Anxiety Starter Kit (Do These This Week)
-Exactly 3 tiny, almost-too-easy actions they can take in the next 7 days to get momentum without pressure. These should feel like "I can do that today."
+## Tool Ties — Execute This Plan Inside Your Sales Coach
+Actionable, specific bridges to the rest of the toolkit (use real names like Personal pillar, Evergreen vault, A+ tier, Value Vault, Weekly Win Plan, etc.):
+- Social: 2-3 exact content angles or story ideas from their Power Theme/hobbies for the Personal pillar or Evergreen vault.
+- Referral Partners: 1-2 named High-Impact Plays or Tier strategies to run this quarter with their specific partner types.
+- Value Vault / Gifts: 2 pop-by or appreciation ideas directly tied to one of their hobbies — instruct them to save each in the Value Vault.
+- Book Vault & Mindset Lab: The single best book + one mindset principle for their biggest challenge, with how to apply it.
+- Prospecting Time Blocks + Weekly Win: How to convert one quarterly milestone into protected Weekly Win time blocks.
+- Database Nurturing: A simple, sustainable system matched to their current database size.
 
-## Motivation & Accountability (In Your Voice)
-A short personalized pep talk + 1-2 accountability ideas written in their preferred tone. Reference one of their hobbies or family notes for warmth.
+## Your 90-Day Launch Plan
+A prioritized, concrete 90-day execution calendar pulled from the Tactics and Tool Ties. Break into First 30 Days (ignition momentum), Days 31-60, and Days 61-90. Be extremely specific with days, people, and actions ("Tuesday: Run Coffee + Value Drop with top 3 A+ realtors"). Keep it exciting and doable.
 
-## Tool Ties — Execute This Plan Inside Your Loan Officer Coach Toolkit
-For each of these, give 1 short specific recommendation that maps to another part of this exact tool (use real feature names like "Personal pillar", "Evergreen vault", "A+ tier", "Value Vault save button", "Weekly Win Plan time blocks"):
-- Social Media Strategy: 1-2 content angles or personal story ideas they can use immediately in the Personal pillar or Evergreen vault (tell them exactly which pillar).
-- Referral Partners: Name 1 specific High-Impact Play or Tier strategy they should open and use this quarter (e.g. "open Referral Partners tool and run the 'Coffee + Value Drop' play with your top A+ realtor").
-- Value Vault / Gifts: 1 pop-by or appreciation idea tied to their hobbies or a partner type (suggest saving it directly in the Value Vault).
-- Book Vault: Recommend exactly 1 book from the list that matches a challenge or goal they have, with the one key takeaway to apply (and how it ties to a hobby).
-- Mindset Lab: 1 specific principle or reframe they should save and read on tough days.
-- Prospecting Time Blocks + Weekly Win: How to turn one quarterly milestone into actual time blocks (reference blocking in Weekly Win Plan).
-- Database Nurturing: 1 simple cadence idea or touch type for their current database size.
+## Personal Fuel & Accountability
+Motivating, personalized pep talk in their preferred tone. Reference their Power Theme, a specific hobby, or family note for emotional connection. Add 1-2 accountability mechanisms that will actually work for their personality and life.
 
-## Obstacles & Simple Workarounds
-Based on their listed challenges + personality, list 2-3 likely roadblocks they might hit (e.g. "time crunch from family") and give one tiny, realistic workaround for each that uses a hobby or preferred activity.
+## Obstacles, Energy & Sustainable Workarounds
+Anticipate 3 likely roadblocks based on their challenges + real life (time, family, energy, etc.). For each, give a practical workaround that leverages one of their hobbies, strengths, or preferred activities.
 
-## Your First 30 Days (Momentum Builder)
-A short prioritized 30-day calendar of the absolute easiest wins pulled from the Low-Anxiety Starter Kit + Tactics. 1-2 actions per week, super specific, low pressure, with "do this on [day]" suggestions.
+## Key Success Metrics & Tracking System
+Define 5-7 leading and lagging KPIs they will track (e.g. weekly conversations, new partners added, specific plays run, database touches). Suggest a simple tracking method (spreadsheet, Weekly Win blocks, or notes in the app).
 
-Make the entire plan feel kind, realistic, and exciting — like a coach who gets that planning can cause anxiety but this one is built from their actual life so it will stick. Use their hobbies to make relationship building and content feel natural and fun. Be extremely specific with numbers, real examples using their exact hobbies/personality, and copy-paste ready language the user can act on today. Never generic. Output ONLY clean markdown with the exact headings above — nothing else before or after.`;
+## 12-Month Strategic Calendar (High Level)
+A bird's-eye view of the year: what the big seasons and focus areas look like month-by-month or quarter-by-quarter. Tie major pushes to their hobbies or life events where relevant.
+
+Make the entire plan feel like an elite, professional business document that a loan officer would be proud to use themselves or hand to a team member — while staying warm, specific, motivating, and unmistakably personal. Use their exact hobbies, personality, challenges, and numbers throughout. Be ruthlessly specific and copy-paste ready. Never generic or fluffy. Output ONLY clean markdown with the exact headings above — nothing else before or after.`;
 
     // Note: The form also has plan-notes for extra context, hobbiesList, activitiesList already collected.
 
     // Centralized API call (Phase 0) - no more hardcoded key
     console.log('[weekly-win-plan] About to call Grok API...');
 
-    const planContent = await window.callGrokAPI(prompt, {
+    // Incorporate any pending feedback from the user for this regeneration
+    const feedbackNote = (window.lastPlanFeedback && window.lastPlanFeedback.trim()) 
+      ? `\n\nADDITIONAL USER FEEDBACK / REQUESTED EDITS FOR THIS VERSION (please specifically incorporate these changes while keeping the required structure and personal tone):\n${window.lastPlanFeedback.trim()}` 
+      : '';
+
+    const planContent = await window.callGrokAPI(prompt + feedbackNote, {
         temperature: 0.7,
-        max_tokens: 4000
+        max_tokens: 4500
     });
 
     console.log('[weekly-win-plan] API response received. Length:', planContent ? planContent.length : 0);
@@ -454,17 +464,18 @@ Make the entire plan feel kind, realistic, and exciting — like a coach who get
                 ? fullPlan 
                 : '<div style="padding:20px; background:#fff3cd; border:2px solid #ffc107; border-radius:12px;"><strong>Generation finished, but no content was returned.</strong><br>Check the browser console and the proxy terminal for errors.</div>';
 
-            // === PREMIUM v2 OUTPUT WRAPPER — World class, fun, anxiety-reducing, deeply integrated ===
+            // === PREMIUM v3 OUTPUT WRAPPER — Professional strategic document with human soul ===
+            // Key metrics dashboard + clean AI content (preserves full compatibility with Copy for Word and Download .doc)
             const planHTML = `
               <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/30 rounded-3xl shadow-2xl p-8 md:p-10 mt-8">
-                <!-- Hero header with results badge -->
+                <!-- Hero header -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                   <div>
                     <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-[#F15A29] text-white text-xs font-bold tracking-[2px] mb-3">
-                      <i class="fas fa-check-circle"></i> YOUR 2026 ROADMAP IS READY
+                      <i class="fas fa-check-circle"></i> 2026 BUSINESS PLAN READY
                     </div>
-                    <h3 class="text-3xl md:text-4xl font-bold text-[#F15A29]">Your Custom 2026 Business Plan</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Built from your real life, your profile, your style, and what actually works for you. No fluff. No overwhelm.</p>
+                    <h3 class="text-3xl md:text-4xl font-bold text-[#002B5C] dark:text-white">Your 2026 Business Plan</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">Strategic. Personal. Built for execution.</p>
                   </div>
                   <div class="flex flex-wrap gap-3">
                     <button onclick="window.copyPlanFormatted()" class="px-6 py-3 rounded-2xl bg-[#002B5C] text-white font-semibold text-sm flex items-center gap-2 hover:bg-black transition">
@@ -482,95 +493,137 @@ Make the entire plan feel kind, realistic, and exciting — like a coach who get
                   </div>
                 </div>
 
-                <!-- The AI content (kept clean) -->
+                <!-- Key Metrics Dashboard (makes it feel like a real business plan immediately) -->
+                <div class="mb-8">
+                  <div class="text-xs font-bold tracking-[1.5px] text-[#00A89D] mb-3">2026 TARGET SNAPSHOT</div>
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                      <div class="text-xs text-gray-500">CLOSINGS TARGET</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.closings || closings} units</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                      <div class="text-xs text-gray-500">VOLUME TARGET</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">$${Math.round((volume || 0) / 1000000)}M</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                      <div class="text-xs text-gray-500">INCOME TARGET</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">$${Number(inputs.income || (closings * (parseFloat(inputs.commission) || 6500))).toLocaleString()}</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                      <div class="text-xs text-gray-500">NEW PARTNERS NEEDED</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.newPartners || Math.ceil((inputs.closings || closings) / (parseFloat(inputs.ratio) || 30) * 0.6)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- The AI-generated content (MUST stay in #plan-preview for Copy + Download to continue working perfectly) -->
                 <div id="plan-preview" class="prose prose-lg max-w-none bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 md:p-10 text-[15px] leading-relaxed">
                   ${contentToShow}
                 </div>
 
-                <!-- NEW: Bring It To Life — The Execution Hub (weaves every other tool in the app) -->
+                <!-- Feedback / Refine section -->
+                <div class="mt-8 p-5 border border-dashed border-[#00A89D]/40 rounded-3xl bg-[#00A89D]/5">
+                  <div class="font-semibold text-[#002B5C] dark:text-white mb-1">Not quite right? Give feedback for a better version.</div>
+                  <p class="text-xs text-gray-500 mb-2">Be specific for best results. Good examples:<br>
+                    • "Add a bigger focus on social media, Reels, and video content"<br>
+                    • "Include more golf, outdoors, and family time in the tactics"<br>
+                    • "Make the 90-day plan more aggressive on new partner outreach"<br>
+                    • "Emphasize database nurturing and handwritten notes over events"<br>
+                    • "Add more details on scaling to a small team"
+                  </p>
+                  <textarea id="plan-feedback-input" class="w-full text-sm p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900" rows="2" placeholder="Your requested changes or focus areas..."></textarea>
+                  <div class="mt-2 flex gap-2">
+                    <button onclick="applyPlanFeedbackAndRegenerate()" class="px-4 py-1.5 text-sm rounded-2xl bg-[#00A89D] text-white font-medium flex items-center gap-2 hover:bg-[#008F85] transition">
+                      <i class="fas fa-redo"></i> <span>Apply feedback &amp; regenerate</span>
+                    </button>
+                    <button onclick="document.getElementById('plan-feedback-input').value=''; if(window.lastPlanFeedback) window.lastPlanFeedback='';" class="px-3 py-1.5 text-sm rounded-2xl border border-gray-300 text-gray-600 hover:bg-gray-100">Clear</button>
+                  </div>
+                </div>
+
+                <!-- Bring This Plan to Life — Premium Execution Hub -->
                 <div class="mt-10 pt-8 border-t-2 border-dashed border-[#00A89D]/30">
-                  <div class="flex items-center gap-3 mb-4">
+                  <div class="flex items-center gap-3 mb-5">
                     <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#00A89D] to-[#F15A29] flex items-center justify-center text-white">
                       <i class="fas fa-rocket"></i>
                     </div>
                     <div>
                       <div class="font-bold text-xl text-[#002B5C] dark:text-white">Bring This Plan to Life</div>
-                      <div class="text-sm text-gray-500">Your toolkit is already built for exactly this. Jump in with one click.</div>
+                      <div class="text-sm text-gray-500">Your entire Sales Coach toolkit was built for exactly these tactics. Turn strategy into action in one click.</div>
                     </div>
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Dynamic-ish cards based on style + profile. All open the right tool + encourage save of related ideas -->
-                    <div onclick="window.showSection('weekly-win-plan');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-5 transition-all hover:shadow-xl">
+                    <div onclick="window.showSection('weekly-win-plan');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:-translate-y-0.5 rounded-3xl p-5 transition-all hover:shadow-xl">
                       <div class="flex items-start gap-3">
                         <i class="fas fa-fire text-2xl text-[#F15A29] mt-0.5"></i>
                         <div class="flex-1">
-                          <div class="font-bold group-hover:text-[#00A89D]">Turn milestones into Weekly Wins</div>
-                          <div class="text-xs text-gray-500 mt-1">Open Weekly Win Plan. Paste 1 quarterly target as your daily mindset block and build the exact prospecting blocks to hit it.</div>
-                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold">→ Go execute this week <i class="fas fa-arrow-right ml-1"></i></div>
+                          <div class="font-bold group-hover:text-[#00A89D] text-[15px]">Turn your quarterly milestones into Weekly Wins</div>
+                          <div class="text-xs text-gray-500 mt-1.5 leading-snug">Open Weekly Win Plan. Drop one of your Q1 milestones directly into a time block and build the precise prospecting and partner activities the plan calls for.</div>
+                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold flex items-center">Execute this week <i class="fas fa-arrow-right ml-1.5 text-xs"></i></div>
                         </div>
                       </div>
                     </div>
 
-                    <div onclick="window.showSection('social');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-5 transition-all hover:shadow-xl">
+                    <div onclick="window.showSection('social');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:-translate-y-0.5 rounded-3xl p-5 transition-all hover:shadow-xl">
                       <div class="flex items-start gap-3">
                         <i class="fas fa-share-alt text-2xl text-[#F15A29] mt-0.5"></i>
                         <div class="flex-1">
-                          <div class="font-bold group-hover:text-[#00A89D]">Turn hobbies & personality into content</div>
-                          <div class="text-xs text-gray-500 mt-1">Open Social Media Strategy. Use your Power Theme + hobbies for the Personal pillar. Save 2 angles straight into the 121+ Evergreen Vault.</div>
-                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold">→ Start creating authentic posts <i class="fas fa-arrow-right ml-1"></i></div>
+                          <div class="font-bold group-hover:text-[#00A89D] text-[15px]">Turn your Power Theme + hobbies into content</div>
+                          <div class="text-xs text-gray-500 mt-1.5 leading-snug">Open Social Post Creator. Use the exact angles from your Power Theme and hobbies for the Personal pillar. Save 2-3 pieces straight into the Evergreen Vault.</div>
+                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold flex items-center">Start posting this week <i class="fas fa-arrow-right ml-1.5 text-xs"></i></div>
                         </div>
                       </div>
                     </div>
 
-                    <div onclick="window.showSection('referrals');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-5 transition-all hover:shadow-xl">
+                    <div onclick="window.showSection('referrals');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:-translate-y-0.5 rounded-3xl p-5 transition-all hover:shadow-xl">
                       <div class="flex items-start gap-3">
                         <i class="fas fa-handshake text-2xl text-[#F15A29] mt-0.5"></i>
                         <div class="flex-1">
-                          <div class="font-bold group-hover:text-[#00A89D]">Hit your new partner goal faster</div>
-                          <div class="text-xs text-gray-500 mt-1">Open Referral Partners. Use the exact Tier playbook + High-Impact Play the plan recommends for your style (First 30 Days or Weekly Value Cadence).</div>
-                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold">→ Open playbooks now <i class="fas fa-arrow-right ml-1"></i></div>
+                          <div class="font-bold group-hover:text-[#00A89D] text-[15px]">Hit your new partner goal with precision</div>
+                          <div class="text-xs text-gray-500 mt-1.5 leading-snug">Open Referral Partners. Run the exact Tier strategy or High-Impact Play your plan recommends for your style and target partners this quarter.</div>
+                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold flex items-center">Open the playbook now <i class="fas fa-arrow-right ml-1.5 text-xs"></i></div>
                         </div>
                       </div>
                     </div>
 
-                    <div onclick="window.showSection('value-vault');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-5 transition-all hover:shadow-xl">
+                    <div onclick="window.showSection('value-vault');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:-translate-y-0.5 rounded-3xl p-5 transition-all hover:shadow-xl">
                       <div class="flex items-start gap-3">
                         <i class="fas fa-gift text-2xl text-[#F15A29] mt-0.5"></i>
                         <div class="flex-1">
-                          <div class="font-bold group-hover:text-[#00A89D]">Appreciation that actually builds loyalty</div>
-                          <div class="text-xs text-gray-500 mt-1">Open Value Vault + Giftology. Turn one of your hobbies into a memorable pop-by or note for top partners. Save the idea so you never forget it.</div>
-                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold">→ Find the perfect touch <i class="fas fa-arrow-right ml-1"></i></div>
+                          <div class="font-bold group-hover:text-[#00A89D] text-[15px]">Appreciation that actually builds loyalty</div>
+                          <div class="text-xs text-gray-500 mt-1.5 leading-snug">Open Value Vault. Turn one of your real hobbies into a memorable pop-by or note for your top A+ partners. Save the idea directly in the vault.</div>
+                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold flex items-center">Find the perfect touch <i class="fas fa-arrow-right ml-1.5 text-xs"></i></div>
                         </div>
                       </div>
                     </div>
 
-                    <div onclick="window.showSection('books');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-5 transition-all hover:shadow-xl">
+                    <div onclick="window.showSection('books');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:-translate-y-0.5 rounded-3xl p-5 transition-all hover:shadow-xl">
                       <div class="flex items-start gap-3">
                         <i class="fas fa-book text-2xl text-[#F15A29] mt-0.5"></i>
                         <div class="flex-1">
-                          <div class="font-bold group-hover:text-[#00A89D]">Read the one book that moves the needle</div>
-                          <div class="text-xs text-gray-500 mt-1">Open Book Vault. The plan recommends the perfect title for your specific challenge. Save the key takeaway and drop it straight into next month’s Weekly Win focus.</div>
-                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold">→ Browse the vault <i class="fas fa-arrow-right ml-1"></i></div>
+                          <div class="font-bold group-hover:text-[#00A89D] text-[15px]">The one book that will move the needle for you</div>
+                          <div class="text-xs text-gray-500 mt-1.5 leading-snug">Open Book Vault. Your plan recommends the single best title for your specific challenge or goal. Save the key takeaway and make it your next Weekly Win focus.</div>
+                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold flex items-center">Browse the vault <i class="fas fa-arrow-right ml-1.5 text-xs"></i></div>
                         </div>
                       </div>
                     </div>
 
-                    <div onclick="window.showSection('mindset-motivation');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-3xl p-5 transition-all hover:shadow-xl">
+                    <div onclick="window.showSection('mindset-motivation');" class="group cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:-translate-y-0.5 rounded-3xl p-5 transition-all hover:shadow-xl">
                       <div class="flex items-start gap-3">
                         <i class="fas fa-brain text-2xl text-[#F15A29] mt-0.5"></i>
                         <div class="flex-1">
-                          <div class="font-bold group-hover:text-[#00A89D]">Your personal mindset anchor</div>
-                          <div class="text-xs text-gray-500 mt-1">Open Mindset Lab. Save the exact principle the plan suggests for your rough days. Make it your daily Random or Weekly Win mindset block.</div>
-                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold">→ Get your reframe <i class="fas fa-arrow-right ml-1"></i></div>
+                          <div class="font-bold group-hover:text-[#00A89D] text-[15px]">Your personal mindset anchor for tough days</div>
+                          <div class="text-xs text-gray-500 mt-1.5 leading-snug">Open Mindset Lab. Save the exact principle your plan recommends for your rough days. Drop it into your Weekly Win mindset block or daily Random.</div>
+                          <div class="mt-3 text-[11px] text-[#00A89D] font-semibold flex items-center">Get your reframe <i class="fas fa-arrow-right ml-1.5 text-xs"></i></div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div class="mt-5 text-center">
-                    <button onclick="window.showSection('prospecting');" class="text-sm px-5 py-2 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition font-semibold">
-                      <i class="fas fa-clock mr-2"></i> Also: Build the exact prospecting blocks for your weekly rhythm →
+                  <div class="mt-6 text-center">
+                    <button onclick="window.showSection('prospecting');" class="inline-flex items-center gap-2 text-sm px-6 py-2.5 rounded-2xl border-2 border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition font-semibold">
+                      <i class="fas fa-clock"></i> 
+                      <span>Also: Build the exact prospecting blocks for your weekly rhythm in Prospecting Time Blocks</span>
                     </button>
                   </div>
                 </div>
@@ -967,7 +1020,7 @@ function restoreWeeklyPreferencesForm() {
 function restoreBusinessPlanningForm() {
     const businessInputs = [
         'target-income', 'avg-commission', 'target-closings', 'avg-loan',
-        'closing-ratio', 'current-partners', 'new-partners', 'database-size'
+        'closing-ratio', 'current-partners', 'new-partners', 'database-size', 'plan-notes', 'hobby-other'
     ];
 
     businessInputs.forEach(id => {
@@ -980,26 +1033,37 @@ function restoreBusinessPlanningForm() {
         }
     });
 
-    // Restore hobby checkboxes in the Business Planning form
+    // Restore plan-style radio (persists user's choice for this tool)
+    const savedStyle = localStorage.getItem('winPlan_plan-style');
+    if (savedStyle) {
+        const radio = document.querySelector(`input[name="plan-style"][value="${savedStyle}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // Restore hobby checkboxes in the Business Planning form (local overrides win over profile)
     const savedHobbies = localStorage.getItem('winPlan_hobbies');
     if (savedHobbies) {
         try {
             const hobbies = JSON.parse(savedHobbies);
             document.querySelectorAll('.hobby-checkbox').forEach(cb => {
-                if (hobbies.includes(cb.value)) cb.checked = true;
+                cb.checked = hobbies.includes(cb.value);
             });
         } catch (e) {}
+    } else {
+        // No local override yet — will be populated by sync from central profile
     }
 
-    // Restore activity checkboxes in the Business Planning form
+    // Restore activity checkboxes in the Business Planning form (local overrides win)
     const savedActivities = localStorage.getItem('winPlan_activities');
     if (savedActivities) {
         try {
             const activities = JSON.parse(savedActivities);
             document.querySelectorAll('.activity-checkbox').forEach(cb => {
-                if (activities.includes(cb.value)) cb.checked = true;
+                cb.checked = activities.includes(cb.value);
             });
         } catch (e) {}
+    } else {
+        // No local override — sync will pull from profile
     }
 }
 
@@ -1405,33 +1469,58 @@ function saveFullPlanToVault() {
           .replace(/<div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-\[#F15A29\] text-white text-xs[^>]*>.*?<\/div>/gi, '')
           .replace(/<h3 class="text-3xl[^>]*>.*?<\/h3>/gi, '');
 
-        // Build rich, polished saved structure (matches quality of blog bundles, equity, etc.)
+        // Build ultra-premium saved structure — feels like a high-end, printable business document asset
         const planStyle = document.querySelector('input[name="plan-style"]:checked')?.value || 'Custom';
         const cleanContent = `
-<div class="plan-saved border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden bg-white dark:bg-gray-900">
-  <div class="px-5 py-4 bg-gradient-to-r from-[#F15A29]/5 via-white to-white dark:via-gray-900 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
-    <div class="flex items-center gap-2">
-      <span class="inline-block px-3 py-0.5 text-[10px] font-bold tracking-[1.5px] rounded-full bg-[#F15A29] text-white">2026 BUSINESS PLAN</span>
-      <span class="text-[10px] text-gray-400">${planStyle}</span>
+<div class="plan-saved border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden bg-white dark:bg-gray-900 shadow-md">
+  <!-- Executive Document Header -->
+  <div class="px-8 py-6 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-3">
+        <span class="inline-block px-4 py-1 text-[10px] font-bold tracking-[2px] rounded-full bg-[#002B5C] text-white">2026 BUSINESS PLAN</span>
+        <span class="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">${planStyle}</span>
+      </div>
+      <div class="text-[10px] font-medium text-gray-400">Strategic • Personal • Actionable</div>
     </div>
-    <div class="mt-1 text-lg font-bold text-[#002B5C] dark:text-white">Your 2026 Business Plan</div>
+    <div class="text-2xl font-bold text-[#002B5C] dark:text-white tracking-tight">Your 2026 Business Plan</div>
+    <div class="mt-1 text-sm text-gray-500">Built from your exact profile, hobbies, goals, and real life. Designed for quarterly reviews and team alignment.</div>
   </div>
 
-  <div class="p-5">
-    <div class="plan-content prose prose-sm dark:prose-invert max-w-none p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl leading-relaxed overflow-auto max-h-[380px]
-      [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-[#002B5C] dark:[&_h1]:text-white [&_h1]:mt-0 [&_h1]:mb-2
-      [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-1.5
-      [&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-3
-      [&_p]:mb-3 [&_p]:text-gray-700 dark:[&_p]:text-gray-300
-      [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1
-      [&_strong]:font-semibold
+  <!-- Premium Snapshot Bar -->
+  <div class="px-8 py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+    <div class="text-[10px] font-bold tracking-widest text-[#00A89D] mb-2">PLAN SNAPSHOT</div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+      <div class="flex items-center gap-2">
+        <div class="font-semibold text-[#002B5C] dark:text-white">Power Theme:</div>
+        <div class="text-gray-600 dark:text-gray-300 italic">See first section below</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="font-semibold text-[#002B5C] dark:text-white">Core Focus:</div>
+        <div class="text-gray-600 dark:text-gray-300">Quarterly Milestones + Weekly Rhythm</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="font-semibold text-[#002B5C] dark:text-white">Execution:</div>
+        <div class="text-gray-600 dark:text-gray-300">90-Day Launch + Tool Ties</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-6">
+    <div class="plan-content prose prose-sm dark:prose-invert max-w-none p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl leading-relaxed overflow-auto max-h-[520px] shadow-inner
+      [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[#002B5C] dark:[&_h1]:text-white [&_h1]:mt-0 [&_h1]:mb-3 [&_h1]:tracking-tight
+      [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-[#002B5C] dark:[&_h2]:text-white [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:border-b [&_h2]:border-gray-200 [&_h2]:pb-1
+      [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-[#00A89D] dark:[&_h3]:text-[#00A89D] [&_h3]:mt-5
+      [&_p]:mb-4 [&_p]:text-gray-700 dark:[&_p]:text-gray-300 [&_p]:leading-relaxed
+      [&_ul]:pl-6 [&_ul]:mb-4 [&_li]:mb-2 [&_li]:text-gray-700 dark:[&_li]:text-gray-300
+      [&_strong]:font-semibold [&_strong]:text-[#002B5C] dark:[&_strong]:text-white
     ">
       ${cleaned}
     </div>
   </div>
 
-  <div class="px-5 py-2.5 bg-gray-50 dark:bg-gray-800 border-t text-[10px] text-gray-400">
-    Saved 2026 Business Plan • Regenerate with updated inputs or profile anytime for a fresh version.
+  <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t flex items-center justify-between text-[10px] text-gray-500">
+    <div class="font-medium">Ready for quarterly reviews • Regenerate with updated profile anytime</div>
+    <div class="hidden sm:block">Built for high-performers & teams</div>
   </div>
 </div>`;
 
@@ -1656,8 +1745,8 @@ function showTaskHelp(task) {
         });
     });
 
-    // === Auto-save for main Business Plan input fields (target income, closings, etc.) ===
-    const planInputIds = ['target-income', 'avg-commission', 'target-closings', 'avg-loan', 'closing-ratio', 'current-partners', 'new-partners', 'database-size'];
+    // === Auto-save for main Business Plan input fields (target income, closings, etc.) + notes + style + hobbies/activities ===
+    const planInputIds = ['target-income', 'avg-commission', 'target-closings', 'avg-loan', 'closing-ratio', 'current-partners', 'new-partners', 'database-size', 'plan-notes', 'hobby-other'];
     planInputIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -1674,6 +1763,37 @@ function showTaskHelp(task) {
         }
     });
 
+    // Persist plan-style radio selection
+    document.querySelectorAll('input[name="plan-style"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.checked) {
+                localStorage.setItem('winPlan_plan-style', radio.value);
+            }
+        });
+    });
+
+    // Save hobby/activity checkbox state on change (so local overrides persist for this tool)
+    document.querySelectorAll('.hobby-checkbox, .activity-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            // Collect current checked for hobbies
+            const checkedHobbies = Array.from(document.querySelectorAll('.hobby-checkbox'))
+                .filter(c => c.checked).map(c => c.value);
+            localStorage.setItem('winPlan_hobbies', JSON.stringify(checkedHobbies));
+
+            const checkedActivities = Array.from(document.querySelectorAll('.activity-checkbox'))
+                .filter(c => c.checked).map(c => c.value);
+            localStorage.setItem('winPlan_activities', JSON.stringify(checkedActivities));
+        });
+    });
+
+    // Also persist hobby-other on input (in case user types after profile sync)
+    const hobbyOtherEl = document.getElementById('hobby-other');
+    if (hobbyOtherEl) {
+        hobbyOtherEl.addEventListener('input', () => {
+            localStorage.setItem('winPlan_hobby-other', hobbyOtherEl.value || '');
+        });
+    }
+
     console.log('🔄 Weekly Win Plan auto-save enabled — changes save instantly');
 })();
 
@@ -1682,45 +1802,85 @@ function showTaskHelp(task) {
 // =====================================================
 window.generatePlan = generatePlan;
 
+window.lastPlanFeedback = window.lastPlanFeedback || '';
+
+window.applyPlanFeedbackAndRegenerate = function() {
+  const input = document.getElementById('plan-feedback-input');
+  if (!input) return;
+  const val = (input.value || '').trim();
+  if (!val) {
+    if (window.showToast) window.showToast('Enter some feedback first (e.g. "more focus on social and golf").');
+    else alert('Enter some feedback first.');
+    return;
+  }
+  window.lastPlanFeedback = val;
+  // Re-run generation with the current form values + the feedback appended to prompt
+  if (typeof generatePlan === 'function') {
+    generatePlan('plan-output');
+  } else if (typeof window.generatePlan === 'function') {
+    window.generatePlan('plan-output');
+  }
+  // Clear the input after triggering (feedback is captured for this run)
+  setTimeout(() => { 
+    if (input) input.value = ''; 
+    window.lastPlanFeedback = ''; // clear after use so next normal generate is clean
+  }, 300);
+};
+
 window.syncPlanningFormFromProfile = function() {
   const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
   const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : {};
 
   const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
 
-  // Pull sensible annual numbers from monthly profile data
+  // Only pull annual numbers from profile if the user hasn't set specific local values yet (persistence wins for 2026-specific targets)
+  const hasLocalClosings = localStorage.getItem('winPlan_target-closings');
+  const hasLocalIncome = localStorage.getItem('winPlan_target-income');
   const monthlyUnits = parseInt(p.monthlyUnits || eff.monthlyUnits || 8, 10);
-  if (monthlyUnits) {
+  if (monthlyUnits && !hasLocalClosings) {
     setVal('target-closings', String(monthlyUnits * 12));
   }
-  if (p.monthlyGoal || eff.monthlyVolume) {
+  if ((p.monthlyGoal || eff.monthlyVolume) && !hasLocalIncome) {
     setVal('target-income', p.monthlyGoal || eff.monthlyVolume);
   }
-  if (p.hours) setVal('weekly-hours-hint', p.hours); // not a real field but we can surface in insight
+  if (p.hours) setVal('weekly-hours-hint', p.hours);
 
-  // Set a balanced style by default if nothing chosen
+  // Set a balanced style by default ONLY if nothing chosen and no local saved style
+  const savedStyle = localStorage.getItem('winPlan_plan-style');
   const checked = document.querySelector('input[name="plan-style"]:checked');
-  if (!checked) {
+  if (!checked && !savedStyle) {
     const bal = Array.from(document.querySelectorAll('input[name="plan-style"]')).find(r => r.value === 'Balanced Growth');
     if (bal) bal.checked = true;
   }
 
-  // === Pull hobbies & activities from central profile into the planning form checkboxes ===
-  // This ensures the page always reflects the user's selected profile info consistently.
-  const profileHobbies = p.hobbies || [];
-  document.querySelectorAll('.hobby-checkbox').forEach(cb => {
-    cb.checked = profileHobbies.includes(cb.value);
-  });
-  if (p.hobbiesOther) {
-    setVal('hobby-other', p.hobbiesOther);
+  // === Pull hobbies & activities from central profile ONLY if no local overrides saved for this tool ===
+  // This way: profile provides smart defaults the first time (no clicking needed), but user's changes in the plan form persist.
+  const hasLocalHobbies = localStorage.getItem('winPlan_hobbies');
+  if (!hasLocalHobbies || hasLocalHobbies === '[]') {
+    const profileHobbies = p.hobbies || [];
+    document.querySelectorAll('.hobby-checkbox').forEach(cb => {
+      cb.checked = profileHobbies.includes(cb.value);
+    });
+    if (p.hobbiesOther) {
+      setVal('hobby-other', p.hobbiesOther);
+    }
+    // Save the profile defaults as the initial local state so they persist
+    const defaultHobbies = Array.from(document.querySelectorAll('.hobby-checkbox')).filter(c => c.checked).map(c => c.value);
+    if (defaultHobbies.length) localStorage.setItem('winPlan_hobbies', JSON.stringify(defaultHobbies));
   }
 
-  const profileActivities = p.activities || [];
-  document.querySelectorAll('.activity-checkbox').forEach(cb => {
-    cb.checked = profileActivities.includes(cb.value);
-  });
+  const hasLocalActivities = localStorage.getItem('winPlan_activities');
+  if (!hasLocalActivities || hasLocalActivities === '[]') {
+    // Support both p.activities and p.preferredActivities for compatibility
+    const profileActivities = [...(p.activities || []), ...(p.preferredActivities || [])];
+    document.querySelectorAll('.activity-checkbox').forEach(cb => {
+      cb.checked = profileActivities.includes(cb.value);
+    });
+    const defaultActivities = Array.from(document.querySelectorAll('.activity-checkbox')).filter(c => c.checked).map(c => c.value);
+    if (defaultActivities.length) localStorage.setItem('winPlan_activities', JSON.stringify(defaultActivities));
+  }
 
-  // Optionally pre-fill notes with key profile challenges/personality if empty (valuable context without overwriting user input)
+  // Pre-fill notes with profile context ONLY if the notes field is still empty (don't overwrite user's 2026 vision/notes)
   const notesEl = document.getElementById('plan-notes');
   if (notesEl && !notesEl.value.trim()) {
     const challenges = (p.challenges || []).join(', ');
@@ -1739,7 +1899,6 @@ window.syncPlanningFormFromProfile = function() {
   if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
 
   // Silent sync — no toast to prevent corner popups saying "something was loaded"
-
 
   // Populate extended relevant profile info visibly on the planning page (so user sees all valuable profile data is being used)
   renderExtendedProfileInfo();
