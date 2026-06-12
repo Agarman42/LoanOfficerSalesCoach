@@ -4006,7 +4006,7 @@
                 <section id="underwriting-search" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Underwriting Guideline Search</h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Ask complex, layered underwriting questions. Upload your current overlays or manuals for more precise answers. Continue the conversation on the same scenario with follow-ups.</p>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Ask complex, layered underwriting questions. <strong>For the most accurate and current answers, upload the exact relevant sections from the latest versions of the agency guides</strong> (Fannie Mae Selling Guide at selling-guide.fanniemae.com, FHA Handbook 4000.1, VA Pamphlet 26-7, etc.) or your investor overlays. The AI is explicitly instructed to treat uploaded text as the highest-authority source and to direct you to the live official locations for anything not provided. Continue the conversation on the same scenario with follow-ups.</p>
     </div>
 
     <!-- Important Warning -->
@@ -4043,7 +4043,8 @@
 
             <!-- Document Upload (optional but powerful) -->
             <div>
-                <label class="block text-sm font-semibold mb-2 text-[#00A89D] tracking-wide">UPLOAD OVERLAYS / MANUALS (OPTIONAL)</label>
+                <label class="block text-sm font-semibold mb-2 text-[#00A89D] tracking-wide">UPLOAD RELEVANT SECTIONS FROM THE LATEST AGENCY GUIDES OR YOUR OVERLAYS (HIGHLY RECOMMENDED)</label>
+                <p class="text-[11px] text-gray-500 -mt-1 mb-2">For the most accurate answers on current guidelines, go to the official locations (selling-guide.fanniemae.com, guide.freddiemac.com, hud.gov for FHA 4000.1, etc.), copy the relevant pages/sections into a .txt or .pdf, and upload them. The AI is instructed to treat uploaded text as the highest authority and to direct you to those live sources for anything not provided.</p>
                 <div id="uw-upload-area" 
                      class="border-2 border-dashed border-[#00A89D] hover:border-[#F15A29] rounded-2xl p-5 text-center cursor-pointer transition-all bg-white dark:bg-gray-800">
                     <div class="flex flex-col items-center">
@@ -4495,10 +4496,10 @@
                     <i class="fas fa-cloud-upload-alt text-4xl text-[#00A89D] mb-3 group-hover:scale-110 transition-transform"></i>
                     <p class="font-semibold">Drag & drop a PDF or TXT file</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">or</p>
-                    <label class="inline-flex items-center px-6 py-2 mt-2 bg-[#00A89D] text-white rounded-2xl cursor-pointer hover:bg-[#00887A] text-sm transition-all">
+                    <label for="blog-file-upload" class="inline-flex items-center px-6 py-2 mt-2 bg-[#00A89D] text-white rounded-2xl cursor-pointer hover:bg-[#00887A] text-sm transition-all" onclick="event.stopImmediatePropagation()">
                         <i class="fas fa-folder-open mr-2"></i>Browse Files
-                        <input type="file" id="blog-file-upload" accept=".pdf,.txt" class="hidden">
                     </label>
+                    <input type="file" id="blog-file-upload" accept=".pdf,.txt" class="hidden">
                     <p id="blog-file-name" class="mt-3 text-sm font-medium text-[#00A89D] hidden"></p>
                 </div>
                 <button onclick="removeBlogUploadedFile()" class="text-red-500 text-sm mt-2 hidden" id="blog-remove-file-btn">Remove file</button>

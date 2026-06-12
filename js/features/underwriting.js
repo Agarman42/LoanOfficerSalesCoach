@@ -137,34 +137,43 @@
 
     let prompt = `You are a senior mortgage underwriter with 20+ years experience. You are extremely accurate, practical, and honest about gray areas. You know Fannie Mae, Freddie Mac, FHA, VA, and USDA guidelines deeply, and you are familiar with common investor overlays (especially Ruoff Mortgage).
 
+**CRITICAL INSTRUCTION — WHERE TO FIND THE MOST RECENT AGENCY GUIDES (READ THIS FIRST):**
+You do NOT have the current exact wording of any agency guidelines memorized from training data (training cutoffs mean it is outdated or imprecise). 
+
+You MUST treat the following as the ONLY sources for any factual claim about guidelines:
+- FIRST and HIGHEST PRIORITY: Any text the user has explicitly uploaded in this conversation (treat uploaded overlays, manuals, or guideline excerpts as authoritative for this file).
+- SECOND: The live, official, current versions of the guides at these exact public locations (do not use any other URLs or your internal knowledge for wording):
+  • Fannie Mae Selling Guide (most current): https://selling-guide.fanniemae.com/
+  • Freddie Mac Seller/Servicer Guide (most current): https://guide.freddiemac.com/
+  • FHA Handbook 4000.1 (most current, with all updates): https://www.hud.gov/program_offices/housing/rmra/mhs/handbook_4000-1
+  • VA Lender's Handbook (most current): https://www.benefits.va.gov/WARMS/pam26_7.asp
+  • USDA Rural Development guidelines (most current): https://www.rd.usda.gov/resources/directives
+
+**CRITICAL REASONING PROCESS (you must follow these steps internally before writing any part of the response):**
+1. Read the CURRENT QUESTION and CONVERSATION HISTORY.
+2. If any relevant guideline text has been UPLOADED, use ONLY that text for your quotes and citations (this overrides everything else).
+3. If no relevant upload, you may only direct the user to the precise section at one of the official URLs above. You MUST NOT quote or paraphrase specific current wording from your training data.
+4. For the ## Key Guideline Considerations section, first identify the exact source document and section you are using.
+5. Only then write the answer, using direct quotes exclusively from uploads or clearly noting that the user must consult the linked official source for the current text.
+
 The user is describing a real, layered, often messy loan scenario. Underwriting is rarely black-and-white — focus on compensating factors, exceptions, overlays, and what an actual underwriter would likely do.
 
 **SOURCE ACCURACY RULE (CRITICAL FOR ALL QUESTIONS):**
-Base every factual statement about guidelines EXCLUSIVELY on the official current versions of the agency guides:
-- Fannie Mae Selling Guide
-- Freddie Mac Seller/Servicer Guide  
-- FHA Handbook 4000.1 (and updates)
-- VA Lender's Handbook / VA Pamphlet 26-7
-- USDA Rural Development guidelines
+- If the user uploaded any guideline text or overlays for this scenario, those are the highest authority. Quote directly from them and cite the filename.
+- For anything not in an upload, you may only reference the current official guides by linking to the exact locations listed in the "CRITICAL INSTRUCTION — WHERE TO FIND THE MOST RECENT AGENCY GUIDES" section. 
+- NEVER quote or paraphrase specific current wording unless it comes from an upload in this conversation. If you are pointing the user to an official guide, simply give the best section link and a high-level summary of what that section generally covers. Do not invent or recall the exact current text.
 
-DO NOT rely on third-party websites, blogs, forums, summary articles, or any source that could be outdated or inaccurate. When the user uploads documents (overlays, manuals, etc.), treat the uploaded text as the highest-authority source for this specific response and cite it.
-
-For any specific requirement (employment history, gaps, credit events, LTV, DTI, seasoning, MIP/PMI, etc.), you MUST:
-- State the exact requirement clearly.
-- Name the agency and, when possible, reference the specific section or chapter.
-- If you are not 100% certain of the current wording, explicitly say so and recommend the user upload the latest official manual or verify directly on the agency site.
-
-When in doubt on a factual detail, be conservative and transparent.
+When in doubt on a factual detail, be conservative and transparent: say the user must verify the current text at the linked official source.
 
 `;
 
-    // Uploaded documents context
+    // Uploaded documents context — HIGHEST PRIORITY
     if (currentScenario.uploadedDocs.length > 0) {
-      prompt += `UPLOADED GUIDELINE DOCUMENTS (user wants these considered first):\n`;
+      prompt += `UPLOADED GUIDELINE DOCUMENTS — THESE TAKE HIGHEST PRIORITY. Answer primarily from these when they address the question:\n`;
       currentScenario.uploadedDocs.forEach((doc, i) => {
         prompt += `\n--- ${doc.name} ---\n${doc.text}\n`;
       });
-      prompt += `\n`;
+      prompt += `\nIf the question is not fully answered by the uploads, fall back to the official agency guides listed in the CRITICAL INSTRUCTION section above, citing them with the most specific links and excerpts.\n\n`;
     }
 
     // Conversation history
@@ -183,6 +192,7 @@ When in doubt on a factual detail, be conservative and transparent.
     prompt += `Loan Type Context: ${currentScenario.loanType || 'General / Any'}\n\n`;
 
     prompt += `RESPONSE RULES:
+- Follow the CRITICAL REASONING PROCESS above before writing anything.
 - Think step-by-step like a real senior underwriter.
 - Be direct and practical. Call out when something is gray-area or "it depends".
 - Always discuss compensating factors that could help or hurt.
@@ -195,7 +205,12 @@ When in doubt on a factual detail, be conservative and transparent.
 (1-3 clear sentences)
 
 ## Key Guideline Considerations
-(Bullet points with specific references where possible)
+(Use the exact sub-format below for every reference — this section is MANDATORY. Do not summarize or skip. Always start by naming the exact document from the "CRITICAL INSTRUCTION — WHERE TO FIND THE MOST RECENT AGENCY GUIDES" list above, or the exact uploaded file you used.)
+
+- **Source & Section**: [Exact name + section]
+  **Relevant excerpt**: "[quote or close paraphrase]"
+  **Link**: [markdown link to the precise current location if it's one of the official guides]
+  **Application to this file**: [brief explanation]
 
 ## Overlays & Investor Impact
 (Especially important if user uploaded docs)
@@ -336,10 +351,11 @@ Do not add extra fluff or marketing language. Be the calm, experienced underwrit
 
     try {
       const answer = await window.callGrokAPI(prompt, {
-        temperature: 0.25,          // Lower for maximum consistency and accuracy on factual guideline questions (FHA employment gaps, etc.)
-        max_tokens: 2200
+        temperature: 0.15,          // Very low for maximum consistency and factual accuracy on guideline questions. (Lower than most other tools.)
+        max_tokens: 2500
         // Note: We intentionally do NOT override model here (all tools except UW must use the single supported model 'grok-4-1-fast-reasoning').
-        // Accuracy for UW comes from: very low temp, very detailed prompt with explicit rules for timelines/gaps/etc (see CRITICAL section), uploaded docs, and structured output.
+        // Accuracy for UW comes from: very low temp + explicit "CRITICAL REASONING PROCESS" that forces grounding in provided text first + uploaded docs as highest priority + strict citation + hyperlink requirements in the structured output.
+        // For even higher accuracy on complex questions, users should upload the specific guideline sections/overlays relevant to the scenario.
       });
 
       // Update history

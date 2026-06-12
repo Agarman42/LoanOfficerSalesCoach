@@ -15,14 +15,10 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Health check route (optional but useful)
-app.get('/', (req, res) => {
-    // Redirect root to the main app HTML so http://localhost:3000 just works
-    res.redirect('/index.html');
-});
-
 // Serve static files (the giant index.html etc.) so we can use http:// instead of file://
-// This avoids brutal browser caching on the massive single-file HTML
+// This avoids brutal browser caching on the massive single-file HTML.
+// Visiting the root URL (/) will automatically serve index.html cleanly
+// without appending /index.html to the browser address bar.
 app.use(express.static('.', {
     setHeaders: (res, path) => {
         if (path.endsWith('index.html')) {
@@ -42,12 +38,12 @@ app.post('/api/v1/chat/completions', async (req, res) => {
         let apiKey = req.headers['authorization']?.replace('Bearer ', '').trim();
 
         if (!apiKey) {
-            apiKey = process.env.XAI_API_KEY;
+            apiKey = process.env.XAI_API_KEY || process.env.GROK_API_KEY;
         }
 
         if (!apiKey) {
             return res.status(401).json({ 
-                error: 'No Grok API key provided. Please enter your xai-... key in the app (API Key button) or set XAI_API_KEY in a .env file.'
+                error: 'No Grok API key provided. Please enter your xai-... key in the app (API Key button) or set XAI_API_KEY (or GROK_API_KEY) in a .env file.'
             });
         }
 
@@ -85,7 +81,7 @@ app.listen(PORT, () => {
     console.log(`✅ Grok Proxy running on http://localhost:${PORT}`);
     console.log(`✅ Ready to receive requests from your frontend (you can serve the HTML from other ports like 8080 if desired; API calls go to this proxy)`);
     
-    if (!process.env.XAI_API_KEY) {
-        console.log('⚠️  Warning: XAI_API_KEY is not set in .env file');
+    if (!process.env.XAI_API_KEY && !process.env.GROK_API_KEY) {
+        console.log('⚠️  Warning: XAI_API_KEY (or GROK_API_KEY) is not set in .env file');
     }
 });

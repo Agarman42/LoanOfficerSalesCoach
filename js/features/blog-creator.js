@@ -74,8 +74,12 @@ const blogUploadArea = document.getElementById('blog-upload-area');
 const blogFileInput = document.getElementById('blog-file-upload');
 
 if (blogUploadArea && blogFileInput) {
-    // Click to browse
-    blogUploadArea.addEventListener('click', () => blogFileInput.click());
+    // Click to browse (anywhere on area except the explicit Browse label, which handles natively via <label for>)
+    blogUploadArea.addEventListener('click', (e) => {
+        if (!e.target.closest('label')) {
+            blogFileInput.click();
+        }
+    });
 
     // Drag & Drop
     blogUploadArea.addEventListener('dragover', e => { e.preventDefault(); blogUploadArea.classList.add('dragover'); });
@@ -113,6 +117,10 @@ async function processBlogFile(file) {
         reader.onload = ev => blogUploadedFileText = ev.target.result.trim();
         reader.readAsText(file);
     }
+
+    // Reset the file input value so the user can select the same file again later if needed
+    const fi = document.getElementById('blog-file-upload');
+    if (fi) fi.value = '';
 }
 
 window.removeBlogUploadedFile = function() {
