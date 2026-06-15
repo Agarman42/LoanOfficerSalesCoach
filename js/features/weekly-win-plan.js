@@ -1007,21 +1007,39 @@ function generateWeeklyICS(days) {
     const eventDate = new Date(baseDate);
     eventDate.setDate(baseDate.getDate() + dayIndex);
     (day.blocks || []).forEach(block => {
+      const scheduledCustom = (block.tasks || []).filter((t) => t.isCustom && t.time);
+      const blockTasks = (block.tasks || []).filter((t) => !(t.isCustom && t.time));
       const timeRange = parseWeeklyTimeRange(block.time);
-      if (!timeRange) return;
-      const start = new Date(eventDate);
-      start.setHours(timeRange.startHour, timeRange.startMinute, 0);
-      const end = new Date(eventDate);
-      end.setHours(timeRange.endHour, timeRange.endMinute, 0);
-      const taskSummary = (block.tasks || []).map(t => t.task).join('; ');
-      const summary = taskSummary || block.focus || 'Prospecting block';
-      lines.push('BEGIN:VEVENT');
-      lines.push(`UID:wwp-${Date.now()}-${Math.random().toString(36).slice(2)}@salescoach`);
-      lines.push(`DTSTART:${formatWeeklyICSDate(start)}`);
-      lines.push(`DTEND:${formatWeeklyICSDate(end)}`);
-      lines.push(`SUMMARY:${escapeWeeklyICSText(summary)}`);
-      if (block.why) lines.push(`DESCRIPTION:${escapeWeeklyICSText(block.why)}`);
-      lines.push('END:VEVENT');
+      if (timeRange) {
+        const start = new Date(eventDate);
+        start.setHours(timeRange.startHour, timeRange.startMinute, 0);
+        const end = new Date(eventDate);
+        end.setHours(timeRange.endHour, timeRange.endMinute, 0);
+        const taskSummary = blockTasks.map((t) => t.task).join('; ');
+        const summary = taskSummary || block.focus || 'Prospecting block';
+        lines.push('BEGIN:VEVENT');
+        lines.push(`UID:wwp-${Date.now()}-${Math.random().toString(36).slice(2)}@salescoach`);
+        lines.push(`DTSTART:${formatWeeklyICSDate(start)}`);
+        lines.push(`DTEND:${formatWeeklyICSDate(end)}`);
+        lines.push(`SUMMARY:${escapeWeeklyICSText(summary)}`);
+        if (block.why) lines.push(`DESCRIPTION:${escapeWeeklyICSText(block.why)}`);
+        lines.push('END:VEVENT');
+      }
+      scheduledCustom.forEach((task) => {
+        const taskRange = parseWeeklyTimeRange(task.time);
+        if (!taskRange) return;
+        const start = new Date(eventDate);
+        start.setHours(taskRange.startHour, taskRange.startMinute, 0);
+        const end = new Date(eventDate);
+        end.setHours(taskRange.endHour, taskRange.endMinute, 0);
+        lines.push('BEGIN:VEVENT');
+        lines.push(`UID:wwp-custom-${Date.now()}-${Math.random().toString(36).slice(2)}@salescoach`);
+        lines.push(`DTSTART:${formatWeeklyICSDate(start)}`);
+        lines.push(`DTEND:${formatWeeklyICSDate(end)}`);
+        lines.push(`SUMMARY:${escapeWeeklyICSText(task.task)}`);
+        if (task.tip) lines.push(`DESCRIPTION:${escapeWeeklyICSText(task.tip)}`);
+        lines.push('END:VEVENT');
+      });
     });
   });
   lines.push('END:VCALENDAR');
@@ -1057,6 +1075,181 @@ function parseWeeklyTimeRange(timeStr) {
     if (ap === 'AM' && endHour === 12) endHour = 0;
   }
   return { startHour, startMinute: parseInt(m1), endHour, endMinute: parseInt(m2) };
+}
+
+function weeklyTimeToInputValue(hour, minute) {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function weeklyInputValueToParts(value) {
+  if (!value || !/^\d{2}:\d{2}$/.test(value)) return null;
+  const [h, m] = value.split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return { hour: h, minute: m };
+}
+
+function weeklyFormatTime12h(hour, minute) {
+  const ap = hour >= 12 ? 'PM' : 'AM';
+  let h = hour % 12;
+  if (h === 0) h = 12;
+  return `${h}:${String(minute).padStart(2, '0')} ${ap}`;
+}
+
+function weeklyFormatBlockTimeRange(startParts, endParts) {
+  if (!startParts || !endParts) return 'Flexible';
+  return `${weeklyFormatTime12h(startParts.hour, startParts.minute)} - ${weeklyFormatTime12h(endParts.hour, endParts.minute)}`;
+}
+
+function weeklyPartsToMinutes(parts) {
+  return parts.hour * 60 + parts.minute;
+}
+
+function weeklyMinutesToParts(totalMinutes) {
+  const capped = Math.max(0, Math.min(totalMinutes, 23 * 60 + 59));
+  return { hour: Math.floor(capped / 60), minute: capped % 60 };
+}
+
+function weeklyMinutesToInputValue(totalMinutes) {
+  const parts = weeklyMinutesToParts(totalMinutes);
+  return weeklyTimeToInputValue(parts.hour, parts.minute);
+}
+
+function weeklyGetDurationMinutes(startValue, endValue, fallback = 30) {
+  const startParts = weeklyInputValueToParts(startValue);
+  const endParts = weeklyInputValueToParts(endValue);
+  if (!startParts || !endParts) return fallback;
+  let diff = weeklyPartsToMinutes(endParts) - weeklyPartsToMinutes(startParts);
+  if (diff <= 0) diff = fallback;
+  return diff;
+}
+
+function weeklyShiftEndFromStart(startInput, endInput) {
+  if (!startInput || !endInput) return;
+  const duration = parseInt(startInput.dataset.durationMinutes, 10)
+    || weeklyGetDurationMinutes(startInput.value, endInput.value);
+  const startParts = weeklyInputValueToParts(startInput.value);
+  if (!startParts) return;
+  endInput.value = weeklyMinutesToInputValue(weeklyPartsToMinutes(startParts) + duration);
+  startInput.dataset.durationMinutes = String(duration);
+}
+
+function weeklySyncDurationDataset(startInput, endInput) {
+  if (!startInput || !endInput) return;
+  startInput.dataset.durationMinutes = String(weeklyGetDurationMinutes(startInput.value, endInput.value));
+}
+
+function weeklyBlockTimeToInputs(timeStr) {
+  const parsed = parseWeeklyTimeRange(timeStr);
+  if (!parsed) return { start: '', end: '', editable: false, hasValue: false };
+  return {
+    start: weeklyTimeToInputValue(parsed.startHour, parsed.startMinute),
+    end: weeklyTimeToInputValue(parsed.endHour, parsed.endMinute),
+    editable: true,
+    hasValue: true
+  };
+}
+
+function persistCurrentWeeklyPlan() {
+  if (!currentWeeklyDays || !currentWeeklyDays.length) return;
+  savedWeeklyPlan = {
+    ...(savedWeeklyPlan || {}),
+    version: WEEKLY_PLAN_VERSION,
+    days: currentWeeklyDays,
+    summary: (savedWeeklyPlan && savedWeeklyPlan.summary) || '',
+    totalHours: (savedWeeklyPlan && savedWeeklyPlan.totalHours) || null
+  };
+  localStorage.setItem('savedWeeklyPlan', JSON.stringify(savedWeeklyPlan));
+}
+
+function migrateWeeklyCheckedTasksOnTimeChange(dayName, oldTime, newTime) {
+  if (!oldTime || oldTime === newTime) return;
+  let current = [];
+  try { current = JSON.parse(localStorage.getItem('weeklyCheckedTasks') || '[]'); } catch (e) {}
+  const prefix = `${dayName}::${oldTime}::`;
+  const migrated = current.map((key) => (key.startsWith(prefix)
+    ? `${dayName}::${newTime}::${key.slice(prefix.length)}`
+    : key));
+  localStorage.setItem('weeklyCheckedTasks', JSON.stringify(migrated));
+}
+
+function updateWeeklyBlockTime(dayName, blockIndex, startValue, endValue) {
+  if (!currentWeeklyDays) return;
+  const dayObj = currentWeeklyDays.find((d) => d.day === dayName);
+  if (!dayObj || !dayObj.blocks || !dayObj.blocks[blockIndex]) return;
+
+  const block = dayObj.blocks[blockIndex];
+  const oldTime = block.time;
+  const startParts = weeklyInputValueToParts(startValue);
+  const endParts = weeklyInputValueToParts(endValue);
+  if (!startParts || !endParts) return;
+
+  const newTime = weeklyFormatBlockTimeRange(startParts, endParts);
+  if (newTime === oldTime) return;
+
+  block.time = newTime;
+  migrateWeeklyCheckedTasksOnTimeChange(dayName, oldTime, newTime);
+  persistCurrentWeeklyPlan();
+
+  const container = document.getElementById('weekly-tasks-container');
+  if (container) renderWeeklyTiles(currentWeeklyDays, container);
+}
+
+function updateWeeklyCustomTaskTime(dayName, blockIndex, taskIndex, startValue, endValue) {
+  if (!currentWeeklyDays) return;
+  const dayObj = currentWeeklyDays.find((d) => d.day === dayName);
+  if (!dayObj || !dayObj.blocks || !dayObj.blocks[blockIndex]) return;
+  const tasks = dayObj.blocks[blockIndex].tasks;
+  if (!tasks || !tasks[taskIndex]) return;
+
+  const task = tasks[taskIndex];
+  if (!startValue && !endValue) {
+    delete task.time;
+    persistCurrentWeeklyPlan();
+    return;
+  }
+
+  const startParts = weeklyInputValueToParts(startValue);
+  if (!startParts) return;
+  let endParts = weeklyInputValueToParts(endValue);
+  if (!endParts) {
+    endParts = weeklyMinutesToParts(weeklyPartsToMinutes(startParts) + 30);
+  }
+
+  task.time = weeklyFormatBlockTimeRange(startParts, endParts);
+  persistCurrentWeeklyPlan();
+}
+
+function wireWeeklyTimeEditors(container) {
+  container.querySelectorAll('.wwp-time-editor').forEach((editor) => {
+    const startInput = editor.querySelector('.wwp-block-time-start, .wwp-task-time-start');
+    const endInput = editor.querySelector('.wwp-block-time-end, .wwp-task-time-end');
+    if (!startInput || !endInput) return;
+
+    weeklySyncDurationDataset(startInput, endInput);
+
+    const commit = () => {
+      const dayName = startInput.dataset.day;
+      const blockIndex = parseInt(startInput.dataset.blockIndex, 10);
+      if (Number.isNaN(blockIndex)) return;
+
+      if (startInput.classList.contains('wwp-task-time-start')) {
+        const taskIndex = parseInt(startInput.dataset.taskIndex, 10);
+        if (Number.isNaN(taskIndex)) return;
+        updateWeeklyCustomTaskTime(dayName, blockIndex, taskIndex, startInput.value, endInput.value);
+        return;
+      }
+
+      updateWeeklyBlockTime(dayName, blockIndex, startInput.value, endInput.value);
+    };
+
+    startInput.addEventListener('input', () => weeklyShiftEndFromStart(startInput, endInput));
+    endInput.addEventListener('input', () => weeklySyncDurationDataset(startInput, endInput));
+    startInput.addEventListener('change', commit);
+    endInput.addEventListener('change', () => {
+      weeklySyncDurationDataset(startInput, endInput);
+      commit();
+    });
+  });
 }
 
 function formatWeeklyICSDate(date) {
@@ -1383,11 +1576,13 @@ function renderWeeklyTiles(days, container) {
         const blockCount = blocks.length;
         const taskCount = blocks.reduce((n, b) => n + (b.tasks || []).length, 0);
 
-        const blocksHtml = blocks.map((block) => {
-            const tasksHtml = (block.tasks || []).map((t) => {
+        const blocksHtml = blocks.map((block, blockIndex) => {
+            const timeInputs = weeklyBlockTimeToInputs(block.time);
+            const tasksHtml = (block.tasks || []).map((t, taskIndex) => {
                 const taskKey = `${day.day}::${block.time}::${t.task}`;
                 const isChecked = checkedTasks.includes(taskKey);
                 const isCustom = t.isCustom === true;
+                const customTimeInputs = isCustom ? weeklyBlockTimeToInputs(t.time || '') : null;
 
                 let icon = 'fa-check-circle';
                 const lower = (t.task || '').toLowerCase();
@@ -1411,6 +1606,17 @@ function renderWeeklyTiles(days, container) {
                                 </div>
                             </div>
                             ${t.tip ? `<div class="mt-1.5 ml-5 text-xs text-gray-500 dark:text-gray-400"><span class="text-[#00A89D] font-semibold">Tip:</span> ${t.tip}</div>` : ''}
+                            ${isCustom ? `
+                            <div class="mt-2 ml-5 flex items-center gap-1.5 flex-wrap wwp-time-editor" title="Optional — adds this task to calendar export">
+                                <span class="text-[10px] text-gray-400 font-medium">Schedule:</span>
+                                <input type="time" class="wwp-task-time-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+                                       ${customTimeInputs && customTimeInputs.start ? `value="${customTimeInputs.start}"` : ''}
+                                       data-day="${day.day}" data-block-index="${blockIndex}" data-task-index="${taskIndex}" aria-label="Custom task start time">
+                                <span class="text-xs text-gray-400">–</span>
+                                <input type="time" class="wwp-task-time-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+                                       ${customTimeInputs && customTimeInputs.end ? `value="${customTimeInputs.end}"` : ''}
+                                       data-day="${day.day}" data-block-index="${blockIndex}" data-task-index="${taskIndex}" aria-label="Custom task end time">
+                            </div>` : ''}
                             <button onclick="if(typeof window.saveWeeklyTask==='function') window.saveWeeklyTask(this)"
                                     data-day="${day.day}" data-task="${(t.task || '').replace(/"/g, '&quot;')}"
                                     data-tip="${(t.tip || '').replace(/"/g, '&quot;')}"
@@ -1422,10 +1628,20 @@ function renderWeeklyTiles(days, container) {
                 `;
             }).join('');
 
+            const timeEditorHtml = timeInputs.editable
+                ? `<div class="flex items-center gap-1.5 flex-wrap wwp-time-editor" title="Adjust times before calendar export — end time shifts with start">
+                        <input type="time" class="wwp-block-time-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+                               value="${timeInputs.start}" data-day="${day.day}" data-block-index="${blockIndex}" aria-label="Block start time">
+                        <span class="text-xs text-gray-400">–</span>
+                        <input type="time" class="wwp-block-time-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+                               value="${timeInputs.end}" data-day="${day.day}" data-block-index="${blockIndex}" aria-label="Block end time">
+                   </div>`
+                : `<div class="font-bold text-sm tabular-nums text-[#002B5C] dark:text-white">${block.time || 'Flexible'}</div>`;
+
             return `
                 <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 p-3.5 mb-3">
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <div class="font-bold text-sm tabular-nums text-[#002B5C] dark:text-white">${block.time}</div>
+                    <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                        ${timeEditorHtml}
                         ${block.focus ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold">${block.focus}</span>` : ''}
                     </div>
                     ${block.why ? `<div class="text-xs text-[#00A89D]/90 mb-2 italic">${block.why}</div>` : ''}
@@ -1470,6 +1686,8 @@ function renderWeeklyTiles(days, container) {
             renderWeeklyTiles(currentWeeklyDays, container);
         });
     });
+
+    wireWeeklyTimeEditors(container);
 }
 
 // =====================================================
@@ -1547,6 +1765,7 @@ function copyWeeklyPlan() {
             text += `  ${b.time}${b.focus ? ` (${b.focus})` : ''}\n`;
             (b.tasks || []).forEach(t => {
                 text += `    • ${t.task}`;
+                if (t.time) text += ` [${t.time}]`;
                 if (t.tip) text += ` — ${t.tip}`;
                 text += `\n`;
             });
@@ -1624,17 +1843,34 @@ function addCustomTaskToDay(dayName, buttonElement) {
     if (!dayObj) return;
 
     const inputWrapper = document.createElement('div');
-    inputWrapper.className = 'mt-3 flex gap-2';
+    inputWrapper.className = 'mt-3 space-y-2';
     inputWrapper.innerHTML = `
         <input type="text" placeholder="Your custom task..." 
-               class="flex-1 px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900">
-        <button class="px-4 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-medium">Add</button>
-        <button class="px-3 py-2 text-sm rounded-2xl border border-gray-300">Cancel</button>
+               class="w-full px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900">
+        <div class="flex items-center gap-2 flex-wrap wwp-time-editor">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Schedule (optional, for calendar export):</span>
+            <input type="time" class="wwp-custom-add-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900" aria-label="Custom task start time">
+            <span class="text-xs text-gray-400">–</span>
+            <input type="time" class="wwp-custom-add-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900" aria-label="Custom task end time">
+        </div>
+        <div class="flex gap-2">
+            <button class="px-4 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-medium">Add</button>
+            <button class="px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Cancel</button>
+        </div>
     `;
 
-    const input = inputWrapper.querySelector('input');
+    const input = inputWrapper.querySelector('input[type="text"]');
+    const startTimeInput = inputWrapper.querySelector('.wwp-custom-add-start');
+    const endTimeInput = inputWrapper.querySelector('.wwp-custom-add-end');
     const addBtn = inputWrapper.querySelector('button');
     const cancelBtn = inputWrapper.querySelectorAll('button')[1];
+
+    if (startTimeInput && endTimeInput) {
+        startTimeInput.addEventListener('input', () => {
+            if (startTimeInput.value) weeklyShiftEndFromStart(startTimeInput, endTimeInput);
+        });
+        endTimeInput.addEventListener('input', () => weeklySyncDurationDataset(startTimeInput, endTimeInput));
+    }
 
     buttonElement.style.display = 'none';
     buttonElement.parentNode.appendChild(inputWrapper);
@@ -1661,11 +1897,24 @@ function addCustomTaskToDay(dayName, buttonElement) {
         }
         if (!targetBlock.tasks) targetBlock.tasks = [];
 
-        targetBlock.tasks.push({
+        const newTask = {
             task: value,
             tip: 'You added this task',
             isCustom: true
-        });
+        };
+
+        if (startTimeInput && endTimeInput && startTimeInput.value) {
+            const startParts = weeklyInputValueToParts(startTimeInput.value);
+            let endParts = weeklyInputValueToParts(endTimeInput.value);
+            if (startParts) {
+                if (!endParts) {
+                    endParts = weeklyMinutesToParts(weeklyPartsToMinutes(startParts) + 30);
+                }
+                newTask.time = weeklyFormatBlockTimeRange(startParts, endParts);
+            }
+        }
+
+        targetBlock.tasks.push(newTask);
 
         savedWeeklyPlan = {
             version: WEEKLY_PLAN_VERSION,
@@ -2686,6 +2935,8 @@ window.copyWeeklyPlan = copyWeeklyPlan;
 window.clearWeeklyPlan = clearWeeklyPlan;
 window.addCustomTaskToDay = addCustomTaskToDay;
 window.exportWeeklyPlanToICS = exportWeeklyPlanToICS;
+window.updateWeeklyBlockTime = updateWeeklyBlockTime;
+window.updateWeeklyCustomTaskTime = updateWeeklyCustomTaskTime;
 
 // =====================================================
 function wireGeneratePlanButton() {
@@ -2803,6 +3054,8 @@ function initWeeklyWinPlan() {
     window.generateWeeklyPlan = generateWeeklyPlan;
     window.saveWeeklyPlanToVault = saveWeeklyPlanToVault;
     window.exportWeeklyPlanToICS = exportWeeklyPlanToICS;
+window.updateWeeklyBlockTime = updateWeeklyBlockTime;
+window.updateWeeklyCustomTaskTime = updateWeeklyCustomTaskTime;
     window.updateWeeklyCustomizeDisplays = updateWeeklyCustomizeDisplays;
 
     console.log('%c[weekly-win-plan.js] Weekly Win Plan / Business Planning initialized', 'color:#00A89D');
