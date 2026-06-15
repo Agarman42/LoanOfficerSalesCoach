@@ -1488,6 +1488,13 @@ async function generateWeeklyPlan(options = {}) {
         renderWeeklyTiles(data.days, container);
         updateWeeklyResultsHeader();
 
+        if (!isFeedbackRegen) {
+          const feedbackSection = document.getElementById('weekly-plan-feedback-section');
+          if (feedbackSection) {
+            setTimeout(() => feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 350);
+          }
+        }
+
     } catch (error) {
         console.error('[weekly-win-plan] generateWeeklyPlan failed:', error);
         container.innerHTML = `
