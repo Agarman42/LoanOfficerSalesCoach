@@ -6642,6 +6642,7 @@
               <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Make it yours.</strong> Use "Add your own task" liberally — your market knowledge and intuition will always beat pure AI suggestions.</span></div>
               <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save what resonates.</strong> Tap into My Saved Items (per task or full plan via copy actions) so good language and plays live in your vault for social, scripts, or next week.</span></div>
               <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use the level-up links.</strong> At the bottom of results, jump straight to the tools (Social, Referral Partners, Database, Events) that turn a basic task into a relationship-building machine.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Refine before you export.</strong> Use the feedback box to tweak focus or timing, regenerate, then export to calendar or copy — so exports match how you actually work.</span></div>
             </div>
             <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
               <i class="fas fa-info-circle"></i>
@@ -6791,6 +6792,27 @@
             <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm ring-1 ring-gray-100 dark:ring-gray-800">
                 <div id="weekly-tasks-container" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     <!-- Tasks injected by JS -->
+                </div>
+
+                <!-- Refine with feedback (before copy / calendar export) -->
+                <div id="weekly-plan-feedback-section" class="mt-8 p-5 border border-dashed border-[#00A89D]/40 rounded-3xl bg-[#00A89D]/5">
+                    <div class="font-semibold text-[#002B5C] dark:text-white mb-1 flex items-center gap-2">
+                        <i class="fas fa-comment-dots text-[#00A89D]"></i>
+                        Refine this plan before you export
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        Tweak focus, timing, or tasks — then regenerate. Your time edits and custom tasks are sent as context so the AI adjusts instead of starting over blind.
+                        <span class="block mt-1 text-gray-600 dark:text-gray-300">Examples: “More realtor pop-bys Tuesday” • “Lighten Monday — only 1 block” • “Add equity scan outreach Thursday” • “Swap sphere for past-client calls”</span>
+                    </p>
+                    <textarea id="weekly-plan-feedback-input" rows="3" class="w-full text-sm p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-[#00A89D]/50" placeholder="What should change in this week's plan?"></textarea>
+                    <div class="mt-3 flex flex-wrap gap-2 items-center">
+                        <button type="button" onclick="if(typeof window.applyWeeklyPlanFeedbackAndRegenerate==='function'){window.applyWeeklyPlanFeedbackAndRegenerate();}" class="px-4 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-medium flex items-center gap-2 hover:bg-[#008F85] transition">
+                            <i class="fas fa-redo"></i>
+                            <span>Apply feedback &amp; regenerate</span>
+                        </button>
+                        <button type="button" onclick="var el=document.getElementById('weekly-plan-feedback-input'); if(el) el.value='';" class="px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Clear</button>
+                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">Then export to calendar or copy when it looks right.</span>
+                    </div>
                 </div>
 
                 <!-- Premium Progress + Actions Dashboard -->

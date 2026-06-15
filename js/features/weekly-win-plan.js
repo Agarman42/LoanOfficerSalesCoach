@@ -967,6 +967,42 @@ Return ONLY valid JSON in this exact format:
 }`;
 }
 
+function buildWeeklyFeedbackPrompt(feedback) {
+  persistCurrentWeeklyPlan();
+  const planSnapshot = savedWeeklyPlan || {
+    summary: currentWeeklyPlanMeta.summary || '',
+    totalHours: currentWeeklyPlanMeta.totalHours || getWeeklyCustomizePrefs().hours,
+    days: currentWeeklyDays || []
+  };
+  const { hours, weaveHobbies, focusAreas } = getWeeklyCustomizePrefs();
+  const defaultFocus = [
+    'Realtor outreach',
+    'Sphere & past client nurturing',
+    'Past client follow-up',
+    'Equity / refinance opportunities',
+    'Listing and buyer lead opportunities'
+  ];
+  const prefsContext = `Weekly hours target: ~${hours}. Focus areas: ${(focusAreas.length ? focusAreas : defaultFocus).join(', ')}. Weave hobbies: ${weaveHobbies ? 'yes' : 'no'}.`;
+
+  return `You are an expert mortgage sales coach editing an existing Weekly Win Plan for a producing loan officer (not a real estate agent).
+
+${prefsContext}
+
+CURRENT PLAN (JSON — treat as the base; preserve structure and anything the user did not ask to change):
+${JSON.stringify(planSnapshot, null, 2)}
+
+USER FEEDBACK — apply these requested changes intelligently:
+${feedback.trim()}
+
+Rules:
+- Return ONLY valid JSON in the exact same schema (summary, totalHours, days with blocks/tasks).
+- Tasks must stay loan-officer-focused: realtor outreach, sphere, past clients, equity/refi scans, partner touches — not listing showings or open houses.
+- Keep realistic times with AM/PM on every block.
+- Respect total weekly hours (~${hours}) unless feedback explicitly changes that.
+- If feedback is narrow (e.g. "more realtor pop-bys on Tuesday"), change only what is needed; keep the rest of the week intact when possible.
+- Block "focus" should align with LO pipelines: Realtors, Sphere, Past Clients, Equity/Refi, Social/Content, Partner Outreach.`;
+}
+
 function updateWeeklyResultsHeader() {
   const summaryEl = document.getElementById('weekly-plan-summary');
   const hoursEl = document.getElementById('weekly-plan-hours');
@@ -1263,14 +1299,16 @@ function escapeWeeklyICSText(text) {
 // =====================================================
 // WEEKLY WIN PLAN - Unified execution (uses API)
 // =====================================================
-async function generateWeeklyPlan() {
+async function generateWeeklyPlan(options = {}) {
+    const feedback = (typeof options === 'string' ? options : options.feedback || '').trim();
+    const isFeedbackRegen = !!feedback;
     const btn = document.getElementById('generate-win-plan-btn');
     const container = document.getElementById('weekly-tasks-container');
 
     // 2026 Business Plan and Weekly Win Plan are completely separate — this function is WEEKLY ONLY.
     // ABSOLUTE FIRST ACTION: force the custom progress "modal" (we replace #global-loading inner content for Weekly).
     if (typeof window.forceShowGlobalLoading === 'function') {
-      window.forceShowGlobalLoading('Building Your Weekly Win Plan...');
+      window.forceShowGlobalLoading(isFeedbackRegen ? 'Applying your feedback...' : 'Building Your Weekly Win Plan...');
     }
 
     const le0 = document.getElementById('global-loading');
@@ -1296,13 +1334,13 @@ async function generateWeeklyPlan() {
                 <div class="text-center mb-8">
                     <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
                     <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">
-                        Building Your Weekly Win Plan...
+                        ${isFeedbackRegen ? 'Applying Your Feedback...' : 'Building Your Weekly Win Plan...'}
                     </h3>
                     <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">
-                        This usually takes 30–60 seconds — grab coffee! ☕
+                        ${isFeedbackRegen ? 'Updating your plan based on your notes — usually 30–60 seconds.' : 'This usually takes 30–60 seconds — grab coffee! ☕'}
                     </p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Creating 7 days of personalized, high-impact prospecting tasks
+                        Creating 7 days of realtor, sphere, past-client, and equity execution blocks
                     </p>
                 </div>
 
@@ -1356,7 +1394,9 @@ async function generateWeeklyPlan() {
 
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i> Building Your Weekly Win Plan...';
+        btn.innerHTML = isFeedbackRegen
+            ? '<i class="fas fa-spinner fa-spin mr-3"></i> Applying feedback...'
+            : '<i class="fas fa-spinner fa-spin mr-3"></i> Building Your Weekly Win Plan...';
     }
 
     if (!container) {
@@ -1394,13 +1434,15 @@ async function generateWeeklyPlan() {
     const pregen = document.getElementById('weekly-pregen-guidance');
     if (pregen) pregen.classList.add('hidden');
 
-    // Clear previous week's checked tasks when generating a fresh plan.
-    // IMPORTANT: Do NOT put any "Generating..." placeholder text into the container. The custom rich content we injected into #global-loading (the full "Building Your Weekly Win Plan..." card with Why it Works + Reminders) is the progress UI the user sees.
-    // The tasks grid will be populated only after the API succeeds (in renderWeeklyTiles).
-    localStorage.removeItem('weeklyCheckedTasks');
-    if (container) container.innerHTML = '';   // keep it clean while the overlay is up
+    // Clear checked tasks only on a full fresh generate — keep progress when refining via feedback.
+    if (!isFeedbackRegen) {
+        localStorage.removeItem('weeklyCheckedTasks');
+    }
+    if (container) container.innerHTML = '';
 
-    const prompt = buildUnifiedWeeklyPrompt();
+    const prompt = isFeedbackRegen
+        ? buildWeeklyFeedbackPrompt(feedback)
+        : buildUnifiedWeeklyPrompt();
 
     try {
         const response = await window.callGrokAPI(prompt, {
@@ -2354,6 +2396,24 @@ function showTaskHelp(task) {
 // PUBLIC API EXPOSURE
 // =====================================================
 window.generatePlan = generatePlan;
+
+window.applyWeeklyPlanFeedbackAndRegenerate = function() {
+  const input = document.getElementById('weekly-plan-feedback-input');
+  if (!input) return;
+  const val = (input.value || '').trim();
+  if (!val) {
+    if (window.showToast) window.showToast('Enter feedback first — e.g. "more realtor outreach on Tuesday"', 'warning');
+    else alert('Enter feedback first — e.g. "more realtor outreach on Tuesday"');
+    return;
+  }
+  if (!currentWeeklyDays || !currentWeeklyDays.length) {
+    if (window.showToast) window.showToast('Generate a plan first, then refine with feedback.', 'warning');
+    else alert('Generate a plan first, then refine with feedback.');
+    return;
+  }
+  generateWeeklyPlan({ feedback: val });
+  input.value = '';
+};
 
 window.lastPlanFeedback = window.lastPlanFeedback || '';
 
