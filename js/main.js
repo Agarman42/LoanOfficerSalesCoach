@@ -560,7 +560,8 @@
     // Alias map for old/stale links in saved plans or elsewhere
     const aliases = {
       'social-media-strategy': 'social',
-      'referral-partners': 'referrals'
+      'referral-partners': 'referrals',
+      'prospecting': 'weekly-win-plan'
     };
     if (aliases[id]) {
       id = aliases[id];
@@ -593,6 +594,9 @@
       // - 2026 Business: generatePlan(), #planning section, #generate-plan-btn, uses wireGeneratePlanButton + enrich panel
       // Shared file (weekly-win-plan.js) but completely separate functions, prompts, buttons, outputs, and loading UI.
       if (id === 'weekly-win-plan') {
+        if (typeof window.updateWeeklyCustomizeDisplays === 'function') {
+          try { window.updateWeeklyCustomizeDisplays(); } catch (e) {}
+        }
         setTimeout(() => {
           const editBtn = document.getElementById('edit-setup-btn');
           if (editBtn && typeof window.openSetupWizard === 'function') {

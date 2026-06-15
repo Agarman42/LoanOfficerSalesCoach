@@ -662,7 +662,14 @@ function restoreSavedWeeklyPlan() {
     const container = document.getElementById('weekly-tasks-container');
     if (!container) return;
 
+    migrateLegacyWeeklyStorage();
+
     if (savedWeeklyPlan && savedWeeklyPlan.days) {
+        savedWeeklyPlan.days = normalizeDaysToV2(savedWeeklyPlan.days);
+        currentWeeklyPlanMeta = {
+          summary: savedWeeklyPlan.summary || '',
+          totalHours: savedWeeklyPlan.totalHours || null
+        };
         const resultsWrapper = document.getElementById('weekly-plan-results');
         if (resultsWrapper) resultsWrapper.classList.remove('hidden');
 
@@ -673,6 +680,7 @@ function restoreSavedWeeklyPlan() {
         if (pregen) pregen.classList.add('hidden');
 
         renderWeeklyTiles(savedWeeklyPlan.days, container);
+        updateWeeklyResultsHeader();
         // Ensure progress UI is in sync on restore
         const checked = JSON.parse(localStorage.getItem('weeklyCheckedTasks') || '[]');
         updatePlanProgress(savedWeeklyPlan.days, checked);
@@ -753,7 +761,314 @@ function restoreSavedBusinessPlan() {
 // (will be called from initWeeklyWinPlan or main init)
 
 // =====================================================
-// WEEKLY WIN PLAN - Daily Prospecting Tiles (uses API)
+// UNIFIED WEEKLY EXECUTION (v2) — time blocks + daily tasks in one plan
+// Merges former Prospecting Time Blocks + Weekly Win Plan (Option A)
+// =====================================================
+const WEEKLY_PLAN_VERSION = 2;
+let currentWeeklyPlanMeta = { summary: '', totalHours: null };
+
+function getWeeklyCustomizePrefs() {
+  const hours = parseInt(document.getElementById('wwp-hours')?.value) || 15;
+  const weaveHobbies = document.getElementById('wwp-weave-hobbies')?.checked !== false;
+  const focusAreas = [];
+  const emphasisMap = [
+    ['wwp-emphasis-realtors', 'Realtor outreach'],
+    ['wwp-emphasis-sphere', 'Sphere & past client nurturing'],
+    ['wwp-emphasis-past', 'Past client follow-up'],
+    ['wwp-emphasis-equity', 'Equity / refinance opportunities'],
+    ['wwp-emphasis-listings', 'Listing and buyer lead opportunities']
+  ];
+  emphasisMap.forEach(([id, label]) => {
+    const el = document.getElementById(id);
+    if (el && el.checked) focusAreas.push(label);
+  });
+  return { hours, weaveHobbies, focusAreas };
+}
+
+function getAllTasksFromDays(days) {
+  const tasks = [];
+  (days || []).forEach(day => {
+    (day.blocks || []).forEach(block => {
+      (block.tasks || []).forEach(t => tasks.push({ day: day.day, block, task: t }));
+    });
+    // Legacy v1 flat tasks
+    (day.tasks || []).forEach(t => tasks.push({ day: day.day, block: null, task: t }));
+  });
+  return tasks;
+}
+
+function countTasksInDays(days) {
+  return getAllTasksFromDays(days).length;
+}
+
+function normalizeDaysToV2(days) {
+  if (!days || !Array.isArray(days)) return [];
+  return days.map(day => {
+    if (day.blocks && Array.isArray(day.blocks)) {
+      return {
+        day: day.day,
+        blocks: day.blocks.map(b => ({
+          time: b.time || 'Flexible',
+          focus: b.focus || '',
+          why: b.why || '',
+          tasks: (b.tasks && b.tasks.length)
+            ? b.tasks
+            : (b.activity ? [{ task: b.activity, tip: b.why || '' }] : [])
+        }))
+      };
+    }
+    // v1: flat tasks per day → single flexible block
+    return {
+      day: day.day,
+      blocks: [{
+        time: 'Flexible',
+        focus: 'General',
+        why: 'Protected prospecting window',
+        tasks: day.tasks || []
+      }]
+    };
+  });
+}
+
+function migrateLegacyWeeklyStorage() {
+  let plan = null;
+  try {
+    plan = JSON.parse(localStorage.getItem('savedWeeklyPlan') || 'null');
+  } catch (e) {}
+
+  const ptbRaw = localStorage.getItem('savedProspectingTimeBlocks');
+  if (!plan && ptbRaw) {
+    try {
+      const ptb = JSON.parse(ptbRaw);
+      plan = {
+        version: WEEKLY_PLAN_VERSION,
+        summary: ptb.summary || '',
+        totalHours: ptb.totalHours || null,
+        days: normalizeDaysToV2(ptb.days)
+      };
+      localStorage.setItem('savedWeeklyPlan', JSON.stringify(plan));
+      localStorage.removeItem('savedProspectingTimeBlocks');
+      const ptbChecked = localStorage.getItem('ptbCheckedBlocks');
+      if (ptbChecked && !localStorage.getItem('weeklyCheckedTasks')) {
+        localStorage.setItem('weeklyCheckedTasks', ptbChecked);
+      }
+    } catch (e) {}
+  }
+
+  if (plan && plan.days) {
+    if (!plan.version || plan.version < WEEKLY_PLAN_VERSION) {
+      plan = {
+        version: WEEKLY_PLAN_VERSION,
+        summary: plan.summary || '',
+        totalHours: plan.totalHours || null,
+        days: normalizeDaysToV2(plan.days)
+      };
+      localStorage.setItem('savedWeeklyPlan', JSON.stringify(plan));
+    }
+    savedWeeklyPlan = plan;
+  }
+}
+
+function updateWeeklyCustomizeDisplays() {
+  const p = getCentralProfile();
+  const goalEl = document.getElementById('wwp-goal-display');
+  const hoursEl = document.getElementById('wwp-hours-display');
+  const focusEl = document.getElementById('wwp-focus-display');
+  if (goalEl) goalEl.textContent = p.monthlyUnits || p.monthlyGoal || 8;
+  if (hoursEl) hoursEl.textContent = p.hours || '15–20';
+  if (focusEl) focusEl.textContent = p.focus || 'Balanced';
+  updateWeeklyLiveSummary();
+}
+
+function updateWeeklyLiveSummary() {
+  const summaryEl = document.getElementById('wwp-live-summary');
+  if (!summaryEl) return;
+  const { hours, weaveHobbies, focusAreas } = getWeeklyCustomizePrefs();
+  const focusCount = focusAreas.length || 1;
+  const estBlocks = Math.max(8, Math.round(hours * 1.1));
+  let text = `~${estBlocks} protected blocks • ${focusCount} focus area${focusCount > 1 ? 's' : ''}`;
+  if (weaveHobbies) text += ' • hobbies woven in';
+  summaryEl.textContent = text;
+}
+
+function wireWeeklyCustomizeControls() {
+  const slider = document.getElementById('wwp-hours');
+  const hoursDisplay = document.getElementById('wwp-hours-value');
+  if (slider && hoursDisplay) {
+    hoursDisplay.textContent = slider.value;
+    slider.addEventListener('input', () => {
+      hoursDisplay.textContent = slider.value;
+      updateWeeklyLiveSummary();
+    });
+  }
+  ['wwp-emphasis-realtors', 'wwp-emphasis-sphere', 'wwp-emphasis-past',
+    'wwp-emphasis-equity', 'wwp-emphasis-listings', 'wwp-weave-hobbies'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', updateWeeklyLiveSummary);
+  });
+  updateWeeklyCustomizeDisplays();
+}
+
+function buildUnifiedWeeklyPrompt() {
+  const p = getCentralProfile();
+  const eff = getEffectiveSetup();
+  const { hours, weaveHobbies, focusAreas } = getWeeklyCustomizePrefs();
+  const roleLabel = document.getElementById('wwp-emphasis-listings')
+    ? 'real estate agent'
+    : 'loan officer';
+
+  return `You are an expert sales coach who specializes in realistic weekly execution for a ${roleLabel}.
+
+User Profile:
+- Name: ${p.name || eff.name || ''}
+- Email: ${p.email || ''}
+- Monthly goal (units): ${p.monthlyUnits || p.monthlyGoal || eff.monthlyUnits || 8}
+- Focus area: ${p.focus || eff.focus || ''}
+- Weekly prospecting hours available: ${p.hours || eff.hours || ''}
+- Hobbies/Passions: ${[...(p.hobbies || []), p.hobbiesOther].filter(Boolean).join(', ') || [...(eff.hobbies || []), eff.hobbiesOther].filter(Boolean).join(', ') || 'none specified'}
+- Preferred prospecting activities: ${(p.activities || p.preferredActivities || eff.preferredActivities || []).join(', ') || 'balanced mix'}
+- Personality: ${p.personality || ''}
+- This week they want to block approximately ${hours} hours total.
+
+Emphasis this week: ${focusAreas.length ? focusAreas.join(', ') : 'balanced across all areas'}
+${weaveHobbies ? 'Naturally weave in their hobbies where it makes sense for relationship building.' : ''}
+
+Create a practical, motivating 7-day (Monday through Sunday) execution plan that combines PROTECTED TIME BLOCKS with SPECIFIC TASKS inside each block.
+
+Rules:
+- Respect their total weekly hours (${hours}).
+- Use realistic time slots and ALWAYS include AM or PM (e.g. "9:00 AM - 9:45 AM"). Never output bare times without meridian.
+- 2-5 blocks per day depending on the day.
+- Each block gets 1-3 specific, actionable tasks (calls, texts, value drops, social, pop-bys, partner touches).
+- Include a short practical tip on each task.
+- Include block "focus" category and optional "why" for motivation.
+- Prioritize their preferred activities and emphasis areas.
+- Keep it grounded — no fluff.
+
+Return ONLY valid JSON in this exact format:
+{
+  "summary": "One sentence overview of the week's strategy",
+  "totalHours": ${hours},
+  "days": [
+    {
+      "day": "Monday",
+      "blocks": [
+        {
+          "time": "9:00 - 9:45 AM",
+          "focus": "Past Clients",
+          "why": "Re-engage people who already know and trust you",
+          "tasks": [
+            {"task": "Specific actionable task here", "tip": "Short practical tip"}
+          ]
+        }
+      ]
+    }
+  ]
+}`;
+}
+
+function updateWeeklyResultsHeader() {
+  const summaryEl = document.getElementById('weekly-plan-summary');
+  const hoursEl = document.getElementById('weekly-plan-hours');
+  if (summaryEl) summaryEl.textContent = currentWeeklyPlanMeta.summary || 'Your protected time + daily execution plan.';
+  if (hoursEl && currentWeeklyPlanMeta.totalHours) {
+    hoursEl.textContent = `${currentWeeklyPlanMeta.totalHours} hrs protected`;
+  }
+}
+
+// ICS export (from former Prospecting Time Blocks)
+function exportWeeklyPlanToICS() {
+  if (!currentWeeklyDays || !currentWeeklyDays.length) {
+    alert('No plan available to export.');
+    return;
+  }
+  const ics = generateWeeklyICS(currentWeeklyDays);
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'Weekly-Win-Plan.ics';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function generateWeeklyICS(days) {
+  const lines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0',
+    'PRODID:-//Sales Coach//Weekly Win Plan//EN',
+    'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'X-WR-CALNAME:Weekly Win Plan',
+    'X-WR-CALDESC:Protected prospecting blocks from your Weekly Win Plan'
+  ];
+  const baseDate = getMondayOfCurrentWeek();
+  days.forEach((day, dayIndex) => {
+    const eventDate = new Date(baseDate);
+    eventDate.setDate(baseDate.getDate() + dayIndex);
+    (day.blocks || []).forEach(block => {
+      const timeRange = parseWeeklyTimeRange(block.time);
+      if (!timeRange) return;
+      const start = new Date(eventDate);
+      start.setHours(timeRange.startHour, timeRange.startMinute, 0);
+      const end = new Date(eventDate);
+      end.setHours(timeRange.endHour, timeRange.endMinute, 0);
+      const taskSummary = (block.tasks || []).map(t => t.task).join('; ');
+      const summary = taskSummary || block.focus || 'Prospecting block';
+      lines.push('BEGIN:VEVENT');
+      lines.push(`UID:wwp-${Date.now()}-${Math.random().toString(36).slice(2)}@salescoach`);
+      lines.push(`DTSTART:${formatWeeklyICSDate(start)}`);
+      lines.push(`DTEND:${formatWeeklyICSDate(end)}`);
+      lines.push(`SUMMARY:${escapeWeeklyICSText(summary)}`);
+      if (block.why) lines.push(`DESCRIPTION:${escapeWeeklyICSText(block.why)}`);
+      lines.push('END:VEVENT');
+    });
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+function getMondayOfCurrentWeek() {
+  const today = new Date();
+  const day = today.getDay();
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(today.setDate(diff));
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+
+function parseWeeklyTimeRange(timeStr) {
+  if (!timeStr || timeStr === 'Flexible') return null;
+  const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[-–]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (!match) return null;
+  let [, h1, m1, ap1, h2, m2, ap2] = match;
+  let startHour = parseInt(h1);
+  let endHour = parseInt(h2);
+  if (!ap1 && ap2) ap1 = ap2;
+  if (!ap2 && ap1) ap2 = ap1;
+  if (ap1) {
+    const ap = ap1.toUpperCase();
+    if (ap === 'PM' && startHour !== 12) startHour += 12;
+    if (ap === 'AM' && startHour === 12) startHour = 0;
+  }
+  if (ap2) {
+    const ap = ap2.toUpperCase();
+    if (ap === 'PM' && endHour !== 12) endHour += 12;
+    if (ap === 'AM' && endHour === 12) endHour = 0;
+  }
+  return { startHour, startMinute: parseInt(m1), endHour, endMinute: parseInt(m2) };
+}
+
+function formatWeeklyICSDate(date) {
+  return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+
+function escapeWeeklyICSText(text) {
+  return String(text).replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n');
+}
+
+// =====================================================
+// WEEKLY WIN PLAN - Unified execution (uses API)
 // =====================================================
 async function generateWeeklyPlan() {
     const btn = document.getElementById('generate-win-plan-btn');
@@ -892,35 +1207,12 @@ async function generateWeeklyPlan() {
     localStorage.removeItem('weeklyCheckedTasks');
     if (container) container.innerHTML = '';   // keep it clean while the overlay is up
 
-    const prompt = `You are an expert mortgage sales coach. Create a practical, motivating 7-day prospecting plan for a loan officer.
-
-User Profile:
-- Name: ${getCentralProfile().name || userSetup.name || ''}
-- Email: ${getCentralProfile().email || ''}
-- Monthly loan goal (units): ${getCentralProfile().monthlyUnits || getCentralProfile().monthlyGoal || userSetup.monthlyGoal || 8}
-- Focus area: ${getCentralProfile().focus || userSetup.focus || ''}
-- Weekly prospecting hours available: ${getCentralProfile().hours || userSetup.hours || ''}
-- Hobbies/Passions: ${[...(getCentralProfile().hobbies || []), getCentralProfile().hobbiesOther].filter(Boolean).join(', ') || [...(userSetup.hobbies || []), userSetup.hobbiesOther].filter(Boolean).join(', ') || 'none specified'}
-- Preferred prospecting activities: ${ (getCentralProfile().activities || getCentralProfile().preferredActivities || userSetup.preferredActivities || []).join(', ') || 'balanced mix' }
-
-Create exactly 7 days (Monday through Sunday). For each day give 2-4 specific, actionable prospecting or relationship tasks that fit the user's available time and preferred style. Weave in their hobbies naturally when it makes sense (e.g. golf with a realtor partner).
-
-Return ONLY valid JSON in this exact format:
-{
-  "days": [
-    {
-      "day": "Monday",
-      "tasks": [
-        {"task": "Specific actionable task here", "tip": "Short practical tip"}
-      ]
-    }
-  ]
-}`;
+    const prompt = buildUnifiedWeeklyPrompt();
 
     try {
         const response = await window.callGrokAPI(prompt, {
             temperature: 0.7,
-            max_tokens: 2500
+            max_tokens: 4000
         });
 
         // Try to parse JSON from the response
@@ -936,9 +1228,17 @@ Return ONLY valid JSON in this exact format:
             throw new Error('Invalid plan structure from AI');
         }
 
+        data.days = normalizeDaysToV2(data.days);
+        data.version = WEEKLY_PLAN_VERSION;
+        currentWeeklyPlanMeta = {
+          summary: data.summary || '',
+          totalHours: data.totalHours || getWeeklyCustomizePrefs().hours
+        };
+
         // Persist the plan so it survives page reloads
         savedWeeklyPlan = data;
         localStorage.setItem('savedWeeklyPlan', JSON.stringify(data));
+        localStorage.removeItem('savedProspectingTimeBlocks');
 
         // Render the tiles + show polished results wrapper
         const resultsWrapper = document.getElementById('weekly-plan-results');
@@ -951,6 +1251,7 @@ Return ONLY valid JSON in this exact format:
         if (pregen) pregen.classList.add('hidden');
 
         renderWeeklyTiles(data.days, container);
+        updateWeeklyResultsHeader();
 
     } catch (error) {
         console.error('[weekly-win-plan] generateWeeklyPlan failed:', error);
@@ -1068,10 +1369,8 @@ function restoreBusinessPlanningForm() {
 }
 
 function renderWeeklyTiles(days, container) {
-    // Store for later use (custom tasks, reset, copy, etc.)
-    currentWeeklyDays = days;
+    currentWeeklyDays = normalizeDaysToV2(days);
 
-    // Load previously checked tasks
     let checkedTasks = [];
     try {
         checkedTasks = JSON.parse(localStorage.getItem('weeklyCheckedTasks') || '[]');
@@ -1079,79 +1378,73 @@ function renderWeeklyTiles(days, container) {
 
     let html = '';
 
-    days.forEach((day) => {
-        const tasks = day.tasks || [];
-        const tasksHtml = tasks.map((t) => {
-            const taskKey = `${day.day}::${t.task}`;
-            const isChecked = checkedTasks.includes(taskKey);
-            const isCustom = t.isCustom === true;
+    currentWeeklyDays.forEach((day) => {
+        const blocks = day.blocks || [];
+        const blockCount = blocks.length;
+        const taskCount = blocks.reduce((n, b) => n + (b.tasks || []).length, 0);
 
-            // Simple icon based on task content for visual pop (keeps it dead simple)
-            let icon = 'fa-check-circle';
-            const lower = (t.task || '').toLowerCase();
-            if (lower.includes('call') || lower.includes('text') || lower.includes('dm') || lower.includes('reach out')) icon = 'fa-phone';
-            else if (lower.includes('social') || lower.includes('post') || lower.includes('reel') || lower.includes('linkedin')) icon = 'fa-share-alt';
-            else if (lower.includes('pop') || lower.includes('gift') || lower.includes('coffee') || lower.includes('lunch') || lower.includes('note')) icon = 'fa-gift';
-            else if (lower.includes('value') || lower.includes('article') || lower.includes('checklist')) icon = 'fa-lightbulb';
+        const blocksHtml = blocks.map((block) => {
+            const tasksHtml = (block.tasks || []).map((t) => {
+                const taskKey = `${day.day}::${block.time}::${t.task}`;
+                const isChecked = checkedTasks.includes(taskKey);
+                const isCustom = t.isCustom === true;
 
-            return `
-                <div class="group flex items-start gap-3 p-3.5 rounded-2xl border transition-all hover:shadow-sm
-                    ${isChecked ? 'bg-[#00A89D]/5 border-[#00A89D]/50' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/60'}
-                    ${isCustom ? 'border-dashed border-[#F15A29]/50' : ''}">
+                let icon = 'fa-check-circle';
+                const lower = (t.task || '').toLowerCase();
+                if (lower.includes('call') || lower.includes('text') || lower.includes('dm') || lower.includes('reach out')) icon = 'fa-phone';
+                else if (lower.includes('social') || lower.includes('post') || lower.includes('reel') || lower.includes('linkedin')) icon = 'fa-share-alt';
+                else if (lower.includes('pop') || lower.includes('gift') || lower.includes('coffee') || lower.includes('lunch') || lower.includes('note')) icon = 'fa-gift';
+                else if (lower.includes('value') || lower.includes('article') || lower.includes('checklist')) icon = 'fa-lightbulb';
 
-                    <div class="mt-0.5">
-                        <input type="checkbox" 
-                               class="weekly-task-checkbox w-5 h-5 accent-[#00A89D] cursor-pointer"
-                               data-key="${taskKey}"
-                               ${isChecked ? 'checked' : ''}>
-                    </div>
-
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-start gap-2">
-                            <i class="fas ${icon} text-[#00A89D] mt-1 text-sm flex-shrink-0"></i>
-                            <div class="font-semibold text-[15px] leading-snug tracking-[-0.1px] ${isChecked ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}">
-                                ${t.task}
-                                ${isCustom ? '<span class="ml-2 text-[9px] px-1.5 py-px rounded bg-[#F15A29]/10 text-[#F15A29] font-bold tracking-wider">CUSTOM</span>' : ''}
+                return `
+                    <div class="group flex items-start gap-3 p-3 rounded-xl border transition-all
+                        ${isChecked ? 'bg-[#00A89D]/5 border-[#00A89D]/40' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50'}
+                        ${isCustom ? 'border-dashed border-[#F15A29]/50' : ''}">
+                        <input type="checkbox" class="weekly-task-checkbox w-4 h-4 mt-1 accent-[#00A89D] cursor-pointer flex-shrink-0"
+                               data-key="${taskKey}" ${isChecked ? 'checked' : ''}>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start gap-2">
+                                <i class="fas ${icon} text-[#00A89D] mt-0.5 text-xs flex-shrink-0"></i>
+                                <div class="font-medium text-sm leading-snug ${isChecked ? 'line-through text-gray-400' : 'text-gray-900 dark:text-gray-100'}">
+                                    ${t.task}
+                                    ${isCustom ? '<span class="ml-1 text-[9px] px-1 py-px rounded bg-[#F15A29]/10 text-[#F15A29] font-bold">CUSTOM</span>' : ''}
+                                </div>
                             </div>
-                        </div>
-
-                        ${t.tip ? `
-                            <div class="mt-2 ml-6 text-xs bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 text-gray-600 dark:text-gray-400">
-                                <span class="font-semibold text-[#00A89D] mr-1">💡</span> ${t.tip}
-                            </div>
-                        ` : ''}
-
-                        <div class="mt-1.5 ml-6">
+                            ${t.tip ? `<div class="mt-1.5 ml-5 text-xs text-gray-500 dark:text-gray-400"><span class="text-[#00A89D] font-semibold">Tip:</span> ${t.tip}</div>` : ''}
                             <button onclick="if(typeof window.saveWeeklyTask==='function') window.saveWeeklyTask(this)"
-                                    data-day="${day.day}"
-                                    data-task="${(t.task || '').replace(/"/g, '&quot;')}"
+                                    data-day="${day.day}" data-task="${(t.task || '').replace(/"/g, '&quot;')}"
                                     data-tip="${(t.tip || '').replace(/"/g, '&quot;')}"
-                                    class="text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-gray-700 text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition flex items-center gap-1">
-                                <i class="far fa-bookmark text-[9px]"></i>
-                                <span>Save</span>
+                                    class="mt-1.5 ml-5 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition inline-flex items-center gap-1">
+                                <i class="far fa-bookmark text-[9px]"></i> Save
                             </button>
                         </div>
                     </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 p-3.5 mb-3">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="font-bold text-sm tabular-nums text-[#002B5C] dark:text-white">${block.time}</div>
+                        ${block.focus ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold">${block.focus}</span>` : ''}
+                    </div>
+                    ${block.why ? `<div class="text-xs text-[#00A89D]/90 mb-2 italic">${block.why}</div>` : ''}
+                    <div class="space-y-2">${tasksHtml || '<div class="text-xs text-gray-400 italic">No tasks in this block</div>'}</div>
                 </div>
             `;
         }).join('');
 
-        const taskCount = tasks.length;
         html += `
             <div class="bg-white dark:bg-gray-900 rounded-3xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col hover:border-[#00A89D]/40 transition-all">
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <div class="font-extrabold text-2xl text-[#F15A29] tracking-tighter">${day.day}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${taskCount} task${taskCount !== 1 ? 's' : ''}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${blockCount} block${blockCount !== 1 ? 's' : ''} • ${taskCount} task${taskCount !== 1 ? 's' : ''}</div>
                     </div>
                     <div class="text-xs px-2.5 py-1 rounded-full bg-[#F15A29]/10 text-[#F15A29] font-bold">FOCUS DAY</div>
                 </div>
-
-                <div class="space-y-2 flex-1 mb-3">
-                    ${tasksHtml || '<div class="text-sm text-gray-500 dark:text-gray-400 italic py-2">Light day — protect energy and focus on relationships.</div>'}
-                </div>
-
-                <button onclick="addCustomTaskToDay('${day.day}', this)" 
+                <div class="flex-1 mb-3">${blocksHtml || '<div class="text-sm text-gray-500 italic py-2">Light day — protect energy.</div>'}</div>
+                <button onclick="addCustomTaskToDay('${day.day}', this)"
                         class="mt-auto text-xs flex items-center justify-center gap-2 text-[#00A89D] hover:text-white hover:bg-[#00A89D] font-semibold py-2.5 border border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-[#00A89D] transition-all">
                     <i class="fas fa-plus text-xs"></i>
                     <span class="font-medium">Add your own task</span>
@@ -1161,25 +1454,20 @@ function renderWeeklyTiles(days, container) {
     });
 
     container.innerHTML = html;
+    updatePlanProgress(currentWeeklyDays, checkedTasks);
 
-    // Update the static progress UI
-    updatePlanProgress(days, checkedTasks);
-
-    // Attach checkbox handlers (re-render on change for visual update)
     container.querySelectorAll('.weekly-task-checkbox').forEach(cb => {
         cb.addEventListener('change', () => {
             const key = cb.dataset.key;
             let current = [];
             try { current = JSON.parse(localStorage.getItem('weeklyCheckedTasks') || '[]'); } catch (e) {}
-
             if (cb.checked) {
                 if (!current.includes(key)) current.push(key);
             } else {
                 current = current.filter(k => k !== key);
             }
             localStorage.setItem('weeklyCheckedTasks', JSON.stringify(current));
-
-            renderWeeklyTiles(days, container);
+            renderWeeklyTiles(currentWeeklyDays, container);
         });
     });
 }
@@ -1218,7 +1506,7 @@ function clearWeeklyPlan() {
 
 // Updates the progress numbers, bar, and message in the new polished layout
 function updatePlanProgress(days, checkedTasks = []) {
-    const total = days.reduce((sum, d) => sum + (d.tasks ? d.tasks.length : 0), 0);
+    const total = countTasksInDays(days);
     const completed = checkedTasks.length || 0;
 
     const completedEl = document.getElementById('tasks-completed');
@@ -1255,10 +1543,13 @@ function copyWeeklyPlan() {
 
     currentWeeklyDays.forEach(day => {
         text += `${day.day}\n`;
-        (day.tasks || []).forEach(t => {
-            text += `• ${t.task}`;
-            if (t.tip) text += ` — ${t.tip}`;
-            text += `\n`;
+        (day.blocks || []).forEach(b => {
+            text += `  ${b.time}${b.focus ? ` (${b.focus})` : ''}\n`;
+            (b.tasks || []).forEach(t => {
+                text += `    • ${t.task}`;
+                if (t.tip) text += ` — ${t.tip}`;
+                text += `\n`;
+            });
         });
         text += `\n`;
     });
@@ -1285,10 +1576,12 @@ function saveWeeklyPlanToVault() {
     <span class="text-xs uppercase tracking-widest font-bold text-[#F15A29]">Weekly Win Plan</span>
   </div>`;
     currentWeeklyDays.forEach(day => {
-        richHtml += `<div class="mb-3">
-  <div class="font-bold text-[#F15A29]">${day.day}</div>`;
-        (day.tasks || []).forEach(t => {
-            richHtml += `<div class="ml-2 text-sm">• ${t.task}${t.tip ? ` <span class="text-gray-500">— ${t.tip}</span>` : ''}</div>`;
+        richHtml += `<div class="mb-3"><div class="font-bold text-[#F15A29]">${day.day}</div>`;
+        (day.blocks || []).forEach(b => {
+            richHtml += `<div class="ml-2 text-sm font-semibold text-[#002B5C]">${b.time}${b.focus ? ` — ${b.focus}` : ''}</div>`;
+            (b.tasks || []).forEach(t => {
+                richHtml += `<div class="ml-4 text-sm">• ${t.task}${t.tip ? ` <span class="text-gray-500">— ${t.tip}</span>` : ''}</div>`;
+            });
         });
         richHtml += `</div>`;
     });
@@ -1360,15 +1653,26 @@ function addCustomTaskToDay(dayName, buttonElement) {
             return;
         }
 
-        if (!dayObj.tasks) dayObj.tasks = [];
+        if (!dayObj.blocks) dayObj.blocks = [];
+        let targetBlock = dayObj.blocks.find(b => b.time === 'Flexible' || b.time === 'Custom');
+        if (!targetBlock) {
+            targetBlock = { time: 'Flexible', focus: 'Custom', why: 'You added this', tasks: [] };
+            dayObj.blocks.push(targetBlock);
+        }
+        if (!targetBlock.tasks) targetBlock.tasks = [];
 
-        dayObj.tasks.push({
+        targetBlock.tasks.push({
             task: value,
             tip: 'You added this task',
             isCustom: true
         });
 
-        savedWeeklyPlan = { days: currentWeeklyDays };
+        savedWeeklyPlan = {
+            version: WEEKLY_PLAN_VERSION,
+            summary: currentWeeklyPlanMeta.summary || '',
+            totalHours: currentWeeklyPlanMeta.totalHours,
+            days: currentWeeklyDays
+        };
         localStorage.setItem('savedWeeklyPlan', JSON.stringify(savedWeeklyPlan));
 
         const container = document.getElementById('weekly-tasks-container');
@@ -2381,6 +2685,7 @@ window.resetWeeklyProgress = resetWeeklyProgress;
 window.copyWeeklyPlan = copyWeeklyPlan;
 window.clearWeeklyPlan = clearWeeklyPlan;
 window.addCustomTaskToDay = addCustomTaskToDay;
+window.exportWeeklyPlanToICS = exportWeeklyPlanToICS;
 
 // =====================================================
 function wireGeneratePlanButton() {
@@ -2491,10 +2796,14 @@ function initWeeklyWinPlan() {
     }
 
     // Auto-restore previously generated weekly plan (persistence)
+    migrateLegacyWeeklyStorage();
     restoreSavedWeeklyPlan();
+    wireWeeklyCustomizeControls();
 
     window.generateWeeklyPlan = generateWeeklyPlan;
     window.saveWeeklyPlanToVault = saveWeeklyPlanToVault;
+    window.exportWeeklyPlanToICS = exportWeeklyPlanToICS;
+    window.updateWeeklyCustomizeDisplays = updateWeeklyCustomizeDisplays;
 
     console.log('%c[weekly-win-plan.js] Weekly Win Plan / Business Planning initialized', 'color:#00A89D');
 
