@@ -681,6 +681,7 @@ function restoreSavedWeeklyPlan() {
 
         renderWeeklyTiles(savedWeeklyPlan.days, container);
         updateWeeklyResultsHeader();
+        ensureWeeklyPlanFeedbackUI();
         // Ensure progress UI is in sync on restore
         const checked = JSON.parse(localStorage.getItem('weeklyCheckedTasks') || '[]');
         updatePlanProgress(savedWeeklyPlan.days, checked);
@@ -1001,6 +1002,75 @@ Rules:
 - Respect total weekly hours (~${hours}) unless feedback explicitly changes that.
 - If feedback is narrow (e.g. "more realtor pop-bys on Tuesday"), change only what is needed; keep the rest of the week intact when possible.
 - Block "focus" should align with LO pipelines: Realtors, Sphere, Past Clients, Equity/Refi, Social/Content, Partner Outreach.`;
+}
+
+function getWeeklyPlanFeedbackInnerHTML() {
+  return `
+    <div class="font-semibold text-[#002B5C] dark:text-white mb-1 flex items-center gap-2">
+      <i class="fas fa-comment-dots text-[#00A89D]"></i>
+      Refine this plan before you export
+      <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F15A29]/15 text-[#F15A29]">Weekly Win Plan</span>
+    </div>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+      Tweak focus, timing, or tasks — then regenerate. Your time edits and custom tasks are sent as context so the AI adjusts instead of starting over blind.
+      <span class="block mt-1 text-gray-600 dark:text-gray-300">Examples: “More realtor pop-bys Tuesday” • “Lighten Monday — only 1 block” • “Add equity scan outreach Thursday” • “Swap sphere for past-client calls”</span>
+    </p>
+    <textarea id="weekly-plan-feedback-input" rows="3" class="w-full text-sm p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-[#00A89D]/50" placeholder="What should change in this week's plan?"></textarea>
+    <div class="mt-3 flex flex-wrap gap-2 items-center">
+      <button type="button" id="weekly-plan-feedback-apply-btn" class="px-4 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-medium flex items-center gap-2 hover:bg-[#008F85] transition">
+        <i class="fas fa-redo"></i>
+        <span>Apply feedback &amp; regenerate</span>
+      </button>
+      <button type="button" id="weekly-plan-feedback-clear-btn" class="px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Clear</button>
+      <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">Then export to calendar or copy when it looks right.</span>
+    </div>`;
+}
+
+/** Ensures feedback UI exists and is visible whenever a weekly plan is shown (handles stale cached index.html). */
+function ensureWeeklyPlanFeedbackUI() {
+  const results = document.getElementById('weekly-plan-results');
+  if (!results || results.classList.contains('hidden')) return;
+  if (!currentWeeklyDays || !currentWeeklyDays.length) return;
+
+  let section = document.getElementById('weekly-plan-feedback-section');
+  if (!section) {
+    section = document.createElement('div');
+    section.id = 'weekly-plan-feedback-section';
+    const tasksContainer = document.getElementById('weekly-tasks-container');
+    const tasksCard = tasksContainer?.parentElement;
+    if (tasksCard && tasksCard.parentElement === results) {
+      results.insertBefore(section, tasksCard);
+    } else if (tasksContainer?.parentNode) {
+      tasksContainer.parentNode.insertBefore(section, tasksContainer);
+    } else {
+      results.appendChild(section);
+    }
+  }
+
+  section.className = 'mb-6 p-5 border-2 border-dashed border-[#00A89D] rounded-3xl bg-[#00A89D]/10 shadow-md';
+  section.classList.remove('hidden');
+  section.hidden = false;
+  section.style.removeProperty('display');
+  section.setAttribute('data-wwp-feedback', 'v2');
+
+  if (!section.querySelector('#weekly-plan-feedback-input')) {
+    section.innerHTML = getWeeklyPlanFeedbackInnerHTML();
+    const applyBtn = section.querySelector('#weekly-plan-feedback-apply-btn');
+    const clearBtn = section.querySelector('#weekly-plan-feedback-clear-btn');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', () => {
+        if (typeof window.applyWeeklyPlanFeedbackAndRegenerate === 'function') {
+          window.applyWeeklyPlanFeedbackAndRegenerate();
+        }
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        const input = document.getElementById('weekly-plan-feedback-input');
+        if (input) input.value = '';
+      });
+    }
+  }
 }
 
 function updateWeeklyResultsHeader() {
@@ -1487,11 +1557,12 @@ async function generateWeeklyPlan(options = {}) {
 
         renderWeeklyTiles(data.days, container);
         updateWeeklyResultsHeader();
+        ensureWeeklyPlanFeedbackUI();
 
         if (!isFeedbackRegen) {
           const feedbackSection = document.getElementById('weekly-plan-feedback-section');
           if (feedbackSection) {
-            setTimeout(() => feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 350);
+            setTimeout(() => feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
           }
         }
 
@@ -1737,6 +1808,7 @@ function renderWeeklyTiles(days, container) {
     });
 
     wireWeeklyTimeEditors(container);
+    ensureWeeklyPlanFeedbackUI();
 }
 
 // =====================================================

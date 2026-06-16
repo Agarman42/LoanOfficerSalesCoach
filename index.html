@@ -6789,10 +6789,11 @@
             </div>
 
             <!-- Refine with feedback (before copy / calendar export) — above task grid so it's visible without scrolling past all days -->
-            <div id="weekly-plan-feedback-section" class="mb-6 p-5 border border-dashed border-[#00A89D]/40 rounded-3xl bg-[#00A89D]/5">
-                <div class="font-semibold text-[#002B5C] dark:text-white mb-1 flex items-center gap-2">
+            <div id="weekly-plan-feedback-section" data-wwp-feedback="v2" class="mb-6 p-5 border-2 border-dashed border-[#00A89D] rounded-3xl bg-[#00A89D]/10 shadow-md">
+                <div class="font-semibold text-[#002B5C] dark:text-white mb-1 flex items-center gap-2 flex-wrap">
                     <i class="fas fa-comment-dots text-[#00A89D]"></i>
                     Refine this plan before you export
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F15A29]/15 text-[#F15A29]">Weekly Win Plan</span>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
                     Tweak focus, timing, or tasks — then regenerate. Your time edits and custom tasks are sent as context so the AI adjusts instead of starting over blind.
@@ -14399,7 +14400,7 @@ window.openExpandedSocialExamplesModal = function(pillar) {
 <script src="js/features/sales-scripts.js"></script>
 <script src="js/features/social-post.js"></script>
 <script src="js/features/mindset-lab.js"></script>
-<script src="js/features/weekly-win-plan.js"></script>
+<script src="js/features/weekly-win-plan.js?v=20260616-feedback"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
 <script src="js/features/blog-creator.js"></script>
 <script src="js/features/legacy-helpers.js"></script>
