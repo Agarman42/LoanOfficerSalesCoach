@@ -20,9 +20,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Visiting the root URL (/) will automatically serve index.html cleanly
 // without appending /index.html to the browser address bar.
 app.use(express.static('.', {
-    setHeaders: (res, path) => {
-        if (path.endsWith('index.html')) {
-            // Force no caching for the main file so edits to rich modals etc. are always fresh
+    setHeaders: (res, filePath) => {
+        // Force no caching for HTML + feature JS so Render deploys are visible immediately
+        if (filePath.endsWith('index.html') || filePath.includes('/js/features/')) {
             res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
             res.setHeader('Pragma', 'no-cache');
             res.setHeader('Expires', '0');
