@@ -767,6 +767,90 @@ function restoreSavedBusinessPlan() {
 // =====================================================
 const WEEKLY_PLAN_VERSION = 2;
 let currentWeeklyPlanMeta = { summary: '', totalHours: null };
+const weeklyOpenTimeEditors = new Set();
+
+function weeklyTimeEditorKey(dayName, blockIndex, taskIndex) {
+  if (taskIndex !== undefined && taskIndex !== null && !Number.isNaN(taskIndex)) {
+    return `${dayName}::block::${blockIndex}::task::${taskIndex}`;
+  }
+  return `${dayName}::block::${blockIndex}`;
+}
+
+function isWeeklyTimeEditorOpen(key) {
+  return weeklyOpenTimeEditors.has(key);
+}
+
+window.toggleWeeklyTimeEditor = function(btn) {
+  const key = btn && btn.dataset ? btn.dataset.editorKey : '';
+  if (!key) return;
+  if (weeklyOpenTimeEditors.has(key)) weeklyOpenTimeEditors.delete(key);
+  else weeklyOpenTimeEditors.add(key);
+  const container = document.getElementById('weekly-tasks-container');
+  if (container && currentWeeklyDays) {
+    renderWeeklyTiles(currentWeeklyDays, container);
+    if (weeklyOpenTimeEditors.has(key)) {
+      setTimeout(() => {
+        const panel = container.querySelector(`[data-editor-panel="${key}"]`);
+        const input = panel && panel.querySelector('input[type="time"]');
+        if (input) input.focus();
+      }, 50);
+    }
+  }
+};
+
+function renderWeeklyBlockTimeUI(dayName, blockIndex, block, timeInputs) {
+  const editorKey = weeklyTimeEditorKey(dayName, blockIndex);
+  const displayTime = block.time || 'Flexible';
+  if (!timeInputs.editable) {
+    return `<div class="font-bold text-sm tabular-nums text-[#002B5C] dark:text-white">${displayTime}</div>`;
+  }
+  const isOpen = isWeeklyTimeEditorOpen(editorKey);
+  const editorPanel = isOpen
+    ? `<div class="w-full basis-full flex items-center gap-1.5 flex-wrap wwp-time-editor mt-1.5" data-editor-panel="${editorKey}" title="Adjust times before calendar export">
+        <input type="time" class="wwp-block-time-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+               value="${timeInputs.start}" data-day="${dayName}" data-block-index="${blockIndex}" aria-label="Block start time">
+        <span class="text-xs text-gray-400">–</span>
+        <input type="time" class="wwp-block-time-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+               value="${timeInputs.end}" data-day="${dayName}" data-block-index="${blockIndex}" aria-label="Block end time">
+       </div>`
+    : '';
+  return `<div class="flex items-center gap-2 flex-wrap">
+      <div class="font-bold text-sm tabular-nums text-[#002B5C] dark:text-white">${displayTime}</div>
+      <button type="button" class="wwp-time-edit-btn text-[10px] px-1.5 py-0.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 hover:border-[#00A89D] hover:text-[#00A89D] transition"
+              data-editor-key="${editorKey}" onclick="if(typeof window.toggleWeeklyTimeEditor==='function')window.toggleWeeklyTimeEditor(this)"
+              aria-label="Edit block time" title="Edit time"><i class="fas fa-pen text-[9px]"></i></button>
+      ${editorPanel}
+    </div>`;
+}
+
+function renderWeeklyCustomTaskTimeUI(dayName, blockIndex, taskIndex, task, customTimeInputs) {
+  const editorKey = weeklyTimeEditorKey(dayName, blockIndex, taskIndex);
+  const isOpen = isWeeklyTimeEditorOpen(editorKey);
+  const hasTime = !!(task.time && customTimeInputs && customTimeInputs.hasValue);
+  const scheduleLabel = hasTime
+    ? `<span class="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums">${task.time}</span>`
+    : '';
+  const editorPanel = isOpen
+    ? `<div class="w-full flex items-center gap-1.5 flex-wrap wwp-time-editor mt-1" data-editor-panel="${editorKey}" title="Optional — adds this task to calendar export">
+        <input type="time" class="wwp-task-time-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+               ${customTimeInputs && customTimeInputs.start ? `value="${customTimeInputs.start}"` : ''}
+               data-day="${dayName}" data-block-index="${blockIndex}" data-task-index="${taskIndex}" aria-label="Custom task start time">
+        <span class="text-xs text-gray-400">–</span>
+        <input type="time" class="wwp-task-time-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
+               ${customTimeInputs && customTimeInputs.end ? `value="${customTimeInputs.end}"` : ''}
+               data-day="${dayName}" data-block-index="${blockIndex}" data-task-index="${taskIndex}" aria-label="Custom task end time">
+       </div>`
+    : '';
+  return `<div class="mt-2 ml-5 flex items-center gap-2 flex-wrap">
+      ${scheduleLabel}
+      <button type="button" class="wwp-time-edit-btn text-[10px] px-1.5 py-0.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 hover:border-[#00A89D] hover:text-[#00A89D] transition"
+              data-editor-key="${editorKey}" onclick="if(typeof window.toggleWeeklyTimeEditor==='function')window.toggleWeeklyTimeEditor(this)"
+              aria-label="${hasTime ? 'Edit task time' : 'Add task time'}" title="${hasTime ? 'Edit time' : 'Add time'}">
+        <i class="fas ${hasTime ? 'fa-pen' : 'fa-clock'} text-[9px]"></i>
+      </button>
+      ${editorPanel}
+    </div>`;
+}
 
 function getWeeklyCustomizePrefs() {
   const hours = parseInt(document.getElementById('wwp-hours')?.value) || 15;
@@ -1033,25 +1117,27 @@ function ensureWeeklyPlanFeedbackUI() {
   if (!currentWeeklyDays || !currentWeeklyDays.length) return;
 
   let section = document.getElementById('weekly-plan-feedback-section');
+  const tasksContainer = document.getElementById('weekly-tasks-container');
+  const tasksCard = tasksContainer?.parentElement;
   if (!section) {
     section = document.createElement('div');
     section.id = 'weekly-plan-feedback-section';
-    const tasksContainer = document.getElementById('weekly-tasks-container');
-    const tasksCard = tasksContainer?.parentElement;
-    if (tasksCard && tasksCard.parentElement === results) {
-      results.insertBefore(section, tasksCard);
-    } else if (tasksContainer?.parentNode) {
-      tasksContainer.parentNode.insertBefore(section, tasksContainer);
-    } else {
-      results.appendChild(section);
+  }
+  // Below the weekly calendar grid, inside the results card (matches realtor layout)
+  if (tasksContainer?.parentNode) {
+    const anchor = tasksContainer.nextSibling;
+    if (section.parentNode !== tasksContainer.parentNode || section.previousSibling !== tasksContainer) {
+      tasksContainer.parentNode.insertBefore(section, anchor);
     }
+  } else if (!section.parentNode) {
+    results.appendChild(section);
   }
 
-  section.className = 'mb-6 p-5 border-2 border-dashed border-[#00A89D] rounded-3xl bg-[#00A89D]/10 shadow-md';
+  section.className = 'mt-8 p-5 border border-dashed border-[#00A89D]/40 rounded-3xl bg-[#00A89D]/5';
   section.classList.remove('hidden');
   section.hidden = false;
   section.style.removeProperty('display');
-  section.setAttribute('data-wwp-feedback', 'v2');
+  section.setAttribute('data-wwp-feedback', 'v3');
 
   if (!section.querySelector('#weekly-plan-feedback-input')) {
     section.innerHTML = getWeeklyPlanFeedbackInnerHTML();
@@ -1311,6 +1397,8 @@ function updateWeeklyCustomTaskTime(dayName, blockIndex, taskIndex, startValue, 
   if (!startValue && !endValue) {
     delete task.time;
     persistCurrentWeeklyPlan();
+    const container = document.getElementById('weekly-tasks-container');
+    if (container && currentWeeklyDays) renderWeeklyTiles(currentWeeklyDays, container);
     return;
   }
 
@@ -1323,6 +1411,8 @@ function updateWeeklyCustomTaskTime(dayName, blockIndex, taskIndex, startValue, 
 
   task.time = weeklyFormatBlockTimeRange(startParts, endParts);
   persistCurrentWeeklyPlan();
+  const container = document.getElementById('weekly-tasks-container');
+  if (container && currentWeeklyDays) renderWeeklyTiles(currentWeeklyDays, container);
 }
 
 function wireWeeklyTimeEditors(container) {
@@ -1559,13 +1649,6 @@ async function generateWeeklyPlan(options = {}) {
         updateWeeklyResultsHeader();
         ensureWeeklyPlanFeedbackUI();
 
-        if (!isFeedbackRegen) {
-          const feedbackSection = document.getElementById('weekly-plan-feedback-section');
-          if (feedbackSection) {
-            setTimeout(() => feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
-          }
-        }
-
     } catch (error) {
         console.error('[weekly-win-plan] generateWeeklyPlan failed:', error);
         container.innerHTML = `
@@ -1726,17 +1809,7 @@ function renderWeeklyTiles(days, container) {
                                 </div>
                             </div>
                             ${t.tip ? `<div class="mt-1.5 ml-5 text-xs text-gray-500 dark:text-gray-400"><span class="text-[#00A89D] font-semibold">Tip:</span> ${t.tip}</div>` : ''}
-                            ${isCustom ? `
-                            <div class="mt-2 ml-5 flex items-center gap-1.5 flex-wrap wwp-time-editor" title="Optional — adds this task to calendar export">
-                                <span class="text-[10px] text-gray-400 font-medium">Schedule:</span>
-                                <input type="time" class="wwp-task-time-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
-                                       ${customTimeInputs && customTimeInputs.start ? `value="${customTimeInputs.start}"` : ''}
-                                       data-day="${day.day}" data-block-index="${blockIndex}" data-task-index="${taskIndex}" aria-label="Custom task start time">
-                                <span class="text-xs text-gray-400">–</span>
-                                <input type="time" class="wwp-task-time-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
-                                       ${customTimeInputs && customTimeInputs.end ? `value="${customTimeInputs.end}"` : ''}
-                                       data-day="${day.day}" data-block-index="${blockIndex}" data-task-index="${taskIndex}" aria-label="Custom task end time">
-                            </div>` : ''}
+                            ${isCustom ? renderWeeklyCustomTaskTimeUI(day.day, blockIndex, taskIndex, t, customTimeInputs) : ''}
                             <button onclick="if(typeof window.saveWeeklyTask==='function') window.saveWeeklyTask(this)"
                                     data-day="${day.day}" data-task="${(t.task || '').replace(/"/g, '&quot;')}"
                                     data-tip="${(t.tip || '').replace(/"/g, '&quot;')}"
@@ -1748,15 +1821,7 @@ function renderWeeklyTiles(days, container) {
                 `;
             }).join('');
 
-            const timeEditorHtml = timeInputs.editable
-                ? `<div class="flex items-center gap-1.5 flex-wrap wwp-time-editor" title="Adjust times before calendar export — end time shifts with start">
-                        <input type="time" class="wwp-block-time-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
-                               value="${timeInputs.start}" data-day="${day.day}" data-block-index="${blockIndex}" aria-label="Block start time">
-                        <span class="text-xs text-gray-400">–</span>
-                        <input type="time" class="wwp-block-time-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-[#002B5C] dark:text-white tabular-nums"
-                               value="${timeInputs.end}" data-day="${day.day}" data-block-index="${blockIndex}" aria-label="Block end time">
-                   </div>`
-                : `<div class="font-bold text-sm tabular-nums text-[#002B5C] dark:text-white">${block.time || 'Flexible'}</div>`;
+            const timeEditorHtml = renderWeeklyBlockTimeUI(day.day, blockIndex, block, timeInputs);
 
             return `
                 <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 p-3.5 mb-3">
@@ -1968,23 +2033,35 @@ function addCustomTaskToDay(dayName, buttonElement) {
     inputWrapper.innerHTML = `
         <input type="text" placeholder="Your custom task..." 
                class="w-full px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900">
-        <div class="flex items-center gap-2 flex-wrap wwp-time-editor">
-            <span class="text-xs text-gray-500 dark:text-gray-400">Schedule (optional, for calendar export):</span>
+        <button type="button" class="wwp-custom-add-schedule-toggle text-xs text-[#00A89D] hover:underline flex items-center gap-1">
+            <i class="fas fa-clock text-[10px]"></i> Add time for calendar (optional)
+        </button>
+        <div class="hidden flex items-center gap-2 flex-wrap wwp-time-editor">
             <input type="time" class="wwp-custom-add-start text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900" aria-label="Custom task start time">
             <span class="text-xs text-gray-400">–</span>
             <input type="time" class="wwp-custom-add-end text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900" aria-label="Custom task end time">
         </div>
         <div class="flex gap-2">
-            <button class="px-4 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-medium">Add</button>
-            <button class="px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Cancel</button>
+            <button type="button" class="wwp-custom-add-submit px-4 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-medium">Add</button>
+            <button type="button" class="wwp-custom-add-cancel px-3 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Cancel</button>
         </div>
     `;
 
     const input = inputWrapper.querySelector('input[type="text"]');
+    const scheduleToggle = inputWrapper.querySelector('.wwp-custom-add-schedule-toggle');
+    const schedulePanel = scheduleToggle && scheduleToggle.nextElementSibling;
     const startTimeInput = inputWrapper.querySelector('.wwp-custom-add-start');
     const endTimeInput = inputWrapper.querySelector('.wwp-custom-add-end');
-    const addBtn = inputWrapper.querySelector('button');
-    const cancelBtn = inputWrapper.querySelectorAll('button')[1];
+    const addBtn = inputWrapper.querySelector('.wwp-custom-add-submit');
+    const cancelBtn = inputWrapper.querySelector('.wwp-custom-add-cancel');
+
+    if (scheduleToggle && schedulePanel) {
+        scheduleToggle.addEventListener('click', () => {
+            schedulePanel.classList.toggle('hidden');
+            schedulePanel.classList.toggle('flex');
+            if (!schedulePanel.classList.contains('hidden') && startTimeInput) startTimeInput.focus();
+        });
+    }
 
     if (startTimeInput && endTimeInput) {
         startTimeInput.addEventListener('input', () => {
