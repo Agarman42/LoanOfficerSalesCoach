@@ -36,6 +36,7 @@
 
   const TITLE_UPDATES = {
     planning: '2026 Recruiting Plan',
+    'recruiting-plan-ops': '2026 Plan Operations',
     database: 'Prospect Nurturing',
     'recruiting-script': 'Recruiting Script Generator',
     blog: 'Recruiting Content Creator',
@@ -206,6 +207,8 @@
       { id: 'discovery', label: 'Discovery', icon: 'fa-search' },
       { id: 'objections', label: 'Objections', icon: 'fa-shield-alt' },
       { id: 'leadership', label: 'Leadership', icon: 'fa-users' },
+      { id: 'linkedin', label: 'LinkedIn', icon: 'fa-linkedin' },
+      { id: 'execprep', label: 'Exec Prep', icon: 'fa-clipboard-check' },
       { id: 'nurture', label: 'Nurture', icon: 'fa-heart' },
       { id: 'coaching', label: 'Coaching', icon: 'fa-chalkboard-teacher' }
     ];
@@ -259,7 +262,40 @@
         <div id="playbook-objection-results" class="space-y-4">${objectionCardsHtml}</div>`, false),
       renderPlaybookPanel('leadership', 'Leadership Meeting Scripts', `
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Position senior leadership conversations as high-value and low-risk — not a hard pitch.</p>
-        ${(playbook.leadershipMeetingScripts || []).map((s, i) => renderTextCard(`Leadership Script ${i + 1}`, s, 'playbook')).join('')}`, false),
+        ${(playbook.leadershipMeetingScripts || []).map((s, i) => renderTextCard(`Leadership Script ${i + 1}`, s, 'playbook')).join('')}
+        <div class="mt-6 text-center">
+          <button type="button" onclick="if(typeof window.openExecCallPrep==='function')window.openExecCallPrep()"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002B5C] text-white text-sm font-semibold hover:bg-black transition">
+            <i class="fas fa-clipboard-check"></i> Open Executive Call Prep &amp; Debrief
+          </button>
+        </div>`, false),
+      renderPlaybookPanel('linkedin', 'LinkedIn Connection & DM Snippets', `
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Copy-ready language for connection requests, follow-ups, and soft exec-call invites. Personalize [Name] and [market] before sending.</p>
+        <div class="space-y-4">
+          ${(playbook.linkedinSnippets || []).map(s => renderTextCard(s.title, s.text, 'linkedin')).join('')}
+        </div>`, false),
+      renderPlaybookPanel('execprep', 'Executive Call Prep & Debrief', `
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Use before and after every executive leadership conversation. Log everything in Shape.</p>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5">
+            <h4 class="font-semibold text-[#00A89D] mb-3">Pre-Call Checklist</h4>
+            ${renderBulletList(playbook.execCallPrep?.preCallChecklist || [], 'execprep')}
+          </div>
+          <div class="p-5 rounded-2xl border border-[#F15A29]/30 bg-[#F15A29]/5">
+            <h4 class="font-semibold text-[#F15A29] mb-3">During the Call</h4>
+            ${renderBulletList(playbook.execCallPrep?.duringCallReminders || [], 'execprep')}
+          </div>
+          <div class="p-5 rounded-2xl border border-[#002B5C]/30 bg-[#002B5C]/5">
+            <h4 class="font-semibold text-[#002B5C] dark:text-white mb-3">Post-Call Debrief</h4>
+            ${renderBulletList(playbook.execCallPrep?.postCallDebrief || [], 'execprep')}
+          </div>
+        </div>
+        <div class="mt-6 text-center">
+          <button type="button" onclick="if(typeof window.openExecCallPrep==='function')window.openExecCallPrep()"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#F15A29] text-white text-sm font-semibold hover:opacity-90 transition">
+            <i class="fas fa-user-edit"></i> Prep a Specific Candidate
+          </button>
+        </div>`, false),
       renderPlaybookPanel('nurture', 'Ending Calls & Long-Term Nurturing', `
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Even when they're not ready, keep the relationship alive. Log every touch in Shape.</p>
         ${renderBulletList(playbook.nurtureClose, 'playbook')}`, false),
@@ -291,7 +327,7 @@
       ${renderMetricsStrip(metrics)}
       <div class="mb-2 flex items-center justify-between gap-3">
         <div>
-          <span class="text-[10px] font-bold tracking-[2px] text-[#F15A29] uppercase">7 Topics — tap or scroll</span>
+          <span class="text-[10px] font-bold tracking-[2px] text-[#F15A29] uppercase">9 Topics — tap or scroll</span>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Philosophy through Coaching — each tab has copy-ready scripts and language.</p>
         </div>
         <div class="hidden sm:flex items-center gap-1 text-xs text-gray-500">
@@ -496,10 +532,144 @@
     window.RECRUITER_SECTION_REDIRECTS = SECTION_REDIRECTS;
   }
 
+  function openExecCallPrep() {
+    const existing = document.getElementById('exec-call-prep-modal');
+    if (existing) {
+      existing.classList.remove('hidden');
+      existing.classList.add('flex');
+      return;
+    }
+
+    const prep = window.RECRUITING_PLAYBOOK?.execCallPrep || {};
+    const modal = document.createElement('div');
+    modal.id = 'exec-call-prep-modal';
+    modal.className = 'fixed inset-0 bg-black/70 z-[999] flex items-center justify-center p-4';
+    modal.innerHTML = `
+      <div class="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[92vh] flex flex-col" onclick="event.stopPropagation()">
+        <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-[#002B5C] to-[#00A89D] rounded-t-3xl">
+          <div>
+            <h3 class="text-xl font-bold text-white">Executive Call Prep &amp; Debrief</h3>
+            <p class="text-sm text-white/80 mt-0.5">Candidate-specific prep → log in Shape → bridge to Script Generator</p>
+          </div>
+          <button type="button" data-close class="text-white/80 hover:text-white text-3xl leading-none">&times;</button>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1 space-y-5 text-sm">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-semibold text-[#002B5C] dark:text-white mb-1">Candidate name</label>
+              <input type="text" id="exec-prep-name" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="e.g. Jamie Smith">
+            </div>
+            <div>
+              <label class="block font-semibold text-[#002B5C] dark:text-white mb-1">Current company</label>
+              <input type="text" id="exec-prep-company" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="e.g. ABC Mortgage">
+            </div>
+            <div>
+              <label class="block font-semibold text-[#002B5C] dark:text-white mb-1">Production (units / yr)</label>
+              <input type="text" id="exec-prep-units" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="e.g. 45 units, 60% purchase">
+            </div>
+            <div>
+              <label class="block font-semibold text-[#002B5C] dark:text-white mb-1">Shape tier</label>
+              <select id="exec-prep-tier" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                <option value="A — Hot">A — Hot</option>
+                <option value="B — Warm">B — Warm</option>
+                <option value="C — Long game">C — Long game</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-[#002B5C] dark:text-white mb-1">What they said / objections / notes</label>
+            <textarea id="exec-prep-notes" rows="3" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="Happy but curious about ops support. Mentioned frustration with turn times..."></textarea>
+          </div>
+          <div>
+            <label class="block font-semibold text-[#00A89D] mb-2">Pre-call checklist</label>
+            <div class="space-y-2">
+              ${(prep.preCallChecklist || []).map((item, i) => `
+                <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                  <input type="checkbox" class="exec-prep-check mt-1 accent-[#00A89D]" data-phase="pre">
+                  <span>${escapeHtml(item)}</span>
+                </label>`).join('')}
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-[#F15A29] mb-2">Post-call debrief</label>
+            <div class="space-y-2">
+              ${(prep.postCallDebrief || []).map(item => `
+                <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                  <input type="checkbox" class="exec-prep-check mt-1 accent-[#F15A29]" data-phase="post">
+                  <span>${escapeHtml(item)}</span>
+                </label>`).join('')}
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-[#002B5C] dark:text-white mb-1">Outcome / next step</label>
+            <textarea id="exec-prep-outcome" rows="2" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="Exec call booked for Thu 2pm / Nurture — revisit in 90 days / Declined leadership call"></textarea>
+          </div>
+        </div>
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-3 justify-end bg-gray-50 dark:bg-gray-900 rounded-b-3xl">
+          <button type="button" id="exec-prep-to-script" class="px-5 py-2.5 rounded-xl bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition">
+            <i class="fas fa-comment-dots"></i> Send to Script Generator
+          </button>
+          <button type="button" id="exec-prep-copy" class="px-5 py-2.5 rounded-xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition">Copy summary</button>
+          <button type="button" data-close class="px-5 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-700 font-semibold">Close</button>
+        </div>
+      </div>`;
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    modal.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', closeModal));
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+    modal.querySelector('#exec-prep-copy')?.addEventListener('click', () => {
+      const summary = buildExecPrepSummary();
+      navigator.clipboard.writeText(summary).then(() => {
+        if (typeof window.showToast === 'function') window.showToast('Prep summary copied', 'success');
+      }).catch(() => alert(summary));
+    });
+
+    modal.querySelector('#exec-prep-to-script')?.addEventListener('click', () => {
+      const ctx = buildExecPrepSummary();
+      if (typeof window.showSection === 'function') window.showSection('recruiting-script');
+      setTimeout(() => {
+        const ta = document.getElementById('script-context');
+        if (ta) {
+          ta.value = ctx;
+          ta.focus();
+        }
+        closeModal();
+        if (typeof window.showToast === 'function') window.showToast('Context sent to Script Generator', 'success');
+      }, 350);
+    });
+
+    function buildExecPrepSummary() {
+      const name = document.getElementById('exec-prep-name')?.value?.trim() || '[Candidate]';
+      const company = document.getElementById('exec-prep-company')?.value?.trim() || '';
+      const units = document.getElementById('exec-prep-units')?.value?.trim() || '';
+      const tier = document.getElementById('exec-prep-tier')?.value || '';
+      const notes = document.getElementById('exec-prep-notes')?.value?.trim() || '';
+      const outcome = document.getElementById('exec-prep-outcome')?.value?.trim() || '';
+      return [
+        `Executive call prep — ${name}`,
+        company ? `Company: ${company}` : '',
+        units ? `Production: ${units}` : '',
+        tier ? `Shape tier: ${tier}` : '',
+        notes ? `Notes: ${notes}` : '',
+        outcome ? `Outcome/next: ${outcome}` : ''
+      ].filter(Boolean).join('\n');
+    }
+
+    document.body.appendChild(modal);
+  }
+
+  window.openExecCallPrep = openExecCallPrep;
+
   function init() {
     hideRecruiterSections();
     updateSectionTitles();
     initRecruitingPlaybook();
+    if (typeof window.initRecruitingPlanOps === 'function') window.initRecruitingPlanOps();
     initRuoffFactVault();
     console.log('[recruiting-config] Recruiting Sales Coach initialized');
   }

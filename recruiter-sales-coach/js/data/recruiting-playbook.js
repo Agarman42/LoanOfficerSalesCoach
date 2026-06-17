@@ -57,18 +57,73 @@ window.RECRUITING_PLAYBOOK = {
     'I\'ll follow up in the fall — no pressure, just want to stay connected.'
   ],
   coachingPoints: [
+    'Pronunciation: Always say "Ruoff" cleanly and confidently.',
     'Use a short neutral opener before the main pitch on most calls.',
     'Let the candidate speak more than you do — especially on personal or career stories.',
     'On "I\'m happy" calls, ask at least one strong discovery question before scheduling a future touch.',
     'At higher production levels, emphasize platform and infrastructure over the upfront bonus.',
-    'Log every meaningful touch in Shape — nothing should drop.'
+    'Log every meaningful touch in Shape — nothing should drop.',
+    'Protect weekends for rest and family — heavy outreach belongs Tue–Thu.'
   ],
-  keysToSuccess: [
+  keysToSuccess: window.RECRUITING_PLAN_2026?.keysToSuccess || [
     'Consistency: Momentum is built through repetition and reliability.',
     'Human First: Real care and connection before any pitch or process.',
     'Authenticity: Be genuine.',
     'Relationships First: Every touchpoint leads with value, not a pitch.',
+    'Input: Every meeting, prospect, and conversation gets logged in Shape.',
     'Speed: Timely follow-up after events or active conversations is non-negotiable.',
+    'Market Awareness: Area Manager intel shapes timing and messaging.',
+    'AI as an Enhancer: AI refines and coaches — relationships remain the core.',
     'The Long Game: Brand recognition and genuine relationships until the right window opens.'
-  ]
+  ],
+  linkedinSnippets: [
+    {
+      title: 'Connection request — value first',
+      text: 'Hi [Name] — I follow your work in [market] and appreciate how you show up for your purchase clients. I\'m with Ruoff Mortgage and share recruiting insights (not pitches) for producers building long-term careers. Would love to connect.'
+    },
+    {
+      title: 'Connection request — mutual respect',
+      text: 'Hi [Name] — your production consistency in [market] stood out. I help LOs explore platform fit when timing is right — zero pressure. Open to connecting?'
+    },
+    {
+      title: 'Follow-up DM after connect',
+      text: 'Thanks for connecting, [Name]. No agenda today — I share occasional content on ops support and career growth for purchase-focused producers. If you\'re ever curious what leadership support looks like at Ruoff, happy to facilitate a short clarity call.'
+    },
+    {
+      title: 'Comment on production post',
+      text: 'Strong month, [Name] — purchase business at that volume is no accident. Appreciate you leading with clients first.'
+    },
+    {
+      title: 'Re-engage after silence',
+      text: 'Hi [Name] — we connected a while back. Saw your recent [post/milestone] — congrats. Still happy to be a resource if you ever want a no-pressure leadership conversation.'
+    },
+    {
+      title: 'Invite to exec call (soft)',
+      text: 'Based on what you\'ve built, I think a 20-minute conversation with our leadership team could be worthwhile — not to pitch, but to give you a clear picture of platform and support. Open to it?'
+    }
+  ],
+  execCallPrep: {
+    preCallChecklist: [
+      'Review Shape notes — last touch, tier (A/B/C), and any objections logged',
+      'Confirm production: units, purchase %, tenure at current shop',
+      'Prepare one specific compliment tied to their business (not generic)',
+      'Have 2–3 discovery questions ready — let them talk first',
+      'Know the leadership value prop: low-risk, clarity-focused, not a hard pitch',
+      'Calendar link ready + backup times if they hesitate'
+    ],
+    duringCallReminders: [
+      'Open with neutral warmth — not a pitch in the first 60 seconds',
+      'Acknowledge their current situation before exploring "what would have to be true"',
+      'If happy/not looking: validate, then one strong discovery question minimum',
+      'Position leadership call as clarity, not commitment',
+      'End with clear next step + permission for future touch'
+    ],
+    postCallDebrief: [
+      'Log every detail in Shape within 30 minutes — non-negotiable',
+      'Send same-day thank-you text or LinkedIn message referencing something specific they said',
+      'Schedule nurture touch if not ready (30-day / 90-day / 6-month)',
+      'If exec call booked: send prep note to leadership with candidate context',
+      'If declined: note reason and re-rank tier — no guilt follow-ups'
+    ]
+  }
 };

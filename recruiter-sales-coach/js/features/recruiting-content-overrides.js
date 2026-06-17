@@ -148,6 +148,39 @@
   }
 
   // ─── Social Post Types ─────────────────────────────────────────────────
+  function initRecruitingSocialIntroCopy() {
+    const section = document.getElementById('social-post');
+    if (!section) return;
+
+    const sub = section.querySelector('h2 + p');
+    if (sub) {
+      sub.textContent = 'Generate authentic recruiting posts and weekly connection plans — build trust with LO prospects without sounding like a billboard.';
+    }
+
+    section.querySelectorAll('p').forEach(p => {
+      let t = p.textContent || '';
+      if (t.includes('70/30') || t.includes('70%')) {
+        t = t.replace(/70\/30 personal\/value/gi, '80/20 personal/Ruoff-focused')
+             .replace(/70% personal/gi, '80% personal/authentic')
+             .replace(/real LO life ideas/gi, 'recruiting life & LO-facing ideas')
+             .replace(/strategy library below/gi, 'Recruiting Playbook & Saved Items')
+             .replace(/newsletter section/gi, 'Recruiting Content Creator')
+             .replace(/Save strong ones back to vault/gi, 'Save strong ones to My Saved Items');
+        p.textContent = t;
+      }
+      if (t.includes('Referral') || t.includes('Value Vault')) {
+        p.textContent = t.replace(/Referral/gi, 'Playbook').replace(/Value Vault/gi, 'Prospect Nurturing');
+      }
+    });
+
+    const cards = section.querySelectorAll('.grid.grid-cols-1.md\\:grid-cols-3 .text-xs');
+    cards.forEach(el => {
+      if ((el.textContent || '').includes('IG, FB, LinkedIn')) {
+        el.textContent = 'Pick recruiting post types or type your own. Get 3 voice-matched options for LinkedIn, Facebook, and more.';
+      }
+    });
+  }
+
   function initRecruitingSocialPostTypes() {
     const sel = document.getElementById('post-type');
     if (!sel) return;
@@ -297,14 +330,22 @@
               ${p.scripts.map(s => `<li class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">${escapeHtml(s)}</li>`).join('')}
             </ul>
           </div>
-          <button type="button" onclick="if(typeof window.showSection==='function')window.showSection('recruiting-script')"
-                  class="w-full py-3 rounded-2xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">
-            Generate custom scripts for this pillar →
+          <button type="button" id="nurture-bridge-script" class="w-full py-3 rounded-2xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">
+            Open Script Generator for this pillar →
           </button>
         </div>
       </div>`;
     modal.querySelector('[data-close]').onclick = () => modal.remove();
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    modal.querySelector('#nurture-bridge-script')?.addEventListener('click', () => {
+      const sample = (p.scripts && p.scripts[0]) ? p.scripts[0] : '';
+      modal.remove();
+      if (window.ToolBridges?.bridgeNurtureToScript) {
+        window.ToolBridges.bridgeNurtureToScript(pillarId, sample);
+      } else if (typeof window.showSection === 'function') {
+        window.showSection('recruiting-script');
+      }
+    });
     document.body.appendChild(modal);
   }
 
@@ -572,6 +613,9 @@
       } else if (typeof window.updateWeeklyCustomizeDisplays === 'function') {
         window.updateWeeklyCustomizeDisplays();
       }
+      if (typeof window.ToolBridges?.init === 'function') {
+        window.ToolBridges.init();
+      }
     }, 50);
     console.log('[recruiting-content] Weekly unified customize panel injected');
   }
@@ -666,6 +710,7 @@
 
   function init() {
     initRecruitingProfile();
+    initRecruitingSocialIntroCopy();
     initRecruitingSocialPostTypes();
     initRecruitingSocialThemes();
     initRecruitingProspectNurturing();
@@ -676,6 +721,9 @@
     initRecruitingBlogCopy();
     initRecruitingMindsetCopy();
     initRecruitingBookCopy();
+    if (typeof window.initRecruitingScorecard === 'function') {
+      setTimeout(window.initRecruitingScorecard, 150);
+    }
   }
 
   if (document.readyState === 'loading') {

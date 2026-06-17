@@ -684,6 +684,8 @@ CRITICAL INSTRUCTIONS — DO NOT VIOLATE:
   - Each post: full caption + hashtags.
 Include local ${localArea} events, holidays, trends where relevant. Tone: warm, fun, conversational.
 
+${typeof window.getWeekendSocialRules === 'function' ? window.getWeekendSocialRules() : ''}
+
 Generate the COMPLETE table now with all ${daysInMonth} days.${getRuoffFactSnippet(6)}`;
 
     const loading = document.getElementById('global-loading');

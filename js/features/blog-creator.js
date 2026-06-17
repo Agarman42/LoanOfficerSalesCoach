@@ -478,9 +478,14 @@ Return the FULL updated output: blog markdown, then ---, caption, ---, Google po
     <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 mb-8 shadow-xl">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-[#F15A29]">Social Media Caption</h3>
+            <div class="flex items-center gap-2">
             <button id="copy-caption-btn" class="text-sm px-4 py-2 bg-[#00A89D] text-white rounded-xl hover:bg-[#008F85] flex items-center gap-2">
                 <i class="fas fa-share-alt"></i> Copy
             </button>
+            <button id="save-caption-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('caption', this)" class="text-sm px-4 py-2 border border-[#00A89D] text-[#00A89D] rounded-xl hover:bg-[#00A89D] hover:text-white flex items-center gap-2">
+                <i class="far fa-bookmark"></i> Save
+            </button>
+            </div>
         </div>
         <div id="social-caption" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base whitespace-pre-wrap font-medium border border-gray-200 dark:border-gray-700">
             ${captionText || 'No caption generated — try regenerating!'}
@@ -491,9 +496,14 @@ Return the FULL updated output: blog markdown, then ---, caption, ---, Google po
     <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 mb-8 shadow-xl">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-[#F15A29]">Google Business Profile Post</h3>
+            <div class="flex items-center gap-2">
             <button id="copy-google-btn" class="text-sm px-4 py-2 bg-[#F15A29] text-white rounded-xl hover:bg-[#F15A29]/90 flex items-center gap-2">
                 <i class="fas fa-copy"></i> Copy
             </button>
+            <button id="save-google-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('google', this)" class="text-sm px-4 py-2 border border-[#F15A29] text-[#F15A29] rounded-xl hover:bg-[#F15A29] hover:text-white flex items-center gap-2">
+                <i class="far fa-bookmark"></i> Save
+            </button>
+            </div>
         </div>
         <div id="google-post" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base prose border border-gray-200 dark:border-gray-700">
             ${googlePostText ? marked.parse(googlePostText) : 'No Google post generated — try a different topic or regenerate.'}
@@ -504,9 +514,14 @@ Return the FULL updated output: blog markdown, then ---, caption, ---, Google po
     <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 shadow-xl">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-[#F15A29]">30–45 Second Reel / Video Script</h3>
+            <div class="flex items-center gap-2">
             <button id="copy-reel-btn" class="text-sm px-4 py-2 bg-[#00A89D] text-white rounded-xl hover:bg-[#008F85] flex items-center gap-2">
                 <i class="fas fa-video"></i> Copy Script
             </button>
+            <button id="save-reel-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('reel', this)" class="text-sm px-4 py-2 border border-[#00A89D] text-[#00A89D] rounded-xl hover:bg-[#00A89D] hover:text-white flex items-center gap-2">
+                <i class="far fa-bookmark"></i> Save
+            </button>
+            </div>
         </div>
         <div id="reel-script" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base prose border border-gray-200 dark:border-gray-700">
             ${reelScriptText ? marked.parse(reelScriptText) : 'No Reel script generated — try regenerating!'}
@@ -652,6 +667,33 @@ function copyBlogAndJumpToPublisher() {
         window.open('https://sales.ruoff.com/blog', '_blank');
     }, 250);
 }
+
+window.saveBlogAsset = function(assetType, btnEl) {
+    if (typeof window.toggleSaveIdea !== 'function') {
+        alert('Saved Items system not ready yet.');
+        return;
+    }
+    const output = document.getElementById('blog-output');
+    const blogTitle = output?.querySelector('h3')?.innerText || 'Blog Post';
+    const map = {
+        caption: { el: 'social-caption', label: 'Social Caption' },
+        google: { el: 'google-post', label: 'Google Business Post' },
+        reel: { el: 'reel-script', label: 'Reel / Video Script' }
+    };
+    const cfg = map[assetType];
+    if (!cfg) return;
+    const node = document.getElementById(cfg.el);
+    const text = node ? (node.innerText || node.textContent || '').trim() : '';
+    if (!text) {
+        alert(`No ${cfg.label.toLowerCase()} to save yet.`);
+        return;
+    }
+    const title = `Blog Asset — ${cfg.label}: ${blogTitle.substring(0, 50)}`;
+    const rich = `<div class="blog-asset-saved"><div class="text-xs uppercase tracking-widest font-bold text-[#F15A29] mb-2">${cfg.label}</div><div class="p-4 bg-gray-50 dark:bg-gray-800 border rounded-2xl text-sm whitespace-pre-wrap">${text.replace(/</g, '&lt;')}</div><div class="text-[10px] text-gray-500 mt-2">From Blog Creator • ${blogTitle}</div></div>`;
+    window.toggleSaveIdea(title, rich, btnEl, 'blog');
+    if (window.showToast) window.showToast(`${cfg.label} saved to My Saved Items`, 'success');
+    else if (typeof window.showSavedFeedback === 'function') window.showSavedFeedback('Saved to My Saved Items');
+};
 
 window.saveBlogToVault = function() {
     if (typeof window.toggleSaveIdea !== 'function') {

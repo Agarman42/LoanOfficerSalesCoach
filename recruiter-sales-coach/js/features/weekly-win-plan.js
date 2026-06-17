@@ -242,7 +242,7 @@
             <div class="flex items-center gap-2 mb-1"><i class="fas fa-check text-[#00A89D]"></i> Loading your central profile, goals &amp; challenges</div>
             <div class="flex items-center gap-2 mb-1"><i class="fas fa-check text-[#00A89D]"></i> Matching hobbies &amp; preferred activities to real tactics</div>
             <div class="flex items-center gap-2 mb-1"><i class="fas fa-spinner fa-spin text-[#F15A29]"></i> Generating quarterly milestones + Weekly Recruiting Plan actions</div>
-            <div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin text-[#F15A29]"></i> Creating cross-tool execution links (Social, Referral, Value Vault, Books, Mindset)</div>
+            <div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin text-[#F15A29]"></i> Creating cross-tool execution links (Weekly Plan, Social, Playbook, Prospect Nurturing)</div>
           </div>
         </div>
       `;
@@ -306,6 +306,7 @@
     // Final rich plan HTML is injected only in the finally{} after hideLoading().
 
     let fullPlan = '';
+    let planContent = '';
 
     try {
     const prompt = `You are an elite Ruoff Mortgage recruiting strategist who has built high-performing recruiting teams. Create a 2026 Recruiting Plan that is simultaneously world-class and deeply personal — something a serious recruiter would proudly print and run their year from. NO EMOJIS.
@@ -346,7 +347,13 @@ REQUIRED STRUCTURE — exact markdown headings in order:
 ## Recruiting Funnel & Conversion Model
 ## Your 2026 Strategic Focus
 ## Quarterly Milestones
+(Use exactly four subheadings — ### Q1, ### Q2, ### Q3, ### Q4 — each followed by 2-4 bullet points with specific hire/outreach/exec-call targets for that quarter.)
+### Q1
+### Q2
+### Q3
+### Q4
 ## Weekly Rhythm & Scorecard
+(Mon–Fri execution: Tue–Thu phone priority, Shape, nurture, social connections. Saturdays and Sundays are rest/family/recharge — optional light prep only, never networking events or heavy outreach.)
 ## Tactics That Actually Fit You
 ## Tool Ties — Execute Inside Recruiting Sales Coach
 ## Your 90-Day Launch Plan
@@ -367,7 +374,7 @@ Make it feel like an elite recruiting document — warm, specific, motivating. O
       ? `\n\nADDITIONAL USER FEEDBACK / REQUESTED EDITS FOR THIS VERSION (please specifically incorporate these changes while keeping the required structure and personal tone):\n${window.lastPlanFeedback.trim()}` 
       : '';
 
-    const planContent = await window.callGrokAPI(prompt + feedbackNote, {
+    planContent = await window.callGrokAPI(prompt + feedbackNote, {
         temperature: 0.7,
         max_tokens: 4500
     });
@@ -459,25 +466,39 @@ Make it feel like an elite recruiting document — warm, specific, motivating. O
                   </div>
                 </div>
 
-                <!-- Key Metrics Dashboard (makes it feel like a real business plan immediately) -->
+                <!-- Key Metrics Dashboard (recruiting funnel targets from form) -->
                 <div class="mb-8">
-                  <div class="text-xs font-bold tracking-[1.5px] text-[#00A89D] mb-3">2026 TARGET SNAPSHOT</div>
+                  <div class="text-xs font-bold tracking-[1.5px] text-[#00A89D] mb-3">2026 RECRUITING TARGET SNAPSHOT</div>
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
-                      <div class="text-xs text-gray-500">CLOSINGS TARGET</div>
-                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.closings || closings} units</div>
+                      <div class="text-xs text-gray-500">ANNUAL NET HIRES</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.annualNetHires}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
-                      <div class="text-xs text-gray-500">VOLUME TARGET</div>
-                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">$${Math.round((volume || 0) / 1000000)}M</div>
+                      <div class="text-xs text-gray-500">MONTHLY NET HIRES</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.monthlyNetHires}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
-                      <div class="text-xs text-gray-500">INCOME TARGET</div>
-                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">$${Number(inputs.income || (closings * (parseFloat(inputs.commission) || 6500))).toLocaleString()}</div>
+                      <div class="text-xs text-gray-500">OUTREACH / WEEK</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.weeklyOutreach}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
-                      <div class="text-xs text-gray-500">NEW PARTNERS NEEDED</div>
-                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.newPartners || Math.ceil((inputs.closings || closings) / (parseFloat(inputs.ratio) || 30) * 0.6)}</div>
+                      <div class="text-xs text-gray-500">QUALITY CONVOS / WK</div>
+                      <div class="text-2xl font-bold text-[#00A89D] mt-1">${inputs.weeklyQualityConvos}</div>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                      <div class="text-xs text-gray-500">EXEC CALLS SCHED. / WK</div>
+                      <div class="text-2xl font-bold text-[#F15A29] mt-1">${inputs.weeklyExecCalls}</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                      <div class="text-xs text-gray-500">NEW SOCIAL CONNECTIONS / WK</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.weeklySocialConnections}</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                      <div class="text-xs text-gray-500">WARM PIPELINE SIZE</div>
+                      <div class="text-2xl font-bold text-[#002B5C] dark:text-white mt-1">${inputs.warmPipelineSize || '—'}</div>
                     </div>
                   </div>
                 </div>
@@ -491,11 +512,11 @@ Make it feel like an elite recruiting document — warm, specific, motivating. O
                 <div class="mt-8 p-5 border border-dashed border-[#00A89D]/40 rounded-3xl bg-[#00A89D]/5">
                   <div class="font-semibold text-[#002B5C] dark:text-white mb-1">Not quite right? Give feedback for a better version.</div>
                   <p class="text-xs text-gray-500 mb-2">Be specific for best results. Good examples:<br>
-                    • "Add a bigger focus on social media, Reels, and video content"<br>
-                    • "Include more golf, outdoors, and family time in the tactics"<br>
-                    • "Make the 90-day plan more aggressive on new partner outreach"<br>
-                    • "Emphasize database nurturing and handwritten notes over events"<br>
-                    • "Add more details on scaling to a small team"
+                    • "Add more LinkedIn sourcing and connection outreach blocks"<br>
+                    • "Weight Tuesday–Thursday phone blocks heavier — I'm stronger on calls"<br>
+                    • "Make Q1 more aggressive on executive leadership call volume"<br>
+                    • "Emphasize Shape pipeline review and B-tier nurture touches"<br>
+                    • "Include more personal brand content tied to my hobbies"
                   </p>
                   <textarea id="plan-feedback-input" class="w-full text-sm p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900" rows="2" placeholder="Your requested changes or focus areas..."></textarea>
                   <div class="mt-2 flex gap-2">
@@ -620,6 +641,9 @@ Make it feel like an elite recruiting document — warm, specific, motivating. O
         // Save the generated business plan for persistence (so user can come back later)
         if (targetOutputId === 'plan-output' && planContainer && planContainer.innerHTML.trim().length > 100) {
             localStorage.setItem('savedBusinessPlan', planContainer.innerHTML);
+            if (typeof window.ToolBridges?.saveAnnualPlanContext === 'function' && planContent) {
+                window.ToolBridges.saveAnnualPlanContext(planContent, { fromApi: true });
+            }
         }
     }
 }
@@ -695,6 +719,10 @@ function restoreSavedBusinessPlan() {
         output.innerHTML = saved;
         output.classList.remove('hidden');
         output.style.display = 'block';
+
+        if (!window.ToolBridges?.loadAnnualPlanContext?.()) {
+            setTimeout(() => window.ToolBridges?.rebuildAnnualContextFromDom?.(), 100);
+        }
 
         // For legacy saved plans (that predate the built-in Clear button in the template),
         // ensure a visible Clear control exists at the top.
@@ -966,6 +994,10 @@ function buildUnifiedWeeklyPrompt() {
   const { hours, weaveHobbies, focusAreas } = getWeeklyCustomizePrefs();
   const metrics = window.RECRUITING_METRICS?.weekly || {};
 
+  const annualBridge = (typeof window.ToolBridges?.getAnnualPlanPromptSlice === 'function')
+    ? window.ToolBridges.getAnnualPlanPromptSlice()
+    : '';
+
   return `You are an expert Ruoff Mortgage recruiting sales coach. Create a realistic weekly execution plan for a loan officer recruiter.
 
 User Profile:
@@ -987,13 +1019,16 @@ Weekly recruiting metrics (coach toward these):
 - Outreach attempts: ~${metrics.outreachAttempts || 270}/week (heavier Tue-Wed-Thu)
 - Quality conversations: ${metrics.qualityConversations?.min || 24}-${metrics.qualityConversations?.max || 25}
 - Executive leadership calls scheduled: ${metrics.executiveCallsScheduled?.min || 4.8}-${metrics.executiveCallsScheduled?.max || 5.1}
+${annualBridge}
+
+${typeof window.getWeekendPlanRules === 'function' ? window.getWeekendPlanRules() : ''}
 
 Create a practical, motivating 7-day (Monday through Sunday) execution plan that combines PROTECTED TIME BLOCKS with SPECIFIC RECRUITING TASKS inside each block.
 
 Rules:
-- Respect their total weekly hours (${hours}).
+- Respect their total weekly hours (${hours}) — count only Mon–Fri toward the hours target; weekend blocks are optional and do not add to the total.
 - Use realistic time slots with AM or PM (e.g. "9:00 AM - 9:45 AM").
-- 2-5 blocks per day; Tue-Thu should have the heaviest phone outreach.
+- 2-5 blocks per day Mon–Fri; Tue-Thu should have the heaviest phone outreach. Saturday and Sunday: 0–1 optional light block each, or empty/rest days. Never schedule networking events, executive calls, or heavy outreach on weekends.
 - Each block gets 1-3 specific tasks: Shape review, phone blocks, LinkedIn/Facebook outreach, quality conversation goals, leadership call prep, nurture touches (no pitch), Shape logging.
 - Never assign LO borrower tasks, realtor pop-bys, or rate pitches.
 - Include block "focus" category and optional "why".
@@ -1038,9 +1073,14 @@ function buildWeeklyFeedbackPrompt(feedback) {
   ];
   const prefsContext = `Weekly hours target: ~${hours}. Focus areas: ${(focusAreas.length ? focusAreas : defaultFocus).join(', ')}. Weave hobbies: ${weaveHobbies ? 'yes' : 'no'}.`;
 
+  const annualBridge = (typeof window.ToolBridges?.getAnnualPlanPromptSlice === 'function')
+    ? window.ToolBridges.getAnnualPlanPromptSlice()
+    : '';
+
   return `You are an expert Ruoff recruiting coach editing an existing Weekly Recruiting Plan.
 
 ${prefsContext}
+${annualBridge}
 
 CURRENT PLAN (JSON — preserve structure and anything the user did not ask to change):
 ${JSON.stringify(planSnapshot, null, 2)}
@@ -1052,7 +1092,8 @@ Rules:
 - Return ONLY valid JSON in the exact same schema (summary, totalHours, days with blocks/tasks).
 - Tasks must stay recruiter-focused: Shape, phone blocks, LinkedIn/Facebook, quality conversations, leadership calls, nurture — never borrower or realtor tasks.
 - Keep realistic times with AM/PM on every block.
-- Respect total weekly hours (~${hours}) unless feedback explicitly changes that.`;
+- Respect total weekly hours (~${hours}) unless feedback explicitly changes that.
+- ${typeof window.getWeekendPlanRules === 'function' ? window.getWeekendPlanRules() : 'Keep Saturday and Sunday light — rest, family, optional prep only.'}`;
 }
 
 function getWeeklyPlanFeedbackInnerHTML() {
@@ -1064,7 +1105,7 @@ function getWeeklyPlanFeedbackInnerHTML() {
     </div>
     <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
       Tweak focus, timing, or tasks — then regenerate. Your time edits and custom tasks are sent as context so the AI adjusts instead of starting over blind.
-      <span class="block mt-1 text-gray-600 dark:text-gray-300">Examples: “More realtor pop-bys Tuesday” • “Lighten Monday — only 1 block” • “Add equity scan outreach Thursday” • “Swap sphere for past-client calls”</span>
+      <span class="block mt-1 text-gray-600 dark:text-gray-300">Examples: “More phone blocks Tuesday–Thursday” • “Lighten Monday — only 1 block” • “Keep Saturday/Sunday fully off” • “Add LinkedIn nurture touches Wednesday”</span>
     </p>
     <textarea id="weekly-plan-feedback-input" rows="3" class="w-full text-sm p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-[#00A89D]/50" placeholder="What should change in this week's plan?"></textarea>
     <div class="mt-3 flex flex-wrap gap-2 items-center">
@@ -1129,9 +1170,12 @@ function ensureWeeklyPlanFeedbackUI() {
 function updateWeeklyResultsHeader() {
   const summaryEl = document.getElementById('weekly-plan-summary');
   const hoursEl = document.getElementById('weekly-plan-hours');
+  window.currentWeeklyPlanMeta = currentWeeklyPlanMeta;
   if (summaryEl) summaryEl.textContent = currentWeeklyPlanMeta.summary || 'Your protected time + daily execution plan.';
   if (hoursEl && currentWeeklyPlanMeta.totalHours) {
     hoursEl.textContent = `${currentWeeklyPlanMeta.totalHours} hrs protected`;
+  } else if (hoursEl) {
+    hoursEl.textContent = '';
   }
 }
 
@@ -1591,6 +1635,9 @@ async function generateWeeklyPlan(options = {}) {
         }
 
         data.days = normalizeDaysToV2(data.days);
+        if (typeof window.sanitizeWeekendDays === 'function') {
+          data.days = window.sanitizeWeekendDays(data.days);
+        }
         data.version = WEEKLY_PLAN_VERSION;
         currentWeeklyPlanMeta = {
           summary: data.summary || '',
@@ -1599,6 +1646,7 @@ async function generateWeeklyPlan(options = {}) {
 
         // Persist the plan so it survives page reloads
         savedWeeklyPlan = data;
+        window.savedWeeklyPlan = savedWeeklyPlan;
         localStorage.setItem('savedWeeklyPlan', JSON.stringify(data));
         localStorage.removeItem('savedProspectingTimeBlocks');
 
@@ -1733,6 +1781,7 @@ function restoreBusinessPlanningForm() {
 
 function renderWeeklyTiles(days, container) {
     currentWeeklyDays = normalizeDaysToV2(days);
+    window.currentWeeklyDays = currentWeeklyDays;
 
     let checkedTasks = [];
     try {
@@ -1741,7 +1790,7 @@ function renderWeeklyTiles(days, container) {
 
     let html = '';
 
-    currentWeeklyDays.forEach((day) => {
+        currentWeeklyDays.forEach((day, dayIndex) => {
         const blocks = day.blocks || [];
         const blockCount = blocks.length;
         const taskCount = blocks.reduce((n, b) => n + (b.tasks || []).length, 0);
@@ -1777,12 +1826,18 @@ function renderWeeklyTiles(days, container) {
                             </div>
                             ${t.tip ? `<div class="mt-1.5 ml-5 text-xs text-gray-500 dark:text-gray-400"><span class="text-[#00A89D] font-semibold">Tip:</span> ${t.tip}</div>` : ''}
                             ${isCustom ? renderWeeklyCustomTaskTimeUI(day.day, blockIndex, taskIndex, t, customTimeInputs) : ''}
-                            <button onclick="if(typeof window.saveWeeklyTask==='function') window.saveWeeklyTask(this)"
-                                    data-day="${day.day}" data-task="${(t.task || '').replace(/"/g, '&quot;')}"
-                                    data-tip="${(t.tip || '').replace(/"/g, '&quot;')}"
-                                    class="mt-1.5 ml-5 text-[10px] px-2 py-0.5 rounded-full border border-gray-200 text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition inline-flex items-center gap-1">
-                                <i class="far fa-bookmark text-[9px]"></i> Save
-                            </button>
+                            <div class="mt-1.5 ml-5 flex flex-wrap gap-2">
+                              <button onclick="if(typeof window.saveWeeklyTask==='function') window.saveWeeklyTask(this)"
+                                      data-day="${day.day}" data-task="${(t.task || '').replace(/"/g, '&quot;')}"
+                                      data-tip="${(t.tip || '').replace(/"/g, '&quot;')}"
+                                      class="text-[10px] px-2 py-0.5 rounded-full border border-gray-200 text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition inline-flex items-center gap-1">
+                                  <i class="far fa-bookmark text-[9px]"></i> Save
+                              </button>
+                              <button type="button" class="weekly-bridge-social text-[10px] px-2 py-0.5 rounded-full border border-[#F15A29]/40 text-[#F15A29] hover:bg-[#F15A29] hover:text-white transition inline-flex items-center gap-1"
+                                      data-day-idx="${dayIndex}" data-block-idx="${blockIndex}" data-task-idx="${taskIndex}">
+                                  <i class="fas fa-share-alt text-[9px]"></i> → Social
+                              </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1841,6 +1896,15 @@ function renderWeeklyTiles(days, container) {
 
     wireWeeklyTimeEditors(container);
     ensureWeeklyPlanFeedbackUI();
+
+    container.querySelectorAll('.weekly-bridge-social').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = parseInt(btn.dataset.dayIdx, 10);
+        const b = parseInt(btn.dataset.blockIdx, 10);
+        const t = parseInt(btn.dataset.taskIdx, 10);
+        if (window.ToolBridges?.sendTaskToSocial) window.ToolBridges.sendTaskToSocial(d, b, t);
+      });
+    });
 }
 
 // =====================================================
@@ -2294,6 +2358,9 @@ function clearBusinessPlan() {
     }
 
     localStorage.removeItem('savedBusinessPlan');
+    localStorage.removeItem('recruiter_savedBusinessPlanContext');
+    localStorage.removeItem('recruiter_savedBusinessPlanMarkdown');
+    window.ToolBridges?.refreshAnnualBridgeUI?.();
     output.innerHTML = '';
     output.classList.add('hidden');
     output.style.display = 'none';
@@ -2301,7 +2368,7 @@ function clearBusinessPlan() {
 
 // Setup & Persistence
 let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
-    name: "Loan Officer",
+    name: "Recruiter",
     email: "",
     monthlyGoal: 8,
     focus: "Balanced",
@@ -2323,6 +2390,8 @@ let savedWeeklyChecked = JSON.parse(localStorage.getItem('savedWeeklyChecked') |
 
 // Current in-memory weekly plan days (used for adding custom tasks + re-rendering)
 let currentWeeklyDays = null;
+window.currentWeeklyDays = null;
+window.savedWeeklyPlan = savedWeeklyPlan;
 
 function updateSetupDisplays() {
     const effective = getEffectiveSetup();
@@ -2388,7 +2457,7 @@ function syncWeeklyPreferencesToUserSetup() {
     const lastMonthEl = document.getElementById('setup-last-month');
     const hobbiesOtherEl = document.getElementById('setup-hobbies-other');
 
-    if (nameEl) userSetup.name = nameEl.value.trim() || "Loan Officer";
+    if (nameEl) userSetup.name = nameEl.value.trim() || "Recruiter";
     if (goalEl) userSetup.monthlyGoal = parseInt(goalEl.value) || 8;
     if (hoursEl) userSetup.hours = hoursEl.value;
     if (focusEl) userSetup.focus = focusEl.value;
@@ -2526,8 +2595,8 @@ window.applyWeeklyPlanFeedbackAndRegenerate = function() {
   if (!input) return;
   const val = (input.value || '').trim();
   if (!val) {
-    if (window.showToast) window.showToast('Enter feedback first — e.g. "more realtor outreach on Tuesday"', 'warning');
-    else alert('Enter feedback first — e.g. "more realtor outreach on Tuesday"');
+    if (window.showToast) window.showToast('Enter feedback first — e.g. "more phone blocks Tuesday–Thursday"', 'warning');
+    else alert('Enter feedback first — e.g. "more phone blocks Tuesday–Thursday"');
     return;
   }
   if (!currentWeeklyDays || !currentWeeklyDays.length) {

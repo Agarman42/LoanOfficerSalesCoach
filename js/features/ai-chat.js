@@ -32,6 +32,19 @@ When asked what the tool does or about its features, ALWAYS highlight the AI TOO
 • AI Chat Assistant – Your always-on coach
 Be enthusiastic, encouraging, low-anxiety, and focus on how these tools save time and help win more business. Use bullet points. Never lead with underwriting — it's one tool among many.`;
 
+  function getWeekendCoachSlice() {
+    if (typeof window.getWeekendPlanRules === 'function') {
+      let slice = `\n\nSCHEDULING & PLANNING RULES (weekly plans, social calendars, outreach timing — always follow):\n${window.getWeekendPlanRules()}`;
+      if (typeof window.getWeekendSocialRules === 'function') slice += `\n\n${window.getWeekendSocialRules()}`;
+      return slice;
+    }
+    return '\n\nSCHEDULING RULE: Saturdays and Sundays are for rest, family, and recharge — never assign networking events, prospecting blitzes, or heavy outreach on weekends. Optional light prep only (15–30 min max).';
+  }
+
+  function getBaseSystemWithCoachRules() {
+    return BASE_SYSTEM_PROMPT + getWeekendCoachSlice();
+  }
+
   // =====================================================
   // ORIGINAL AI CHAT CODE (moved and combined)
   // =====================================================
@@ -39,7 +52,7 @@ Be enthusiastic, encouraging, low-anxiety, and focus on how these tools save tim
 let chatHistory = [
     {
         role: "system",
-        content: BASE_SYSTEM_PROMPT
+        content: getBaseSystemWithCoachRules()
     }
 ];
 async function sendChatMessage() {
@@ -220,7 +233,7 @@ function injectProfileContext() {
   const ctx = getProfileContext();
   const systemMsg = chatHistory[0];
   if (systemMsg && systemMsg.role === 'system') {
-    systemMsg.content = BASE_SYSTEM_PROMPT + `\n\nCURRENT USER PROFILE CONTEXT — use this to make every answer specific and personal: ${ctx}`;
+    systemMsg.content = getBaseSystemWithCoachRules() + `\n\nCURRENT USER PROFILE CONTEXT — use this to make every answer specific and personal: ${ctx}`;
   }
 }
 
@@ -237,7 +250,7 @@ function loadChatHistory() {
     const saved = JSON.parse(localStorage.getItem('aiChatHistory') || '[]');
     if (saved.length) {
       // Rebuild: system first, then saved
-      const system = chatHistory[0] || { role: 'system', content: BASE_SYSTEM_PROMPT };
+      const system = chatHistory[0] || { role: 'system', content: getBaseSystemWithCoachRules() };
       chatHistory = [system, ...saved];
     }
   } catch (e) {}
@@ -340,7 +353,7 @@ function clearChat() {
   if (!confirm('Clear this conversation?')) return;
   const messagesDiv = document.getElementById('chat-messages');
   if (messagesDiv) messagesDiv.innerHTML = '';
-  chatHistory = [{ role: 'system', content: BASE_SYSTEM_PROMPT }];
+  chatHistory = [{ role: 'system', content: getBaseSystemWithCoachRules() }];
   localStorage.removeItem('aiChatHistory');
   // Show fresh welcome
   setTimeout(() => {
@@ -393,7 +406,7 @@ function setupChatSuggestions() {
 
     // Ensure system prompt is the rich base
     if (!chatHistory.length || chatHistory[0].role !== 'system') {
-      chatHistory.unshift({ role: 'system', content: BASE_SYSTEM_PROMPT });
+      chatHistory.unshift({ role: 'system', content: getBaseSystemWithCoachRules() });
     }
 
     // Render any previous messages

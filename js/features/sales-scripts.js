@@ -993,9 +993,49 @@ window.showContextTipsModal = function() {
 
   }
 
+  function bridgeToScriptGenerator(opts) {
+    const { categoryKey, scenarioValue, context } = opts || {};
+    if (typeof window.showSection === 'function') window.showSection('sales-script');
+
+    setTimeout(() => {
+      if (!document.getElementById('sales-category-cards')?.children?.length) {
+        renderCategoryCards();
+      }
+
+      const keys = Object.keys(scenarioData);
+      const catCards = document.querySelectorAll('#sales-category-cards > div');
+      const idx = keys.indexOf(categoryKey);
+      if (idx >= 0 && catCards[idx]) {
+        selectCategory(categoryKey, catCards[idx]);
+      }
+
+      setTimeout(() => {
+        if (scenarioValue && categoryKey && categoryKey !== 'custom') {
+          const cat = scenarioData[categoryKey];
+          const scCards = document.querySelectorAll('#sales-scenario-cards > div');
+          const scIdx = cat?.scenarios?.findIndex(s => s.value === scenarioValue) ?? -1;
+          if (scIdx >= 0 && scCards[scIdx]) {
+            selectScenario(scenarioValue, cat.scenarios[scIdx].label, scCards[scIdx]);
+          }
+        }
+
+        const ta = document.getElementById('script-context');
+        if (ta && context) {
+          ta.value = context;
+          ta.focus();
+        }
+
+        if (typeof window.showToast === 'function') {
+          window.showToast('Script Generator ready — review scenario & context, then generate', 'success');
+        }
+      }, 150);
+    }, 350);
+  }
+
   // =====================================================
   // PUBLIC API EXPOSURE
   // =====================================================
+  window.bridgeToScriptGenerator = bridgeToScriptGenerator;
   window.generateSalesScript = generateSalesScript;
   window.copySingleScript = copySingleScript;
   window.saveSalesScript = saveSalesScript;

@@ -6,7 +6,7 @@
  *
  * Includes:
  * - chatHistory (with system prompt)
- * - smartRouteChat() - routes underwriting questions to the dedicated tool
+ * - smartRouteChat() - routes specific questions to dedicated tools (e.g. process or listing related)
  * - sendChatMessage() - main chat flow with Grok API
  * - Keypress listener for Enter key
  *
@@ -19,17 +19,20 @@
   // =====================================================
   // BASE SYSTEM + PROFILE (defined early so initial chatHistory can use it)
   // =====================================================
-  const BASE_SYSTEM_PROMPT = `You are the ultimate AI Sales Coach for Ruoff Mortgage loan officer recruiters. This app helps recruiters source, nurture, and hire purchase-focused LOs (30-70 units) through consistent outreach, quality conversations, and executive leadership calls.
-When asked what the tool does or about its features, ALWAYS highlight the AI TOOLS first:
-• Recruiting Script Generator – Objection handlers for "I'm happy", platform comparisons, nurture conversations
-• Social Media Post & 30-Day Calendar – 80% personal / 20% Ruoff content for LO prospect attraction
-• Recruiting Content Creator – Thought leadership posts for LinkedIn/Facebook
-• Ruoff Fact Vault – Upload the latest company facts; grounds all AI tools in accurate Ruoff truth
-• 2026 Recruiting Plan + Weekly Recruiting Plan (unified time blocks + daily tasks)
-• Prospect Nurturing – Hot pipeline, warm nurture, long-game cadences
-• Recruiting Playbook, Mindset Lab, Book Vault
-• AI Chat Assistant – Your always-on recruiting coach
-Be enthusiastic, encouraging, and focus on outreach discipline (270/wk), quality conversations (24-25/wk), and executive calls — not rate pitches or borrower content. Use bullet points.`;
+  const BASE_SYSTEM_PROMPT = `You are the ultimate AI Sales Coach for realtors. This app is packed with powerful AI tools designed to help realtors win more listings and buyers, build stronger relationships, and grow their business.
+When asked what the tool does or about its features, ALWAYS highlight the AI TOOLS first — they are the coolest and most valuable part:
+• Listing Description Generator – Instant professional, emotional, and social-ready descriptions in multiple lengths
+• Open House Script & Strategy – Full kit: setup checklist, opening scripts, talking points, objections, lead capture, and social angles
+• Buyer/Seller Consultation Prep Kit – Personalized market snapshots, comps, pricing/affordability, objections, and follow-up plans
+• Sales Script Generator – Instant objection handlers and conversation scripts
+• Social Media Post & Calendar Creator – Ready-to-post content + full monthly plans (6 pillars, 14 Reels, 120+ Evergreen)
+• Blog Creator – Full SEO + GEO optimized blog posts with matching social + Google + Reel assets in seconds
+• Value Vault – Save and organize your best ideas
+• 2026 Business Plan + Weekly Win Plan Creators – Anxiety-reducing, profile-powered planning
+• Mindset Lab – 100+ principles for resilience
+• Prospecting Time Blocks, Event Planning (4 high-impact + post-event), Referral Partners (6 playbooks + tiers), Database Nurturing (A+/B/C cadences), Transaction Process stages + templates, Pop-Bys & Giftology, 7-Day Post-Closing
+• AI Chat Assistant – Your always-on coach
+Be enthusiastic, encouraging, low-anxiety, and focus on how these tools save time and help win more business. Use bullet points.`;
 
   function getWeekendCoachSlice() {
     if (typeof window.getWeekendPlanRules === 'function') {
@@ -59,7 +62,13 @@ async function sendChatMessage() {
     const userMessage = input.value.trim();
     if (!userMessage) return;
 
-    // Underwriting smart-route disabled in Recruiting Coach (LO-only tool hidden)
+    // Smart routing to specialized tools (e.g. process or listing related) - uses old logic but with new renderer
+    if (smartRouteChat(userMessage)) {
+        addMessage('user', userMessage, false);
+        addMessage('assistant', "I've moved you to the relevant specialized tool for the most accurate answer. Your question is pre-filled — just hit the generate or review the result!", false);
+        input.value = '';
+        return;
+    }
 
     addMessage('user', userMessage, false);
     input.value = '';
@@ -136,9 +145,6 @@ function attachChatInputListener() {
 
 // Smart routing for AI Chat Assistant — more flexible
 function smartRouteChat(message) {
-    // Recruiting Coach: no underwriting routing — stay in chat for all messages
-    return false;
-
     const lower = message.toLowerCase();
 
     // === BLOCK: Explicitly about the tool/app/features/help ===
@@ -155,8 +161,8 @@ function smartRouteChat(message) {
 
     // === PRIMARY: Must have at least one strict underwriting keyword ===
     const primaryKeywords = [
-        'guideline', 'guidelines', 'underwriting', 'scenario', 'du finding', 'lp finding',
-        'aus finding', 'overlay', 'manual underwrite', 'compensating factor'
+        'guideline', 'guidelines', 'financing', 'pre-approval', 'qualification', 'scenario', 
+        'dti', 'credit', 'self-employed', 'conventional', 'fha', 'va', 'jumbo', 'buydown', 'cash out'
     ];
     const hasPrimary = primaryKeywords.some(kw => lower.includes(kw));
 
@@ -165,8 +171,8 @@ function smartRouteChat(message) {
     // === SECONDARY: Loan/underwriting context terms (optional but boosts accuracy) ===
     const secondaryKeywords = [
         'dti', 'debt to income', 'credit score', 'fico', 'ltv', 'cltv', 'self-employed',
-        'bankruptcy', 'foreclosure', 'fha', 'va', 'usda', 'conventional', 'jumbo',
-        'non-qm', '203k', 'buydown', 'cash out', 'lpmi', 'manufactured home'
+        'bankruptcy', 'foreclosure', 'fha', 'va', 'conventional', 'jumbo',
+        'non-qm', 'buydown', 'cash out'
     ];
     const hasSecondary = secondaryKeywords.some(kw => lower.includes(kw));
 
@@ -179,22 +185,9 @@ function smartRouteChat(message) {
 
     // === ROUTE ONLY IF STRONG SIGNAL ===
     if (hasPrimary && (hasSecondary || isQuestion)) {
-        // Switch to underwriting section
-        document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-        const uwSection = document.getElementById('underwriting-search');
-        if (uwSection) {
-            uwSection.classList.remove('hidden');
-        }
-
-        // Pre-fill and focus (NO auto-search)
-        const uwInput = document.getElementById('uw-question');
-        if (uwInput) {
-            uwInput.value = message;
-            uwInput.focus();
-            uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        return true; // Routed
+        // For realtor version: specialized financing questions detected — keep in chat and let user use dedicated tools (listing, open house, consultation, prospecting)
+        console.log('[ai-chat] Specialized buyer/financing question detected — staying in chat for seamless experience. User can switch to dedicated tools.');
+        return false; // Routed
     }
 
     // Default: Stay in general chat
@@ -216,10 +209,7 @@ function getProfileContext() {
     if (p.hobbies && p.hobbies.length) parts.push(`Hobbies & activities: ${p.hobbies.join(', ')}`);
     if (p.goals) parts.push(`Current goals: ${p.goals}`);
     if (p.challenges) parts.push(`Key challenges: ${p.challenges}`);
-    const candidates = p.targetPartners || p.partnerTypes || [];
-    if (candidates.length) parts.push(`Ideal LO candidates: ${Array.isArray(candidates) ? candidates.join(', ') : candidates}`);
-    if (p.monthlyUnits) parts.push(`Monthly net hires goal: ${p.monthlyUnits}`);
-    if (p.focus) parts.push(`Recruiting focus: ${p.focus}`);
+    if (p.targetPartners && p.targetPartners.length) parts.push(`Ideal partners: ${p.targetPartners.join(', ')}`);
     if (p.tone) parts.push(`Preferred tone: ${p.tone}`);
     return parts.length ? parts.join('. ') + '.' : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
   } catch (e) {
@@ -227,26 +217,12 @@ function getProfileContext() {
   }
 }
 
-function getFactVaultContext() {
-  if (typeof window.getRuoffFactContext !== 'function') return '';
-  try {
-    return window.getRuoffFactContext('', 10);
-  } catch (e) {
-    return '';
-  }
-}
-
 function injectProfileContext() {
   if (!chatHistory || chatHistory.length === 0) return;
   const ctx = getProfileContext();
-  const facts = getFactVaultContext();
   const systemMsg = chatHistory[0];
   if (systemMsg && systemMsg.role === 'system') {
-    let content = getBaseSystemWithCoachRules() + `\n\nCURRENT USER PROFILE CONTEXT — use this to make every answer specific and personal: ${ctx}`;
-    if (facts) {
-      content += `\n\nRUOFF FACT VAULT (ground recruiting advice in these facts — never invent comp, ops, or tech claims):\n${facts}`;
-    }
-    systemMsg.content = content;
+    systemMsg.content = getBaseSystemWithCoachRules() + `\n\nCURRENT USER PROFILE CONTEXT — use this to make every answer specific and personal: ${ctx}`;
   }
 }
 
@@ -287,7 +263,7 @@ function addMessage(role, content, addActions = true) {
   const wrapper = document.createElement('div');
   wrapper.className = isUser ? 'text-right mb-4' : 'text-left mb-4 group';
 
-  let innerHTML = `<div class="${isUser ? 'inline-block bg-[#F15A29] text-white' : 'inline-block bg-[#002B5C] text-white'} rounded-2xl px-5 py-3 max-w-[85%] shadow-sm text-[15px] leading-relaxed">`;
+  let innerHTML = `<div class="${isUser ? 'inline-block bg-[#00A89D] text-white' : 'inline-block bg-[#002B5C] text-white'} rounded-2xl px-5 py-3 max-w-[85%] shadow-sm text-[15px] leading-relaxed">`;
   innerHTML += isUser ? content : marked.parse(content || '');
   innerHTML += `</div>`;
 
@@ -296,7 +272,7 @@ function addMessage(role, content, addActions = true) {
       <div class="mt-1 flex gap-1.5 text-[10px] opacity-60 group-hover:opacity-100 transition">
         <button onclick="copyChatMessage(this)" class="px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Copy</button>
         <button onclick="saveChatMessage(this)" class="px-2 py-0.5 rounded border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Save to Vault</button>
-        <button onclick="useInTool(this, 'social')" class="px-2 py-0.5 rounded border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white">To Social</button>
+        <button onclick="useInTool(this, 'social')" class="px-2 py-0.5 rounded border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">To Social</button>
       </div>`;
   }
 
@@ -343,7 +319,7 @@ function useInTool(btn, tool) {
   if (tool === 'social' && window.showSection) {
     window.showSection('social-post');
     setTimeout(() => {
-      const ta = document.getElementById('post-details') || document.querySelector('#social-post textarea');
+      const ta = document.getElementById('custom-plan-prompt') || document.querySelector('#social-post textarea');
       if (ta) {
         ta.value = (ta.value ? ta.value + '\n\n' : '') + 'Idea from AI Coach: ' + text;
         ta.focus();
@@ -371,7 +347,7 @@ function clearChat() {
   // Show fresh welcome
   setTimeout(() => {
     if (messagesDiv) {
-      addMessage('assistant', "Hi! I'm your AI Recruiting Coach — profile-aware and connected to every tool in this coach. What are we winning at today?", false);
+      addMessage('assistant', "Hi! I'm your AI Realtor Coach — profile-aware and connected to every tool in this coach. What are we winning at today?", false);
     }
   }, 50);
 }
@@ -381,14 +357,14 @@ function setupChatSuggestions() {
   if (!container) return;
   if (container.children.length > 0) return; // already populated
   const prompts = [
-    "Give me 3 LinkedIn post ideas this week that attract 30–70 unit LOs",
-    "Help me handle an 'I'm happy where I am' objection with a warm script",
-    "What should my Tue–Thu phone block look like for 270 outreach attempts?",
-    "Draft a nurture touch for a B-tier Shape prospect I haven't talked to in 60 days",
+    "Give me 3 social post ideas this week that match my personality and hobbies",
+    "Help me handle a 'rates are too high' objection with a warm script",
+    "Brainstorm a high-impact pop-by or client appreciation idea for realtors",
+    "What's a good 7-day post-closing touch sequence for a first-time buyer?",
     "Motivate me — I'm feeling in a slump this week",
-    "Turn one of my hobbies into 2 authentic recruiting content angles",
-    "Review my hire goals and suggest my top 3 focus actions this week",
-    "Prep me for an executive leadership call — key questions to ask"
+    "Turn one of my hobbies into 2 evergreen content angles for social or blog",
+    "Review my goals and suggest my top 3 focus actions this week",
+    "Give me a strong referral ask script for a past client"
   ];
   // Use data attributes + event listener instead of inline onclick to avoid quote escaping / syntax errors in generated HTML
   container.innerHTML = prompts.map(p => {
@@ -434,7 +410,7 @@ function setupChatSuggestions() {
     // If no messages yet (fresh), show a warm personalized welcome
     const messagesDiv = document.getElementById('chat-messages');
     if (messagesDiv && messagesDiv.children.length === 0) {
-      const welcome = "Hi! I'm your AI Recruiting Coach. I know your profile, your pipeline goals, and your tools. What are we winning at today?";
+      const welcome = "Hi! I'm your AI Realtor Coach. I know your profile, your tools, and your goals. What are we winning at today?";
       addMessage('assistant', welcome, false);
     }
 

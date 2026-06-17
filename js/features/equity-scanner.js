@@ -690,6 +690,15 @@ function buildDashboard() {
             </div>
         </div>
 
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button onclick="copyDashboard()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002B5C] text-white font-semibold shadow-lg hover:bg-black transition">
+                <i class="fas fa-copy"></i> Copy All Data
+            </button>
+            <button onclick="saveFullReportToVault()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl border-2 border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition">
+                <i class="far fa-bookmark"></i> Save Report to My Saved Items
+            </button>
+        </div>
+
         <div id="opportunity-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12"></div>
     </div>
 `;
@@ -1509,6 +1518,7 @@ function saveFullReportToVault() {
   if (typeof openDetailModal === 'function') window.openDetailModal = openDetailModal;
   if (typeof saveOpportunityToVault === 'function') window.saveOpportunityToVault = saveOpportunityToVault;
   if (typeof saveFullReportToVault === 'function') window.saveFullReportToVault = saveFullReportToVault;
+  if (typeof copyDashboard === 'function') window.copyDashboard = copyDashboard;
   if (typeof closeDetailModal === 'function') window.closeDetailModal = closeDetailModal;
   if (typeof resetEquityTool === 'function') window.resetEquityTool = resetEquityTool;
   if (typeof generateEquityReport === 'function') window.generateEquityReport = generateEquityReport;

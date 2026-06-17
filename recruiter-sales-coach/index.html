@@ -181,6 +181,7 @@
             <div class="sidebar-group mt-5">STRATEGY &amp; DEVELOPMENT</div>
             <ul class="space-y-0.5 px-2 text-sm">
                 <li><a href="#planning" class="sidebar-link px-4 py-2.5"><i class="fas fa-chart-line w-5"></i> 2026 Recruiting Plan</a></li>
+                <li><a href="#recruiting-plan-ops" class="sidebar-link px-4 py-2.5"><i class="fas fa-clipboard-list w-5"></i> 2026 Plan Operations</a></li>
                 <li><a href="#mindset-motivation" class="sidebar-link px-4 py-2.5"><i class="fas fa-brain w-5"></i> Mindset Lab</a></li>
                 <li><a href="#books" class="sidebar-link px-4 py-2.5"><i class="fas fa-book w-5"></i> Book Vault</a></li>
             </ul>
@@ -214,6 +215,14 @@
             <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Battle-tested openers, discovery questions, and objection responses for recruiting conversations.</p>
         </div>
         <div id="recruiting-playbook-content"></div>
+    </section>
+
+    <section id="recruiting-plan-ops" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">2026 Plan Operations</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Execute the Ruoff Recruiting Plan pillars — click any pillar card for rhythm, checklists, examples, and one-click links into tools.</p>
+        </div>
+        <div id="recruiting-plan-ops-content"></div>
     </section>
 
     <section id="ruoff-fact-vault" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -1286,8 +1295,11 @@
         </div>
     </div>
     <div class="bg-gradient-to-r from-[#002B5C] to-[#F15A29] text-white p-10 rounded-3xl text-center mt-12">
-    <p class="text-2xl font-bold mb-4">Sales Script Generator</p>
-    <p class="text-xl">Natural, objection-proof scripts that feel human and help you close more deals with confidence.</p>
+    <p class="text-2xl font-bold mb-4">Recruiting Script Generator</p>
+    <p class="text-xl">Natural, curiosity-first scripts that feel human and help you book executive calls with confidence.</p>
+    <button type="button" onclick="if(typeof window.openExecCallPrep==='function')window.openExecCallPrep()" class="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white text-sm font-semibold transition border border-white/30">
+        <i class="fas fa-clipboard-check"></i> Executive Call Prep &amp; Debrief
+    </button>
 </div>
 </section>
 
@@ -1978,9 +1990,15 @@
                   <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white">This Week's Recruiting Plan</h3>
                   <div class="px-3 py-1 rounded-full bg-[#00A89D]/10 text-[#00A89D] text-xs font-bold tracking-wider">PERSONALIZED</div>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">7 focused days of prospecting + relationship building, made for you</p>
+                <p id="weekly-plan-summary" class="text-sm text-gray-600 dark:text-gray-300 mt-2 max-w-2xl">Your protected time + daily execution plan.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="weekly-plan-hours"></span> · 7 focused days of prospecting + relationship building</p>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="if(window.ToolBridges)window.ToolBridges.sendWeekThemeToSocial()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white text-sm font-semibold transition-all">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Week theme → Social</span>
+                </button>
                 <button onclick=" (typeof window.generateWeeklyPlan==='function' ? window.generateWeeklyPlan() : (typeof generateWeeklyPlan==='function' ? generateWeeklyPlan() : console.warn('generateWeeklyPlan not ready'))) " 
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white text-sm font-semibold transition-all">
                     <i class="fas fa-redo"></i>
@@ -2197,17 +2215,22 @@
 
 <!-- Recruiting data + config (before feature scripts) -->
 <script src="js/data/recruiting-metrics.js"></script>
+<script src="js/data/recruiting-plan-2026.js"></script>
+<script src="js/data/weekend-plan-policy.js"></script>
 <script src="js/data/recruiting-playbook.js"></script>
 <script src="js/data/recruiting-scenarios.js"></script>
 <script src="js/data/ruoff-fact-vault.js"></script>
 <script src="js/features/ruoff-fact-vault-manager.js"></script>
 <script src="js/features/recruiting-config.js"></script>
+<script src="js/features/recruiting-scorecard.js"></script>
+<script src="js/features/recruiting-plan-ops.js"></script>
 
 <!-- Extracted Features (Phase 1) -->
 <script src="js/features/sales-scripts.js"></script>
 <script src="js/features/social-post.js"></script>
 <script src="js/features/mindset-lab.js"></script>
 <script src="js/features/weekly-win-plan.js"></script>
+<script src="js/features/tool-bridges.js"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
 <script src="js/features/blog-creator.js"></script>
 <script src="js/features/legacy-helpers.js"></script>

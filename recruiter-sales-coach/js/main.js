@@ -605,6 +605,13 @@
       // Shared file (weekly-win-plan.js) but completely separate functions, prompts, buttons, outputs, and loading UI.
       if (id === 'weekly-win-plan') {
         setTimeout(() => {
+          if (typeof window.ToolBridges?.rebuildAnnualContextFromDom === 'function') {
+            window.ToolBridges.rebuildAnnualContextFromDom();
+          }
+          if (typeof window.ToolBridges?.refreshAnnualBridgeUI === 'function') {
+            window.ToolBridges.refreshAnnualBridgeUI();
+          }
+
           const editBtn = document.getElementById('edit-setup-btn');
           if (editBtn && typeof window.openSetupWizard === 'function') {
             editBtn.onclick = window.openSetupWizard;   // direct assignment as fallback

@@ -227,23 +227,46 @@ function calculateAdvanced() {
         </div>
     </div>
 
-    <div class="mt-6 flex justify-center">
+    <div class="mt-6 flex flex-wrap justify-center gap-3">
       <button onclick="copyCalcResults()" class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">
         <i class="fas fa-copy"></i>
         <span>Copy Full Breakdown</span>
+      </button>
+      <button onclick="saveCalcResults()" class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-2xl border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white transition">
+        <i class="far fa-bookmark"></i>
+        <span>Save to My Saved Items</span>
       </button>
     </div>
 `;
 }
 
-function copyCalcResults() {
+function getCalcResultsText() {
   const output = document.getElementById('calc-output');
-  if (!output || !output.textContent.trim()) {
+  if (!output || !output.textContent.trim()) return '';
+  return (output.innerText || output.textContent).trim();
+}
+
+function saveCalcResults() {
+  const text = getCalcResultsText();
+  if (!text) {
+    alert('No results to save yet. Run a calculation first.');
+    return;
+  }
+  const btn = typeof event !== 'undefined' && event.currentTarget ? event.currentTarget : null;
+  const title = 'Mortgage Calculator Results — ' + new Date().toLocaleDateString();
+  if (typeof window.toggleSaveIdea === 'function') {
+    window.toggleSaveIdea(title, text, btn, 'calculator');
+    if (typeof window.showSavedFeedback === 'function') window.showSavedFeedback('Saved to My Saved Items');
+  }
+}
+
+function copyCalcResults() {
+  const text = getCalcResultsText();
+  if (!text) {
     alert('No results to copy yet. Run a calculation first.');
     return;
   }
-  const text = output.innerText || output.textContent;
-  navigator.clipboard.writeText(text.trim()).then(() => {
+  navigator.clipboard.writeText(text).then(() => {
     const orig = event.currentTarget ? event.currentTarget.innerHTML : '';
     // simple toast
     const toast = document.createElement('div');

@@ -661,6 +661,8 @@ CRITICAL INSTRUCTIONS — DO NOT VIOLATE:
   - Each post: full caption + hashtags.
 Include local ${localArea} events, holidays, trends where relevant. Tone: warm, fun, conversational.
 
+${typeof window.getWeekendSocialRules === 'function' ? window.getWeekendSocialRules() : ''}
+
 Generate the COMPLETE table now with all ${daysInMonth} days.`;
 
     const loading = document.getElementById('global-loading');
@@ -823,10 +825,15 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
                 const postId = `post-${day}-${pIdx}`;
                 return `
                     <div class="relative mb-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-md border border-[#00A89D]/20">
-                        <button type="button" onclick="copySinglePost('${postId}', event)" class="absolute top-4 right-4 bg-[#00A89D] hover:bg-[#00887A] text-white p-3 rounded-full shadow-lg transition-all flex items-center gap-2 copy-btn" data-post-id="${postId}">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                        <div id="${postId}" class="text-base md:text-lg leading-relaxed">${post}</div>
+                        <div class="absolute top-4 right-4 flex items-center gap-2">
+                            <button type="button" onclick="copySinglePost('${postId}', event)" class="bg-[#00A89D] hover:bg-[#00887A] text-white p-3 rounded-full shadow-lg transition-all flex items-center gap-2 copy-btn" data-post-id="${postId}" title="Copy post">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button type="button" onclick="saveCalendarPost('${postId}', ${day}, ${pIdx}, this)" class="border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white p-2.5 rounded-full shadow-md transition-all flex items-center gap-1 text-xs font-semibold" title="Save to My Saved Items">
+                                <i class="far fa-bookmark"></i>
+                            </button>
+                        </div>
+                        <div id="${postId}" class="text-base md:text-lg leading-relaxed pr-24">${post}</div>
                     </div>
                 `;
             }).join('');
@@ -864,6 +871,11 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
                 </div>
                 <p class="text-3xl text-white">Copied ideas for <span class="font-black text-[#F15A29]" id="copied-count">0</span> of 30 days</p>
                 <p class="text-xl text-gray-300 mt-6" id="progress-message">Start copying to track progress!</p>
+                <div class="mt-8 flex flex-wrap justify-center gap-3">
+                    <button type="button" onclick="saveFullSocialCalendar('${monthName}', this)" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl border-2 border-white/80 text-white hover:bg-white hover:text-[#002B5C] font-semibold transition-all">
+                        <i class="far fa-bookmark"></i> Save Full Calendar to My Saved Items
+                    </button>
+                </div>
             </div>
         `;
 
@@ -914,6 +926,34 @@ function toggleCalendarSection() {
     
     content.classList.toggle('hidden');
     icon.classList.toggle('rotate-180');
+}
+
+function saveCalendarPost(postId, day, pIdx, btnEl) {
+    const el = document.getElementById(postId);
+    if (!el) return;
+    const text = el.innerText.trim();
+    if (!text) return;
+
+    const monthEl = document.querySelector('#printable-plan h1');
+    const monthName = monthEl ? monthEl.textContent.replace(' Social Media Calendar', '').trim() : 'Social Calendar';
+    const title = `${monthName} — Day ${day} Post ${parseInt(pIdx, 10) + 1}`;
+
+    if (typeof window.toggleSaveIdea === 'function') {
+        const richContent = `<div class="social-calendar-saved"><div class="text-xs uppercase tracking-widest font-bold text-[#00A89D] mb-2">${monthName} • Day ${day}</div><div class="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap">${text.replace(/</g, '&lt;')}</div></div>`;
+        window.toggleSaveIdea(title, richContent, btnEl, 'social');
+        if (typeof window.showSavedFeedback === 'function') window.showSavedFeedback('Saved to My Saved Items');
+    }
+}
+
+function saveFullSocialCalendar(monthName, btnEl) {
+    const plan = document.getElementById('printable-plan');
+    if (!plan) return alert('Generate a calendar first.');
+    const title = `${monthName || 'Monthly'} Social Media Calendar (Full Plan)`;
+    const content = plan.innerHTML;
+    if (typeof window.toggleSaveIdea === 'function') {
+        window.toggleSaveIdea(title, content, btnEl, 'social');
+        if (typeof window.showSavedFeedback === 'function') window.showSavedFeedback('Full calendar saved to My Saved Items');
+    }
 }
 
 // Global copy function — works for freshly generated OR loaded saved plans
@@ -1082,6 +1122,8 @@ themeIds.forEach(id => {
   window.generateMonthlyPlan = generateMonthlyPlan;
   window.toggleCalendarSection = toggleCalendarSection;
   window.copySinglePost = window.copySinglePost || copySinglePost; // if defined inside
+  window.saveCalendarPost = saveCalendarPost;
+  window.saveFullSocialCalendar = saveFullSocialCalendar;
 
   // =====================================================
   // INITIALIZATION
