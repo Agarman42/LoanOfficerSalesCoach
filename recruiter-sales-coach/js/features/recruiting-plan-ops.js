@@ -151,12 +151,14 @@
     if (modal) return modal;
     modal = document.createElement('div');
     modal.id = 'recruiting-pillar-modal';
-    modal.className = 'fixed inset-0 z-[200] hidden items-center justify-center p-4';
+    modal.className = 'fixed inset-0 z-[200] hidden items-center justify-center p-4 sm:p-6';
     modal.innerHTML = `
       <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-pillar-modal-close></div>
-      <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in">
-        <button type="button" data-pillar-modal-close class="absolute top-4 right-4 w-10 h-10 rounded-full border border-gray-200 dark:border-gray-600 text-gray-400 hover:text-red-500 hover:border-red-300 text-xl leading-none" aria-label="Close">&times;</button>
-        <div id="recruiting-pillar-modal-body"></div>
+      <div class="recruiting-pillar-modal-panel relative w-full max-w-2xl max-h-[min(90vh,820px)] flex flex-col bg-white dark:bg-gray-800 rounded-3xl border-2 border-[#00A89D]/40 overflow-hidden animate-fade-in">
+        <button type="button" data-pillar-modal-close class="absolute top-3 right-3 z-20 w-10 h-10 rounded-full bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-600 text-gray-400 hover:text-red-500 hover:border-red-300 text-xl leading-none shadow-sm backdrop-blur-sm" aria-label="Close">&times;</button>
+        <div id="recruiting-pillar-modal-scroll" class="recruiting-pillar-modal-scroll p-6 md:p-8 pt-7 md:pt-8">
+          <div id="recruiting-pillar-modal-body" class="pr-1"></div>
+        </div>
       </div>`;
     document.body.appendChild(modal);
     modal.querySelectorAll('[data-pillar-modal-close]').forEach(el => {
