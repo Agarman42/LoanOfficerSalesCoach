@@ -102,6 +102,75 @@
     return parts.length ? parts.join('. ') + '.' : 'Write in a helpful, trustworthy, conversational voice for a local real estate professional.';
   }
 
+  function trimBundleSectionEdges(text) {
+    return (text || '')
+      .replace(/^(?:\s*---\s*\n?)+/, '')
+      .replace(/(?:\n?\s*---\s*)+$/, '')
+      .trim();
+  }
+
+  /** Split API response into blog + caption + Google + Reel using section labels (not every ---). */
+  function parseBlogBundleFromResponse(fullContent) {
+    const content = (fullContent || '').trim();
+    const fallback = { blogMarkdown: content, captionText: '', googlePostText: '', reelScriptText: '' };
+    if (!content) return fallback;
+
+    const markerDefs = [
+      { key: 'captionText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Social Media Caption:?\*{0,2}\s*/i },
+      { key: 'googlePostText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Google Post:?\*{0,2}\s*/i },
+      { key: 'reelScriptText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}30-45 Second Reel Script(?:\s*&\s*Video Idea)?:?\*{0,2}\s*/i },
+    ];
+
+    const markers = [];
+    for (const def of markerDefs) {
+      const match = def.regex.exec(content);
+      if (match) {
+        markers.push({ key: def.key, index: match.index, end: match.index + match[0].length });
+      }
+    }
+
+    if (markers.length === 0) {
+      const parts = content.split(/(?:^|\n)---\s*\n?\s*(?=\*{0,2}(?:Suggested Social Media Caption|Suggested Google Post|30-45 Second Reel Script))/i);
+      if (parts.length >= 2) {
+        const result = {
+          blogMarkdown: trimBundleSectionEdges(parts[0]),
+          captionText: '',
+          googlePostText: '',
+          reelScriptText: '',
+        };
+        if (parts.length >= 4) {
+          result.captionText = trimBundleSectionEdges(parts[1]);
+          result.googlePostText = trimBundleSectionEdges(parts[2]);
+          result.reelScriptText = trimBundleSectionEdges(parts[3]);
+        } else if (parts.length >= 3) {
+          result.captionText = trimBundleSectionEdges(parts[1]);
+          result.googlePostText = trimBundleSectionEdges(parts[2]);
+        } else {
+          result.captionText = trimBundleSectionEdges(parts[1]);
+        }
+        return result;
+      }
+      return fallback;
+    }
+
+    markers.sort((a, b) => a.index - b.index);
+
+    const result = {
+      blogMarkdown: trimBundleSectionEdges(content.slice(0, markers[0].index)),
+      captionText: '',
+      googlePostText: '',
+      reelScriptText: '',
+    };
+
+    for (let i = 0; i < markers.length; i++) {
+      const start = markers[i].end;
+      const end = i + 1 < markers.length ? markers[i + 1].index : content.length;
+      result[markers[i].key] = trimBundleSectionEdges(content.slice(start, end));
+    }
+
+    return result;
+  }
+
   // =====================================================
   // ORIGINAL BLOG CREATOR CODE (moved verbatim)
   // =====================================================
@@ -357,25 +426,26 @@ let finalPrompt = systemPrompt;
             window.hideLoading?.();
             return;
         }
-        finalPrompt = `You are an expert real estate content editor. The user already has a complete blog bundle (blog + social caption + Google post + Reel script). Apply ONLY the requested edits while keeping the same overall structure, separators (---), and section labels.
+        finalPrompt = `You are an expert real estate content editor. The user already has a complete blog bundle (blog + social caption + Google post + Reel script). Apply ONLY the requested edits while keeping the same overall structure and section labels.
 
 USER FEEDBACK / REQUESTED EDITS:
 ${feedback}
 
-CURRENT FULL OUTPUT (edit this — return the COMPLETE revised bundle in the same format):
----
+CURRENT FULL OUTPUT (edit this — return the COMPLETE revised bundle using the exact section labels below):
+
+[BLOG POST — full markdown]
 ${lastBlogBundle.blogMarkdown}
----
+
 **Suggested Social Media Caption:**
 ${lastBlogBundle.captionText}
----
+
 **Suggested Google Post:**
 ${lastBlogBundle.googlePostText}
----
+
 **30-45 Second Reel Script & Video Idea:**
 ${lastBlogBundle.reelScriptText}
 
-Return the FULL updated output: blog markdown, then ---, caption, ---, Google post, ---, Reel script. Same rules as original (no word counts, clean markdown). Topic context: ${topicInput}`;
+Return the FULL updated output in this order: blog markdown first, then **Suggested Social Media Caption:**, then **Suggested Google Post:**, then **30-45 Second Reel Script & Video Idea:**. Do NOT use --- as section separators (the blog may contain --- horizontal rules). Same rules as original (no word counts, clean markdown). Topic context: ${topicInput}`;
     }
 
     try {
@@ -387,51 +457,7 @@ Return the FULL updated output: blog markdown, then ---, caption, ---, Google po
 
         if (!fullContent) throw new Error('Empty response from API');
 
-        // === SPLIT + AGGRESSIVE CLEANING (now supports 4 sections: blog + social + google + reel) ===
-        let blogMarkdown = fullContent;
-        let captionText = '';
-        let googlePostText = '';
-        let reelScriptText = '';
-
-        const parts = fullContent.split(/---\s*/);
-
-        if (parts.length >= 4) {
-            blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim()
-                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-            googlePostText = parts[2].trim()
-                .replace(/^\**Suggested Google Post:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-            reelScriptText = parts[3].trim()
-                .replace(/^\**30-45 Second Reel Script & Video Idea:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-        } else if (parts.length >= 3) {
-            blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim()
-                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-            googlePostText = parts[2].trim()
-                .replace(/^\**Suggested Google Post:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-        } else if (parts.length === 2) {
-            blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim()
-                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-        }
+        const { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
 
         lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
 

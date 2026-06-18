@@ -17,6 +17,28 @@
 (function () {
   'use strict';
 
+  function getBlogFeedbackHtml() {
+    return `
+    <!-- Feedback / Refine (like Newsletter) -->
+    <div class="mt-8 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-8">
+        <label class="block text-lg font-semibold text-[#00A89D] mb-3">Feedback / Specific Edits (Optional)</label>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Tweak tone, length, examples, or emphasis without starting over. The blog, caption, Google post, and Reel script will all be updated together.</p>
+        <textarea id="blog-feedback" rows="3" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800" placeholder="e.g., Make the intro warmer, shorten by ~200 words, add more recruiting stats, tone down the humor in the FAQ."></textarea>
+        <button id="blog-refine-btn" class="mt-4 w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 px-10 rounded-full font-bold text-lg shadow-xl flex items-center justify-center gap-2 mx-auto">
+            <i class="fas fa-redo"></i> Refine with Edits
+        </button>
+        <p class="text-xs text-center text-gray-500 mt-2">AI edits only what you ask while keeping the full bundle structure.</p>
+    </div>`;
+  }
+
+  function patchRestoredBlogOutput(html) {
+    let patched = html || '';
+    if (!patched.includes('id="blog-feedback"')) {
+      patched += getBlogFeedbackHtml();
+    }
+    return patched;
+  }
+
   // =====================================================
   // CENTRAL PROFILE INTEGRATION (consistent with other tools)
   // =====================================================
@@ -63,12 +85,82 @@
     return parts.length ? parts.join('. ') + '.' : 'Write in a helpful, trustworthy, conversational voice for a Ruoff mortgage recruiter.';
   }
 
+  function trimBundleSectionEdges(text) {
+    return (text || '')
+      .replace(/^(?:\s*---\s*\n?)+/, '')
+      .replace(/(?:\n?\s*---\s*)+$/, '')
+      .trim();
+  }
+
+  /** Split API response into blog + caption + Google + Reel using section labels (not every ---). */
+  function parseBlogBundleFromResponse(fullContent) {
+    const content = (fullContent || '').trim();
+    const fallback = { blogMarkdown: content, captionText: '', googlePostText: '', reelScriptText: '' };
+    if (!content) return fallback;
+
+    const markerDefs = [
+      { key: 'captionText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Social Media Caption:?\*{0,2}\s*/i },
+      { key: 'googlePostText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Google Post:?\*{0,2}\s*/i },
+      { key: 'reelScriptText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}30-45 Second Reel Script(?:\s*&\s*Video Idea)?:?\*{0,2}\s*/i },
+    ];
+
+    const markers = [];
+    for (const def of markerDefs) {
+      const match = def.regex.exec(content);
+      if (match) {
+        markers.push({ key: def.key, index: match.index, end: match.index + match[0].length });
+      }
+    }
+
+    if (markers.length === 0) {
+      const parts = content.split(/(?:^|\n)---\s*\n?\s*(?=\*{0,2}(?:Suggested Social Media Caption|Suggested Google Post|30-45 Second Reel Script))/i);
+      if (parts.length >= 2) {
+        const result = {
+          blogMarkdown: trimBundleSectionEdges(parts[0]),
+          captionText: '',
+          googlePostText: '',
+          reelScriptText: '',
+        };
+        if (parts.length >= 4) {
+          result.captionText = trimBundleSectionEdges(parts[1]);
+          result.googlePostText = trimBundleSectionEdges(parts[2]);
+          result.reelScriptText = trimBundleSectionEdges(parts[3]);
+        } else if (parts.length >= 3) {
+          result.captionText = trimBundleSectionEdges(parts[1]);
+          result.googlePostText = trimBundleSectionEdges(parts[2]);
+        } else {
+          result.captionText = trimBundleSectionEdges(parts[1]);
+        }
+        return result;
+      }
+      return fallback;
+    }
+
+    markers.sort((a, b) => a.index - b.index);
+
+    const result = {
+      blogMarkdown: trimBundleSectionEdges(content.slice(0, markers[0].index)),
+      captionText: '',
+      googlePostText: '',
+      reelScriptText: '',
+    };
+
+    for (let i = 0; i < markers.length; i++) {
+      const start = markers[i].end;
+      const end = i + 1 < markers.length ? markers[i + 1].index : content.length;
+      result[markers[i].key] = trimBundleSectionEdges(content.slice(start, end));
+    }
+
+    return result;
+  }
+
   // =====================================================
   // ORIGINAL BLOG CREATOR CODE (moved verbatim)
   // =====================================================
 
 // ==================== LOAN OFFICER BLOG DOCUMENT UPLOAD ====================
 let blogUploadedFileText = '';
+let lastBlogBundle = null; // { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput }
 
 const blogUploadArea = document.getElementById('blog-upload-area');
 const blogFileInput = document.getElementById('blog-file-upload');
@@ -130,8 +222,8 @@ window.removeBlogUploadedFile = function() {
     document.getElementById('blog-remove-file-btn').classList.add('hidden');
 };
 
-async function generateBlog() {
-    console.log('%c[blog-creator] generateBlog() called', 'color:#00A89D');
+async function generateBlog(feedback = '') {
+    console.log('%c[blog-creator] generateBlog() called', feedback ? 'with feedback' : 'fresh', 'color:#00A89D');
 
     // Ensure latest local area is persisted before generation
     const localInput = document.getElementById('blog-local-area');
@@ -317,60 +409,46 @@ let finalPrompt = systemPrompt;
 
     finalPrompt += `\n\nTopic: ${topicInput}`;
 
+    if (feedback) {
+        if (!lastBlogBundle) {
+            alert('Generate a blog first, then use feedback to refine it.');
+            window.hideLoading?.();
+            return;
+        }
+        finalPrompt = `You are an expert mortgage recruiting content editor. The user already has a complete blog bundle (blog + social caption + Google post + Reel script). Apply ONLY the requested edits while keeping the same overall structure and section labels.
+
+USER FEEDBACK / REQUESTED EDITS:
+${feedback}
+
+CURRENT FULL OUTPUT (edit this — return the COMPLETE revised bundle using the exact section labels below):
+
+[BLOG POST — full markdown]
+${lastBlogBundle.blogMarkdown}
+
+**Suggested Social Media Caption:**
+${lastBlogBundle.captionText}
+
+**Suggested Google Post:**
+${lastBlogBundle.googlePostText}
+
+**30-45 Second Reel Script & Video Idea:**
+${lastBlogBundle.reelScriptText}
+
+Return the FULL updated output in this order: blog markdown first, then **Suggested Social Media Caption:**, then **Suggested Google Post:**, then **30-45 Second Reel Script & Video Idea:**. Do NOT use --- as section separators (the blog may contain --- horizontal rules). Same rules as original (no word counts, clean markdown). Topic context: ${topicInput}`;
+    }
+
     try {
         // Centralized API call (Phase 0) - no more hardcoded key
         let fullContent = await window.callGrokAPI(finalPrompt, {
-            temperature: 0.25,
+            temperature: feedback ? 0.35 : 0.25,
             max_tokens: 18000
         });
 
         if (!fullContent) throw new Error('Empty response from API');
 
-        // === SPLIT + AGGRESSIVE CLEANING (now supports 4 sections: blog + social + google + reel) ===
-        let blogMarkdown = fullContent;
-        let captionText = '';
-        let googlePostText = '';
-        let reelScriptText = '';
+        const { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
 
-        const parts = fullContent.split(/---\s*/);
-
-        if (parts.length >= 4) {
-            blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim()
-                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-            googlePostText = parts[2].trim()
-                .replace(/^\**Suggested Google Post:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-            reelScriptText = parts[3].trim()
-                .replace(/^\**30-45 Second Reel Script & Video Idea:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-        } else if (parts.length >= 3) {
-            blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim()
-                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-            googlePostText = parts[2].trim()
-                .replace(/^\**Suggested Google Post:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-        } else if (parts.length === 2) {
-            blogMarkdown = parts[0].trim();
-            captionText = parts[1].trim()
-                .replace(/^\**Suggested Social Media Caption:?\**?\s*/i, '')
-                .replace(/^\*\*\s*/, '')
-                .replace(/^\s+/, '')
-                .trim();
-        }
+        lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
 
         // === Render output - Premium Card Style matching Social section ===
         output.innerHTML = `
@@ -457,6 +535,8 @@ let finalPrompt = systemPrompt;
             <a href="#social-post" onclick="if(typeof window.showSection==='function'){window.showSection('social-post');}return false;" class="text-[#00A89D] hover:underline">Open Social Post &amp; 30-Day Calendar</a>
         </div>
     </div>
+
+    ${getBlogFeedbackHtml()}
 `;
 
         output.classList.remove('hidden');
@@ -498,7 +578,20 @@ let finalPrompt = systemPrompt;
         // Re-attach listeners for id-based buttons (safe to call on fresh gen)
         attachBlogOutputListeners();
 
-        gtag('event', 'generate_blog', {
+        const refineBtn = document.getElementById('blog-refine-btn');
+        if (refineBtn) {
+            refineBtn.onclick = () => {
+                const fb = document.getElementById('blog-feedback')?.value.trim() || '';
+                if (!fb) { alert('Please enter feedback or specific edits first!'); return; }
+                generateBlog(fb);
+            };
+        }
+        if (feedback) {
+            const fbEl = document.getElementById('blog-feedback');
+            if (fbEl) fbEl.value = '';
+        }
+
+        gtag('event', feedback ? 'edit_blog' : 'generate_blog', {
             event_category: 'Tool Usage',
             event_label: 'Blog Generated',
             value: 1
@@ -679,6 +772,7 @@ window.saveBlogToVault = function() {
 // My Saved Items (Vault) copies are independent and stay until the user deletes them from the library.
 window.clearSavedBlog = function() {
   try { localStorage.removeItem('lastBlogOutput'); } catch (e) {}
+  lastBlogBundle = null;
   const out = document.getElementById('blog-output');
   if (out) {
     out.innerHTML = '';
@@ -699,6 +793,15 @@ function attachBlogOutputListeners() {
   if (googBtn) googBtn.onclick = copyGooglePostWithFormatting;
   const jumpBtn = document.getElementById('jump-publish-btn');
   if (jumpBtn) jumpBtn.onclick = copyBlogAndJumpToPublisher;
+
+  const refineBtn = document.getElementById('blog-refine-btn');
+  if (refineBtn) {
+    refineBtn.onclick = () => {
+      const fb = document.getElementById('blog-feedback')?.value.trim() || '';
+      if (!fb) { alert('Please enter feedback or specific edits first!'); return; }
+      generateBlog(fb);
+    };
+  }
 
   const copyReelBtn = document.getElementById('copy-reel-btn');
   if (copyReelBtn) {
@@ -912,7 +1015,7 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
       const last = localStorage.getItem('lastBlogOutput');
       const out = document.getElementById('blog-output');
       if (last && out && !out.innerHTML.trim()) {
-        out.innerHTML = last;
+        out.innerHTML = patchRestoredBlogOutput(last);
         out.classList.remove('hidden');
         attachBlogOutputListeners();
       }
