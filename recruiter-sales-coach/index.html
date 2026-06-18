@@ -2899,13 +2899,13 @@
 <!-- ===================================================== -->
 <!-- 
   VERSION FINE PRINT MARKER (applies to LO, Realtor, and Recruiter tools)
-  Update the git commit SHA + date below before every Git push + manual Render deploy.
-  This lets you instantly know exactly which version is live.
-  Keep it tiny and out of the way.
+  Bump APP_VERSION in js/app-version.js before every Git push + Render deploy.
+  Footer shows e.g. v2.14 so you can instantly confirm which build is live.
 -->
-<div class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
-  Ultimate Recruiter Sales Coach • git:8df32b0 • 2026-06-17 • Render
+<div id="app-version-line" data-app-name="Ultimate Recruiter Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
+  Ultimate Recruiter Sales Coach • v… • … • Render
 </div>
+<script src="js/app-version.js"></script>
 
 </body>
 </html>
