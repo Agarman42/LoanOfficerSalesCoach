@@ -29,29 +29,46 @@
 
   function getEffectiveSetup() {
     const central = getCentralProfile();
+    const location = central.location || central.localArea || central.market || '';
+    const partnerTypes = central.partnerTypes || central.targetPartners || [];
+    const challenges = Array.isArray(central.challenges)
+      ? central.challenges
+      : (central.challenges ? String(central.challenges).split(',').map((s) => s.trim()) : []);
+
     return {
       ...central,
       name: central.name || '',
       email: central.email || '',
-      localArea: central.localArea || central.market || '',
+      phone: central.phone || '',
+      nmls: central.nmls || '',
+      intro: central.intro || '',
+      localArea: location,
+      location,
       voiceTraits: central.voiceTraits || [],
       personality: central.personality || '',
       tone: central.tone || 'Friendly & Relatable',
-      targetPartners: central.targetPartners || [],
-      goals: central.goals || '',
-      challenges: central.challenges || ''
+      partnerTypes,
+      targetPartners: partnerTypes,
+      goals: central.goals || [central.monthlyUnits, central.monthlyGoal].filter(Boolean).join('; '),
+      challenges,
+      contentNotes: central.contentNotes || '',
+      partnerFocus: central.partnerFocus || ''
     };
   }
 
   function buildSalesPersonalization() {
     const eff = getEffectiveSetup();
-    let parts = [];
+    const parts = [];
 
+    if (eff.intro) parts.push(`Intro: ${eff.intro}`);
     if (eff.personality) parts.push(`Personality: ${eff.personality}`);
     if (eff.voiceTraits && eff.voiceTraits.length) parts.push(`Voice traits: ${eff.voiceTraits.join(', ')}`);
     if (eff.tone) parts.push(`Preferred tone: ${eff.tone}`);
     if (eff.localArea) parts.push(`Primary market: ${eff.localArea}`);
-    if (eff.targetPartners && eff.targetPartners.length) parts.push(`Key referral partners: ${eff.targetPartners.join(', ')}`);
+    if (eff.partnerTypes && eff.partnerTypes.length) parts.push(`Key referral partners: ${eff.partnerTypes.join(', ')}`);
+    if (eff.partnerFocus) parts.push(`Partner focus: ${eff.partnerFocus}`);
+    if (eff.challenges && eff.challenges.length) parts.push(`Challenges: ${eff.challenges.join(', ')}`);
+    if (eff.contentNotes) parts.push(`Content guardrails: ${eff.contentNotes}`);
 
     const base = 'Warm, authentic, relationship-first loan officer who speaks like a trusted advisor.';
     return parts.length ? `${base} ${parts.join('. ')}.` : base;
@@ -403,6 +420,19 @@ Focus on building connection and trust — not closing the deal.`;
 
         scriptsHTML += '</div>';
 
+        const nextStepsFooter = (typeof window.renderModalNextSteps === 'function')
+            ? window.renderModalNextSteps([
+                { label: 'Practice on a Live Call', onclick: "if(typeof window.showSection==='function')window.showSection('sales-script');", style: 'primary' },
+                { label: 'Save to My Saved Items', onclick: "if(typeof window.showSavedItemsLibrary==='function')window.showSavedItemsLibrary('script');", style: 'accent' },
+                { label: 'Social Post Creator', onclick: "if(typeof window.showSection==='function')window.showSection('social');", style: 'primary' },
+                { label: 'Weekly Win Plan', onclick: "if(typeof window.showSection==='function')window.showSection('weekly-win-plan');", style: 'accent' }
+              ], 'Use These Scripts Next')
+            : '';
+
+        if (nextStepsFooter) {
+            scriptsHTML += `<div class="mt-8 p-6 bg-gradient-to-br from-[#002B5C]/5 to-[#00A89D]/5 rounded-3xl border border-[#002B5C]/20">${nextStepsFooter}</div>`;
+        }
+
         renderedHTML = scriptsHTML;
 
         // Fixed: use scriptSections.length
@@ -616,56 +646,132 @@ function saveSalesScript(title, scriptId, btnEl) {
 
 // Helpful modal with suggested context for different scenario types
 window.showContextTipsModal = function() {
+    const existing = document.getElementById('context-tips-modal');
+    if (existing) {
+        if (typeof window.closeAppModal === 'function') window.closeAppModal(existing);
+        else existing.remove();
+    }
+
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4';
+    modal.id = 'context-tips-modal';
+    modal.className = 'app-modal-overlay fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4';
     modal.innerHTML = `
-        <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full max-h-[85vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-[#002B5C]/5 to-[#00A89D]/5">
                 <div>
-                    <h3 class="text-2xl font-bold">Tips for Better Scripts</h3>
-                    <p class="text-sm text-gray-500">The more specific you are, the more personalized and effective the scripts become.</p>
+                    <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white">Tips for Better Scripts</h3>
+                    <p class="text-sm text-gray-500">Specific context = scripts you will actually use on live calls. See good vs. weak examples below.</p>
                 </div>
-                <button class="text-3xl text-gray-400 hover:text-red-500" onclick="this.closest('.fixed').remove()">×</button>
+                <button type="button" class="context-tips-close text-3xl text-gray-400 hover:text-red-500">×</button>
             </div>
             <div class="p-6 overflow-y-auto max-h-[65vh] space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <strong class="text-red-700 dark:text-red-300">Weak context (generic output):</strong>
+                    <p class="mt-1 text-gray-600 dark:text-gray-400 italic">"Borrower thinks rates are too high."</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <strong class="text-green-700 dark:text-green-300">Strong context (personalized output):</strong>
+                    <p class="mt-1 text-gray-600 dark:text-gray-400 italic">"First-time buyers, been looking 8 months, lease ends in 90 days, target payment $2,400, worried about PMI, pre-approved at another lender but unhappy with communication."</p>
+                </div>
+
                 <div>
-                    <strong class="text-[#F15A29]">For Rate Objections / Waiting Situations</strong>
+                    <strong class="text-[#F15A29]">Rate Objections / Waiting Situations — include:</strong>
                     <ul class="mt-2 list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
-                        <li>How long have they been looking?</li>
-                        <li>Have they been pre-approved yet?</li>
-                        <li>Is there a specific monthly payment they're trying to hit?</li>
-                        <li>Any upcoming life events (baby, job change, lease ending)?</li>
+                        <li>How long have they been looking? Pre-approved elsewhere?</li>
+                        <li>Target monthly payment or purchase price range</li>
+                        <li>Lease end date, school timeline, or baby on the way</li>
+                        <li>What they have heard from media, friends, or other lenders</li>
                     </ul>
+                    <button type="button" class="context-prefill mt-2 text-xs px-3 py-1.5 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold" data-context="First-time buyers looking 6+ months. Lease ends in 90 days. Target payment around $2,400. Worried rates will drop soon. Pre-approved elsewhere but lender is slow to respond.">Pre-fill example →</button>
                 </div>
                 <div>
-                    <strong class="text-[#F15A29]">For Realtor Pushback Situations</strong>
+                    <strong class="text-[#F15A29]">Realtor Pushback — include:</strong>
                     <ul class="mt-2 list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
-                        <li>How long have you worked with this realtor?</li>
-                        <li>Have you closed any deals together before?</li>
-                        <li>Do they have a specific pain point with their current lender?</li>
-                        <li>Any co-marketing or events you've done together?</li>
+                        <li>How long you have known them; deals closed together (0 vs. 3+)</li>
+                        <li>Their stated pain with current lender (speed, communication, tough files)</li>
+                        <li>Whether you have co-hosted events or supported their listings</li>
+                        <li>Their production level and client type (FTB, luxury, investors)</li>
                     </ul>
+                    <button type="button" class="context-prefill mt-2 text-xs px-3 py-1.5 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold" data-context="Realtor I've met twice at open houses, no deals yet. Said her current lender 'goes dark' after pre-approval. She does mostly first-time buyers under $400k. I supported her last open house with snacks.">Pre-fill example →</button>
                 </div>
                 <div>
-                    <strong class="text-[#F15A29]">For Review / Survey Responses</strong>
+                    <strong class="text-[#F15A29]">Review / Survey Responses — include:</strong>
                     <ul class="mt-2 list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
-                        <li>What did the review actually say? (positive or negative?)</li>
-                        <li>Was this a borrower or a realtor review?</li>
-                        <li>Any specific part of the experience you want to highlight or address?</li>
+                        <li>Exact quote or summary (positive 5-star vs. mixed 3-star)</li>
+                        <li>Borrower vs. realtor review</li>
+                        <li>Specific moment to highlight (closing day, rate lock save, etc.)</li>
                     </ul>
+                    <button type="button" class="context-prefill mt-2 text-xs px-3 py-1.5 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold" data-context="5-star Google review from borrower. Mentioned I 'saved the deal' when appraisal came in low and communicated daily. Want a warm thank-you response I can also share on social.">Pre-fill example →</button>
                 </div>
                 <div>
-                    <strong class="text-[#F15A29]">For Special Situations (divorce, inheritance, credit events, etc.)</strong>
+                    <strong class="text-[#F15A29]">Special Situations (divorce, inheritance, credit) — include:</strong>
                     <ul class="mt-2 list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
-                        <li>How emotional or sensitive is the situation?</li>
-                        <li>Are there other professionals involved (attorney, financial advisor)?</li>
-                        <li>Is timing a factor (closing date, inheritance deadline)?</li>
+                        <li>Emotional sensitivity level (high / moderate)</li>
+                        <li>Other professionals involved (attorney, CPA, advisor)</li>
+                        <li>Hard deadlines (court date, inheritance distribution, lease)</li>
+                        <li>What they are afraid of (judgment, pressure, complexity)</li>
                     </ul>
+                    <button type="button" class="context-prefill mt-2 text-xs px-3 py-1.5 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold" data-context="Client going through divorce, high emotional sensitivity. Attorney involved, needs to know equity options before mediation in 45 days. Wants calm, no-pressure tone — afraid of being sold to.">Pre-fill example →</button>
+                </div>
+                <div class="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                    <button type="button" id="context-tips-goto-generator" class="w-full py-3 rounded-2xl bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white font-semibold hover:opacity-90 transition">Open Script Generator with Pre-filled Context</button>
+                    ${typeof window.renderModalNextSteps === 'function' ? window.renderModalNextSteps([
+                        { label: 'Mindset Lab', onclick: "if(typeof window.closeAppModal==='function')window.closeAppModal(document.getElementById('context-tips-modal')); else document.getElementById('context-tips-modal')?.remove(); if(typeof window.showSection==='function')window.showSection('mindset-lab');", style: 'accent' },
+                        { label: 'My Saved Items', onclick: "if(typeof window.closeAppModal==='function')window.closeAppModal(document.getElementById('context-tips-modal')); else document.getElementById('context-tips-modal')?.remove(); if(typeof window.showSavedItemsLibrary==='function')window.showSavedItemsLibrary('script');", style: 'primary' }
+                    ], 'Related Tools') : ''}
                 </div>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
+
+    const closeContextTips = () => {
+        if (typeof window.closeAppModal === 'function') window.closeAppModal(modal);
+        else modal.remove();
+        if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
+    };
+
+    modal.querySelector('.context-tips-close')?.addEventListener('click', closeContextTips);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeContextTips();
+    });
+
+    if (typeof window.openAppModal === 'function') {
+        window.openAppModal(modal);
+    } else {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+        modal.style.pointerEvents = 'auto';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.zIndex = '9999';
+    }
+
+    let pendingContext = '';
+    modal.querySelectorAll('.context-prefill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            pendingContext = btn.getAttribute('data-context') || '';
+            modal.querySelectorAll('.context-prefill').forEach(b => b.classList.remove('ring-2', 'ring-[#00A89D]'));
+            btn.classList.add('ring-2', 'ring-[#00A89D]');
+            if (window.showToast) window.showToast('Example loaded — click the button below to open the generator.');
+        });
+    });
+
+    const gotoBtn = modal.querySelector('#context-tips-goto-generator');
+    if (gotoBtn) {
+        gotoBtn.addEventListener('click', () => {
+            const ctxEl = document.getElementById('script-context') || document.getElementById('custom-context') || document.querySelector('[name="context"], #sales-context, textarea[id*="context"]');
+            if (pendingContext && ctxEl) {
+                ctxEl.value = pendingContext;
+                ctxEl.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            if (typeof window.closeAppModal === 'function') window.closeAppModal(modal);
+            else modal.remove();
+            if (typeof window.showSection === 'function') window.showSection('sales-script');
+            if (pendingContext && window.showToast) window.showToast('Context pre-filled in Script Generator.');
+        });
+    }
 };
 // Accordion toggle
 

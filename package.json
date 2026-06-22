@@ -5,6 +5,9 @@
   "main": "proxy.js",
   "scripts": {
     "start": "node proxy.js",
+    "extract-perf": "node scripts/finish-extract.mjs",
+    "extract-perf:py": "python3 scripts/chunk-extract.py",
+    "audit:vault": "node scripts/audit-vault-ids.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

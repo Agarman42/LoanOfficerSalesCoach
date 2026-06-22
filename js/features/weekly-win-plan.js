@@ -63,7 +63,12 @@
       monthlyUnits: central.monthlyUnits || local.monthlyGoal || local.monthlyUnits || 8,
       // Dollar volume goal (for future use)
       monthlyVolume: central.monthlyGoal || '',
-      focus: central.focus || local.focus || '',
+      focus: central.focusLabel || central.focus || local.focus || '',
+      intro: central.intro || '',
+      databaseSize: central.databaseSize || '',
+      databaseSizeLabel: central.databaseSizeLabel || '',
+      partnerFocus: central.partnerFocus || '',
+      contentNotes: central.contentNotes || '',
       hours: central.hours || local.hours || '',
       hobbies: central.hobbies || local.hobbies || [],
       hobbiesOther: central.hobbiesOther || local.hobbiesOther || '',
@@ -110,7 +115,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 min-w-0 col-span-2">
           <div class="flex items-center gap-2 text-[#00A89D] mb-1"><i class="fas fa-bullseye text-sm"></i> <span class="text-xs font-bold tracking-wider">PRIMARY FOCUS</span></div>
-          <div class="font-semibold text-gray-900 dark:text-white text-[15px] break-words leading-tight">${p.focus || eff.focus || '—'}</div>
+          <div class="font-semibold text-gray-900 dark:text-white text-[15px] break-words leading-tight">${p.focusLabel || p.focus || eff.focus || '—'}</div>
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 min-w-0 col-span-2">
           <div class="flex items-center gap-2 text-[#00A89D] mb-1"><i class="fas fa-microphone text-sm"></i> <span class="text-xs font-bold tracking-wider">PERSONALITY / VOICE</span></div>
@@ -973,7 +978,7 @@ function updateWeeklyCustomizeDisplays() {
   const focusEl = document.getElementById('wwp-focus-display');
   if (goalEl) goalEl.textContent = p.monthlyUnits || p.monthlyGoal || 8;
   if (hoursEl) hoursEl.textContent = p.hours || '15–20';
-  if (focusEl) focusEl.textContent = p.focus || 'Balanced';
+  if (focusEl) focusEl.textContent = p.focusLabel || p.focus || 'Balanced';
   updateWeeklyLiveSummary();
 }
 
@@ -1023,12 +1028,18 @@ function buildUnifiedWeeklyPrompt() {
 User Profile:
 - Name: ${p.name || eff.name || ''}
 - Email: ${p.email || ''}
+- One-line intro: ${p.intro || 'not specified'}
 - Monthly goal (units): ${p.monthlyUnits || p.monthlyGoal || eff.monthlyUnits || 8}
-- Focus area: ${p.focus || eff.focus || ''}
+- Focus area: ${p.focusLabel || p.focus || eff.focus || ''}
+- Past client database: ${p.databaseSizeLabel || p.databaseSize || 'not specified'}
+- Partner focus: ${p.partnerFocus || 'not specified'}
 - Weekly prospecting hours available: ${p.hours || eff.hours || ''}
 - Hobbies/Passions: ${[...(p.hobbies || []), p.hobbiesOther].filter(Boolean).join(', ') || [...(eff.hobbies || []), eff.hobbiesOther].filter(Boolean).join(', ') || 'none specified'}
 - Preferred prospecting activities: ${(p.activities || p.preferredActivities || eff.preferredActivities || []).join(', ') || 'balanced mix'}
+- Target partner types: ${(p.partnerTypes || []).join(', ') || 'not specified'}
+- Key challenges: ${(p.challenges || []).join(', ') || 'not specified'}
 - Personality: ${p.personality || ''}
+- Content guardrails: ${p.contentNotes || 'none'}
 - This week they want to block approximately ${hours} hours total.
 
 Emphasis this week: ${focusAreas.length ? focusAreas.join(', ') : 'balanced across all areas'}
@@ -1839,6 +1850,11 @@ function renderWeeklyTiles(days, container) {
                             ${t.tip ? `<div class="mt-1.5 ml-5 text-xs text-gray-500 dark:text-gray-400"><span class="text-[#00A89D] font-semibold">Tip:</span> ${t.tip}</div>` : ''}
                             ${isCustom ? renderWeeklyCustomTaskTimeUI(day.day, blockIndex, taskIndex, t, customTimeInputs) : ''}
                             <div class="mt-1.5 ml-5 flex flex-wrap gap-2">
+                              <button type="button" class="weekly-task-help text-[10px] px-2 py-0.5 rounded-full border border-[#002B5C]/30 text-[#002B5C] dark:text-[#00A89D] hover:bg-[#002B5C] hover:text-white transition inline-flex items-center gap-1"
+                                      data-task="${(t.task || '').replace(/"/g, '&quot;')}"
+                                      data-tip="${(t.tip || '').replace(/"/g, '&quot;')}">
+                                  <i class="fas fa-question-circle text-[9px]"></i> Help
+                              </button>
                               <button onclick="if(typeof window.saveWeeklyTask==='function') window.saveWeeklyTask(this)"
                                       data-day="${day.day}" data-task="${(t.task || '').replace(/"/g, '&quot;')}"
                                       data-tip="${(t.tip || '').replace(/"/g, '&quot;')}"
@@ -1915,6 +1931,15 @@ function renderWeeklyTiles(days, container) {
         const b = parseInt(btn.dataset.blockIdx, 10);
         const t = parseInt(btn.dataset.taskIdx, 10);
         if (window.ToolBridges?.sendTaskToSocial) window.ToolBridges.sendTaskToSocial(d, b, t);
+      });
+    });
+
+    container.querySelectorAll('.weekly-task-help').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const task = (btn.dataset.task || '').replace(/&quot;/g, '"');
+        const tip = (btn.dataset.tip || '').replace(/&quot;/g, '"');
+        showTaskHelp(task, tip);
       });
     });
 }
@@ -2486,9 +2511,467 @@ function syncWeeklyPreferencesToUserSetup() {
     updateSetupDisplays();
 }
 
-// Task Help (placeholder)
-function showTaskHelp(task) {
-    console.log('Help requested for task:', task);
+// Task Help — match the actual task, not just the first keyword hit
+function taskHelpHasPartnerRef(t) {
+    return /realtor|real estate agent|referral partner|referral partners|\bagent\b|\bpartner\b|attorney|cpa|title (rep|agent)|financial planner|insurance agent|builder rep/.test(t);
+}
+
+function taskHelpHasMeetingIntent(t) {
+    return /\bmeet\b|meeting|lunch|coffee|breakfast|\b1:1\b|one[- ]on[- ]one|grab (a )?(coffee|lunch|bite)|get together|invite .+ to (lunch|coffee)|sit down with|take .+ to (lunch|coffee)/.test(t);
+}
+
+function taskHelpHasGoalsIntent(t) {
+    return /\bgoals?\b|business plan|their year|production target|\bgci\b|where (they|she|he)('re| are) (headed|going)|ask about (their|her|his)|what they want to (hit|achieve)|deal count|volume goal|plans for the year/.test(t);
+}
+
+function taskHelpHasPopbyIntent(t) {
+    if (/pop.?by|handwritten|value drop|gift bag|small gift|\bgift\b|deliver|drop off|mail (a )?card|thank.?you card|appreciation (gift|basket)/.test(t)) return true;
+    if (/bring (lunch|coffee|donuts|breakfast|treats)|lunch drop|coffee drop|drop (off )?(lunch|coffee|donuts)/.test(t)) return true;
+    if (/(handwritten )?note|greeting card/.test(t) && !taskHelpHasMeetingIntent(t)) return true;
+    return false;
+}
+
+function resolveTaskHelpProfile(taskText) {
+    const t = (taskText || '').toLowerCase().trim();
+    const partnerRef = taskHelpHasPartnerRef(t);
+    const meetingIntent = taskHelpHasMeetingIntent(t);
+    const goalsIntent = taskHelpHasGoalsIntent(t);
+    const popbyIntent = taskHelpHasPopbyIntent(t);
+    const lunchLearn = /lunch &.?learn|lunch and learn/.test(t);
+
+    if (/script|objection|roleplay|voicemail practice/.test(t)) {
+        return { category: 'scripts', variant: null };
+    }
+
+    if (partnerRef && (meetingIntent || goalsIntent) && goalsIntent && !popbyIntent) {
+        return { category: 'realtor', variant: 'realtor-goals-meeting' };
+    }
+    if (partnerRef && meetingIntent && !popbyIntent && !lunchLearn) {
+        return { category: 'realtor', variant: 'realtor-meeting' };
+    }
+    if (lunchLearn && partnerRef) {
+        return { category: 'realtor', variant: 'realtor-lunch-learn' };
+    }
+    if (partnerRef && /call|phone|text|dm|reach out|touch|follow.?up/.test(t) && !popbyIntent) {
+        return { category: 'realtor', variant: 'realtor-call-text' };
+    }
+    if (partnerRef && /open house|broker tour|caravan/.test(t)) {
+        return { category: 'realtor', variant: 'realtor-open-house' };
+    }
+    if (partnerRef && !popbyIntent) {
+        return { category: 'realtor', variant: null };
+    }
+
+    if (/bring (lunch|coffee|donuts|breakfast|treats)|lunch drop|coffee drop|drop (off )?(lunch|coffee)/.test(t)) {
+        return { category: 'popby', variant: 'popby-lunch-drop' };
+    }
+    if (popbyIntent) {
+        return { category: 'popby', variant: null };
+    }
+
+    if (/database|past client|anniversary|birthday|nurture|vip|sphere|client touch/.test(t)) {
+        if (/birthday/.test(t)) return { category: 'database', variant: 'database-birthday' };
+        if (/anniversary/.test(t)) return { category: 'database', variant: 'database-anniversary' };
+        return { category: 'database', variant: null };
+    }
+    if (/event|appreciation party|mastermind|networking event|charity|host .+ (party|event)|attend .+ event/.test(t) || (/open house/.test(t) && !partnerRef)) {
+        return { category: 'event', variant: null };
+    }
+    if (/equity|refinance|rate update|market update|pre-approv/.test(t) && !/newsletter|post|blog/.test(t)) {
+        return { category: 'equity', variant: null };
+    }
+    if (/newsletter|blog|article|email blast/.test(t)) {
+        return { category: 'content', variant: null };
+    }
+    if (/social|post|reel|linkedin|instagram|facebook|story/.test(t) && !partnerRef) {
+        return { category: 'social', variant: null };
+    }
+    if (/call|phone|dial|text \d|dm \d|reach out|follow.?up|outbound/.test(t)) {
+        return { category: 'calls', variant: null };
+    }
+    if (/note|card|handwritten|coffee|lunch/.test(t)) {
+        return { category: 'popby', variant: null };
+    }
+    return { category: 'general', variant: null };
+}
+
+function mergeTaskHelpContent(base, variant) {
+    if (!variant) return base;
+    return {
+        ...base,
+        ...variant,
+        checklist: variant.checklist || base.checklist,
+        tips: variant.tips || base.tips,
+        links: variant.links || base.links
+    };
+}
+
+function deriveTaskHelpTitle(taskText, helpTitle) {
+    if (!taskText || helpTitle !== 'Crush This Task') return helpTitle;
+    const cleaned = taskText.replace(/^\d+[\).\s]+/, '').trim();
+    if (!cleaned) return helpTitle;
+    return cleaned.length > 55 ? `${cleaned.slice(0, 52)}…` : cleaned;
+}
+
+const TASK_HELP_CONTENT = {
+    calls: {
+        title: 'Outbound Calls & Texts',
+        why: 'Warm outreach is still the highest-ROI activity in mortgage. Smile when you dial — they hear it. Batch 10–15 touches in one block.',
+        checklist: ['Pull 10 names from CRM (A+ VIPs, rising B partners, or past clients due for touch)', 'Have one personal detail ready per person', 'Make the ask light — check-in first, business second', 'Log every touch in CRM before moving on'],
+        script: "Hey [Name], it's [Your Name] — quick check-in. How's everything going with the house / market? Anyone in your world thinking about buying, selling, or refinancing? No agenda — just wanted to say hi.",
+        scriptLabel: 'Warm Check-In (Call or Text)',
+        tips: ['Stand up and smile — energy transfers', 'Leave a voicemail if no answer; text 2 hours later', 'End every block with 1 realtor or partner touch'],
+        links: [
+            { label: 'Sales Script Generator', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('sales-script');", style: 'primary' },
+            { label: 'Database Nurturing Playbooks', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('database-nurturing');", style: 'accent' }
+        ]
+    },
+    social: {
+        title: 'Social Media Task',
+        why: 'Consistency beats perfection. One authentic post keeps you visible to hundreds of past clients and partners who scroll but never call.',
+        checklist: ['Open Social Post Creator or pick a saved idea', 'Add one personal detail (local spot, hobby, family moment)', 'Post + engage on 5 other people\'s posts in 10 minutes', 'Save anything that performed well'],
+        script: 'Sunday reset: coffee, planning the week, and [personal detail]. What does your Sunday look like? Grateful for this community.',
+        scriptLabel: 'Personal Post Starter',
+        tips: ['50% personal / 30% local / 20% educational is the sweet spot', 'Use the → Social bridge on any task to pre-fill context', 'Batch record 2–3 short videos while you are already set up'],
+        links: [
+            { label: 'Social Post Creator', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('social-post');", style: 'primary' },
+            { label: 'Social Strategy Guides', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('social');", style: 'accent' }
+        ]
+    },
+    popby: {
+        title: 'Pop-By, Gift & Personal Touch',
+        why: 'Physical touches feel rare in 2026. A $15–30 thoughtful gift with a handwritten note creates outsized gratitude and referrals.',
+        checklist: ['Pick 3–5 recipients (anniversaries, birthdays, or “just because” A+ VIPs)', 'Reference something real in the note', 'Deliver or mail within 48 hours of writing', 'Photo the gift before sending — great social proof'],
+        script: '[Name], I was thinking about you today and wanted you to have this. Hope the house is still treating you well — if anyone in your world needs mortgage help, I am always here.',
+        scriptLabel: 'Pop-By Note (pair with gift)',
+        tips: ['Check Value Vault for seasonal gift ideas', 'Batch notes on Sunday — deliver Mon–Wed', 'Pair with equity snapshot for past clients'],
+        links: [
+            { label: 'Value Vault (Gift Ideas)', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('value-vault');", style: 'primary' },
+            { label: 'High-ROI Personal Touches', onclick: "closeTaskHelp(); if(typeof showClientAppreciationModal==='function')showClientAppreciationModal('touches');", style: 'accent' }
+        ]
+    },
+    realtor: {
+        title: 'Realtor & Partner Outreach',
+        why: 'Partners send you their best clients when they trust your communication and speed. One great file can unlock years of referrals.',
+        checklist: ['Lead with value — market insight, co-branded tool, or event invite', 'Ask about their active buyers before pitching yourself', 'Confirm preferred communication style', 'Schedule next touch before hanging up'],
+        script: "Hey [Agent Name], [Your Name] here. Saw your listing on [Address] — looks great. I have a quick market note for buyers in that price range if useful. Also — any buyers stuck on rate concerns I can help think through?",
+        scriptLabel: 'Partner Value Touch',
+        tips: ['Thursday file updates are non-negotiable on active deals', 'Invite top partners to masterminds 2x/year', 'Celebrate their wins publicly on social (with permission)'],
+        links: [
+            { label: 'Referral Partner Playbooks', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('referrals');", style: 'primary' },
+            { label: 'Partner Mastermind Guide', onclick: "closeTaskHelp(); if(typeof window.openEventModal==='function')window.openEventModal('partner-mastermind');", style: 'accent' }
+        ]
+    },
+    database: {
+        title: 'Database Nurturing',
+        why: 'Your past clients and sphere are your cheapest source of business. Tiered touches keep A+ VIPs warm while automation handles the rest.',
+        checklist: ['Filter CRM for who is due (anniversary, birthday, no touch 90+ days)', 'Personalize every A+ touch — generic is fine for C tier', 'Include soft referral language on anniversary touches', 'Log the touch and set next reminder'],
+        script: "[Name], I can't believe it's already [X] years since you got the keys! Hope the house is still treating you well. Happy to run a quick equity snapshot if you're ever curious — no strings attached.",
+        scriptLabel: 'Home Anniversary Touch',
+        tips: ['Batch 8–10 birthday videos in one sitting', 'Life events get a response within 1 week', 'See Life Event playbooks for marriage, baby, job change, etc.'],
+        links: [
+            { label: 'Database Nurturing Section', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('database-nurturing');", style: 'primary' },
+            { label: 'Client Appreciation Events', onclick: "closeTaskHelp(); if(typeof showClientAppreciationModal==='function')showClientAppreciationModal('events');", style: 'accent' }
+        ]
+    },
+    event: {
+        title: 'Events & Appreciation',
+        why: 'Events create emotional deposits no email can match. Photos become months of content; +1 guests become warm leads.',
+        checklist: ['Confirm date, venue, and budget 6–8 weeks out', 'Personal video invites to top 60–80 clients', 'Allow +1 on every invite', 'Plan 48-hour post-event follow-up batch'],
+        script: "Hey [Name] — I'm hosting a small client appreciation [Pie Day / picnic / holiday party] next month. You and a guest are invited — food and good company on me. Would love to catch up in person!",
+        scriptLabel: 'Event Invitation (Text or Video)',
+        tips: ['Full execution timeline lives in Event Planning', 'Track RSVPs in a simple spreadsheet', 'Post 3–5 event photos over the following weeks'],
+        links: [
+            { label: 'Event Planning (Full Playbook)', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('eventplanning'); if(typeof window.openEventModal==='function')setTimeout(()=>window.openEventModal('client-appreciation'),350);", style: 'primary' },
+            { label: 'Post-Event Follow-Up Scripts', onclick: "closeTaskHelp(); if(typeof window.openEventModal==='function')window.openEventModal('post-event-followup');", style: 'accent' }
+        ]
+    },
+    equity: {
+        title: 'Equity & Market Conversations',
+        why: 'Homeowners love knowing their position even when they are not moving. Equity touches open refinance and move-up conversations naturally.',
+        checklist: ['Pull 3 comps or a simple trend for their neighborhood', 'Lead with data, not a sales pitch', 'Offer a 10-minute call — optional', 'Note the conversation in CRM'],
+        script: "Quick note for [Neighborhood] — values are up about [X]% year-over-year. If you've wondered what your equity could do (renovation, investment, move-up), happy to run real numbers in 10 minutes. No pressure.",
+        scriptLabel: 'Equity Snapshot Outreach',
+        tips: ['Use Equity Scanner for personalized talking points', 'Pair with rate context only when relevant', 'Best responses come from past clients 2+ years out'],
+        links: [
+            { label: 'Equity Scanner', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('equity-scanner');", style: 'primary' },
+            { label: 'Sales Scripts (Rate Objections)', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('sales-script');", style: 'accent' }
+        ]
+    },
+    content: {
+        title: 'Content & Newsletter',
+        why: 'Value-first content keeps your entire database warm at scale. One newsletter or blog can touch hundreds of relationships in 20 minutes.',
+        checklist: ['Pick one useful topic (market, myth-bust, local event, client story)', 'Write for humans — one clear takeaway', 'Include soft CTA: "reply if you want numbers for your area"', 'Schedule or send, then repurpose to social'],
+        script: 'Subject: Quick [Neighborhood] market note + one thing buyers should know this month. Body: 3–4 sentences of real data, one personal line, and an easy reply ask.',
+        scriptLabel: 'Newsletter Outline',
+        tips: ['Repurpose every newsletter into 2–3 social posts', 'Blog Creator can draft from your bullet points', 'Batch content on Sunday for the week'],
+        links: [
+            { label: 'Newsletter Generator', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('newsletter-generator');", style: 'primary' },
+            { label: 'Blog Creator', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('blog');", style: 'accent' }
+        ]
+    },
+    scripts: {
+        title: 'Sales Scripts & Roleplay',
+        why: 'Practicing out loud builds confidence for live conversations. Specific context produces scripts you will actually use.',
+        checklist: ['Name the exact scenario (rate objection, realtor pushback, etc.)', 'Add 2–3 context details in the generator', 'Read aloud twice — adjust for your natural voice', 'Save the best version to My Saved Items'],
+        script: 'Roleplay prompt: "Borrower says rates are too high to buy. They have been looking 6 months, lease ends in 90 days, target payment $2,400." Generate 3 approaches.',
+        scriptLabel: 'Script Generator Context Example',
+        tips: ['Use Context Tips before generating for better output', 'Record yourself — playback reveals filler words', 'Pair with 5 live calls same day while energy is high'],
+        links: [
+            { label: 'Sales Script Generator', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('sales-script');", style: 'primary' },
+            { label: 'Context Tips', onclick: "closeTaskHelp(); if(typeof window.showContextTipsModal==='function')window.showContextTipsModal();", style: 'accent' }
+        ]
+    },
+    general: {
+        title: 'Crush This Task',
+        why: 'Focused 25-minute blocks beat scattered all-day effort. One completed task builds momentum for the next.',
+        checklist: ['Set a 25-minute timer', 'Remove distractions — phone on Do Not Disturb', 'Do the task fully before checking email', 'Check the box and take a 5-minute break'],
+        script: '',
+        scriptLabel: '',
+        tips: ['Tie tasks to your hobbies when authentic — golf, coffee, local events', 'Batch similar tasks back-to-back', 'End the block by logging CRM notes'],
+        links: [
+            { label: 'Weekly Win Plan Preferences', onclick: "closeTaskHelp(); document.getElementById('weekly-preferences-accordion')?.scrollIntoView({behavior:'smooth'});", style: 'primary' },
+            { label: 'Business Plan', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('planning');", style: 'accent' }
+        ]
+    }
+};
+
+const TASK_HELP_VARIANTS = {
+    'realtor-goals-meeting': {
+        title: 'Partner Meeting: Ask About Their Goals',
+        why: 'Understanding a partner\'s goals turns a lunch into a strategy session. When you know what they\'re chasing — volume, team growth, better client experience — you can position yourself as part of their plan, not just another lender asking for business.',
+        checklist: [
+            'Confirm the meeting 24 hours ahead with time and place',
+            'Prepare 3 genuine questions about their goals — not a pitch deck',
+            'Listen for the first 20 minutes; take notes on what matters to them',
+            'Close with one specific way you can support their goal (speed, communication, buyer tools)',
+            'Send a same-day thank-you text referencing something they said'
+        ],
+        script: "Thanks for making time today — I really wanted to understand what you're building this year. What's the big goal for your business right now? ... What would make the biggest difference for your buyers in this market? ... Based on what you shared, here's one way I can help — [specific offer]. Can we grab coffee again in 30 days to check in?",
+        scriptLabel: 'Goals Conversation (Lunch or Coffee)',
+        tips: [
+            'No rate sheets on the table for the first 20 minutes',
+            'Ask about their ideal client and pain points with current lender relationships',
+            'Log their goals in CRM — reference them on your next touch'
+        ],
+        links: [
+            { label: 'Sales Script Generator', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('sales-script');", style: 'primary' },
+            { label: 'Referral Partner Playbooks', onclick: "closeTaskHelp(); if(typeof window.showSection==='function')window.showSection('referrals');", style: 'accent' }
+        ]
+    },
+    'realtor-meeting': {
+        title: 'Partner Lunch or Coffee Meeting',
+        why: 'Face-to-face time builds trust faster than a year of emails. The goal is to learn how they work, add one piece of value, and leave them wanting a second meeting.',
+        checklist: [
+            'Pick one partner you want to know better (not just your biggest producer)',
+            'Text to confirm: "Still good for [time] at [place]?"',
+            'Bring one useful insight — local market stat, buyer tool, or co-marketing idea',
+            'Ask about active buyers before talking about yourself',
+            'Schedule the next touch before you leave the table'
+        ],
+        script: "Hey [Agent Name] — looking forward to lunch. No agenda — I just want to learn how you like to work with lenders and where I can actually be useful. What's your biggest headache with buyers right now?",
+        scriptLabel: 'Meeting Opener (Lunch or Coffee)',
+        tips: [
+            'Pay for lunch if you invited them — small gesture, big signal',
+            'Put your phone face-down except to exchange contacts',
+            'Follow up within 24 hours with one resource tied to what they mentioned'
+        ]
+    },
+    'realtor-lunch-learn': {
+        title: 'Partner Lunch & Learn',
+        why: 'A short, useful education session positions you as the expert partners invite back. They get content for their team; you get visibility with every agent in the room.',
+        checklist: [
+            'Pick one tight topic (rates myth, pre-approval speed, FHA/VA update)',
+            'Confirm headcount and dietary needs 48 hours out',
+            'Bring food + one-page handout or QR to a buyer tool',
+            'Keep presentation to 15–20 minutes; leave 10 for Q&A',
+            'Collect business cards or connect on LinkedIn before you leave'
+        ],
+        script: "Thanks everyone for having me. In the next 15 minutes I'll cover [topic] — the one thing that helps your buyers win offers in this market. Then I want to hear what's actually slowing your deals down.",
+        scriptLabel: 'Lunch & Learn Opener',
+        tips: [
+            'End with "Who has a buyer stuck right now?" — offer 10-minute follow-ups',
+            'Photo the group (with permission) for social proof later',
+            'Send a recap email to the office manager same day'
+        ]
+    },
+    'realtor-call-text': {
+        title: 'Partner Call or Text Touch',
+        why: 'Short, value-first touches keep you top of mind between meetings. Partners remember the LO who sends useful updates, not the one who only calls when they need a deal.',
+        checklist: [
+            'Lead with something useful — listing congrats, market note, or buyer tip',
+            'Keep it under 2 minutes on a call; texts should be 2–3 sentences',
+            'Ask one question about active buyers or pipeline',
+            'Confirm how they prefer updates (text, email, Thursday file note)',
+            'Log the touch and set a 30-day reminder'
+        ],
+        script: "Hey [Agent Name], [Your Name] here — quick one. Saw [listing/win/market note]. Any buyers stuck on [rate/payment/pre-approval]? Happy to help think through options. What's the best way to reach you on active files?",
+        scriptLabel: 'Partner Check-In (Call or Text)',
+        tips: [
+            'Thursday afternoon file updates are a trust-builder on active deals',
+            'Voice memos feel personal without needing a live call',
+            'Batch 5–8 partner texts in one 25-minute block'
+        ]
+    },
+    'realtor-open-house': {
+        title: 'Partner Open House or Tour',
+        why: 'Showing up at their open house proves you invest in their success. Buyers meet you organically; the agent sees you as part of their team.',
+        checklist: [
+            'Confirm time/address and bring open-house materials (rate sheet, QR pre-qual)',
+            'Introduce yourself to visitors — focus on buyer education, not hard selling',
+            'Help the agent (sign-in, refreshments, traffic) before promoting yourself',
+            'Debrief with the agent before leaving — any hot buyers?',
+            'Follow up within 48 hours with a thank-you + any buyer notes'
+        ],
+        script: "Hi, I'm [Your Name] with [Company] — [Agent Name] asked me to be here in case you have financing questions. No pressure at all. What got you interested in this property?",
+        scriptLabel: 'Open House Intro (to Buyers)',
+        tips: [
+            'Bring a small branded item for the agent, not swag for strangers',
+            'Never poach — all buyer leads go through the hosting agent',
+            'Post one photo tagging the agent (with permission) after the event'
+        ]
+    },
+    'popby-lunch-drop': {
+        title: 'Lunch or Coffee Drop (Gift Touch)',
+        why: 'Dropping off food is a high-impact pop-by when you cannot stay. It feels personal, costs less than a formal event, and opens the door for a real conversation later.',
+        checklist: [
+            'Call ahead or text: "Dropping lunch by at noon — hope that works"',
+            'Include a short handwritten note referencing something specific',
+            'Deliver during office hours when the team is present',
+            'Stay 5–10 minutes max unless invited to stay longer',
+            'Photo the spread for social (with permission) and log the touch'
+        ],
+        script: 'Hey [Name] — wanted your team to have lunch on me today. No need to chat now; just know I appreciate the partnership. If anyone has a buyer who needs a fast pre-approval, text me anytime.',
+        scriptLabel: 'Lunch Drop Note',
+        tips: [
+            'Order from a local spot they love — shows you pay attention',
+            'Best days: Tuesday–Thursday, 11:30–12:30',
+            'Pair with a quarterly market one-pager in the bag'
+        ]
+    },
+    'database-birthday': {
+        title: 'Client Birthday Touch',
+        why: 'Birthday messages are the highest-open-rate touch in your database. A 30-second personal video beats any generic card.',
+        checklist: [
+            'Record or write a message that mentions something specific about them',
+            'Send morning-of or the night before — not a week late',
+            'Keep business talk out unless they bring it up',
+            'A+ clients get a call; B/C can get text or email',
+            'Log the touch and note any life updates they share'
+        ],
+        script: "Hey [Name]! It's [Your Name] — just wanted to wish you a happy birthday. Hope you get to do something fun with [family/hobby/pet they mentioned]. Grateful you're in my world!",
+        scriptLabel: 'Birthday Video or Text',
+        tips: [
+            'Batch-record 8–10 birthday videos on Sunday',
+            'See Life Event playbooks if they mention a major update',
+            'Never pair a birthday touch with a hard sales pitch'
+        ]
+    },
+    'database-anniversary': {
+        title: 'Home Anniversary Touch',
+        why: 'Home anniversaries trigger nostalgia and referral conversations naturally. It is one of the easiest high-ROI touches in your database.',
+        checklist: [
+            'Confirm closing date from CRM',
+            'Reference the home, neighborhood, or a memory from closing',
+            'Offer an optional equity snapshot — no pressure',
+            'Include soft referral language ("anyone in your world...")',
+            'Set a reminder for next year before you close the task'
+        ],
+        script: "[Name], I can't believe it's already [X] years since you got the keys at [Address]! Hope the house is still treating you well. Happy to run a quick equity snapshot if you're ever curious — and if anyone in your world is buying or refinancing, I'd love to help.",
+        scriptLabel: 'Home Anniversary Message',
+        tips: [
+            'A+ clients get a handwritten card; others get email or text',
+            'Pair with a local market stat for their zip code',
+            'Best send window: within 3 days of the anniversary date'
+        ]
+    }
+};
+
+function showTaskHelp(taskText, tipText) {
+    const modal = document.getElementById('task-help-modal');
+    const titleEl = document.getElementById('task-help-title');
+    const contentEl = document.getElementById('task-help-content');
+    if (!modal || !titleEl || !contentEl) return;
+
+    const profile = resolveTaskHelpProfile(taskText || '');
+    const base = TASK_HELP_CONTENT[profile.category] || TASK_HELP_CONTENT.general;
+    const variant = profile.variant ? TASK_HELP_VARIANTS[profile.variant] : null;
+    const help = mergeTaskHelpContent(base, variant);
+    const setup = (typeof userSetup !== 'undefined' && userSetup) ? userSetup : { name: 'your name', hobbies: [] };
+    const loName = setup.name || 'your name';
+
+    let scriptBlock = '';
+    if (help.script) {
+        const scriptText = help.script.replace(/\[Your Name\]/g, loName);
+        scriptBlock = `
+          <h4 class="font-bold text-[#002B5C] dark:text-white mt-4 mb-2">Ready-to-Use Script</h4>
+          <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="${scriptText.replace(/"/g, '&quot;')}">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex-1">
+                <strong class="text-sm font-semibold">${help.scriptLabel}</strong>
+                <div class="text-[15px] text-gray-700 dark:text-gray-300 mt-1 italic">"${scriptText}"</div>
+              </div>
+              <button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold whitespace-nowrap">Copy</button>
+            </div>
+          </div>`;
+    }
+
+    const tipBlock = tipText
+        ? `<div class="p-3 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm"><strong class="text-[#F15A29]">From your plan:</strong> ${tipText}</div>`
+        : '';
+
+    const hobbyTip = (setup.hobbies && setup.hobbies.length && profile.category === 'general')
+        ? `<p class="text-sm text-gray-600 dark:text-gray-400">Pro move: tie this to <strong>${setup.hobbies[0]}</strong> — invite a sphere member or partner to join you.</p>`
+        : '';
+
+    const nextSteps = (typeof window.renderModalNextSteps === 'function')
+        ? window.renderModalNextSteps(help.links)
+        : '';
+
+    titleEl.textContent = deriveTaskHelpTitle(taskText, help.title);
+    contentEl.innerHTML = `
+      <div class="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-sm mb-4">
+        <strong class="text-[#002B5C] dark:text-white">Your task:</strong> ${taskText || 'Weekly win plan task'}
+      </div>
+      ${tipBlock}
+      <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-2xl p-4 mb-4">
+        <div class="flex items-center gap-2 mb-1"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] text-sm uppercase tracking-wider">Why This Matters</span></div>
+        <p class="text-[15px]">${help.why}</p>
+      </div>
+      <h4 class="font-bold text-[#002B5C] dark:text-white mb-2">Execution Checklist</h4>
+      <ul class="text-sm space-y-1 mb-4 list-disc pl-5">${help.checklist.map(c => `<li>${c}</li>`).join('')}</ul>
+      ${scriptBlock}
+      <h4 class="font-bold text-[#002B5C] dark:text-white mt-4 mb-2">Pro Tips</h4>
+      <ul class="text-sm space-y-1 mb-2 list-disc pl-5">${help.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+      ${hobbyTip}
+      <p class="mt-4 text-sm font-semibold text-[#F15A29]">⏱ Start a 25-minute timer and go!</p>
+      ${nextSteps}
+    `;
+
+    if (typeof window.openAppModal === 'function') {
+        window.openAppModal(modal);
+    } else {
+        if (modal.parentElement !== document.body) document.body.appendChild(modal);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.zIndex = '9999';
+        modal.scrollTop = 0;
+    }
+}
+
+function closeTaskHelp() {
+    const modal = document.getElementById('task-help-modal');
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+        window.closeAppModal(modal);
+    } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modal.style.display = 'none';
+    }
 }
 
 // === STEP 2: AUTO-SAVE ON EVERY CHANGE ===
@@ -2727,6 +3210,21 @@ function renderExtendedProfileInfo() {
   const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : {};
 
   const parts = [];
+
+  const intro = p.intro || eff.intro || '';
+  if (intro) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Intro:</span> ${intro}</div>`);
+
+  const market = p.location || p.localArea || p.market || eff.localArea || '';
+  if (market) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Market:</span> ${market}</div>`);
+
+  const focus = p.focusLabel || p.focus || eff.focus || '';
+  if (focus) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Focus:</span> ${focus}</div>`);
+
+  const database = p.databaseSizeLabel || p.databaseSize || eff.databaseSizeLabel || eff.databaseSize || '';
+  if (database) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Database:</span> ${database}</div>`);
+
+  const partnerFocus = p.partnerFocus || eff.partnerFocus || '';
+  if (partnerFocus) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Partner focus:</span> ${partnerFocus}</div>`);
 
   const challenges = (p.challenges || []).join(', ') || (eff.challenges || []).join(', ');
   if (challenges) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Challenges:</span> ${challenges}</div>`);
@@ -3314,6 +3812,8 @@ function initWeeklyWinPlan() {
     wireWeeklyCustomizeControls();
 
     window.generateWeeklyPlan = generateWeeklyPlan;
+    window.showTaskHelp = showTaskHelp;
+    window.closeTaskHelp = closeTaskHelp;
     window.saveWeeklyPlanToVault = saveWeeklyPlanToVault;
     window.exportWeeklyPlanToICS = exportWeeklyPlanToICS;
 window.updateWeeklyBlockTime = updateWeeklyBlockTime;

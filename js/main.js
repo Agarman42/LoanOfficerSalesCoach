@@ -424,8 +424,15 @@
     }
 
     function showModal() {
+      modal.style.removeProperty('display');
+      modal.style.removeProperty('pointer-events');
+      modal.style.removeProperty('visibility');
+      modal.style.removeProperty('opacity');
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      modal.style.display = 'flex';
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
       updateStatus();
 
       const hosted = (typeof window.isProductionHosted === 'function' && window.isProductionHosted()) ||
@@ -459,6 +466,7 @@
     }
 
     function hideModal() {
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
       modal.classList.remove('flex');
       modal.classList.add('hidden');
     }
@@ -561,7 +569,9 @@
     const aliases = {
       'social-media-strategy': 'social',
       'referral-partners': 'referrals',
-      'prospecting': 'weekly-win-plan'
+      'prospecting': 'weekly-win-plan',
+      'database-nurturing': 'database',
+      'loan-process': 'process'
     };
     if (aliases[id]) {
       id = aliases[id];
@@ -572,10 +582,20 @@
       sec.classList.add('hidden');
     });
 
-    // Show the target
+    // Show the target (fallback to AI Chat if hash/alias is stale)
     const target = document.getElementById(id);
+    if (!target) {
+      if (id !== 'ai-chat') {
+        showSection('ai-chat');
+      }
+      return;
+    }
+
     if (target) {
       target.classList.remove('hidden');
+      if (typeof window.onCoachSectionShown === 'function') {
+        try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
+      }
       // Smooth scroll into view
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -686,6 +706,14 @@
             if (typeof window.wireGeneratePlanButton === 'function') window.wireGeneratePlanButton();
           }, 30);
         }, 180);
+      }
+
+      if (id === 'referrals') {
+        setTimeout(() => {
+          if (typeof window.renderRuoffFactVault === 'function') {
+            try { window.renderRuoffFactVault(); } catch (e) {}
+          }
+        }, 80);
       }
 
       // Mindset Lab — refresh saved button states when returning to the section
@@ -832,10 +860,7 @@
     // On initial page load, respect a hash if present, otherwise show AI Chat as default
     if (location.hash) {
       const id = location.hash.replace('#', '');
-      setTimeout(() => {
-        const target = document.getElementById(id);
-        if (target) showSection(id);
-      }, 150);
+      setTimeout(() => showSection(id), 150);
     } else {
       // Default view: Show AI Chat Assistant (original intended behavior)
       setTimeout(() => {

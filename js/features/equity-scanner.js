@@ -1257,6 +1257,33 @@ function openDetailModal(client) {
                 <div id="script-content" class="whitespace-pre-wrap text-lg bg-gray-50 dark:bg-gray-900 p-6 rounded-xl">${scriptContent}</div>
             </div>
 
+            <div class="mt-8 p-6 bg-white dark:bg-gray-800 border border-[#00A89D]/30 rounded-2xl">
+                <h4 class="text-lg font-bold mb-4 text-[#002B5C] dark:text-[#00A89D] flex items-center gap-2"><i class="fas fa-bullseye text-[#F15A29]"></i> Outreach Playbook</h4>
+                <div class="grid md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
+                    <div class="p-4 rounded-xl bg-[#00A89D]/5 border border-[#00A89D]/20">
+                        <strong class="text-[#00A89D] block mb-1">Best timing</strong>
+                        <p>Tuesday–Thursday, 9:30–11:30am or 4:30–6pm local. Avoid Monday mornings and Friday afternoons unless they asked you to follow up.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-[#F15A29]/5 border border-[#F15A29]/20">
+                        <strong class="text-[#F15A29] block mb-1">Channel pick</strong>
+                        <p>${client.phone ? 'Text first (highest open rate). If no reply in 48 hours, call once. Email only as backup or for detailed numbers.' : client.email ? 'Email first with a warm subject line. Follow with a call within 2 business days if no reply.' : 'Reach out via your best on-file contact method — keep it low-pressure and relationship-first.'}</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-[#002B5C]/5 border border-[#002B5C]/20">
+                        <strong class="text-[#002B5C] dark:text-white block mb-1">Follow-up cadence</strong>
+                        <p>Day 0: initial outreach. Day 2: light check-in ("no rush — just wanted to make sure you saw this"). Day 7: value-add touch (market note or checklist). Day 21: final soft close.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                        <strong class="block mb-1">If they're not ready</strong>
+                        <p>Ask permission to check back in 90 days. Add to nurture list. ${client.buyersAgent ? 'Loop in their agent with a brief "keeping you both in the loop" note.' : 'Offer a free annual equity review either way — plants the seed for future business.'}</p>
+                    </div>
+                </div>
+                ${typeof window.renderModalNextSteps === 'function' ? window.renderModalNextSteps([
+                    { label: 'Sales Script Generator', onclick: "closeDetailModal(); if(typeof window.showSection==='function')window.showSection('sales-script');", style: 'primary' },
+                    { label: 'Social Post Creator', onclick: "closeDetailModal(); if(typeof window.showSection==='function')window.showSection('social');", style: 'accent' },
+                    { label: 'My Saved Items', onclick: "closeDetailModal(); if(typeof window.showSavedItemsLibrary==='function')window.showSavedItemsLibrary('equity-opportunity');", style: 'primary' }
+                ], 'Put This Opportunity to Work') : ''}
+            </div>
+
             <div class="mt-8 p-4 bg-gradient-to-br from-[#00A89D]/5 to-[#F15A29]/5 rounded-xl text-sm">
                 <h4 class="text-lg font-bold mb-3 text-[#002B5C] dark:text-[#00A89D]">Calculation Key</h4>
                 <ul class="space-y-2 text-gray-700 dark:text-gray-300">
@@ -1347,8 +1374,14 @@ Rewrite this as a warmer, more personalized, relationship-first outreach message
     const equityModal = document.getElementById('equity-detail-modal');
     const detailModal = document.getElementById('detail-modal');
     if (equityModal) {
-        equityModal.style.display = 'flex';
-        equityModal.classList.remove('hidden');
+        if (typeof window.openAppModal === 'function') {
+            window.openAppModal(equityModal);
+        } else {
+            if (typeof window.resetModalScroll === 'function') window.resetModalScroll(equityModal);
+            equityModal.style.display = 'flex';
+            equityModal.classList.remove('hidden');
+            if (typeof window.resetModalScroll === 'function') window.resetModalScroll(equityModal);
+        }
     }
     if (detailModal) {
         detailModal.style.display = 'none';
@@ -1358,14 +1391,21 @@ Rewrite this as a warmer, more personalized, relationship-first outreach message
 
 function closeDetailModal() {
     const equityModal = document.getElementById('equity-detail-modal');
-    if (equityModal) {
-        equityModal.style.display = 'none';
-        equityModal.classList.add('hidden');
-    }
     const detailModal = document.getElementById('detail-modal');
-    if (detailModal) {
-        detailModal.style.display = 'none';
-        detailModal.classList.add('hidden');
+    if (typeof window.closeAppModal === 'function') {
+        if (equityModal) window.closeAppModal(equityModal);
+        if (detailModal) window.closeAppModal(detailModal);
+    } else {
+        [equityModal, detailModal].forEach(modal => {
+            if (!modal) return;
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        });
+    }
+    if (!document.querySelector('.app-modal-overlay:not(.hidden)')) {
+        document.body.classList.remove('modal-open');
     }
 }
 
@@ -1519,7 +1559,9 @@ function saveFullReportToVault() {
   if (typeof saveOpportunityToVault === 'function') window.saveOpportunityToVault = saveOpportunityToVault;
   if (typeof saveFullReportToVault === 'function') window.saveFullReportToVault = saveFullReportToVault;
   if (typeof copyDashboard === 'function') window.copyDashboard = copyDashboard;
-  if (typeof closeDetailModal === 'function') window.closeDetailModal = closeDetailModal;
+  if (typeof closeDetailModal === 'function' && typeof window.closeDetailModal !== 'function') {
+    window.closeDetailModal = closeDetailModal;
+  }
   if (typeof resetEquityTool === 'function') window.resetEquityTool = resetEquityTool;
   if (typeof generateEquityReport === 'function') window.generateEquityReport = generateEquityReport;
   if (typeof formatMoney === 'function') window.formatMoney = formatMoney;

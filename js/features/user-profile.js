@@ -1,0 +1,731 @@
+/**
+ * js/features/user-profile.js
+ * Central profile: normalized schema, quick wizard, completeness meter, tool wiring.
+ */
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'userProfile';
+  const WIZARD_DONE_KEY = 'coachProfileWizardDone';
+
+  const FOCUS_OPTIONS = {
+    'balanced-growth': 'Balanced Growth',
+    'referral-partners': 'Heavy Realtor Partnerships',
+    database: 'Past Client / Database Focus',
+    'equity-refi': 'Equity & Refinance Opportunities'
+  };
+
+  const FOCUS_LEGACY = {
+    'Balanced Growth': 'balanced-growth',
+    'Heavy Realtor Partnerships': 'referral-partners',
+    'Past Client / Database Focus': 'database',
+    'Equity & Refinance Opportunities': 'equity-refi'
+  };
+
+  const DATABASE_LABELS = {
+    'under-50': 'Under 50 past clients',
+    '50-200': '50–200 past clients',
+    '200-plus': '200+ past clients'
+  };
+
+  const COMPLETENESS_CHECKS = [
+    { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach' },
+    { key: 'location', weight: 10, hint: 'Add your market', tools: 'Social, Newsletter' },
+    { key: 'focus', weight: 10, hint: 'Pick a focus style', tools: 'Weekly Plan, Start Here' },
+    { key: 'monthlyUnits', weight: 8, hint: 'Set a monthly unit goal', tools: 'Weekly Plan' },
+    { key: 'hobbies', weight: 10, hint: 'Add 1–2 hobbies', tools: 'Social, Content' },
+    { key: 'tone', weight: 8, hint: 'Choose your tone', tools: 'AI, Scripts' },
+    { key: 'partnerTypes', weight: 10, hint: 'Select partner types', tools: 'Referrals, Scripts' },
+    { key: 'challenges', weight: 8, hint: 'Pick your top challenge', tools: 'Weekly Plan' },
+    { key: 'intro', weight: 8, hint: 'Add a one-line intro', tools: 'Scripts, Social' },
+    { key: 'activities', weight: 6, hint: 'Preferred prospecting activities', tools: 'Weekly Plan' },
+    { key: 'databaseSize', weight: 5, hint: 'Database size tier', tools: 'Nurture, Weekly Plan' },
+    { key: 'contentNotes', weight: 5, hint: 'Content guardrails', tools: 'All AI tools' }
+  ];
+
+  function asArray(val) {
+    if (Array.isArray(val)) return val.filter(Boolean);
+    if (typeof val === 'string' && val.trim()) return val.split(',').map((s) => s.trim()).filter(Boolean);
+    return [];
+  }
+
+  function normalizeFocus(raw) {
+    if (!raw) return { value: '', label: '' };
+    if (FOCUS_OPTIONS[raw]) return { value: raw, label: FOCUS_OPTIONS[raw] };
+    if (FOCUS_LEGACY[raw]) return { value: FOCUS_LEGACY[raw], label: raw };
+    const lower = String(raw).toLowerCase();
+    if (lower.includes('referral') || lower.includes('realtor') || lower.includes('partner')) {
+      return { value: 'referral-partners', label: FOCUS_OPTIONS['referral-partners'] };
+    }
+    if (lower.includes('database') || lower.includes('past client') || lower.includes('sphere')) {
+      return { value: 'database', label: FOCUS_OPTIONS.database };
+    }
+    if (lower.includes('equity') || lower.includes('refi')) {
+      return { value: 'equity-refi', label: FOCUS_OPTIONS['equity-refi'] };
+    }
+    return { value: raw, label: raw };
+  }
+
+  function readRawProfile() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function checkComplete(p, key) {
+    switch (key) {
+      case 'name':
+        return !!(p.name && String(p.name).trim());
+      case 'location':
+        return !!(p.location && String(p.location).trim());
+      case 'focus':
+        return !!(p.focus && String(p.focus).trim());
+      case 'monthlyUnits':
+        return !!(p.monthlyUnits || p.monthlyGoal);
+      case 'hobbies':
+        return asArray(p.hobbies).length > 0 || !!(p.hobbiesOther && p.hobbiesOther.trim());
+      case 'tone':
+        return !!(p.tone || p.personality);
+      case 'partnerTypes':
+        return asArray(p.partnerTypes).length > 0;
+      case 'challenges':
+        return asArray(p.challenges).length > 0;
+      case 'intro':
+        return !!(p.intro && String(p.intro).trim());
+      case 'activities':
+        return asArray(p.activities).length > 0;
+      case 'databaseSize':
+        return !!(p.databaseSize && String(p.databaseSize).trim());
+      case 'contentNotes':
+        return !!(p.contentNotes && String(p.contentNotes).trim());
+      default:
+        return false;
+    }
+  }
+
+  function normalizeProfile(raw) {
+    const p = raw || {};
+    const focus = normalizeFocus(p.focus);
+    const hobbies = asArray(p.hobbies);
+    const activities = asArray(p.activities);
+    const partnerTypes = asArray(p.partnerTypes).length
+      ? asArray(p.partnerTypes)
+      : asArray(p.targetPartners);
+    const challenges = asArray(p.challenges);
+    const niches = asArray(p.niches);
+    const voiceTraits = asArray(p.voiceTraits);
+    const formats = asArray(p.formats);
+    const location = (p.location || p.localArea || p.market || '').trim();
+
+    const goals = [
+      p.monthlyUnits ? `${p.monthlyUnits} loans/mo` : '',
+      p.monthlyGoal ? `Volume: ${p.monthlyGoal}` : ''
+    ].filter(Boolean).join('; ');
+
+    return {
+      ...p,
+      name: (p.name || '').trim(),
+      email: (p.email || '').trim(),
+      phone: (p.phone || '').trim(),
+      nmls: (p.nmls || '').trim(),
+      intro: (p.intro || '').trim(),
+      location,
+      localArea: location,
+      market: location,
+      focus: focus.value,
+      focusLabel: focus.label,
+      years: p.years || '',
+      team: p.team || '',
+      monthlyUnits: p.monthlyUnits || '',
+      monthlyGoal: p.monthlyGoal || '',
+      income: p.income || '',
+      hours: p.hours || '',
+      databaseSize: p.databaseSize || '',
+      databaseSizeLabel: DATABASE_LABELS[p.databaseSize] || '',
+      partnerFocus: (p.partnerFocus || '').trim(),
+      family: (p.family || '').trim(),
+      personality: (p.personality || '').trim(),
+      tone: p.tone || '',
+      contentNotes: (p.contentNotes || '').trim(),
+      hobbiesOther: (p.hobbiesOther || '').trim(),
+      hobbies,
+      activities,
+      partnerTypes,
+      targetPartners: partnerTypes,
+      partnerTypesOther: (p.partnerTypesOther || '').trim(),
+      niches,
+      nichesOther: (p.nichesOther || '').trim(),
+      challenges,
+      challengesOther: (p.challengesOther || '').trim(),
+      formats,
+      voiceTraits,
+      goals,
+      lastUpdated: p.lastUpdated || ''
+    };
+  }
+
+  function getProfileCompleteness(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    let score = 0;
+    const missing = [];
+
+    COMPLETENESS_CHECKS.forEach((c) => {
+      if (checkComplete(p, c.key)) {
+        score += c.weight;
+      } else {
+        missing.push(c);
+      }
+    });
+
+    return {
+      score: Math.min(100, score),
+      missing: missing.slice(0, 4),
+      isComplete: score >= 70
+    };
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function previewRow(label, value) {
+    if (!value || (Array.isArray(value) && !value.length)) return '';
+    const text = Array.isArray(value) ? value.join(', ') : String(value);
+    if (!text.trim()) return '';
+    return `<div class="flex gap-2 py-0.5"><span class="font-semibold text-[#002B5C] dark:text-[#00A89D] min-w-[6.5rem] flex-shrink-0">${escapeHtml(label)}</span><span class="text-gray-700 dark:text-gray-300">${escapeHtml(text)}</span></div>`;
+  }
+
+  function buildPreviewHtml(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    const rows = [
+      previewRow('Name', p.name),
+      previewRow('Email', p.email),
+      previewRow('Phone', p.phone),
+      previewRow('NMLS', p.nmls),
+      previewRow('Market', p.location),
+      previewRow('Intro', p.intro),
+      previewRow('Focus', p.focusLabel || p.focus),
+      previewRow('Goals', [p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(' · ')),
+      previewRow('Hours/wk', p.hours),
+      previewRow('Database', p.databaseSizeLabel || p.databaseSize),
+      previewRow('Partners', [...p.partnerTypes, p.partnerTypesOther].filter(Boolean).join(', ')),
+      previewRow('Partner focus', p.partnerFocus),
+      previewRow('Hobbies', [...p.hobbies, p.hobbiesOther].filter(Boolean).join(', ')),
+      previewRow('Activities', p.activities),
+      previewRow('Challenges', [...p.challenges, p.challengesOther].filter(Boolean).join(', ')),
+      previewRow('Niches', [...p.niches, p.nichesOther].filter(Boolean).join(', ')),
+      previewRow('Tone', p.tone),
+      previewRow('Voice', p.voiceTraits),
+      previewRow('Personality', p.personality),
+      previewRow('Formats', p.formats),
+      previewRow('Guardrails', p.contentNotes),
+      previewRow('Family', p.family)
+    ].filter(Boolean);
+
+    if (!rows.length) {
+      return '<p class="text-gray-500 italic">No fields filled yet — complete the form below and every tool will personalize from it.</p>';
+    }
+    return rows.join('');
+  }
+
+  function buildPreviewText(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    if (p.intro) return p.intro;
+    const bits = [p.name, p.location, p.focusLabel, p.tone].filter(Boolean);
+    return bits.length ? bits.join(' · ') : 'Complete your profile so every tool sounds like you.';
+  }
+
+  function buildAiContext(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    const lines = [];
+    if (p.name) lines.push(`Name: ${p.name}`);
+    if (p.email) lines.push(`Email: ${p.email}`);
+    if (p.phone) lines.push(`Phone: ${p.phone}`);
+    if (p.nmls) lines.push(`NMLS: ${p.nmls}`);
+    if (p.location) lines.push(`Primary market: ${p.location}`);
+    if (p.intro) lines.push(`One-line intro: ${p.intro}`);
+    if (p.focusLabel) lines.push(`Business focus: ${p.focusLabel}`);
+    if (p.monthlyUnits || p.monthlyGoal) {
+      lines.push(`Goals: ${[p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(', ')}`);
+    }
+    if (p.databaseSizeLabel) lines.push(`Past client database: ${p.databaseSizeLabel}`);
+    if (p.partnerFocus) lines.push(`Partner focus: ${p.partnerFocus}`);
+    if (p.personality) lines.push(`Personality: ${p.personality}`);
+    if (p.hobbies.length) lines.push(`Hobbies: ${p.hobbies.join(', ')}`);
+    if (p.activities.length) lines.push(`Preferred activities: ${p.activities.join(', ')}`);
+    if (p.partnerTypes.length) lines.push(`Target partners: ${p.partnerTypes.join(', ')}`);
+    if (p.challenges.length) lines.push(`Challenges: ${p.challenges.join(', ')}`);
+    if (p.niches.length) lines.push(`Ideal clients: ${p.niches.join(', ')}`);
+    if (p.tone) lines.push(`Tone: ${p.tone}`);
+    if (p.voiceTraits.length) lines.push(`Voice traits: ${p.voiceTraits.join(', ')}`);
+    if (p.contentNotes) lines.push(`Content guardrails: ${p.contentNotes}`);
+    return lines.length
+      ? lines.join('. ') + '.'
+      : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
+  }
+
+  // --- Modal state ---
+  let modal;
+  let autoSaveTimer = null;
+  let wizardStep = 1;
+
+  function collectProfileFromForm() {
+    const get = (id) => document.getElementById(id);
+    const getVal = (id) => (get(id)?.value || '').trim();
+    const getRaw = (id) => get(id)?.value || '';
+
+    return {
+      name: getVal('profile-name'),
+      email: getVal('profile-email'),
+      phone: getVal('profile-phone'),
+      nmls: getVal('profile-nmls'),
+      intro: getVal('profile-intro'),
+      location: getVal('profile-location'),
+      years: getRaw('profile-years'),
+      team: getRaw('profile-team'),
+      monthlyUnits: getRaw('profile-monthly-units'),
+      monthlyGoal: getRaw('profile-monthly-goal'),
+      income: getRaw('profile-income'),
+      focus: getRaw('profile-focus'),
+      hours: getRaw('profile-hours'),
+      databaseSize: getRaw('profile-database-size'),
+      partnerFocus: getVal('profile-partner-focus'),
+      family: getVal('profile-family'),
+      personality: getVal('profile-personality'),
+      tone: getRaw('profile-tone'),
+      contentNotes: getVal('profile-content-notes'),
+      hobbiesOther: getVal('profile-hobbies-other'),
+      hobbies: Array.from(document.querySelectorAll('.profile-hobby:checked')).map((c) => c.value),
+      activities: Array.from(document.querySelectorAll('.profile-activity:checked')).map((c) => c.value),
+      niches: Array.from(document.querySelectorAll('.profile-niche:checked')).map((c) => c.value),
+      nichesOther: getVal('profile-niche-other'),
+      challenges: Array.from(document.querySelectorAll('.profile-challenge:checked')).map((c) => c.value),
+      challengesOther: getVal('profile-challenge-other'),
+      formats: Array.from(document.querySelectorAll('.profile-format:checked')).map((c) => c.value),
+      voiceTraits: Array.from(document.querySelectorAll('.profile-voice:checked')).map((c) => c.value),
+      partnerTypes: Array.from(document.querySelectorAll('.profile-partner:checked')).map((c) => c.value),
+      partnerTypesOther: getVal('profile-partner-other'),
+      lastUpdated: new Date().toISOString()
+    };
+  }
+
+  function persistProfile(profile, showFeedback, closeAfter) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+
+    const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...profile }));
+
+    refreshProfileUI();
+    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
+
+    if (closeAfter) closeModal();
+
+    if (showFeedback) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Profile saved! All tools will now use your updated preferences.');
+      } else {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#00A89D] text-white px-6 py-3 rounded-2xl shadow-xl z-[9999]';
+        toast.textContent = 'Profile saved! All tools will now use your updated preferences.';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+      }
+    }
+  }
+
+  function performSave(showFeedback, closeAfter) {
+    persistProfile(collectProfileFromForm(), showFeedback, closeAfter);
+  }
+
+  function loadProfileIntoForm() {
+    const profile = normalizeProfile(readRawProfile());
+
+    const fields = [
+      'name', 'email', 'phone', 'nmls', 'intro', 'location', 'years', 'team',
+      'monthly-units', 'monthly-goal', 'income', 'focus', 'hours',
+      'database-size', 'partner-focus', 'family', 'personality', 'tone',
+      'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other'
+    ];
+
+    fields.forEach((field) => {
+      const el = document.getElementById('profile-' + field);
+      if (!el) return;
+      const key = field.replace(/-([a-z])/g, (_, l) => l.toUpperCase());
+      const val = profile[key] || profile[field] || '';
+      el.value = val;
+    });
+
+    const yearsEl = document.getElementById('profile-years');
+    if (yearsEl?.type === 'number') {
+      const num = parseInt(yearsEl.value, 10);
+      yearsEl.value = isNaN(num) ? '' : String(num);
+    }
+
+    const sets = [
+      ['.profile-hobby', 'hobbies'],
+      ['.profile-activity', 'activities'],
+      ['.profile-niche', 'niches'],
+      ['.profile-challenge', 'challenges'],
+      ['.profile-format', 'formats'],
+      ['.profile-voice', 'voiceTraits'],
+      ['.profile-partner', 'partnerTypes']
+    ];
+
+    sets.forEach(([sel, key]) => {
+      document.querySelectorAll(sel).forEach((cb) => {
+        cb.checked = profile[key] && profile[key].includes(cb.value);
+      });
+    });
+
+    syncSelectAllStates();
+    refreshProfileUI();
+  }
+
+  function refreshProfileUI() {
+    const profile = normalizeProfile(readRawProfile());
+    const { score, missing } = getProfileCompleteness(profile);
+
+    const scoreEl = document.getElementById('profile-strength-score');
+    const barEl = document.getElementById('profile-strength-bar');
+    const hintsEl = document.getElementById('profile-strength-hints');
+
+    if (scoreEl) scoreEl.textContent = `${score}%`;
+    if (barEl) barEl.style.width = `${score}%`;
+
+    if (hintsEl) {
+      if (missing.length) {
+        hintsEl.innerHTML = missing.map((m) =>
+          `<span class="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400"><i class="fas fa-arrow-right text-[#00A89D] text-[9px]"></i> ${m.hint} <span class="text-gray-400">(${m.tools})</span></span>`
+        ).join('');
+      } else {
+        hintsEl.innerHTML = '<span class="text-[11px] text-[#00A89D]"><i class="fas fa-check-circle"></i> Profile is strong — tools will personalize well.</span>';
+      }
+    }
+
+    document.querySelectorAll('[data-profile-section]').forEach((el) => {
+      const section = el.dataset.profileSection;
+      const filled = getSectionFillCount(section, profile);
+      const badge = el.querySelector('.profile-section-badge');
+      if (badge) badge.textContent = filled.label;
+    });
+
+    updateHeaderProfileBadge(score);
+
+    if (typeof window.refreshCoachOnboarding === 'function') {
+      window.refreshCoachOnboarding();
+    }
+  }
+
+  function updateHeaderProfileBadge(score) {
+    const openBtn = document.getElementById('open-profile-btn');
+    if (!openBtn) return;
+
+    let badge = document.getElementById('header-profile-strength');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'header-profile-strength';
+      badge.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-0.5';
+      openBtn.appendChild(badge);
+    }
+
+    badge.textContent = `${score}%`;
+    badge.classList.remove('bg-green-500/30', 'text-green-100', 'bg-amber-400/30', 'text-amber-100', 'bg-red-400/30', 'text-red-100');
+    if (score >= 70) {
+      badge.classList.add('bg-green-500/30', 'text-green-100');
+    } else if (score >= 40) {
+      badge.classList.add('bg-amber-400/30', 'text-amber-100');
+    } else {
+      badge.classList.add('bg-red-400/30', 'text-red-100');
+    }
+    openBtn.title = `My Profile — ${score}% complete`;
+  }
+
+  function getSectionFillCount(section, profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    const maps = {
+      personal: [
+        () => p.hobbies.length || p.hobbiesOther,
+        () => p.family,
+        () => p.personality
+      ],
+      prospecting: [
+        () => p.activities.length,
+        () => p.partnerTypes.length || p.partnerTypesOther,
+        () => p.partnerFocus
+      ],
+      advanced: [
+        () => p.niches.length || p.nichesOther,
+        () => p.challenges.length || p.challengesOther
+      ],
+      content: [
+        () => p.tone,
+        () => p.contentNotes,
+        () => p.voiceTraits.length,
+        () => p.formats.length
+      ]
+    };
+    const checks = maps[section] || [];
+    const done = checks.filter((fn) => fn()).length;
+    return { done, total: checks.length, label: checks.length ? `${done}/${checks.length}` : '' };
+  }
+
+  function showView(view) {
+    const wizard = document.getElementById('profile-wizard-view');
+    const full = document.getElementById('profile-full-view');
+    if (wizard) wizard.classList.toggle('hidden', view !== 'wizard');
+    if (full) full.classList.toggle('hidden', view !== 'full');
+    const scroll = document.getElementById('profile-form-scroll');
+    if (scroll) scroll.scrollTop = 0;
+  }
+
+  function shouldShowWizard() {
+    if (localStorage.getItem(WIZARD_DONE_KEY) === '1') return false;
+    return getProfileCompleteness().score < 55;
+  }
+
+  function needsFullProfile() {
+    return getProfileCompleteness().score < 70;
+  }
+
+  function renderWizardStep() {
+    const steps = document.querySelectorAll('.profile-wizard-step');
+    steps.forEach((el) => el.classList.add('hidden'));
+    const active = document.getElementById(`profile-wizard-step-${wizardStep}`);
+    if (active) active.classList.remove('hidden');
+
+    const progress = document.getElementById('profile-wizard-progress');
+    if (progress) progress.textContent = `Step ${wizardStep} of 3`;
+
+    const back = document.getElementById('profile-wizard-back');
+    const next = document.getElementById('profile-wizard-next');
+    if (back) back.classList.toggle('hidden', wizardStep === 1);
+    if (next) next.textContent = wizardStep === 3 ? 'Save & finish' : 'Continue';
+  }
+
+  function mergeWizardIntoProfile() {
+    const existing = readRawProfile();
+    const step1 = {
+      name: document.getElementById('wizard-name')?.value.trim() || existing.name || '',
+      location: document.getElementById('wizard-location')?.value.trim() || existing.location || '',
+      focus: document.getElementById('wizard-focus')?.value || existing.focus || ''
+    };
+    const hobbies = Array.from(document.querySelectorAll('.wizard-hobby:checked')).map((c) => c.value);
+    const step2 = {
+      tone: document.getElementById('wizard-tone')?.value || existing.tone || '',
+      hobbies: hobbies.length ? hobbies : (existing.hobbies || [])
+    };
+    const challenge = document.getElementById('wizard-challenge')?.value;
+    const step3 = {
+      monthlyUnits: document.getElementById('wizard-monthly-units')?.value || existing.monthlyUnits || '',
+      hours: document.getElementById('wizard-hours')?.value || existing.hours || '',
+      challenges: challenge ? [challenge] : (existing.challenges || []),
+      intro: document.getElementById('wizard-intro')?.value.trim() || existing.intro || ''
+    };
+
+    return normalizeProfile({
+      ...existing,
+      ...step1,
+      ...step2,
+      ...step3,
+      lastUpdated: new Date().toISOString()
+    });
+  }
+
+  function prefillWizardFromProfile() {
+    const p = normalizeProfile(readRawProfile());
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    set('wizard-name', p.name);
+    set('wizard-location', p.location);
+    set('wizard-focus', p.focus);
+    set('wizard-tone', p.tone);
+    set('wizard-monthly-units', p.monthlyUnits);
+    set('wizard-hours', p.hours);
+    set('wizard-intro', p.intro);
+    if (p.challenges[0]) set('wizard-challenge', p.challenges[0]);
+    document.querySelectorAll('.wizard-hobby').forEach((cb) => {
+      cb.checked = p.hobbies.includes(cb.value);
+    });
+  }
+
+  function finishWizard() {
+    const merged = mergeWizardIntoProfile();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    localStorage.setItem(WIZARD_DONE_KEY, '1');
+    const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
+    loadProfileIntoForm();
+    showView('full');
+    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
+    if (typeof window.showToast === 'function') {
+      window.showToast('Quick profile saved — add more anytime for even sharper content.');
+    }
+  }
+
+  function openModal(forceFull) {
+    modal = document.getElementById('user-profile-modal');
+    if (!modal) return;
+
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.display = 'flex';
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+    }
+
+    const openFull = forceFull || needsFullProfile();
+
+    if (!openFull && shouldShowWizard()) {
+      wizardStep = 1;
+      prefillWizardFromProfile();
+      renderWizardStep();
+      showView('wizard');
+    } else {
+      loadProfileIntoForm();
+      showView('full');
+    }
+  }
+
+  function closeModal() {
+    if (!modal) modal = document.getElementById('user-profile-modal');
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    if (typeof window.renderWeeklyProfileSummary === 'function') window.renderWeeklyProfileSummary();
+    if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
+    if (typeof window.updatePTBProfileDisplay === 'function') window.updatePTBProfileDisplay();
+  }
+
+  function autoSaveProfile() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+      if (document.getElementById('profile-full-view')?.classList.contains('hidden')) return;
+      performSave(false, false);
+      const statusEl = document.getElementById('profile-save-status');
+      if (statusEl) {
+        statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]"></i> <span>Saved just now</span>';
+        setTimeout(() => {
+          if (statusEl) statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]"></i> <span>All changes saved automatically</span>';
+        }, 2400);
+      }
+    }, 450);
+  }
+
+  function syncSelectAllStates() {
+    if (!modal) modal = document.getElementById('user-profile-modal');
+    if (!modal) return;
+    modal.querySelectorAll('.profile-select-all').forEach((master) => {
+      const sel = master.getAttribute('data-target');
+      if (!sel) return;
+      const boxes = modal.querySelectorAll(sel);
+      if (!boxes.length) return;
+      master.checked = Array.prototype.every.call(boxes, (b) => b.checked);
+    });
+  }
+
+  function setupSelectAllToggles() {
+    if (!modal) return;
+    modal.addEventListener('change', (e) => {
+      const master = e.target.closest('.profile-select-all');
+      if (master) {
+        const targetSelector = master.getAttribute('data-target');
+        if (targetSelector) {
+          modal.querySelectorAll(targetSelector).forEach((cb) => { cb.checked = master.checked; });
+          autoSaveProfile();
+        }
+      }
+      const t = e.target;
+      if (t.matches('input[type="checkbox"].profile-hobby, input[type="checkbox"].profile-activity, input[type="checkbox"].profile-partner, input[type="checkbox"].profile-niche, input[type="checkbox"].profile-challenge, input[type="checkbox"].profile-voice, input[type="checkbox"].profile-format')) {
+        syncSelectAllStates();
+      }
+    });
+  }
+
+  function setupWizardHandlers() {
+    document.getElementById('profile-wizard-skip')?.addEventListener('click', () => {
+      localStorage.setItem(WIZARD_DONE_KEY, '1');
+      loadProfileIntoForm();
+      showView('full');
+    });
+
+    document.getElementById('profile-wizard-back')?.addEventListener('click', () => {
+      if (wizardStep > 1) { wizardStep -= 1; renderWizardStep(); }
+    });
+
+    document.getElementById('profile-wizard-next')?.addEventListener('click', () => {
+      if (wizardStep < 3) {
+        wizardStep += 1;
+        renderWizardStep();
+      } else {
+        finishWizard();
+      }
+    });
+
+    document.getElementById('profile-open-wizard')?.addEventListener('click', () => {
+      wizardStep = 1;
+      prefillWizardFromProfile();
+      renderWizardStep();
+      showView('wizard');
+    });
+  }
+
+  function initProfileModal() {
+    modal = document.getElementById('user-profile-modal');
+    const openBtn = document.getElementById('open-profile-btn');
+    if (!modal || !openBtn) {
+      console.warn('[user-profile] Modal elements not found');
+      return;
+    }
+
+    openBtn.addEventListener('click', () => openModal(false));
+    document.getElementById('close-profile-modal')?.addEventListener('click', closeModal);
+    document.getElementById('cancel-profile')?.addEventListener('click', closeModal);
+    document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
+
+    modal.addEventListener('input', autoSaveProfile);
+    modal.addEventListener('change', autoSaveProfile);
+    setupSelectAllToggles();
+    setupWizardHandlers();
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) e.preventDefault();
+    });
+
+    refreshProfileUI();
+
+    console.log('%c[user-profile] Initialized — wizard, meter, normalized schema', 'color:#00A89D');
+  }
+
+  window.getUserProfile = function getUserProfile() {
+    return normalizeProfile(readRawProfile());
+  };
+
+  window.getProfileCompleteness = getProfileCompleteness;
+  window.buildProfileAiContext = buildAiContext;
+  window.buildProfilePreviewText = buildPreviewText;
+  window.buildProfilePreviewHtml = buildPreviewHtml;
+  window.normalizeUserProfile = normalizeProfile;
+
+  window.openUserProfile = function openUserProfile(forceFull) {
+    openModal(!!forceFull);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProfileModal);
+  } else {
+    initProfileModal();
+  }
+})();

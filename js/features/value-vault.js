@@ -169,94 +169,456 @@
   }
 
   // =====================================================
-  // SEARCH / FILTER
+  // SEARCH / FILTER (DOM + VALUE_VAULT_ITEMS data)
   // =====================================================
+  function getVaultItems() {
+    return Array.isArray(window.VALUE_VAULT_ITEMS) ? window.VALUE_VAULT_ITEMS : [];
+  }
+
+  function buildItemSearchBlob(item) {
+    if (!item) return '';
+    return [
+      item.title,
+      item.teaser,
+      item.type,
+      item.pillar,
+      item.cost,
+      item.copyText,
+      ...(item.tags || [])
+    ].filter(Boolean).join(' ').toLowerCase();
+  }
+
+  function itemMatchesVaultQuery(item, term) {
+    if (!term) return true;
+    return buildItemSearchBlob(item).includes(term);
+  }
+
+  function cardMatchesVaultQuery(card, term) {
+    if (!term) return true;
+    const id = card.dataset?.id;
+    if (id) {
+      const item = getVaultItems().find((i) => i.id === id);
+      if (item && itemMatchesVaultQuery(item, term)) return true;
+    }
+    return card.textContent.toLowerCase().includes(term);
+  }
+
+  window.searchValueVaultItems = function searchValueVaultItems(term, limit = 12) {
+    const q = (term || '').toLowerCase().trim();
+    if (!q || q.length < 2) return [];
+    return getVaultItems().filter((item) => itemMatchesVaultQuery(item, q)).slice(0, limit);
+  };
+
+  function ensureVaultDataResultsPanel() {
+    let panel = document.getElementById('vault-data-search-results');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'vault-data-search-results';
+      panel.className = 'hidden';
+      const extras = getVaultToolbarExtras();
+      if (extras) {
+        extras.insertBefore(panel, extras.firstChild);
+      } else {
+        const vault = document.getElementById('value-vault');
+        if (vault) vault.insertBefore(panel, vault.firstChild);
+      }
+    }
+    return panel;
+  }
+
+  function renderVaultDataSearchResults(term, matches) {
+    const panel = ensureVaultDataResultsPanel();
+    if (!panel) return;
+
+    if (!term || !matches.length) {
+      panel.classList.add('hidden');
+      panel.innerHTML = '';
+      return;
+    }
+
+    const needsPanel = matches.some((item) => {
+      const card = document.querySelector(`#popby-cards .popby-card[data-id="${item.id}"]`);
+      return !card || card.style.display === 'none';
+    });
+
+    if (!needsPanel) {
+      panel.classList.add('hidden');
+      panel.innerHTML = '';
+      return;
+    }
+
+    const typeLabel = (type) => {
+      if (type === 'pop-by') return 'Pop-By';
+      if (type === 'gift') return 'Gift';
+      if (type === 'script') return 'Script';
+      if (type === 'fact') return 'Ruoff Fact';
+      return 'Vault';
+    };
+
+    panel.classList.remove('hidden');
+    panel.innerHTML = `
+      <div class="rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 dark:bg-[#00A89D]/10 p-4">
+        <div class="text-xs font-semibold text-[#002B5C] dark:text-white mb-2">
+          <i class="fas fa-database mr-1 text-[#00A89D]"></i>
+          ${matches.length} library match${matches.length === 1 ? '' : 'es'} for “${term}”
+          <span class="font-normal text-gray-500 dark:text-gray-400"> — open any item directly</span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          ${matches.slice(0, 10).map((item) => `
+            <button type="button"
+              class="vault-data-hit text-left text-xs px-3 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:shadow-sm transition"
+              data-vault-id="${item.id}">
+              <span class="text-[9px] uppercase tracking-wider text-[#00A89D] font-semibold">${typeLabel(item.type)}</span>
+              <span class="block font-medium text-gray-800 dark:text-gray-200 leading-tight">${item.title}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    panel.querySelectorAll('.vault-data-hit').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.vaultId;
+        if (id && typeof window.showVaultItemModal === 'function') {
+          window.showVaultItemModal(id);
+        }
+      });
+    });
+  }
+
+  const PILLAR_LABELS = {
+    1: 'Pop-Bys & Partner Appreciation',
+    2: 'Client Gifts & Giftology',
+    3: 'Post-Closing Systems',
+    4: 'Objection Handling Mastery',
+    5: 'Content & Nurture Templates',
+    6: 'Database Nurture'
+  };
+
+  const VAULT_QUICK_PICKS = [
+    { label: 'Rates too high', modalId: 'objection-rates' },
+    { label: 'Waiting to buy', modalId: 'objection-waiting' },
+    { label: 'Credit concerns', modalId: 'objection-credit' },
+    { label: 'Down payment', modalId: 'objection-downpayment' },
+    { label: 'Partner objections', modalId: 'objection-gain-partner-business' },
+    { label: 'All objections', pillar: 4 },
+    { label: 'Pop-bys', pillar: 1 },
+    { label: 'Nurture', pillar: 5 }
+  ];
+
+  let vaultFocusPillar = null;
+
+  function escapeVaultHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function getVaultToolbarExtras() {
+    let extras = document.getElementById('vault-toolbar-extras');
+    if (!extras) {
+      const toolbar = document.getElementById('value-vault-toolbar');
+      if (!toolbar) return null;
+      extras = document.createElement('div');
+      extras.id = 'vault-toolbar-extras';
+      toolbar.appendChild(extras);
+    }
+    return extras;
+  }
+
+  function initVaultQuickPicks() {
+    const extras = getVaultToolbarExtras();
+    if (!extras || document.getElementById('vault-quick-picks')) return;
+
+    const row = document.createElement('div');
+    row.id = 'vault-quick-picks';
+    row.className = 'pt-3 border-t border-gray-200 dark:border-gray-600';
+    row.innerHTML = `
+      <div class="text-[10px] font-bold tracking-[1.5px] text-gray-500 dark:text-gray-400 uppercase mb-2">
+        <i class="fas fa-bolt text-[#F15A29] mr-1"></i> Quick jumps — objections &amp; pillars
+      </div>
+      <div class="flex flex-wrap gap-2" id="vault-quick-picks-buttons"></div>
+    `;
+    extras.appendChild(row);
+
+    const btnWrap = row.querySelector('#vault-quick-picks-buttons');
+    VAULT_QUICK_PICKS.forEach((pick) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vault-quick-pick text-xs px-3 py-1.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] font-medium transition';
+      btn.textContent = pick.label;
+      btn.addEventListener('click', () => {
+        if (pick.modalId) {
+          window.openVaultItemWhenReady(pick.modalId);
+        } else if (pick.pillar) {
+          window.openVaultPillar(pick.pillar);
+        }
+      });
+      btnWrap.appendChild(btn);
+    });
+  }
+
+  function updateVaultStatusBanner(term, focusPillar) {
+    const extras = getVaultToolbarExtras();
+    if (!extras) return;
+
+    const q = (term || '').toLowerCase().trim();
+    const pillarNum = focusPillar || vaultFocusPillar;
+    const pillarLabel = pillarNum ? PILLAR_LABELS[pillarNum] : '';
+
+    let banner = document.getElementById('vault-status-banner');
+    if (!q && !pillarLabel) {
+      banner?.remove();
+      return;
+    }
+
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'vault-status-banner';
+      extras.appendChild(banner);
+    }
+
+    const message = q
+      ? `<i class="fas fa-filter text-[#00A89D] mr-1.5"></i> Filtered: <strong>“${escapeVaultHtml(q)}”</strong>`
+      : `<i class="fas fa-crosshairs text-[#00A89D] mr-1.5"></i> Focused on <strong>${escapeVaultHtml(pillarLabel)}</strong>`;
+
+    banner.innerHTML = `
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 dark:bg-[#00A89D]/10">
+        <div class="text-sm text-[#002B5C] dark:text-white">
+          ${message}
+          <span class="text-gray-500 dark:text-gray-400 text-xs ml-1">— all 6 pillars stay below</span>
+        </div>
+        <button type="button" id="vault-show-full-btn"
+          class="text-xs px-3 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition flex-shrink-0">
+          <i class="fas fa-th-large mr-1"></i>Show full vault
+        </button>
+      </div>
+    `;
+
+    banner.querySelector('#vault-show-full-btn')?.addEventListener('click', () => {
+      window.clearVaultView();
+    });
+  }
+
+  function collapseAllVaultPillars() {
+    if (typeof window.closeValueVaultPillar === 'function') {
+      for (let i = 1; i <= 6; i++) window.closeValueVaultPillar(i);
+      return;
+    }
+    document.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
+      el.style.removeProperty('display');
+      el.classList.add('hidden');
+    });
+    const grid = document.getElementById('value-vault-pillars-grid');
+    if (grid) {
+      grid.querySelectorAll('.pillar-card').forEach((c) => {
+        c.classList.remove('!border-[#00A89D]', 'ring-1', 'ring-[#00A89D]');
+      });
+    }
+  }
+
+  window.clearVaultView = function clearVaultView() {
+    const searchInput = document.getElementById('value-vault-search');
+    if (searchInput) searchInput.value = '';
+    vaultFocusPillar = null;
+    applyVaultSearchFilter('');
+    collapseAllVaultPillars();
+    updateVaultStatusBanner('', null);
+    const clearBtn = document.getElementById('vault-search-clear-btn');
+    if (clearBtn) clearBtn.classList.add('hidden');
+  };
+
+  window.clearVaultSearch = window.clearVaultView;
+
+  window.scrollVaultToToolbar = function scrollVaultToToolbar() {
+    const toolbar = document.getElementById('value-vault-toolbar');
+    const vault = document.getElementById('value-vault');
+    const target = toolbar || vault;
+    if (!target) return;
+    const headerOffset = 130;
+    const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  };
+
+  window.openVaultPillar = function openVaultPillar(pillarNumber, options) {
+    const opts = options || {};
+    const searchInput = document.getElementById('value-vault-search');
+    if (searchInput) searchInput.value = '';
+    applyVaultSearchFilter('');
+
+    const num = parseInt(pillarNumber, 10);
+    if (!num) return;
+
+    vaultFocusPillar = num;
+    updateVaultStatusBanner('', num);
+
+    const grid = document.getElementById('value-vault-pillars-grid');
+    const card = grid?.querySelector(`.pillar-card[data-pillar="${num}"]`);
+    const scrollMode = opts.scrollTo === 'pillar' ? 'pillar' : 'toolbar';
+
+    setTimeout(() => {
+      if (typeof window.openValueVaultPillar === 'function') {
+        window.openValueVaultPillar(num, card || null, scrollMode);
+      } else if (typeof window.toggleValueVaultPillar === 'function') {
+        window.toggleValueVaultPillar(num, card || null, scrollMode);
+      } else {
+        const content = document.getElementById(`value-vault-pillar-${num}`);
+        if (content) {
+          document.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
+            if (el.id !== `value-vault-pillar-${num}`) el.classList.add('hidden');
+          });
+          content.classList.remove('hidden');
+        }
+        if (scrollMode !== 'none') window.scrollVaultToToolbar();
+      }
+    }, 120);
+  };
+
+  window.openVaultItemWhenReady = function openVaultItemWhenReady(id, attempt = 0) {
+    const items = window.VALUE_VAULT_ITEMS;
+    const item = Array.isArray(items) ? items.find((i) => i.id === id) : null;
+    if (item && typeof window.showVaultItemModal === 'function') {
+      window.showVaultItemModal(id);
+      return;
+    }
+    if (attempt < 40) {
+      setTimeout(() => window.openVaultItemWhenReady(id, attempt + 1), 120);
+      return;
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast('Value Vault is still loading — try again in a moment.');
+    }
+  };
+
+  function applyVaultSearchFilter(term) {
+    const q = (term || '').toLowerCase().trim();
+    const dataMatches = window.searchValueVaultItems(q, 20);
+
+    // 1. Legacy accordions (if any remain)
+    document.querySelectorAll('#value-vault .accordion').forEach((acc) => {
+      const titleEl = acc.querySelector('button');
+      const contentEl = acc.querySelector('.accordion-content');
+      if (!titleEl || !contentEl) return;
+      const titleText = titleEl.textContent.toLowerCase();
+      const contentText = contentEl.textContent.toLowerCase();
+      const match = !q || titleText.includes(q) || contentText.includes(q);
+      acc.style.display = match ? '' : 'none';
+      if (match && q && !contentEl.classList.contains('open')) {
+        contentEl.classList.add('open');
+      }
+    });
+
+    // 2. Filter pillar + static cards (data-aware when data-id present)
+    document.querySelectorAll('#value-vault .cursor-pointer.group, #value-vault .popby-card').forEach((card) => {
+      if (card.getAttribute('onclick')?.includes('toggleValueVaultPillar')) return;
+      const match = cardMatchesVaultQuery(card, q);
+      card.style.display = match ? '' : 'none';
+    });
+
+    // 3. Auto-expand pillars when search matches content inside them
+    if (q) {
+      const matchIds = new Set(dataMatches.map((i) => i.id));
+      document.querySelectorAll('[id^="value-vault-pillar-"]').forEach((pillar) => {
+        const pillarText = pillar.textContent.toLowerCase();
+        const hasDataMatch = Array.from(pillar.querySelectorAll('[data-id], [onclick*="showVaultItemModal"]')).some((el) => {
+          const id = el.dataset?.id || (el.getAttribute('onclick')?.match(/showVaultItemModal\('([^']+)'\)/) || [])[1];
+          return id && matchIds.has(id);
+        });
+        if ((pillarText.includes(q) || hasDataMatch) && window.getComputedStyle(pillar).display === 'none') {
+          pillar.style.removeProperty('display');
+          pillar.classList.remove('hidden');
+        }
+      });
+    }
+
+    // 4. Pop-By grid count + data-driven card visibility
+    const popbyGrid = document.getElementById('popby-cards');
+    if (popbyGrid) {
+      let visibleCount = 0;
+      popbyGrid.querySelectorAll('.popby-card').forEach((c) => {
+        const match = cardMatchesVaultQuery(c, q);
+        c.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+
+      let status = popbyGrid.parentNode.querySelector('.search-status');
+      if (q) {
+        if (!status) {
+          status = document.createElement('div');
+          status.className = 'search-status text-[10px] text-gray-500 mt-2';
+          popbyGrid.parentNode.appendChild(status);
+        }
+        status.textContent = `Showing ${visibleCount} grid result${visibleCount === 1 ? '' : 's'} for “${q}”`;
+      } else if (status) {
+        status.remove();
+      }
+    }
+
+    renderVaultDataSearchResults(q, dataMatches);
+    if (q) vaultFocusPillar = null;
+    updateVaultStatusBanner(q, vaultFocusPillar);
+
+    if (!q) {
+      document.querySelectorAll('#value-vault .accordion').forEach((acc) => {
+        acc.style.display = '';
+      });
+      document.querySelectorAll('#value-vault .cursor-pointer.group, #value-vault .popby-card').forEach((el) => {
+        el.style.display = '';
+      });
+    }
+
+    return dataMatches;
+  }
+
+  window.applyVaultSearch = function applyVaultSearch(term) {
+    const searchInput = document.getElementById('value-vault-search');
+    if (searchInput && searchInput.value !== term) {
+      searchInput.value = term;
+    }
+    return applyVaultSearchFilter((term || '').toLowerCase().trim());
+  };
+
   function initSearch() {
     const searchInput = document.getElementById('value-vault-search');
     if (!searchInput) return;
 
+    if (!searchInput.dataset.clearBtnAttached) {
+      searchInput.dataset.clearBtnAttached = '1';
+      const wrap = searchInput.parentElement;
+      if (wrap && !wrap.querySelector('#vault-search-clear-btn')) {
+        wrap.classList.add('relative');
+        searchInput.classList.add('pr-10');
+        const clearBtn = document.createElement('button');
+        clearBtn.type = 'button';
+        clearBtn.id = 'vault-search-clear-btn';
+        clearBtn.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#00A89D] transition hidden';
+        clearBtn.title = 'Clear search';
+        clearBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+        clearBtn.addEventListener('click', () => window.clearVaultSearch());
+        wrap.appendChild(clearBtn);
+      }
+    }
+
+    const syncClearBtn = () => {
+      const btn = document.getElementById('vault-search-clear-btn');
+      if (btn) btn.classList.toggle('hidden', !searchInput.value.trim());
+    };
+
     searchInput.addEventListener('input', () => {
-      const term = searchInput.value.toLowerCase().trim();
-
-      // 1. Legacy accordions (if any remain)
-      const accordions = document.querySelectorAll('#value-vault .accordion');
-      accordions.forEach(acc => {
-        const titleEl = acc.querySelector('button');
-        const contentEl = acc.querySelector('.accordion-content');
-        if (!titleEl || !contentEl) return;
-        const titleText = titleEl.textContent.toLowerCase();
-        const contentText = contentEl.textContent.toLowerCase();
-        const match = !term || titleText.includes(term) || contentText.includes(term);
-        acc.style.display = match ? '' : 'none';
-        if (match && term && !contentEl.classList.contains('open')) {
-          contentEl.classList.add('open');
-        }
-      });
-
-      // 2. Filter all modern Value Vault cards reliably
-      // Target the actual clickable cards used in the pillars + Pop-By grid
-      const allVaultCards = document.querySelectorAll('#value-vault .cursor-pointer.group, #value-vault .popby-card');
-      allVaultCards.forEach(card => {
-        // Skip the big pillar header cards themselves
-        if (card.getAttribute('onclick') && card.getAttribute('onclick').includes('toggleValueVaultPillar')) {
-          return;
-        }
-        const text = card.textContent.toLowerCase();
-        const match = !term || text.includes(term);
-        card.style.display = match ? '' : 'none';
-      });
-
-      // 3. Auto-expand pillars when search matches content inside them
-      if (term) {
-        document.querySelectorAll('[id^="value-vault-pillar-"]').forEach(pillar => {
-          const pillarText = pillar.textContent.toLowerCase();
-          if (pillarText.includes(term) && pillar.classList.contains('hidden')) {
-            pillar.classList.remove('hidden');
-          }
-        });
-      }
-
-      // 4. Handle the Pop-By grid + live result count
-      const popbyGrid = document.getElementById('popby-cards');
-      if (popbyGrid) {
-        const cards = popbyGrid.querySelectorAll('.popby-card');
-        let visibleCount = 0;
-        cards.forEach(c => {
-          const text = c.textContent.toLowerCase();
-          const match = !term || text.includes(term);
-          c.style.display = match ? '' : 'none';
-          if (match) visibleCount++;
-        });
-
-        let status = popbyGrid.parentNode.querySelector('.search-status');
-        if (term) {
-          if (!status) {
-            status = document.createElement('div');
-            status.className = 'search-status text-[10px] text-gray-500 mt-2';
-            popbyGrid.parentNode.appendChild(status);
-          }
-          status.textContent = `Showing ${visibleCount} results for “${term}”`;
-        } else if (status) {
-          status.remove();
-        }
-      }
-
-      // 5. If search is cleared, make sure everything is visible again
-      if (!term) {
-        document.querySelectorAll('#value-vault .cursor-pointer.group, #value-vault .popby-card').forEach(el => {
-          el.style.display = '';
-        });
-      }
+      applyVaultSearchFilter(searchInput.value.toLowerCase().trim());
+      syncClearBtn();
     });
 
-    // Clear search on Escape
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        searchInput.value = '';
-        searchInput.dispatchEvent(new Event('input'));
+        window.clearVaultSearch();
         searchInput.blur();
       }
     });
+
+    syncClearBtn();
   }
 
   // =====================================================
@@ -287,7 +649,8 @@
       });
 
       // New modern pillar system
-      vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach(el => {
+      vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
+        el.style.removeProperty('display');
         el.classList.remove('hidden');
       });
     });
@@ -311,9 +674,14 @@
       });
 
       // New modern pillar system
-      vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach(el => {
-        el.classList.add('hidden');
-      });
+      if (typeof window.closeValueVaultPillar === 'function') {
+        for (let i = 1; i <= 6; i++) window.closeValueVaultPillar(i);
+      } else {
+        vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
+          el.style.removeProperty('display');
+          el.classList.add('hidden');
+        });
+      }
     });
   }
 
@@ -542,7 +910,7 @@
 
       modal = document.createElement('div');
       modal.id = 'idea-modal';
-      modal.className = 'fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4';
+      modal.className = 'app-modal-overlay hidden fixed inset-0 bg-black/60 z-[200] items-center justify-center p-4';
       modal.innerHTML = `
         <div onclick="event.stopImmediatePropagation()" 
              class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-7 md:p-8 shadow-2xl relative">
@@ -578,27 +946,28 @@
       contentDiv = modal.querySelector('#idea-content');
       saveBtn = modal.querySelector('#save-idea-btn');
 
-      // Wire close buttons
-      modal.querySelector('.close-idea-btn')?.addEventListener('click', () => {
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-      });
+      modal.querySelector('.close-idea-btn')?.addEventListener('click', () => closeIdeaModal());
 
-      // Wire "Get Another Idea"
       modal.querySelector('.get-another-idea-btn')?.addEventListener('click', () => {
         if (typeof window.showRandomIdea === 'function') window.showRandomIdea();
       });
 
-      // Backdrop close
       modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.remove('flex');
-          modal.classList.add('hidden');
-          modal.style.display = 'none';
-        }
+        if (e.target === modal) closeIdeaModal();
       });
     }
+
+    const executionTips = {
+      'Pop-By Idea': 'Pick one partner or past client. Schedule the drop for this week. Snap a photo for social after.',
+      'Gift Idea': 'Order or assemble today. Pair with a handwritten note referencing something specific about them.',
+      'Video Script': 'Film on your phone this week — no perfection needed. Post to Stories first, then feed.',
+      'Email Template': 'Personalize the opening line, then send to 3 warm contacts before end of day.',
+      'Follow-Up Script': 'Use on your very next call or text. Save the response pattern if it lands well.',
+      'Objection Response': 'Role-play once out loud, then use on the next live conversation where this comes up.',
+      'Value Vault Script': 'Copy, personalize one line, and send to a partner or client within 24 hours.'
+    };
+    const tipKey = Object.keys(executionTips).find(k => (currentIdea.category || '').includes(k.split(' ')[0])) || 'Value Vault Script';
+    const tipText = executionTips[tipKey] || executionTips['Value Vault Script'];
 
     contentDiv.innerHTML = `
       <div class="mb-2">
@@ -609,6 +978,13 @@
       <div class="font-semibold text-lg mb-3">${currentIdea.title}</div>
       <div class="text-gray-700 dark:text-gray-300">${currentIdea.content}</div>
     `;
+
+    const tipsEl = document.getElementById('idea-execution-tips');
+    const tipsTextEl = document.getElementById('idea-execution-text');
+    if (tipsEl && tipsTextEl) {
+      tipsTextEl.textContent = tipText;
+      tipsEl.classList.remove('hidden');
+    }
 
     // Update save button
     if (saveBtn) {
@@ -628,10 +1004,15 @@
       };
     }
 
-    // Force visibility
-    modal.style.display = 'flex';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+    }
   }
 
   // Immediate exposure so any early clicks or other scripts can find it
@@ -639,7 +1020,11 @@
 
   function closeIdeaModal() {
     const modal = document.getElementById('idea-modal');
-    if (modal) {
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
       modal.classList.remove('flex');
       modal.classList.add('hidden');
       modal.style.display = 'none';
@@ -1157,10 +1542,17 @@ DAY OF
       if (!modal) modal = document.querySelector('[id*="modal-' + type + '"]');
 
       if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        modal.style.display = 'flex';
-        modal.style.zIndex = '9999';
+        if (typeof window.openNamedModal === 'function') {
+          window.openNamedModal(modal);
+        } else if (typeof window.openAppModal === 'function') {
+          window.openAppModal(modal);
+        } else {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          modal.style.display = 'flex';
+          modal.style.pointerEvents = 'auto';
+          modal.style.zIndex = '9999';
+        }
         return;
       }
 
@@ -1251,15 +1643,24 @@ DAY OF
       };
       const guideContent = contentMap[type] || `<p>Guide content for this event type.</p>`;
       const fb = document.createElement('div');
-      fb.className = 'fixed inset-0 bg-black/60 flex items-center justify-center p-4';
+      fb.className = 'app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center p-4';
+      fb.setAttribute('data-event-fallback-modal', 'true');
       fb.style.zIndex = '9999';
       fb.innerHTML = `
         <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-8 shadow-2xl" onclick="event.stopImmediatePropagation()">
-          <button onclick="this.closest('.fixed').remove()" class="float-right text-3xl text-gray-400 hover:text-gray-600 leading-none">&times;</button>
+          <button type="button" class="event-fallback-close float-right text-3xl text-gray-400 hover:text-gray-600 leading-none">&times;</button>
           ${guideContent}
-          <div class="mt-6 text-right"><button onclick="this.closest('.fixed').remove()" class="px-5 py-2 bg-[#00A89D] text-white rounded-2xl text-sm">Close</button></div>
+          <div class="mt-6 text-right"><button type="button" class="event-fallback-close px-5 py-2 bg-[#00A89D] text-white rounded-2xl text-sm">Close</button></div>
         </div>`;
       document.body.appendChild(fb);
+      const closeFb = () => {
+        if (typeof window.closeAppModal === 'function') window.closeAppModal(fb);
+        else fb.remove();
+        if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
+      };
+      fb.querySelectorAll('.event-fallback-close').forEach((btn) => btn.addEventListener('click', closeFb));
+      fb.addEventListener('click', (e) => { if (e.target === fb) closeFb(); });
+      if (typeof window.openAppModal === 'function') window.openAppModal(fb);
     } catch (e) { console.error('[Event] openEventModal (value-vault.js) error', e); }
   }
 
@@ -1268,15 +1669,22 @@ DAY OF
       let modal = document.getElementById('modal-' + type);
       if (!modal) modal = document.querySelector('#modal-' + type);
       if (modal) {
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
+        if (typeof window.closeNamedModal === 'function') {
+          window.closeNamedModal(modal);
+        } else if (typeof window.closeAppModal === 'function') {
+          window.closeAppModal(modal);
+        } else {
+          modal.classList.remove('flex');
+          modal.classList.add('hidden');
+          modal.style.display = 'none';
+        }
+        if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
       }
     } catch (e) {}
   }
 
-  window.openEventModal = openEventModal;
-  window.closeEventModal = closeEventModal;
+  if (typeof window.openEventModal !== 'function') window.openEventModal = openEventModal;
+  if (typeof window.closeEventModal !== 'function') window.closeEventModal = closeEventModal;
 
   // =====================================================
   // MAIN INIT
@@ -1294,6 +1702,7 @@ DAY OF
 
     attachCopyButtons();
     initSearch();
+    initVaultQuickPicks();
     initExpandCollapse();
     initPhase3Features();   // Favorites + Idea of the Day
 

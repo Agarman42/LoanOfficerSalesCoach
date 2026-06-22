@@ -58,6 +58,33 @@
   }
 
   // =====================================================
+  // BLOG TIPS MODAL (UW-style premium modal)
+  // =====================================================
+  window.openBlogTips = function openBlogTips() {
+    const modal = document.getElementById('blog-tips-modal');
+    if (!modal) return;
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.display = 'flex';
+    }
+  };
+
+  window.closeBlogTips = function closeBlogTips() {
+    const modal = document.getElementById('blog-tips-modal');
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  };
+
+  // =====================================================
   // CENTRAL PROFILE INTEGRATION (consistent with other tools)
   // =====================================================
   function getCentralProfile() {
@@ -89,9 +116,12 @@
 
   // Build a rich personalization string for the prompt
   function buildBlogPersonalization(profile) {
-    const eff = getEffectiveSetup();
-    let parts = [];
+    if (typeof window.buildProfileAiContext === 'function') {
+      return window.buildProfileAiContext(profile || getCentralProfile());
+    }
 
+    const eff = getEffectiveSetup();
+    const parts = [];
     if (eff.personality) parts.push(`Your personality: ${eff.personality}`);
     if (eff.voiceTraits && eff.voiceTraits.length) parts.push(`Voice traits: ${eff.voiceTraits.join(', ')}`);
     if (eff.tone) parts.push(`Preferred tone: ${eff.tone}`);

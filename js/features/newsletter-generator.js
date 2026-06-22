@@ -23,6 +23,30 @@
 
 let lastGeneratedHTML = '';
 
+  window.openNewsletterTips = function openNewsletterTips() {
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (!modal) return;
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.display = 'flex';
+    }
+  };
+
+  window.closeNewsletterTips = function closeNewsletterTips() {
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  };
+
 // Hero Images (20 pre-approved Midwest homes)
 const heroImages = [
     'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/b19e864a-dd57-45c4-b14e-4a340bfeb685.jpg',
@@ -1487,15 +1511,19 @@ async function generateNewsletter(feedback = '') {
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
                 'LO PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* loan officer. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
-                '- Name: ' + (p.name || document.getElementById('nl-name').value || ''),
-                '- Email: ' + (p.email || document.getElementById('nl-email').value || ''),
-                '- Personality / lifestyle: ' + (p.personality || ''),
-                '- Voice traits: ' + ((p.voiceTraits && p.voiceTraits.length) ? p.voiceTraits.join(', ') : ''),
-                '- Preferred tone: ' + (p.tone || document.getElementById('nl-tone').value || 'warm and professional'),
-                '- Hobbies & passions (weave naturally for authenticity in personal note or relatable examples): ' + ((p.hobbies && p.hobbies.length) ? p.hobbies.join(', ') : (p.hobbiesOther || p['hobbies-other'] || '')),
-                '- Key challenges they help clients with: ' + ((p.challenges && p.challenges.length) ? p.challenges.join(', ') : ''),
-                '- Primary focus style: ' + (p.focus || ''),
-                '- Years in business / team: ' + (p.years || '') + (p.team ? ' / ' + p.team : ''),
+                (typeof window.buildProfileAiContext === 'function'
+                  ? window.buildProfileAiContext(p)
+                  : [
+                    '- Name: ' + (p.name || document.getElementById('nl-name').value || ''),
+                    '- Email: ' + (p.email || document.getElementById('nl-email').value || ''),
+                    '- Personality / lifestyle: ' + (p.personality || ''),
+                    '- Voice traits: ' + ((p.voiceTraits && p.voiceTraits.length) ? p.voiceTraits.join(', ') : ''),
+                    '- Preferred tone: ' + (p.tone || document.getElementById('nl-tone').value || 'warm and professional'),
+                    '- Hobbies & passions: ' + ((p.hobbies && p.hobbies.length) ? p.hobbies.join(', ') : (p.hobbiesOther || '')),
+                    '- Key challenges: ' + ((p.challenges && p.challenges.length) ? p.challenges.join(', ') : ''),
+                    '- Primary focus: ' + (p.focusLabel || p.focus || ''),
+                    '- Years in business / team: ' + (p.years || '') + (p.team ? ' / ' + p.team : '')
+                  ].join('\n')),
                 '',
                 '',
                 'CRITICAL RULES:',

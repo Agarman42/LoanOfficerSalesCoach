@@ -211,18 +211,11 @@ function smartRouteChat(message) {
 
 function getProfileContext() {
   try {
+    if (typeof window.buildProfileAiContext === 'function') {
+      return window.buildProfileAiContext();
+    }
     const p = (window.getUserProfile && window.getUserProfile()) || JSON.parse(localStorage.getItem('userProfile') || '{}');
-    const parts = [];
-    if (p.name) parts.push(`Name: ${p.name}`);
-    if (p.email) parts.push(`Email: ${p.email}`);
-    if (p.localArea || p.market) parts.push(`Primary market: ${p.localArea || p.market}`);
-    if (p.personality) parts.push(`Personality/voice: ${p.personality}`);
-    if (p.hobbies && p.hobbies.length) parts.push(`Hobbies & activities: ${p.hobbies.join(', ')}`);
-    if (p.goals) parts.push(`Current goals: ${p.goals}`);
-    if (p.challenges) parts.push(`Key challenges: ${p.challenges}`);
-    if (p.targetPartners && p.targetPartners.length) parts.push(`Ideal partners: ${p.targetPartners.join(', ')}`);
-    if (p.tone) parts.push(`Preferred tone: ${p.tone}`);
-    return parts.length ? parts.join('. ') + '.' : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
+    return p.name ? `Name: ${p.name}.` : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
   } catch (e) {
     return 'No profile context available.';
   }
