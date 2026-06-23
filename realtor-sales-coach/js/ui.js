@@ -374,7 +374,7 @@
     clearModalForceHide(modal);
     resetModalScroll(modal);
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.classList.add('flex', 'items-center', 'justify-center');
     modal.style.display = 'flex';
     modal.style.pointerEvents = 'auto';
     modal.style.position = 'fixed';

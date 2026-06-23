@@ -5,6 +5,163 @@
 (function () {
   'use strict';
 
+  const COMPLETENESS_CHECKS = [
+    { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach' },
+    { key: 'location', weight: 12, hint: 'Add your market', tools: 'Social, Newsletter' },
+    { key: 'focus', weight: 10, hint: 'Pick your business focus', tools: 'Weekly Plan' },
+    { key: 'monthlyUnits', weight: 10, hint: 'Set a monthly closing goal', tools: 'Weekly Plan' },
+    { key: 'hobbies', weight: 10, hint: 'Add 1–2 hobbies', tools: 'Social, Content' },
+    { key: 'tone', weight: 10, hint: 'Choose your tone', tools: 'AI, Scripts' },
+    { key: 'partnerTypes', weight: 10, hint: 'Select referral partner types', tools: 'Referrals' },
+    { key: 'challenges', weight: 8, hint: 'Pick your top challenge', tools: 'Weekly Plan' },
+    { key: 'activities', weight: 8, hint: 'Preferred prospecting activities', tools: 'Weekly Plan' },
+    { key: 'contentNotes', weight: 10, hint: 'Content guardrails', tools: 'All AI tools' }
+  ];
+
+  function asArray(val) {
+    if (Array.isArray(val)) return val.filter(Boolean);
+    if (typeof val === 'string' && val.trim()) return val.split(',').map((s) => s.trim()).filter(Boolean);
+    return [];
+  }
+
+  function checkComplete(p, key) {
+    switch (key) {
+      case 'name':
+        return !!(p.name && String(p.name).trim());
+      case 'location':
+        return !!(p.location && String(p.location).trim());
+      case 'focus':
+        return !!(p.focus && String(p.focus).trim());
+      case 'monthlyUnits':
+        return !!(p.monthlyUnits || p.monthlyGoal);
+      case 'hobbies':
+        return asArray(p.hobbies).length > 0 || !!(p.hobbiesOther && p.hobbiesOther.trim());
+      case 'tone':
+        return !!(p.tone || p.personality);
+      case 'partnerTypes':
+        return asArray(p.partnerTypes).length > 0 || !!(p.partnerTypesOther && p.partnerTypesOther.trim());
+      case 'challenges':
+        return asArray(p.challenges).length > 0 || !!(p.challengesOther && p.challengesOther.trim());
+      case 'activities':
+        return asArray(p.activities).length > 0;
+      case 'contentNotes':
+        return !!(p.contentNotes && String(p.contentNotes).trim());
+      default:
+        return false;
+    }
+  }
+
+  function getProfileCompleteness(profile) {
+    const p = profile || (typeof window.getUserProfile === 'function' ? window.getUserProfile() : {});
+    let score = 0;
+    const missing = [];
+
+    COMPLETENESS_CHECKS.forEach((c) => {
+      if (checkComplete(p, c.key)) {
+        score += c.weight;
+      } else {
+        missing.push(c);
+      }
+    });
+
+    return {
+      score: Math.min(100, score),
+      missing: missing.slice(0, 4),
+      isComplete: score >= 70
+    };
+  }
+
+  function isProfileModalOpen() {
+    const el = document.getElementById('user-profile-modal');
+    return !!(el && !el.classList.contains('hidden') && (el.classList.contains('flex') || el.style.display === 'flex'));
+  }
+
+  function collectProfileFromForm() {
+    return {
+      name: document.getElementById('profile-name')?.value.trim() || '',
+      email: document.getElementById('profile-email')?.value.trim() || '',
+      location: document.getElementById('profile-location')?.value.trim() || '',
+      years: document.getElementById('profile-years')?.value || '',
+      team: document.getElementById('profile-team')?.value || '',
+      monthlyUnits: document.getElementById('profile-monthly-units')?.value || '',
+      monthlyGoal: document.getElementById('profile-monthly-goal')?.value || '',
+      income: document.getElementById('profile-income')?.value || '',
+      focus: document.getElementById('profile-focus')?.value || '',
+      hours: document.getElementById('profile-hours')?.value || '',
+      family: document.getElementById('profile-family')?.value.trim() || '',
+      personality: document.getElementById('profile-personality')?.value.trim() || '',
+      tone: document.getElementById('profile-tone')?.value || '',
+      contentNotes: document.getElementById('profile-content-notes')?.value.trim() || '',
+      hobbiesOther: document.getElementById('profile-hobbies-other')?.value.trim() || '',
+      hobbies: Array.from(document.querySelectorAll('.profile-hobby:checked')).map((c) => c.value),
+      activities: Array.from(document.querySelectorAll('.profile-activity:checked')).map((c) => c.value),
+      niches: Array.from(document.querySelectorAll('.profile-niche:checked')).map((c) => c.value),
+      nichesOther: document.getElementById('profile-niche-other')?.value.trim() || '',
+      challenges: Array.from(document.querySelectorAll('.profile-challenge:checked')).map((c) => c.value),
+      challengesOther: document.getElementById('profile-challenge-other')?.value.trim() || '',
+      formats: Array.from(document.querySelectorAll('.profile-format:checked')).map((c) => c.value),
+      voiceTraits: Array.from(document.querySelectorAll('.profile-voice:checked')).map((c) => c.value),
+      partnerTypes: Array.from(document.querySelectorAll('.profile-partner:checked')).map((c) => c.value),
+      partnerTypesOther: document.getElementById('profile-partner-other')?.value.trim() || ''
+    };
+  }
+
+  function refreshProfileUI() {
+    const profile = isProfileModalOpen()
+      ? collectProfileFromForm()
+      : (typeof window.getUserProfile === 'function' ? window.getUserProfile() : {});
+    const { score, missing } = getProfileCompleteness(profile);
+
+    const scoreEl = document.getElementById('profile-strength-score');
+    const barEl = document.getElementById('profile-strength-bar');
+    const hintsEl = document.getElementById('profile-strength-hints');
+
+    if (scoreEl) scoreEl.textContent = `${score}%`;
+    if (barEl) barEl.style.width = `${score}%`;
+
+    if (hintsEl) {
+      if (missing.length) {
+        hintsEl.innerHTML = missing.map((m) =>
+          `<span class="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400"><i class="fas fa-arrow-right text-[#00A89D] text-[9px]"></i> ${m.hint} <span class="text-gray-400">(${m.tools})</span></span>`
+        ).join('');
+      } else {
+        hintsEl.innerHTML = '<span class="text-[11px] text-[#00A89D]"><i class="fas fa-check-circle"></i> Profile is strong — tools will personalize well.</span>';
+      }
+    }
+
+    updateHeaderProfileBadge(score);
+
+    if (typeof window.refreshCoachOnboarding === 'function') {
+      window.refreshCoachOnboarding();
+    }
+  }
+
+  function updateHeaderProfileBadge(score) {
+    const openBtn = document.getElementById('open-profile-btn');
+    if (!openBtn) return;
+
+    let badge = document.getElementById('header-profile-strength');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'header-profile-strength';
+      badge.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-0.5';
+      openBtn.appendChild(badge);
+    }
+
+    badge.textContent = `${score}%`;
+    badge.classList.remove('bg-green-500/30', 'text-green-100', 'bg-amber-400/30', 'text-amber-100', 'bg-red-400/30', 'text-red-100');
+    if (score >= 70) {
+      badge.classList.add('bg-green-500/30', 'text-green-100');
+    } else if (score >= 40) {
+      badge.classList.add('bg-amber-400/30', 'text-amber-100');
+    } else {
+      badge.classList.add('bg-red-400/30', 'text-red-100');
+    }
+    openBtn.title = `My Profile — ${score}% complete`;
+  }
+
+  window.getProfileCompleteness = getProfileCompleteness;
+
     let modal, openBtn, closeBtn, cancelBtn, saveBtn;
 
     function initProfileModal() {
@@ -46,6 +203,8 @@
         setupSelectAllToggles();
 
         console.log('%c[Profile Modal] Initialized (auto-save + protected close)', 'color:#00A89D');
+
+        refreshProfileUI();
 
         // Expose globally so tools can open the profile easily
         window.openUserProfile = openModal;
@@ -200,38 +359,14 @@
         if (statusEl) {
             statusEl.innerHTML = `<i class="fas fa-check text-[#00A89D]"></i> <span>All changes saved automatically</span>`;
         }
+
+        refreshProfileUI();
     }
 
     // Core save logic (can be called silently for auto-save or with feedback for explicit Save)
     function performSave(showFeedback = true, closeAfter = true) {
         const profile = {
-            name: document.getElementById('profile-name')?.value.trim() || '',
-            email: document.getElementById('profile-email')?.value.trim() || '',
-            location: document.getElementById('profile-location')?.value.trim() || '',
-            years: document.getElementById('profile-years')?.value || '',
-            team: document.getElementById('profile-team')?.value || '',
-            monthlyUnits: document.getElementById('profile-monthly-units')?.value || '',
-            monthlyGoal: document.getElementById('profile-monthly-goal')?.value || '',
-            income: document.getElementById('profile-income')?.value || '',
-            focus: document.getElementById('profile-focus')?.value || '',
-            hours: document.getElementById('profile-hours')?.value || '',
-            family: document.getElementById('profile-family')?.value.trim() || '',
-            personality: document.getElementById('profile-personality')?.value.trim() || '',
-            tone: document.getElementById('profile-tone')?.value || '',
-            contentNotes: document.getElementById('profile-content-notes')?.value.trim() || '',
-            hobbiesOther: document.getElementById('profile-hobbies-other')?.value.trim() || '',
-            hobbies: Array.from(document.querySelectorAll('.profile-hobby:checked')).map(c => c.value),
-            activities: Array.from(document.querySelectorAll('.profile-activity:checked')).map(c => c.value),
-            niches: Array.from(document.querySelectorAll('.profile-niche:checked')).map(c => c.value),
-            nichesOther: document.getElementById('profile-niche-other')?.value.trim() || '',
-            challenges: Array.from(document.querySelectorAll('.profile-challenge:checked')).map(c => c.value),
-            challengesOther: document.getElementById('profile-challenge-other')?.value.trim() || '',
-            formats: Array.from(document.querySelectorAll('.profile-format:checked')).map(c => c.value),
-            voiceTraits: Array.from(document.querySelectorAll('.profile-voice:checked')).map(c => c.value),
-            partnerTypes: Array.from(document.querySelectorAll('.profile-partner:checked')).map(c => c.value),
-            partnerTypesOther: document.getElementById('profile-partner-other')?.value.trim() || '',
-
-            // Professional Branding & Social (central for newsletter + future content)
+            ...collectProfileFromForm(),
             companyName: document.getElementById('profile-company-name')?.value.trim() || '',
             tagline: document.getElementById('profile-tagline')?.value.trim() || '',
             phone: document.getElementById('profile-phone')?.value.trim() || '',
@@ -244,11 +379,11 @@
                 youtube: document.getElementById('profile-social-youtube')?.value.trim() || '',
                 x: document.getElementById('profile-social-x')?.value.trim() || ''
             },
-
             lastUpdated: new Date().toISOString()
         };
 
         localStorage.setItem('userProfile', JSON.stringify(profile));
+        refreshProfileUI();
 
         // Backward compatibility with older tools
         const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
@@ -301,9 +436,21 @@
     function setupAutoSave() {
         if (!modal) return;
 
+        let liveUiTimer = null;
+        function scheduleLiveProfileUI() {
+            clearTimeout(liveUiTimer);
+            liveUiTimer = setTimeout(refreshProfileUI, 120);
+        }
+
         // Event delegation on the whole modal: any typing, selecting, or checkbox toggle auto-saves
-        modal.addEventListener('input', autoSaveProfile);
-        modal.addEventListener('change', autoSaveProfile);
+        modal.addEventListener('input', () => {
+            scheduleLiveProfileUI();
+            autoSaveProfile();
+        });
+        modal.addEventListener('change', () => {
+            scheduleLiveProfileUI();
+            autoSaveProfile();
+        });
     }
 
     // --- Select All toggles for the multi-select checkbox categories (in the 4 bottom accordions) ---
@@ -350,15 +497,9 @@
         });
     }
 
-    // Initialize after DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initProfileModal);
     } else {
         initProfileModal();
     }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initProfileModal);
-  } else {
-    initProfileModal();
-  }
 })();

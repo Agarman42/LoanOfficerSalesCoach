@@ -40,13 +40,13 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v243">
+    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v244">
 
     <!-- Centralized API client (Phase 0) - must load early -->
-    <script src="js/api.js?v=20260623-realtor-v243"></script>
+    <script src="js/api.js?v=20260623-realtor-v244"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-realtor-v243"></script>
+    <script src="js/ui.js?v=20260623-realtor-v244"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -219,6 +219,7 @@
 
 <!-- The full AI Chat section remains where it is, but now accessible from anywhere -->
 <main class="p-6 space-y-8 pt-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div id="global-profile-nudge" class="max-w-5xl mx-auto w-full"></div>
     <!-- pt-48 = tight but comfortable spacing below fixed quote bar -->
     <!-- pt-64 gives breathing room below the fixed quote bar -->
                  <section id="mindset-motivation" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -7036,13 +7037,13 @@
    </section> 
 
 <!-- Rich modal modules (LO polish mirror) -->
-<script src="js/features/social-modals.js?v=20260623-realtor-v243"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v243"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-realtor-v243"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v243"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-realtor-v243"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-realtor-v243"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v243"></script>
+<script src="js/features/social-modals.js?v=20260623-realtor-v244"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v244"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-realtor-v244"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v244"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-realtor-v244"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-realtor-v244"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v244"></script>
 
 <script>
 // Reusable toggle for Supporting Systems sections (makes them behave like the main 6 pillars)
@@ -13639,8 +13640,8 @@ window.toggleSupportingSection = function(sectionId) {
   }
 })();
 </script>
-<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v243"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v243"></script>
+<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v244"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v244"></script>
 
 </main>
 <!-- Global Centered Loading Modal — Premium style matching Social & Blog Creator -->
@@ -13729,26 +13730,26 @@ window.toggleSupportingSection = function(sectionId) {
 </div>
 
 <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-<script src="js/main.js?v=20260623-realtor-v243"></script>
+<script src="js/main.js?v=20260623-realtor-v244"></script>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/save-ribbon.js?v=20260623-realtor-v243"></script>
-<script src="js/features/sales-scripts.js?v=20260623-realtor-v243"></script>
-<script src="js/features/listing-description.js?v=20260623-realtor-v243"></script>
-<script src="js/features/open-house.js?v=20260623-realtor-v243"></script>
-<script src="js/features/consultation-kit.js?v=20260623-realtor-v243"></script>
-<script src="js/features/social-post.js?v=20260623-realtor-v243"></script>
-<script src="js/features/mindset-lab.js?v=20260623-realtor-v243"></script>
-<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v243"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v243"></script>
-<script src="js/features/tool-bridges.js?v=20260623-realtor-v243"></script>
-<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v243"></script>
-<script src="js/features/blog-creator.js?v=20260623-realtor-v243"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-realtor-v243"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-realtor-v243"></script>
-<script src="js/features/ai-chat.js?v=20260623-realtor-v243"></script>
-<script src="js/features/underwriting.js?v=20260623-realtor-v243"></script>
-<script src="js/features/value-vault.js?v=20260623-realtor-v243"></script>
+<script src="js/features/save-ribbon.js?v=20260623-realtor-v244"></script>
+<script src="js/features/sales-scripts.js?v=20260623-realtor-v244"></script>
+<script src="js/features/listing-description.js?v=20260623-realtor-v244"></script>
+<script src="js/features/open-house.js?v=20260623-realtor-v244"></script>
+<script src="js/features/consultation-kit.js?v=20260623-realtor-v244"></script>
+<script src="js/features/social-post.js?v=20260623-realtor-v244"></script>
+<script src="js/features/mindset-lab.js?v=20260623-realtor-v244"></script>
+<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v244"></script>
+<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v244"></script>
+<script src="js/features/tool-bridges.js?v=20260623-realtor-v244"></script>
+<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v244"></script>
+<script src="js/features/blog-creator.js?v=20260623-realtor-v244"></script>
+<script src="js/features/legacy-helpers.js?v=20260623-realtor-v244"></script>
+<script src="js/features/newsletter-generator.js?v=20260623-realtor-v244"></script>
+<script src="js/features/ai-chat.js?v=20260623-realtor-v244"></script>
+<script src="js/features/underwriting.js?v=20260623-realtor-v244"></script>
+<script src="js/features/value-vault.js?v=20260623-realtor-v244"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
 
@@ -14855,8 +14856,23 @@ if (document.readyState === 'loading') {
             <button id="close-profile-modal" class="text-3xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0">&times;</button>
         </div>
 
+        <!-- Profile strength meter -->
+        <div class="flex-shrink-0 px-6 md:px-8 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-[#00A89D]/5 to-transparent">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between mb-3">
+                <div class="text-sm font-semibold text-[#002B5C] dark:text-white">Profile strength: <span id="profile-strength-score" class="text-[#00A89D]">0%</span></div>
+                <div class="flex-1 max-w-xs h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div id="profile-strength-bar" class="h-full rounded-full bg-gradient-to-r from-[#F15A29] to-[#00A89D] transition-all duration-500" style="width:0%"></div>
+                </div>
+            </div>
+            <div id="profile-strength-hints" class="flex flex-wrap gap-x-4 gap-y-1 mb-2"></div>
+            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed m-0">
+                <i class="fas fa-link text-[#00A89D] mr-1.5"></i>
+                One profile, every tool. What you save here flows into AI Coach, Weekly Plan, scripts, social, and newsletters — personalized to your voice, market, and goals.
+            </p>
+        </div>
+
         <!-- Modal Body -->
-        <div class="overflow-y-auto p-6 md:p-8 space-y-6 flex-1">
+        <div id="profile-form-scroll" class="overflow-y-auto p-6 md:p-8 space-y-6 flex-1 min-h-0">
 
             <!-- ========== TIER 1: CORE PROFILE (Always Visible) ========== -->
 
@@ -15231,12 +15247,13 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260623-realtor-v243"></script>
+<script src="js/features/user-profile.js?v=20260623-realtor-v244"></script>
+<script src="js/features/onboarding-coach.js?v=20260623-realtor-v244"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
 <!-- ===================================================== -->
-<div id="modal-drive-attendance" onclick="if (event.target.id === 'modal-drive-attendance') closeEventModal('drive-attendance')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
+<div id="modal-drive-attendance" onclick="if (event.target.id === 'modal-drive-attendance') closeEventModal('drive-attendance')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F15A29]/10 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
       <div>
@@ -15380,8 +15397,8 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Agent Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Agent Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v243"></script>
-<script src="js/app-version.js?v=20260623-realtor-v243"></script>
+<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v244"></script>
+<script src="js/app-version.js?v=20260623-realtor-v244"></script>
 
 </body>
 </html>

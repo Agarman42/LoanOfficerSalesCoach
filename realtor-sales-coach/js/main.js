@@ -580,6 +580,10 @@
       // Smooth scroll into view
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+      if (typeof window.onCoachSectionShown === 'function') {
+        try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
+      }
+
       // Weekly Win Plan (separate from 2026 Business Plan) button wiring (robust fallback)
       // IMPORTANT: Weekly Win Plan (time blocks) and 2026 Business Plan are TWO SEPARATE features.
       // - Weekly: generateWeeklyPlan(), #weekly-win-plan section, #generate-win-plan-btn
