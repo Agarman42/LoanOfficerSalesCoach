@@ -12,7 +12,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const indexPath = join(root, 'index.html');
 let html = readFileSync(indexPath, 'utf8');
 
-function extractHolder(htmlStr, id, outFile, loaderPrefix) {
+function extractHolder(htmlStr, id, outFile, loaderPrefix, restoreSuffix) {
   const open = `<script type="text/plain" id="${id}"`;
   const start = htmlStr.indexOf(open);
   if (start === -1) return htmlStr;
@@ -25,7 +25,8 @@ function extractHolder(htmlStr, id, outFile, loaderPrefix) {
   code = code.replace(/^\/\/ PLACEHOLDER_START\n/, '');
 
   const outPath = join(root, outFile);
-  writeFileSync(outPath, loaderPrefix + code.trimStart() + '\n');
+  const suffix = restoreSuffix ? '\n' + restoreSuffix.trim() + '\n' : '';
+  writeFileSync(outPath, loaderPrefix + code.trimStart() + suffix);
 
   const commentStart = htmlStr.lastIndexOf('<!-- extracted-to-app-bulk.js -->', start);
   const removeFrom = commentStart !== -1 && commentStart > start - 200 ? commentStart : start;
@@ -59,10 +60,45 @@ const appBulkPrefix = `// Fully extracted from index.html — app bulk features
 })();
 
 `;
-html = extractHolder(html, 'app-bulk-src', 'js/features/app-bulk.js', appBulkPrefix);
+const appBulkRestoreSuffix = `
+// ─── Restore canonical rich modal modules (override stale inline defs) ───
+(function () {
+  const modules = [
+    ['restoreSocialModals', 'social-modals.js'],
+    ['restoreProcessModals', 'process-rich-modals.js'],
+    ['restoreNurtureModals', 'nurture-rich-modals.js'],
+    ['restoreDatabaseModals', 'database-rich-modals.js'],
+    ['restoreEventModals', 'event-rich-modals.js'],
+    ['restoreReferralModals', 'referral-rich-modals.js']
+  ];
+  modules.forEach(([fn, label]) => {
+    if (typeof window[fn] === 'function') {
+      window[fn]();
+      console.log('[app-bulk] ' + label + ' restored');
+    }
+  });
+})();
+`;
+
+html = extractHolder(html, 'app-bulk-src', 'js/features/app-bulk.js', appBulkPrefix, appBulkRestoreSuffix);
 
 const referralPrefix = `// Fully extracted from index.html — referral / event / profile modal helpers\n`;
-html = extractHolder(html, 'referral-event-modals-src', 'js/features/referral-event-modals.js', referralPrefix);
+
+const referralRestoreSuffix = `
+// ─── Restore event + referral rich modals after bulk helpers load ───
+(function () {
+  if (typeof window.restoreEventModals === 'function') {
+    window.restoreEventModals();
+    console.log('[referral-event-modals] event-rich-modals.js restored');
+  }
+  if (typeof window.restoreReferralModals === 'function') {
+    window.restoreReferralModals();
+    console.log('[referral-event-modals] referral-rich-modals.js restored');
+  }
+})();
+`;
+
+html = extractHolder(html, 'referral-event-modals-src', 'js/features/referral-event-modals.js', referralPrefix, referralRestoreSuffix);
 
 // Clean up stray end comment if present
 html = html.replace('</script><!-- referral-event-modals-src end -->', '');

@@ -13,7 +13,53 @@
       .replace(/"/g, '&quot;');
   }
 
-  function scriptCard(title, script, tip) {
+  const PARTNER_TIER_TITLES = {
+    'a-plus': 'A+ Partners — White-Glove Playbook',
+    b: 'B Partners — Growth Playbook',
+    c: 'C Partners — Efficient Conversion Playbook'
+  };
+
+  function whyBox(label, text, accent) {
+    const color = accent === 'orange' ? '#F15A29' : accent === 'navy' ? '#002B5C' : '#00A89D';
+    return `
+      <div class="bg-[${color}]/10 border border-[${color}]/30 rounded-3xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[${color}]"></i><span class="font-bold text-[${color}] uppercase tracking-wider text-sm">${esc(label)}</span></div>
+        <p class="text-[15px] leading-relaxed">${text}</p>
+      </div>`;
+  }
+
+  function sectionTitle(text) {
+    return `<h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">${text}</h4>`;
+  }
+
+  function bulletList(items) {
+    return `<ul class="text-sm space-y-1.5 mb-6 pl-5 list-disc text-gray-700 dark:text-gray-300">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+  }
+
+  function cadenceCard(text) {
+    return `<div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-3 text-[15px] mb-2">${text}</div>`;
+  }
+
+  function proTip(text) {
+    return `<div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm mb-6"><strong>Pro Tip:</strong> ${text}</div>`;
+  }
+
+  function goalBox(text) {
+    return `<div class="p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl text-sm mb-6"><strong>Goal:</strong> ${text}</div>`;
+  }
+
+  function bridgeRow(buttons) {
+    return `
+      <div class="flex flex-wrap gap-2 mb-6">
+        ${buttons.map((b) => `
+          <button type="button" data-referral-bridge="${esc(b.action)}"
+            class="text-xs px-3 py-2 rounded-xl ${b.primary ? 'bg-[#002B5C] text-white font-semibold hover:bg-black' : 'border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D]/5'} transition">
+            ${esc(b.label)} →
+          </button>`).join('')}
+      </div>`;
+  }
+
+  function scriptCard(title, script, tip, saveKey) {
     return `
       <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
         <div class="font-semibold text-sm text-[#002B5C] dark:text-white mb-2">${esc(title)}</div>
@@ -23,7 +69,19 @@
           class="mt-3 text-[10px] px-3 py-1.5 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold transition">
           <i class="fas fa-copy mr-1"></i>Copy script
         </button>
+        ${saveKey ? `<button type="button" data-referral-save="${esc(saveKey)}" data-referral-save-text="${esc(script)}"
+          class="mt-2 ml-2 text-[10px] px-3 py-1.5 rounded-xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white font-semibold transition">
+          <i class="fas fa-bookmark mr-1"></i>Save
+        </button>` : ''}
       </div>`;
+  }
+
+  function normalizePartnerTier(tier) {
+    const t = String(tier || '').trim().toLowerCase();
+    if (t === 'a+' || t === 'a plus' || t === 'a-plus' || t === 'aplus') return 'a-plus';
+    if (t === 'b') return 'b';
+    if (t === 'c') return 'c';
+    return null;
   }
 
   function weekCard(label, title, tasks, color) {
@@ -84,7 +142,10 @@
     contentEl.querySelectorAll('[data-referral-save]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const key = btn.getAttribute('data-referral-save');
-        if (typeof window.savePartnerStrategy === 'function') {
+        const text = btn.getAttribute('data-referral-save-text') || '';
+        if (text && typeof window.toggleSaveIdea === 'function') {
+          window.toggleSaveIdea(key, text, btn, 'partner');
+        } else if (typeof window.savePartnerStrategy === 'function') {
           window.savePartnerStrategy(key, 0, btn);
         }
       });
@@ -95,8 +156,11 @@
         const action = btn.getAttribute('data-referral-bridge');
         const modal = document.getElementById('referral-modal');
         if (modal) {
-          modal.classList.add('hidden');
-          modal.style.display = 'none';
+          if (typeof window.closeReferralModal === 'function') window.closeReferralModal();
+          else {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+          }
         }
         setTimeout(() => {
           if (action === 'weekly' && typeof window.showSection === 'function') {
@@ -112,7 +176,15 @@
             if (typeof window.showSection === 'function') window.showSection('value-vault');
             setTimeout(() => window.openVaultItemWhenReady(action.split(':')[1]), 200);
           } else if (action?.startsWith('play:') && typeof window.openHighImpactPlay === 'function') {
-            window.openHighImpactPlay(action.split(':')[1]);
+            window.openHighImpactPlay(action.split(':').slice(1).join(':'));
+          } else if (action?.startsWith('tier:') && typeof window.openTierModal === 'function') {
+            window.openTierModal(action.split(':')[1]);
+          } else if (action?.startsWith('event:') && typeof window.openEventModal === 'function') {
+            window.openEventModal(action.split(':')[1]);
+          } else if (action?.startsWith('section:') && typeof window.showSection === 'function') {
+            window.showSection(action.split(':')[1]);
+          } else if (action === 'referral:realtors' && typeof window.openReferralModal === 'function') {
+            window.openReferralModal('Realtors');
           }
         }, 220);
       });
@@ -449,6 +521,140 @@
     attachHandlers(contentEl);
   }
 
+  // ─── PARTNER TIERS (A+ / B / C) ──────────────────────────────────────
+  function renderPartnerTierAPlus(contentEl) {
+    contentEl.innerHTML = `
+      <div class="mb-4 flex flex-wrap gap-2">
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C]">TOP 10–20 PARTNERS</span>
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">WHITE-GLOVE CADENCE</span>
+      </div>
+      ${whyBox('These 10–20 People Pay Your Mortgage',
+        'Your true A+ partners send 5+ referrals per year or represent outsized strategic value. They deserve concierge treatment — not because you are desperate, but because protecting this tier is how top producers stay at the top.',
+        'navy')}
+      ${sectionTitle('How to Identify A+ Partners')}
+      ${bulletList([
+        '<strong>5+ referrals</strong> in the last 12 months (or 3+ with very high average loan size)',
+        'They call you <strong>first</strong> — not second or third — on new deals',
+        'They introduce you to other top producers in their network',
+        'They invite you to client-facing moments (listings, open houses, closings)',
+        'Losing them would materially hurt your annual production goal'
+      ])}
+      ${sectionTitle('White-Glove Cadence (Protect at All Costs)')}
+      <div class="mb-6">
+        ${cadenceCard('Personal call or coffee every 3–4 weeks — not just when you need something')}
+        ${cadenceCard('Handwritten note or meaningful local gift 3–4 times per year (not generic swag)')}
+        ${cadenceCard('Birthday + work anniversary personal video')}
+        ${cadenceCard('Same-hour updates on every active file + proactive check-in when quiet 2+ weeks')}
+        ${cadenceCard('First invite to every client appreciation or mastermind event')}
+        ${cadenceCard('Year-end personalized video + small gift thanking them for the year')}
+      </div>
+      ${sectionTitle('Ready-to-Use Scripts (Copy + Save)')}
+      <div class="space-y-4 mb-6">
+        ${scriptCard('Quarterly Personal Check-In', 'Hey [Agent Name] — just wanted to check in. How is business treating you? Anything coming up I can help with — even if it is just a second opinion on a tricky scenario.', 'No ask embedded — pure relationship maintenance.', 'A+ Partner Check-In')}
+        ${scriptCard('Proactive Quiet-File Check-In', 'Hey [Name] — no file update today, just checking in. Want to make sure you always know I am here even when things are quiet. Anything on the horizon I can get ahead of for you?', 'Send when you have not heard from them in 2+ weeks.', 'A+ Partner Proactive Check-In')}
+        ${scriptCard('Birthday / Anniversary Video Script', 'Hey [Name] — happy [birthday / work anniversary]! Grateful for our partnership this year. You have sent some amazing clients my way and I do not take that for granted. Hope you get to celebrate properly today.', 'Record 15–20 in one batch for your A+ list.', 'A+ Partner Birthday Video')}
+        ${scriptCard('Year-End Thank You', 'As the year wraps up — thank you for trusting me with [X] clients in [year]. You made my job easy and your clients were a pleasure. Excited for what we build together next year.', 'Send first week of December to every A+ partner.', 'A+ Partner Year-End Thank You')}
+        ${scriptCard('VIP Event Invite', 'I am hosting a small [event name] next month and you are at the top of my invite list. Would love to have you there — bring a colleague if you want. Low-key, great people, no pitches.', 'Invite 7–10 days before the wider list.', 'A+ Partner VIP Event Invite')}
+      </div>
+      ${proTip('These partners should feel like you only have five clients total. If you are too busy to nurture A+ relationships, something else on your calendar needs to go — not these touches.')}
+      ${bridgeRow([
+        { label: 'Partner Mastermind Events', action: 'event:partner-mastermind', primary: true },
+        { label: 'Realtor Primary Playbook', action: 'referral:realtors' },
+        { label: 'Turn 1 Realtor Into 5 More', action: 'play:realtor-to-5-more' }
+      ])}
+      ${footerSave('Tier-A+', 'Save A+ Tier Playbook')}
+    `;
+    attachHandlers(contentEl);
+  }
+
+  function renderPartnerTierB(contentEl) {
+    contentEl.innerHTML = `
+      <div class="mb-4 flex flex-wrap gap-2">
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">GROWTH TIER</span>
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600">1–4 REFERRALS / YEAR</span>
+      </div>
+      ${whyBox('The Partners You Are Actively Trying to Promote',
+        'B partners send 1–4 referrals per year and show growth potential. Your job is to deliver A+ level service on their files while using scalable touches to earn the next referral — and eventually promote them to A+.',
+        'teal')}
+      ${sectionTitle('Promotion Signals (When to Move B → A+)')}
+      ${bulletList([
+        'They referred you <strong>twice in 6 months</strong> without being asked',
+        'They respond to your value touches and engage in conversation',
+        'They start calling you before other lenders on time-sensitive deals',
+        'They attended your event and brought a colleague'
+      ])}
+      ${sectionTitle('Scalable Growth Cadence')}
+      <div class="mb-6">
+        ${cadenceCard('Monthly value touch (30-sec market video, useful article, or quick win they can use)')}
+        ${cadenceCard('Quarterly personal note or small gift')}
+        ${cadenceCard('Invite to 1–2 client appreciation or partner events per year')}
+        ${cadenceCard('White-glove execution on every file — treat B partners like A+ on active deals')}
+        ${cadenceCard('Light, natural referral ask after a particularly smooth closing')}
+      </div>
+      ${sectionTitle('Ready-to-Use Scripts (Copy + Save)')}
+      <div class="space-y-4 mb-6">
+        ${scriptCard('Monthly Value Touch', 'Quick market note for your buyers — inventory in [Area] is up and we are seeing more negotiation room than 90 days ago. Happy to run real numbers on any active deal. No pitch, just data you can use with clients.', 'Batch the body — personalize area only.', 'B Partner Value Touch')}
+        ${scriptCard('Post-Smooth-Close Ask', 'Really enjoyed working with you on [Client]. If you have anyone else on the horizon who needs the same experience, I would love to help. Either way — thanks for trusting me.', 'Send within 48 hours of closing.', 'B Partner Post-Close Ask')}
+        ${scriptCard('Event Invitation', 'Hosting a small client appreciation event next month — would love to have you there. Good food, good people, no business talk. Let me know if you are in and feel free to bring a colleague.', 'Pair with Getting People to Show Up playbook for invites.', 'B Partner Event Invite')}
+        ${scriptCard('Quarterly Personal Note', 'Hey [Name] — just a quick note to say I appreciate our partnership. You sent some great clients my way and I do not take it lightly. Hope Q[X] is treating you well.', 'Handwritten version hits harder for rising B partners.', 'B Partner Quarterly Note')}
+      </div>
+      ${goalBox('Move 3–5 B partners into A+ every year. The lever is over-delivery on files + consistent value between files.')}
+      ${bridgeRow([
+        { label: 'Client Appreciation Events', action: 'event:client-appreciation', primary: true },
+        { label: 'Weekly Value Cadence', action: 'play:weekly-value-cadence' },
+        { label: 'A+ Playbook (Promotion Target)', action: 'tier:A+' }
+      ])}
+      ${footerSave('Tier-B', 'Save B Tier Playbook')}
+    `;
+    attachHandlers(contentEl);
+  }
+
+  function renderPartnerTierC(contentEl) {
+    contentEl.innerHTML = `
+      <div class="mb-4 flex flex-wrap gap-2">
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">PROSPECTS / NEW</span>
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600">LOW TIME · HIGH IMPACT</span>
+      </div>
+      ${whyBox('Low Time, High-Impact Prospecting',
+        'New or low-volume sources. You cannot afford heavy one-on-one time on everyone here — but you CAN afford a full audition on the first file. That single investment separates partners who promote themselves from one-and-done referrals.',
+        'orange')}
+      ${sectionTitle('Who Belongs in C (For Now)')}
+      ${bulletList([
+        'Met once at an event — no file yet',
+        'Sent exactly one referral ever',
+        'Responsive to email but not yet engaged personally',
+        'High potential on paper but unproven in practice'
+      ])}
+      ${sectionTitle('Efficient Conversion System')}
+      <div class="mb-6">
+        ${cadenceCard('<strong>Day 0:</strong> Add to CRM + tag as C-tier + add to value newsletter')}
+        ${cadenceCard('<strong>First file:</strong> Run the full 60-day onboarding sequence — treat this like an A+ audition')}
+        ${cadenceCard('<strong>Post-close:</strong> If they respond positively → promote to B. If silent → stay on automated touches only')}
+        ${cadenceCard('<strong>Quarterly:</strong> One light personal touch to entire C list (batched, 30 min)')}
+      </div>
+      ${sectionTitle('Ready-to-Use Scripts (Copy + Save)')}
+      <div class="space-y-4 mb-6">
+        ${scriptCard('Day 0 Welcome (Text or Video)', 'Hey [Agent Name] — [Your Name] here. Thanks for trusting me with [Client Name]. Quick overview of how I work: same-hour updates on milestones, Thursday check-ins even when quiet, and I will make you look brilliant to your client. Here is my one-pager on my process — reach out anytime.', 'Send same day the file arrives.', 'C Partner Welcome')}
+        ${scriptCard('Post-Close Promotion Check', 'Hope [Client] closing went smoothly on your end too. How did the process feel from your side? If you have anyone else coming up, I would love to deliver the same experience.', 'Their answer tells you B vs stay-C.', 'C Partner Post-Close Check')}
+        ${scriptCard('Quarterly Light Touch (Batchable)', 'Hey [Name] — quick quarterly note. Still here if any of your clients need help on the mortgage side. Hope business is good.', 'Personalize name only — send to full C list in one sitting.', 'C Partner Quarterly Batch')}
+      </div>
+      ${proTip('Do not promote to B based on potential alone — promote based on response. A C partner who engages after a great first file is your next B partner.')}
+      ${bridgeRow([
+        { label: '60-Day Onboarding Sequence', action: 'play:60-day-realtor-onboarding', primary: true },
+        { label: 'First 30 Days Checklist', action: 'play:first-30-days-checklist' },
+        { label: 'B Playbook (Promotion Target)', action: 'tier:B' }
+      ])}
+      ${footerSave('Tier-C', 'Save C Tier Playbook')}
+    `;
+    attachHandlers(contentEl);
+  }
+
+  const TIER_RENDERERS = {
+    'a-plus': renderPartnerTierAPlus,
+    b: renderPartnerTierB,
+    c: renderPartnerTierC
+  };
+
   const RENDERERS = {
     '60-day-realtor-onboarding': render60DayOnboarding,
     'first-30-days-checklist': renderFirst30Days,
@@ -470,5 +676,35 @@
     return true;
   };
 
-  console.log('%c[referral-rich-modals] Premium plays ready (' + Object.keys(RENDERERS).length + ' plays)', 'color:#00A89D');
+  window.renderRichPartnerTierModal = function renderRichPartnerTierModal(tier, contentEl) {
+    const key = normalizePartnerTier(tier);
+    if (!key || !contentEl) return false;
+    const fn = TIER_RENDERERS[key];
+    if (!fn) return false;
+    fn(contentEl);
+    return true;
+  };
+
+  window.getPartnerTierModalTitle = function getPartnerTierModalTitle(tier) {
+    const key = normalizePartnerTier(tier);
+    return key ? PARTNER_TIER_TITLES[key] : null;
+  };
+
+  window.__REFERRAL_MODALS_EXPORTS = {
+    renderRichReferralPlay: window.renderRichReferralPlay,
+    renderRichPartnerTierModal: window.renderRichPartnerTierModal,
+    getPartnerTierModalTitle: window.getPartnerTierModalTitle
+  };
+
+  window.restoreReferralModals = function restoreReferralModals() {
+    const exp = window.__REFERRAL_MODALS_EXPORTS;
+    if (!exp) return;
+    Object.keys(exp).forEach(function (k) {
+      window[k] = exp[k];
+    });
+  };
+
+  console.log('%c[referral-rich-modals] Premium plays + partner tiers ready (' +
+    Object.keys(RENDERERS).length + ' plays, ' +
+    Object.keys(TIER_RENDERERS).length + ' tiers)', 'color:#00A89D');
 })();

@@ -1445,11 +1445,18 @@
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Three strong options per month. Source in bulk on Amazon, Temu, or locally.</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-[55vh] overflow-y-auto pr-1">
-        ${months.map((mo) => `
-          <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-            <div class="font-bold text-sm text-[#002B5C] dark:text-white">${esc(mo.m)} <span class="text-gray-400 font-normal text-xs">· ${esc(mo.theme)}</span></div>
+        ${months.map((mo, idx) => {
+          const isCurrent = idx === new Date().getMonth();
+          return `
+          <div class="rounded-xl border p-3 ${isCurrent ? 'border-[#F15A29] bg-[#F15A29]/5 ring-2 ring-[#F15A29]/30 shadow-sm' : 'border-gray-200 dark:border-gray-700'}" ${isCurrent ? 'id="popby-seasonal-current-month"' : ''}>
+            <div class="font-bold text-sm text-[#002B5C] dark:text-white">
+              ${esc(mo.m)}
+              ${isCurrent ? '<span class="ml-1.5 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded bg-[#F15A29] text-white align-middle">Now</span>' : ''}
+              <span class="text-gray-400 font-normal text-xs">· ${esc(mo.theme)}</span>
+            </div>
             <ul class="mt-1 text-xs space-y-0.5 text-gray-600 dark:text-gray-400">${mo.ideas.map((i) => `<li>• ${esc(i)}</li>`).join('')}</ul>
-          </div>`).join('')}
+          </div>`;
+        }).join('')}
       </div>
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:popby-sourcing-budget" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D]/5 transition">Sourcing & budget →</button>
@@ -1458,6 +1465,10 @@
       ${footerActions('Copy Seasonal Calendar')}
     `;
     window.attachRichVaultModalHandlers(contentEl, item);
+    requestAnimationFrame(function () {
+      const current = contentEl.querySelector('#popby-seasonal-current-month');
+      if (current) current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
   }
 
   // ─── TOP PRODUCER HABITS ─────────────────────────────────────────────
