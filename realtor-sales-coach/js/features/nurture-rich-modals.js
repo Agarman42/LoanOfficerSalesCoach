@@ -168,7 +168,7 @@
         <strong>Gift ideas:</strong> Cutting board, doormat, plant, local treat, wine with custom label. Photo the gift before sending — great social content with permission.
       </div>
       ${bridgeRow([
-        { label: 'Annual mortgage review framework', action: 'vault:annual-mortgage-review', primary: true },
+        { label: 'Home anniversary check-in framework', action: 'vault:annual-mortgage-review', primary: true },
         { label: 'Client anniversary system', action: 'vault:client-anniversary-system' },
         { label: 'Equity scanner', action: 'equity' }
       ])}
@@ -213,7 +213,7 @@
       ${whyBox('Best Timing & Mindset', 'Only after consistent value — especially after a strong anniversary touch, life event response, or when they\'ve raved about you. The ask should feel like a natural extension, never transactional.')}
       <div class="space-y-4 mb-6">
         ${scriptCard('Low-pressure ask (after positive touch)',
-          '[Name], I\'m really glad I was able to help you with your home. If you ever come across anyone who\'s thinking about buying, selling, or refinancing, I\'d be honored if you\'d think of me. I promise I\'ll take great care of them the same way I took care of you.',
+          '[Name], I\'m really glad I was able to help you with your home. If you ever come across anyone who\'s thinking about buying or selling, I\'d be honored if you\'d think of me. I promise I\'ll take great care of them the same way I took care of you.',
           'Make it about helping their people, not your pipeline.', 'Nurture: Referral Ask')}
         ${scriptCard('After they\'ve raved or referred',
           'That means a lot — thank you. If you know anyone else who might be in a similar situation, I\'d love the opportunity to help them too. No pressure at all — only if it feels natural for you.',
@@ -235,7 +235,7 @@
   function renderScalableTouches(contentEl) {
     const categories = [
       { label: 'Social & Visibility', color: 'border-[#00A89D]', items: ['Like/comment on 10+ client/realtor posts per week', 'Post photos from client events or local happenings', 'Share local business spotlights (tag them)', 'Post fun polls or "this or that" questions'] },
-      { label: 'Value & Content', color: 'border-purple-400', items: ['Monthly value-first newsletter', 'Quarterly market update video', 'Share one useful article/tool per week', 'Forward rate/market news with personal note', '"Just sold in your neighborhood" touch'] },
+      { label: 'Value & Content', color: 'border-purple-400', items: ['Monthly value-first newsletter', 'Quarterly market update video', 'Share one useful article/tool per week', 'Forward local market news with personal note', '"Just sold in your neighborhood" touch'] },
       { label: 'Light Personal', color: 'border-[#002B5C]/30', items: ['Quarterly "just checking in" text to B-tier', 'Quick voice note instead of text occasionally', 'Tag people in relevant local posts', 'Quarterly equity snapshot email (1-pager)'] },
       { label: 'Higher-Impact (1–2/month)', color: 'border-[#F15A29]/40', items: ['Co-host quarterly lunch & learn or buyer workshop', 'Seasonal value emails (recipes, maintenance tips)', 'End-of-year thank-you video to top 100', 'Thoughtful comments on realtor posts'] }
     ];
@@ -295,10 +295,10 @@
       'teal',
       `${cadenceList(['<strong>1–2 weeks:</strong> Congratulations note or gift (no business talk)', '<strong>30–60 days:</strong> Light check-in — "how\'s wedding planning?"', '<strong>90+ days:</strong> Optional housing conversation if they\'ve hinted at moving'])}
       <div class="space-y-4 mb-6">
-        ${scriptCard('Initial congratulations', 'Congratulations on your engagement! That\'s such exciting news. Wishing you both all the best in this next chapter — can\'t wait to see what you two build together.', 'Card, text, or small gift — no mortgage talk.', 'Life Event: Marriage Congrats')}
+        ${scriptCard('Initial congratulations', 'Congratulations on your engagement! That\'s such exciting news. Wishing you both all the best in this next chapter — can\'t wait to see what you two build together.', 'Card, text, or small gift — no real estate talk.', 'Life Event: Marriage Congrats')}
         ${scriptCard('Soft housing door-opener (60–90 days later)', 'I know a lot of couples start thinking about their housing situation around this time — whether that means upgrading, combining households, or even investing together. I\'d love to be a calm, no-pressure resource if any of those conversations come up.', 'Only if timing feels natural.', 'Life Event: Marriage Housing')}
       </div>
-      <p class="text-sm mb-4"><strong>Gift ideas:</strong> Monogram cutting board, local wine, "home together" cookbook, plant — celebratory, not mortgage-themed.</p>
+      <p class="text-sm mb-4"><strong>Gift ideas:</strong> Monogram cutting board, local wine, "home together" cookbook, plant — celebratory, not sales-themed.</p>
       ${proTip('Ask about wedding plans and reference something specific next time. Couples remember who showed up early with genuine joy.')}`,
       [
         { label: 'Sales scripts (couples)', action: 'scripts', primary: true },
@@ -331,9 +331,9 @@
       'orange',
       `<div class="space-y-4 mb-6">
         ${scriptCard('Congratulations first', 'Congratulations on the new role! That\'s awesome — you\'ve earned it. Wishing you tons of success in this next chapter.', 'Send within 1–2 weeks of the news.', 'Life Event: Job Congrats')}
-        ${scriptCard('Soft value follow-up (2–4 weeks later)', 'Big life changes like this often make people curious about their housing options or what increased income plus current equity could unlock. Happy to run a few what-if scenarios whenever it feels right — totally no pressure.', 'Relocation? Offer lender referral in new market as goodwill.', 'Life Event: Job Housing')}
+        ${scriptCard('Soft value follow-up (2–4 weeks later)', 'Big life changes like this often make people curious about their housing options or what increased income plus current home equity could unlock. Happy to walk through a few what-if scenarios whenever it feels right — totally no pressure.', 'Relocation? Offer a trusted agent referral in the new market as goodwill.', 'Life Event: Job Housing')}
       </div>
-      ${proTip('Relocation job changes deserve a separate playbook — ask about timeline and whether they need a referral in the new market.')}`,
+      ${proTip('Relocation job changes deserve a separate playbook — ask about timeline and whether they need an agent referral in the new market.')}`,
       [
         { label: 'Equity scanner', action: 'equity', primary: true },
         { label: 'Sales scripts', action: 'scripts' }
@@ -377,7 +377,7 @@
         <li class="text-green-700 dark:text-green-400">✓ Send a brief, supportive note</li>
         <li class="text-green-700 dark:text-green-400">✓ Offer to answer questions if their attorney involves you</li>
         <li class="text-green-700 dark:text-green-400">✓ Wait for them to raise timing</li>
-        <li class="text-red-600 dark:text-red-400">✗ Don't pitch products or rates</li>
+        <li class="text-red-600 dark:text-red-400">✗ Don't pitch listings or pressure a decision</li>
         <li class="text-red-600 dark:text-red-400">✗ Don't ask which spouse to call</li>
         <li class="text-red-600 dark:text-red-400">✗ Don't share their situation with anyone</li>
       </ul>

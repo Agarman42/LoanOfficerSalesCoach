@@ -1,6 +1,6 @@
 /**
  * js/features/process-rich-modals.js
- * Bespoke premium modals for Loan Process journey templates.
+ * Bespoke premium modals for Transaction Process journey templates (Realtor Sales Coach).
  */
 (function () {
   'use strict';
@@ -8,7 +8,7 @@
   const TITLES = {
     'weekly-pipeline': 'Weekly Pipeline Review Agenda',
     'post-closing-7day': '7-Day Post-Closing Check-In — Full Scripts + LTV Strategy',
-    'realtor-onboarding': 'Realtor Partner Onboarding — 6-Step Playbook + Scripts',
+    'realtor-onboarding': 'Building Lender Partner Relationships — 6-Step Playbook + Scripts',
     'monday-status': 'Monday Status Update Scripts — 4 Ready-to-Record Videos',
     'pre-close-confirmation': 'Pre-Closing Confirmation Scripts — 48h Playbook + Wire Safety'
   };
@@ -104,6 +104,8 @@
             window.showProcessTemplateModal(action.split(':')[1]);
           } else if (action?.startsWith('play:') && typeof window.openHighImpactPlay === 'function') {
             window.openHighImpactPlay(action.split(':')[1]);
+          } else if (action?.startsWith('section:') && typeof window.showSection === 'function') {
+            window.showSection(action.split(':')[1]);
           }
         }, 220);
       });
@@ -113,32 +115,32 @@
   function renderWeeklyPipeline(contentEl) {
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C] dark:text-white">30-MIN RITUAL</span></div>
-      ${whyBox('Why This Meeting Is Non-Negotiable', 'This 30-minute ritual is the highest-leverage process habit for any LO who wants to scale volume without losing control. It surfaces problems while they\'re still small, celebrates momentum, and forces a realistic capacity conversation before you overpromise. Teams that run this every Monday close more deals with less drama.')}
+      ${whyBox('Why This Meeting Is Non-Negotiable', 'This 30-minute ritual is the highest-leverage process habit for any agent who wants to scale volume without losing control or sleep. It surfaces problems while they\'re still small, celebrates momentum, and forces a realistic capacity conversation before you overpromise on new clients. Teams that run this every Monday close more deals with less drama.')}
       <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">Exact 30-Minute Agenda</h4>
       <div class="space-y-3 mb-6">
         ${agendaCard('0–2 min — Celebrate Wins', 'Start positive. Name every closing, great client feedback, or smooth file from the week.')}
-        ${agendaCard('2–12 min — Aging File Review', 'Call out anything sitting 7+ days in underwriting, appraisal, or conditions. Assign owner + next action + due date out loud.')}
-        ${agendaCard('12–17 min — Upcoming Milestones', 'CTCs, closings, and appraisals for the next 7 days. Confirm everyone knows their role.')}
-        ${agendaCard('17–27 min — Stalled Files Deep Dive', 'The 1–3 files that are truly stuck. What\'s blocking? What does the client/realtor know? Who owns the fix?')}
-        ${agendaCard('27–30 min — Capacity Forecast Close', 'How many new files can we comfortably take this week? Protect the team from overcommitting.')}
+        ${agendaCard('2–12 min — Aging File Review', 'Call out anything sitting 7+ days waiting on inspection, appraisal, title, or lender approval. Assign owner + next action + due date out loud.')}
+        ${agendaCard('12–17 min — Upcoming Milestones', 'Clear-to-closes, closings, and appraisals for the next 7 days. Confirm everyone knows their role.')}
+        ${agendaCard('17–27 min — Stalled Files Deep Dive', 'The 1–3 files that are truly stuck. What\'s blocking? What does the client/partner know? Who owns the fix?')}
+        ${agendaCard('27–30 min — Communication & Capacity', 'Who needs an extra touch this week? How many new buyer or listing consultations can we responsibly take on?')}
       </div>
       <div class="rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 p-5 mb-6 text-sm">
         <div class="font-bold text-[#002B5C] dark:text-white mb-2"><i class="fas fa-list-check text-[#00A89D] mr-1"></i> Monday checklist</div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5">
-          <div>☐ Pull pipeline report before the meeting</div>
+          <div>☐ Pull pipeline + listing report before the meeting</div>
           <div>☐ Flag files 7+ days in same status</div>
           <div>☐ List CTCs/closings next 7 days</div>
           <div>☐ Assign owner on every stalled file</div>
-          <div>☐ End with capacity number (new files OK)</div>
+          <div>☐ End with capacity number (new clients OK)</div>
           <div>☐ Log actions in CRM same day</div>
         </div>
       </div>
       ${bridgeRow([
         { label: 'Monday status video scripts', action: 'process:monday-status', primary: true },
         { label: 'Weekly Win Plan', action: 'weekly' },
-        { label: 'Ruoff CTC speed fact', action: 'vault:fact-ctc-speed' }
+        { label: 'Open House Toolkit', action: 'section:open-house' }
       ])}
-      ${proTip('Protect this meeting like a closing. Same day, same time, every week. Solo LOs still block 30 minutes — the discipline compounds.')}
+      ${proTip('Protect this meeting like a closing. Same day, same time, every week. Solo agents still block 30 minutes — the discipline compounds.')}
     `;
     attachHandlers(contentEl);
   }
@@ -149,14 +151,14 @@
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">HIGHEST-ROI TOUCH</span>
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">DAY 6–8</span>
       </div>
-      ${whyBox('Why This Touch Is Pure Gold', 'Most LOs vanish when the wire clears. The 7-day check-in is when clients are settled enough to reflect — and decide whether you were "just another lender" or someone who cared. Done right, this call generates reviews, referrals, and lifetime value no marketing spend can match.')}
+      ${whyBox('Why This Touch Is Pure Gold', 'Most agents vanish the second the wire clears. The 7-day check-in is when clients are finally settled enough to reflect — and decide whether you were "just another agent" or someone who actually cared. Done right, this call generates Google reviews, referral conversations, and lifetime value no marketing spend can match.')}
       <div class="text-xs font-bold tracking-wider text-gray-500 uppercase mb-3">Ready-to-run scripts</div>
       <div class="space-y-4 mb-6">
         ${scriptCard('Opening — warm + curious',
           'Hey [First Name], it\'s [Your Name] — just checking in now that you\'ve had a full week in the new place. How\'s everything feeling? Any surprises with the house or the paperwork? I want to make sure you\'re completely settled before I get out of your hair.',
           'Pause. Let them talk before you educate or ask.', 'Process: 7-Day Opening Script')}
         ${scriptCard('Review + referral ask (after they sound happy)',
-          'That\'s great to hear. Quick favor — would you mind leaving a short Google review when you have two minutes? It really helps other families in your exact situation find someone who will actually take care of them. I sent the link in a text just now. And if anyone in your world is even thinking about buying or refinancing in the next year, I\'d be honored to help them the same way I helped you.',
+          'That\'s great to hear. Quick favor — would you mind leaving a short Google review when you have two minutes? It really helps other families in your exact situation find someone who will actually take care of them. I sent the link in a text just now. And if anyone in your world is even thinking about buying or selling in the next year, I\'d be honored to help them the same way I helped you.',
           'Send review link within 2 hours of the call.', 'Process: 7-Day Review Ask')}
         ${scriptCard('Video / voicemail fallback',
           'Hey [Name] — it\'s [Your Name]. Just left you a quick voicemail. I wanted to check in now that you\'ve been in the house a full week. Everything going okay? Any surprises? Shoot me a text when you have a second. Also — if you loved working with me, I\'d be incredibly grateful for a short Google review. I texted the link over. Hope you\'re loving the new place!',
@@ -169,7 +171,7 @@
         { label: 'Full 5-part call framework (Vault)', action: 'vault:post-closing-7day', primary: true },
         { label: '7-day objection responses', action: 'vault:7day-objections' },
         { label: 'Post-closing text templates', action: 'vault:post-closing-texts' },
-        { label: 'Annual review anchor', action: 'vault:annual-mortgage-review' }
+        { label: 'Home anniversary system', action: 'vault:client-anniversary-system' }
       ])}
       ${proTip('Call on day 6, 7, or 8 — never day 1 or 2. They need time to live in the house before real feedback. The full education framework lives in Value Vault — use this modal for scripts + follow-up execution.')}
     `;
@@ -178,16 +180,16 @@
 
   function renderRealtorOnboarding(contentEl) {
     const steps = [
-      { day: 'Day 0', title: 'Same-Day Welcome Video + One-Pager', body: 'The moment the file hits your desk, send a 30–45 second personal video + "How I Work With Agents" PDF. Realtors notice speed here more than anything.' },
-      { day: 'Day 1–2', title: '15-Min Intro Call', body: 'Learn their business, biggest lender frustrations, and preferred communication style. Ask real questions. Take notes.' },
-      { day: 'Within 48h', title: 'Written Cadence + Tools', body: 'Email your Thursday update cadence + 2–3 co-branded assets they can actually use (buyer presentation, open house flyer, etc.).' },
-      { day: 'Week 1', title: 'First Thursday Update (Over-Deliver)', body: 'Do not miss this. Send the update even if nothing changed. This is when they decide whether you\'re different.' },
-      { day: 'Post First Close', title: 'Testimonial + Preferred List Ask', body: 'Ask for a quick quote or video for their marketing. Then ask to be added to their preferred lender list.' },
-      { day: 'Ongoing', title: 'Never Go Dark on Their Files', body: 'The bar is low. Most LOs are inconsistent. Your consistency becomes your moat.' }
+      { day: 'Day 0', title: 'Same-Day Intro to Your Lender Partner', body: 'The moment you have a buyer under contract (or a strong pre-approved lead), send a 30–45 second personal video to your lender partner + a clean "How I Run My Files" one-pager. Speed and clarity here set the tone.' },
+      { day: 'Day 1–2', title: '15-Min Intro Call', body: 'Learn how they communicate, what they need from you on files, and how they like updates structured. Ask real questions. Take notes.' },
+      { day: 'Within 48h', title: 'Written Cadence + Tools', body: 'Email the exact update cadence you committed to + 2–3 co-branded assets you can share (buyer guide, neighborhood snapshot, open house flyer, etc.).' },
+      { day: 'Week 1', title: 'First Client Update (Over-Deliver)', body: 'Do not miss this. Send a clear status update even if nothing changed. This is the moment they decide whether you\'re different.' },
+      { day: 'Post First Close', title: 'Testimonial + Preferred List Ask', body: 'Ask for a quick quote or video you can use in your marketing. Then ask to be added to their preferred agent list for future buyer referrals.' },
+      { day: 'Ongoing', title: 'Never Go Dark on Their Files', body: 'The bar is low. Most agents are inconsistent. Your consistency becomes your moat.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">FIRST 30 DAYS</span></div>
-      ${whyBox('Why the First 30 Days Determine Everything', 'A new realtor relationship is either the start of a 20-file-per-year pipeline or a one-and-done. Treat the first file like an audition — over-communicate, deliver every promise, and make the realtor look like a hero. Do that once and you become their default lender faster than any lunch ever could.')}
+      ${whyBox('Why the First 30 Days Determine Everything', 'A new lender partnership is either the start of a steady referral pipeline or a one-and-done. Top agents treat the first shared file like an audition — over-communicate, deliver on every promise, and make your lender partner look like a hero to the client. Do that on the first one and you become their go-to agent faster than any lunch or gift ever could.')}
       <h4 class="font-bold text-lg mb-3 text-[#002B5C] dark:text-white">The 6-Step Onboarding System</h4>
       <div class="space-y-3 mb-6">
         ${steps.map((s) => `
@@ -199,37 +201,37 @@
       </div>
       <div class="text-xs font-bold tracking-wider text-gray-500 uppercase mb-3">Key scripts</div>
       <div class="space-y-4 mb-6">
-        ${scriptCard('Day 0 realtor handoff text',
-          'Hey [Realtor Name] — [Borrower Name] just reached out for pre-approval on the [address or type] property. I\'ve already sent them a personal welcome video and a simple one-page timeline. I\'ll keep you in the loop on every single step. What\'s the best way for us to stay in sync on this one?',
-          'Send within 2 hours of application.', 'Process: Realtor Day 0 Handoff')}
+        ${scriptCard('Day 0 lender partner handoff text',
+          'Hey [Lender Name] — I just put [Buyer Name] under contract on [address]. I\'ve already welcomed them and sent a simple roadmap. I\'ll keep you in the loop on every step from my side — inspection, appraisal, repairs, and closing prep. What\'s the best way for us to stay in sync on this one?',
+          'Send within 2 hours of contract.', 'Process: Lender Day 0 Handoff')}
         ${scriptCard('48-hour cadence follow-up email',
-          'Hey [Realtor Name] — thank you again for the introduction to [Client]. Quick follow-up from our intro call yesterday: I\'ve attached the exact communication cadence I use with every partner (Thursday updates + same-hour milestone notifications). I also included three co-branded tools you can use right away. Looking forward to making this one (and many more) look great for you and your clients.',
-          'Attach cadence PDF + 2–3 co-branded assets.', 'Process: Realtor Cadence Email')}
+          'Hey [Lender Name] — great connecting yesterday. Quick follow-up: I\'ve attached the exact communication cadence I use on every shared file (milestone updates + same-day inspection/appraisal notifications). I also included three co-branded tools we can use with buyers. Looking forward to making this one (and many more) look great for your team and our mutual clients.',
+          'Attach cadence PDF + 2–3 co-branded assets.', 'Process: Lender Cadence Email')}
         ${scriptCard('Post-first-close testimonial ask',
-          'First closing with [Realtor Name] went perfectly. [Client] is thrilled. Quick favor — would you be open to a short 20-second quote or video I can use in my marketing that says why you liked working with me? And if it felt good on your end, I\'d love to be on your preferred lender list for future clients.',
-          'Ask within 48 hours of funding while emotion is high.', 'Process: Realtor Testimonial Ask')}
+          'First closing with [Lender Name] went perfectly. [Client] is thrilled. Quick favor — would you be open to a short 20-second quote or video I can use in my marketing about why you liked working with me on this file? And if it felt good on your end, I\'d love to be on your preferred agent list for future buyer referrals.',
+          'Ask within 48 hours of closing while emotion is high.', 'Process: Lender Testimonial Ask')}
       </div>
       ${bridgeRow([
-        { label: '60-day onboarding sequence', action: 'play:60-day-realtor-onboarding', primary: true },
+        { label: '60-day partnership sequence', action: 'play:60-day-realtor-onboarding', primary: true },
         { label: 'Weekly value cadence', action: 'play:weekly-value-cadence' },
         { label: 'Co-marketing assets', action: 'play:co-marketing-assets' },
         { label: 'Pop-by library', action: 'vault:popby-best-practices' }
       ])}
-      ${proTip('The goal is not one referral — it\'s to become their default lender. Over-communicate on the first file and you earn the spot faster than any gift basket.')}
+      ${proTip('The goal of onboarding is not one referral — it\'s to become their go-to agent. Over-communicate on the first transaction and you earn the spot faster than any gift basket ever will.')}
     `;
     attachHandlers(contentEl);
   }
 
   function renderMondayStatus(contentEl) {
     const scripts = [
-      { title: 'Script 1 — Smooth / on track', script: 'Hey [Name], it\'s [Your Name] with your Monday update. Appraisal came back clean yesterday. We\'re now waiting on one condition from underwriting (your recent paystub). I\'ve already requested it from your employer. Targeting full clear by Thursday. No action needed from you this week. How are you feeling about everything so far?', save: 'Process: Monday Smooth Script' },
+      { title: 'Script 1 — Smooth / on track', script: 'Hey [Name], it\'s [Your Name] with your Monday update. Inspection went well and the appraisal came back at value yesterday. Your lender partner is working through final approval — I\'ve already checked in with them. We\'re still targeting our [date] close. No action needed from you this week. How are you feeling about everything so far?', save: 'Process: Monday Smooth Script' },
       { title: 'Script 2 — Appraisal delay (proactive)', script: 'Hey [Name], it\'s [Your Name] with your Monday update. We hit a small delay on the appraisal — the appraiser needs one additional photo of the back patio. I\'ve already coordinated with the listing agent and they\'re handling it today. This shouldn\'t push our timeline, but I wanted you to hear it from me first. I\'ll send another note the second we have the report. How\'s everything else going on your end?', save: 'Process: Monday Appraisal Delay' },
-      { title: 'Script 3 — Conditions received', script: 'Hey [Name], it\'s [Your Name] with your Monday update. Conditions just came back from underwriting. There are three items — two are easy (updated bank statement and insurance declaration). The third is an explanation letter on the credit inquiry from last month. I\'ve already emailed you a simple template you can use. Can you get that back to me by Wednesday? If we knock these out this week we stay on track for your rate lock.', save: 'Process: Monday Conditions Script' },
-      { title: 'Script 4 — Nothing new (still valuable)', script: 'Hey [Name], it\'s [Your Name] with your Monday update. We\'re still waiting on final underwriting sign-off. Nothing new to report yet, but I wanted you to know I\'m watching this file every day and will text you the second we have movement. Your rate lock is safe through [date]. No action needed from you — just wanted to give you peace of mind. How\'s the house hunting going otherwise?', save: 'Process: Monday No Movement' }
+      { title: 'Script 3 — Action needed (clear ask)', script: 'Hey [Name], it\'s [Your Name] with your Monday update. The seller accepted our repair request and we\'re waiting on the amended inspection report. I\'ve already followed up with the listing side and your lender partner so nothing slips. Can you confirm you received the HOA docs I emailed yesterday? If we get those back by Wednesday we stay on track for our close date.', save: 'Process: Monday Conditions Script' },
+      { title: 'Script 4 — Nothing new (still valuable)', script: 'Hey [Name], it\'s [Your Name] with your Monday update. We\'re still waiting on the appraisal report — nothing new to report yet, but I wanted you to know I\'m checking in with the appraiser and your lender partner every day and will text you the second we have movement. No action needed from you — just wanted to give you peace of mind. How\'s everything else going on your end?', save: 'Process: Monday No Movement' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">EVERY MONDAY</span></div>
-      ${whyBox('Why Predictable Monday Updates Win', 'Clients in process are anxious. Silence = anxiety + competitor opportunity. A consistent Monday video (45–60 seconds) that says where we are, what\'s next, and what you need from them removes most "just checking in" calls and makes you look like the most organized professional they\'ve ever worked with.')}
+      ${whyBox('Why Predictable Monday Updates Win', 'Clients in process are anxious. Silence = anxiety + competitor opportunity. A consistent Monday video (45–60 seconds) that says exactly where we are, what\'s next, and what you need from them removes 80% of the "just checking in" calls and makes you look like the most organized professional they\'ve ever worked with. Do this for 6 months and partners will start saying "I only work with [Your Name] because my clients actually know what\'s going on."')}
       <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 mb-6 text-[15px]">
         <strong class="text-[#002B5C] dark:text-white">45-second video formula</strong>
         <ol class="mt-2 space-y-1 list-decimal pl-5 text-sm">
@@ -246,9 +248,9 @@
         ${scripts.map((s) => scriptCard(s.title, s.script, 'Film Sunday night or Monday AM. Batch all active files.', s.save)).join('')}
       </div>
       ${bridgeRow([
-        { label: 'Milestone updates (Ruoff)', action: 'vault:fact-milestone-updates', primary: true },
-        { label: 'Loan Butler for borrowers', action: 'vault:fact-loan-butler' },
-        { label: 'Weekly pipeline review', action: 'process:weekly-pipeline' }
+        { label: 'Transaction milestone playbook', action: 'vault:fact-milestone-updates', primary: true },
+        { label: 'Weekly pipeline review', action: 'process:weekly-pipeline' },
+        { label: 'Referral Partners', action: 'section:referrals' }
       ])}
       ${proTip('Batch all Monday videos Sunday night or first thing Monday. End every single one with a real question — it drives replies and keeps the relationship two-way.')}
     `;
@@ -272,9 +274,9 @@
         ${scriptCard('CD walk-through invite',
           'We just received Clear to Close. The Closing Disclosure will hit your email in the next hour. Rather than you trying to read 10 pages of legal language alone, I\'d love to walk through it with you on a quick 10–15 minute call or video this afternoon or tomorrow morning. No surprises — just making sure you feel 100% comfortable with every number before you sign. What time works?',
           'Never let clients sign CD alone on complex files.', 'Process: CD Walk-Through Invite')}
-        ${scriptCard('Funding celebration + handoff',
-          'Congratulations [Name]! Your loan just funded. You officially own the home! I\'m so happy for you and your family. I sent a short celebration video to your text. If you\'d like a quick photo with the keys at the table, let me know — I\'d love to capture the moment. Here\'s exactly what happens next: title will record [today/tomorrow], you\'ll get the keys from the realtor once it records, and I\'m your point of contact for anything that comes up in the first 30 days. Welcome home!',
-          'Sets up the 7-day call naturally.', 'Process: Funding Celebration Handoff')}
+        ${scriptCard('Closing celebration + handoff',
+          'Congratulations [Name]! We did it — you officially own the home! I\'m so happy for you and your family. I sent a short celebration video to your text. If you\'d like a quick photo with the keys at the table, let me know — I\'d love to capture the moment. Here\'s exactly what happens next: title will record [today/tomorrow], you\'ll get the keys once it records, and I\'m your point of contact for anything that comes up in the first 30 days. Welcome home!',
+          'Sets up the 7-day call naturally.', 'Process: Closing Celebration Handoff')}
       </div>
       <div class="rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 p-4 text-sm mb-6">
         <strong>Pre-closing checklist:</strong> ID confirmed · Wire verified verbally · CD walk-through scheduled · Final walkthrough coordinated with realtor · 5-item buyer checklist sent night before
@@ -284,7 +286,7 @@
         { label: 'Digital closing advantage', action: 'vault:fact-digital-closing' },
         { label: 'Closing excellence stats', action: 'vault:fact-closing-excellence' }
       ])}
-      ${proTip('For purchases, send a 5-item checklist the night before ("check all lights, test faucets, look for new damage"). It makes buyers feel prepared — and you look like the pro who thinks of everything.')}
+      ${proTip('For purchases, coordinate the final walkthrough timing with all parties and send the buyer a short 5-item checklist the night before ("check all lights and outlets, test every faucet, look for new damage"). It makes buyers feel prepared and in control — and you look like the pro who thinks of everything.')}
     `;
     attachHandlers(contentEl);
   }

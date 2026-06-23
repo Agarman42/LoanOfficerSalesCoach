@@ -187,28 +187,28 @@
   function renderPartnerMastermind(contentEl) {
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PARTNER MASTERMIND</span></div>
-      ${whyBox('Why Masterminds Convert So Well',
-        'Realtors crave education, networking, and ways to look smart in front of their clients. When you host a high-value, non-salesy roundtable, they view you as the expert — and send you business to protect their reputation.',
+      ${whyBox('Why Sphere & Partner Events Convert So Well',
+        'Your sphere, past clients, and referral partners crave connection, local insight, and reasons to stay in touch. When you host a high-value, non-salesy gathering — open house happy hour, client appreciation mixer, or neighborhood market chat — they view you as the go-to agent in town.',
         'orange')}
-      ${sectionTitle('Three High-Impact Partner Event Formats')}
+      ${sectionTitle('Three High-Impact Event Formats (Agent POV)')}
       <div class="space-y-3 mb-6 text-sm">
-        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Quarterly Mastermind (60–90 min)</strong><p class="mt-1">8–15 agents. One timely topic. Light food. Cost: $200–350.</p></div>
-        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Co-Hosted Open House Happy Hour</strong><p class="mt-1">You bring drinks + market moment. Face time with their clients. 3–4x/year.</p></div>
-        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">VIP Dinner (Top 8–12 Senders)</strong><p class="mt-1">Nice restaurant. Short toast. These agents become your inner circle.</p></div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Open House Happy Hour (60–90 min)</strong><p class="mt-1">Co-host with a lender or stager. Drinks + casual tour. Face time with neighbors and buyers. 3–4x/year.</p></div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Client Appreciation Mixer</strong><p class="mt-1">40–60 past clients +1. Pie Day, picnic, or cookie exchange. Pure gratitude. Highest referral ROI.</p></div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Sphere Coffee & Market Chat</strong><p class="mt-1">8–15 warm contacts. One timely neighborhood topic. Light food. Cost: $150–250.</p></div>
       </div>
-      ${sectionTitle('60–90 Minute Mastermind Agenda')}
+      ${sectionTitle('60–90 Minute Sphere Event Agenda')}
       <div class="space-y-2 mb-6 text-[15px]">
         ${stepCard('0–10 min', 'Welcome, food, light intros')}
-        ${stepCard('10–35 min', '20-min market insight or guest speaker — 2–3 actionable takeaways')}
-        ${stepCard('35–55 min', 'Open roundtable: "What\'s working for you right now?"')}
-        ${stepCard('55–70 min', 'Q&A on lending, offers, buyer objections')}
-        ${stepCard('70–90 min', 'Networking + "Who do you have coming up I can help look like a hero for?"')}
+        ${stepCard('10–35 min', '20-min neighborhood market insight or guest speaker — 2–3 actionable takeaways')}
+        ${stepCard('35–55 min', 'Open roundtable: "What\'s happening in your world right now?"')}
+        ${stepCard('55–70 min', 'Q&A on buying, selling, and local market timing — zero sales pitch')}
+        ${stepCard('70–90 min', 'Networking + "Who in your world should I make sure gets an invite next time?"')}
       </div>
       <div class="space-y-4 mb-6">
-        ${scriptCard('Mastermind Invitation', 'Join me for an exclusive evening with top producers. "Winning Offers in Today\'s Market" on [Date] — great food, fresh data, open discussion. Limited to 15 agents. RSVP to [contact].', 'Personal text beats mass email for top agents.', 'Event: Mastermind Invite')}
-        ${scriptCard('Post-Mastermind Recap + Soft Ask', 'Thanks again for coming. Here\'s the one-page market snapshot I promised. Biggest takeaway: agents winning right now over-communicate with buyers on realistic timelines. Who do you have coming up that I can help look like a hero for?', 'Send within 24 hours with your handout attached.', 'Event: Mastermind Recap Ask')}
+        ${scriptCard('Open House Happy Hour Invite', 'You\'re invited to a casual open house happy hour at [Address] on [Date] — drinks, light bites, and a relaxed tour. Bring a friend or neighbor if you\'d like. No sales pitch, just good company and a peek at a great home. RSVP to [contact].', 'Personal text beats mass email for sphere and past clients.', 'Event: Open House Invite')}
+        ${scriptCard('Post-Event Recap + Soft Ask', 'Thanks again for coming to [Event]. Here\'s the neighborhood market snapshot I promised. Biggest takeaway: buyers and sellers who feel informed make calmer decisions. If anyone in your world is curious about what\'s happening locally, I\'m always happy to be a no-pressure resource.', 'Send within 24 hours with your handout attached.', 'Event: Sphere Event Recap')}
       </div>
-      ${proTip('Keep it 60–90 min max. Send recap with stats within 24h. Over-deliver on the first event with a new group — it earns you preferred-lender status faster than co-marketing spend.')}
+      ${proTip('Keep it 60–90 min max. Send recap with stats within 24h. Over-deliver on the first event with a new group — it earns you trusted partner status faster than any ad spend.')}
       ${bridgeRow([
         { label: 'Referral Partner Playbooks', action: 'referrals', primary: true },
         { label: 'Partner Events (Database Nurturing)', action: 'appreciation:partners', accent: true },
@@ -239,7 +239,7 @@
       </ul>
       <div class="space-y-4 mb-6">
         ${scriptCard('Happy Hour Invite (Host Your Own)', 'Hey [Name] — I\'m putting together a small group for happy hour at [Local Spot] next Thursday. No agenda, just good people and good conversation. First round on me.', 'Personal invites to 25–40 warm contacts.', 'Event: Happy Hour Invite')}
-        ${scriptCard('48-Hour Follow-Up (New Connection)', 'Great meeting you at [Event]! I\'m [Your Name] — I help families and agents navigate mortgages without the usual chaos. Would love to stay connected — what\'s the best way to reach you?', 'No pitch. Just genuine connection.', 'Event: Networking Follow-Up')}
+        ${scriptCard('48-Hour Follow-Up (New Connection)', 'Great meeting you at [Event]! I\'m [Your Name] — I help families buy and sell homes in [Area] without the usual chaos. Would love to stay connected — what\'s the best way to reach you?', 'No pitch. Just genuine connection.', 'Event: Networking Follow-Up')}
       </div>
       ${proTip('Pick 1–2 recurring groups and go deep for 6 months — that\'s when referrals start showing up. Personal follow-up within 48 hours with anyone new.')}
       ${bridgeRow([
@@ -255,7 +255,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">COMMUNITY & CHARITY</span></div>
       ${whyBox('Why This Builds Long-Term Trust',
-        'People remember who shows up for the community when it counts. Charity events signal who you are beyond rate sheets — and give you authentic content for 2–4 weeks. Co-hosting with a realtor splits cost and multiplies reach.',
+        'People remember who shows up for the community when it counts. Charity events signal who you are beyond listing flyers — and give you authentic content for 2–4 weeks. Co-hosting with a lender or local business splits cost and multiplies reach.',
         'teal')}
       ${sectionTitle('Four Proven Formats (Pick 2–3 Per Year)')}
       <div class="space-y-2 mb-6 text-sm">
@@ -289,7 +289,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">EVENT PHILOSOPHY</span></div>
       ${whyBox('Value First — The Non-Negotiable Foundation',
-        'When guests feel they received a genuine gift (fun, food, connection) with zero sales pressure, they lower their guard and become natural advocates. This is why some LOs get 15–30 referrals from one event while others get zero.',
+        'When guests feel they received a genuine gift (fun, food, connection) with zero sales pressure, they lower their guard and become natural advocates. This is why some top agents get 15–30 referrals from one event while others get zero.',
         'teal')}
       ${sectionTitle('How to Execute Value-First Events')}
       <ul class="text-sm space-y-2 mb-6 pl-5 list-disc">
@@ -302,13 +302,13 @@
       <ul class="text-sm space-y-1.5 mb-6 pl-5 list-disc">
         <li>Invite copy emphasizes gratitude and fun — not networking or business</li>
         <li>Venue and experience feel intentional</li>
-        <li>2-minute welcome toast scripted — no slides, no rate charts</li>
+        <li>2-minute welcome toast scripted — no slides, no market pitch decks</li>
         <li>Photo moments planned</li>
         <li>Post-event follow-up blocks on calendar before invites go out</li>
       </ul>
       <div class="space-y-4 mb-6">
-        ${scriptCard('Event Welcome Toast (2 min max)', 'Thank you all for being here tonight. This is my thank-you to the people who have trusted me with their homes — no agenda, no pitch, just gratitude and good company. Enjoy yourselves.', 'Then mingle — no mortgage talk unless they ask.', 'Event Philosophy: Welcome Toast')}
-        ${scriptCard('Rate Question Deflection', 'I would love to chat about that — let me grab your info and we can talk this week when I can give you real attention. Tonight is about celebrating, not spreadsheets.', 'Collect contact info warmly — never dismissive.', 'Event Philosophy: Rate Deflection')}
+        ${scriptCard('Event Welcome Toast (2 min max)', 'Thank you all for being here tonight. This is my thank-you to the people who have trusted me with their homes — no agenda, no pitch, just gratitude and good company. Enjoy yourselves.', 'Then mingle — zero sales pitch unless they ask.', 'Event Philosophy: Welcome Toast')}
+        ${scriptCard('Housing Question Deflection', 'I would love to chat about that — let me grab your info and we can talk this week when I can give you real attention. Tonight is about celebrating, not business talk.', 'Collect contact info warmly — never dismissive.', 'Event Philosophy: Housing Deflection')}
       </div>
       <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm mb-6"><strong>Success Metric:</strong> 30%+ of guests bring a +1, and 3+ guests mention the event positively within 10 days.</div>
       ${bridgeRow([
@@ -324,7 +324,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">EVENT PHILOSOPHY</span></div>
       ${whyBox('Invite +1 — Your Built-in Lead Machine',
-        'The +1 policy is the highest-ROI feature of any event. Every guest who attends is a warm prospect who already trusts the host. Smart LOs turn one 50-person event into 15–25 new CRM contacts.',
+        'The +1 policy is the highest-ROI feature of any event. Every guest who attends is a warm prospect who already trusts the host. Smart agents turn one 50-person event into 15–25 new CRM contacts.',
         'teal')}
       ${sectionTitle('Where to Put the +1 Policy')}
       <ul class="text-sm space-y-1.5 mb-6 pl-5 list-disc">
@@ -335,7 +335,7 @@
       </ul>
       <div class="space-y-4 mb-6">
         ${scriptCard('+1 Line for Invites', 'You are invited — and please bring someone you love! A friend, neighbor, or family member. No business talk, just good people and good times.', 'Put this in every invite channel.', 'Event Philosophy: Plus One Invite')}
-        ${scriptCard('+1 Follow-Up (Within 72 Hours)', 'It was great meeting you at [Event] as [Host Name]\'s guest. If you ever have questions about homebuying or financing, I\'m happy to be a resource — no pressure whatsoever.', 'Tag in CRM: Met at [Event] via [Host].', 'Event Philosophy: Plus One Follow Up')}
+        ${scriptCard('+1 Follow-Up (Within 72 Hours)', 'It was great meeting you at [Event] as [Host Name]\'s guest. If you or anyone in your world ever has questions about buying or selling a home, I\'m happy to be a resource — no pressure whatsoever.', 'Tag in CRM: Met at [Event] via [Host].', 'Event Philosophy: Plus One Follow Up')}
         ${scriptCard('Day 1 Thank-You (Name the +1)', 'Thank you for coming to [Event Name] — and for bringing [Guest Name]! So good to meet them. Here are photos from the night. Who else should I make sure gets an invite next time?', 'Use the +1 name from check-in — this detail impresses.', 'Event Philosophy: Plus One Thank You')}
       </div>
       <p class="text-sm mb-6">Tag every +1 as: <strong>Met at [Event Name] via [Host Name]</strong>. These convert 3–5x higher than cold leads.</p>
@@ -363,7 +363,7 @@
         ${stepCard('Both promote to both lists', 'Success metric: 40%+ of attendees from co-host list.')}
       </div>
       <div class="space-y-4 mb-6">
-        ${scriptCard('Co-Host Outreach (Realtor)', 'I have been thinking about a small client appreciation event this [season] — would you want to co-host? I will handle half the food and logistics if you invite your top 20 clients. We both get the credit, half the cost.', 'Warm personal text to agents you already have rapport with.', 'Event Philosophy: Co-Host Outreach')}
+        ${scriptCard('Co-Host Outreach (Lender Partner)', 'I have been thinking about a small client appreciation event this [season] — would you want to co-host? I will handle half the food and logistics if you invite your top referral partners and sphere. We both get the credit, half the cost.', 'Warm personal text to lenders or local businesses you already have rapport with.', 'Event Philosophy: Co-Host Outreach')}
         ${scriptCard('Co-Host Agreement Recap', 'Quick recap: I handle [food/venue], you handle [invites/promotion]. Both names on every piece. Split costs 50/50. I handle attendee thank-yous, you handle partner recap. Sound good?', 'Confirm in writing before money is spent.', 'Event Philosophy: Co-Host Agreement')}
         ${scriptCard('Post-Event Co-Host Debrief', 'Great event last night — thank you for co-hosting. I counted [X] from your list and [Y] from mine. Let\'s do another one in [season] and track referrals from tonight separately.', 'Sets up the next joint event.', 'Event Philosophy: Co-Host Debrief')}
       </div>
@@ -381,12 +381,12 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">EVENT PHILOSOPHY</span></div>
       ${whyBox('Frequency Goal — 4–6 Events Per Year',
-        'Too many events and you burn out. Too few and you disappear. The sweet spot for most successful LOs is 4–6 high-quality events per year, thoughtfully spaced and themed.',
+        'Too many events and you burn out. Too few and you disappear. The sweet spot for most successful agents is 4–6 high-quality events per year, thoughtfully spaced and themed.',
         'teal')}
       ${sectionTitle('Recommended Annual Rhythm')}
       <div class="grid sm:grid-cols-2 gap-3 mb-6 text-sm">
         <div class="border rounded-2xl p-3"><strong>Q1:</strong> Client Appreciation (post-tax season)</div>
-        <div class="border rounded-2xl p-3"><strong>Q2:</strong> Realtor Mastermind or Education Event</div>
+        <div class="border rounded-2xl p-3"><strong>Q2:</strong> Open House Happy Hour or Sphere Market Chat</div>
         <div class="border rounded-2xl p-3"><strong>Q3:</strong> Community / Charity Event</div>
         <div class="border rounded-2xl p-3"><strong>Q4:</strong> Big Holiday Client + Partner Appreciation</div>
       </div>
@@ -395,7 +395,7 @@
         <li>Block 4–6 dates before anything else fills them</li>
         <li>Assign event type to each date</li>
         <li>Identify co-host partners for 2 events</li>
-        <li>Budget total annual spend ($1,500–$4,000 for most LOs)</li>
+        <li>Budget total annual spend ($1,500–$4,000 for most agents)</li>
         <li>Schedule post-event follow-up blocks for each date</li>
         <li>Reuse winning formats — do not reinvent every quarter</li>
       </ol>
@@ -426,7 +426,7 @@
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">FILL THE ROOM</span>
       </div>
       ${whyBox('Why Attendance Feels Hard (And How to Fix It)',
-        'Low turnout is almost never "people don\'t like events." It\'s usually weak invites, wrong timing, salesy positioning, or no reminder system. The LOs who consistently get 30–50+ guests run a <strong>personal invite machine</strong> — not a one-time mass email and hope.',
+        'Low turnout is almost never "people don\'t like events." It\'s usually weak invites, wrong timing, salesy positioning, or no reminder system. The agents who consistently get 30–50+ guests run a <strong>personal invite machine</strong> — not a one-time mass email and hope.',
         'orange')}
       ${sectionTitle('The Realistic Math (Set Expectations for Your Team)')}
       <div class="grid sm:grid-cols-3 gap-3 mb-6 text-sm">
@@ -437,7 +437,7 @@
       ${sectionTitle('The 7 Reasons People Don\'t Show Up')}
       <ul class="text-sm space-y-1.5 mb-6 pl-5 list-disc text-gray-700 dark:text-gray-300">
         <li><strong>Mass email only</strong> — feels generic; gets ignored</li>
-        <li><strong>Event sounds like a sales pitch</strong> — "mortgage seminar" kills warmth</li>
+        <li><strong>Event sounds like a sales pitch</strong> — "listing seminar" or hard sell kills warmth</li>
         <li><strong>No personal follow-up</strong> — one invite is not enough</li>
         <li><strong>Bad timing</strong> — conflicts with kids\' sports, holidays, or tax crunch without positioning</li>
         <li><strong>No +1 policy</strong> — halves your potential headcount</li>
@@ -462,7 +462,7 @@
       <ul class="text-sm space-y-1.5 mb-6 pl-5 list-disc">
         <li><strong>Best client event windows:</strong> Saturday 10am–2pm or Sunday 2–4pm (family-friendly)</li>
         <li><strong>Best mastermind windows:</strong> Tue/Wed 5:30–7:30pm with food ready at 5:30</li>
-        <li><strong>Lead with the experience:</strong> "Pie, drinks, and good company" — not "networking" or "learn about rates"</li>
+        <li><strong>Lead with the experience:</strong> "Pie, drinks, and good company" — not "networking" or "learn about the market"</li>
         <li><strong>Make RSVP stupid-easy:</strong> "Reply YES" to text — not a multi-field form</li>
         <li><strong>Use scarcity honestly:</strong> "Capping at 50 so it stays personal" — then actually cap it</li>
         <li><strong>Show photos from last year</strong> in every invite wave — proof it was fun</li>
@@ -470,7 +470,7 @@
       ${sectionTitle('Ready-to-Use Scripts (Copy + Save)')}
       <div class="space-y-4 mb-6">
         ${scriptCard('Save-the-Date (6–8 weeks out)', 'Save the date — I\'m hosting my annual client thank-you [Pie Day / picnic / cookie exchange] on [Date] from [Time] at [Location]. Mark your calendar — formal invite coming soon. You and a guest will be on the list.', 'Send to A+ and B before the wider list.', 'Attendance: Save the Date')}
-        ${scriptCard('Personal Video Script (30 sec)', 'Hey [Name] — it\'s [Your Name]. I\'m hosting a small thank-you event next month and you\'re on my short list. Great food, you can bring someone you love, and zero mortgage talk — just gratitude and catching up. Would love to see you there. Shoot me a quick YES if you\'re in.', 'Record 15–20 in one batch for A+ VIPs.', 'Attendance: Personal Video Invite')}
+        ${scriptCard('Personal Video Script (30 sec)', 'Hey [Name] — it\'s [Your Name]. I\'m hosting a small thank-you event next month and you\'re on my short list. Great food, you can bring someone you love, and zero sales pitch — just gratitude and catching up. Would love to see you there. Shoot me a quick YES if you\'re in.', 'Record 15–20 in one batch for A+ VIPs.', 'Attendance: Personal Video Invite')}
         ${scriptCard('Social Proof Invite (2 weeks out)', 'Quick note — our client appreciation [event name] is [date] and we already have [X] families confirmed. Would genuinely love to have you and a guest there. Food and drinks on me — reply YES and I\'ll save your spot.', 'Only send after you have 15+ RSVPs — the number creates momentum.', 'Attendance: Social Proof Invite')}
         ${scriptCard('1-Week Reminder', 'Hey [Name] — quick reminder our [event] is this [day] from [time] at [location]. You and a guest are on the list — would love to see you there! Reply YES so I can save you a plate.', 'Personalize day/time only — body stays the same for batching.', 'Attendance: 1-Week Reminder')}
         ${scriptCard('Morning-Of Text', 'Doors open at [time] — can\'t wait to see you (and your +1 if they\'re coming)! Address: [location]. Parking is [detail]. See you soon!', 'Send to all RSVPs by 9am event day.', 'Attendance: Morning Of Text')}
@@ -526,14 +526,14 @@
         <div class="border border-[#00A89D]/30 bg-[#00A89D]/5 rounded-2xl p-4"><strong class="text-[#00A89D]">Past Clients</strong><br>Gratitude-first. Soft ask: who to invite next time.</div>
         <div class="border border-[#F15A29]/30 bg-[#F15A29]/5 rounded-2xl p-4"><strong class="text-[#F15A29]">+1 Guests</strong><br>Personal intro within 72h. CRM tag: Met at [Event] via [Host].</div>
         <div class="border border-[#002B5C]/30 bg-[#002B5C]/5 rounded-2xl p-4"><strong>Realtors / Partners</strong><br>Partnership tone. Offer coffee. Ask who else in office should come.</div>
-        <div class="border border-gray-200 rounded-2xl p-4"><strong>Sphere</strong><br>Light social tone. Invite to next event. No mortgage talk unless they bring it up.</div>
+        <div class="border border-gray-200 rounded-2xl p-4"><strong>Sphere</strong><br>Light social tone. Invite to next event. Zero business talk unless they bring it up.</div>
       </div>
       <div class="space-y-4 mb-6">
         ${scriptCard('Day 1 Thank-You (All Attendees)', 'Thank you for joining us at [Event Name]! It was so good to see you and [Guest if known]. Here are my favorite photos: [Link]. Who should I invite next time?', 'Send morning after — batch-friendly.', 'Event: Day 1 Thank You')}
         ${scriptCard('Week 1 VIP Personal', 'Hey [Name] — loved catching up at [Event]. The story about [specific detail] had me laughing all week. Who else should I have at the next one?', 'Reference something real from your night-of notes.', 'Event: Week 1 VIP Personal')}
-        ${scriptCard('+1 Guest Follow-Up (72 Hours)', 'It was great meeting you at [Event Name] — [Host Name] speaks highly of you. If you ever have questions about homebuying or financing, I\'m happy to be a resource. No pressure whatsoever.', 'Warm intro — not a pitch.', 'Event: Plus One Follow Up')}
+        ${scriptCard('+1 Guest Follow-Up (72 Hours)', 'It was great meeting you at [Event Name] — [Host Name] speaks highly of you. If you or anyone in your world ever has questions about buying or selling a home, I\'m happy to be a resource. No pressure whatsoever.', 'Warm intro — not a pitch.', 'Event: Plus One Follow Up')}
       </div>
-      ${proTip('Batch your touches — Day 1 morning (30 min), Day 3 social (20 min), Week 1 personal (45 min). One well-run event + disciplined follow-up can be worth 5–10 loans per year in referrals.')}
+      ${proTip('Batch your touches — Day 1 morning (30 min), Day 3 social (20 min), Week 1 personal (45 min). One well-run event + disciplined follow-up can be worth 5–10 closed sides per year in referrals.')}
       ${bridgeRow([
         { label: 'Getting People to Show Up', action: 'event:drive-attendance', primary: true },
         { label: 'Client Appreciation Events', action: 'event:client-appreciation', accent: true },
@@ -613,16 +613,16 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PARTNER EVENTS</span></div>
       ${whyBox('Why Partner Events Are Your Highest-Leverage Marketing',
-        'Realtors who feel genuinely appreciated and supported will send you their best clients. Events let you give them value, visibility, and a chance to deepen the relationship in a non-transactional setting.',
+        'Lender partners and local businesses who feel genuinely appreciated and supported will send you their best referrals. Events let you give them value, visibility, and a chance to deepen the relationship in a non-transactional setting.',
         'teal')}
       ${sectionTitle('Three High-Impact Partner Event Formats')}
       <div class="space-y-3 mb-6 text-sm">
         <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Quarterly Mastermind (60–90 min)</strong><p class="mt-1">8–15 agents. Timely topic. Light food. $200–350.</p></div>
-        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Open House Happy Hour</strong><p class="mt-1">Co-host with 2–3 agents. You bring drinks + market moment.</p></div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Open House Happy Hour</strong><p class="mt-1">Co-host with a lender or stager. Drinks + casual tour + neighbor meet-and-greet.</p></div>
         <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">VIP Dinner</strong><p class="mt-1">Top 8–12 senders. 1–2x per year. Inner circle building.</p></div>
       </div>
       <div class="space-y-4 mb-6">
-        ${scriptCard('Mastermind / Roundtable Invite', 'I\'m hosting a small, no-fluff roundtable for my top agent partners next month. Topic: Winning Listings in Today\'s Market. Food and drinks on me. Limited to 12 spots — would love to have you at the table.', 'Never ask for referrals in first 3–6 months of new partnership.', 'Partner Event Invite')}
+        ${scriptCard('Sphere Coffee & Market Chat Invite', 'I\'m hosting a small, no-fluff neighborhood market chat for some of my favorite clients and sphere next month. Topic: What\'s Actually Happening in [Area] Right Now. Coffee and pastries on me. Limited to 12 spots — would love to have you there.', 'Lead with value and connection — never a hard sell.', 'Sphere Event Invite')}
       </div>
       <div class="p-4 bg-[#F15A29]/5 border border-[#F15A29]/20 rounded-2xl text-sm mb-6"><strong>Key Rule:</strong> Keep events educational and relationship-first. Publicly celebrate their wins on social (with permission).</div>
       ${nextStepsHtml([

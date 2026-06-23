@@ -55,7 +55,7 @@
     },
     'social': {
       headline: 'Consistency beats talent — every single time',
-      detail: 'You have the pillars, theme days, and evergreen vault. The loan officers who win post weekly, not when they feel inspired. Turn any idea into finished posts in seconds.',
+      detail: 'You have the pillars, theme days, and evergreen vault. The agents who win post weekly, not when they feel inspired. Turn any idea into finished posts in seconds.',
       gradient: 'orange',
       links: [
         { label: 'Social Post & Calendar Creator', action: 'social-post-creator' },

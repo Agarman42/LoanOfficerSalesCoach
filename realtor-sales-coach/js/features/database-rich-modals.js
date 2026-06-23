@@ -18,7 +18,7 @@
   };
 
   const PILLAR_TITLES = {
-    'a-plus-vips': 'A+ VIPs — Your Platinum Tier (The 50 Who Pay Your Mortgage)',
+    'a-plus-vips': 'A+ VIPs — Your Platinum Tier (The 50 Who Fuel Your Business)',
     'past-clients': 'Past Clients — Your Highest-ROI Goldmine',
     'sphere-of-influence': 'Sphere of Influence — Warm & Authentic',
     'referral-partners': 'Referral Partners — Make Them Indispensable',
@@ -181,7 +181,7 @@
       ${whyBox('Why Ruthless Segmentation Protects Your Time & Your Results',
         'When your database crosses 500–1,000 contacts, giving everyone "the same amount of love" is the fastest way to burn out. Top producers who scale to 100+ units while keeping sane hours all say the same thing: <strong>you must prioritize finite time on relationships that generate the most referrals, repeat business, and goodwill.</strong> This is strategic generosity — not cold transactionality.',
         'teal')}
-      <p class="text-sm mb-4">Assume ~$9,000 per closed loan. A strong A+ VIP sends 2–5 referrals per year ($18k–$45k+ from one relationship). A C-tier contact might send one referral every 2–3 years. Spending equal time across 1,000 people means your top 50 get ~5% of nurturing attention when they should get 50%+.</p>
+      <p class="text-sm mb-4">Assume ~$10,000+ per closed side (commission on a typical transaction). A strong A+ VIP sends 2–5 referrals per year ($20k–$50k+ from one relationship). A C-tier contact might send one referral every 2–3 years. Spending equal time across 1,000 people means your top 50 get ~5% of nurturing attention when they should get 50%+.</p>
       ${sectionTitle('The Three-Tier System (With Recommended Time Allocation)')}
       <div class="space-y-4 mb-6">
         ${tierCard('A+ VIPs — Top 40–60 people (≈50% of personal nurturing time)',
@@ -246,7 +246,7 @@
         '<strong>Loom + phone notes app</strong> for fast personal videos',
         '<strong>Canva + scheduler</strong> for value content to B/C tiers',
         '<strong>Simple VA or spouse help</strong> for physical mailing once a month',
-        '<strong>Recurring calendar blocks</strong> labeled "Nurture Batch — This Pays the Mortgage"'
+        '<strong>Recurring calendar blocks</strong> labeled "Nurture Batch — Fuel Your Business"'
       ])}
       <div class="space-y-4 mb-6">
         ${scriptCard('25-second batch video template',
@@ -270,7 +270,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">90-DAY FEEDBACK LOOP</span></div>
       ${whyBox('Why Tracking Turns Good Intentions Into a Real System',
-        'Most loan officers nurture randomly and wonder why results are inconsistent. Scalers run a simple loop: touch → log → review response/referral → double down or cut. You need 3–4 numbers you actually look at every 90 days — not fancy dashboards.',
+        'Most agents nurture randomly and wonder why results are inconsistent. Scalers run a simple loop: touch → log → review response/referral → double down or cut. You need 3–4 numbers you actually look at every 90 days — not fancy dashboards.',
         'teal')}
       ${sectionTitle('The Only Metrics That Matter')}
       <div class="grid md:grid-cols-2 gap-4 text-sm mb-6">
@@ -319,13 +319,13 @@
         '<strong>Quarterly personal call or coffee</strong> — zero agenda, listen 80%',
         '<strong>Handwritten note + meaningful gift</strong> on home anniversary',
         '<strong>Birthday video or card</strong> — 30–60 sec, one specific personal detail',
-        '<strong>Annual equity review offer</strong> — often triggers refi, move-up, or referrals',
+        '<strong>Annual home value check-in</strong> — often triggers move-up, downsizing, or referrals',
         '<strong>1–2 client appreciation events/year</strong> — always allow +1',
         '<strong>Same-day life event response</strong> — be first to show up'
       ])}
       <div class="space-y-4 mb-6">
         ${scriptCard('Platinum call opener',
-          'Hey [Name], it\'s [Your Name]. I was thinking about you this morning and realized it\'s been way too long since we caught up. No mortgage stuff — I just wanted to hear how you and the family are doing. Got 10–12 minutes this week?',
+          'Hey [Name], it\'s [Your Name]. I was thinking about you this morning and realized it\'s been way too long since we caught up. No real estate talk — I just wanted to hear how you and the family are doing. Got 10–12 minutes this week?',
           'End with: "If anything real estate related ever comes up, I\'m always here. No pressure ever."', 'A+ Client: Call Opener')}
         ${scriptCard('Life event text (same day)',
           'Hey [Name] — saw the post about [specific thing]. That\'s awesome / I\'m so sorry / that\'s huge. No agenda, just wanted you to know I\'m thinking about you. If there\'s ever anything I can do to make life easier, just say the word.',
@@ -359,7 +359,7 @@
         'Monthly or quarterly value touches (market snapshot for their neighborhood)',
         'Event invites + personal follow-up after attendance',
         'Occasional handwritten note when they engage, refer, or hit a life event',
-        'Fast but not concierge-level service on loan questions'
+        'Fast but not concierge-level service on real estate questions'
       ])}
       <div class="space-y-4 mb-6">
         ${scriptCard('Quarterly value video',
@@ -389,7 +389,7 @@
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600">10–15% PERSONAL TIME</span>
       </div>
       ${whyBox('Why C Tier Still Matters (Without Burning You Out)',
-        'Low current engagement + low demonstrated potential today — but people move up when life happens. Consistent automated value + social presence is more than 95% of loan officers ever give anyone. You protect energy for A+ and rising B while C still feels remembered.',
+        'Low current engagement + low demonstrated potential today — but people move up when life happens. Consistent automated value + social presence is more than 95% of agents ever give anyone. You protect energy for A+ and rising B while C still feels remembered.',
         'orange')}
       ${sectionTitle('C-Tier Touch Strategy')}
       ${bulletList([
@@ -447,12 +447,12 @@
         'Quarterly personal call or coffee (15–25 min, listen 80%)',
         'Handwritten note + meaningful gift on home anniversary',
         'Birthday video or handwritten card',
-        'Annual equity review offer',
+        'Annual home value check-in offer',
         '1–2 client appreciation events per year (+1 always welcome)',
         'Same-day or next-day life event response'
       ])}
       <div class="space-y-4 mb-6">
-        ${scriptCard('Platinum call opener', 'Hey [Name], it\'s [Your Name]. I was thinking about you this morning and realized it\'s been way too long since we caught up. No mortgage stuff — I just wanted to hear how you and the family are doing. Got 10–12 minutes this week?', 'Then listen. End with no-pressure availability.', 'A+ VIP: Call Opener')}
+        ${scriptCard('Platinum call opener', 'Hey [Name], it\'s [Your Name]. I was thinking about you this morning and realized it\'s been way too long since we caught up. No real estate talk — I just wanted to hear how you and the family are doing. Got 10–12 minutes this week?', 'Then listen. End with no-pressure availability.', 'A+ VIP: Call Opener')}
         ${scriptCard('Life event text', 'Hey [Name] — saw the post about [specific thing]. That\'s awesome / I\'m so sorry / that\'s huge. No agenda, just wanted you to know I\'m thinking about you and rooting for you.', 'Same day response.', 'A+ VIP: Life Event Text')}
         ${scriptCard('Birthday video', 'Happy Birthday [Name]! Hope this year treats you and the family even better than the last. I\'m grateful to have you in my world — not just as a client, but as someone I genuinely enjoy.', '30–45 seconds. One inside reference.', 'A+ VIP: Birthday Video')}
       </div>
@@ -473,14 +473,14 @@
         'teal')}
       ${sectionTitle('Non-Negotiable Annual Touches')}
       ${bulletList([
-        '<strong>Home Anniversary</strong> — Handwritten card + gift + neighborhood equity snapshot. Often triggers refi or move-up + referrals.',
+        '<strong>Home Anniversary</strong> — Handwritten card + gift + neighborhood market snapshot. Often triggers move-up, downsizing, or referrals.',
         '<strong>Birthday</strong> — Short personal video or nice card with one specific reference.',
-        '<strong>2–3 additional personal touches</strong> — life events, holiday gift, equity check-in when rates move.',
-        '<strong>Annual Equity Review</strong> — Many refi, cash-out, or move-up when they see the number.'
+        '<strong>2–3 additional personal touches</strong> — life events, holiday gift, market value check-in when inventory shifts.',
+        '<strong>Annual Home Value Check-In</strong> — Many clients explore selling, move-up, or investing when they see updated numbers.'
       ])}
       <div class="space-y-4 mb-6">
         ${scriptCard('Anniversary card / video', '[Name], I can\'t believe it\'s already [X] years since you got the keys! Hope the house is still treating you well. I pulled a quick update on values in your neighborhood — happy to hop on a 10-minute call if you\'re curious what your equity looks like. No strings attached.', 'The single most powerful touch.', 'Past Client: Anniversary')}
-        ${scriptCard('Equity check-in (rates moved)', 'Hey [Name], rates have moved a bit since we closed. If you\'ve thought about refi or cash-out — or just want to know what your equity is doing — I\'m happy to run real numbers. No pitch, just information. Takes 8 minutes.', 'Send when rates move meaningfully.', 'Past Client: Equity Text')}
+        ${scriptCard('Market value check-in (inventory shifted)', 'Hey [Name], the market in your neighborhood has shifted a bit since we closed. If you\'ve thought about selling, moving up, or just want to know what your home is worth today — I\'m happy to run real numbers. No pitch, just information. Takes 8 minutes.', 'Send when local inventory or values move meaningfully.', 'Past Client: Market Value Text')}
       </div>
       ${proTip('Segment by years since close + move-up potential + investor vs primary. Never send the same generic anniversary card — reference something specific from their file.', 'orange')}
       ${bridgeRow([
@@ -531,7 +531,7 @@
         'Real personal relationship (kids, goals, challenges, wins)'
       ])}
       <div class="space-y-4 mb-6">
-        ${scriptCard('Just-because note to top realtor', '[Name] — saw you closed that tricky one on Maple. You handled it like a pro. Dropping off a little something to celebrate. Let me know how I can make the next one even smoother for you and your clients.', 'Handwritten or text + small gift.', 'Partner: Just Because Note')}
+        ${scriptCard('Just-because note to top lender partner', '[Name] — saw we just closed that tricky one on Maple together. You handled your side like a pro. Dropping off a little something to celebrate. Let me know how I can make the next one even smoother for you and our mutual clients.', 'Handwritten or text + small gift.', 'Partner: Just Because Note')}
       </div>
       ${proTip('Never ask for referrals in the first 3–6 months of a new partner relationship. When they send a file, treat the client like gold and over-communicate back to the partner.', 'orange')}
       ${bridgeRow([
@@ -549,7 +549,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PILLAR 5 • LOCAL EXPERT</span></div>
       ${whyBox('Why Local Network Pays Off at Scale',
-        'Small business owners, school parents, HOA leaders, charity organizers, local real estate-adjacent pros. When you become known as the helpful, generous, never-pushy mortgage person in your town, business flows without chasing.',
+        'Small business owners, school parents, HOA leaders, charity organizers, local real estate-adjacent pros. When you become known as the helpful, generous, never-pushy agent in your town, business flows without chasing.',
         'teal')}
       ${sectionTitle('How to Nurture (High Visibility, Low Time)')}
       ${bulletList([
@@ -571,7 +571,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">PILLAR 6 • SILENT REVENUE</span></div>
       ${whyBox('Why You Must Nurture Prospects',
-        'People who inquired or got pre-approved but didn\'t move forward. If you disappear, they use whoever is in front of them when ready — often 6–24 months later. Stay the helpful expert and you win the business and their referrals.',
+        'People who inquired, got pre-qualified, or were actively looking but didn\'t move forward. If you disappear, they use whoever is in front of them when ready — often 6–24 months later. Stay the helpful expert and you win the business and their referrals.',
         'orange')}
       ${sectionTitle('Light, Valuable Cadence (Never Salesy)')}
       ${bulletList([
@@ -581,9 +581,9 @@
         'Warm response to life events through social or mutual connections'
       ])}
       <div class="space-y-4 mb-6">
-        ${scriptCard('Rate-move check-in', 'Hey, just thinking about you — rates moved a bit. Happy to run fresh numbers if the timing feels better now. No pressure at all.', '20-sec video or short text. Only if you had a real conversation.', 'Prospect: Rate Check-In')}
+        ${scriptCard('Market-timing check-in', 'Hey, just thinking about you — inventory shifted a bit in your price range. Happy to share what\'s actually out there if the timing feels better now. No pressure at all.', '20-sec video or short text. Only if you had a real conversation.', 'Prospect: Market Check-In')}
       </div>
-      ${proTip('Segment by where they were in the process (pre-approval, browsing, credit issue, rate-sensitive). Track last touch so no one falls through for 9+ months.', 'orange')}
+      ${proTip('Segment by buyer readiness stage (pre-qualified, actively looking, paused/searching, timing-sensitive). Track last touch so no one falls through for 9+ months.', 'orange')}
       ${bridgeRow([
         { label: 'Sales scripts', action: 'scripts', primary: true },
         { label: '21 scalable touches', action: 'nurture:scalable-touches' }

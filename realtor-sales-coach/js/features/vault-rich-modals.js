@@ -99,9 +99,9 @@
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">HIGHEST-ROI TOUCH</span>
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PILLAR 3</span>
       </div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-2">The call most LOs skip — and the one that builds reviews, referrals, and lifetime value.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-2">The call most agents skip — and the one that builds reviews, referrals, and lifetime value.</p>
       <div class="mb-6 p-4 rounded-2xl bg-[#F15A29]/5 border border-[#F15A29]/20 text-sm">
-        <strong>The math:</strong> One nurtured first-time buyer can be <strong>$20k+ lifetime value</strong> (refis, move-ups, family deals, referrals). This 7-day call installs that asset.
+        <strong>The math:</strong> One nurtured buyer can be <strong>$30k–$80k+ lifetime value</strong> (move-ups, investment properties, family referrals, future listings). This 7-day call installs that asset.
       </div>
 
       <div class="mb-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm">
@@ -112,19 +112,19 @@
       <div class="text-xs font-bold tracking-wider text-gray-500 uppercase mb-3">The 5-part call framework</div>
       <div class="space-y-4 mb-6">
         ${scriptCard('1. Opening — enthusiastic & permission-based',
-          'Hi [Name]! It’s [Your Name]. Am I catching you at a good time for 2–3 minutes? I’m calling to congratulate you on your new home and thank you for trusting us with your mortgage.',
+          'Hi [Name]! It’s [Your Name]. Am I catching you at a good time for 2–3 minutes? I’m calling to congratulate you on your new home and thank you for trusting me with the purchase.',
           'Pause. Let them feel the energy before you educate.')}
         ${scriptCard('2. Permission-based education',
-          'Now that you’ve officially closed, I want to share a few important things. Would you mind if I shared them with you?',
-          'Then cover: first payment/escrows, tax exemptions, junk mail/refi solicitations, myHomeIQ/HomeBot.')}
+          'Now that you’ve officially closed, I want to share a few things that catch most new homeowners off guard in the first month. Would you mind if I shared them with you?',
+          'Then cover: homestead exemption, utility transfers, mailbox/address change, contractor solicitations, and how to reach you for any real estate questions.')}
         ${scriptCard('3. Feedback — active listening',
-          'Thinking back, how do you feel we did for you overall? What’s one thing we could have done better?',
+          'Thinking back on the whole process, how do you feel I did for you overall? What’s one thing I could have done better?',
           'This is gold. Dig deeper if they hesitate.')}
         ${scriptCard('4. The asks (soft)',
-          'Before we wrap — two quick favors? If I send a link, would you leave a quick Google review? And when mortgages come up with friends or coworkers, would you mention us?',
+          'Before we wrap — two quick favors? If I send a link, would you leave a quick Google review? And when friends or coworkers mention buying or selling, would you feel comfortable mentioning my name?',
           'Never stack both asks without permission.')}
-        ${scriptCard('5. Sales anchor — Annual Mortgage Review',
-          'I’d like to reach back out once a year around your home anniversary for a 15–30 minute mortgage efficiency check-up. Everyone loves these.',
+        ${scriptCard('5. Relationship anchor — Annual Home Review',
+          'I’d like to reach back out once a year around your home anniversary for a 15–30 minute home equity and market check-in. Most clients find it really useful.',
           'Plants the annual review without pressure.')}
       </div>
 
@@ -136,7 +136,7 @@
           <div>☐ Run full 5-part framework on each call</div>
           <div>☐ Log notes + send same-day thank-you text</div>
           <div>☐ Send Google review link if they agreed</div>
-          <div>☐ Calendar Annual Review for ~11 months out</div>
+          <div>☐ Calendar Annual Home Review for ~11 months out</div>
           <div>☐ Pivot to anniversary/birthday calls in same block</div>
           <div>☐ Follow up with recap text within 2 hours</div>
         </div>
@@ -144,7 +144,7 @@
 
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="weekly" class="text-xs px-3 py-2 rounded-xl bg-[#002B5C] text-white font-semibold hover:bg-black transition"><i class="fas fa-calendar-week mr-1"></i>Block in Weekly Win Plan</button>
-        <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition">Annual Review framework →</button>
+        <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition">Annual Home Review framework →</button>
         <button type="button" data-vault-bridge="modal:post-closing-texts" class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition">Follow-up texts →</button>
         <button type="button" data-vault-bridge="modal:client-anniversary-system" class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition">Anniversary system →</button>
         <button type="button" data-vault-bridge="pillar:3" class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition">All Pillar 3 →</button>
@@ -156,38 +156,38 @@
 
   // ─── ANNUAL MORTGAGE REVIEW ──────────────────────────────────────────
   function renderAnnualMortgageReview(item, contentEl, modal) {
-    setKicker(modal, 'Value Vault • Annual Client Review');
+    setKicker(modal, 'Value Vault • Annual Home Review');
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">RETENTION ANCHOR</span>
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C] dark:text-gray-300">15–30 MIN CALL</span>
       </div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">The follow-on you plant in the 7-day call. Feels like a free annual service — surfaces refi, equity, and life-change opportunities.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">The follow-on you plant in the 7-day call. Feels like a free annual service — surfaces equity, market shifts, and life-change opportunities for future buy/sell needs.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
           <div class="font-semibold text-sm mb-2"><i class="fas fa-list-ol text-[#00A89D] mr-1"></i> 5-part agenda</div>
           <ol class="text-sm space-y-2 text-gray-700 dark:text-gray-300 list-decimal pl-4">
-            <li><strong>Rate & market check</strong> — their rate vs today (no specific quotes; general language only)</li>
-            <li><strong>Equity position</strong> — value + equity built since closing</li>
-            <li><strong>Life/goals check-in</strong> — job, family, renovations, investment property</li>
-            <li><strong>Optimization</strong> — term, cash-out, second home, helping family buy</li>
-            <li><strong>Relationship + soft ask</strong> — how are we doing? referrals? see you next year</li>
+            <li><strong>Market & neighborhood check</strong> — what homes are selling for nearby, days on market, inventory trends</li>
+            <li><strong>Equity position</strong> — estimated value + equity built since closing</li>
+            <li><strong>Life/goals check-in</strong> — job, family, renovations, investment property, downsizing</li>
+            <li><strong>Opportunity scan</strong> — move-up timing, rental potential, helping family buy or sell</li>
+            <li><strong>Relationship + soft ask</strong> — how am I doing? referrals? see you next year</li>
           </ol>
         </div>
         <div class="rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 p-4 text-sm">
           <div class="font-semibold mb-2">Why this converts</div>
           <ul class="space-y-1 text-gray-700 dark:text-gray-300">
-            <li>• Positions you as ongoing expert, not one-time closer</li>
-            <li>• Life changes = natural mortgage conversations</li>
-            <li>• Equity talk opens move-up and cash-out paths</li>
-            <li>• One nurtured client = $8k–$25k+ lifetime value</li>
+            <li>• Positions you as ongoing advisor, not one-time closer</li>
+            <li>• Life changes = natural buy/sell conversations</li>
+            <li>• Equity talk opens move-up, investment, and listing paths</li>
+            <li>• One nurtured client = $15k–$50k+ lifetime commission value</li>
           </ul>
         </div>
       </div>
 
       ${scriptCard('Opening script (home anniversary)',
-        'Hi [Name], it’s [Your Name]. I’m circling back around your home anniversary for the quick mortgage efficiency check-up we talked about. It’s only 15–20 minutes — basically a financial physical for your mortgage. Got a few minutes this week or next?',
+        'Hi [Name], it’s [Your Name]. I’m circling back around your home anniversary for the quick home equity and market check-in we talked about. It’s only 15–20 minutes — basically a check-up on your home’s value and what’s happening in your neighborhood. Got a few minutes this week or next?',
         'Send a prep email 48 hrs before listing what you’ll cover.')}
 
       <div class="mt-4 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
@@ -195,10 +195,10 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
           <div>• How has the house been treating you?</div>
           <div>• Any big life changes since we closed?</div>
-          <div>• If rates dropped meaningfully, would you want to look?</div>
+          <div>• Curious what your home might be worth today?</div>
           <div>• More equity than you expected?</div>
-          <div>• Second home, investment, or helping family buy?</div>
-          <div>• How’s the payment feeling today?</div>
+          <div>• Thinking about a second home, investment, or helping family buy?</div>
+          <div>• Anyone in your circle talking about selling?</div>
         </div>
       </div>
 
@@ -217,14 +217,14 @@
     setKicker(modal, 'Value Vault • Long-Term Retention Engine');
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">RUNS AFTER 7-DAY CALLS</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">The weekly habit that turns one great closing into decades of referrals — most LOs never build this system.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">The weekly habit that turns one great closing into decades of referrals — most agents never build this system.</p>
 
       <div class="space-y-4 mb-6">
         <div class="rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 p-5">
           <div class="text-[10px] font-bold tracking-wider text-[#00A89D] uppercase mb-1">Every Monday (or your day)</div>
           <div class="font-bold text-[#002B5C] dark:text-white mb-2">Pull the next-7-days list</div>
           <ul class="text-sm space-y-1 text-gray-700 dark:text-gray-300">
-            <li>☐ Home loan anniversaries in the next 7 days</li>
+            <li>☐ Home purchase anniversaries in the next 7 days</li>
             <li>☐ Client birthdays in the next 7 days</li>
             <li>☐ Add to same Power Hour block as 7-day calls</li>
           </ul>
@@ -233,14 +233,14 @@
           <div class="font-bold text-sm mb-2">Anniversary calls (valuable)</div>
           <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Congratulate them. Ask how the home is treating them. Mention general market context if relevant. Re-offer Annual Review.</p>
           ${scriptCard('Anniversary opener',
-            'Happy home anniversary [Name]! Can you believe it’s been a year already? How’s the house treating you? I still have you on my calendar for that quick mortgage check-up we talked about — want to find 15 minutes in the next couple weeks?',
+            'Happy home anniversary [Name]! Can you believe it’s been a year already? How’s the house treating you? I still have you on my calendar for that quick home equity and market check-in we talked about — want to find 15 minutes in the next couple weeks?',
             null)}
         </div>
         <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
           <div class="font-bold text-sm mb-2">Birthday touches (relationship)</div>
           <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">60-second call or thoughtful text. Reference something specific if you can.</p>
           ${scriptCard('Birthday text',
-            'Happy birthday [Name]! Hope you have an amazing day. Grateful we got to help you into the home — let me know if you ever need anything mortgage-related.',
+            'Happy birthday [Name]! Hope you have an amazing day. Grateful we got to help you into the home — let me know if you ever need anything buying, selling, or market-related.',
             null)}
         </div>
       </div>
@@ -301,7 +301,7 @@
   function renderContent30DaySprint(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Content Operating System');
     const weeks = [
-      { w: 'Week 1', focus: 'Foundation', pillars: '5 + 6', color: 'purple', tasks: ['Film 3 First-Time Buyer Reels', 'Film 1 Rate Reality Check Reel', 'Turn into 2 carousels + 4 text posts', 'Set up basic nurture email rhythm'] },
+      { w: 'Week 1', focus: 'Foundation', pillars: '5 + 6', color: 'purple', tasks: ['Film 3 First-Time Buyer Reels', 'Film 1 Market Reality Check Reel', 'Turn into 2 carousels + 4 text posts', 'Set up basic nurture email rhythm'] },
       { w: 'Week 2', focus: 'Authority', pillars: '1 + 6', color: 'teal', tasks: ['2 Local Market Data videos', '2 “Did You Know” myth busters', 'One longer YouTube combining Week 1 hits'] },
       { w: 'Week 3', focus: 'Human', pillars: '5 + 4', color: 'amber', tasks: ['Behind-the-scenes content', '2 client win stories (with permission)', 'Heavy Stories usage this week'] },
       { w: 'Week 4', focus: 'Systems', pillars: '3 + repurpose', color: 'slate', tasks: ['Cadence Reel + “how I plan content” post', 'Repurpose best performer into 5 new formats', 'Review analytics — double down on winner'] }
@@ -338,9 +338,9 @@
     const steps = [
       { n: '1', title: 'Acknowledge (3–5 sec)', script: 'I completely understand why that feels like the right move right now.', tip: 'Never argue first. Mirror their concern.' },
       { n: '2', title: 'Validate + Reframe (15–20 sec)', script: 'That makes total sense given what you\'ve been hearing. A lot of people feel the same way — and there\'s usually one piece of the picture missing.', tip: 'Give legitimacy, then introduce reality gently.' },
-      { n: '3', title: 'Story or Data (25–35 sec)', script: 'I had a client last month in almost this exact situation… [one specific outcome]. Want me to run your numbers the same way?', tip: 'One example beats three statistics.' },
+      { n: '3', title: 'Story or Data (25–35 sec)', script: 'I had a client last month in almost this exact situation… [one specific outcome]. Want me to walk you through what we did?', tip: 'One example beats three statistics.' },
       { n: '4', title: 'Question back (15 sec)', script: 'How are you thinking about that? What would need to be true for you to feel good moving forward?', tip: 'Silence after the question. Let them talk.' },
-      { n: '5', title: 'Permission + next step (10 sec)', script: 'No pressure at all — I just want you to have the full picture. Can I send you a quick comparison to look at on your own time?', tip: 'Take pressure off while keeping the door open.' }
+      { n: '5', title: 'Permission + next step (10 sec)', script: 'No pressure at all — I just want you to have the full picture. Can I send you a quick market snapshot to look at on your own time?', tip: 'Take pressure off while keeping the door open.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-600">90-SECOND SYSTEM</span></div>
@@ -358,7 +358,7 @@
         <strong>Practice drill:</strong> Pick your top 3 objections. Run this 5-step flow out loud twice this week with a colleague or spouse.
       </div>
       <div class="flex flex-wrap gap-2 mb-6">
-        <button type="button" data-vault-bridge="modal:objection-rates" class="text-xs px-3 py-2 rounded-xl border border-amber-500 text-amber-700 font-semibold hover:bg-amber-500 hover:text-white transition">Rate objections →</button>
+        <button type="button" data-vault-bridge="modal:objection-rates" class="text-xs px-3 py-2 rounded-xl border border-amber-500 text-amber-700 font-semibold hover:bg-amber-500 hover:text-white transition">Market objections →</button>
         <button type="button" data-vault-bridge="scripts" class="text-xs px-3 py-2 rounded-xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">Sales Script Generator →</button>
         <button type="button" data-vault-bridge="pillar:4" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">All objections →</button>
       </div>
@@ -376,7 +376,7 @@
       <div class="space-y-4 mb-6">
         ${responses.map((r, i) => scriptCard(r.title || `Response ${i + 1}`, r.text, r.tip)).join('')}
       </div>
-      <div class="text-xs text-gray-500 mb-4 italic">Deliver calmly. Never argue. Always offer to run their specific numbers.</div>
+      <div class="text-xs text-gray-500 mb-4 italic">Deliver calmly. Never argue. Always offer to walk through their specific situation.</div>
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="scripts" class="text-xs px-3 py-2 rounded-xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">Practice in Sales Scripts →</button>
         <button type="button" data-vault-bridge="modal:objection-psychology-system" class="text-xs px-3 py-2 rounded-xl border border-amber-500 text-amber-700 font-semibold hover:bg-amber-500 hover:text-white transition">90-Second system →</button>
@@ -388,55 +388,55 @@
 
   function renderObjectionRates(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: '1. Equity Reality Play', text: 'I hear that every day. Here\'s what most people miss: if rates drop 1%, home prices often rise 8–12% from increased competition. Waiting has already cost many buyers $40–70k in equity. Want me to show you the math on your situation?', tip: 'Lead with data, not defense.' },
-      { title: '2. Buydown + Future Refi', text: 'Totally fair. We have 2-1 and 3-2-1 buydown options that lower your rate 1–3% for the first few years. When rates drop, we refinance at zero cost. You get in now and protect yourself both ways.', tip: 'Offer a concrete path forward.' },
-      { title: '3. Marry the House, Date the Rate', text: 'The house you want today at today\'s rate will likely cost more in 18 months even at a lower rate. Marry the house you love. Date the rate — we\'ll adjust when it makes sense.', tip: 'Classic frame — use when they love the home.' },
-      { title: '4. Total Cost of Ownership', text: 'Let\'s look at the full picture. Your total monthly cost is often still lower than rent — and you\'re building equity instead of making your landlord rich. Want to run the real numbers?', tip: 'Great for renters and first-time buyers.' },
-      { title: '5. Psychological Permission', text: 'I get it — today\'s rate feels high compared to 2020. But people who bought in 2021 at higher rates are still sitting on $80–120k in equity. The rate is one variable. Do you want to own or keep renting while prices climb?', tip: 'End with a life question, not a rate debate.' }
-    ], 'Five battle-tested responses for the #1 objection in today\'s market.', 'amber');
+      { title: '1. Equity Reality Play', text: 'I hear that every day. Here\'s what most people miss: waiting for prices to drop often means competing with more buyers when they do. In our market, well-priced homes under $450k are still moving in under two weeks. Want me to show you what\'s actually available in your range right now?', tip: 'Lead with local data, not defense.' },
+      { title: '2. Payment vs. Rent Math', text: 'Totally fair concern. Let\'s compare your actual monthly cost of owning vs. renting in this neighborhood — plus the equity you\'d build in 3 years. Most buyers are surprised the gap is smaller than they thought.', tip: 'Offer a concrete side-by-side.' },
+      { title: '3. Marry the Neighborhood, Date the Timing', text: 'The neighborhood and school district you want today will likely cost more in 18 months even if prices soften slightly. Marry the location you love. Date the timing — we\'ll find the right home and structure the offer smartly.', tip: 'Classic frame — use when they love the area.' },
+      { title: '4. Total Cost of Ownership', text: 'Let\'s look at the full picture. Your total monthly cost is often still lower than rent — and you\'re building equity instead of making your landlord rich. Want to run the real numbers for this specific home?', tip: 'Great for renters and first-time buyers.' },
+      { title: '5. Psychological Permission', text: 'I get it — prices feel high compared to a few years ago. But homeowners who bought in 2021 are often sitting on $80–120k in equity today. Price is one variable. Do you want to keep renting while your target neighborhoods get more expensive?', tip: 'End with a life question, not a price debate.' }
+    ], 'Five battle-tested responses for the #1 buyer objection in today\'s market — "prices are too high."', 'amber');
   }
 
   function renderObjectionWaiting(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: 'Price Increase Math', text: 'Let\'s say rates drop to 5.5% in 12–18 months. In that same period, average home prices often rise 9–14%. On a $420k home that\'s $42–58k extra — to save maybe $180–220/month. Break-even is often 7–9 years.', tip: 'Most effective response — use their price range.' },
+      { title: 'Price Increase Math', text: 'Let\'s say the market cools 5% in 12–18 months. In that same period, mortgage rates could rise, wiping out any payment savings. On a $420k home, waiting often costs $30–50k in higher prices or lost equity — to save maybe $150–200/month. Break-even is often 7–9 years.', tip: 'Most effective response — use their price range.' },
       { title: 'The Two-Moves Trap', text: 'A lot of people wait, then still buy in 18 months. That\'s two moves — renting longer plus buying at higher prices. One move now is almost always cheaper than two moves later.', tip: 'Reframe waiting as an active choice with cost.' },
-      { title: 'Life Cost Question', text: 'I respect wanting to wait. The real question: what\'s the cost in your actual life? Paying $2,100 rent that could be $1,850 owning? Kids in a school district you love? One more year of building equity? Sometimes the lifestyle cost beats the rate difference.', tip: 'Shift from financial to personal.' }
+      { title: 'Life Cost Question', text: 'I respect wanting to wait. The real question: what\'s the cost in your actual life? Kids in a school district you love? One more year of building equity? Sometimes the lifestyle cost beats waiting for a perfect market.', tip: 'Shift from financial to personal.' }
     ], 'The cost of waiting is one of the most expensive decisions buyers make — they just don\'t see it until it\'s too late.', 'amber');
   }
 
   function renderObjectionCredit(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: 'Path, not perfection', text: 'Credit doesn\'t have to be perfect — it has to be on a path. Let\'s pull your report together and build a 60–90 day plan. I\'ve helped plenty of people buy sooner than they thought.', tip: 'Offer partnership, not judgment.' },
-      { title: 'FHA / alternative programs', text: 'There are programs designed exactly for this situation. Before you assume you can\'t buy for two years, let me run a quick scenario — you might be closer than you think.', tip: 'Never promise approval — offer to investigate.' },
-      { title: 'Rent vs build equity', text: 'Every month you rent while waiting to fix credit, you\'re not building equity. Sometimes a small down payment program plus credit coaching gets you in faster than waiting for a perfect score.', tip: 'Compare timelines honestly.' }
-    ], 'Credit objections are often fear disguised as facts. Your job is to offer a clear path forward.', 'amber');
+      { title: 'Path, not perfection', text: 'Credit doesn\'t have to be perfect to start looking. Let\'s connect you with a great lender for a soft conversation and build a 60–90 day plan. I\'ve helped plenty of buyers get into homes sooner than they thought.', tip: 'Offer partnership, not judgment.' },
+      { title: 'Programs exist', text: 'There are programs designed exactly for this situation. Before you assume you can\'t buy for two years, let me introduce you to a lender who can run a quick pre-qual — you might be closer than you think.', tip: 'Never promise approval — offer to connect.' },
+      { title: 'Rent vs build equity', text: 'Every month you rent while waiting to fix credit, you\'re not building equity. Sometimes getting pre-qualified plus a credit plan gets you in faster than waiting for a perfect score.', tip: 'Compare timelines honestly.' }
+    ], 'Credit objections are often fear disguised as facts. Your job is to offer a clear path forward with the right lender partner.', 'amber');
   }
 
   function renderObjectionDownpayment(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: 'Programs exist', text: 'Down payment is the #1 myth I hear. There are FHA, VA, USDA, and state programs that get people in with far less than 20% — sometimes 0–3.5%. Have you seen what you actually qualify for?', tip: 'Education beats assumption.' },
-      { title: 'Gift funds frame', text: 'A lot of my clients use gift funds from family — it\'s more common than people admit. If that\'s an option, we can structure it cleanly and compliantly.', tip: 'Normalize help from family.' },
-      { title: 'Monthly payment reframe', text: 'Let\'s compare: saving $500/month for 3 years vs getting in now with a smaller down payment and building equity. The math often surprises people.', tip: 'Run side-by-side scenarios.' }
+      { title: 'Programs exist', text: 'Down payment is the #1 myth I hear. Between FHA, VA, USDA, and state assistance programs, many buyers get in with far less than 20% — sometimes 0–3.5%. Have you talked to a lender about what you actually qualify for?', tip: 'Education beats assumption — partner with a lender.' },
+      { title: 'Gift funds frame', text: 'A lot of my clients use gift funds from family — it\'s more common than people admit. If that\'s an option, a good lender can structure it cleanly and compliantly.', tip: 'Normalize help from family.' },
+      { title: 'Monthly payment reframe', text: 'Let\'s compare: saving $500/month for 3 years vs getting in now with a smaller down payment and building equity. The math often surprises people.', tip: 'Run side-by-side numbers with a trusted lender partner.' }
     ], 'Down payment concerns usually mean they haven\'t seen their real options yet.', 'amber');
   }
 
   function renderObjectionPartnerBusiness(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: '“I\'m too busy right now”', text: 'I completely get it — this market is wild. I\'m not here to take more of your time. I wanted to drop off something small that might save you time on your next few deals. No meeting required.', tip: 'Value-first, zero pressure.' },
-      { title: '“I already have a lender”', text: 'Totally respect loyalty. I\'m not asking you to switch anyone. I\'m offering to be a no-pressure second set of eyes on tricky files or rate questions. A lot of agents keep me in their back pocket for creative solutions.', tip: 'Position as backup expert.' },
-      { title: '“I don\'t send clients to lenders they don\'t know”', text: 'Fair — that\'s how I want to work with you too. I\'m happy to prove value first: run scenarios, show up at an open house, or co-brand something useful. No expectation until you\'ve seen the difference.', tip: 'Earn trust before asking.' },
-      { title: '“Your rates aren\'t the lowest”', text: 'Rates matter — but in this market the difference between winning and losing is often 24–48 hours of certainty. I focus on making your buyer\'s offer the strongest on the table.', tip: 'Shift from price to certainty.' }
-    ], 'Value-first partner responses — never pushy, never sleazy. Match the Giftology philosophy throughout the vault.', 'teal');
+      { title: '"I\'m too busy right now"', text: 'I completely get it — this market is wild. I\'m not here to take more of your time. I wanted to drop off something small that might help you on your next few deals. No meeting required.', tip: 'Value-first, zero pressure.' },
+      { title: '"I already have a preferred lender"', text: 'Totally respect loyalty. I\'m not asking you to switch anyone. I\'m offering to be a no-pressure second set of eyes on listings, pricing strategy, or tough negotiations. A lot of lenders keep me in their back pocket for clients who need a great agent.', tip: 'Position as backup expert.' },
+      { title: '"I don\'t refer clients to agents they don\'t know"', text: 'Fair — that\'s how I want to work with you too. I\'m happy to prove value first: run a CMA, show up at your open house, or co-brand something useful. No expectation until you\'ve seen the difference.', tip: 'Earn trust before asking.' },
+      { title: '"Your commission/fees aren\'t competitive"', text: 'I hear you — every dollar matters. In this market the difference between winning and losing is often communication, negotiation, and certainty. I focus on making your client\'s offer the strongest on the table and keeping the deal together.', tip: 'Shift from price to certainty and results.' }
+    ], 'Value-first partner responses for earning business from lenders and fellow agents — never pushy, never sleazy.', 'teal');
   }
 
   // ─── POST-CLOSING TEXT TEMPLATES ─────────────────────────────────────
   function renderPostClosingTexts(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Post-Closing Follow-Up');
     const templates = [
-      { title: 'Same-Day Thank You + Review Ask', when: 'Within 2 hours of the 7-day call', script: 'Hi [Name], thanks again for the time on the call today. Really appreciate you trusting us with your mortgage. If you have a quick second, would you mind leaving us a Google review? Here\'s the link: [link]', tip: 'Send only if they agreed to review on the call.' },
-      { title: 'After Positive Feedback on Call', when: 'Same day or next morning', script: 'Thank you for the kind words [Name]! It means a lot. When you talk to friends or coworkers about mortgages, I\'d love it if you mentioned us.', tip: 'Pairs perfectly with a handwritten thank-you note.' },
-      { title: '30-Day Value Check-In', when: 'Day 30 after closing', script: 'Hi [Name] — just checking in at the 30-day mark. How is everything feeling in the new house? Any questions on the payment, taxes, or insurance side? Happy to hop on a quick call or just text back and forth.', tip: 'Reference one detail from the 7-day call for 10x impact.' },
-      { title: '90-Day + Annual Review Seed', when: 'Day 90', script: '[Name], you\'re coming up on 90 days in the new home — time flies! Everything still going smoothly? Around your one-year anniversary I like to do a quick 15-20 min "mortgage check-up" to make sure your loan is still working for you. I\'ll put a note to reach out then.', tip: 'Plants the Annual Review without pressure.' }
+      { title: 'Same-Day Thank You + Review Ask', when: 'Within 2 hours of the 7-day call', script: 'Hi [Name], thanks again for the time on the call today. Really appreciate you trusting me with your home purchase. If you have a quick second, would you mind leaving me a Google review? Here\'s the link: [link]', tip: 'Send only if they agreed to review on the call.' },
+      { title: 'After Positive Feedback on Call', when: 'Same day or next morning', script: 'Thank you for the kind words [Name]! It means a lot. When friends or coworkers mention buying or selling, I\'d love it if you mentioned my name.', tip: 'Pairs perfectly with a handwritten thank-you note.' },
+      { title: '30-Day Value Check-In', when: 'Day 30 after closing', script: 'Hi [Name] — just checking in at the 30-day mark. How is everything feeling in the new house? Any questions about utilities, taxes, or neighborhood stuff? Happy to hop on a quick call or just text back and forth.', tip: 'Reference one detail from the 7-day call for 10x impact.' },
+      { title: '90-Day + Annual Review Seed', when: 'Day 90', script: '[Name], you\'re coming up on 90 days in the new home — time flies! Everything still going smoothly? Around your one-year anniversary I like to do a quick 15-20 min home equity and market check-in. I\'ll put a note to reach out then.', tip: 'Plants the Annual Home Review without pressure.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
@@ -459,7 +459,7 @@
       </div>
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:post-closing-7day" class="text-xs px-3 py-2 rounded-xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">7-Day call framework →</button>
-        <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition">Annual Review →</button>
+        <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition">Annual Home Review →</button>
         <button type="button" data-vault-bridge="modal:nurture-12month-calendar" class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition">12-month calendar →</button>
       </div>
       ${footerActions('Copy All Follow-Up Texts')}
@@ -471,11 +471,11 @@
   function render7DayObjections(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • 7-Day Call Defense');
     const objections = [
-      { pushback: '"I\'m really busy right now."', script: 'I completely understand — this will only take 2–3 minutes. I just want to make sure you\'re not running into any surprises with the new payment or paperwork.', tip: 'Acknowledge + name the tiny time commitment.' },
+      { pushback: '"I\'m really busy right now."', script: 'I completely understand — this will only take 2–3 minutes. I just want to make sure you\'re not running into any surprises as a new homeowner in the first month.', tip: 'Acknowledge + name the tiny time commitment.' },
       { pushback: '"Everything is fine, I don\'t really have any questions."', script: 'That\'s great to hear! Before I let you go, can I quickly cover two things that catch most people off guard in the first month?', tip: 'Validate + create curiosity.' },
-      { pushback: '"I already have a guy for that."', script: 'Totally fair. I\'m not trying to sell you anything — this is literally just a quick check-in to make sure your first month goes smoothly. Most people appreciate the heads-up on the tax bills and refinance mail.', tip: 'Remove sales pressure. Position as free insurance.' },
+      { pushback: '"I already have a guy for that."', script: 'Totally fair. I\'m not trying to sell you anything — this is literally just a quick check-in to make sure your first month goes smoothly. Most people appreciate the heads-up on homestead exemptions and junk mail.', tip: 'Remove sales pressure. Position as free insurance.' },
       { pushback: '"Can you just email it to me?"', script: 'Happy to — the reason I called is these first-month gotchas are easy to miss in an email. It\'s literally two minutes and most people say they\'re glad we talked live.', tip: 'Honor the request while explaining why live is better.' },
-      { pushback: '"I don\'t want to think about my mortgage right now."', script: 'Totally get that — you just moved in! The only reason I\'m calling is to make sure the boring stuff (tax bills, insurance, junk mail) doesn\'t surprise you in the next 30 days. After this you\'re good for the year.', tip: 'Empathize with honeymoon phase + limit scope.' }
+      { pushback: '"I don\'t want to think about real estate stuff right now."', script: 'Totally get that — you just moved in! The only reason I\'m calling is to make sure the boring stuff (tax bills, utility transfers, junk mail) doesn\'t surprise you in the next 30 days. After this you\'re good for the year.', tip: 'Empathize with honeymoon phase + limit scope.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-600">ON THE 7-DAY CALL</span></div>
@@ -510,7 +510,7 @@
       { m: 'Month 9', touch: 'Light referral ask + "I\'m taking new clients"', type: 'referral', bridge: null },
       { m: 'Month 10', touch: 'Home anniversary email — most powerful of the year', type: 'call', bridge: 'modal:client-anniversary-system' },
       { m: 'Month 11', touch: 'Thinking of you + branded gift or resource', type: 'gift', bridge: 'pillar:2' },
-      { m: 'Month 12', touch: 'Annual Mortgage Review invitation', type: 'call', bridge: 'modal:annual-mortgage-review' }
+      { m: 'Month 12', touch: 'Annual Home Review invitation', type: 'call', bridge: 'modal:annual-mortgage-review' }
     ];
     const typeColors = { text: 'border-blue-300 bg-blue-50/50 dark:bg-blue-900/20', email: 'border-indigo-300 bg-indigo-50/50', value: 'border-purple-300 bg-purple-50/50', relationship: 'border-pink-300 bg-pink-50/50', gift: 'border-[#F15A29]/40 bg-[#F15A29]/5', referral: 'border-teal-300 bg-teal-50/50', call: 'border-[#00A89D]/40 bg-[#00A89D]/5' };
     contentEl.innerHTML = `
@@ -551,7 +551,7 @@
       { n: '2', title: 'Wow During Process', desc: 'Exceptional service + strategic client gifts (Pillar 2) create emotional peaks.', pillar: 2, color: 'border-[#F15A29]' },
       { n: '3', title: 'Installation', desc: '7-Day Post-Closing System + ongoing retention (Pillar 3) locks in lifetime value.', pillar: 3, color: 'border-[#00A89D]' },
       { n: '4', title: 'Relationship Fuel', desc: 'Regular pop-bys for partners (Pillar 1) + thoughtful ongoing touches (Pillar 6).', pillar: 1, color: 'border-teal-400' },
-      { n: '5', title: 'Defense', desc: 'World-class objection handling (Pillar 4) when rates or life create hesitation.', pillar: 4, color: 'border-amber-400' }
+      { n: '5', title: 'Defense', desc: 'World-class objection handling (Pillar 4) when market conditions or life changes create hesitation.', pillar: 4, color: 'border-amber-400' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
@@ -584,25 +584,25 @@
 
   function renderObjectionInvestor(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: '"I\'ll just pay cash"', text: 'I love working with cash buyers — they\'re usually the strongest. But even cash buyers are using leverage right now because money is still relatively cheap compared to real estate returns. Would you be open to running the numbers on keeping some cash liquid and financing 50–70% LTV? A lot of my investors love the flexibility.', tip: 'Never argue against cash — show the leverage math.' },
-      { title: '"Rates don\'t matter to me as an investor"', text: 'Completely understand. The two things that usually matter more are cash flow and appreciation. What most people miss is that higher rates are creating better buying opportunities because there\'s less competition. Want to look at actual cash-on-cash returns on a couple deals?', tip: 'Shift from rate to cap rate and cash flow.' }
+      { title: '"I\'ll just pay cash"', text: 'I love working with cash buyers — they\'re usually the strongest. But even cash investors are using leverage on rentals right now because returns on real estate still beat sitting cash. Would you be open to looking at a couple properties with strong cap rates?', tip: 'Never argue against cash — show the opportunity math.' },
+      { title: '"Market timing doesn\'t matter to me as an investor"', text: 'Completely understand. The two things that usually matter more are cash flow and appreciation. What most people miss is that higher prices are creating better buying opportunities in certain submarkets because there\'s less competition. Want to look at actual cash-on-cash returns on a couple deals?', tip: 'Shift from timing to cap rate and cash flow.' }
     ], 'Investor and cash buyer objections — stay in the conversation without sounding retail.', 'amber');
   }
 
   function renderObjectionCompetitor(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: 'The Respectful Approach', text: 'Totally understand — loyalty matters. I\'m not here to badmouth anyone. The only reason I\'m asking for 10 minutes is because the mortgage world has changed dramatically in the last 18 months. If after 10 minutes you feel your guy is still the best fit, I\'ll respect that completely. Fair?', tip: 'Ask for a micro-commitment, not a switch.' },
-      { title: 'Second Opinion Frame', text: 'I\'m happy to be your second opinion at no obligation. I do this for a lot of people who already have a relationship — just to confirm they\'re getting the best structure.', tip: 'Position as verification, not replacement.' },
-      { title: 'Referral Leverage', text: 'The person who referred you to me specifically asked me to reach out because they felt you might be missing some current options. Would it hurt to compare?', tip: 'Use only when there\'s a real mutual connection.' }
-    ], 'Non-sleazy ways to earn the right to compete when they already have a lender.', 'amber');
+      { title: 'The Respectful Approach', text: 'Totally understand — loyalty matters. I\'m not here to badmouth anyone. The only reason I\'m asking for 10 minutes is because this market has changed dramatically in the last 18 months. If after 10 minutes you feel your agent is still the best fit, I\'ll respect that completely. Fair?', tip: 'Ask for a micro-commitment, not a switch.' },
+      { title: 'Second Opinion Frame', text: 'I\'m happy to be your second opinion at no obligation. I do this for a lot of people who already have a relationship — just to confirm they\'re getting the best strategy and pricing.', tip: 'Position as verification, not replacement.' },
+      { title: 'Referral Leverage', text: 'The person who referred you to me specifically asked me to reach out because they felt you might be missing some current market options. Would it hurt to compare?', tip: 'Use only when there\'s a real mutual connection.' }
+    ], 'Non-sleazy ways to earn the right to compete when they already have an agent.', 'amber');
   }
 
   function renderObjectionModern(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
-      { title: '"I ran my numbers on ChatGPT…"', text: 'Those tools are great for ballpark math. The problem is they don\'t know your specific credit profile, your state\'s programs, or the 12–15 loan products we have access to. I\'ve had clients come in with a ChatGPT quote $340/month higher than what we actually got them approved for. Want me to run the real numbers?', tip: 'Never trash AI — position yourself as the precision layer.' },
-      { title: '"Zillow says rates are 6.1%"', text: 'Those advertised rates are usually best-case — 780+ credit, 25% down, perfect file. Most people don\'t qualify for that rate. I\'ll show you what you actually qualify for in 5 minutes with your real numbers.', tip: 'Educate on advertised vs actual.' },
-      { title: '"Rates are about to crash / Fed is cutting hard"', text: 'The Fed has started cutting, but mortgage rates follow the 10-year Treasury and inflation expectations more than the Fed funds rate. Even with cuts, many economists project 5.75–6.5% for most of 2026. People waiting for 4% again may wait a very long time.', tip: 'Ground in economics, not opinion.' }
-    ], '2026 objections — ChatGPT, Zillow, and "rates are crashing" claims.', 'amber');
+      { title: '"I ran my numbers on ChatGPT…"', text: 'Those tools are great for ballpark math. The problem is they don\'t know your specific neighborhood, off-market activity, or the negotiation strategies that actually win in our market. I\'ve had clients come in with a ChatGPT price estimate $40k off what the home actually sold for. Want me to run a real CMA?', tip: 'Never trash AI — position yourself as the precision layer.' },
+      { title: '"Zillow says my home is worth $X"', text: 'Zillow\'s estimates are usually within 5–15% — sometimes way off on unique homes. I\'ll show you what comparable sales actually closed for in your neighborhood in the last 90 days. Takes 5 minutes.', tip: 'Educate on algorithm vs actual comps.' },
+      { title: '"Prices are about to crash / market is cooling hard"', text: 'Inventory is up in some areas, but well-priced homes in desirable neighborhoods are still moving fast. People waiting for a crash often miss years of equity and end up paying more when they finally buy. Let\'s look at your specific situation.', tip: 'Ground in local data, not opinion.' }
+    ], '2026 objections — ChatGPT, Zillow, and "market is crashing" claims.', 'amber');
   }
 
   // ─── LTV & REFERRAL FLYWHEEL MINDSET ─────────────────────────────────
@@ -617,7 +617,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 p-4">
           <div class="font-bold text-sm text-[#002B5C] dark:text-white mb-1">Direct Value</div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Future refis, second homes, kids buying, parents downsizing — one nurtured client generates multiple files.</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Future listings, move-ups, investment properties, family referrals — one nurtured client generates multiple transactions.</div>
         </div>
         <div class="rounded-2xl border border-purple-300 bg-purple-50/50 dark:bg-purple-900/20 p-4">
           <div class="font-bold text-sm mb-1">Indirect Value</div>
@@ -629,8 +629,8 @@
         </div>
       </div>
       <div class="p-5 rounded-2xl bg-gradient-to-r from-teal-600 to-[#00A89D] text-white mb-6">
-        <div class="font-bold mb-2">Simple math most LOs ignore</div>
-        <div class="text-sm opacity-95">40 closings/year × 3 referrals per nurtured client over 5 years = <strong>600+ lifetime opportunities</strong>. The 7-day system is the cheapest, highest-ROI marketing you will ever run.</div>
+        <div class="font-bold mb-2">Simple math most agents ignore</div>
+        <div class="text-sm opacity-95">20 closings/year × 3 referrals per nurtured client over 5 years = <strong>300+ lifetime opportunities</strong>. The 7-day system is the cheapest, highest-ROI marketing you will ever run.</div>
       </div>
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:post-closing-7day" class="text-xs px-3 py-2 rounded-xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">Start 7-Day framework →</button>
@@ -646,10 +646,10 @@
   function renderPostClosingFullScripts(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Word-for-Word Scripts');
     const sections = [
-      { title: 'Opening — Build Rapport + Permission', script: 'Hi [Name], it\'s [Your Name] from [Company]. I\'m just calling to check in on how the first week in the new house is going. Do you have 3-4 minutes? I promise I won\'t keep you long.', tip: 'Smile while you talk. Energy matters more than perfection.' },
-      { title: 'Education Section — The Value', script: 'A couple quick things most people run into in the first month… 1. Your first mortgage payment is due [date] for [amount]. 2. You\'ll get separate bills for taxes and insurance — don\'t pay them twice. 3. You might start getting refinance offers in the mail — forward them to me and I\'ll tell you if they\'re worth looking at. 4. I\'ll send monthly home value updates through myHomeIQ/HomeBot so you can see your equity growing.', tip: 'Pause after each point. Ask "make sense?" before moving on.' },
-      { title: 'Feedback Section', script: 'Before I let you go — how did we do overall? Is there anything we could have done better? Your honest feedback helps me improve for the next family.', tip: 'Silence after the question. Let them talk.' },
-      { title: 'The Ask — Reviews + Referrals + Anchor', script: 'If you\'re happy with how everything went, I\'d be incredibly grateful for a quick Google review — I\'ll text you the link after we hang up. And when friends or coworkers mention buying or refinancing, would you be comfortable mentioning my name? Last thing — I\'d love to do a quick 15-minute mortgage efficiency check-up around your one-year anniversary. I\'ll reach out then. Sound good?', tip: 'Send review link within 2 hours. Calendar the annual review.' }
+      { title: 'Opening — Build Rapport + Permission', script: 'Hi [Name], it\'s [Your Name] from [Brokerage]. I\'m just calling to check in on how the first week in the new house is going. Do you have 3-4 minutes? I promise I won\'t keep you long.', tip: 'Smile while you talk. Energy matters more than perfection.' },
+      { title: 'Education Section — The Value', script: 'A couple quick things most people run into in the first month… 1. File your homestead exemption if you haven\'t — it can save real money on property taxes. 2. Update your address with USPS, banks, and insurance. 3. You might start getting investor and solicitor mail — feel free to forward anything that looks sketchy and I\'ll tell you if it\'s worth a look. 4. I\'ll send periodic home value updates so you can see your equity growing.', tip: 'Pause after each point. Ask "make sense?" before moving on.' },
+      { title: 'Feedback Section', script: 'Before I let you go — how did I do overall? Is there anything I could have done better? Your honest feedback helps me improve for the next family.', tip: 'Silence after the question. Let them talk.' },
+      { title: 'The Ask — Reviews + Referrals + Anchor', script: 'If you\'re happy with how everything went, I\'d be incredibly grateful for a quick Google review — I\'ll text you the link after we hang up. And when friends or coworkers mention buying or selling, would you be comfortable mentioning my name? Last thing — I\'d love to do a quick 15-minute home equity and market check-in around your one-year anniversary. I\'ll reach out then. Sound good?', tip: 'Send review link within 2 hours. Calendar the annual review.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">COMPLETE CONVERSATION</span></div>
@@ -673,7 +673,7 @@
     const blocks = [
       { title: 'Weekly Power Hour (Thursdays)', color: 'border-[#00A89D]', items: ['Pull list of clients who closed 7 days ago', 'Block 60–90 minutes — non-negotiable', 'Complete full 7-day calls using script + checklist', 'Log everything in CRM with notes', 'Send follow-up text same day', 'Send Google review link if they agreed'] },
       { title: '30 / 60 / 90 Day Follow-Ups', color: 'border-purple-400', items: ['Day 30: Call or detailed check-in text', 'Day 60: Light value touch + soft referral ask', 'Day 90: Email + small gift or resource + Annual Review seed'] },
-      { title: 'Ongoing Engine', color: 'border-[#002B5C]/40', items: ['Every Monday: Pull birthday + anniversary list for the week', 'Call or text every client on that list', 'Quarterly: Review top 10 referrers — personal note + small gift', 'Annually: Send Annual Mortgage Review invitation at closing anniversary'] }
+      { title: 'Ongoing Engine', color: 'border-[#002B5C]/40', items: ['Every Monday: Pull birthday + anniversary list for the week', 'Call or text every client on that list', 'Quarterly: Review top 10 referrers — personal note + small gift', 'Annually: Send Annual Home Review invitation at closing anniversary'] }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
@@ -707,14 +707,14 @@
   function renderObjectionFullLibrary(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Master Objection Index');
     const categories = [
-      { label: 'Rates Too High', count: 6, bridge: 'modal:objection-rates', sample: 'Rates feel high compared to 2021, but people who waited often paid 15–25% more for the same house. Want me to show you the math on your price range?' },
-      { label: 'Waiting for Rates to Drop', count: 5, bridge: 'modal:objection-waiting', sample: 'Let\'s say rates drop to 5.5% in 12 months. Homes often rise 9–14% in that time. On a $420k home that\'s $42–58k extra to save ~$200/month.' },
-      { label: 'Credit Score Too Low', count: 4, bridge: 'modal:objection-credit', sample: 'Credit doesn\'t have to be perfect — it has to be on a path. I\'ve helped plenty of people buy sooner than they thought with a 60–90 day plan.' },
-      { label: 'Down Payment Concerns', count: 4, bridge: 'modal:objection-downpayment', sample: 'You may not need as much as you think. Between DPA programs, gift funds, and seller concessions, I\'ve helped people get in with under $5k out of pocket.' },
-      { label: '"I Have a Guy"', count: 4, bridge: 'modal:objection-competitor', sample: 'I respect loyalty. Happy to be a no-pressure second opinion — if after one conversation your guy is still the best fit, I\'ll respect that completely.' },
-      { label: 'AI / Zillow / Modern', count: 3, bridge: 'modal:objection-modern', sample: 'Those tools are great for ballpark math. They don\'t know your credit profile, state programs, or the 12–15 products we have. Want real numbers?' },
-      { label: 'Investor / Cash Buyer', count: 2, bridge: 'modal:objection-investor', sample: 'Even cash buyers use leverage right now. Want to run numbers on keeping cash liquid with 50–70% LTV?' },
-      { label: 'Partner / Realtor Pushback', count: 4, bridge: 'modal:objection-gain-partner-business', sample: 'I\'m not here to take more of your time. I wanted to drop off something small that might save you time on your next few deals.' }
+      { label: 'Prices Too High', count: 6, bridge: 'modal:objection-rates', sample: 'Prices feel high compared to a few years ago, but people who waited often paid 15–25% more for the same neighborhood. Want me to show you what\'s actually available in your price range?' },
+      { label: 'Waiting for Market to Cool', count: 5, bridge: 'modal:objection-waiting', sample: 'Let\'s say prices soften 5% in 12 months. In that same period, rates could rise and inventory could tighten. On a $420k home that\'s $30–50k in lost opportunity to save ~$200/month.' },
+      { label: 'Credit Score Too Low', count: 4, bridge: 'modal:objection-credit', sample: 'Credit doesn\'t have to be perfect — it has to be on a path. I\'ve helped plenty of buyers get into homes sooner than they thought with a 60–90 day plan and the right lender.' },
+      { label: 'Down Payment Concerns', count: 4, bridge: 'modal:objection-downpayment', sample: 'You may not need as much as you think. Between DPA programs, gift funds, and seller concessions, I\'ve seen buyers get in with under $5k out of pocket.' },
+      { label: '"I Have an Agent"', count: 4, bridge: 'modal:objection-competitor', sample: 'I respect loyalty. Happy to be a no-pressure second opinion — if after one conversation your agent is still the best fit, I\'ll respect that completely.' },
+      { label: 'AI / Zillow / Modern', count: 3, bridge: 'modal:objection-modern', sample: 'Those tools are great for ballpark math. They don\'t know off-market activity, neighborhood nuances, or negotiation strategy. Want real comps?' },
+      { label: 'Investor / Cash Buyer', count: 2, bridge: 'modal:objection-investor', sample: 'Even cash buyers use leverage on rentals. Want to run numbers on cap rate and cash-on-cash returns?' },
+      { label: 'Lender / Partner Pushback', count: 4, bridge: 'modal:objection-gain-partner-business', sample: 'I\'m not here to take more of your time. I wanted to drop off something small that might help you on your next few deals.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
@@ -756,28 +756,28 @@
         'Just thinking about you guys. Any fun plans for the house this summer?',
         'Hope you had a great weekend! The new kitchen looks amazing from the photos you posted.',
         'Random check-in — how\'s the puppy adjusting to the new backyard?',
-        'Hey [Name], just wanted to say thanks for the partnership. You make my job easy.'
+        'Hey [Name], just wanted to say thanks for trusting me with your home purchase. You made my job easy.'
       ]},
       { name: 'Value Touches / Market Updates', msgs: [
         'Quick note — property taxes for [County] are due next month. Let me know if you want the exact amount for your home.',
-        'Rates moved a little this week. Not saying it\'s time to do anything, but happy to run a quick scenario if you\'re curious.',
-        'Inventory in [neighborhood] is up 12% this month. Might be good for some of your buyers.',
-        'New first-time buyer program just launched in [state] — up to $10k assistance. Happy to send details.',
-        'Rates are at a 3-month low this week. Want a simple flyer you can forward to past clients?'
+        'Three new listings just hit [neighborhood] this week — might be good intel if any friends are looking.',
+        'Inventory in [neighborhood] is up 12% this month. Curious what that means for your home\'s value? Happy to run a quick update.',
+        'A friend of mine just listed in [neighborhood] — if you know anyone looking, I\'d love to help them the same way I helped you.',
+        'Market shifted a bit this week. Want a simple one-pager you can forward to friends thinking about selling?'
       ]},
       { name: 'Light Referral Asks', msgs: [
-        'If any friends or coworkers mention buying or refinancing, I\'d love to help them the same way I helped you.',
-        'When mortgages come up with your clients, feel free to mention my name. I\'ll take great care of them.',
+        'If any friends or coworkers mention buying or selling, I\'d love to help them the same way I helped you.',
+        'When real estate comes up with your friends, feel free to mention my name. I\'ll take great care of them.',
         'No pressure — if you know anyone thinking about moving in the next 6 months, I\'d be honored to help.',
         'Your referrals mean the world. I treat every one like family.',
-        'Just a reminder I\'m always here — even for a quick question.'
+        'Just a reminder I\'m always here — even for a quick question about your home\'s value.'
       ]},
       { name: 'Post-Closing & Anniversary', msgs: [
-        'First payment went out smoothly on my end. Let me know if you have any questions about what you\'re seeing.',
         'Hope the first month in the new house has been smooth. Any surprises pop up?',
         'One year ago today we closed! Hope you\'re loving the home as much as day one.',
         'Your home value update just came in — equity is up nicely. Want the details?',
-        'If you ever want to chat about future goals (move-up, investment, etc.), I\'m here.'
+        'If you ever want to chat about future goals (move-up, investment, selling), I\'m here.',
+        'Happy home anniversary! Can\'t believe it\'s been a year already. How\'s the house treating you?'
       ]}
     ];
     contentEl.innerHTML = `
@@ -878,7 +878,7 @@
         </div>
       </div>
       ${scriptCard('Same-day follow-up text',
-        'Hope the [gift] brings a smile. Let me know if I can support any of your buyers this week.',
+        'Hope the [gift] brings a smile. Let me know if I can support any of your clients this week.',
         'Reference the specific gift and keep it under 2 sentences.')}
       <div class="mt-4 p-4 rounded-2xl bg-[#F15A29]/5 border border-[#F15A29]/20 text-sm mb-6">
         <strong>80/20 Rule:</strong> Spend $6–12 on 80% of pop-bys. Save $18–30 "wow" items for top 10–15 partners. Consistency beats extravagance.
@@ -987,7 +987,7 @@
           <ul class="text-sm space-y-2 text-gray-700 dark:text-gray-300 list-none">
             <li class="flex gap-2"><span class="text-[#00A89D]">☐</span> Run your first full 7-Day Power Hour on recent closings</li>
             <li class="flex gap-2"><span class="text-[#00A89D]">☐</span> Start birthday/anniversary touch system</li>
-            <li class="flex gap-2"><span class="text-[#00A89D]">☐</span> Book 3 Annual Mortgage Review calls with past clients</li>
+            <li class="flex gap-2"><span class="text-[#00A89D]">☐</span> Book 3 Annual Home Review calls with past clients</li>
           </ul>
           <button type="button" data-vault-bridge="modal:post-closing-7day" class="mt-3 text-xs px-2 py-1 rounded-lg border border-[#00A89D] text-[#00A89D] font-semibold">7-Day framework →</button>
         </div>
@@ -1069,7 +1069,7 @@
   function renderGiftCustomMap(item, contentEl, modal) {
     renderPremiumGift(item, contentEl, modal, {
       badge: 'HYPER-PERSONAL',
-      whyWorks: ['Extremely high emotional resonance', 'Most people never get this from a lender', 'Hangs in the home — daily visual reminder', 'Tells their "new chapter" story'],
+      whyWorks: ['Extremely high emotional resonance', 'Most people never get this from an agent', 'Hangs in the home — daily visual reminder', 'Tells their "new chapter" story'],
       timing: 'Closing gift or 30–60 day "settled in" surprise. Ship to new address with handwritten card.',
       proUpgrade: 'Include small framing gift card if budget is tight post-move. Source from Etsy or local print shop.',
       noteScript: 'Every home has a story — glad we got to be part of yours. Hope this reminds you of the neighborhood you chose.',
@@ -1083,7 +1083,7 @@
       whyWorks: ['Used multiple times daily by whole family', 'Impossible to ignore at the front door', 'Under $60 with highest visibility ROI', 'Kids and guests see your thoughtfulness too'],
       timing: 'Closing day or first-week delivery while they\'re still settling in.',
       proUpgrade: 'Neutral high-quality mat, elegant font. Avoid thin cheap mats.',
-      noteScript: 'May every person who crosses this threshold feel as welcome as you made us feel during your loan process.',
+      noteScript: 'May every person who crosses this threshold feel as welcome as you made us feel during your home purchase.',
       copyLabel: 'Copy Welcome Mat Gift Guide'
     });
   }
@@ -1093,7 +1093,7 @@
       badge: 'LOW COST · HIGH ROI',
       whyWorks: ['Ultimate proof you were listening as a human', 'Almost no one does this consistently', '$15–30 with outsized emotional impact', 'Perfect for 6–12 month surprise timing'],
       timing: '6–12 month anniversary or birthday. Note inside cover, not on a sticky.',
-      proUpgrade: 'Reference their specific hobby from the 7-day call or loan process notes in CRM.',
+      proUpgrade: 'Reference their specific hobby from the 7-day call or transaction notes in CRM.',
       noteScript: 'Saw this and immediately thought of you. Hope it gives you as much joy as you gave us during your home purchase.',
       noteTip: 'Write inside the cover — permanent and personal.',
       copyLabel: 'Copy Hobby Book Gift Guide'
@@ -1121,7 +1121,7 @@
       proUpgrade: 'Custom embroidery with family name or new address. Pair with anniversary call.',
       noteScript: 'One year in the books — hope this keeps you cozy for many more chapters in the home.',
       extraBridge: 'modal:annual-mortgage-review',
-      extraBridgeLabel: 'Annual review →',
+      extraBridgeLabel: 'Annual home review →',
       copyLabel: 'Copy Throw Blanket Gift Guide'
     });
   }
@@ -1131,11 +1131,11 @@
     setKicker(modal, 'Value Vault • Content Operating Menu');
     const pillars = [
       { n: '1', title: 'Local Market Expertise & Data', color: 'border-[#00A89D]', why: 'People buy in specific neighborhoods — you become the local authority.', ideas: ['"What $X buys in [neighborhood]" carousels', 'Hottest listings under $400k with commentary', '3 things changing in [zip] buyers need to know', '2024 vs 2026 median price comparisons'], pro: 'End with "DM me for the full neighborhood report."' },
-      { n: '2', title: 'First-Time Buyer Education', color: 'border-[#F15A29]', why: 'Most scared buyers — make them feel safe, earn referrals for life.', ideas: ['7 fees nobody tells you until closing', 'Credit score reality in 2026 (not 740)', 'How much house can you really afford?', 'Documents needed — organized by stage'], pro: null },
-      { n: '3', title: 'Rate & Market Reality Checks', color: 'border-amber-500', why: 'You become the calm trusted voice vs fear-mongering media.', ideas: ['What 6.8% actually means on a $380k home', '3 scenarios where waiting costs money', 'Why 7% today can beat 4% in 2021 (with math)', 'Weekly 45-sec Rate Reality Check Reels'], pro: null },
-      { n: '4', title: 'Client Wins & Stories', color: 'border-blue-500', why: 'Social proof beats any script. Real stories convert.', ideas: ['618 credit score + $8k down — how we did it', 'Refi saved $417/mo — kitchen remodel story', 'Family of 5 into "impossible" school district'], pro: 'Always get permission. Change names if needed.' },
-      { n: '5', title: 'Behind the Scenes & Personality', color: 'border-emerald-500', why: 'People do business with people they know, like, trust.', ideas: ['Day in the life (phone filmed)', '3 questions before we pull credit', 'What I\'m telling buyers this week vs 6 months ago', 'Funny/relatable closing moments'], pro: null },
-      { n: '6', title: 'Quick Tips & Myth Busters', color: 'border-rose-500', why: 'Snackable, high shareability — perfect for Reels/Stories.', ideas: ['Gift funds from employer for down payment', 'VA loans — no PMI at 0% down', 'Equity access — tax-free in many cases', 'Myth-busting series (20% down, credit myths)'], pro: null }
+      { n: '2', title: 'First-Time Buyer Education', color: 'border-[#F15A29]', why: 'Most scared buyers — make them feel safe, earn referrals for life.', ideas: ['7 costs nobody tells you until closing', 'How to win in a low-inventory market', 'How much house can you really afford?', 'Documents needed — organized by stage'], pro: null },
+      { n: '3', title: 'Market & Pricing Reality Checks', color: 'border-amber-500', why: 'You become the calm trusted voice vs fear-mongering media.', ideas: ['What $380k actually buys right now in [area]', '3 scenarios where waiting costs money', 'Why buying in 2024–2026 can beat waiting for a "crash"', 'Weekly 45-sec Market Reality Check Reels'], pro: null },
+      { n: '4', title: 'Client Wins & Stories', color: 'border-blue-500', why: 'Social proof beats any script. Real stories convert.', ideas: ['First-time buyer wins in competitive market', 'Seller got $25k over ask — here\'s how we positioned it', 'Family of 5 into "impossible" school district'], pro: 'Always get permission. Change names if needed.' },
+      { n: '5', title: 'Behind the Scenes & Personality', color: 'border-emerald-500', why: 'People do business with people they know, like, trust.', ideas: ['Day in the life (phone filmed)', '3 questions I ask before every showing', 'What I\'m telling buyers this week vs 6 months ago', 'Funny/relatable closing moments'], pro: null },
+      { n: '6', title: 'Quick Tips & Myth Busters', color: 'border-rose-500', why: 'Snackable, high shareability — perfect for Reels/Stories.', ideas: ['You don\'t need 20% down to buy', 'Staging mistakes that cost sellers money', 'How to read a CMA in 60 seconds', 'Myth-busting series (timing the market, FSBO myths)'], pro: null }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
@@ -1153,7 +1153,7 @@
           </div>`).join('')}
       </div>
       <div class="p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 text-sm mb-6">
-        <strong>Weekly mix rule:</strong> 1× Local (Pillar 1) + 1× Education/Rate (2 or 3) + 1× Story/Personality/Tip (4, 5, or 6). Authoritative + human.
+        <strong>Weekly mix rule:</strong> 1× Local (Pillar 1) + 1× Education/Market (2 or 3) + 1× Story/Personality/Tip (4, 5, or 6). Authoritative + human.
       </div>
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:content-30day-sprint" class="text-xs px-3 py-2 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">30-day sprint →</button>
@@ -1171,7 +1171,7 @@
       { title: 'Record the Mother Video', desc: '60–90 sec Reel answering one real question. Trending audio. Direct to camera.', outputs: null },
       { title: 'Same-Day Repurposes', desc: 'Immediate leverage while energy is high.', outputs: ['Post to IG + TikTok + YouTube Shorts', 'Story series — 3–4 frames from raw cut', '3–5 carousel graphics (Canva/CapCut)', '3–4 quote posts for LinkedIn + Facebook'] },
       { title: 'Next 1–2 Days', desc: 'Deeper formats from same transcript.', outputs: ['400–600 word LinkedIn/Facebook article', 'Email to database: "This week\'s 90-sec insight"', '5–7 slide carousel (different framing)', '45-sec polished square feed version'] },
-      { title: 'Weekly Long-Form', desc: 'Combine 3–4 best Reels into one 8–12 min YouTube video.', outputs: ['Title: "Mortgage Questions I\'m Answering This Week"', 'SEO gold + lead magnet potential'] }
+      { title: 'Weekly Long-Form', desc: 'Combine 3–4 best Reels into one 8–12 min YouTube video.', outputs: ['Title: "Real Estate Questions I\'m Answering This Week"', 'SEO gold + lead magnet potential'] }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-500/10 text-purple-600">1 → 7 SYSTEM</span></div>
@@ -1249,17 +1249,17 @@
   function renderReelHookFormula(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Scroll-Stopping Hooks');
     const hooks = [
-      { name: 'The "I Was Wrong" Hook', script: 'I used to tell every buyer to wait for lower rates… I was dead wrong.', why: 'Vulnerability + authority. They want to know what changed your mind.' },
-      { name: 'Contrarian / Counter-Intuitive', script: '6.75% is actually one of the best times in 15 years to buy. Here\'s the math nobody shows you.', why: 'Challenges belief — brain keeps watching to resolve dissonance.' },
-      { name: '"Most People Don\'t Know"', script: 'Most people don\'t realize veterans can put 0% down with no PMI. Watch this before you listen to your uncle.', why: 'Curiosity gap + social proof against bad advice.' },
-      { name: 'Specific Number Hook', script: 'This couple just saved $2,847 per year using a strategy most loan officers never mention.', why: 'Specific numbers feel researched. Vague claims get scrolled.' },
-      { name: 'Story Hook (best for Reels)', script: 'A 29-year-old nurse walked in crying. Three months later she closed on her first home. Here\'s what we did differently.', why: 'Human + emotional + repeatable method promise.' },
-      { name: 'Direct Question Hook', script: 'If rates dropped to 5.5% tomorrow, would you actually be ready to buy? Most of my clients wouldn\'t. Here\'s why that\'s dangerous.', why: 'Forces self-reflection — am I one of "most clients"?' },
-      { name: '"2026 Reality" Hook', script: 'The game changed in 2025. If you\'re still using 2021 buying advice, you\'re leaving money on the table.', why: 'Recency + authority — works extremely well right now.' }
+      { name: 'The "I Was Wrong" Hook', script: 'I used to tell every seller to wait for spring… I was dead wrong.', why: 'Vulnerability + authority. They want to know what changed your mind.' },
+      { name: 'Contrarian / Counter-Intuitive', script: 'This is actually one of the best times in 5 years to buy in [neighborhood]. Here\'s the data nobody shows you.', why: 'Challenges belief — brain keeps watching to resolve dissonance.' },
+      { name: '"Most People Don\'t Know"', script: 'Most sellers don\'t realize a $3,000 staging fix can return $15,000 at closing. Watch this before you list.', why: 'Curiosity gap + social proof against bad advice.' },
+      { name: 'Specific Number Hook', script: 'This seller just got $23,400 over asking using a strategy most agents never mention.', why: 'Specific numbers feel researched. Vague claims get scrolled.' },
+      { name: 'Story Hook (best for Reels)', script: 'A first-time buyer lost three offers. Six weeks later they closed on their dream home. Here\'s what we did differently.', why: 'Human + emotional + repeatable method promise.' },
+      { name: 'Direct Question Hook', script: 'If your home value dropped 8% tomorrow, would you actually be ready to sell? Most of my clients wouldn\'t. Here\'s why that matters.', why: 'Forces self-reflection — am I one of "most clients"?' },
+      { name: '"2026 Reality" Hook', script: 'The game changed in 2025. If you\'re still using 2021 selling advice, you\'re leaving money on the table.', why: 'Recency + authority — works extremely well right now.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-500/10 text-purple-600">1.5 SECONDS TO WIN</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Seven hook patterns working for loan officers in 2026. First 3 words must be crystal clear.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Seven hook patterns working for real estate agents in 2026. First 3 words must be crystal clear.</p>
       <div class="space-y-3 mb-6">
         ${hooks.map((h) => `
           <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
@@ -1285,9 +1285,10 @@
   function renderPopbyWhatToSay(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Pop-By Delivery Scripts');
     const scripts = [
-      { situation: 'Standard drop (no prior relationship)', script: 'Hey [Name], I\'m [Your Name] with [Company]. I know you\'re busy — I just wanted to drop this off and say thanks for everything you do for the community. No strings attached. Hope it makes your week a little better. My card\'s inside if you ever need anything.', tip: 'Under 30 seconds. Smile. Leave before awkward.' },
-      { situation: 'After they referred you', script: 'I just wanted to personally thank you for sending [Client Name] my way. That meant a lot. I dropped off a little something to show my appreciation — no big deal, just wanted you to know I noticed.', tip: 'Reference the specific client name always.' },
-      { situation: 'Busy season / high stress', script: 'I know it\'s crazy right now with listings. I won\'t keep you — just wanted to leave this for you and your team. You guys are killing it. Let me know if there\'s any way I can make your life easier on the financing side.', tip: 'Best timing for reciprocity trigger.' },
+      { situation: 'Standard drop to lender/partner (no prior relationship)', script: 'Hey [Name], I\'m [Your Name] with [Brokerage]. I know you\'re busy — I just wanted to drop this off and say thanks for everything you do for buyers in our market. No strings attached. Hope it makes your week a little better. My card\'s inside if you ever need a great agent.', tip: 'Under 30 seconds. Smile. Leave before awkward.' },
+      { situation: 'After they referred you a client', script: 'I just wanted to personally thank you for sending [Client Name] my way. That meant a lot. I dropped off a little something to show my appreciation — no big deal, just wanted you to know I noticed.', tip: 'Reference the specific client name always.' },
+      { situation: 'Busy season / high stress', script: 'I know it\'s crazy right now with closings. I won\'t keep you — just wanted to leave this for you and your team. You guys are killing it. Let me know if there\'s any way I can make your life easier on the transaction side.', tip: 'Best timing for reciprocity trigger.' },
+      { situation: 'Pop-by to past client', script: 'Hey [Name] — just swinging by with a little something for the new home. Hope you\'re settling in great. I\'m always here if anything comes up — buying, selling, or just questions about the neighborhood.', tip: 'No business talk unless they bring it up.' },
       { situation: 'Long-term partner (keep light)', script: 'Just swinging by to say hi and drop this off. How\'s your summer going? Any fun trips planned? I\'m around if you need anything at all.', tip: 'No business talk unless they bring it up.' }
     ];
     contentEl.innerHTML = `
@@ -1311,17 +1312,17 @@
   function renderPopbyNoteTemplates(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Handwritten Note Library');
     const notes = [
-      { label: 'Standard thank you', text: '[Name],\n\nJust wanted to drop this off and say thank you for all the great work you do. You make buying and selling homes look easy. Hope this brightens your day.\n\nGrateful to know you,\n[Your Name]' },
+      { label: 'Standard thank you (lender/partner)', text: '[Name],\n\nJust wanted to drop this off and say thank you for all the great work you do. You make buying and selling homes look easy. Hope this brightens your day.\n\nGrateful to know you,\n[Your Name]' },
       { label: 'After a referral', text: '[Name],\n\nThank you for trusting me with [Client]. It means the world. I wanted you to know I took great care of them. Here\'s a little something for you — enjoy!\n\nTalk soon,\n[Your Name]' },
-      { label: 'Busy season support', text: '[Name],\n\nI know it\'s insane right now. Just dropping this off as a small "you\'re crushing it" gift. You\'re doing amazing work. Let me know if I can ever help lighten the load on the financing side.\n\n[Your Name]' },
+      { label: 'Busy season support', text: '[Name],\n\nI know it\'s insane right now. Just dropping this off as a small "you\'re crushing it" gift. You\'re doing amazing work. Let me know if I can ever help lighten the load with buyers or listings.\n\n[Your Name]' },
       { label: 'Long-term partner', text: '[Name],\n\nJust swinging by to say hi. Hope this small gift makes your week better. Appreciate the partnership more than you know.\n\n[Your Name]' },
-      { label: 'Client win celebration', text: '[Name],\n\nCongrats on helping [Client] close! I wanted to celebrate your win with this. You\'re the best.\n\n[Your Name]' },
-      { label: 'Just because', text: '[Name],\n\nNo reason — just thinking about how lucky I am to work with agents like you. Enjoy this!\n\n[Your Name]' },
-      { label: 'Market update drop', text: '[Name],\n\nDropped off a quick local market snapshot + this small treat. Thought it might be useful for your sphere.\n\n[Your Name]' },
+      { label: 'Client closing celebration', text: '[Name],\n\nCongrats on helping [Client] close! I wanted to celebrate your win with this. You\'re the best.\n\n[Your Name]' },
+      { label: 'Just because (partner)', text: '[Name],\n\nNo reason — just thinking about how lucky I am to work with great partners like you. Enjoy this!\n\n[Your Name]' },
+      { label: 'Market update drop', text: '[Name],\n\nDropped off a quick local market snapshot + this small treat. Thought it might be useful for your clients.\n\n[Your Name]' },
+      { label: 'Client gift note', text: '[First Name],\n\nI still remember how excited you were about [specific detail]. Hope this [gift] helps you enjoy the home for years. Thank you for trusting me.\n\nWelcome home,\n[Your Name]' },
       { label: 'After tough week', text: '[Name],\n\nI know this week was crazy. Just a small pick-me-up to say you\'re appreciated.\n\n[Your Name]' },
       { label: 'Seasonal / holiday', text: '[Name],\n\nHappy [holiday]! Hope this small gift adds a little joy to your season.\n\n[Your Name]' },
-      { label: 'New agent support', text: '[Name],\n\nCongrats on the new chapter. Dropped off a few things to help you crush your first 100 days.\n\n[Your Name]' },
-      { label: 'Referral thank you', text: '[Name],\n\nJust closed on [Client] thanks to you. Here\'s a small token of my appreciation — you\'re the best.\n\n[Your Name]' },
+      { label: 'New agent support', text: '[Name],\n\nCongrats on the new chapter. Dropped off a few things to help you crush your first 100 days. Rooting for you!\n\n[Your Name]' },
       { label: 'Quarterly touch', text: '[Name],\n\nJust a quarterly thank you for the partnership. Hope this helps make your week a little brighter.\n\n[Your Name]' }
     ];
     contentEl.innerHTML = `
@@ -1389,11 +1390,11 @@
   function renderNurture90Day(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • New Client Drip Sequence');
     const touches = [
-      { day: 'Day 3', channel: 'Text', script: 'Hey [Name], just checking in — how\'s the new place feeling? Any questions about the first payment or anything else? I\'m here.', tip: 'Send 2–3 days after closing — not same day as 7-day call.' },
-      { day: 'Day 10', channel: 'Email', script: 'Hi [First Name],\n\nHope the first couple weeks in the new home have been smooth. If any questions about taxes, insurance, or maintenance pop up, I\'m still your person — no expiration date on that.\n\nWarmly,\n[Your Name]', tip: 'Soft review ask if experience was great.' },
-      { day: 'Day 30', channel: 'Text', script: 'Hi [Name] — just checking in at the 30-day mark. How is everything feeling in the new house? Any questions on payment, taxes, or insurance?', tip: 'Use post-closing texts template for variations.' },
-      { day: 'Day 60', channel: 'Text', script: 'Quick one — if you ever talk to friends or family about mortgages, I\'d love to help them the same way I helped you.', tip: 'Light referral ask — no pressure language.' },
-      { day: 'Day 90', channel: 'Email + gift', script: 'Hi [First Name],\n\nThree months in — hope the house is starting to feel like home. I\'d love to do a quick 15-minute mortgage efficiency check-up around your one-year anniversary. I\'ll reach out then.\n\nWarmly,\n[Your Name]', tip: 'Include small useful resource or gift. Plants Annual Review.' }
+      { day: 'Day 3', channel: 'Text', script: 'Hey [Name], just checking in — how\'s the new place feeling? Any questions about utilities, taxes, or the neighborhood? I\'m here.', tip: 'Send 2–3 days after closing — not same day as 7-day call.' },
+      { day: 'Day 10', channel: 'Email', script: 'Hi [First Name],\n\nHope the first couple weeks in the new home have been smooth. If any questions about homestead exemption, contractors, or maintenance pop up, I\'m still your person — no expiration date on that.\n\nWarmly,\n[Your Name]', tip: 'Soft review ask if experience was great.' },
+      { day: 'Day 30', channel: 'Text', script: 'Hi [Name] — just checking in at the 30-day mark. How is everything feeling in the new house? Any questions about the neighborhood or settling in?', tip: 'Use post-closing texts template for variations.' },
+      { day: 'Day 60', channel: 'Text', script: 'Quick one — if you ever talk to friends or family about buying or selling, I\'d love to help them the same way I helped you.', tip: 'Light referral ask — no pressure language.' },
+      { day: 'Day 90', channel: 'Email + gift', script: 'Hi [First Name],\n\nThree months in — hope the house is starting to feel like home. I\'d love to do a quick 15-minute home equity and market check-in around your one-year anniversary. I\'ll reach out then.\n\nWarmly,\n[Your Name]', tip: 'Include small useful resource or gift. Plants Annual Home Review.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
@@ -1477,7 +1478,7 @@
     const blocks = [
       { when: 'Every Monday', items: ['Pull birthday/anniversary list for next 7 days', 'Film 2–3 Reels for the week (batch)', 'Send 3–5 value touches to top partners'], color: 'border-[#00A89D]' },
       { when: 'Every Thursday', items: ['Run 7-day post-closing calls (Power Hour)', 'Drop 2–3 strategic pop-bys', 'Review referral sources from last 30 days'], color: 'border-[#F15A29]' },
-      { when: 'Monthly', items: ['Send one high-quality client gift', 'Run 4–6 Annual Mortgage Review calls', 'Review content performance — double down on winners'], color: 'border-purple-400' },
+      { when: 'Monthly', items: ['Send one high-quality client gift', 'Run 4–6 Annual Home Review calls', 'Review content performance — double down on winners'], color: 'border-purple-400' },
       { when: 'Quarterly', items: ['Deep review of top 20 referral partners', 'Plan next quarter content themes', 'Handwritten notes to biggest referrers'], color: 'border-[#002B5C]/40' }
     ];
     contentEl.innerHTML = `
@@ -1510,8 +1511,8 @@
   function renderContentBrandPositioning(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Personal Brand Strategy');
     const positions = [
-      'The Local Market Expert', 'The First-Time Buyer Champion', 'The Rate & Strategy Educator',
-      'The No-BS Truth Teller', 'The Client-For-Life Relationship Builder', 'The Tech-Savvy Modern Mortgage Pro'
+      'The Local Market Expert', 'The First-Time Buyer Champion', 'The Market & Strategy Educator',
+      'The No-BS Truth Teller', 'The Client-For-Life Relationship Builder', 'The Tech-Savvy Modern Agent'
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-500/10 text-purple-600">BRAND STRATEGY</span></div>
@@ -1524,9 +1525,9 @@
       </div>
       <div class="rounded-2xl border border-[#F15A29]/30 bg-[#F15A29]/5 p-5 mb-6">
         <div class="font-bold text-sm text-[#F15A29] mb-2">Step 2 — Your "Only I" statement</div>
-        <div class="text-sm italic text-gray-700 dark:text-gray-300 mb-2">"I am the only loan officer in [your area] who _______________ while also _______________."</div>
+        <div class="text-sm italic text-gray-700 dark:text-gray-300 mb-2">"I am the only agent in [your area] who _______________ while also _______________."</div>
         ${scriptCard('Example',
-          'I am the only loan officer in the greater metro who explains every fee like I\'m talking to my mom, while also being brutally honest about when waiting makes sense.',
+          'I am the only agent in the greater metro who explains every step like I\'m talking to my best friend, while also being brutally honest about when to buy, sell, or wait.',
           'Fill in yours. Be specific — vague positioning is forgettable.')}
       </div>
       <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
@@ -1554,10 +1555,10 @@
     const scripts = [
       { pillar: 'Pillar 1 · Local Market', script: 'In [neighborhood] right now, the average home is spending only 11 days on market — down from 19 last month. If you\'ve been thinking about selling, well-priced homes are moving fast. Want the full breakdown for your street? DM me.', color: 'text-[#00A89D]' },
       { pillar: 'Pillar 2 · First-Time Buyer', script: 'You do NOT need 20% down. I\'m helping buyers get in with as little as 3% — sometimes 0% with the right programs. The biggest myth keeping people renting is the huge down payment idea. Let\'s break the math on a $350k home.', color: 'text-[#F15A29]' },
-      { pillar: 'Pillar 3 · Rate Reality', script: '6.8% feels scary until you realize waiting for 5% could cost you $50,000+ in higher home prices. I\'m not saying buy today no matter what — let\'s run your actual numbers both ways before you decide based on headlines.', color: 'text-amber-600' },
-      { pillar: 'Pillar 4 · Client Wins', script: 'This couple came to me with a 612 credit score and thought they had no shot. 47 days later they closed on their first home with a 2-1 buydown. Stories like this are why I do what I do. If you\'re on the fence, reach out.', color: 'text-blue-600' },
-      { pillar: 'Pillar 5 · Behind the Scenes', script: 'People ask what I actually do all day as a loan officer. Spoiler: it\'s not just pushing papers. Today I spent 3 hours on scenarios, 2 hours on partner calls, and 1 hour making sure a first-time buyer understood every fee before they signed. This is the job.', color: 'text-emerald-600' },
-      { pillar: 'Pillar 6 · Myth Buster', script: 'Myth: you need perfect credit to buy a home. Reality: I closed someone with a 580 FHA last month. Myth: you need 20% down. Reality: 3.5% FHA, 0% VA. Stop letting myths keep you renting while prices climb.', color: 'text-rose-600' }
+      { pillar: 'Pillar 3 · Market Reality', script: 'Waiting for prices to "crash" could cost you $50,000+ in higher home prices. I\'m not saying buy today no matter what — let\'s run your actual numbers both ways before you decide based on headlines.', color: 'text-amber-600' },
+      { pillar: 'Pillar 4 · Client Wins', script: 'This couple lost two offers and thought they had no shot. 47 days later they closed on their first home in a competitive market. Stories like this are why I do what I do. If you\'re on the fence, reach out.', color: 'text-blue-600' },
+      { pillar: 'Pillar 5 · Behind the Scenes', script: 'People ask what I actually do all day as a real estate agent. Spoiler: it\'s not just opening doors. Today I spent 3 hours on CMAs, 2 hours on partner calls, and 1 hour making sure a first-time buyer understood every step before they offered. This is the job.', color: 'text-emerald-600' },
+      { pillar: 'Pillar 6 · Myth Buster', script: 'Myth: you need perfect credit to buy a home. Reality: I helped a buyer with a 580 score last month. Myth: you need 20% down. Reality: 3.5% FHA, 0% VA. Stop letting myths keep you renting while prices climb.', color: 'text-rose-600' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
@@ -1586,14 +1587,14 @@
   function renderPopbyFullScriptPack(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Complete Pop-By Sequence');
     const steps = [
-      { phase: '1. Drop-off (15–30 sec)', script: 'Hey [Name], I\'m [Your Name] with [Company]. I know you\'re busy — just wanted to drop this off and say thanks. No strings attached. Hope it makes your week better. My card\'s inside.', tip: 'Use situation-specific scripts from What to Say modal.' },
+      { phase: '1. Drop-off (15–30 sec)', script: 'Hey [Name], I\'m [Your Name] with [Brokerage]. I know you\'re busy — just wanted to drop this off and say thanks. No strings attached. Hope it makes your week better. My card\'s inside.', tip: 'Use situation-specific scripts from What to Say modal.' },
       { phase: '2. Same-day text (2–4 hrs later)', script: 'Hey [Name], just wanted to say thanks again for the quick chat earlier. Hope you enjoyed the [gift]. No need to reply — just wanted you to know I appreciate you.', tip: 'Reference the specific gift. No ask.' },
-      { phase: '3. 1-week value follow-up', script: 'Hey [Name] — hope your week is going well. I put together a quick one-pager on rates and inventory in [their neighborhood]. Happy to email it over if useful. No strings.', tip: 'Attach real market data — this is value, not a pitch.' },
-      { phase: '4. 30-day light touch', script: 'Random thought — if you ever have a client nervous about financing or wanting a second opinion, I\'m always happy to be a resource. Appreciate the partnership!', tip: 'Soft positioning as backup expert.' }
+      { phase: '3. 1-week value follow-up', script: 'Hey [Name] — hope your week is going well. I put together a quick one-pager on inventory and pricing in [their neighborhood]. Happy to email it over if useful. No strings.', tip: 'Attach real market data — this is value, not a pitch.' },
+      { phase: '4. 30-day light touch', script: 'Random thought — if you ever have a client on the fence about buying or selling and wanting a second opinion, I\'m always happy to be a resource. Appreciate the partnership!', tip: 'Soft positioning as trusted agent.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">DROP → TEXT → VALUE → TOUCH</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">The complete pop-by sequence — most LOs only do step 1 and wonder why it doesn't compound.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">The complete pop-by sequence — most agents only do step 1 and wonder why it doesn't compound.</p>
       <div class="space-y-4 mb-6">
         ${steps.map((s) => scriptCard(s.phase, s.script, s.tip)).join('')}
       </div>
@@ -1617,12 +1618,12 @@
     setKicker(modal, 'Value Vault • Partner Quick Touch');
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-teal-500/10 text-teal-600">WITHIN 24–48 HRS</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Fast, grateful, low-pressure — send after every successful closing or referral.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Fast, grateful, low-pressure — send after every successful closing or referral from a lender/partner.</p>
       ${scriptCard('Quick text after closing/referral',
-        'Hey [Name], just helped [Mutual Client] close smoothly — they loved working with you! Any buyers I can pre-approve this week?',
+        'Hey [Name], just helped [Mutual Client] close smoothly — they loved working with you! Any buyers or sellers I can help this week?',
         'Short. Grateful. Ends with easy ask — not a demand.')}
       ${scriptCard('Video version (15 sec)',
-        'Hey [Name] — quick update: [Client] just closed and had great things to say about you. Let me know if any of your buyers need scenarios this week. Appreciate you!',
+        'Hey [Name] — quick update: [Client] just closed and had great things to say about you. Let me know if any of your clients need a great agent this week. Appreciate you!',
         'Film in car after closing. Personal > polished.')}
       <div class="flex flex-wrap gap-2 mb-6 mt-4">
         <button type="button" data-vault-bridge="modal:popby-full-script-pack" class="text-xs px-3 py-2 rounded-xl border border-teal-500 font-semibold hover:bg-teal-100 transition">Full pop-by sequence →</button>
@@ -1636,12 +1637,12 @@
     setKicker(modal, 'Value Vault • Partner Value Email');
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500/10 text-indigo-600">WEEKLY VALUE DROP</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Market update + soft ask — positions you as their financing intel source.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Market update + soft ask — positions you as their local market intel source.</p>
       ${scriptCard('Subject line options',
-        'This week\'s rate watch + new buyer checklist (co-brand ready)\n— OR —\nQuick market pulse for [their zip codes]',
+        'This week\'s market pulse + seller prep checklist (co-brand ready)\n— OR —\nQuick inventory update for [their zip codes]',
         'Rotate subjects so it doesn\'t feel automated.')}
       ${scriptCard('Email body',
-        'Hi [Name],\n\nSharing this week\'s rate watch + a new buyer checklist I put together. Happy to co-brand with your logo if you want to forward to your sphere.\n\nLet me know if any of your buyers need quick scenarios — I turn those around same day.\n\n[Your Name]',
+        'Hi [Name],\n\nSharing this week\'s market pulse + a seller prep checklist I put together. Happy to co-brand with your logo if you want to forward to your sphere.\n\nLet me know if any of your clients need a great agent — I turn referrals around same day.\n\n[Your Name]',
         'Attach 1-page PDF. Co-brand option is the unlock.')}
       <div class="flex flex-wrap gap-2 mb-6 mt-4">
         <button type="button" data-vault-bridge="play:weekly-value-cadence" class="text-xs px-3 py-2 rounded-xl border border-indigo-400 font-semibold hover:bg-indigo-100 transition">Weekly cadence play →</button>
@@ -1655,13 +1656,13 @@
     setKicker(modal, 'Value Vault • Quarterly Partner Call');
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-500/10 text-slate-600">TOP 10–15 PARTNERS · QUARTERLY</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Relationship maintenance — ask about their challenges, not just your business.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Relationship maintenance with lenders and fellow agents — ask about their challenges, not just your business.</p>
       ${scriptCard('Opening',
-        'How\'s business treating you? Anything I can do to support your listings this month?',
+        'How\'s business treating you? Anything I can do to support your clients or listings this month?',
         'Listen 80%. Take notes. Reference something specific next touch.')}
       ${scriptCard('Deepening question',
-        'What\'s the biggest friction you\'re seeing with buyers right now — rates, inventory, or something else?',
-        'Their answer tells you what content and scenarios to prepare.')}
+        'What\'s the biggest friction you\'re seeing with buyers and sellers right now — inventory, pricing, or something else?',
+        'Their answer tells you what content and market intel to prepare.')}
       ${scriptCard('Closing',
         'Really appreciate the partnership. I\'ll send over [specific resource] this week that might help with what you mentioned.',
         'Always end with a value promise you actually deliver within 48 hours.')}
@@ -1674,21 +1675,21 @@
   }
 
   function renderRealtorOpenHouseKit(item, contentEl, modal) {
-    setKicker(modal, 'Value Vault • Open House Support Kit');
-    const items = ['Pre-approval station signage', 'Financing one-pagers (rate buydown, FHA, VA)', 'Sign-in sheets with subtle branding', 'Snacks + water + mints', 'Scenario cheat sheet for on-site questions', 'Business cards in a nice holder'];
+    setKicker(modal, 'Value Vault • Open House Excellence Kit');
+    const items = ['Professional signage + directional arrows', 'Branded listing flyers + QR to property page', 'Sign-in sheets with follow-up automation', 'Snacks + water + mints', 'Staging touch-up kit (flowers, towels, lights)', 'Business cards in a nice holder', 'Neighborhood market snapshot one-pager'];
     contentEl.innerHTML = `
-      <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">PARTNER TOOL</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Show up early, set up the table, stay 20–30 min, then leave. You become the helpful expert — not a salesperson.</p>
+      <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">LISTING TOOL</span></div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Show up early, stage the entry, run a polished open house, and capture every lead. This is how you become the agent sellers remember.</p>
       <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
         <div class="font-bold text-sm mb-3">Bring this kit</div>
         <ul class="text-sm space-y-1.5">${items.map((i) => `<li class="flex gap-2"><span class="text-[#00A89D]">☐</span>${esc(i)}</li>`).join('')}</ul>
       </div>
-      ${scriptCard('Agent offer text (before open house)',
-        'Happy to set up a pre-approval station at your open house Saturday — I\'ll bring materials and run quick scenarios for serious buyers. No cost, no catch. Want me there?',
-        'Send 3–5 days before. Most agents say yes.')}
+      ${scriptCard('Invite a lender partner (optional co-host)',
+        'Happy to co-host your open house Saturday — I\'ll handle the buyer welcome station and you focus on the property. I\'ll bring materials and follow up on every sign-in lead. Want me there?',
+        'Send 3–5 days before. Co-hosting doubles your reach.')}
       <div class="flex flex-wrap gap-2 mb-6 mt-4">
         <button type="button" data-vault-bridge="play:open-house-domination" class="text-xs px-3 py-2 rounded-xl bg-[#F15A29] text-white font-semibold hover:bg-orange-600 transition">Open house play →</button>
-        <button type="button" data-vault-bridge="modal:popby-open-house-kit" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">Pop-by kit idea →</button>
+        <button type="button" data-vault-bridge="modal:popby-open-house-kit" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">Partner gift idea →</button>
       </div>
       ${footerActions('Copy Open House Kit Checklist')}
     `;
@@ -1699,17 +1700,17 @@
     setKicker(modal, 'Value Vault • Weekly Market Touch');
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-600">EVERY MONDAY</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Low-effort, high-value — 3 bullets + one chart. Becomes their go-to financing intel.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Low-effort, high-value — 3 bullets + one chart. Becomes your sphere\'s go-to market intel.</p>
       <div class="rounded-2xl border border-blue-200 bg-blue-50/50 dark:bg-blue-900/20 p-5 mb-6 text-sm">
         <div class="font-bold mb-2">Email structure</div>
         <div><strong>Subject:</strong> This week in [area] — quick read (2 min)</div>
         <ul class="mt-2 space-y-1">
-          <li>• Bullet 1: Rate movement + what it means for buyers</li>
-          <li>• Bullet 2: Inventory / days on market in their zip</li>
-          <li>• Bullet 3: One program or tip they can forward</li>
-          <li>• Chart: simple rate trend or median price graphic</li>
+          <li>• Bullet 1: New listings and price reductions in your farm area</li>
+          <li>• Bullet 2: Days on market / inventory trend in key zips</li>
+          <li>• Bullet 3: One tip for buyers or sellers they can forward</li>
+          <li>• Chart: simple median price or inventory graphic</li>
         </ul>
-        <div class="mt-2 italic">Close: "Happy to hop on a 5-min call if any of your buyers need scenarios."</div>
+        <div class="mt-2 italic">Close: "Happy to hop on a 5-min call if you or anyone you know is thinking about moving."</div>
       </div>
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="play:weekly-value-cadence" class="text-xs px-3 py-2 rounded-xl border border-blue-400 font-semibold hover:bg-blue-100 transition">Weekly cadence →</button>
@@ -1769,7 +1770,7 @@
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">INTEGRATED SYSTEM</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Sophisticated LOs tie gifts deliberately into 7-Day, Anniversary, and Birthday systems.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Sophisticated agents tie gifts deliberately into 7-Day, Anniversary, and Birthday systems.</p>
       <div class="space-y-3 mb-6">
         ${touches.map((t) => `
           <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap justify-between gap-2">
@@ -1858,10 +1859,10 @@
     renderPremiumGift(item, contentEl, modal, { badge: 'LUXURY DAILY USE', whyWorks: ['Substantial, beautiful, extremely personal', 'Most people would never buy for themselves', 'Lives on counter — used every day', 'Giftology-aligned premium kitchen item'], timing: 'Closing gift for clients who love cooking/entertaining.', proUpgrade: 'Thick wood, engraved address or family name. Etsy or local woodworker.', noteScript: 'May your kitchen be the heart of the home — and this board see many great meals.', copyLabel: 'Copy Cutting Board Guide' });
   }
   function renderGiftExperience(item, contentEl, modal) {
-    renderPremiumGift(item, contentEl, modal, { badge: 'MEMORY > OBJECT', whyWorks: ['Creates emotional memories lasting years', 'Every retelling = they think of you', 'Highest wow factor without huge spend', 'Perfect for couples and VIP clients'], timing: '6–12 month touch for best clients, or closing gift for first-time buyer couples.', proUpgrade: 'Dinner for two, golf round, spa day, cooking class — match their interests from loan notes.', noteScript: 'Instead of another thing for the house — an experience to celebrate this chapter. Enjoy!', copyLabel: 'Copy Experience Gift Guide' });
+    renderPremiumGift(item, contentEl, modal, { badge: 'MEMORY > OBJECT', whyWorks: ['Creates emotional memories lasting years', 'Every retelling = they think of you', 'Highest wow factor without huge spend', 'Perfect for couples and VIP clients'], timing: '6–12 month touch for best clients, or closing gift for first-time buyer couples.', proUpgrade: 'Dinner for two, golf round, spa day, cooking class — match their interests from transaction notes.', noteScript: 'Instead of another thing for the house — an experience to celebrate this chapter. Enjoy!', copyLabel: 'Copy Experience Gift Guide' });
   }
   function renderGiftSubscription(item, contentEl, modal) {
-    renderPremiumGift(item, contentEl, modal, { badge: 'MONTHLY PRESENCE', whyWorks: ['Something from you every month', 'Stays top-of-mind long after closing', 'Low effort after setup', 'Coffee, wine, books, or snack boxes all work'], timing: 'Pay for first 3–6 months. Best as 6-month or anniversary surprise.', proUpgrade: 'Match their habit — coffee lovers get coffee club, readers get book box.', noteScript: 'A little something arriving each month to remind you we\'re still here for anything mortgage-related.', copyLabel: 'Copy Subscription Gift Guide' });
+    renderPremiumGift(item, contentEl, modal, { badge: 'MONTHLY PRESENCE', whyWorks: ['Something from you every month', 'Stays top-of-mind long after closing', 'Low effort after setup', 'Coffee, wine, books, or snack boxes all work'], timing: 'Pay for first 3–6 months. Best as 6-month or anniversary surprise.', proUpgrade: 'Match their habit — coffee lovers get coffee club, readers get book box.', noteScript: 'A little something arriving each month to remind you I\'m still here for anything buying, selling, or market-related.', copyLabel: 'Copy Subscription Gift Guide' });
   }
   function renderGiftCoasterSet(item, contentEl, modal) {
     renderPremiumGift(item, contentEl, modal, { badge: 'DAILY LIVING ROOM', whyWorks: ['Used multiple times daily', 'Visible in main living areas', 'Feels expensive under $50', 'Engraving adds personal permanence'], timing: 'Closing or 6-month touch. Marble, wood, or leather sets.', proUpgrade: '4–6 coasters engraved with address or family name.', noteScript: 'For all the coffees, dinners, and conversations that make a house a home.', copyLabel: 'Copy Coaster Set Guide' });
@@ -1906,10 +1907,10 @@
   function renderRealtorCobrandedFlyers(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Co-Marketing Toolkit');
     const assets = [
-      { name: 'Open house financing station', desc: 'Pre-approval signage + rate snapshot one-pager + QR to your application', tip: 'Agent\'s brand dominates the front. Your logo on back or footer only.' },
-      { name: '2-1 buydown explainer', desc: 'Visual one-pager showing payment savings — agents forward to nervous buyers', tip: 'Update monthly with current buydown math for your market.' },
-      { name: 'First-time buyer checklist', desc: 'Documents, timeline, programs — co-brand ready PDF', tip: 'Offer to customize with agent headshot. They will use this constantly.' },
-      { name: 'Weekly rate watch flyer', desc: '3 bullets + simple chart — designed to be forwarded', tip: 'Pair with Monday email cadence. Same content, print + digital.' }
+      { name: 'Seller prep one-pager', desc: 'Staging checklist + pricing strategy snapshot + QR to your listing consult', tip: 'Your brand dominates. Lender logo on back or footer only if co-marketing.' },
+      { name: 'Neighborhood market report', desc: 'Visual one-pager showing comps, days on market, and inventory — sphere-forwardable', tip: 'Update monthly with fresh local data.' },
+      { name: 'First-time buyer guide', desc: 'Step-by-step buying timeline — co-brand ready PDF with your headshot', tip: 'Lenders love co-branding this — they will forward to their database.' },
+      { name: 'Weekly market pulse flyer', desc: '3 bullets + simple chart — designed to be forwarded to sphere', tip: 'Pair with Monday email cadence. Same content, print + digital.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#F15A29]/10 text-[#F15A29]">PARTNER TOOL</span></div>
@@ -1923,7 +1924,7 @@
           </div>`).join('')}
       </div>
       <div class="p-4 rounded-2xl bg-[#F15A29]/5 border text-sm mb-6">
-        <strong>Golden rule:</strong> Ruoff Marketing Portal or Canva templates. Agent logo/name on front. Your contact on back. Never dominate their brand.
+        <strong>Golden rule:</strong> Canva or brokerage marketing templates. Your logo/name on front. Partner contact on back when co-branding. Never dominate their brand.
       </div>
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="play:co-marketing-assets" class="text-xs px-3 py-2 rounded-xl bg-[#F15A29] text-white font-semibold hover:bg-orange-600 transition">Co-marketing play →</button>
@@ -1938,14 +1939,14 @@
   function renderRealtorJointValueAdds(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Joint Events Playbook');
     const events = [
-      { title: 'First-Time Buyer Seminar', format: 'In-person or Zoom · 45 min', you: 'Present rates, programs, affordability myths', them: 'Invite sphere + provide venue', script: 'Happy to run the content if you invite your database — I\'ll make it zero sales pitch, pure education.' },
-      { title: 'Lunch & Learn (Brokerage)', format: '30 min during office meeting', you: 'Market update + 2 buyer scenarios', them: 'Books the room and introduces you', script: 'I can do a tight 20-minute market reality check for your agents — no pitch, just useful intel they can use today.' },
-      { title: 'Co-Hosted Webinar', format: 'Virtual · 30–40 min', you: 'Slides, Q&A, follow-up scenarios', them: 'Promotes to email list + social', script: 'Let\'s co-host a "What $X buys right now" session — I\'ll build the deck, you invite, we both win.' },
-      { title: 'Open House Financing Table', format: 'On-site · 2 hours', you: 'Pre-approval station + scenario cheat sheet', them: 'Hosts the open house', script: 'Happy to set up a financing table at your Saturday open house — materials, scenarios, zero cost to you.' }
+      { title: 'First-Time Buyer Seminar', format: 'In-person or Zoom · 45 min', you: 'Present market reality, neighborhood data, buying process', them: 'Lender presents programs and pre-qualification', script: 'Happy to co-host a first-time buyer seminar — I\'ll handle market education if you invite your database and cover lending programs. Zero sales pitch, pure education.' },
+      { title: 'Lunch & Learn (Brokerage)', format: '30 min during office meeting', you: 'Market update + listing strategy tips', them: 'Books the room and introduces you', script: 'I can do a tight 20-minute market reality check for your agents — no pitch, just useful intel they can use today.' },
+      { title: 'Co-Hosted Webinar', format: 'Virtual · 30–40 min', you: 'Slides, Q&A, neighborhood breakdowns', them: 'Lender promotes to email list + social', script: 'Let\'s co-host a "What $X buys right now" session — I\'ll build the market deck, you invite, we both win.' },
+      { title: 'Open House Co-Host', format: 'On-site · 2 hours', you: 'Host the property, capture leads, run the experience', them: 'Lender brings buyer welcome materials and follows up on financing leads', script: 'Happy to co-host your Saturday open house — I\'ll run the property, you handle buyer financing questions. Win-win for both our pipelines.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500/10 text-indigo-600">HIGH-IMPACT PARTNERSHIP</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">You do the heavy lifting on content; they invite their sphere. Everyone wins — and you become indispensable.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">You bring market expertise; lenders bring financing depth. Everyone wins — and you become the agent partners trust with their best clients.</p>
       <div class="space-y-4 mb-6">
         ${events.map((e) => `
           <div class="rounded-2xl border-l-4 border-indigo-400 border border-gray-200 dark:border-gray-700 p-4">
@@ -1987,21 +1988,21 @@
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-600">EVERY MONDAY</span>
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 text-xs">UNDER 80 WORDS</span>
       </div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">Short, useful, zero pressure — the email realtors actually forward.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">Short, useful, zero pressure — the email lender partners actually forward.</p>
       <ul class="text-sm space-y-1 mb-6 text-gray-700 dark:text-gray-300">
         <li>• Send Monday/Tuesday — consistency builds trust</li>
-        <li>• Hyper-local bullets beat generic rate talk</li>
+        <li>• Hyper-local bullets beat generic market talk</li>
         <li>• Always offer co-brand — removes sales feel</li>
         <li>• End with "No strings" — never a hard CTA</li>
       </ul>
       ${emailCard('Market snapshot + tool offer',
-        'Quick read for your buyers this week',
-        'Hi [Realtor First Name],\n\nQuick one for you this week:\n• Median days on market in [neighborhood] just dropped to 11.\n• 3 new listings under $425k hit the market yesterday that actually show well.\n• I put together a simple one-page "What $X Buys Right Now" for your first-time buyers — happy to co-brand it for you.\n\nLet me know if you want it. No strings.\n\nBest,\n[Your Name]',
+        'Quick read for your clients this week',
+        'Hi [Partner First Name],\n\nQuick one for you this week:\n• Median days on market in [neighborhood] just dropped to 11.\n• 3 new listings under $425k hit the market yesterday that actually show well.\n• I put together a simple one-page "What $X Buys Right Now" for your buyers — happy to co-brand it for you.\n\nLet me know if you want it. No strings.\n\nBest,\n[Your Name]',
         'Most forwarded format — pair with pop-by every 4–6 weeks.')}
       ${emailCard('Inventory update + buyer resource', null,
-        'Hi [Realtor First Name],\n\nQuick update:\n• Inventory in our primary zip codes is still under 2 months.\n• I created a simple 1-page "First-Time Buyer Checklist" (rates, programs, timeline) — happy to co-brand with your logo and drop it by or email it.\n\nLet me know if it would be useful for your sphere. No strings.\n\nBest,\n[Your Name]')}
-      ${emailCard('Rate watch + soft offer', null,
-        'Hi [Realtor First Name],\n\nRates moved a bit this week (currently 6.65% on a 30-yr conventional for strong files). I put together a super simple "Rate Watch" one-pager with current buydown options and when a refi might make sense.\n\nHappy to email or drop it off — no strings at all.\n\nBest,\n[Your Name]')}
+        'Hi [Partner First Name],\n\nQuick update:\n• Inventory in our primary zip codes is still under 2 months.\n• I created a simple 1-page "Neighborhood Buyer Guide" (timeline, what to expect, local tips) — happy to co-brand with your logo and drop it by or email it.\n\nLet me know if it would be useful for your clients. No strings.\n\nBest,\n[Your Name]')}
+      ${emailCard('Market pulse + soft offer', null,
+        'Hi [Partner First Name],\n\nMarket shifted a bit this week — inventory up slightly in [area] but well-priced homes still moving fast. I put together a super simple "Market Pulse" one-pager with current comps and seller prep tips.\n\nHappy to email or drop it off — no strings at all.\n\nBest,\n[Your Name]')}
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:realtor-weekly-snapshots" class="text-xs px-3 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Snapshot format →</button>
         <button type="button" data-vault-bridge="play:weekly-value-cadence" class="text-xs px-3 py-2 rounded-xl border border-blue-400 font-semibold hover:bg-blue-100 transition">Weekly cadence play →</button>
@@ -2015,11 +2016,11 @@
     setKicker(modal, 'Value Vault • Monthly Market Email');
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-600">FORWARDABLE</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Clean, no-hype — designed for agents to forward to their entire sphere.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Clean, no-hype — designed for you to forward to your entire sphere and past clients.</p>
       ${emailCard('Monthly snapshot (main template)',
         '[Your City] Market Update – [Month] [Year] (Great for Your Clients)',
         'Hi [Name],\n\nHere\'s the clean, no-hype version of what\'s actually happening in our market this month. Feel free to forward this directly to your sphere or use any piece of it.\n\nKey Numbers This Month:\n• Median price: $412,500 (up 3.2% YoY)\n• Days on market: 14 (down from 19 last month)\n• Inventory: 2.1 months (still very low)\n\nWhat I\'m Telling Buyers Right Now:\n• [Bullet 1 — local reality]\n• [Bullet 2 — program or strategy]\n• [Bullet 3 — when waiting costs money]\n\nIf any of your clients want the full neighborhood-by-neighborhood breakdown, just have them text me. Happy to help.\n\nThanks for everything you do.\n[Your Name]',
-        'Update numbers monthly. Agents love sharing these — you become their market expert.')}
+        'Update numbers monthly. Past clients and sphere contacts love sharing these — you become their market expert.')}
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:email-weekly-partner" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">Weekly version →</button>
       </div>
@@ -2038,10 +2039,10 @@
       <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">Highest-response post-close email — pair with a same-day review link text.</p>
       ${emailCard('Warm + review ask',
         'Congratulations Again on Your New Home, [First Name]!',
-        'Hi [First Name],\n\nI just wanted to say congratulations again on getting into your new home. It was genuinely a pleasure working with you.\n\nIf anything comes up — questions about taxes, insurance, maintenance, whatever — I\'m still your person. You don\'t need a "reason" to reach out.\n\nAlso, if you have 20 seconds, I would be incredibly grateful if you left a quick Google review. It helps me help more families like yours. Here\'s the link: [your link]\n\nNo pressure at all. Just know I\'m rooting for you in the new house.\n\nWarmly,\n[Your Name]',
-        'Personalize with one detail from the loan process. Send review link via text same day.')}
+        'Hi [First Name],\n\nI just wanted to say congratulations again on getting into your new home. It was genuinely a pleasure working with you.\n\nIf anything comes up — questions about the neighborhood, contractors, maintenance, whatever — I\'m still your person. You don\'t need a "reason" to reach out.\n\nAlso, if you have 20 seconds, I would be incredibly grateful if you left a quick Google review. It helps me help more families like yours. Here\'s the link: [your link]\n\nNo pressure at all. Just know I\'m rooting for you in the new house.\n\nWarmly,\n[Your Name]',
+        'Personalize with one detail from the transaction. Send review link via text same day.')}
       ${emailCard('Personalized detail version', null,
-        'Hi [First Name],\n\nCongratulations again! I still remember how excited you were about [specific detail — kitchen, yard, school district]. Hope you\'re already making great memories there.\n\nI\'m still your person for anything mortgage-related — no expiration date.\n\nIf you have 20 seconds, a Google review would mean the world: [your link]\n\nRooting for you,\n[Your Name]')}
+        'Hi [First Name],\n\nCongratulations again! I still remember how excited you were about [specific detail — kitchen, yard, school district]. Hope you\'re already making great memories there.\n\nI\'m still your person for anything real estate-related — no expiration date.\n\nIf you have 20 seconds, a Google review would mean the world: [your link]\n\nRooting for you,\n[Your Name]')}
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:post-closing-texts" class="text-xs px-3 py-2 rounded-xl border border-blue-400 font-semibold hover:bg-blue-100 transition">Follow-up texts →</button>
         <button type="button" data-vault-bridge="modal:post-closing-7day" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">7-day call →</button>
@@ -2054,9 +2055,9 @@
   function renderEmail306090(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • 30/60/90 Nurture Sequence');
     const touches = [
-      { day: 'Day 30', channel: 'Email', subject: 'How\'s the new place treating you?', body: 'Hi [First Name],\n\nJust checking in at the 30-day mark — how is everything feeling in the new house? Any questions about the first payment, taxes, or insurance?\n\nI\'m still here if anything pops up.\n\n[Your Name]', tip: 'Ask one specific question from the 7-day call notes.' },
+      { day: 'Day 30', channel: 'Email', subject: 'How\'s the new place treating you?', body: 'Hi [First Name],\n\nJust checking in at the 30-day mark — how is everything feeling in the new house? Any questions about utilities, taxes, or the neighborhood?\n\nI\'m still here if anything pops up.\n\n[Your Name]', tip: 'Ask one specific question from the 7-day call notes.' },
       { day: 'Day 60', channel: 'Text', subject: null, body: 'Hey [Name] — quick one. Any chance you\'ve told anyone you know about the experience of working with me? I\'m trying to help a few more families this month and your referral would mean a lot.', tip: 'Light ask — no pressure language.' },
-      { day: 'Day 90', channel: 'Email + gift', subject: 'One quick favor + a small thank-you', body: 'Hi [First Name],\n\nThree months in — hope the house is starting to feel like home. I\'d love to do a quick 15-minute mortgage efficiency check-up around your one-year anniversary. I\'ll reach out then.\n\nWarmly,\n[Your Name]', tip: 'Include small useful gift. Plants Annual Review invite.' }
+      { day: 'Day 90', channel: 'Email + gift', subject: 'One quick favor + a small thank-you', body: 'Hi [First Name],\n\nThree months in — hope the house is starting to feel like home. I\'d love to do a quick 15-minute home equity and market check-in around your one-year anniversary. I\'ll reach out then.\n\nWarmly,\n[Your Name]', tip: 'Include small useful gift. Plants Annual Home Review invite.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-600">FIRST 90 DAYS</span></div>
@@ -2081,39 +2082,39 @@
   }
 
   function renderEmailAnnualReviewInvite(item, contentEl, modal) {
-    setKicker(modal, 'Value Vault • Annual Review Invite');
+    setKicker(modal, 'Value Vault • Annual Home Review Invite');
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">HIGHEST ROI EMAIL</span>
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 text-xs">HOME ANNIVERSARY</span>
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">The money email — positions you as ongoing advisor, not one-time closer.</p>
-      ${emailCard('Annual review invite',
-        'Your Free "Mortgage Efficiency Check-Up" (15 minutes)',
-        'Hi [First Name],\n\nIt\'s been about a year since we closed on your home. I\'m reaching out to offer something I do for all my past clients — a free 15–20 minute "Annual Mortgage Review."\n\nIt\'s basically a mortgage efficiency check-up. I\'ll look at current rates vs your rate, your equity position, and any life changes that might make refinancing, cash-out, or a different structure make sense for you right now.\n\nNo pressure, no sales pitch. Just data. Most people find it surprisingly useful.\n\nWant to book a quick time? Just reply with a couple days that work.',
+      ${emailCard('Annual home review invite',
+        'Your Free "Home Equity & Market Check-In" (15 minutes)',
+        'Hi [First Name],\n\nIt\'s been about a year since we closed on your home. I\'m reaching out to offer something I do for all my past clients — a free 15–20 minute "Annual Home Review."\n\nIt\'s basically a home equity and market check-in. I\'ll look at what your home might be worth today, what\'s happening in your neighborhood, and any life changes that might make buying, selling, or investing make sense for you right now.\n\nNo pressure, no sales pitch. Just data. Most people find it surprisingly useful.\n\nWant to book a quick time? Just reply with a couple days that work.',
         'Send on exact anniversary. Follow up with text 3 days later if no reply.')}
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">Review framework →</button>
         <button type="button" data-vault-bridge="equity" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] font-semibold hover:bg-[#00A89D]/5 transition">Equity Scanner →</button>
       </div>
-      ${footerActions('Copy Annual Review Invite')}
+      ${footerActions('Copy Annual Home Review Invite')}
     `;
     window.attachRichVaultModalHandlers(contentEl, item);
   }
 
   function renderEmailRefiCheckin(item, contentEl, modal) {
-    setKicker(modal, 'Value Vault • Refi Check-In');
+    setKicker(modal, 'Value Vault • Market Shift Check-In');
     contentEl.innerHTML = `
-      <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-600">RATE REACTIVATION</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Non-pushy outreach when rates move — data-first, zero pressure.</p>
-      ${emailCard('Rate improvement check-in',
-        'Rates have moved — worth a 3-minute look for you?',
-        'Hi [First Name],\n\nRates have improved a bit over the last few weeks. I\'m not promising anything dramatic, but for some of my clients it\'s now making sense to run the numbers.\n\nIf you\'re even slightly curious, I can run a quick no-obligation scenario for you in about 3 minutes. No pressure — just data.\n\nWant me to take a look?',
-        'Only send when rates actually moved meaningfully. Batch to past 24-month clients.')}
+      <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-600">MARKET REACTIVATION</span></div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">Non-pushy outreach when the market shifts — data-first, zero pressure.</p>
+      ${emailCard('Market shift check-in',
+        'The market shifted — worth a 3-minute look for you?',
+        'Hi [First Name],\n\nThe market has shifted a bit over the last few weeks. I\'m not promising anything dramatic, but for some of my past clients it\'s now worth revisiting what their home might be worth or whether timing makes sense for a move-up.\n\nIf you\'re even slightly curious, I can run a quick no-obligation equity update in about 3 minutes. No pressure — just data.\n\nWant me to take a look?',
+        'Only send when market conditions actually shifted. Batch to past 24-month clients.')}
       <div class="flex flex-wrap gap-2 mb-6">
-        <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">Annual review →</button>
+        <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">Annual home review →</button>
       </div>
-      ${footerActions('Copy Refi Check-In Email')}
+      ${footerActions('Copy Market Shift Check-In Email')}
     `;
     window.attachRichVaultModalHandlers(contentEl, item);
   }
@@ -2125,7 +2126,7 @@
       <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">The most emotionally powerful nurture email — pair with a gift for VIP clients.</p>
       ${emailCard('One year ago today…',
         'One year ago today…',
-        'Hi [First Name],\n\nOne year ago today we closed on your home. I still remember how excited you were about [specific detail they mentioned — the kitchen, the yard, the school district, etc.].\n\nI hope the house is treating you well and that you\'re making incredible memories there.\n\nAs always, I\'m here if anything mortgage-related comes up. No expiration date on that.\n\nHappy home anniversary.\n\n[Your Name]',
+        'Hi [First Name],\n\nOne year ago today we closed on your home. I still remember how excited you were about [specific detail they mentioned — the kitchen, the yard, the school district, etc.].\n\nI hope the house is treating you well and that you\'re making incredible memories there.\n\nAs always, I\'m here if anything buying, selling, or market-related comes up. No expiration date on that.\n\nHappy home anniversary.\n\n[Your Name]',
         'Send morning of anniversary. Reference something specific from CRM notes. Pair with throw blanket for top clients.')}
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:client-anniversary-system" class="text-xs px-3 py-2 rounded-xl border border-[#F15A29] font-semibold hover:bg-[#F15A29]/5 transition">Anniversary system →</button>
@@ -2140,12 +2141,12 @@
     setKicker(modal, 'Value Vault • Pop-By Follow-Up Texts');
     const texts = [
       { label: 'Simple & professional', script: 'Hey [Name], just dropped off a little something at your office. Hope it makes your week a tiny bit better. No need to reply — just wanted you to know I\'m thinking about you.', tip: 'Send 2–4 hours after drop. Reference the specific gift if possible.' },
-      { label: 'Soft CTA version', script: 'Dropped off a small gift at the front desk for you. If you end up with any clients who need a second opinion on financing in the next few weeks, I\'d love to help. Enjoy the [item]!', tip: 'Use sparingly — not every pop-by needs an ask.' },
+      { label: 'Soft CTA version', script: 'Dropped off a small gift at the front desk for you. If you end up with any clients who need a second opinion on their agent search in the next few weeks, I\'d love to help. Enjoy the [item]!', tip: 'Use sparingly — not every pop-by needs an ask.' },
       { label: 'Relationship-first', script: 'Hey [Name] — left a little surprise for you. You\'ve been crushing it lately and I wanted to say thank you for the referrals and the partnership. Let\'s grab coffee soon if you have time.', tip: 'Best for top-tier partners after a big win.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">SAME DAY / NEXT MORNING</span></div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">The text that turns a nice gesture into a relationship touch — most LOs skip this step.</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">The text that turns a nice gesture into a relationship touch — most agents skip this step.</p>
       <div class="space-y-4 mb-6">
         ${texts.map((t) => scriptCard(t.label, t.script, t.tip)).join('')}
       </div>
@@ -2160,25 +2161,25 @@
 
   // ─── POP-BY LIBRARY (RICH DATA-DRIVEN + PREMIUM OVERRIDES) ───────────
   const POPBY_PREMIUM = {
-    'popby-tote': { badge: 'WALKING BILLBOARD', whyWorks: ['High frequency of use every day', 'Agents carry files, signs, marketing materials', 'Subtle branding opportunity on quality totes', 'Perfect low-cost rotation item'], timing: 'After a referral or new listing. Pair with handwritten note naming the specific win.', dropScript: 'Hey [Name], just dropping this off — thought it might be useful for open houses and errands. No strings. Hope your week is great!', followUp: 'Hey [Name], hope the tote is useful! Let me know if any of your buyers need pre-approvals this week.' },
-    'popby-coffee': { badge: 'UNIVERSAL WIN', whyWorks: ['Used daily — high frequency reminder', 'Low risk, works with almost any partner', 'Pun lands + feels personal with amount written on note', 'Perfect after a referral or tough week'], timing: 'After a referral, post-closing celebration with agent, or random Tuesday morale boost.', dropScript: 'Hey [Name], just dropping this off — figured you could use a pick-me-up after the week you\'ve had. No strings!', followUp: 'Hope you enjoyed the coffee! Let me know if any buyers need scenarios this week.' },
-    'popby-yeti': { badge: 'PREMIUM DAILY USE', whyWorks: ['Used every single day for years', 'Highest perceived value under $30', 'Every sip is a reminder of you', 'Works for top 10 partners and VIP agents'], timing: 'Top-tier partners, busy season appreciation, or after a major referral. Engrave first name only.', dropScript: 'Hey [Name], I know you\'re busy — just wanted to drop this off and say thanks for everything. Hope it keeps your coffee hot during crazy weeks!', followUp: 'Hope the tumbler is getting a workout! Appreciate the partnership — here if any buyers need scenarios.' },
-    'popby-open-house-kit': { badge: 'MOST USEFUL GIFT', whyWorks: ['Solves real pain during long open houses', 'Shows you understand their job deeply', 'Water, snacks, sign-in = instant hero status', 'Pairs perfectly with open house play'], timing: '3–5 days before their next open house. Offer via text first — most agents say yes.', dropScript: 'Brought a little open house survival kit — figured it might help Saturday. I\'ll let you get back to it. Good luck this weekend!', followUp: 'Hope the open house kit came in handy Saturday! Let me know if you want me at the next one for quick pre-approvals.' },
-    'popby-laser-measure': { badge: 'PRO TOOL UPGRADE', whyWorks: ['Listing agents use this constantly', 'Serious upgrade over cheap free tools', 'Positions you as a craft-respecting partner', 'High wow at $20–30 price point'], timing: 'For experienced listing agents or after helping on a complex property.', dropScript: 'Hey [Name], picked this up thinking it might save you time on listings. No pitch — just appreciate the partnership.', followUp: 'Hope the laser measure is saving you steps out there! Any buyers need scenarios this week?' },
-    'popby-tape': { badge: 'PRO TOOL', whyWorks: ['Realtors use tape measures constantly', 'Upgrade over flimsy freebies they carry', 'Shows you understand listing presentations', 'Pun + utility = memorable'], timing: 'After helping on a listing-heavy month or new listing win.', dropScript: 'Hey [Name], thought this might come in handy on your next listing appointment. Appreciate you!', followUp: 'Hope the tape measure is getting use! Here if any buyers need pre-approvals.' },
-    'popby-new-agent-kit': { badge: 'LOYALTY FROM DAY ONE', whyWorks: ['New agents remember early supporters forever', 'Emotional + practical combination', 'Notebook, pen, coffee = perfect starter kit', 'Builds pipeline of future top producers'], timing: 'Within first 30 days of agent joining brokerage. Ask broker who\'s new.', dropScript: 'Congrats on the new chapter! Dropped off a few things to help you crush your first 100 days. Rooting for you!', followUp: 'Hope the first few weeks are going well! I\'m always here if any of your buyers need financing help.' },
-    'popby-client-win': { badge: 'RELATIONSHIP GOLD', whyWorks: ['You\'re celebrating THEIR win, not yours', 'Naming the client creates deep loyalty', 'Often leads to best referrals', 'Feels generous and memorable'], timing: 'Within 24–48 hours of their client closing with you. Champagne or gourmet chocolate.', dropScript: 'Just wanted to celebrate [Client Name]\'s closing with you — you did an amazing job. Enjoy this!', followUp: 'So glad we got [Client] closed smoothly for you. Let me know if any other buyers need help this month!' },
+    'popby-tote': { badge: 'WALKING BILLBOARD', whyWorks: ['High frequency of use every day', 'Agents carry files, signs, marketing materials', 'Subtle branding opportunity on quality totes', 'Perfect low-cost rotation item'], timing: 'After a referral or new listing. Pair with handwritten note naming the specific win.', dropScript: 'Hey [Name], just dropping this off — thought it might be useful for open houses and errands. No strings. Hope your week is great!', followUp: 'Hey [Name], hope the tote is useful! Let me know if any of your clients need an agent this week.' },
+    'popby-coffee': { badge: 'UNIVERSAL WIN', whyWorks: ['Used daily — high frequency reminder', 'Low risk, works with almost any partner', 'Pun lands + feels personal with amount written on note', 'Perfect after a referral or tough week'], timing: 'After a referral, post-closing celebration with agent, or random Tuesday morale boost.', dropScript: 'Hey [Name], just dropping this off — figured you could use a pick-me-up after the week you\'ve had. No strings!', followUp: 'Hope you enjoyed the coffee! Let me know if any buyers need a great agent this week.' },
+    'popby-yeti': { badge: 'PREMIUM DAILY USE', whyWorks: ['Used every single day for years', 'Highest perceived value under $30', 'Every sip is a reminder of you', 'Works for top 10 partners and VIP agents'], timing: 'Top-tier partners, busy season appreciation, or after a major referral. Engrave first name only.', dropScript: 'Hey [Name], I know you\'re busy — just wanted to drop this off and say thanks for everything. Hope it keeps your coffee hot during crazy weeks!', followUp: 'Hope the tumbler is getting a workout! Appreciate the partnership — here if any buyers need a great agent.' },
+    'popby-open-house-kit': { badge: 'MOST USEFUL GIFT', whyWorks: ['Solves real pain during long open houses', 'Shows you understand their job deeply', 'Water, snacks, sign-in = instant hero status', 'Pairs perfectly with open house play'], timing: '3–5 days before their next open house. Offer via text first — most agents say yes.', dropScript: 'Brought a little open house survival kit — figured it might help Saturday. I\'ll let you get back to it. Good luck this weekend!', followUp: 'Hope the open house kit came in handy Saturday! Let me know if you want me to co-host your next one.' },
+    'popby-laser-measure': { badge: 'PRO TOOL UPGRADE', whyWorks: ['Listing agents use this constantly', 'Serious upgrade over cheap free tools', 'Positions you as a craft-respecting partner', 'High wow at $20–30 price point'], timing: 'For experienced listing agents or after helping on a complex property.', dropScript: 'Hey [Name], picked this up thinking it might save you time on listings. No pitch — just appreciate the partnership.', followUp: 'Hope the laser measure is saving you steps out there! Any buyers need a great agent this week?' },
+    'popby-tape': { badge: 'PRO TOOL', whyWorks: ['Realtors use tape measures constantly', 'Upgrade over flimsy freebies they carry', 'Shows you understand listing presentations', 'Pun + utility = memorable'], timing: 'After helping on a listing-heavy month or new listing win.', dropScript: 'Hey [Name], thought this might come in handy on your next listing appointment. Appreciate you!', followUp: 'Hope the tape measure is getting use! Here if any buyers have buyers or sellers.' },
+    'popby-new-agent-kit': { badge: 'LOYALTY FROM DAY ONE', whyWorks: ['New agents remember early supporters forever', 'Emotional + practical combination', 'Notebook, pen, coffee = perfect starter kit', 'Builds pipeline of future top producers'], timing: 'Within first 30 days of agent joining brokerage. Ask broker who\'s new.', dropScript: 'Congrats on the new chapter! Dropped off a few things to help you crush your first 100 days. Rooting for you!', followUp: 'Hope the first few weeks are going well! I\'m always here if any of your clients need a great agent.' },
+    'popby-client-win': { badge: 'RELATIONSHIP GOLD', whyWorks: ['You\'re celebrating THEIR win, not yours', 'Naming the client creates deep loyalty', 'Often leads to best referrals', 'Feels generous and memorable'], timing: 'Within 24–48 hours of their client closing with you. Champagne or gourmet chocolate.', dropScript: 'Just wanted to celebrate [Client Name]\'s closing with you — you did an amazing job. Enjoy this!', followUp: 'So glad we got [Client] closed smoothly for you. Let me know if any other clients need help this month!' },
     'popby-market-update': { badge: 'VALUE DROP', whyWorks: ['Low effort for you, high value for them', 'Positions you as market intel source', 'Printed snapshot + treat = memorable', 'Repeat every 4–6 weeks for top partners'], timing: 'Every 4–6 weeks for top 15–20 partners. Monday mornings work best.', dropScript: 'Dropped off a quick local market snapshot + a small treat. Thought it might be useful for your sphere. No strings!', followUp: 'Hope the market snapshot was useful — happy to customize for your zip codes anytime.' },
-    'popby-hand-cream': { badge: 'THOUGHTFUL DAILY USE', whyWorks: ['Realtors shake hundreds of hands', 'Feels luxurious at low cost', 'Solves a real daily annoyance', 'Works year-round'], timing: 'Winter dry-skin season or after a busy open house weekend.', dropScript: 'Hey [Name], know your hands take a beating showing homes — thought this might help. Appreciate you!', followUp: 'Hope the hand cream is useful! Here when any buyers need help.' },
-    'popby-candle': { badge: 'HOME + OFFICE', whyWorks: ['Used in personal space daily', 'Pleasant sensory reminder', 'Feels thoughtful not promotional', 'Great for agents who work late'], timing: 'After a smooth closing month or holiday season appreciation.', dropScript: 'Hey [Name], just a small thank-you for everything this quarter. Hope this makes your space a little nicer.', followUp: 'Hope you\'re enjoying the candle! Let me know if any buyers need scenarios.' },
-    'popby-honey': { badge: 'LOCAL PREMIUM', whyWorks: ['Supports local + feels artisanal', 'Conversation starter with a story', 'Higher perceived value than cost', 'Shareable with family'], timing: 'Fall farmers market season or local business appreciation week.', dropScript: 'Hey [Name], grabbed this from a local spot I love — thought of you. Thanks for being such a great partner.', followUp: 'Hope you enjoyed the honey! Here if any buyers need help this month.' },
-    'popby-lottery': { badge: 'INSTANT SMILE', whyWorks: ['Ultra low cost, high delight', 'Fun after a tough negotiation week', 'Memorable pun every time', 'Great filler between bigger gifts'], timing: 'After a stressful deal or random "just because" touch.', dropScript: 'Hey [Name], figured we could both use a little luck this week. Enjoy!', followUp: 'Hope you enjoyed the tickets! Let me know if any buyers need pre-approvals.' },
-    'popby-mints': { badge: 'MICRO-TOUCH', whyWorks: ['Tiny but thoughtful', 'Perfect between bigger gifts', 'Pun lands instantly', 'Bulk-friendly for top 20 partners'], timing: 'Monthly rotation filler — pair with a handwritten note.', dropScript: 'Hey [Name], just popping by with a tiny thank-you. Appreciate you!', followUp: 'Hope your week is going great! Here when you need scenarios.' },
-    'popby-ice-scraper': { badge: 'WINTER HERO', whyWorks: ['Solves painful seasonal problem', 'Shows you understand cold-climate grind', 'Used every snowy morning', 'Highly memorable in Midwest markets'], timing: 'First cold snap of the season (Oct–Nov).', dropScript: 'Hey [Name], winter\'s coming — thought this might save you a frozen morning. Appreciate you!', followUp: 'Hope the scraper is getting use! Here if any buyers need help.' },
-    'popby-cocoa': { badge: 'HOLIDAY CLASSIC', whyWorks: ['Warm, family-friendly, emotional', 'Perfect December office drop', 'Shareable with team/family', 'Strong seasonal timing'], timing: 'First two weeks of December for top partners.', dropScript: 'Hey [Name], warm wishes for the season — hope you and the family enjoy this!', followUp: 'Happy holidays! Here when you need scenarios in the new year.' },
-    'popby-smores': { badge: 'MEMORY MAKER', whyWorks: ['Ties to new home / family memories', 'Fun and shareable', 'Great for family-focused agents', 'Emotional without being cheesy'], timing: 'Summer closings or agents with young families.', dropScript: 'Hey [Name], thought this might be fun for a backyard night with the kids. Enjoy!', followUp: 'Hope the s\'mores kit was a hit! Here if any buyers need help.' },
+    'popby-hand-cream': { badge: 'THOUGHTFUL DAILY USE', whyWorks: ['Realtors shake hundreds of hands', 'Feels luxurious at low cost', 'Solves a real daily annoyance', 'Works year-round'], timing: 'Winter dry-skin season or after a busy open house weekend.', dropScript: 'Hey [Name], know your hands take a beating showing homes — thought this might help. Appreciate you!', followUp: 'Hope the hand cream is useful! Here when any clients need help.' },
+    'popby-candle': { badge: 'HOME + OFFICE', whyWorks: ['Used in personal space daily', 'Pleasant sensory reminder', 'Feels thoughtful not promotional', 'Great for agents who work late'], timing: 'After a smooth closing month or holiday season appreciation.', dropScript: 'Hey [Name], just a small thank-you for everything this quarter. Hope this makes your space a little nicer.', followUp: 'Hope you\'re enjoying the candle! Let me know if any buyers need a great agent.' },
+    'popby-honey': { badge: 'LOCAL PREMIUM', whyWorks: ['Supports local + feels artisanal', 'Conversation starter with a story', 'Higher perceived value than cost', 'Shareable with family'], timing: 'Fall farmers market season or local business appreciation week.', dropScript: 'Hey [Name], grabbed this from a local spot I love — thought of you. Thanks for being such a great partner.', followUp: 'Hope you enjoyed the honey! Here if any clients need help this month.' },
+    'popby-lottery': { badge: 'INSTANT SMILE', whyWorks: ['Ultra low cost, high delight', 'Fun after a tough negotiation week', 'Memorable pun every time', 'Great filler between bigger gifts'], timing: 'After a stressful deal or random "just because" touch.', dropScript: 'Hey [Name], figured we could both use a little luck this week. Enjoy!', followUp: 'Hope you enjoyed the tickets! Let me know if any buyers have buyers or sellers.' },
+    'popby-mints': { badge: 'MICRO-TOUCH', whyWorks: ['Tiny but thoughtful', 'Perfect between bigger gifts', 'Pun lands instantly', 'Bulk-friendly for top 20 partners'], timing: 'Monthly rotation filler — pair with a handwritten note.', dropScript: 'Hey [Name], just popping by with a tiny thank-you. Appreciate you!', followUp: 'Hope your week is going great! Here when you need a great agent.' },
+    'popby-ice-scraper': { badge: 'WINTER HERO', whyWorks: ['Solves painful seasonal problem', 'Shows you understand cold-climate grind', 'Used every snowy morning', 'Highly memorable in Midwest markets'], timing: 'First cold snap of the season (Oct–Nov).', dropScript: 'Hey [Name], winter\'s coming — thought this might save you a frozen morning. Appreciate you!', followUp: 'Hope the scraper is getting use! Here if any clients need help.' },
+    'popby-cocoa': { badge: 'HOLIDAY CLASSIC', whyWorks: ['Warm, family-friendly, emotional', 'Perfect December office drop', 'Shareable with team/family', 'Strong seasonal timing'], timing: 'First two weeks of December for top partners.', dropScript: 'Hey [Name], warm wishes for the season — hope you and the family enjoy this!', followUp: 'Happy holidays! Here when you need a great agent in the new year.' },
+    'popby-smores': { badge: 'MEMORY MAKER', whyWorks: ['Ties to new home / family memories', 'Fun and shareable', 'Great for family-focused agents', 'Emotional without being cheesy'], timing: 'Summer closings or agents with young families.', dropScript: 'Hey [Name], thought this might be fun for a backyard night with the kids. Enjoy!', followUp: 'Hope the s\'mores kit was a hit! Here if any clients need help.' },
     'popby-champagne': { badge: 'NEW YEAR ENERGY', whyWorks: ['Forward-looking and celebratory', 'Perfect first-week-of-January touch', 'Sets tone for goal-oriented year', 'Pairs with goal-setting conversation'], timing: 'First week of January for top 10–15 partners.', dropScript: 'Hey [Name], here\'s to a big year ahead — thanks for an amazing partnership last year!', followUp: 'Cheers to a great year! Let me know how I can support your goals.' },
-    'popby-valentine': { badge: 'SEASONAL WARMTH', whyWorks: ['Light, professional, relationship-focused', 'Timely without being awkward', 'Easy to source in bulk', 'Differentiates from rate-shoppers'], timing: 'Week before Valentine\'s Day — keep it professional and brief.', dropScript: 'Hey [Name], just a small thank-you during a busy season. Appreciate the partnership!', followUp: 'Hope you had a great week! Here when buyers need scenarios.' }
+    'popby-valentine': { badge: 'SEASONAL WARMTH', whyWorks: ['Light, professional, relationship-focused', 'Timely without being awkward', 'Easy to source in bulk', 'Differentiates from transaction-shoppers'], timing: 'Week before Valentine\'s Day — keep it professional and brief.', dropScript: 'Hey [Name], just a small thank-you during a busy season. Appreciate the partnership!', followUp: 'Hope you had a great week! Here when buyers need a great agent.' }
   };
 
   function defaultPopbyWhyWorks(item) {
@@ -2246,110 +2247,110 @@
     window.attachRichVaultModalHandlers(contentEl, item);
   }
 
-  // ─── RUOFF FACT VAULT (PLATFORM DIFFERENTIATORS) ─────────────────────
+  // ─── AGENT EXCELLENCE VAULT (TRANSACTION DIFFERENTIATORS) ────────────
   const FACT_CATEGORY_META = {
-    Technology: { when: 'Agent asks about speed, tech, or “can you keep up?”', angle: 'Show the tool — don’t feature-dump. One proof point per conversation.' },
-    Support: { when: 'Complex file, timeline pressure, or “will this close on time?”', angle: 'Cite the desk or metric — agents trust operations proof over promises.' },
-    Programs: { when: 'Buyer needs DPA, builder deal, aggressive pricing, or niche product', angle: 'Match program to their buyer scenario — not a product laundry list.' },
-    Culture: { when: 'New partner trust-building, recruiting conversations, or “why Ruoff?”', angle: 'Human proof + institutional backing — you are not a solo operator.' }
+    Technology: { when: 'Partner asks about your systems, responsiveness, or "can you keep up?"', angle: 'Show the tool — don\'t feature-dump. One proof point per conversation.' },
+    Support: { when: 'Complex transaction, timeline pressure, or "will this close on time?"', angle: 'Cite your process or metric — partners trust operations proof over promises.' },
+    Programs: { when: 'Unique buyer/seller situation, niche property, or creative deal structure', angle: 'Match your strength to their scenario — not a laundry list of credentials.' },
+    Culture: { when: 'New partner trust-building, recruiting conversations, or "why work with you?"', angle: 'Human proof + consistent execution — you are not a transactional order-taker.' }
   };
 
   const FACT_PREMIUM = {
     'fact-ruoff-plus': {
-      partnerScript: 'Everything I need lives in one platform — pipeline, PAs, rate checks, training, marketing. That’s why I can respond faster and never drop a ball on your files.',
-      agentObjection: '“Can you keep up with my volume?” → Ruoff+ means one mission control — I’m not juggling five systems.'
+      partnerScript: 'Everything I need lives in one CRM — pipeline, CMAs, follow-ups, marketing, and client nurture. That\'s why I respond faster and never drop a ball on your referrals.',
+      agentObjection: '\"Can you keep up with my volume?\" → One integrated system means I\'m not juggling five apps — your clients get same-day responses.'
     },
     'fact-lo-app': {
-      partnerScript: 'I can issue updates, share referral links, and run scenarios from my phone between showings — your buyers and you never wait because I’m at a desk.',
-      agentObjection: '“Are you hard to reach?” → Ruoff LO App — full pipeline power on mobile.'
+      partnerScript: 'I can send updates, share listing links, and run a CMA from my phone between showings — your clients and you never wait because I\'m tied to a desk.',
+      agentObjection: '\"Are you hard to reach?\" → Mobile CRM + instant text response — full pipeline power in my pocket.'
     },
     'fact-loai': {
-      partnerScript: 'When your buyer applies, LOAi can run soft credit, program select, tax/insurance estimates, and DU/LP in about a minute. Saves 15–30 minutes per file — your pre-approval turnaround gets noticeably faster.',
-      agentObjection: '“How fast can you turn a pre-approval?” → LOAi automates the first pass so I focus on structure and communication.'
+      partnerScript: 'When your buyer needs comps or market context, I can pull neighborhood data, active inventory, and pricing trends in minutes — your client gets answers during the showing, not days later.',
+      agentObjection: '\"How fast can you turn around market intel?\" → Automated CMA tools + local expertise means I focus on strategy and communication.'
     },
     'fact-step-ahead': {
-      partnerScript: 'On your next competitive offer — we can have the file fully underwritten before your buyer even finds the house. Step Ahead means the PA letter is backed by real UW, not guesswork. Want me to run one for your active shopper?',
-      agentObjection: '“Other lenders issue PAs faster.” → Faster letters that fall apart at UW hurt your reputation. We underwrite first so your offer actually holds.'
+      partnerScript: 'On your next competitive offer — I can have a pricing strategy, comp analysis, and offer structure ready before your buyer even schedules the showing. Want me to prep one for your active shopper?',
+      agentObjection: '\"Other agents move faster.\" → Speed without strategy hurts your reputation. I prep offers backed by real data so your client\'s offer actually holds.'
     },
     'fact-agent-advantage': {
-      partnerScript: 'Every Monday you get an automated pipeline snapshot from me — pre-approved buyers, active deals, recent closings — plus my personal notes. You never have to chase me for “who’s ready.”',
-      agentObjection: '“I don’t know who you have in pipeline.” → Agent Advantage sends it every Monday automatically.'
+      partnerScript: 'Every Monday you get a pipeline snapshot from me — active buyers, pending deals, recent closings — plus my personal notes. You never have to chase me for \"who\'s ready.\"',
+      agentObjection: '\"I don\'t know who you have in pipeline.\" → Weekly partner update sends it automatically.'
     },
     'fact-loan-butler': {
-      partnerScript: 'Your buyers get a secure portal with a clear to-do list, doc upload, and real-time status — so you’re not playing middleman on every question.',
-      agentObjection: '“My client doesn’t know what’s happening.” → Loan Butler gives borrowers and agents live status without chasing me.'
+      partnerScript: 'Your clients get a clear transaction timeline, milestone updates, and a direct line to me — so you\'re not playing middleman on every question.',
+      agentObjection: '\"My client doesn\'t know what\'s happening.\" → Automated milestone updates + direct agent access on every file.'
     },
     'fact-milestone-updates': {
-      partnerScript: 'You and your client get automated milestone texts and emails throughout the file — appraisal ordered, UW submitted, CTC, etc. Predictable communication without me manually chasing updates.',
-      agentObjection: '“I hate lenders who go dark.” → Automated milestone updates to you and the borrower on every file.'
+      partnerScript: 'You and your client get proactive updates throughout the transaction — inspection scheduled, appraisal ordered, clear to close, etc. Predictable communication without you chasing me.',
+      agentObjection: '\"I hate agents who go dark.\" → Automated milestone updates to you and the client on every deal.'
     },
     'fact-scenario-builder': {
-      partnerScript: 'I can run side-by-side rate, product, and down payment comparisons in under two minutes at an open house or buyer consult — your client chooses confidently on the spot.',
-      agentObjection: '“Can you show options quickly?” → Scenario Builder — real comparisons in under 2 minutes.'
+      partnerScript: 'I can run side-by-side pricing scenarios, offer structures, and negotiation strategies in under two minutes at an open house or buyer consult — your client decides confidently on the spot.',
+      agentObjection: '\"Can you show options quickly?\" → Real comparisons and strategy in under 2 minutes.'
     },
     'fact-preapproval-advantage': {
-      partnerScript: 'For serious shoppers, I set guardrails and they can generate updated PA scenarios within my limits — empowers your buyer without me being a bottleneck.',
-      agentObjection: '“My buyer needs an updated letter tonight.” → Pre-Approval Advantage lets qualified shoppers self-serve within my parameters.'
+      partnerScript: 'For serious shoppers, I set up a saved search with instant alerts and pre-built offer templates — empowers your buyer without me being a bottleneck.',
+      agentObjection: '\"My buyer needs to move fast on a new listing.\" → Instant alerts + pre-built offer strategy within my parameters.'
     },
     'fact-digital-closing': {
-      partnerScript: 'Most docs are e-signed before closing day — less stress at the table for your client and a cleaner experience for you on the big day.',
-      agentObjection: '“Closing day is always chaotic.” → Majority of docs signed digitally before the table.'
+      partnerScript: 'Most paperwork is handled digitally before closing day — less stress at the table for your client and a cleaner experience for you on the big day.',
+      agentObjection: '\"Closing day is always chaotic.\" → Majority of docs handled digitally before the table.'
     },
     'fact-mi-comparison': {
-      partnerScript: 'We quote every MI provider in minutes — I make sure your buyer isn’t overpaying on mortgage insurance vs. what competitors quote.',
-      agentObjection: '“PMI killed the payment.” → MI Comparison Tool shops every provider in minutes.'
+      partnerScript: 'I shop every comparable sale in the neighborhood — I make sure your listing is priced competitively vs. what\'s actually selling, not what Zillow guesses.',
+      agentObjection: '\"The price feels too high.\" → Real comp analysis shops every relevant sale in minutes.'
     },
     'fact-quick-qualify': {
-      partnerScript: 'When income is the question, Quick Qualify gets verification answers in about two hours — we move forward with confidence instead of guessing.',
-      agentObjection: '“Income is complicated.” → Quick Qualify — income answers in ~2 hours.'
+      partnerScript: 'When timing is the question, I can confirm buyer readiness, lender pre-qual status, and offer strength in about two hours — we move forward with confidence instead of guessing.',
+      agentObjection: '\"Is this buyer really ready?\" → Buyer readiness check in ~2 hours with lender partner.'
     },
     'fact-income-desk': {
-      partnerScript: 'Self-employed, variable, or rental income? We have a dedicated Income Desk for calcs that stall files elsewhere — I’m not winging it in front of your client.',
-      agentObjection: '“They’re self-employed — this will be hard.” → Income Desk handles the scenarios other lenders pass on.'
+      partnerScript: 'Self-employed buyers, investors, or unique financial situations? I have lender partners who handle scenarios other agents pass on — I\'m not winging it in front of your client.',
+      agentObjection: '\"They\'re self-employed — this will be hard.\" → Trusted lender network handles complex buyer scenarios.'
     },
     'fact-scenario-desk': {
-      partnerScript: 'Unique credit, income, or collateral question? Scenario Desk gets real UW guidance — I bring answers, not “we’ll see.”',
-      agentObjection: '“This file is weird.” → Scenario Desk for real UW answers on edge cases.'
+      partnerScript: 'Unique property, HOA restrictions, or tricky negotiation? I bring real answers from experience and my partner network — not \"we\'ll see.\"',
+      agentObjection: '\"This deal is weird.\" → Creative deal structure expertise for edge cases.'
     },
     'fact-marketing-team': {
-      partnerScript: 'Happy to co-brand open house flyers, buyer guides, or social content — we have a full marketing team and hundreds of ready-made assets. Tell me what you need for your next listing and I’ll get it turned around.',
-      agentObjection: '“I need co-marketing help.” → Full marketing team + instant co-brand downloads.'
+      partnerScript: 'Happy to co-brand open house flyers, neighborhood reports, or social content — I have ready-made market assets and a fast turnaround. Tell me what you need for your next client and I\'ll get it done.',
+      agentObjection: '\"I need co-marketing help.\" → Professional marketing assets + instant co-brand options.'
     },
     'fact-dedicated-processor': {
-      partnerScript: 'Every file gets a dedicated processor — not a rotating call center. Same person knows your deal start to finish.',
-      agentObjection: '“I never know who to call on your files.” → Dedicated processor on every loan.'
+      partnerScript: 'Every transaction gets my full attention — not handed to a junior or rotating coordinator. Same agent knows your deal start to finish.',
+      agentObjection: '\"I never know who to call on your deals.\" → Direct agent access on every transaction.'
     },
     'fact-ctc-speed': {
-      partnerScript: 'Our average clear-to-close is about 15.7 days with ~1 day UW turn — in-house, not outsourced. When contract dates are tight, that’s the number I want you thinking about.',
-      agentObjection: '“Will we make the closing date?” → Cite CTC average + dedicated processor on every file.'
+      partnerScript: 'My average contract-to-close timeline beats the market average because I front-load due diligence and keep every party aligned. When contract dates are tight, that\'s the number I want you thinking about.',
+      agentObjection: '\"Will we make the closing date?\" → Cite your on-time close rate + proactive transaction management.'
     },
     'fact-closing-excellence': {
-      partnerScript: '75% of our loans close on or before the CD date — and clients aren’t waiting at the table for funding authorization. Your buyer’s celebration stays a celebration.',
-      agentObjection: '“Last lender had closing day surprises.” → 75% on/before CD date, no funding wait at the table.'
+      partnerScript: 'The vast majority of my deals close on or before the contract date — and clients aren\'t waiting at the table for last-minute surprises. Your buyer\'s celebration stays a celebration.',
+      agentObjection: '\"Last agent had closing day surprises.\" → On-time closes with proactive milestone management.'
     },
     'fact-pinchi-hitter': {
-      partnerScript: 'When I’m on vacation, a peer pinch hitter has full file access — your deal doesn’t pause because I’m away.',
-      agentObjection: '“What if you’re out of town?” → Pinch Hitter coverage with full file access.'
+      partnerScript: 'When I\'m on vacation, a trusted team member has full deal access — your transaction doesn\'t pause because I\'m away.',
+      agentObjection: '\"What if you\'re out of town?\" → Team coverage with full transaction access.'
     },
     'fact-homenow-ratedrop': {
-      partnerScript: 'Between conventional, FHA, VA, USDA, HomeNow, RateDrop, and equity leverage options — we usually find a path when other lenders say no. Tell me your buyer’s scenario.',
-      agentObjection: '“Programs won’t work for this buyer.” → HomeNow, RateDrop, DPA, bank statement, HELOC, and more.'
+      partnerScript: 'Between traditional sales, leasebacks, new construction, investment properties, and creative structures — I usually find a path when other agents say no. Tell me your client\'s scenario.',
+      agentObjection: '\"This deal won\'t work.\" → Creative deal structures, investor experience, and lender partnerships.'
     },
     'fact-builder-pricing': {
-      partnerScript: 'On builder deals we can offer aggressive pricing — 80bps comp plus borrower credits that help buyers afford new construction. Let me run numbers on your next spec.',
-      agentObjection: '“New construction payment is too high.” → Builder pricing + credits on new builds.'
+      partnerScript: 'On new construction deals I negotiate builder incentives, closing cost credits, and upgrade packages that help buyers afford new builds. Let me run numbers on your next spec home client.',
+      agentObjection: '\"New construction is too expensive.\" → Builder incentives + negotiation on upgrades and credits.'
     },
     'fact-branch-pricing': {
-      partnerScript: 'For rate-sensitive buyers you bring directly, we have branch-generated pricing at 50bps comp — competitive without me sacrificing service.',
-      agentObjection: '“Your rate isn’t competitive.” → Branch pricing for aggressive branch-sourced deals.'
+      partnerScript: 'For price-sensitive listings, I use data-driven pricing strategy and staging recommendations that maximize net proceeds without sacrificing days on market.',
+      agentObjection: '\"Your commission isn\'t competitive.\" → Net proceeds strategy beats discount commission every time.'
     },
     'fact-leadership-culture': {
-      partnerScript: 'You’re not betting on a solo operator — Ruoff has accessible leadership, 98.5% customer satisfaction, and Top 100 / Inc 500 recognition. I have institutional backing behind my personal service.',
-      agentObjection: '“Why Ruoff vs. a big bank?” → Leadership access + culture + national recognition with local relationship.'
+      partnerScript: 'You\'re not betting on a part-time hobbyist — I have brokerage backing, proven client satisfaction, and local market recognition behind my personal service.',
+      agentObjection: '\"Why you vs. a big team?\" → Institutional resources + personal relationship + local expertise.'
     },
     'fact-lo-testimonials': {
-      partnerScript: 'Producers who’ve been here 10–26 years consistently say ops go the extra mile and leadership makes things right — that’s the machine behind your files.',
-      agentObjection: '“Is your company stable?” → Real LO testimonials — culture and ops that scale without losing service.'
+      partnerScript: 'Agents and clients who\'ve worked with me consistently say I go the extra mile and make things right — that\'s the standard behind every transaction.',
+      agentObjection: '\"Are you established?\" → Real client and partner testimonials — consistent execution that scales.'
     }
   };
 
@@ -2362,15 +2363,15 @@
     const cat = item.libraryCategory || 'Platform';
     const meta = FACT_CATEGORY_META[cat] || FACT_CATEGORY_META.Technology;
     const bodyText = stripHtml(item.content).replace(/Use with partners:.*$/i, '').trim();
-    const partnerScript = prem.partnerScript || `Quick Ruoff differentiator for agents: ${item.teaser || bodyText.slice(0, 120)}. Use when they ask why work with you — keep it to one proof point, then offer to demonstrate on their next file.`;
+    const partnerScript = prem.partnerScript || `Quick differentiator for partners: ${item.teaser || bodyText.slice(0, 120)}. Use when they ask why work with you — keep it to one proof point, then offer to demonstrate on their next referral.`;
     const tagsHtml = (item.tags || []).map((t) =>
       `<span class="px-2 py-0.5 text-[10px] rounded-full bg-[#002B5C]/10 text-[#002B5C] dark:text-gray-300">${esc(t)}</span>`
     ).join(' ');
 
-    setKicker(modal, 'Value Vault • Ruoff Fact Vault');
+    setKicker(modal, 'Value Vault • Agent Excellence Vault');
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2 items-center">
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C] dark:text-white">RUOFF EDGE</span>
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C] dark:text-white">AGENT EDGE</span>
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">${esc(cat)}</span>
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 mb-3">${esc(item.teaser || '')}</p>
@@ -2392,7 +2393,7 @@
         </div>
       </div>
 
-      ${scriptCard('Say this to a partner', partnerScript, 'One proof point per conversation — then offer to show it on their next buyer.')}
+      ${scriptCard('Say this to a partner', partnerScript, 'One proof point per conversation — then offer to show it on their next referral.')}
       ${prem.agentObjection ? scriptCard('If they push back', prem.agentObjection, 'Stay calm — data beats defensiveness.') : ''}
 
       <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 text-sm mb-6">
