@@ -1,8 +1,8 @@
 /**
  * js/features/listing-description.js
  *
- * Smart Listing Description Generator (Realtor)
- * Ported from old monolithic Realtor Sales Coach as-is (prompts/logic first, polish later).
+ * Smart Listing Description Generator (Agent Sales Coach)
+ * Ported from monolithic coach — prompts/logic first, polish ongoing.
  * Self-initializes. Exposes window.generateListingDescription
  */
 
@@ -160,5 +160,5 @@ Make buyers fall in love and want to reach out immediately.`;
   window.generateListingDescription = generateListingDescription;
 
   // Optional: small init hook if needed later
-  console.log('[Realtor] Listing Description feature loaded');
+  console.log('[Agent] Listing Description feature loaded');
 })();

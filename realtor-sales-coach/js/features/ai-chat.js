@@ -24,6 +24,7 @@ When asked what the tool does or about its features, ALWAYS highlight the AI TOO
 • Listing Description Generator – Instant professional, emotional, and social-ready descriptions in multiple lengths
 • Open House Script & Strategy – Full kit: setup checklist, opening scripts, talking points, objections, lead capture, and social angles
 • Buyer/Seller Consultation Prep Kit – Personalized market snapshots, comps, pricing/affordability, objections, and follow-up plans
+• Buyer Financing & Qualification Reference – Layered scenario analysis with lender-partner guidance and follow-up threads
 • Sales Script Generator – Instant objection handlers and conversation scripts
 • Social Media Post & Calendar Creator – Ready-to-post content + full monthly plans (6 pillars, 14 Reels, 120+ Evergreen)
 • Blog Creator – Full SEO + GEO optimized blog posts with matching social + Google + Reel assets in seconds

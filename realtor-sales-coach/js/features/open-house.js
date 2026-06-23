@@ -1,8 +1,8 @@
 /**
  * js/features/open-house.js
  *
- * Open House Script & Strategy Generator (Realtor)
- * Ported from old monolithic Realtor Sales Coach (prompts/logic first).
+ * Open House Script & Strategy Generator (Agent Sales Coach)
+ * Ported from monolithic coach (prompts/logic first).
  */
 
 (function () {
@@ -95,5 +95,5 @@ Keep it actionable, warm, professional, and lead-focused. Use bullet points and 
   }
 
   window.generateOpenHouse = generateOpenHouse;
-  console.log('[Realtor] Open House feature loaded');
+  console.log('[Agent] Open House feature loaded');
 })();

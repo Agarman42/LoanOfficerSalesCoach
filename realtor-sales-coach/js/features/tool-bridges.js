@@ -1,6 +1,6 @@
 /**
- * Tool Bridges — opt-in handoffs between coach tools (realtor).
- * Pattern is reusable for LO / Realtor apps with different appId + storage keys.
+ * Tool Bridges — opt-in handoffs between coach tools (agent).
+ * Pattern is reusable for LO / Agent apps with different appId + storage keys.
  *
  * Principles: off by default, small context slices, user picks the link.
  */

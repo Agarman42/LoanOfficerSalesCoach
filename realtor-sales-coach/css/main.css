@@ -2,7 +2,7 @@
    Ultimate Agent Sales Coach
    Main Stylesheet (extracted from monolithic index.html)
    Phase 0 - Structure & Maintainability Refactor
-   Realtor variant: navy/warm-teal sidebar + amber accents
+   Agent variant: navy/warm-teal sidebar + amber accents
    ============================================ */
 
 .dark { 
@@ -32,13 +32,13 @@
     max-height: 3000px; 
 }
 
-/* === HEADER - BOLDER & DARKER (Realtor variant) === */
+/* === HEADER - BOLDER & DARKER (Agent variant) === */
 header {
     background: linear-gradient(to right, #001429, #002b5c) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* === SIDEBAR - Realtor differentiated: navy to warm teal + subtle Ruoff === */
+/* === SIDEBAR - Agent differentiated: navy to warm teal === */
 #sidebar {
     background: linear-gradient(to bottom, #002B5C, #134e4b) !important;
     box-shadow: 12px 0 40px rgba(0, 0, 0, 0.7);

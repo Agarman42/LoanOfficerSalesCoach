@@ -199,7 +199,7 @@
       color: "#00A89D",
       scenarios: [
         { value: "Follow up after sending a buyer qualification packet or buyer resources", label: "Follow up after buyer resources / qualification share", contextTip: "Helpful details: How long ago did you send the qualification overview or resources to the buyer? Did they respond? Any specific questions about process, lenders, or next steps?" },
-        { value: "Respond to an Experience.com or Google review", label: "Respond to review/survey", contextTip: "Very helpful: Was the review positive or critical? Did it come from a buyer/client or a realtor/partner? What specific part of the experience did they mention?" },
+        { value: "Respond to an Experience.com or Google review", label: "Respond to review/survey", contextTip: "Very helpful: Was the review positive or critical? Did it come from a buyer/client or a referral partner (lender, title, co-broke)? What specific part of the experience did they mention?" },
         { value: "Thank a client for completing a post-closing survey or review", label: "Thank client for completing survey/review", contextTip: "Nice touch: What did they specifically say in the review that stood out? Was there anything particularly stressful about their transaction that you helped with?" },
         { value: "Thank a past client for sending a referral", label: "Thank past client for a referral", contextTip: "Great context: How did the referral turn out? Did the new client end up closing? Any specific things the referring client might appreciate being acknowledged for (their intro, their sphere trust)?" },
         { value: "Offer value to another agent (no ask)", label: "Offer value to another agent (no ask)", contextTip: "Useful details: What kind of value are you thinking of offering (hot buyer lead in their area, market update, co-marketing idea, introduction to a lender)? Have you done anything like this with them before?" },
@@ -656,7 +656,7 @@ window.showContextTipsModal = function() {
                     <strong class="text-[#00A89D]">For Review / Survey Responses</strong>
                     <ul class="mt-2 list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
                         <li>What did the review actually say? (positive or negative?)</li>
-                        <li>Was this a buyer/client or a realtor/partner review?</li>
+                        <li>Was this a buyer/client or a referral partner review?</li>
                         <li>Any specific part of the experience you want to highlight or address?</li>
                     </ul>
                 </div>

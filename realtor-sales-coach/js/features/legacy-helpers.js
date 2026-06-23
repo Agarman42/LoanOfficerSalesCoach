@@ -48,7 +48,7 @@
     ],
     monthly: [
       "Deliver pop-by gifts to top 10 partners/clients.",
-      "Host an Ask Your Lender Zoom call.",
+      "Co-host a buyer financing Q&A with your lender partner.",
       "Host a first-time homebuyer seminar.",
       "Send handwritten birthday/anniversary cards.",
       "Record a long-form video on a trending topic.",
@@ -57,7 +57,7 @@
       "Host a passion-blended event (wine & canvas, golf, etc.).",
       "Mail a 'Just Because' value pack to database.",
       "Run a referral partner survey.",
-      "Create monthly 'LO Insider' newsletter."
+      "Create monthly client + partner market newsletter."
     ],
     quarterly: [
       "Host a full Lunch & Learn for agents/partners.",

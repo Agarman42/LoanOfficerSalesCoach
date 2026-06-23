@@ -1,8 +1,8 @@
 /**
  * js/features/consultation-kit.js
  *
- * Buyer/Seller Consultation Prep Kit (Realtor)
- * Ported prompts + logic from old monolithic Realtor Sales Coach.
+ * Buyer/Seller Consultation Prep Kit (Agent Sales Coach)
+ * Ported prompts + logic from monolithic coach.
  */
 
 (function () {
@@ -96,5 +96,5 @@ Make everything warm, client-centered, and confidence-building. Use emotional la
   }
 
   window.generateConsultationKit = generateConsultationKit;
-  console.log('[Realtor] Consultation Kit feature loaded');
+  console.log('[Agent] Consultation Kit feature loaded');
 })();
