@@ -275,7 +275,6 @@
     'global-loading',
     'task-help-modal',
     'detail-modal',
-    'equity-detail-modal',
     'nurture-template-modal',
     'process-template-modal',
     'process-stage-modal',
@@ -435,17 +434,12 @@
 
   window.closeDetailModal = function closeDetailModal() {
     const dbModal = document.getElementById('detail-modal');
-    const equityModal = document.getElementById('equity-detail-modal');
     if (typeof window.closeAppModal === 'function') {
       if (dbModal) window.closeAppModal(dbModal);
-      if (equityModal) window.closeAppModal(equityModal);
-    } else {
-      [dbModal, equityModal].forEach((m) => {
-        if (!m) return;
-        m.classList.remove('flex');
-        m.classList.add('hidden');
-        m.style.display = 'none';
-      });
+    } else if (dbModal) {
+      dbModal.classList.remove('flex');
+      dbModal.classList.add('hidden');
+      dbModal.style.display = 'none';
     }
     window.releaseModalScrollLock();
   };
@@ -454,18 +448,12 @@
     document.querySelectorAll('.fixed.inset-0[data-event-fallback-modal="true"]').forEach((el) => el.remove());
   };
 
-  const EQUITY_MODAL_INNER_IDS = new Set([
-    'modal-client-name', 'modal-address', 'modal-type-badge', 'modal-phone-link',
-    'modal-phone-na', 'modal-email-link', 'modal-email-na', 'modal-buyers-agent-section',
-    'modal-transaction-type', 'modal-buyers-agent', 'modal-program', 'modal-closing-date',
-    'modal-current-rate', 'modal-term', 'modal-original-ltv', 'modal-balance',
-    'modal-value', 'modal-original-pi', 'modal-original-mi', 'modal-original-insurance',
-    'modal-original-taxes', 'modal-pmi-alert', 'modal-scripts',
+  const MODAL_INNER_IDS = new Set([
     'social-modal-title', 'social-modal-body', 'social-modal-eyebrow', 'social-modal-badge', 'social-modal-back'
   ]);
 
   function portalModalRoot(el) {
-    if (!el || EQUITY_MODAL_INNER_IDS.has(el.id)) return;
+    if (!el || MODAL_INNER_IDS.has(el.id)) return;
     if (el.parentElement && el.parentElement !== document.body) {
       document.body.appendChild(el);
     }
@@ -473,7 +461,7 @@
   }
 
   function repairMisportaledModalParts() {
-    EQUITY_MODAL_INNER_IDS.forEach(id => {
+    MODAL_INNER_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.classList.remove('app-modal-overlay');
@@ -486,7 +474,7 @@
   function portalNestedFixedModals() {
     const seen = new Set();
     document.querySelectorAll('.app-modal-overlay').forEach(el => {
-      if (!el.id || seen.has(el.id) || EQUITY_MODAL_INNER_IDS.has(el.id)) return;
+      if (!el.id || seen.has(el.id) || MODAL_INNER_IDS.has(el.id)) return;
       seen.add(el.id);
       portalModalRoot(el);
     });

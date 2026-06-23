@@ -44,7 +44,7 @@ fi
 
 PORT=${PORT:-3001}
 export PORT
-echo "[OK] Starting Realtor proxy on http://localhost:${PORT}"
+echo "[OK] Starting Agent Sales Coach proxy on http://localhost:${PORT}"
 echo "     (Loan Officer coach runs separately on http://localhost:3000)"
 echo ""
 echo "=================================================================="

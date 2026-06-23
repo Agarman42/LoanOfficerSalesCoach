@@ -366,7 +366,7 @@ main {
 .force-reflow {
     opacity: 0.99;
 }
-main, #equity-scanner, #equity-output, #opportunity-cards {
+main {
     overflow: visible !important;
     overscroll-behavior: auto !important;
 }

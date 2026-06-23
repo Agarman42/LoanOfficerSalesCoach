@@ -40,13 +40,13 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v239">
+    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v240">
 
     <!-- Centralized API client (Phase 0) - must load early -->
-    <script src="js/api.js?v=20260623-realtor-v239"></script>
+    <script src="js/api.js?v=20260623-realtor-v240"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-realtor-v239"></script>
+    <script src="js/ui.js?v=20260623-realtor-v240"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -3516,7 +3516,7 @@
 <!-- Life Event & Scaling Detail Modal (also used by Database Nurturing pillars) -->
 <div id="detail-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden" onclick="if (event.target.id === 'detail-modal') closeDetailModal()">
     <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-full sm:max-w-4xl max-h-[90vh] mx-2 sm:mx-4 overflow-y-auto" onclick="event.stopPropagation()">
-        <!-- Premium Close (sticky, matching equity modal polish) -->
+        <!-- Premium Close (sticky) -->
         <div class="sticky top-0 z-10 flex justify-end p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl">
             <button onclick="closeDetailModal()" class="text-3xl leading-none text-gray-400 hover:text-red-500 transition w-10 h-10 flex items-center justify-center">&times;</button>
         </div>
@@ -7179,13 +7179,13 @@
    </section> 
 
 <!-- Rich modal modules (LO polish mirror) -->
-<script src="js/features/social-modals.js?v=20260623-realtor-v239"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v239"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-realtor-v239"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v239"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-realtor-v239"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-realtor-v239"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v239"></script>
+<script src="js/features/social-modals.js?v=20260623-realtor-v240"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v240"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-realtor-v240"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v240"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-realtor-v240"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-realtor-v240"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v240"></script>
 
 <script>
 // Reusable toggle for Supporting Systems sections (makes them behave like the main 6 pillars)
@@ -7389,7 +7389,7 @@ window.toggleSupportingSection = function(sectionId) {
   };
 
   // =====================================================
-  // LOAN PROCESS SECTION — World Class Enhancements
+  // TRANSACTION PROCESS SECTION — World Class Enhancements
   // =====================================================
 
   const PROCESS_STAGES = {
@@ -8756,7 +8756,7 @@ window.toggleSupportingSection = function(sectionId) {
         modal.className = 'fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4';
         modal.innerHTML = `
           <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-full sm:max-w-4xl max-h-[90vh] mx-2 sm:mx-4 overflow-y-auto" onclick="event.stopPropagation()">
-            <!-- Premium Close (sticky, matching equity modal polish) -->
+            <!-- Premium Close (sticky) -->
             <div class="sticky top-0 z-10 flex justify-end p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl">
               <button onclick="if(typeof closeDetailModal==='function') closeDetailModal(); else this.closest('#detail-modal').classList.add('hidden');" class="text-3xl leading-none text-gray-400 hover:text-red-500 transition w-10 h-10 flex items-center justify-center">&times;</button>
             </div>
@@ -13275,20 +13275,12 @@ window.toggleSupportingSection = function(sectionId) {
 
   window.closeDetailModal = function() {
     const dbModal = document.getElementById('detail-modal');
-    const equityModal = document.getElementById('equity-detail-modal');
     if (typeof window.closeAppModal === 'function') {
       if (dbModal) window.closeAppModal(dbModal);
-      if (equityModal) window.closeAppModal(equityModal);
-    } else {
-      if (dbModal) {
-        dbModal.classList.remove('flex');
-        dbModal.classList.add('hidden');
-        dbModal.style.display = 'none';
-      }
-      if (equityModal) {
-        equityModal.style.display = 'none';
-        equityModal.classList.add('hidden');
-      }
+    } else if (dbModal) {
+      dbModal.classList.remove('flex');
+      dbModal.classList.add('hidden');
+      dbModal.style.display = 'none';
     }
     if (typeof window.releaseModalScrollLock === 'function') {
       window.releaseModalScrollLock();
@@ -13301,7 +13293,6 @@ window.toggleSupportingSection = function(sectionId) {
     const modalIds = [
       'global-loading',
       'detail-modal',
-      'equity-detail-modal',
       'nurture-template-modal',
       'process-template-modal',
       'process-stage-modal',
@@ -13803,8 +13794,8 @@ window.toggleSupportingSection = function(sectionId) {
   }
 })();
 </script>
-<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v239"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v239"></script>
+<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v240"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v240"></script>
 
 </main>
 <!-- Global Centered Loading Modal — Premium style matching Social & Blog Creator -->
@@ -13839,109 +13830,6 @@ window.toggleSupportingSection = function(sectionId) {
   Old inline code removed below.
 */
 </script>
-
-<!-- Equity Scanner Detail Modal -->
-<div id="equity-detail-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" style="display: none;" onclick="closeDetailModal()">
-    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-full sm:max-w-4xl max-h-[90vh] mx-2 sm:mx-4 overflow-y-auto" onclick="event.stopPropagation()">
-        <!-- Premium Close -->
-        <div class="sticky top-0 z-10 flex justify-end p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl">
-            <button onclick="closeDetailModal()" class="text-3xl leading-none text-gray-400 hover:text-red-500 transition w-10 h-10 flex items-center justify-center">&times;</button>
-        </div>
-
-        <!-- Content -->
-        <div class="px-4 sm:px-8 pb-8 sm:pb-10 -mt-2 sm:-mt-4">
-            <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-2">Equity &amp; Opportunity Scanner</div>
-            <div class="flex items-start justify-between mb-6">
-                <div>
-                    <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white" id="modal-client-name"></h3>
-                    <p class="text-xl text-gray-600 dark:text-gray-400 mt-1" id="modal-address"></p>
-                </div>
-                <div id="modal-type-badge" class="flex flex-wrap gap-2"></div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-[15px]">
-                <div class="space-y-3">
-                    <div class="flex items-center gap-2"><i class="fas fa-phone text-[#00A89D] w-4"></i> <span class="text-gray-500">Phone:</span> <a id="modal-phone-link" href="" class="font-semibold text-[#00A89D] hover:underline"></a><span id="modal-phone-na" class="text-gray-400 ml-2 hidden">(not available)</span></div>
-                    <div class="flex items-center gap-2"><i class="fas fa-envelope text-[#00A89D] w-4"></i> <span class="text-gray-500">Email:</span> <a id="modal-email-link" href="" class="font-semibold text-[#00A89D] hover:underline"></a><span id="modal-email-na" class="text-gray-400 ml-2 hidden">(not available)</span></div>
-                </div>
-                <div class="space-y-3" id="modal-buyers-agent-section" style="display: none;">
-                    <div><span class="text-gray-500">Transaction:</span> <span id="modal-transaction-type" class="font-semibold"></span></div>
-                    <div><span class="text-gray-500">Buyer's Agent:</span> <span id="modal-buyers-agent" class="font-semibold"></span></div>
-                </div>
-            </div>
-
-            <!-- Original Loan Details Section -->
-            <div class="mt-6 p-6 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl">
-                <h4 class="text-lg font-bold text-[#002B5C] dark:text-[#00A89D] mb-4 flex items-center gap-2"><i class="fas fa-file-invoice-dollar text-[#00A89D]"></i> Original Loan Details</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#00A89D]/10 text-[#00A89D]"><i class="fas fa-file-contract text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Program</span> <span id="modal-program" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#00A89D]/10 text-[#00A89D]"><i class="fas fa-calendar-check text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Closed</span> <span id="modal-closing-date" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#00A89D]/10 text-[#00A89D]"><i class="fas fa-percentage text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Rate</span> <span id="modal-current-rate" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#00A89D]/10 text-[#00A89D]"><i class="fas fa-clock text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Term</span> <span id="modal-term" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#00A89D]/10 text-[#00A89D]"><i class="fas fa-chart-line text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Original LTV</span> <span id="modal-original-ltv" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#00A89D]/10 text-[#00A89D]"><i class="fas fa-wallet text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Est. Balance</span> <span id="modal-balance" class="font-semibold text-sm leading-tight text-[#00A89D]"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#00A89D]/10 text-[#00A89D]"><i class="fas fa-home text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Est. Value</span> <span id="modal-value" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-green-500/10 text-green-600"><i class="fas fa-dollar-sign text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">P&I Payment</span> <span id="modal-original-pi" class="font-semibold text-sm leading-tight text-green-600"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-purple-500/10 text-purple-600"><i class="fas fa-shield-alt text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Monthly MI</span> <span id="modal-original-mi" class="font-semibold text-sm leading-tight text-purple-600"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-orange-500/10 text-orange-500"><i class="fas fa-fire text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Insurance</span> <span id="modal-original-insurance" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                    <div class="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-blue-500/10 text-blue-600"><i class="fas fa-receipt text-xs"></i></span>
-                        <div class="min-w-0"><span class="text-gray-500 block text-[10px] leading-none mb-0.5">Taxes</span> <span id="modal-original-taxes" class="font-semibold text-sm leading-tight"></span></div>
-                    </div>
-                </div>
-                <p id="modal-pmi-alert" class="mt-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-3 rounded-xl text-sm font-semibold flex items-center gap-2" style="display: none;">
-                    <i class="fas fa-check-circle"></i> Eligible for PMI Removal (LTV ≤ 80%)
-                </p>
-            </div>
-
-            <!-- Current Estimates & Comparison Section -->
-            <div class="mt-6 p-6 bg-gradient-to-br from-[#00A89D]/5 to-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl">
-                <h4 class="text-lg font-bold text-[#002B5C] dark:text-[#00A89D] mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-[#00A89D]"></i> Refinance Comparison @ Current Rate</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="listing-comparison-grid">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- Personalized Scripts Section -->
-            <div id="modal-scripts" class="mt-8"></div>
-        </div>
-
-        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between text-xs flex-shrink-0">
-            <div class="text-gray-500">Use Copy &amp; Save buttons liberally</div>
-            <button onclick="closeDetailModal()" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close</button>
-        </div>
-    </div>
-</div>
 
 <!-- API Key Management Modal (Phase 0.5) -->
 <div id="api-key-modal" class="fixed inset-0 bg-black/70 z-[9999] hidden items-center justify-center p-4">
@@ -13996,27 +13884,27 @@ window.toggleSupportingSection = function(sectionId) {
 </div>
 
 <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-<script src="js/main.js?v=20260623-realtor-v239"></script>
+<script src="js/main.js?v=20260623-realtor-v240"></script>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/save-ribbon.js?v=20260623-realtor-v239"></script>
-<script src="js/features/sales-scripts.js?v=20260623-realtor-v239"></script>
-<script src="js/features/listing-description.js?v=20260623-realtor-v239"></script>
-<script src="js/features/open-house.js?v=20260623-realtor-v239"></script>
-<script src="js/features/consultation-kit.js?v=20260623-realtor-v239"></script>
-<script src="js/features/social-post.js?v=20260623-realtor-v239"></script>
-<script src="js/features/mindset-lab.js?v=20260623-realtor-v239"></script>
-<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v239"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v239"></script>
-<script src="js/features/tool-bridges.js?v=20260623-realtor-v239"></script>
-<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v239"></script>
-<script src="js/features/blog-creator.js?v=20260623-realtor-v239"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-realtor-v239"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-realtor-v239"></script>
-<script src="js/features/ai-chat.js?v=20260623-realtor-v239"></script>
-<script src="js/features/calculator.js?v=20260623-realtor-v239"></script>
-<script src="js/features/underwriting.js?v=20260623-realtor-v239"></script>
-<script src="js/features/value-vault.js?v=20260623-realtor-v239"></script>
+<script src="js/features/save-ribbon.js?v=20260623-realtor-v240"></script>
+<script src="js/features/sales-scripts.js?v=20260623-realtor-v240"></script>
+<script src="js/features/listing-description.js?v=20260623-realtor-v240"></script>
+<script src="js/features/open-house.js?v=20260623-realtor-v240"></script>
+<script src="js/features/consultation-kit.js?v=20260623-realtor-v240"></script>
+<script src="js/features/social-post.js?v=20260623-realtor-v240"></script>
+<script src="js/features/mindset-lab.js?v=20260623-realtor-v240"></script>
+<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v240"></script>
+<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v240"></script>
+<script src="js/features/tool-bridges.js?v=20260623-realtor-v240"></script>
+<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v240"></script>
+<script src="js/features/blog-creator.js?v=20260623-realtor-v240"></script>
+<script src="js/features/legacy-helpers.js?v=20260623-realtor-v240"></script>
+<script src="js/features/newsletter-generator.js?v=20260623-realtor-v240"></script>
+<script src="js/features/ai-chat.js?v=20260623-realtor-v240"></script>
+<script src="js/features/calculator.js?v=20260623-realtor-v240"></script>
+<script src="js/features/underwriting.js?v=20260623-realtor-v240"></script>
+<script src="js/features/value-vault.js?v=20260623-realtor-v240"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
 
@@ -15499,7 +15387,7 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260623-realtor-v239"></script>
+<script src="js/features/user-profile.js?v=20260623-realtor-v240"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -15648,8 +15536,8 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Agent Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Agent Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v239"></script>
-<script src="js/app-version.js?v=20260623-realtor-v239"></script>
+<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v240"></script>
+<script src="js/app-version.js?v=20260623-realtor-v240"></script>
 
 </body>
 </html>
