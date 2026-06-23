@@ -486,7 +486,7 @@
       ${proTip('Segment by years since close + move-up potential + investor vs primary. Never send the same generic anniversary card — reference something specific from their file.', 'orange')}
       ${bridgeRow([
         { label: 'Anniversary nurture template', action: 'nurture:anniversary', primary: true },
-        { label: 'Equity scanner', action: 'equity' }
+        { label: 'Annual equity review', action: 'equity' }
       ])}
     `;
     attachHandlers(contentEl);

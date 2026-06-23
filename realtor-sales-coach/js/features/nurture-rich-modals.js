@@ -171,7 +171,7 @@
       ${bridgeRow([
         { label: 'Home anniversary check-in framework', action: 'vault:annual-home-equity-review', primary: true },
         { label: 'Client anniversary system', action: 'vault:client-anniversary-system' },
-        { label: 'Equity scanner', action: 'equity' }
+        { label: 'Annual equity review', action: 'equity' }
       ])}
       ${nextStepsHtml([
         { label: 'High-ROI Personal Touches', onclick: "closeNamedModal('nurture-template-modal'); if(typeof showClientAppreciationModal==='function')showClientAppreciationModal('touches');", style: 'primary' },
@@ -320,7 +320,7 @@
       <p class="text-sm mb-4"><strong>Gift ideas:</strong> Board books, onesie, meal delivery card, soft blanket — never salesy.</p>
       ${proTip('Note the baby\'s name in CRM. Reference it in every future touch — parents feel genuinely known.')}`,
       [
-        { label: 'Equity scanner', action: 'equity', primary: true },
+        { label: 'Annual equity review', action: 'equity', primary: true },
         { label: 'Personal touches', action: 'touches' }
       ]);
     attachHandlers(contentEl);
@@ -336,7 +336,7 @@
       </div>
       ${proTip('Relocation job changes deserve a separate playbook — ask about timeline and whether they need an agent referral in the new market.')}`,
       [
-        { label: 'Equity scanner', action: 'equity', primary: true },
+        { label: 'Annual equity review', action: 'equity', primary: true },
         { label: 'Sales scripts', action: 'scripts' }
       ]);
     attachHandlers(contentEl);
@@ -349,7 +349,7 @@
       `${cadenceList(['Downsize to lower maintenance + cash out equity', 'Stay put and access equity for travel or investments', 'Convert current home to rental / investment property'])}
       <div class="mb-6">${scriptCard('Empty nest door-opener', 'Now that the kids are out on their own, a lot of my clients start thinking about what they really want their next chapter to look like. Some downsize, some travel more, and some turn their current home into an income-producing asset. Would you ever want to explore what options look like for your situation — totally no pressure?', 'Listen more than you talk.', 'Life Event: Empty Nest')}</div>`,
       [
-        { label: 'Equity scanner', action: 'equity', primary: true },
+        { label: 'Annual equity review', action: 'equity', primary: true },
         { label: 'Sales scripts', action: 'scripts' }
       ]);
     attachHandlers(contentEl);

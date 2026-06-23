@@ -75,7 +75,7 @@
           } else if (action === 'social' && typeof window.showSection === 'function') {
             window.showSection('social');
           } else if (action === 'scripts' && typeof window.showSection === 'function') {
-            window.showSection('sales-scripts');
+            window.showSection('sales-script');
           } else if (action?.startsWith('pillar:') && typeof window.openVaultPillar === 'function') {
             if (typeof window.showSection === 'function') window.showSection('value-vault');
             setTimeout(() => window.openVaultPillar(parseInt(action.split(':')[1], 10)), 200);
