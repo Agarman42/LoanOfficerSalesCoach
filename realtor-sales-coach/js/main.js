@@ -579,15 +579,6 @@
       // Smooth scroll into view
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      // Auto-trigger calculator results when navigating to it
-      if (id === 'calculator') {
-        setTimeout(() => {
-          if (typeof window.calculateAdvanced === 'function') {
-            window.calculateAdvanced();
-          }
-        }, 120);
-      }
-
       // Weekly Win Plan (separate from 2026 Business Plan) button wiring (robust fallback)
       // IMPORTANT: Weekly Win Plan (time blocks) and 2026 Business Plan are TWO SEPARATE features.
       // - Weekly: generateWeeklyPlan(), #weekly-win-plan section, #generate-win-plan-btn
