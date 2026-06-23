@@ -127,557 +127,133 @@
   // =====================================================
   // SOCIAL MEDIA PILLAR MODALS
   // =====================================================
-  window.openSocialModal = function openSocialModal(category) {
-    const modal = document.getElementById('content-modal');
-    if (!modal) {
-      console.error('Social modal #content-modal not found');
-      return;
-    }
-
-    const titleEl = document.getElementById('modal-title');
-    const listEl = document.getElementById('modal-list');
-
-    if (!titleEl || !listEl) {
-      console.error('Missing modal-title or modal-list elements');
-      return;
-    }
-
-    listEl.innerHTML = '';
-
-    let title = category + ' Content Ideas';
-    let items = [];
-
-    switch (category) {
-      case 'Personal':
-        title = 'Personal Content Ideas';
-        items = [
-          "Behind-the-scenes of my morning coffee run ☕",
-          "Weekend family hike — who else loves the outdoors?",
-          "My favorite hobby right now (golf/poker/cooking) — what’s yours?",
-          "Quick kitchen hack or recipe I used this week",
-          "Throwback to my very first closing — 5 years ago!",
-          "Pet photo Friday! Meet my dog 🐶",
-          "What I’m grateful for this week as a loan officer",
-          "A funny story from a recent client meeting",
-          "Favorite local restaurant I took a client to"
-        ];
-        break;
-      case 'Local':
-        title = 'Local Spotlight Ideas';
-        items = [
-          "Why homes in our area are selling faster than ever",
-          "Hidden gem coffee shop perfect for client meetings",
-          "This weekend’s best community events",
-          "Local market stats snapshot (easy to read graphic)",
-          "Shout-out to a great local business I love"
-        ];
-        break;
-      case 'Educational':
-        title = 'Educational / Value Content';
-        items = [
-          "What first-time buyers need to know in 2026",
-          "Current rate trends explained simply",
-          "How to use equity to buy your next home",
-          "5 questions every buyer should ask their lender",
-          "Refinance vs. purchase — when does it make sense?"
-        ];
-        break;
-      case 'Client Wins':
-        title = 'Client Wins & Testimonials';
-        items = [
-          "Another happy family in their dream home!",
-          "First-time buyer closed in 21 days — here’s how",
-          "Referral partner success story (tag them!)",
-          "Before & after: From pre-approval to keys"
-        ];
-        break;
-      case 'Value':
-        title = 'Value-First Posts for Partners';
-        items = [
-          "Market update tailored for realtors",
-          "Co-branded infographic you can share",
-          "Quick tip: How to explain today’s rates to buyers",
-          "Free tool or checklist you can send to your clients"
-        ];
-        break;
-      case 'Engagement':
-        title = 'Engagement & Interaction Posts';
-        items = [
-          "Poll: “What’s the #1 thing buyers are asking you right now?”",
-          "Ask your followers: “What’s your favorite local restaurant?”",
-          "Tag 3 realtors who made your week easier",
-          "Open question: “What would make your job easier this month?”"
-        ];
-        break;
-      default:
-        items = ["Great content idea coming soon for " + category];
-    }
-
-    titleEl.textContent = title;
-    listEl.innerHTML = '';
-
-    items.forEach((item, index) => {
-      const card = document.createElement('div');
-      card.className = 'group flex items-start justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-700/70 rounded-2xl border border-gray-200 dark:border-gray-600 hover:border-[#00A89D]/60 hover:shadow-md transition-all';
-
-      const safeTitle = `${category}: ${item.substring(0, 72).replace(/'/g, "\\'")}`;
-      card.innerHTML = `
-        <div class="flex-1 text-base leading-snug text-gray-800 dark:text-gray-200 pr-2">
-          ${item}
-        </div>
-        <div class="flex flex-shrink-0 items-center gap-1 opacity-60 group-hover:opacity-100 transition-all">
-        <button class="copy-btn text-[#00A89D] hover:text-[#008F85] p-1.5 rounded-lg hover:bg-[#00A89D]/10"
-                title="Copy idea">
-          <i class="fas fa-copy text-sm"></i>
-        </button>
-        <button class="save-idea-btn text-[#00A89D] hover:text-[#008F85] p-1.5 rounded-lg hover:bg-[#00A89D]/10 border border-transparent hover:border-[#00A89D]/30"
-                title="Save to My Saved Items">
-          <i class="far fa-bookmark text-sm"></i>
-        </button>
-        </div>
-      `;
-
-      // Add copy functionality
-      const copyBtn = card.querySelector('.copy-btn');
-      const saveBtn = card.querySelector('.save-idea-btn');
-      if (saveBtn && typeof window.toggleSaveIdea === 'function') {
-        saveBtn.addEventListener('click', (e) => {
-          e.stopImmediatePropagation();
-          window.toggleSaveIdea(safeTitle, item, saveBtn, 'social');
-          if (typeof window.showSavedFeedback === 'function') window.showSavedFeedback('Saved to My Saved Items');
-        });
-      }
-      copyBtn.addEventListener('click', (e) => {
-        e.stopImmediatePropagation();
-        navigator.clipboard.writeText(item).then(() => {
-          const originalHTML = copyBtn.innerHTML;
-          copyBtn.innerHTML = `<i class="fas fa-check text-sm"></i>`;
-          copyBtn.classList.add('text-green-500');
-
-          // Show toast
-          showToast('Idea copied to clipboard!');
-
-          setTimeout(() => {
-            copyBtn.innerHTML = originalHTML;
-            copyBtn.classList.remove('text-green-500');
-          }, 1500);
-        }).catch(() => {
-          // Fallback for older browsers
-          const textArea = document.createElement('textarea');
-          textArea.value = item;
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          showToast('Idea copied!');
-        });
-      });
-
-      listEl.appendChild(card);
-    });
-
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-  };
+  // openSocialModal — disabled. Canonical: social-modals.js + restoreSocialModals.
 
   window.closeModal = function closeModal() {
+    if (typeof window.closeSocialContentModal === 'function') {
+      window.closeSocialContentModal();
+      return;
+    }
+    if (typeof window.closeNamedModal === 'function') {
+      window.closeNamedModal('content-modal');
+      return;
+    }
     const modal = document.getElementById('content-modal');
     if (modal) {
       modal.classList.add('hidden');
+      modal.classList.remove('flex');
       modal.style.display = 'none';
+      modal.style.pointerEvents = 'none';
     }
   };
 
   // =====================================================
-  // RICH REFERRAL PARTNER PLAYBOOKS (Strategy + Content Focused)
+  // =====================================================
+  // PARTNER SAVE + LEGACY PLAYBOOK STUBS (agent POV)
+  // Canonical rich playbooks: referral-rich-modals.js
   // =====================================================
   const PARTNER_PLAYBOOKS = {
-    Realtors: {
-      title: "Realtors – Primary Referral Engine",
-      intro: "Realtors remain the single highest-leverage referral source for the vast majority of loan officers. The agents who consistently send you their best clients do it because you make them look like heroes and dramatically reduce their stress. This is a deep, battle-tested playbook.",
-      sections: [
-        {
-          heading: "Core Positioning That Wins Realtors",
-          content: `<ul class="space-y-2">
-            <li><strong>Speed + Certainty > Rate</strong> — The agent who can get a buyer approved in hours and close on time wins more deals than the one with the lowest rate.</li>
-            <li><strong>Make Them the Hero</strong> — Public credit, co-branded assets, and “your buyer got the house because of your agent” stories.</li>
-            <li><strong>Reduce Their Liability & Stress</strong> — Call them first when issues arise. Never let them be surprised by a client.</li>
-          </ul>`
-        },
-        {
-          heading: "High-Impact Outreach Scripts",
-          content: `<div class="space-y-6">
-            <div class="border-l-4 border-[#00A89D] pl-4">
-              <div class="font-semibold mb-1">Cold / Warm Intro (New Agent in Your Farm Area)</div>
-              <p class="italic text-sm">"Hi [Name], I’ve noticed you’ve been closing quite a few deals in the [neighborhood] area. I specialize in helping agents win more listings by delivering fast, clean pre-approvals and creative financing solutions that actually get offers accepted. I’d love 15 minutes of your time to learn how I can support your business — completely no pressure."</p>
-            </div>
-            <div class="border-l-4 border-[#00A89D] pl-4">
-              <div class="font-semibold mb-1">Value-First Follow-Up After Meeting</div>
-              <p class="italic text-sm">"Hey [Name], really enjoyed our conversation. I put together a one-page ‘Rate Buydown vs. Seller Concessions’ cheat sheet that’s been helping your peers win more negotiations right now. Happy to co-brand it and send it over if it would be useful for your listings."</p>
-            </div>
-            <div class="border-l-4 border-[#00A89D] pl-4">
-              <div class="font-semibold mb-1">Open House Support Offer</div>
-              <p class="italic text-sm">"I’m going to be in the area this weekend. If you’re holding an open house, I’d be happy to swing by for 30-45 minutes and run quick pre-approval scenarios on-site for any buyers who look serious. I’ll bring branded materials and stay out of your way unless you want me involved."</p>
-            </div>
-            <div class="border-l-4 border-[#00A89D] pl-4">
-              <div class="font-semibold mb-1">After They Sent a Referral (Thank You + Momentum)</div>
-              <p class="italic text-sm">"[Name], thank you for sending [Client] my way. They’re a great fit and we’re moving fast. I sent you a quick video update on their file this morning. Also — who else on your team or in your sphere might benefit from the same level of communication and speed?"</p>
-            </div>
-          </div>`
-        },
-        {
-          heading: "Ongoing Nurturing & Value Cadence (The Real Money)",
-          content: `<ul class="space-y-2">
-            <li><strong>Weekly:</strong> 60-90 second video or text: “Rate & Inventory Snapshot for your top 3 zip codes”</li>
-            <li><strong>Bi-weekly:</strong> Co-branded buyer guide, checklist, or market report they can send to their sphere</li>
-            <li><strong>Monthly:</strong> Personal text or call + one public win shoutout tagging them</li>
-            <li><strong>Quarterly:</strong> Lunch/coffee or pop-by with something useful (branded signage, folders, treats for their team)</li>
-            <li><strong>Always:</strong> Immediate notification on any file issues + solution before they hear it from the client</li>
-          </ul>`
-        },
-        {
-          heading: "Common Realtor Objections + Winning Responses",
-          content: `<div class="space-y-5">
-            <div><strong>“I already have a lender I like.”</strong><br><span class="text-sm">"Totally understand. Most of the agents I work best with have 2-3 lenders they trust for different situations. I’d love to be the one you call when speed, communication, or creative financing is the difference between winning and losing the deal."</span></div>
-            <div><strong>“Your rates aren’t the lowest right now.”</strong><br><span class="text-sm">"Rates definitely matter, but in this market the difference between an accepted offer and a lost deal is often 24-48 hours of certainty. I focus on making your buyer’s offer the strongest on the table — fast pre-approvals, strong communication with the listing side, and problem-solving when issues come up."</span></div>
-            <div><strong>“I don’t want to change lenders mid-transaction.”</strong><br><span class="text-sm">"Smart. I’m not asking you to switch anyone mid-deal. I’m asking for the next buyer who is still shopping. Let me prove the difference on one file and we can go from there."</span></div>
-          </div>`
-        },
-        {
-          heading: "60-Day New Realtor Onboarding Sequence",
-          content: `<ol class="list-decimal pl-5 space-y-2 text-sm">
-            <li><strong>Day 1-2:</strong> Personal intro text + offer to run scenarios on any active listings they have right now.</li>
-            <li><strong>Day 7:</strong> Send a high-value, co-brandable neighborhood market snapshot for one of their key areas.</li>
-            <li><strong>Day 14:</strong> Coffee or lunch. Goal: Learn their business model and biggest frustrations.</li>
-            <li><strong>Day 21:</strong> Co-branded piece of content + concrete offer to co-host an open house or buyer seminar.</li>
-            <li><strong>Day 30:</strong> Check-in call: “How can I make working with me easier and more valuable for you?”</li>
-            <li><strong>Day 45:</strong> First public win shoutout (even a small one) tagging them.</li>
-            <li><strong>Day 60:</strong> Review the relationship and ask for their honest feedback + one introduction to another agent they respect.</li>
-          </ol>`
-        },
-        {
-          heading: "Advanced Co-Marketing & Collaboration Plays",
-          content: `<ul class="space-y-2">
-            <li>Joint “Rate Buydown Strategy” lunch & learn (you bring the financing expertise, they bring the buyers)</li>
-            <li>Co-branded quarterly market report they can send to their entire database</li>
-            <li>Instagram / Facebook Live “Q&A for First-Time Buyers” together</li>
-            <li>Shared open house branding package (signage, flyers, branded water bottles)</li>
-            <li>Offer to run comps and financing scenarios for their listing presentations</li>
-          </ul>`
-        },
-        {
-          heading: "Social Media & Personal Brand Collaboration",
-          content: `<ul class="space-y-2">
-            <li>Monthly “Client Win” Reel featuring the agent (with their permission)</li>
-            <li>Tag them in every relevant market update you post</li>
-            <li>Collaborate on “Day in the Life” or “Behind the Scenes” content</li>
-            <li>Let them use your content in their marketing (make it stupidly easy)</li>
-            <li>Co-create short educational videos they can repurpose</li>
-          </ul>`
-        },
-        {
-          heading: "How to Ask for Referrals Professionally",
-          content: `<div class="space-y-4">
-            <div><strong>After a Smooth Closing:</strong><br><span class="italic">"[Name], this one went really well. I’m grateful you trusted me with your client. If you have any other buyers or sellers who would appreciate this same level of communication and speed, I’d be honored to help them too."</span></div>
-            <div><strong>Quarterly Relationship Check-In:</strong><br><span class="italic">"Hey [Name], I was thinking about you this week. How’s your pipeline looking? Is there anything I can do to help you hit your numbers this quarter — even if it’s just running scenarios or helping with financing questions on listings?"</span></div>
-          </div>`
-        },
-        {
-          heading: "Handling Lost Deals & Rebuilding Trust",
-          content: `<div><strong>When a Deal Falls Apart:</strong><br><span class="text-sm">Call the agent the same day. Take ownership where appropriate, explain what happened transparently, and offer specific ideas for how you’ll handle similar situations better in the future. Then follow up in 7-10 days with value (not an ask).</span></div>`
-        },
-        {
-          heading: "90-Day Nurturing Calendar (Copy-Paste Ready)",
-          content: `<div class="text-sm space-y-3">
-            <p><strong>Month 1:</strong> 4 value touches + 1 in-person (focus on learning their business).</p>
-            <p><strong>Month 2:</strong> 3 value touches + 1 co-branded asset + public shoutout.</p>
-            <p><strong>Month 3:</strong> 2 value touches + 1 personal ask for feedback + 1 introduction request.</p>
-            <p class="italic">Repeat and adjust based on their response level.</p>
-          </div>`
-        },
-        {
-          heading: "How to Become Their 'Go-To' Lender",
-          content: `<ul class="space-y-2 text-sm">
-            <li>Always answer their calls/texts within 1 business hour during business days.</li>
-            <li>Send them a monthly "Top 3 Things I'm Seeing in the Market" email they can forward.</li>
-            <li>Offer to review their current listings for financing angles they can use in negotiations.</li>
-            <li>Never make them chase you for status updates.</li>
-          </ul>`
-        },
-        {
-          heading: "Scripts for When They Need You Most",
-          content: `<div class="space-y-4 text-sm">
-            <div><strong>When they're stressed about a tough buyer:</strong><br><span class="italic">"Send me the file. I'll personally walk it through underwriting and give you a realistic timeline by end of day."</span></div>
-            <div><strong>When a listing is sitting:</strong><br><span class="italic">"Want me to put together financing options that could help a buyer get creative on your listing? I can have it to you by tomorrow."</span></div>
-          </div>`
-        }
-      ]
+    'Partner-FellowAgents': {
+      title: 'Fellow Agents & Co-Broke Partners',
+      sections: [{
+        heading: 'Core Co-Broke Plays',
+        content: 'Co-broke kickoff text on offer acceptance. Post-close thank you within 48 hours. Open house co-broke invitations. White-glove communication on every shared file makes you the agent they call first.'
+      }]
     },
-
-    Builders: {
-      title: "Builders – New Construction & Preferred Lender Status",
-      intro: "Builders care about velocity and predictability. They want buyers who can actually close on time and a lender who makes their sales team look good. Preferred lender status is extremely high-ROI when earned.",
-      sections: [
-        {
-          heading: "What Builders Actually Care About",
-          content: `<ul class="space-y-2">
-            <li>Fast, reliable pre-approvals so their sales team can write contracts confidently</li>
-            <li>Clear communication on construction-to-permanent and one-time close loans</li>
-            <li>Help educating their sales team on current financing options (buydowns, rate locks during construction, etc.)</li>
-            <li>Low fall-through rate on the buyers they send you</li>
-          </ul>`
-        },
-        {
-          heading: "Winning Outreach Angles",
-          content: `<ul class="space-y-2">
-            <li>“I help your sales team convert more traffic by getting buyers pre-approved the same day they visit the model home.”</li>
-            <li>Offer to run regular training sessions for their sales team on current programs.</li>
-            <li>Propose joint marketing at the model home (branded materials, on-site pre-approval station).</li>
-          </ul>`
-        },
-        {
-          heading: "High-Value Scripts & Emails",
-          content: `<div class="space-y-4">
-            <div><strong>Builder Sales Manager Intro:</strong><br><span class="italic">"I work with several builders in the area as a preferred lender. My team specializes in getting your buyers approved quickly and keeping everyone updated through the construction process so there are no surprises at closing. I’d love to show you how we can reduce your fall-through rate."</span></div>
-          </div>`
-        },
-        {
-          heading: "Nurturing & Relationship Builders",
-          content: `<ul class="space-y-2">
-            <li>Regular model home pop-bys with treats for the sales team</li>
-            <li>Co-branded “New Construction Financing Guide” they can give every visitor</li>
-            <li>Quarterly training lunch for their entire sales staff</li>
-            <li>Immediate updates whenever one of their buyers hits a milestone</li>
-          </ul>`
-        },
-        {
-          heading: "Objections Specific to Builders",
-          content: `<div><strong>“We already have a preferred lender.”</strong><br><span class="text-sm">"Completely fair. Many builders work with 2-3 lenders so their buyers have options. I’d love to earn a spot on that list by proving we can help more of your buyers actually close."</span></div>`
-        },
-        {
-          heading: "Construction-to-Permanent Loan Play",
-          content: `<ul class="space-y-2">
-            <li>Become the expert on one-time close loans — many builders' sales teams are not comfortable explaining them.</li>
-            <li>Offer to create a simple one-pager comparing construction-to-permanent vs traditional two-loan process.</li>
-            <li>Be available for same-day calls when a buyer is in the model home and has questions about financing during construction.</li>
-          </ul>`
-        }
-      ]
+    'Partner-Lenders': {
+      title: 'Lenders & Mortgage Partners',
+      sections: [{
+        heading: 'Lender Bench Strategy',
+        content: 'Build 2–3 go-to loan officers who pre-qualify fast and protect contracts. Day 0 handoff on new files, monthly market value touches, post-close thank yous. Co-host buyer events and open houses together.'
+      }]
     },
-
-    "Financial Planners": {
-      title: "Financial Planners & CPAs – High-Net-Worth Referrals",
-      intro: "These partners send fewer but higher-quality clients. They value professionalism, education, and alignment with wealth planning goals.",
-      sections: [
-        {
-          heading: "Positioning That Works",
-          content: `<ul class="space-y-2">
-            <li>Position yourself as the mortgage strategist who understands net worth impact, not just monthly payment.</li>
-            <li>Emphasize tax implications, equity strategies, and timing around life events.</li>
-            <li>Never be salesy — they hate it.</li>
-          </ul>`
-        },
-        {
-          heading: "Best Outreach & Collaboration",
-          content: `<ul class="space-y-2">
-            <li>Joint workshops: “Homeownership as a Wealth-Building Tool” or “Refinancing vs. Investing the Equity”</li>
-            <li>Offer to review mortgage strategies for their high-net-worth clients (no strings)</li>
-            <li>Cross-referral agreements that feel professional and reciprocal</li>
-          </ul>`
-        },
-        {
-          heading: "Scripts & Value Language",
-          content: `<div><strong>Approach Script:</strong><br><span class="italic">"I work with several planners and CPAs helping their clients make smart mortgage decisions that align with their overall financial plan. I’d love to understand how you advise clients around real estate and see if there are ways I can support your clients without ever getting in the way of your relationship."</span></div>`
-        },
-        {
-          heading: "Nurturing Ideas",
-          content: `<ul class="space-y-2">
-            <li>Quarterly market/equity update they can forward to clients</li>
-            <li>Invite them to speak at your client events (makes them look good)</li>
-            <li>Send them articles or strategies relevant to their client base</li>
-          </ul>`
-        },
-        {
-          heading: "Key Objection Handling",
-          content: `<div><strong>“I don’t want to refer my clients to someone who will just sell them a loan.”</strong><br><span class="text-sm">"I completely respect that. My goal is to be the person you trust to have the same fiduciary mindset you do. I’m happy to start by reviewing a couple of your clients’ situations with zero expectation of business."</span></div>`
-        },
-        {
-          heading: "Equity & Wealth Strategy Collaboration",
-          content: `<ul class="space-y-2">
-            <li>Offer to run “mortgage as a wealth tool” reviews for their clients (cash-out refi vs HELOC vs selling, etc.)</li>
-            <li>Send them quarterly equity market updates they can use in client meetings</li>
-            <li>Co-host virtual workshops on “Using Home Equity Strategically in Retirement”</li>
-          </ul>`
-        }
-      ]
+    'Partner-Title': {
+      title: 'Title & Escrow Partners',
+      sections: [{
+        heading: 'Clean Closing Relationships',
+        content: 'Proactive escrow handoffs, milestone check-ins, and post-close thank yous. Title reps refer agents who prevent surprises and communicate before problems reach the table.'
+      }]
     },
-
-    Attorneys: {
-      title: "Attorneys – Divorce, Probate, Estate & Real Estate",
-      intro: "These relationships are built on trust, speed, discretion, and zero surprises. Attorneys remember the lender who made a difficult transaction smoother for their client.",
-      sections: [
-        {
-          heading: "What Attorneys Value Most",
-          content: `<ul class="space-y-2">
-            <li>Extremely clean communication and documentation</li>
-            <li>Speed without sacrificing accuracy</li>
-            <li>Never blindsiding them or their client with bad news</li>
-            <li>Professionalism during emotionally charged transactions</li>
-          </ul>`
-        },
-        {
-          heading: "Winning Outreach",
-          content: `<ul class="space-y-2">
-            <li>Offer to speak at firm CLE or lunch meetings on current real estate financing trends</li>
-            <li>Position as the lender who understands complex title and timing issues in divorce/probate</li>
-            <li>Emphasize your ability to move quickly when a closing date is court-ordered or time-sensitive</li>
-          </ul>`
-        },
-        {
-          heading: "Communication Protocol They Love",
-          content: `<ul class="space-y-2">
-            <li>Day 1: Intro email to the attorney (not just the client) with clear timeline and your direct contact</li>
-            <li>Weekly status updates every Thursday (even if nothing changed)</li>
-            <li>Immediate phone call on any issue — never let them find out from their client first</li>
-            <li>Post-closing thank you + summary they can use for their own records</li>
-          </ul>`
-        },
-        {
-          heading: "Key Scripts",
-          content: `<div><strong>Divorce Attorney Approach:</strong><br><span class="italic">"I work with several family law attorneys on divorce-related refinances and purchases. I understand the sensitivity and tight timelines involved. I’d be happy to be a resource when your clients need fast, clean mortgage solutions."</span></div>`
-        },
-        {
-          heading: "Nurturing & Referrals",
-          content: `Send them quarterly “Real Estate & Financing Update for Attorneys” emails. Offer to review financing implications on complex estate or divorce cases pro bono (builds massive goodwill).`
-        },
-        {
-          heading: "Time-Sensitive Transaction Support",
-          content: `<ul class="space-y-2">
-            <li>Have a dedicated fast-track process for court-ordered or time-sensitive closings (divorce, probate, relocation)</li>
-            <li>Offer weekend/holiday availability when a closing date is court-mandated</li>
-            <li>Provide clear, written timelines the attorney can share with their client and opposing counsel</li>
-          </ul>`
-        }
-      ]
+    'Partner-Builders': {
+      title: 'Builders — New Construction',
+      sections: [{
+        heading: 'Preferred Agent Status',
+        content: 'Educate sales teams, deliver same-day buyer updates, co-host model-home consultations with your lender partner. Speed and follow-through win preferred-agent lists.'
+      }]
     },
-
-    "Insurance Agents": {
-      title: "Insurance Agents – Bundling & Relationship Loops",
-      intro: "Insurance agents have frequent, trusted contact with homeowners. Creating easy, natural handoff processes turns them into a steady referral source.",
-      sections: [
-        {
-          heading: "Natural Connection Points",
-          content: `<ul class="space-y-2">
-            <li>New home purchase → homeowners insurance</li>
-            <li>Refinance with cash-out → review coverage</li>
-            <li>Life events (marriage, new baby, etc.)</li>
-          </ul>`
-        },
-        {
-          heading: "Best Collaboration Tactics",
-          content: `<ul class="space-y-2">
-            <li>Joint client appreciation events (especially around homeownership milestones)</li>
-            <li>Easy, professional referral handoff process (shared form or quick intro call)</li>
-            <li>Co-branded homeowner resources (“What to Know in Your First Year of Homeownership”)</li>
-            <li>Refer homeowners insurance needs back to them after every closing</li>
-          </ul>`
-        },
-        {
-          heading: "Scripts",
-          content: `<div><strong>Insurance Agent Approach:</strong><br><span class="italic">"I close a lot of loans for clients who also need homeowners or auto insurance. I’d love to create an easy process where we can refer clients to each other cleanly. I always send my closings back to the agent who referred the insurance side."</span></div>`
-        },
-        {
-          heading: "Nurturing Cadence",
-          content: `Quarterly lunch, joint client events twice a year, and immediate referral back on every closing. Make it stupidly easy for them to send you business.`
-        },
-        {
-          heading: "Objections",
-          content: `<div><strong>“I already refer to another lender.”</strong><br><span class="text-sm">"Totally fair. I’m not asking you to stop working with anyone. I’m asking to be one of the lenders you feel good about referring when your client needs fast communication and a smooth experience."</span></div>`
-        },
-        {
-          heading: "Creating Natural Handoff Loops",
-          content: `<ul class="space-y-2">
-            <li>After every closing, immediately refer the client back for homeowners + auto review</li>
-            <li>Create a simple shared referral form both of you can use</li>
-            <li>Host joint “New Homeowner” events twice a year (great for both of your databases)</li>
-          </ul>`
-        }
-      ]
+    'Partner-FinancialPlanners': {
+      title: 'Financial Planners & CPAs',
+      sections: [{
+        heading: 'HNW Referral Protocol',
+        content: 'Education-first outreach on equity, downsizing, and investment property strategy. Never salesy — earn trust with discretion and flawless execution on referred clients.'
+      }]
     },
-
-    Other: {
-      title: "Other Professionals (HR, Relocation, Title, etc.)",
-      intro: "These sources can be extremely valuable but require more customized approaches. The principles remain the same: understand their world, give massive value first, and make referrals frictionless.",
-      sections: [
-        {
-          heading: "HR Directors & Relocation Companies",
-          content: `<ul class="space-y-2">
-            <li>Position as the lender who can move fast for corporate relocations and executive packages</li>
-            <li>Offer to create customized pre-approval packets for their relocating employees</li>
-            <li>Provide regular market updates for the cities they move people into/out of</li>
-          </ul>`
-        },
-        {
-          heading: "Title Companies & Escrow Officers",
-          content: `<ul class="space-y-2">
-            <li>Build relationships through consistent, professional communication on files</li>
-            <li>Offer joint educational events for realtors</li>
-            <li>Be the lender who responds quickly to title questions and conditions</li>
-          </ul>`
-        },
-        {
-          heading: "General Framework for Any New Source",
-          content: `Identify what keeps them up at night or creates friction for them, then become the person who removes that friction for their clients or business. Give before you ask — always.`
-        },
-        {
-          heading: "Quick Outreach Template",
-          content: `<p class="italic">"I’ve been working with several [their profession] professionals helping their clients with smooth mortgage experiences. I’d love 15 minutes to understand the challenges you see most often and see if there are ways I can support the people you work with."</p>`
-        }
-      ]
+    'Partner-Attorneys': {
+      title: 'Attorneys — Trust & Referrals',
+      sections: [{
+        heading: 'Attorney Handoff Standard',
+        content: 'Keep attorneys copied on major updates. Speed and discretion on divorce, probate, and estate-related transactions. Offer a simple agent handoff packet for their office.'
+      }]
+    },
+    'Partner-Insurance': {
+      title: 'Insurance Agents',
+      sections: [{
+        heading: 'Natural Referral Loops',
+        content: 'Co-host Home Protection events. Refer clients back for homeowners and auto reviews after every closing. Easy two-way handoffs build steady referral loops.'
+      }]
+    },
+    'Partner-Other': {
+      title: 'Other Professionals',
+      sections: [{
+        heading: 'Universal Outreach Framework',
+        content: 'Identify what creates friction for their clients, remove it, and give value before you ask. Discovery coffee, soft referral asks after proven delivery, reciprocal introductions.'
+      }]
     }
   };
 
-  window.openReferralModal = function openReferralModal(type) {
-    const modal = document.getElementById('referral-modal');
-    const titleEl = document.getElementById('referral-modal-title');
-    const contentEl = document.getElementById('referral-content');
-
-    if (!modal || !titleEl || !contentEl) {
-      console.error('Referral modal elements missing');
-      return;
-    }
-
-    const playbook = PARTNER_PLAYBOOKS[type] || PARTNER_PLAYBOOKS['Other'];
-
-    titleEl.textContent = playbook.title;
-
-    let html = `
-      <div class="mb-6">
-        <p class="text-lg text-gray-600 dark:text-gray-400">${playbook.intro}</p>
-      </div>
-    `;
-
-    playbook.sections.forEach((section, idx) => {
-      html += `
-        <div class="mb-8 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 bg-white dark:bg-gray-800">
-          <div class="flex items-start justify-between gap-4 mb-3">
-            <h4 class="text-xl font-bold text-[#002B5C] dark:text-white">${section.heading}</h4>
-            <button onclick="savePartnerStrategy('${type}', ${idx}, this)"
-                    class="flex-shrink-0 text-sm px-3.5 py-1.5 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition flex items-center gap-1.5">
-              <i class="far fa-bookmark"></i> <span>Save</span>
-            </button>
-          </div>
-          <div class="prose dark:prose-invert text-[15px] leading-relaxed max-w-none">
-            ${section.content}
-          </div>
-        </div>
-      `;
-    });
-
-    contentEl.innerHTML = html;
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
+  const PARTNER_SAVE_REGISTRY = {
+    'First30Days': { title: 'First 30 Days — New Partner Checklist', content: 'Week 1: welcome + CRM tags + first value touch. Week 2: personal call + second value touch. Weeks 3–4: social shoutout, co-host offer, third value touch, light support ask.' },
+    'Objections': { title: 'Partner Objection Playbook', content: "Already have an agent: position as specialist backup. Don't know you: earn trust with coffee + one-pager. Gatekeeper role: prove value on one client. Reciprocity: offer mutual referrals without pressure." },
+    'RelationshipManagement': { title: 'Relationship Management Guidance', content: 'Ask what you can do to earn more referrals. Celebrate partner wins publicly. Call first when deals go sideways. Send value between transactions with no ask attached.' },
+    'CoMarketingAssets': { title: 'Co-Marketing Asset Ideas', content: 'Buyer guides, monthly market snapshots, open house toolkits, social content packs, joint event formats. Text before sending: put together something useful for your clients.' },
+    'HighImpact-60Day': { title: '60-Day Partner Onboarding Sequence', content: 'Days 1–2 intro, Day 7 market snapshot, Day 14 coffee, Day 21 co-branded asset, Day 30 relationship review, Day 45 public win, Day 60 feedback + introduction request.' },
+    'HighImpact-Cadence': { title: 'Weekly Partner Value Cadence', content: 'Rotate market updates, co-branded assets, personal touches, introductions, and public shoutouts. Never more than 20% ask-oriented. Batch-create assets monthly.' },
+    'HighImpact-OpenHouse': { title: 'Open House Domination Play', content: 'Prep listing and partner roles before. Qualify buyers and capture leads during. Thank partners and follow up within 48 hours. Week 2: joint buyer event or next co-host offer.' },
+    'HighImpact-NetworkEffect': { title: 'Turn 1 Partner Into 5 More', content: 'After 3+ wins ask for one warm intro. Reach out within 48 hours referencing mutual connection. Repeat loop with new partner. Publicly thank original partner for introduction.' },
+    'HighImpact-BuilderTraining': { title: 'Builder Sales Team Training', content: 'Lunch & learn on buyer journey, one-pager for walk-ins, same-day buyer support, quarterly market refresher for sales team.' },
+    'HighImpact-ProfessionalAsk': { title: 'Professional Referral Scripts', content: 'Post-close thank you within 48 hours. Quarterly check-in with no embedded ask. Introduction request only after 2+ referrals. Reciprocal offers to trusted partners.' },
+    'Tier-A+': { title: 'A+ Partner White-Glove Playbook', content: 'Top 10–20 partners: personal coffee every 3–4 weeks, handwritten notes, birthday videos, same-day file updates, VIP event invites, year-end thank you.' },
+    'Tier-B': { title: 'B Partner Growth Playbook', content: '1–4 referrals/year: monthly value touches, quarterly notes, event invites, white-glove execution on every referral, light ask after smooth closings. Promote to A+ when they refer twice in 6 months.' },
+    'Tier-C': { title: 'C Partner Conversion Playbook', content: 'New/low-volume: CRM + newsletter, full 60-day onboarding on first referral, promote to B on positive response, quarterly batched light touches only otherwise.' },
+    'Partner-FellowAgents': { title: 'Fellow Agents & Co-Broke Playbook', content: 'Co-broke kickoff on offer acceptance. Post-close thank you + handwritten note. Open house co-broke offers. Communicate proactively on every shared file.' },
+    'Partner-Lenders': { title: 'Lenders & Mortgage Partners Playbook', content: 'Day 0 lender handoff. Monthly market value touch. Post-close thank you. Co-host buyer seminars and open houses. Build a bench of 2–3 communicative loan officers.' },
+    'Partner-Title': { title: 'Title & Escrow Partners Playbook', content: 'Opening escrow handoff. Proactive milestone check-ins. Post-close thank you. Invite top title rep to client appreciation annually.' },
+    'Partner-Builders': { title: 'Builders Playbook', content: 'Sales team lunch & learn, walk-in one-pager, same-day buyer updates with lender partner, quarterly refresher sessions.' },
+    'Partner-FinancialPlanners': { title: 'Financial Planners & CPAs Playbook', content: 'Education-first coffee/Zoom on equity and downsizing. Joint workshops for pre-retirees. Discretion and wealth-aligned advice on every referral.' },
+    'Partner-Attorneys': { title: 'Attorneys Playbook', content: 'Attorney handoff with direct cell. Copied on every major update. Speed on court-ordered or time-sensitive closings.' },
+    'Partner-Insurance': { title: 'Insurance Agents Playbook', content: 'Joint Home Protection Night events. Refer clients back after closings. Two-way referral loops with low pressure.' },
+    'Partner-Other': { title: 'Other Professionals Playbook', content: 'Discovery coffee, soft referral ask after value delivered, reciprocal introductions. Listen 80%, talk 20%.' }
   };
+
+  const HIGH_IMPACT_SAVE_ALIASES = {
+    First30Days: 'first-30-days-checklist',
+    Objections: 'referral-objections',
+    RelationshipManagement: 'relationship-management',
+    CoMarketingAssets: 'co-marketing-assets',
+    'HighImpact-60Day': '60-day-realtor-onboarding',
+    'HighImpact-Cadence': 'weekly-value-cadence',
+    'HighImpact-OpenHouse': 'open-house-domination',
+    'HighImpact-NetworkEffect': 'realtor-to-5-more',
+    'HighImpact-BuilderTraining': 'builder-training',
+    'HighImpact-ProfessionalAsk': 'professional-referral-request'
+  };
+
+  function stripHtml(html) {
+    return String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  // openReferralModal — disabled (LO-era playbook). Canonical version lives in index.html
+  // + referral-rich-modals.js renderRichReferralPartner. Do not re-enable here.
 
   window.closeReferralModal = function closeReferralModal() {
     const modal = document.getElementById('referral-modal');
@@ -737,7 +313,7 @@
         <div>
           <h4 class="font-bold mb-2">Key Scripts for A+ Partners</h4>
           <p class="italic text-sm mb-2">"I was thinking about you this week — how are things going with [specific thing they mentioned last time]?"</p>
-          <p class="italic text-sm">"I have a buyer who would be perfect for one of your listings. Can I run a quick scenario for you before I present it?"</p>
+          <p class="italic text-sm">"I have a buyer touring [area] this week — thought of you immediately. Want me to send their criteria before they write?"</p>
         </div>
       `
     },
@@ -758,7 +334,7 @@
           <h4 class="font-bold mb-2">Conversion Tactics</h4>
           <ul class="list-disc pl-5 space-y-1">
             <li>After their 2nd or 3rd referral, do a "thank you + relationship review" lunch.</li>
-            <li>Ask: "What would it take for us to work together on more files?"</li>
+            <li>Ask: "What would it take for you to send me the next client who needs this level of communication?"</li>
             <li>Invite them to one exclusive or small-group event per year.</li>
           </ul>
         </div>
@@ -794,52 +370,15 @@
           <h4 class="font-bold mb-2">Qualification Questions (Use in Conversations)</h4>
           <ul class="list-disc pl-5 space-y-1 text-sm">
             <li>"How many referrals are you looking to send this year?"</li>
-            <li>"What frustrates you most about the lenders you currently work with?"</li>
-            <li>"Would you be open to me helping with one file so you can see how I communicate?"</li>
+            <li>"What frustrates you most about agents you've worked with on past deals?"</li>
+            <li>"Would you be open to me helping one of your clients so you can see how I communicate?"</li>
           </ul>
         </div>
       `
     }
   };
 
-  window.openTierModal = function openTierModal(tier) {
-    try {
-      const modal = document.getElementById('referral-modal');
-      const titleEl = document.getElementById('referral-modal-title');
-      const contentEl = document.getElementById('referral-content');
-
-      if (!modal || !titleEl || !contentEl) {
-        console.error('Referral modal elements missing for tier:', tier);
-        alert('Modal elements not found. Please refresh the page.');
-        return;
-      }
-
-      const data = TIER_PLAYBOOKS[tier];
-      if (!data) {
-        console.error('No tier data for:', tier);
-        return;
-      }
-
-      titleEl.textContent = data.title;
-      contentEl.innerHTML = `
-        <div class="prose dark:prose-invert max-w-none text-[15px]">
-          ${data.content}
-        </div>
-        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button onclick="savePartnerStrategy('Tier-${tier}', 0, this)" 
-                  class="text-sm px-4 py-2 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">
-            <i class="far fa-bookmark"></i> Save This Tier Playbook
-          </button>
-        </div>
-      `;
-
-      modal.classList.remove('hidden');
-      modal.style.display = 'flex';
-    } catch (e) {
-      console.error('Error opening tier modal:', e);
-      alert('Error opening modal. Check console for details.');
-    }
-  };
+  // openTierModal — disabled. Canonical: index.html + referral-rich-modals.js renderRichPartnerTierModal.
 
   // =====================================================
   // HIGH IMPACT PLAYS & SEQUENCES (Unique, Focused Modals)
@@ -864,7 +403,7 @@
             <strong class="block mb-1">Week 2: Relationship Building</strong>
             <ul class="list-disc pl-5 text-sm space-y-1">
               <li>Personal text or call (learn about their business/goals)</li>
-              <li>Offer to run scenarios on any current listings/opportunities</li>
+              <li>Offer listing insights, buyer support, or a warm intro to trusted vendors</li>
               <li>Send second value touch (co-branded asset or introduction)</li>
             </ul>
           </div>
@@ -890,17 +429,17 @@
         <p class="mb-4">Strong, natural responses to the most common objections you’ll hear from partners.</p>
         
         <div class="space-y-5">
-          <div><strong>“I already have a lender I like.”</strong><br>
-          <span class="text-sm italic">"Totally fair. Most of the agents I work best with have 2–3 lenders they trust for different situations. I’d love to be the one you call when speed, communication, or creative financing is the difference between winning and losing the deal."</span></div>
+          <div><strong>“I already have an agent I use.”</strong><br>
+          <span class="text-sm italic">"Totally fair. Most partners I work best with keep a short list for different situations — relocation, luxury, investor deals. I’d love to be the one you call when local expertise, communication, or deal strategy is the difference between closing and losing the client."</span></div>
           
-          <div><strong>“Your rates aren’t the lowest.”</strong><br>
-          <span class="text-sm italic">"Rates matter, but in this market the difference between an accepted offer and a lost deal is often 24–48 hours of certainty. I focus on making your buyer’s offer the strongest on the table."</span></div>
+          <div><strong>“I don’t send clients to agents I don’t know.”</strong><br>
+          <span class="text-sm italic">"Makes sense — your reputation is on the line. I’m not asking for a blind referral. Let’s do one coffee, I’ll send a one-pager on how I work, and you decide after you’ve seen how I treat your people."</span></div>
           
-          <div><strong>“I don’t want to change mid-transaction.”</strong><br>
-          <span class="text-sm italic">"Smart. I’m not asking you to switch anyone mid-deal. I’m asking for the next buyer who is still shopping. Let me prove the difference on one file."</span></div>
+          <div><strong>“My clients expect me to pick the agent.”</strong><br>
+          <span class="text-sm italic">"That’s exactly why I want to earn a spot on your bench. Let me prove it on one client — white-glove updates, no drama, and I’ll make you look brilliant."</span></div>
           
           <div><strong>“I only refer when I get something back.”</strong><br>
-          <span class="text-sm italic">"Fair. I believe the best relationships are reciprocal. I’m happy to send you buyers who need a great realtor whenever it makes sense."</span></div>
+          <span class="text-sm italic">"Fair. The best relationships are reciprocal. I’m happy to send you sellers or buyers in my sphere whenever it makes sense — and I’ll always make your introduction easy."</span></div>
         </div>
         <div class="mt-4">
           <button onclick="savePartnerStrategy('Objections', 0, this)" class="text-sm px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Save Objection Playbook</button>
@@ -916,7 +455,7 @@
         <div class="space-y-5">
           <div>
             <strong>Best Question to Ask for More Business:</strong><br>
-            <span class="text-base italic">"What can I do to earn more of your business?"</span>
+            <span class="text-base italic">"What can I do to earn more of your referrals?"</span>
             <p class="text-sm mt-1">This question is powerful because it puts the focus on them and what they need, rather than on you asking for favors.</p>
           </div>
           
@@ -942,9 +481,9 @@
         <p class="mb-4">Ready-to-create co-marketing ideas you can offer partners.</p>
         
         <div class="space-y-4">
-          <div><strong>Buyer Guides & Checklists</strong> — Co-branded “First-Time Buyer Guide” or “Rate Buydown Explainer” they can send to their sphere.</div>
-          <div><strong>Monthly Market Snapshot</strong> — One-page PDF with rates + inventory for their main zip codes (easy to brand with their logo).</div>
-          <div><strong>Open House Toolkit</strong> — Branded signage, flyers, and a “Pre-Approval Station” one-pager.</div>
+          <div><strong>Buyer Guides & Checklists</strong> — Co-branded First-Time Buyer Guide, Seller Prep Checklist, or Neighborhood Insider Guide they pass to clients.</div>
+          <div><strong>Monthly Market Snapshot</strong> — One-page PDF: inventory, pricing trends, and days-on-market for their main zip codes (easy to co-brand).</div>
+          <div><strong>Open House Toolkit</strong> — Co-branded flyers, directional signs, lead-capture sheets, and partner thank-you cards.</div>
           <div><strong>Social Content Packs</strong> — 4–5 carousel posts or Reels they can repost with minimal editing.</div>
           <div><strong>Joint Event Ideas</strong> — Lunch & Learn topics, happy hours, or first-time buyer seminars with suggested titles and formats.</div>
         </div>
@@ -955,11 +494,11 @@
     },
 
     '60-day-realtor-onboarding': {
-      title: "60-Day Realtor Onboarding Sequence",
+      title: "60-Day Partner Onboarding Sequence",
       content: `
-        <p class="mb-4">A proven step-by-step system to turn a brand new realtor relationship into a consistent referral source within 60 days.</p>
+        <p class="mb-4">A proven step-by-step system to turn a new fellow agent, lender, title, or builder contact into a consistent referral source within 60 days.</p>
         <div class="space-y-4">
-          <div class="border-l-4 border-[#00A89D] pl-4"><strong>Days 1-2:</strong> Personal intro + offer to run scenarios on their current listings.</div>
+          <div class="border-l-4 border-[#00A89D] pl-4"><strong>Days 1-2:</strong> Personal intro + offer a quick market pulse or useful buyer/seller resource — no pitch.</div>
           <div class="border-l-4 border-[#00A89D] pl-4"><strong>Day 7:</strong> Send a high-value co-brandable neighborhood market snapshot.</div>
           <div class="border-l-4 border-[#00A89D] pl-4"><strong>Day 14:</strong> Coffee/lunch – learn their business and pain points.</div>
           <div class="border-l-4 border-[#00A89D] pl-4"><strong>Day 21:</strong> Deliver one co-branded asset + offer to co-host an open house.</div>
@@ -994,12 +533,12 @@
     'open-house-domination': {
       title: "Open House Domination Play",
       content: `
-        <p class="mb-4">Turn every open house into a dual win: buyer leads + new realtor relationships.</p>
+        <p class="mb-4">Turn every open house you run into buyer leads, sphere growth, and stronger partner relationships.</p>
         <div class="space-y-3">
-          <div><strong>Before:</strong> Offer the agent on-site pre-approval support + bring branded materials.</div>
-          <div><strong>During:</strong> Run quick scenarios for serious buyers. Collect contact info compliantly.</div>
-          <div><strong>After:</strong> Send the agent a thank-you + summary of buyers you met + next steps.</div>
-          <div><strong>Follow-up:</strong> Within 48 hours offer to co-host their next open house or create a joint buyer event.</div>
+          <div><strong>Before:</strong> Prep listing, signage, flyers, and invite a lender partner for an optional pre-qual station.</div>
+          <div><strong>During:</strong> Warm greet every visitor, qualify buyers, and capture contact info compliantly.</div>
+          <div><strong>After:</strong> Thank lender/title partners who helped + follow up every qualified buyer within 48 hours.</div>
+          <div><strong>Follow-up:</strong> Post recap for sphere, log leads in CRM, and offer a joint buyer event with partners.</div>
         </div>
         <div class="mt-4">
           <button onclick="savePartnerStrategy('HighImpact-OpenHouse', 0, this)" class="text-sm px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Save This Play</button>
@@ -1007,11 +546,11 @@
       `
     },
     'realtor-to-5-more': {
-      title: "Turning One Strong Realtor Into 5 More",
+      title: "Turning One Strong Partner Into 5 More",
       content: `
-        <p class="mb-4">The network effect strategy: leverage your best relationships to grow your referral partner base exponentially.</p>
+        <p class="mb-4">The network effect strategy: leverage your best partner relationships to grow your referral base exponentially.</p>
         <ol class="list-decimal pl-5 space-y-2 text-sm">
-          <li>After 3+ successful files, ask: “Who’s one agent you respect that I should meet?”</li>
+          <li>After 3+ successful referrals exchanged, ask: “Who’s one agent, lender, or title pro you respect that I should meet?”</li>
           <li>Get a warm introduction or at minimum their name + why they’d be a good fit.</li>
           <li>Reach out within 48 hours referencing the mutual connection.</li>
           <li>Once the new agent sends one file, repeat the process with them.</li>
@@ -1025,12 +564,12 @@
     'builder-training': {
       title: "Builder Sales Team Training Sequence",
       content: `
-        <p class="mb-4">Become the preferred lender by making the entire sales team smarter and more confident.</p>
+        <p class="mb-4">Become the go-to agent for builder sales teams through market education, buyer support, and reliable follow-through.</p>
         <div class="space-y-3 text-sm">
-          <div><strong>Step 1:</strong> Offer a 20-30 min “Current Financing Options” lunch & learn at the model home.</div>
-          <div><strong>Step 2:</strong> Create a simple one-pager they can hand every visitor.</div>
-          <div><strong>Step 3:</strong> Be available for same-day scenario help on active traffic.</div>
-          <div><strong>Step 4:</strong> Quarterly refresher sessions + new program updates.</div>
+          <div><strong>Step 1:</strong> Offer a 20–30 min lunch & learn on the local buyer journey (lender partner covers financing basics).</div>
+          <div><strong>Step 2:</strong> Create a simple neighborhood guide or buyer roadmap they hand every walk-in.</div>
+          <div><strong>Step 3:</strong> Be available for same-day buyer questions and lender introductions on active traffic.</div>
+          <div><strong>Step 4:</strong> Quarterly market refresher + Q&A as inventory and buyer behavior shifts.</div>
         </div>
         <div class="mt-4">
           <button onclick="savePartnerStrategy('HighImpact-BuilderTraining', 0, this)" class="text-sm px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Save This Sequence</button>
@@ -1052,29 +591,7 @@
     }
   };
 
-  window.openHighImpactPlay = function openHighImpactPlay(key) {
-    const modal = document.getElementById('referral-modal');
-    const titleEl = document.getElementById('referral-modal-title');
-    const contentEl = document.getElementById('referral-content');
-
-    if (!modal || !titleEl || !contentEl) return;
-
-    const play = HIGH_IMPACT_PLAYS[key];
-    if (!play) {
-      console.error('High impact play not found:', key);
-      return;
-    }
-
-    titleEl.textContent = play.title;
-    contentEl.innerHTML = `
-      <div class="prose dark:prose-invert max-w-none">
-        ${play.content}
-      </div>
-    `;
-
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-  };
+  // openHighImpactPlay — disabled. Canonical: index.html + referral-rich-modals.js renderRichReferralPlay.
 
   // =====================================================
   // BOOK VAULT - Modern Interactive Book Recommendations
@@ -1083,17 +600,17 @@
     // Sales & Negotiation
     { id: "book-001", title: "Never Split the Difference", author: "Chris Voss", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "FBI hostage negotiator tactics that work incredibly well on rate objections, tough clients, and contract negotiations.", keyTakeaway: "Tactical empathy and calibrated questions beat traditional hard bargaining.", amazonLink: "https://www.amazon.com/Never-Split-Difference-Negotiating-Depended/dp/0062407805" },
     { id: "book-002", title: "The Challenger Sale", author: "Matthew Dixon & Brent Adamson", category: "Sales & Negotiation", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "Research-backed approach to selling that teaches you how to challenge and educate clients instead of just building relationships.", keyTakeaway: "The best salespeople teach their customers something new.", amazonLink: "https://www.amazon.com/Challenger-Sale-Control-Conversation-Selling/dp/1591844355" },
-    { id: "book-003", title: "To Sell Is Human", author: "Daniel H. Pink", category: "Sales & Negotiation", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Modern take on sales in a world where everyone is selling (including loan officers constantly selling themselves and their process).", keyTakeaway: "Attunement, buoyancy, and clarity are the new core skills of selling.", amazonLink: "https://www.amazon.com/Sell-Human-Surprising-Truth-Persuading/dp/1594634114" },
-    { id: "book-004", title: "Ninja Selling", author: "Larry Kendall", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Highly practical system specifically for real estate professionals. Many top LOs credit this book with transforming how they work with agents and clients.", keyTakeaway: "Focus on the relationship and the transaction takes care of itself.", amazonLink: "https://www.amazon.com/Ninja-Selling-Subtle-Skills-Results/dp/1626342849" },
+    { id: "book-003", title: "To Sell Is Human", author: "Daniel H. Pink", category: "Sales & Negotiation", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Modern take on sales in a world where everyone is selling (including real estate agents constantly selling themselves and their process).", keyTakeaway: "Attunement, buoyancy, and clarity are the new core skills of selling.", amazonLink: "https://www.amazon.com/Sell-Human-Surprising-Truth-Persuading/dp/1594634114" },
+    { id: "book-004", title: "Ninja Selling", author: "Larry Kendall", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Highly practical system specifically for real estate professionals. Many top agents credit this book with transforming how they work with agents and clients.", keyTakeaway: "Focus on the relationship and the transaction takes care of itself.", amazonLink: "https://www.amazon.com/Ninja-Selling-Subtle-Skills-Results/dp/1626342849" },
 
     // Prospecting & Lead Generation
-    { id: "book-005", title: "Fanatical Prospecting", author: "Jeb Blount", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "The gold standard for consistent prospecting. Essential reading for any loan officer who wants to control their pipeline instead of hoping for referrals.", keyTakeaway: "Prospecting is a numbers game fueled by discipline and the right activity mix.", amazonLink: "https://www.amazon.com/Fanatical-Prospecting-Conversations-Leveraging-Telephone/dp/1119144752" },
-    { id: "book-006", title: "New Sales. Simplified.", author: "Mike Weinberg", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Extremely practical playbook for building a sales pipeline from scratch. Great for LOs who need a system for consistent outreach.", keyTakeaway: "Simple disciplines beat complex strategies every time.", amazonLink: "https://www.amazon.com/New-Sales-Simplified-Prospecting-Development/dp/0814431771" },
-    { id: "book-007", title: "Crushing Call Reluctance for Loan Officers", author: "Carl White", category: "Prospecting & Lead Generation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "LO-specific help for overcoming the fear of picking up the phone. Very tactical and encouraging.", keyTakeaway: "Call reluctance is a skill issue, not a character flaw.", amazonLink: "https://www.amazon.com/Crushing-Call-Reluctance-Loan-Officers-White/dp/B07Z8G5Y3G" },
+    { id: "book-005", title: "Fanatical Prospecting", author: "Jeb Blount", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "The gold standard for consistent prospecting. Essential reading for any real estate agent who wants to control their pipeline instead of hoping for referrals.", keyTakeaway: "Prospecting is a numbers game fueled by discipline and the right activity mix.", amazonLink: "https://www.amazon.com/Fanatical-Prospecting-Conversations-Leveraging-Telephone/dp/1119144752" },
+    { id: "book-006", title: "New Sales. Simplified.", author: "Mike Weinberg", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Extremely practical playbook for building a sales pipeline from scratch. Great for agents who need a system for consistent outreach.", keyTakeaway: "Simple disciplines beat complex strategies every time.", amazonLink: "https://www.amazon.com/New-Sales-Simplified-Prospecting-Development/dp/0814431771" },
+    { id: "book-007", title: "Crushing Call Reluctance", author: "Carl White", category: "Prospecting & Lead Generation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Practical help for overcoming call reluctance — the mindset and phone tactics apply directly to agent prospecting, sphere calls, and follow-up.", keyTakeaway: "Call reluctance is a skill issue, not a character flaw.", amazonLink: "https://www.amazon.com/Crushing-Call-Reluctance-Loan-Officers-White/dp/B07Z8G5Y3G" },
 
     // Mindset & Performance
     { id: "book-008", title: "Atomic Habits", author: "James Clear", category: "Mindset & Performance", level: "Beginner", readTime: "6-8 hrs", whyUseful: "The best modern book on building systems that actually stick. Directly applicable to daily prospecting, follow-up, and content habits.", keyTakeaway: "You do not rise to the level of your goals. You fall to the level of your systems.", amazonLink: "https://www.amazon.com/Atomic-Habits-Proven-Build-Break/dp/0735211299" },
-    { id: "book-009", title: "The Psychology of Money", author: "Morgan Housel", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Brilliant insights into how people actually think about money. Helps LOs understand client behavior and their own relationship with income and success.", keyTakeaway: "Your personal experiences with money make up maybe 0.00000001% of what’s happened in the world, but 100% of how you think the world works.", amazonLink: "https://www.amazon.com/Psychology-Money-Timeless-lessons-happiness/dp/0857197681" },
+    { id: "book-009", title: "The Psychology of Money", author: "Morgan Housel", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Brilliant insights into how people actually think about money. Helps agents understand client behavior and their own relationship with income and success.", keyTakeaway: "Your personal experiences with money make up maybe 0.00000001% of what’s happened in the world, but 100% of how you think the world works.", amazonLink: "https://www.amazon.com/Psychology-Money-Timeless-lessons-happiness/dp/0857197681" },
     { id: "book-010", title: "Mindset: The New Psychology of Success", author: "Carol S. Dweck", category: "Mindset & Performance", level: "Beginner", readTime: "7-9 hrs", whyUseful: "Classic on growth vs fixed mindset. Essential for any professional who wants to keep improving instead of protecting their ego.", keyTakeaway: "The view you adopt for yourself profoundly affects the way you lead your life.", amazonLink: "https://www.amazon.com/Mindset-Psychology-Carol-S-Dweck/dp/0345472322" },
     { id: "book-011", title: "The Almanack of Naval Ravikant", author: "Eric Jorgenson", category: "Mindset & Performance", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Distilled wisdom on happiness, wealth, and decision making from one of the clearest thinkers of our time.", keyTakeaway: "Play long-term games with long-term people.", amazonLink: "https://www.amazon.com/Almanack-Naval-Ravikant-Naval-Ravikant/dp/1544514212" },
 
@@ -1103,115 +620,115 @@
     { id: "book-014", title: "How to Win Friends and Influence People", author: "Dale Carnegie", category: "Networking & Relationships", level: "Beginner", readTime: "6-8 hrs", whyUseful: "Timeless principles of human relations. Still one of the best books ever written on getting along with people and earning their trust.", keyTakeaway: "You can make more friends in two months by becoming interested in other people than you can in two years by trying to get other people interested in you.", amazonLink: "https://www.amazon.com/How-Win-Friends-Influence-People/dp/0671027034" },
 
     // Personal Branding & Content
-    { id: "book-015", title: "Building a StoryBrand", author: "Donald Miller", category: "Personal Branding & Content", level: "Beginner", readTime: "5-7 hrs", whyUseful: "The best framework for how loan officers should communicate who they are and what they do. Transforms websites, social content, and conversations.", keyTakeaway: "If you confuse, you lose. Make the customer the hero of the story.", amazonLink: "https://www.amazon.com/Building-StoryBrand-Clarify-Message-Customers/dp/0718033329" },
-    { id: "book-016", title: "This Is Marketing", author: "Seth Godin", category: "Personal Branding & Content", level: "Intermediate", readTime: "4-6 hrs", whyUseful: "Helps you understand how to create meaningful work that spreads. Excellent for LOs building a personal brand instead of just chasing transactions.", keyTakeaway: "Marketing is the generous act of helping someone solve a problem.", amazonLink: "https://www.amazon.com/This-Marketing-You-Cant-Advertise/dp/0525542795" },
+    { id: "book-015", title: "Building a StoryBrand", author: "Donald Miller", category: "Personal Branding & Content", level: "Beginner", readTime: "5-7 hrs", whyUseful: "The best framework for how real estate agents should communicate who they are and what they do. Transforms websites, social content, and conversations.", keyTakeaway: "If you confuse, you lose. Make the customer the hero of the story.", amazonLink: "https://www.amazon.com/Building-StoryBrand-Clarify-Message-Customers/dp/0718033329" },
+    { id: "book-016", title: "This Is Marketing", author: "Seth Godin", category: "Personal Branding & Content", level: "Intermediate", readTime: "4-6 hrs", whyUseful: "Helps you understand how to create meaningful work that spreads. Excellent for agents building a personal brand instead of just chasing transactions.", keyTakeaway: "Marketing is the generous act of helping someone solve a problem.", amazonLink: "https://www.amazon.com/This-Marketing-You-Cant-Advertise/dp/0525542795" },
 
     // Leadership & Team Building
     { id: "book-017", title: "The 21 Irrefutable Laws of Leadership", author: "John C. Maxwell", category: "Leadership & Team Building", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "Foundational leadership principles. Invaluable once you start building a team or want to lead by influence with realtors and partners.", keyTakeaway: "Leadership is influence. Nothing more, nothing less.", amazonLink: "https://www.amazon.com/21-Irrefutable-Laws-Leadership-Anniversary/dp/0785288376" },
-    { id: "book-018", title: "Extreme Ownership", author: "Jocko Willink & Leif Babin", category: "Leadership & Team Building", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Navy SEAL principles applied to business. Brutally honest look at personal accountability — highly relevant for loan officers who want to own their results.", keyTakeaway: "Leaders must own everything in their world.", amazonLink: "https://www.amazon.com/Extreme-Ownership-U-S-Navy-SEALs/dp/1250067057" },
+    { id: "book-018", title: "Extreme Ownership", author: "Jocko Willink & Leif Babin", category: "Leadership & Team Building", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Navy SEAL principles applied to business. Brutally honest look at personal accountability — highly relevant for real estate agents who want to own their results.", keyTakeaway: "Leaders must own everything in their world.", amazonLink: "https://www.amazon.com/Extreme-Ownership-U-S-Navy-SEALs/dp/1250067057" },
 
     // Business & Financial Intelligence
-    { id: "book-019", title: "Profit First", author: "Mike Michalowicz", category: "Business & Financial Intelligence", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Transforms how you think about the money in your business. Many LOs run profitable businesses but still feel broke because they don’t manage cash flow properly.", keyTakeaway: "Revenue is vanity. Profit is sanity.", amazonLink: "https://www.amazon.com/Profit-First-Transform-Cash-Eating-ebook/dp/B01H7X8M4A" },
+    { id: "book-019", title: "Profit First", author: "Mike Michalowicz", category: "Business & Financial Intelligence", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Transforms how you think about the money in your business. Many agents run profitable businesses but still feel broke because they don’t manage cash flow properly.", keyTakeaway: "Revenue is vanity. Profit is sanity.", amazonLink: "https://www.amazon.com/Profit-First-Transform-Cash-Eating-ebook/dp/B01H7X8M4A" },
     { id: "book-020", title: "The Richest Man in Babylon", author: "George S. Clason", category: "Business & Financial Intelligence", level: "Beginner", readTime: "4-5 hrs", whyUseful: "Timeless parables on saving, investing, and building wealth. Perfect foundational money mindset for anyone in a high-income profession.", keyTakeaway: "A part of all you earn is yours to keep.", amazonLink: "https://www.amazon.com/Richest-Man-Babylon-George-Clason/dp/0451205367" },
 
     // AI & Modern Tools
-    { id: "book-021", title: "Co-Intelligence: Living and Working with AI", author: "Ethan Mollick", category: "AI & Modern Tools", level: "Beginner", readTime: "5-7 hrs", whyUseful: "The single best book on how to actually use AI in your daily work. Extremely practical for loan officers who want to stay ahead of the curve.", keyTakeaway: "Treat AI as a co-worker, not just a tool.", amazonLink: "https://www.amazon.com/Co-Intelligence-Living-Working-Ethan-Mollick/dp/059371671X" },
+    { id: "book-021", title: "Co-Intelligence: Living and Working with AI", author: "Ethan Mollick", category: "AI & Modern Tools", level: "Beginner", readTime: "5-7 hrs", whyUseful: "The single best book on how to actually use AI in your daily work. Extremely practical for real estate agents who want to stay ahead of the curve.", keyTakeaway: "Treat AI as a co-worker, not just a tool.", amazonLink: "https://www.amazon.com/Co-Intelligence-Living-Working-Ethan-Mollick/dp/059371671X" },
 
     // Additional High-Value Additions
-    { id: "book-023", title: "Influence: The Psychology of Persuasion", author: "Robert B. Cialdini", category: "Sales & Negotiation", level: "Intermediate", readTime: "8-10 hrs", whyUseful: "The foundational book on the psychology of influence. Every loan officer should understand the 6 principles of persuasion.", keyTakeaway: "People say yes for reasons they often don't consciously understand.", amazonLink: "https://www.amazon.com/Influence-Psychology-Persuasion-Robert-Cialdini/dp/006124189X" },
+    { id: "book-023", title: "Influence: The Psychology of Persuasion", author: "Robert B. Cialdini", category: "Sales & Negotiation", level: "Intermediate", readTime: "8-10 hrs", whyUseful: "The foundational book on the psychology of influence. Every real estate agent should understand the 6 principles of persuasion.", keyTakeaway: "People say yes for reasons they often don't consciously understand.", amazonLink: "https://www.amazon.com/Influence-Psychology-Persuasion-Robert-Cialdini/dp/006124189X" },
     { id: "book-024", title: "The Obstacle Is the Way", author: "Ryan Holiday", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Stoic philosophy applied to modern challenges. Excellent for staying resilient during slow markets or tough objections.", keyTakeaway: "The impediment to action advances action. What stands in the way becomes the way.", amazonLink: "https://www.amazon.com/Obstacle-Way-Timeless-Turning-Triumph/dp/1591846358" },
     { id: "book-025", title: "Grit: The Power of Passion and Perseverance", author: "Angela Duckworth", category: "Mindset & Performance", level: "Beginner", readTime: "7-9 hrs", whyUseful: "Research-backed proof that effort and persistence often beat raw talent. Critical mindset for consistent prospecting and long-term success.", keyTakeaway: "Grit is passion and perseverance for very long-term goals.", amazonLink: "https://www.amazon.com/Grit-Passion-Perseverance-Angela-Duckworth/dp/1501111108" },
     { id: "book-026", title: "Contagious: Why Things Catch On", author: "Jonah Berger", category: "Personal Branding & Content", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Explains exactly why certain ideas and content spread. Extremely useful for creating social media and referral-worthy content that actually gets shared.", keyTakeaway: "Things catch on when they are remarkable, emotional, or have social currency.", amazonLink: "https://www.amazon.com/Contagious-Things-Catch-Jonah-Berger/dp/1451686579" },
-    { id: "book-027", title: "The 5 Dysfunctions of a Team", author: "Patrick Lencioni", category: "Leadership & Team Building", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The best book on why teams fail and how to build a healthy, high-performing team. Invaluable once you start hiring or leading loan officers.", keyTakeaway: "Not finance, but trust, conflict, commitment, accountability, and results.", amazonLink: "https://www.amazon.com/Five-Dysfunctions-Team-Leadership-Fable/dp/0787960756" },
-    { id: "book-028", title: "The Psychology of Selling", author: "Brian Tracy", category: "Sales & Negotiation", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Practical, no-fluff strategies specifically for high-ticket sales. Very applicable to mortgage conversations.", keyTakeaway: "Selling is a mental game. Your attitude determines your altitude.", amazonLink: "https://www.amazon.com/Psychology-Selling-Increase-Sales-Faster/dp/0785288066" },
+    { id: "book-027", title: "The 5 Dysfunctions of a Team", author: "Patrick Lencioni", category: "Leadership & Team Building", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The best book on why teams fail and how to build a healthy, high-performing team. Invaluable once you start hiring or leading real estate agents.", keyTakeaway: "Not finance, but trust, conflict, commitment, accountability, and results.", amazonLink: "https://www.amazon.com/Five-Dysfunctions-Team-Leadership-Fable/dp/0787960756" },
+    { id: "book-028", title: "The Psychology of Selling", author: "Brian Tracy", category: "Sales & Negotiation", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Practical, no-fluff strategies specifically for high-ticket sales. Very applicable to buyer consultations and listing presentations.", keyTakeaway: "Selling is a mental game. Your attitude determines your altitude.", amazonLink: "https://www.amazon.com/Psychology-Selling-Increase-Sales-Faster/dp/0785288066" },
     { id: "book-030", title: "Ultra Learning", author: "Scott H. Young", category: "Mindset & Performance", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "How to learn hard skills quickly and effectively. Perfect for mastering new tools, AI, or complex financing strategies.", keyTakeaway: "Aggressive, focused learning beats passive consumption every time.", amazonLink: "https://www.amazon.com/Ultra-Learning-Master-Outsmart-Competition/dp/006285268X" },
     { id: "book-031", title: "The Challenger Customer", author: "Brent Adamson et al.", category: "Sales & Negotiation", level: "Advanced", readTime: "8-10 hrs", whyUseful: "Follow-up to The Challenger Sale focused on complex B2B buying committees — very relevant when working with real estate teams or multiple decision makers.", keyTakeaway: "You must mobilize internal champions inside the client's organization.", amazonLink: "https://www.amazon.com/Challenger-Customer-Selling-Complex-Stakeholder/dp/1591848156" },
     { id: "book-032", title: "Deep Work", author: "Cal Newport", category: "Mindset & Performance", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Essential for anyone who wants to produce high-quality work in a distracted world. Directly applicable to focused prospecting blocks and content creation.", keyTakeaway: "The ability to perform deep work is becoming increasingly rare and valuable.", amazonLink: "https://www.amazon.com/Deep-Work-Focused-Success-Distracted/dp/1455586692" },
 
     // Additional strong additions
-    { id: "book-033", title: "The Little Red Book of Selling", author: "Jeffrey Gitomer", category: "Sales & Negotiation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Short, punchy, and extremely practical sales truths. Many top loan officers still swear by Gitomer’s no-BS approach.", keyTakeaway: "People buy with their heart and justify with their mind.", amazonLink: "https://www.amazon.com/Little-Red-Book-Selling-12-5/dp/1885167601" },
+    { id: "book-033", title: "The Little Red Book of Selling", author: "Jeffrey Gitomer", category: "Sales & Negotiation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Short, punchy, and extremely practical sales truths. Many top real estate agents still swear by Gitomer’s no-BS approach.", keyTakeaway: "People buy with their heart and justify with their mind.", amazonLink: "https://www.amazon.com/Little-Red-Book-Selling-12-5/dp/1885167601" },
     { id: "book-034", title: "SPIN Selling", author: "Neil Rackham", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Research-based methodology for complex, high-value sales. Excellent for understanding how to handle larger, more sophisticated referral partner relationships.", keyTakeaway: "In major sales, questions are more powerful than statements.", amazonLink: "https://www.amazon.com/SPIN-Selling-Neil-Rackham/dp/0070511136" },
     { id: "book-035", title: "Gap Selling", author: "Keenan", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Modern take on sales that focuses on the gap between where the customer is and where they want to be. Very relevant for helping clients see the cost of inaction.", keyTakeaway: "Sell the gap, not the product.", amazonLink: "https://www.amazon.com/Gap-Selling-Getting-Customers-Buying/dp/1732035202" },
-    { id: "book-036", title: "The 10X Rule", author: "Grant Cardone", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Aggressive goal-setting and massive action mindset. Useful (with some filtering) for loan officers who need to dramatically increase their activity level.", keyTakeaway: "Set targets 10x higher and take 10x the action.", amazonLink: "https://www.amazon.com/10X-Rule-Difference-Between-Success/dp/0470627603" },
-    { id: "book-037", title: "Can't Hurt Me", author: "David Goggins", category: "Mindset & Performance", level: "Intermediate", readTime: "8-10 hrs", whyUseful: "Extreme ownership and mental toughness. Powerful for loan officers who struggle with consistency, rejection, or self-doubt.", keyTakeaway: "The only way to grow is to get comfortable being uncomfortable.", amazonLink: "https://www.amazon.com/Cant-Hurt-Me-Master-Your-Mind/dp/1544512287" },
+    { id: "book-036", title: "The 10X Rule", author: "Grant Cardone", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Aggressive goal-setting and massive action mindset. Useful (with some filtering) for real estate agents who need to dramatically increase their activity level.", keyTakeaway: "Set targets 10x higher and take 10x the action.", amazonLink: "https://www.amazon.com/10X-Rule-Difference-Between-Success/dp/0470627603" },
+    { id: "book-037", title: "Can't Hurt Me", author: "David Goggins", category: "Mindset & Performance", level: "Intermediate", readTime: "8-10 hrs", whyUseful: "Extreme ownership and mental toughness. Powerful for real estate agents who struggle with consistency, rejection, or self-doubt.", keyTakeaway: "The only way to grow is to get comfortable being uncomfortable.", amazonLink: "https://www.amazon.com/Cant-Hurt-Me-Master-Your-Mind/dp/1544512287" },
     { id: "book-038", title: "The War of Art", author: "Steven Pressfield", category: "Mindset & Performance", level: "Beginner", readTime: "3-4 hrs", whyUseful: "Short and profound book about Resistance (procrastination, fear, self-sabotage). Essential reading for anyone who wants to actually do the hard work of prospecting and content creation.", keyTakeaway: "The more important the task, the more Resistance you will feel.", amazonLink: "https://www.amazon.com/War-Art-Through-Creative-Lives/dp/1936891026" },
     { id: "book-039", title: "Slow Productivity", author: "Cal Newport", category: "Mindset & Performance", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Counter-cultural approach to doing great work without burning out. Very relevant in an industry that often glorifies constant hustle.", keyTakeaway: "Do fewer things, work at a natural pace, and obsess over quality.", amazonLink: "https://www.amazon.com/Slow-Productivity-Accomplishment-Without-Burnout/dp/0593544854" },
     { id: "book-040", title: "Thinking in Bets", author: "Annie Duke", category: "Mindset & Performance", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Excellent framework for making better decisions under uncertainty. Highly applicable to pricing, risk, and client conversations.", keyTakeaway: "Focus on making good decisions, not on being right.", amazonLink: "https://www.amazon.com/Thinking-Bets-Making-Smarter-Decisions/dp/0735216355" },
     { id: "book-041", title: "Building a Second Brain", author: "Tiago Forte", category: "Mindset & Performance", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "System for capturing, organizing, and retrieving information. Extremely useful for managing client notes, market knowledge, and referral partner information.", keyTakeaway: "Your brain is for having ideas, not holding them.", amazonLink: "https://www.amazon.com/Building-Second-Brain-Proven-Organize/dp/1982167386" },
     { id: "book-042", title: "The Effective Executive", author: "Peter F. Drucker", category: "Leadership & Team Building", level: "Advanced", readTime: "6-8 hrs", whyUseful: "Timeless classic on effectiveness and leadership. Essential once you start managing people or want to dramatically increase your personal output.", keyTakeaway: "Effectiveness can be learned and must be earned.", amazonLink: "https://www.amazon.com/Effective-Executive-Definitive-Drucker-Classics/dp/0060838965" },
-    { id: "book-043", title: "High Output Management", author: "Andy Grove", category: "Leadership & Team Building", level: "Advanced", readTime: "6-8 hrs", whyUseful: "Intel CEO’s practical guide to running high-performing teams. Gold for loan officers who want to build a team or run a more professional operation.", keyTakeaway: "A manager’s output = the output of their organization + the output of the neighboring organizations under their influence.", amazonLink: "https://www.amazon.com/High-Output-Management-Andrew-Grove/dp/0679762884" },
+    { id: "book-043", title: "High Output Management", author: "Andy Grove", category: "Leadership & Team Building", level: "Advanced", readTime: "6-8 hrs", whyUseful: "Intel CEO’s practical guide to running high-performing teams. Gold for real estate agents who want to build a team or run a more professional operation.", keyTakeaway: "A manager’s output = the output of their organization + the output of the neighboring organizations under their influence.", amazonLink: "https://www.amazon.com/High-Output-Management-Andrew-Grove/dp/0679762884" },
 
     // Restored from original + new high-value additions
     { id: "book-045", title: "The Laws of Human Nature", author: "Robert Greene", category: "Sales & Negotiation", level: "Advanced", readTime: "12-15 hrs", whyUseful: "Deep understanding of human behavior and psychology. One of the best books for mastering influence, reading people, and handling difficult personalities in sales.", keyTakeaway: "Mastering others starts with mastering yourself.", amazonLink: "https://www.amazon.com/Laws-Human-Nature-Robert-Greene/dp/0143110012" },
-    { id: "book-046", title: "The ONE Thing", author: "Gary Keller", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Focus on the one thing that matters most. Extremely practical for loan officers who get pulled in too many directions.", keyTakeaway: "Extraordinary results come from doing the one most important thing.", amazonLink: "https://www.amazon.com/ONE-Thing-Surprisingly-Extraordinary-Results/dp/1885167776" },
-    { id: "book-047", title: "Loan Officer Champions", author: "Carl White", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Real case studies and strategies from top-producing loan officers. Very actionable and industry-specific.", keyTakeaway: "Learn directly from the habits and systems of the best in the business.", amazonLink: "https://www.amazon.com/Loan-Officer-Champions-Studies-Producers/dp/173246555X" },
-    { id: "book-048", title: "Be the Better Broker, Volume 1", author: "Dustan Woodhouse", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Practical, no-fluff advice specifically for mortgage professionals. Highly regarded in the industry.", keyTakeaway: "Focus on relationships and systems to become a top producer.", amazonLink: "https://www.amazon.com/Be-Better-Broker-Become-Producer/dp/1988344034" },
-    { id: "book-049", title: "The Millionaire Loan Officer", author: "Scott Hudspeth", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Real-world strategies and mindset shifts from a top producer. Great for scaling your business.", keyTakeaway: "Treat your career like a business, not a job.", amazonLink: "https://www.amazon.com/Millionaire-Loan-Officer-Scott-Hudspeth/dp/0971619409" },
-    { id: "book-050", title: "The Mortgage 101 Bootcamp", author: "David Dutton", category: "Sales & Negotiation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Solid foundational knowledge for new loan officers. Clear explanations of the basics.", keyTakeaway: "Build a strong foundation before trying to master advanced techniques.", amazonLink: "https://www.amazon.com/Mortgage-101-Bootcamp-David-Dutton/dp/B07Z8G5Y3G" },
-    { id: "book-051", title: "Pass the Mortgage Loan Originator Test", author: "Real Estate Institute", category: "Sales & Negotiation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Targeted exam prep for those getting licensed or helping others study. Very practical.", keyTakeaway: "A focused resource for passing the licensing exam efficiently.", amazonLink: "https://www.amazon.com/Pass-Mortgage-Loan-Originator-Test/dp/0997581808" },
+    { id: "book-046", title: "The ONE Thing", author: "Gary Keller", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Focus on the one thing that matters most. Extremely practical for real estate agents who get pulled in too many directions.", keyTakeaway: "Extraordinary results come from doing the one most important thing.", amazonLink: "https://www.amazon.com/ONE-Thing-Surprisingly-Extraordinary-Results/dp/1885167776" },
+    { id: "book-047", title: "Top Producer Case Studies", author: "Carl White", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Real case studies from top producers — the habits, scripts, and referral systems translate directly to a real estate practice.", keyTakeaway: "Learn directly from the habits and systems of the best in the business.", amazonLink: "https://www.amazon.com/Loan-Officer-Champions-Studies-Producers/dp/173246555X" },
+    { id: "book-048", title: "Be the Better Broker, Volume 1", author: "Dustan Woodhouse", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Broker playbook strong on relationship systems and client experience — agents can adapt the frameworks for listings, buyers, and partner development.", keyTakeaway: "Focus on relationships and systems to become a top producer.", amazonLink: "https://www.amazon.com/Be-Better-Broker-Become-Producer/dp/1988344034" },
+    { id: "book-049", title: "Millionaire Producer Mindset", author: "Scott Hudspeth", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Business-building strategies from a top producer — pipeline discipline, referral systems, and treating your real estate career like a real company.", keyTakeaway: "Treat your career like a business, not a job.", amazonLink: "https://www.amazon.com/Millionaire-Loan-Officer-Scott-Hudspeth/dp/0971619409" },
+    { id: "book-050", title: "The Mortgage 101 Bootcamp", author: "David Dutton", category: "Sales & Negotiation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Helps agents speak confidently about buyer financing basics with clients and lender partners — not just for loan officers.", keyTakeaway: "Understand the lending side well enough to guide buyers and protect your contracts.", amazonLink: "https://www.amazon.com/Mortgage-101-Bootcamp-David-Dutton/dp/B07Z8G5Y3G" },
+    { id: "book-051", title: "Exactly How to Sell a House", author: "Mark Ferguson", category: "Sales & Negotiation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Practical listing and buyer-side fundamentals from an investor-agent perspective. Better fit for producing agents than LO licensing prep.", keyTakeaway: "Master the mechanics of transactions so you can focus on relationships and referrals.", amazonLink: "https://www.amazon.com/Exactly-How-Sell-House-Mark-Ferguson/dp/1947200184" },
     { id: "book-052", title: "The Connector's Advantage", author: "Michelle Tillis Lederman", category: "Networking & Relationships", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Modern networking strategies with a focus on building genuine, high-value relationships.", keyTakeaway: "Networking is about creating mutual value over time.", amazonLink: "https://www.amazon.com/Connectors-Advantage-7-Traits-Highly/dp/1989025358" },
     { id: "book-053", title: "Networking in the 21st Century", author: "David J.P. Fisher", category: "Networking & Relationships", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Updated take on networking for the digital age. Very relevant for social media + in-person combination.", keyTakeaway: "Build relationships before you need them.", amazonLink: "https://www.amazon.com/Networking-21st-Century-Professionals-Connections/dp/1944730036" },
-    { id: "book-054", title: "Raving Fans", author: "Ken Blanchard", category: "Networking & Relationships", level: "Beginner", readTime: "3-4 hrs", whyUseful: "Classic on creating exceptional customer experiences. Perfect mindset for loan officers who want referrals and repeat business.", keyTakeaway: "Create raving fans, not just satisfied customers.", amazonLink: "https://www.amazon.com/Raving-Fans-Revolutionary-Approach-Customer/dp/0688123163" },
+    { id: "book-054", title: "Raving Fans", author: "Ken Blanchard", category: "Networking & Relationships", level: "Beginner", readTime: "3-4 hrs", whyUseful: "Classic on creating exceptional customer experiences. Perfect mindset for real estate agents who want referrals and repeat business.", keyTakeaway: "Create raving fans, not just satisfied customers.", amazonLink: "https://www.amazon.com/Raving-Fans-Revolutionary-Approach-Customer/dp/0688123163" },
     { id: "book-055", title: "Getting to Yes", author: "Roger Fisher & William Ury", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "The classic book on principled negotiation. Still one of the best frameworks for win-win outcomes.", keyTakeaway: "Separate the people from the problem and focus on interests, not positions.", amazonLink: "https://www.amazon.com/Getting-Yes-Negotiating-Agreement-Without/dp/0143118757" },
     { id: "book-056", title: "Rich Dad Poor Dad", author: "Robert T. Kiyosaki", category: "Business & Financial Intelligence", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Foundational money and asset mindset. Helpful for explaining concepts to clients and building your own financial intelligence.", keyTakeaway: "The rich buy assets. The poor buy liabilities.", amazonLink: "https://www.amazon.com/Rich-Dad-Poor-Dad-Robert-Kiyosaki/dp/1612680178" },
     { id: "book-057", title: "The Total Money Makeover", author: "Dave Ramsey", category: "Business & Financial Intelligence", level: "Beginner", readTime: "6-8 hrs", whyUseful: "Practical debt elimination and wealth-building steps. Useful when helping clients get their financial house in order before or after buying.", keyTakeaway: "Live like no one else so later you can live like no one else.", amazonLink: "https://www.amazon.com/Total-Money-Makeover-Classic-Financial/dp/1400205298" },
 
-    // Phil M. Jones — Essential for loan officers (added per request)
+    // Phil M. Jones — Essential for agents (objection handling) (added per request)
     { id: "book-093", title: "Exactly What to Say: The Magic Words for Influence and Impact", author: "Phil M. Jones", category: "Sales & Negotiation", level: "Beginner", readTime: "3-4 hrs", whyUseful: "The definitive short guide to using precise, psychologically smart language to influence conversations, handle objections, and guide clients toward decisions without sounding pushy. Invaluable for every client conversation and realtor interaction.", keyTakeaway: "The right words at the right time change everything.", amazonLink: "https://www.amazon.com/Exactly-What-Say-Influence-Impact/dp/1989025005" },
-    { id: "book-094", title: "Exactly What to Say: For Real Estate Agents", author: "Phil M. Jones, Chris Smith & Jimmy Mackin", category: "Sales & Negotiation", level: "Beginner", readTime: "3-4 hrs", whyUseful: "30 targeted 'magic words' and phrases specifically for real estate conversations — listing presentations, buyer consultations, price objections, follow-up, and asking for referrals. Extremely practical for LOs who work closely with agents and want better conversations with buyers and partners.", keyTakeaway: "Small changes in language create massive shifts in outcomes.", amazonLink: "https://www.amazon.com/Exactly-What-Say-Estate-Agents/dp/1989603297" },
+    { id: "book-094", title: "Exactly What to Say: For Real Estate Agents", author: "Phil M. Jones, Chris Smith & Jimmy Mackin", category: "Sales & Negotiation", level: "Beginner", readTime: "3-4 hrs", whyUseful: "30 targeted 'magic words' and phrases specifically for real estate conversations — listing presentations, buyer consultations, price objections, follow-up, and asking for referrals. Extremely practical for agents who want sharper conversations with buyers and partners.", keyTakeaway: "Small changes in language create massive shifts in outcomes.", amazonLink: "https://www.amazon.com/Exactly-What-Say-Estate-Agents/dp/1989603297" },
 
     // Additional high-value books (new additions)
-    { id: "book-095", title: "The Book of Yes", author: "Kevin Ward", category: "Sales & Negotiation", level: "Intermediate", readTime: "4-6 hrs", whyUseful: "One of the most recommended books among top-producing loan officers. Practical scripts and mindset for building powerful realtor partnerships and converting more referrals into closed loans.", keyTakeaway: "Your success is directly tied to the quality of your conversations with real estate agents.", amazonLink: "https://www.amazon.com/Book-Yes-Mortgage-Officers-Real/dp/0996701400" },
-    { id: "book-096", title: "High Trust Selling", author: "Todd Duncan", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Builds the deep trust required for high-ticket, relationship-driven sales like mortgages. Excellent framework for becoming the go-to trusted advisor instead of just another lender.", keyTakeaway: "Trust is the ultimate shortcut to sales success.", amazonLink: "https://www.amazon.com/High-Trust-Selling-Money-Time/dp/0785263934" },
-    { id: "book-097", title: "Power Questions", author: "Andrew Sobel", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Master the art of asking the right questions to uncover needs, build deep relationships, and guide clients and partners. Directly applicable to discovery calls, rate conversations, and partner development.", keyTakeaway: "Great questions are more powerful than great answers.", amazonLink: "https://www.amazon.com/Power-Questions-Relationships-Business-Influence/dp/1118119630" },
-    { id: "book-098", title: "The Trusted Advisor", author: "David H. Maister, Charles H. Green, Robert M. Galford", category: "Networking & Relationships", level: "Advanced", readTime: "7-9 hrs", whyUseful: "The classic on becoming a true trusted advisor rather than a vendor. Essential reading for any loan officer who wants realtors and clients to see them as indispensable partners.", keyTakeaway: "Trust is the foundation of all valuable professional relationships.", amazonLink: "https://www.amazon.com/Trusted-Advisor-David-H-Maister/dp/0743212347" },
-    { id: "book-099", title: "The Science of Selling", author: "David Hoffeld", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Research-backed sales methodology that explains exactly why certain approaches work. Perfect for LOs who want to move beyond gut feel to proven, repeatable techniques.", keyTakeaway: "Sales success comes from applying what science tells us about how people decide.", amazonLink: "https://www.amazon.com/Science-Selling-Strategies-Relationships-Close/dp/0143129333" },
-    { id: "book-100", title: "Insight Selling", author: "Mike Schultz & John E. Doerr", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Shows how to lead with insights that change the client's perspective. Highly relevant for educating realtors and clients on financing options they haven't considered.", keyTakeaway: "The best salespeople don't just respond to needs — they create new insights.", amazonLink: "https://www.amazon.com/Insight-Selling-Surprising-Research-Effort/dp/1118875354" },
-    { id: "book-101", title: "Endless Referrals", author: "Bob Burg", category: "Networking & Relationships", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Practical system for generating a steady stream of referrals through genuine relationship building. A must for any LO focused on referral partnerships and long-term growth.", keyTakeaway: "All things being equal, people do business with and refer business to those they know, like, and trust.", amazonLink: "https://www.amazon.com/Endless-Referrals-Strategies-Networking-Relationships/dp/0071453091" },
-    { id: "book-102", title: "You Can't Teach a Kid to Ride a Bike at a Seminar", author: "David Sandler", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The foundation of the Sandler Selling System — one of the most effective methodologies for consultative, high-trust sales. Loan officers who adopt these principles consistently outperform the average.", keyTakeaway: "Stop selling and start making people want to buy.", amazonLink: "https://www.amazon.com/You-Cant-Teach-Seminar-Updated/dp/1259834581" },
+    { id: "book-095", title: "The Book of Yes", author: "Kevin Ward", category: "Sales & Negotiation", level: "Intermediate", readTime: "4-6 hrs", whyUseful: "One of the most recommended books among top-producing real estate agents. Practical scripts and mindset for building powerful client and partner conversations that earn referrals and repeat business.", keyTakeaway: "Your success is directly tied to the quality of your conversations with clients and partners.", amazonLink: "https://www.amazon.com/Book-Yes-Mortgage-Officers-Real/dp/0996701400" },
+    { id: "book-096", title: "High Trust Selling", author: "Todd Duncan", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Builds the deep trust required for high-ticket, relationship-driven sales like real estate. Excellent framework for becoming the go-to trusted advisor instead of just another agent in the market.", keyTakeaway: "Trust is the ultimate shortcut to sales success.", amazonLink: "https://www.amazon.com/High-Trust-Selling-Money-Time/dp/0785263934" },
+    { id: "book-097", title: "Power Questions", author: "Andrew Sobel", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Master the art of asking the right questions to uncover needs, build deep relationships, and guide clients and partners. Directly applicable to buyer consultations, listing presentations, and partner development.", keyTakeaway: "Great questions are more powerful than great answers.", amazonLink: "https://www.amazon.com/Power-Questions-Relationships-Business-Influence/dp/1118119630" },
+    { id: "book-098", title: "The Trusted Advisor", author: "David H. Maister, Charles H. Green, Robert M. Galford", category: "Networking & Relationships", level: "Advanced", readTime: "7-9 hrs", whyUseful: "The classic on becoming a true trusted advisor rather than a vendor. Essential reading for any real estate agent who wants clients and partners to see them as indispensable partners.", keyTakeaway: "Trust is the foundation of all valuable professional relationships.", amazonLink: "https://www.amazon.com/Trusted-Advisor-David-H-Maister/dp/0743212347" },
+    { id: "book-099", title: "The Science of Selling", author: "David Hoffeld", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Research-backed sales methodology that explains exactly why certain approaches work. Perfect for agents who want to move beyond gut feel to proven, repeatable techniques.", keyTakeaway: "Sales success comes from applying what science tells us about how people decide.", amazonLink: "https://www.amazon.com/Science-Selling-Strategies-Relationships-Close/dp/0143129333" },
+    { id: "book-100", title: "Insight Selling", author: "Mike Schultz & John E. Doerr", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Shows how to lead with insights that change the client's perspective. Highly relevant for educating buyers and partners on market realities they haven't considered.", keyTakeaway: "The best salespeople don't just respond to needs — they create new insights.", amazonLink: "https://www.amazon.com/Insight-Selling-Surprising-Research-Effort/dp/1118875354" },
+    { id: "book-101", title: "Endless Referrals", author: "Bob Burg", category: "Networking & Relationships", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Practical system for generating a steady stream of referrals through genuine relationship building. A must for any agent focused on sphere growth and long-term repeat business.", keyTakeaway: "All things being equal, people do business with and refer business to those they know, like, and trust.", amazonLink: "https://www.amazon.com/Endless-Referrals-Strategies-Networking-Relationships/dp/0071453091" },
+    { id: "book-102", title: "You Can't Teach a Kid to Ride a Bike at a Seminar", author: "David Sandler", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The foundation of the Sandler Selling System — one of the most effective methodologies for consultative, high-trust sales. real estate agents who adopt these principles consistently outperform the average.", keyTakeaway: "Stop selling and start making people want to buy.", amazonLink: "https://www.amazon.com/You-Cant-Teach-Seminar-Updated/dp/1259834581" },
 
     // === NEW ADDITIONS (Crucial titles + balanced thin categories) ===
 
     // High-impact titles
-    { id: "book-103", title: "Crucial Conversations", author: "Kerry Patterson, Joseph Grenny, Ron McMillan, Al Switzler", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "The gold standard for handling emotionally charged conversations — rate objections, 'I need to think about it,' and high-stakes negotiations with clients and realtors.", keyTakeaway: "The person who can stay in dialogue the longest usually wins.", amazonLink: "https://www.amazon.com/Crucial-Conversations-Talking-Stakes-Results/dp/1260474135" },
-    { id: "book-104", title: "Essentialism", author: "Greg McKeown", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Teaches how to cut through the noise and focus on what truly matters. Invaluable for loan officers drowning in leads, follow-up, content, and partner requests.", keyTakeaway: "If you don't prioritize your life, someone else will.", amazonLink: "https://www.amazon.com/Essentialism-Disciplined-Pursuit-Greg-McKeown/dp/0804137382" },
-    { id: "book-105", title: "Dare to Lead", author: "Brené Brown", category: "Leadership & Team Building", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Practical courage and vulnerability framework. Transforms how you build trust with top-producing realtors and lead any team you grow.", keyTakeaway: "Vulnerability is the birthplace of trust and connection.", amazonLink: "https://www.amazon.com/Dare-Lead-Brave-Work-Tough/dp/0593171128" },
+    { id: "book-103", title: "Crucial Conversations", author: "Kerry Patterson, Joseph Grenny, Ron McMillan, Al Switzler", category: "Sales & Negotiation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "The gold standard for handling emotionally charged conversations — price objections, 'I need to think about it,' and high-stakes negotiations with clients and partners.", keyTakeaway: "The person who can stay in dialogue the longest usually wins.", amazonLink: "https://www.amazon.com/Crucial-Conversations-Talking-Stakes-Results/dp/1260474135" },
+    { id: "book-104", title: "Essentialism", author: "Greg McKeown", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Teaches how to cut through the noise and focus on what truly matters. Invaluable for real estate agents drowning in leads, follow-up, content, and partner requests.", keyTakeaway: "If you don't prioritize your life, someone else will.", amazonLink: "https://www.amazon.com/Essentialism-Disciplined-Pursuit-Greg-McKeown/dp/0804137382" },
+    { id: "book-105", title: "Dare to Lead", author: "Brené Brown", category: "Leadership & Team Building", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Practical courage and vulnerability framework. Transforms how you build trust with clients, partners, and any team you grow.", keyTakeaway: "Vulnerability is the birthplace of trust and connection.", amazonLink: "https://www.amazon.com/Dare-Lead-Brave-Work-Tough/dp/0593171128" },
     { id: "book-106", title: "The Infinite Game", author: "Simon Sinek", category: "Mindset & Performance", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Shifts your thinking from short-term transactions to building something that lasts. Perfect mindset for creating a referral network that compounds for decades.", keyTakeaway: "The goal is not to win the game — the goal is to keep playing.", amazonLink: "https://www.amazon.com/Infinite-Game-Simon-Sinek/dp/073521350X" },
     { id: "book-107", title: "The Slight Edge", author: "Jeff Olson", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "Shows how small daily disciplines compound into massive results. The perfect philosophy for consistent prospecting, follow-up, and content habits.", keyTakeaway: "The slight edge is the difference between success and mediocrity.", amazonLink: "https://www.amazon.com/Slight-Edge-Successful-Happy-Fulfilling/dp/1626340463" },
-    { id: "book-108", title: "The Referral Engine", author: "John Jantsch", category: "Networking & Relationships", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "One of the best systems for turning your business into a referral-generating machine. Extremely practical for loan officers who want predictable, high-quality inbound business.", keyTakeaway: "Build a system that makes referrals the natural outcome of how you do business.", amazonLink: "https://www.amazon.com/Referral-Engine-Networking-Your-Business/dp/1591843111" },
+    { id: "book-108", title: "The Referral Engine", author: "John Jantsch", category: "Networking & Relationships", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "One of the best systems for turning your business into a referral-generating machine. Extremely practical for real estate agents who want predictable, high-quality inbound business.", keyTakeaway: "Build a system that makes referrals the natural outcome of how you do business.", amazonLink: "https://www.amazon.com/Referral-Engine-Networking-Your-Business/dp/1591843111" },
     { id: "book-109", title: "Book Yourself Solid", author: "Michael Port", category: "Personal Branding & Content", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "A complete system for packaging and marketing yourself so the right clients and referral partners naturally seek you out.", keyTakeaway: "Your expertise is worthless if no one knows about it.", amazonLink: "https://www.amazon.com/Book-Yourself-Solid-Marketing-Professional/dp/0470643471" },
 
     // Prospecting & Lead Generation (expanded)
-    { id: "book-110", title: "Smart Calling", author: "Art Sobczak", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The modern bible of effective, non-sleazy phone prospecting. Outstanding scripts and frameworks for reaching busy real estate agents and past clients.", keyTakeaway: "Research + relevance + relationship = results on the phone.", amazonLink: "https://www.amazon.com/Smart-Calling-Eliminate-Rejection-Sales/dp/1119673666" },
-    { id: "book-111", title: "High-Profit Prospecting", author: "Mark Hunter", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Focuses on quality over quantity in prospecting. Teaches LOs how to spend less time on low-value leads and more time on high-potential realtors and referral sources.", keyTakeaway: "Prospect the right people, not just more people.", amazonLink: "https://www.amazon.com/High-Profit-Prospecting-Strategies-Generating/dp/0814437788" },
-    { id: "book-112", title: "The Ultimate Sales Machine", author: "Chet Holmes", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "A complete operating system for sales and marketing. The chapter on prospecting and follow-up systems alone is worth the price for any serious loan officer.", keyTakeaway: "Success comes from doing the mundane things exceptionally well every single day.", amazonLink: "https://www.amazon.com/Ultimate-Sales-Machine-Turbocharge-Business/dp/1591847745" },
-    { id: "book-113", title: "Never Cold Call Again", author: "Frank Rumbauskas", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "4-6 hrs", whyUseful: "A proven system for generating warm leads without traditional cold calling. Excellent for LOs who hate the phone but still need consistent pipeline activity.", keyTakeaway: "The best prospecting feels like service, not selling.", amazonLink: "https://www.amazon.com/Never-Cold-Call-Again-Generating/dp/0471786799" },
+    { id: "book-110", title: "Smart Calling", author: "Art Sobczak", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The modern bible of effective, non-sleazy phone prospecting. Outstanding scripts for reaching past clients, sphere contacts, and referral partners.", keyTakeaway: "Research + relevance + relationship = results on the phone.", amazonLink: "https://www.amazon.com/Smart-Calling-Eliminate-Rejection-Sales/dp/1119673666" },
+    { id: "book-111", title: "High-Profit Prospecting", author: "Mark Hunter", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "Focuses on quality over quantity in prospecting. Teaches agents how to spend less time on low-value leads and more time on high-potential sphere contacts and referral sources.", keyTakeaway: "Prospect the right people, not just more people.", amazonLink: "https://www.amazon.com/High-Profit-Prospecting-Strategies-Generating/dp/0814437788" },
+    { id: "book-112", title: "The Ultimate Sales Machine", author: "Chet Holmes", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "A complete operating system for sales and marketing. The chapter on prospecting and follow-up systems alone is worth the price for any serious real estate agent.", keyTakeaway: "Success comes from doing the mundane things exceptionally well every single day.", amazonLink: "https://www.amazon.com/Ultimate-Sales-Machine-Turbocharge-Business/dp/1591847745" },
+    { id: "book-113", title: "Never Cold Call Again", author: "Frank Rumbauskas", category: "Prospecting & Lead Generation", level: "Intermediate", readTime: "4-6 hrs", whyUseful: "A proven system for generating warm leads without traditional cold calling. Excellent for agents who hate the phone but still need consistent pipeline activity.", keyTakeaway: "The best prospecting feels like service, not selling.", amazonLink: "https://www.amazon.com/Never-Cold-Call-Again-Generating/dp/0471786799" },
     { id: "book-114", title: "The 7 Levels of Communication", author: "Michael J. Maher", category: "Prospecting & Lead Generation", level: "Beginner", readTime: "4-6 hrs", whyUseful: "Extremely popular in real estate circles. A simple, relationship-first communication system that turns agents and clients into raving fans and consistent referrers.", keyTakeaway: "People do business with those they know, like, and trust — at the highest level.", amazonLink: "https://www.amazon.com/7-Levels-Communication-Strategies-Relationships/dp/1948489007" },
 
     // Personal Branding & Content (expanded)
-    { id: "book-115", title: "Marketing Made Simple", author: "Donald Miller", category: "Personal Branding & Content", level: "Beginner", readTime: "4-6 hrs", whyUseful: "The practical follow-up to StoryBrand. Gives loan officers a clear, one-page marketing plan that actually works for websites, social, and referral outreach.", keyTakeaway: "A confused mind always says no. Clarity wins.", amazonLink: "https://www.amazon.com/Marketing-Made-Simple-Step-Step/dp/1400209390" },
-    { id: "book-116", title: "Platform", author: "Michael Hyatt", category: "Personal Branding & Content", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Shows how to build a personal platform that attracts opportunities instead of chasing them. Excellent for LOs who want to become the obvious choice in their market.", keyTakeaway: "Your platform is the sum total of your online and offline presence.", amazonLink: "https://www.amazon.com/Platform-Get-Noticed-Noisy-World/dp/159555503X" },
-    { id: "book-117", title: "The 1-Page Marketing Plan", author: "Allan Dib", category: "Personal Branding & Content", level: "Beginner", readTime: "4-6 hrs", whyUseful: "A simple, powerful framework for creating a complete marketing plan in one page. Perfect for busy loan officers who need clarity fast.", keyTakeaway: "If you can't explain your marketing on one page, it's too complicated.", amazonLink: "https://www.amazon.com/1-Page-Marketing-Plan-Customers-Money/dp/1989025013" },
-    { id: "book-118", title: "Positioning", author: "Al Ries & Jack Trout", category: "Personal Branding & Content", level: "Advanced", readTime: "6-8 hrs", whyUseful: "The classic on how to own a specific space in the minds of your market. Essential reading for LOs who want to differentiate themselves powerfully from the competition.", keyTakeaway: "It's better to be first in the mind than first in the market.", amazonLink: "https://www.amazon.com/Positioning-Battle-Your-Mind-Anniversary/dp/0071373586" },
+    { id: "book-115", title: "Marketing Made Simple", author: "Donald Miller", category: "Personal Branding & Content", level: "Beginner", readTime: "4-6 hrs", whyUseful: "The practical follow-up to StoryBrand. Gives real estate agents a clear, one-page marketing plan that actually works for websites, social, and referral outreach.", keyTakeaway: "A confused mind always says no. Clarity wins.", amazonLink: "https://www.amazon.com/Marketing-Made-Simple-Step-Step/dp/1400209390" },
+    { id: "book-116", title: "Platform", author: "Michael Hyatt", category: "Personal Branding & Content", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Shows how to build a personal platform that attracts opportunities instead of chasing them. Excellent for agents who want to become the obvious choice in their market.", keyTakeaway: "Your platform is the sum total of your online and offline presence.", amazonLink: "https://www.amazon.com/Platform-Get-Noticed-Noisy-World/dp/159555503X" },
+    { id: "book-117", title: "The 1-Page Marketing Plan", author: "Allan Dib", category: "Personal Branding & Content", level: "Beginner", readTime: "4-6 hrs", whyUseful: "A simple, powerful framework for creating a complete marketing plan in one page. Perfect for busy real estate agents who need clarity fast.", keyTakeaway: "If you can't explain your marketing on one page, it's too complicated.", amazonLink: "https://www.amazon.com/1-Page-Marketing-Plan-Customers-Money/dp/1989025013" },
+    { id: "book-118", title: "Positioning", author: "Al Ries & Jack Trout", category: "Personal Branding & Content", level: "Advanced", readTime: "6-8 hrs", whyUseful: "The classic on how to own a specific space in the minds of your market. Essential reading for agents who want to differentiate themselves powerfully from the competition.", keyTakeaway: "It's better to be first in the mind than first in the market.", amazonLink: "https://www.amazon.com/Positioning-Battle-Your-Mind-Anniversary/dp/0071373586" },
 
     // AI & Modern Tools (expanded)
-    { id: "book-119", title: "Human + Machine", author: "Paul R. Daugherty & H. James Wilson", category: "AI & Modern Tools", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The best book on how humans and AI work together in business. Practical frameworks for loan officers who want to use AI without losing the human touch that wins referrals.", keyTakeaway: "The winners will be those who master the human + machine partnership.", amazonLink: "https://www.amazon.com/Human-Machine-Reimagining-Work-Age/dp/1633693864" },
-    { id: "book-120", title: "The Coming Wave", author: "Mustafa Suleyman", category: "AI & Modern Tools", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "A clear-eyed look at where AI is heading and how it will reshape every industry. Essential reading for any loan officer who wants to stay ahead of massive change.", keyTakeaway: "The wave is coming — the only choice is whether you learn to surf it.", amazonLink: "https://www.amazon.com/Coming-Wave-Technology-Transform/dp/0593593952" },
-    { id: "book-121", title: "Power and Prediction", author: "Ajay Agrawal, Joshua Gans, Avi Goldfarb", category: "AI & Modern Tools", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Explains how AI changes decision-making in business. Highly relevant for pricing strategy, risk assessment, and client conversations in mortgage lending.", keyTakeaway: "AI's real power is in prediction — and better predictions change everything.", amazonLink: "https://www.amazon.com/Power-Prediction-Artificial-Intelligence-Transform/dp/1647822696" },
-    { id: "book-122", title: "AI Superpowers", author: "Kai-Fu Lee", category: "AI & Modern Tools", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "A global perspective on the AI revolution from one of the world's leading experts. Helps loan officers understand both the opportunities and the human elements that will remain irreplaceable.", keyTakeaway: "The future belongs to those who blend AI with uniquely human strengths like empathy and creativity.", amazonLink: "https://www.amazon.com/AI-Superpowers-China-Silicon-Valley/dp/1328547205" },
+    { id: "book-119", title: "Human + Machine", author: "Paul R. Daugherty & H. James Wilson", category: "AI & Modern Tools", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "The best book on how humans and AI work together in business. Practical frameworks for real estate agents who want to use AI without losing the human touch that wins referrals.", keyTakeaway: "The winners will be those who master the human + machine partnership.", amazonLink: "https://www.amazon.com/Human-Machine-Reimagining-Work-Age/dp/1633693864" },
+    { id: "book-120", title: "The Coming Wave", author: "Mustafa Suleyman", category: "AI & Modern Tools", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "A clear-eyed look at where AI is heading and how it will reshape every industry. Essential reading for any real estate agent who wants to stay ahead of massive change.", keyTakeaway: "The wave is coming — the only choice is whether you learn to surf it.", amazonLink: "https://www.amazon.com/Coming-Wave-Technology-Transform/dp/0593593952" },
+    { id: "book-121", title: "Power and Prediction", author: "Ajay Agrawal, Joshua Gans, Avi Goldfarb", category: "AI & Modern Tools", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Explains how AI changes decision-making in business. Highly relevant for pricing strategy, market analysis, and client conversations in real estate.", keyTakeaway: "AI's real power is in prediction — and better predictions change everything.", amazonLink: "https://www.amazon.com/Power-Prediction-Artificial-Intelligence-Transform/dp/1647822696" },
+    { id: "book-122", title: "AI Superpowers", author: "Kai-Fu Lee", category: "AI & Modern Tools", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "A global perspective on the AI revolution from one of the world's leading experts. Helps real estate agents understand both the opportunities and the human elements that will remain irreplaceable.", keyTakeaway: "The future belongs to those who blend AI with uniquely human strengths like empathy and creativity.", amazonLink: "https://www.amazon.com/AI-Superpowers-China-Silicon-Valley/dp/1328547205" },
 
     // User-requested additions
-    { id: "book-123", title: "Creating Superfans", author: "Brittany Hodak", category: "Networking & Relationships", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "A practical five-step system for turning ordinary clients and referral partners into passionate advocates who refer business consistently. Extremely relevant for loan officers who want realtors and past clients to become their biggest growth engine.", keyTakeaway: "Superfans don't just buy — they bring their friends.", amazonLink: "https://www.amazon.com/Creating-Superfans-Five-Step-Multiplying-Reputation/dp/1774580780" },
-    { id: "book-124", title: "Rethink Everything You Know About Social Media", author: "Kyle Draper", category: "Personal Branding & Content", level: "Beginner", readTime: "4-6 hrs", whyUseful: "A no-BS reset for real estate professionals (including loan officers) on how to actually use social media to build real relationships instead of chasing vanity metrics. Heavy emphasis on video, authenticity, and storytelling that converts.", keyTakeaway: "Stop posting like everyone else. Start connecting like a human.", amazonLink: "https://www.amazon.com/Rethink-Everything-About-Social-Media/dp/B0C126KFMX" },
+    { id: "book-123", title: "Creating Superfans", author: "Brittany Hodak", category: "Networking & Relationships", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "A practical five-step system for turning ordinary clients and referral partners into passionate advocates who refer business consistently. Extremely relevant for real estate agents who want realtors and past clients to become their biggest growth engine.", keyTakeaway: "Superfans don't just buy — they bring their friends.", amazonLink: "https://www.amazon.com/Creating-Superfans-Five-Step-Multiplying-Reputation/dp/1774580780" },
+    { id: "book-124", title: "Rethink Everything You Know About Social Media", author: "Kyle Draper", category: "Personal Branding & Content", level: "Beginner", readTime: "4-6 hrs", whyUseful: "A no-BS reset for real estate professionals (including real estate agents) on how to actually use social media to build real relationships instead of chasing vanity metrics. Heavy emphasis on video, authenticity, and storytelling that converts.", keyTakeaway: "Stop posting like everyone else. Start connecting like a human.", amazonLink: "https://www.amazon.com/Rethink-Everything-About-Social-Media/dp/B0C126KFMX" },
     { id: "book-125", title: "Good to Great", author: "Jim Collins", category: "Leadership & Team Building", level: "Advanced", readTime: "8-10 hrs", whyUseful: "The definitive research-backed book on what separates good companies (and professionals) from truly great ones. Timeless lessons on disciplined people, thought, and action — highly valuable once you start scaling your business or building a team.", keyTakeaway: "Good is the enemy of great.", amazonLink: "https://www.amazon.com/Good-Great-Some-Companies-Others/dp/0066620996" },
     { id: "book-126", title: "Trump: The Art of the Deal", author: "Donald J. Trump & Tony Schwartz", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "A classic (and controversial) look at aggressive deal-making, leverage, promotion, and negotiation psychology. Useful for understanding high-stakes real estate transactions and bold positioning, even if you adapt the style heavily.", keyTakeaway: "Think big, use leverage, and always promote.", amazonLink: "https://www.amazon.com/Trump-Art-Deal-Donald-J/dp/0399594493" },
-    { id: "book-127", title: "Do the Hard Things First", author: "Scott Allan", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "A direct, practical guide to beating procrastination and building the habit of tackling your most important (and difficult) work first. Perfect for loan officers who struggle with consistent prospecting, follow-up, or content creation.", keyTakeaway: "The hard things you avoid today become the reasons you stay average tomorrow.", amazonLink: "https://www.amazon.com/Hard-Things-First-Procrastination-Bulletproof/dp/1989599834" }
+    { id: "book-127", title: "Do the Hard Things First", author: "Scott Allan", category: "Mindset & Performance", level: "Beginner", readTime: "5-7 hrs", whyUseful: "A direct, practical guide to beating procrastination and building the habit of tackling your most important (and difficult) work first. Perfect for real estate agents who struggle with consistent prospecting, follow-up, or content creation.", keyTakeaway: "The hard things you avoid today become the reasons you stay average tomorrow.", amazonLink: "https://www.amazon.com/Hard-Things-First-Procrastination-Bulletproof/dp/1989599834" }
   ];
 
   const bookCategories = [...new Set(BOOKS_DATA.map(b => b.category))];
   let activeBookCategories = [];
 
-  // Foundational 3 for the sexy "Start Here" row (hand-picked high-ROI for LOs)
+  // Foundational 3 for the sexy "Start Here" row (hand-picked high-ROI for agents)
   const FEATURED_BOOK_IDS = ['book-004', 'book-005', 'book-008']; // Ninja Selling, Fanatical Prospecting, Atomic Habits
 
   function renderFeaturedBooks() {
@@ -1329,7 +846,7 @@
           <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">by ${book.author}</p>
 
           <div class="mb-3">
-            <div class="text-[10px] uppercase tracking-wider text-[#F15A29] font-bold mb-0.5">Why this matters for LOs</div>
+            <div class="text-[10px] uppercase tracking-wider text-[#F15A29] font-bold mb-0.5">Why this matters for agents</div>
             <p class="text-sm leading-snug">${book.whyUseful}</p>
           </div>
 
@@ -1587,14 +1104,47 @@
     if (typeof window.showSavedFeedback === 'function') window.showSavedFeedback('Saved to My Saved Items');
   };
 
-  // Save individual strategy pieces from the playbook
+  // Save individual strategy pieces from playbooks / open referral modal
   window.savePartnerStrategy = function savePartnerStrategy(partnerType, sectionIndex, btnEl) {
-    const playbook = PARTNER_PLAYBOOKS[partnerType];
-    if (!playbook) return;
+    let title;
+    let content;
 
-    const section = playbook.sections[sectionIndex];
-    const title = `${partnerType}: ${section.heading}`;
-    const content = section.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 800);
+    const registry = PARTNER_SAVE_REGISTRY[partnerType];
+    if (registry) {
+      title = registry.title;
+      content = registry.content;
+    } else {
+      const hiKey = HIGH_IMPACT_SAVE_ALIASES[partnerType] || partnerType;
+      const hiPlay = HIGH_IMPACT_PLAYS[hiKey];
+      if (hiPlay) {
+        title = hiPlay.title;
+        content = stripHtml(hiPlay.content).substring(0, 1200);
+      } else {
+        const tier = TIER_PLAYBOOKS[partnerType];
+        if (tier) {
+          title = tier.title;
+          content = stripHtml(tier.content).substring(0, 1200);
+        } else {
+          const playbook = PARTNER_PLAYBOOKS[partnerType];
+          if (playbook && playbook.sections && playbook.sections[sectionIndex]) {
+            const section = playbook.sections[sectionIndex];
+            title = `${playbook.title || partnerType}: ${section.heading}`;
+            content = stripHtml(section.content).substring(0, 800);
+          } else {
+            const modal = document.getElementById('referral-modal');
+            const titleEl = document.getElementById('referral-modal-title');
+            const contentEl = document.getElementById('referral-content');
+            const modalOpen = modal && !modal.classList.contains('hidden');
+            if (modalOpen && titleEl && contentEl) {
+              title = (titleEl.textContent || partnerType).trim();
+              content = contentEl.innerText.replace(/\s+/g, ' ').trim().substring(0, 1200);
+            } else {
+              return;
+            }
+          }
+        }
+      }
+    }
 
     // Use the unified saved items system
     let saved = [];

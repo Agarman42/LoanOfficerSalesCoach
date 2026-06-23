@@ -21,7 +21,7 @@
   const APPRECIATION_TITLES = {
     events: 'Client Appreciation Events – Execution Guide',
     touches: 'High-ROI Personal Touches',
-    partners: 'Realtor & Partner Events'
+    partners: 'Referral Partner Events'
   };
 
   function esc(s) {
@@ -255,16 +255,16 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">COMMUNITY & CHARITY</span></div>
       ${whyBox('Why This Builds Long-Term Trust',
-        'People remember who shows up for the community when it counts. Charity events signal who you are beyond listing flyers — and give you authentic content for 2–4 weeks. Co-hosting with a lender or local business splits cost and multiplies reach.',
+        'People remember who shows up for the community when it counts. Charity events signal who you are beyond listing flyers — and give you authentic content for 2–4 weeks. Co-hosting with fellow agents, local businesses, or lender partners splits cost and multiplies reach.',
         'teal')}
       ${sectionTitle('Four Proven Formats (Pick 2–3 Per Year)')}
       <div class="space-y-2 mb-6 text-sm">
-        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Back-to-School Supply Drive</strong> — Co-host with agents. Late July/early August.</div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Back-to-School Supply Drive</strong> — Co-host with fellow agents or a local business. Late July/early August.</div>
         <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Charity 5K Sponsorship</strong> — Branded tent or water station. Meet dozens of locals.</div>
         <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Shred Day + Food Drive</strong> — Practical value + community service.</div>
-        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Youth Sports Sponsorship</strong> — Co-sponsor with top realtor. Months of visibility.</div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong class="text-[#00A89D]">Youth Sports Sponsorship</strong> — Co-sponsor with a fellow agent or local business. Months of visibility.</div>
       </div>
-      ${sectionTitle('Co-Host Playbook with Realtor Partners')}
+      ${sectionTitle('Co-Host Playbook with Partners')}
       <div class="space-y-2 mb-6">
         ${stepCard('Pick the Right Partner', 'Shares your values, will actually promote — not just show up.')}
         ${stepCard('Split 50/50', 'Cost, promotion, day-of labor, photo posting. One-page "who does what."')}
@@ -272,7 +272,7 @@
         ${stepCard('Debrief Within 48 Hours', 'What worked, attendance count, who to invite next time.')}
       </div>
       <div class="space-y-4 mb-6">
-        ${scriptCard('Realtor Co-Host Pitch', 'Hey [Agent] — I\'d love to co-host a [back-to-school drive / shred day / 5K sponsorship] with you this [season]. I\'ll split cost and promotion 50/50. Want to grab 15 minutes to pick a date?', 'Lead with mutual benefit — content + goodwill.', 'Event: Realtor Co-Host Pitch')}
+        ${scriptCard('Co-Host Partner Pitch', 'Hey [Partner Name] — I\'d love to co-host a [back-to-school drive / shred day / 5K sponsorship] with you this [season]. I\'ll split cost and promotion 50/50. Want to grab 15 minutes to pick a date?', 'Lead with mutual benefit — content + goodwill.', 'Event: Co-Host Partner Pitch')}
         ${scriptCard('Charity Invitation', 'We\'re teaming up with [Charity] for [Event] on [Date]. Would love your help — donate, volunteer an hour, or spread the word. Hope to see you there!', 'Works for clients, sphere, and social.', 'Event: Charity Invite')}
       </div>
       ${proTip('Go deep on 2–3 causes per year instead of spreading thin. Tag the nonprofit and every volunteer in photos. Follow the Post-Event playbook within 48 hours.')}
@@ -353,11 +353,11 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">EVENT PHILOSOPHY</span></div>
       ${whyBox('Co-Host for Leverage',
-        'Co-hosting with a top realtor or local business doubles your marketing reach and cuts costs dramatically. It creates a natural reason for future joint events and deepens the partnership.',
+        'Co-hosting with a lender partner, title rep, or local business doubles your marketing reach and cuts costs dramatically. It creates a natural reason for future joint events and deepens the partnership.',
         'teal')}
       ${sectionTitle('How to Structure a Co-Hosted Event')}
       <div class="space-y-2 mb-6">
-        ${stepCard('Choose the right partner', 'Realtors who send business or have complementary audiences.')}
+        ${stepCard('Choose the right partner', 'Partners who send you referrals or have complementary audiences (lenders, title, insurance, fellow agents).')}
         ${stepCard('Split responsibilities in writing', 'Venue, invites, food, photos, follow-up. Both names on all marketing.')}
         ${stepCard('Split costs 50/50', 'Or alternate who pays. Clarity upfront prevents resentment.')}
         ${stepCard('Both promote to both lists', 'Success metric: 40%+ of attendees from co-host list.')}
@@ -455,7 +455,7 @@
       ${sectionTitle('Who to Invite First (Tier Strategy)')}
       <div class="grid md:grid-cols-3 gap-3 mb-6 text-sm">
         <div class="border border-[#002B5C]/30 rounded-2xl p-4"><strong class="text-[#002B5C]">Wave 1: A+ VIPs</strong><p class="mt-1">Personal video or call. These 30–50 people should get invited 7–10 days before everyone else.</p></div>
-        <div class="border border-[#00A89D]/30 rounded-2xl p-4"><strong class="text-[#00A89D]">Wave 2: B Tier + Top Partners</strong><p class="mt-1">Personal text referencing something real. Realtors co-promote to their top clients.</p></div>
+        <div class="border border-[#00A89D]/30 rounded-2xl p-4"><strong class="text-[#00A89D]">Wave 2: B Tier + Top Partners</strong><p class="mt-1">Personal text referencing something real. Partners co-promote to their top clients and sphere.</p></div>
         <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4"><strong>C Tier / Newsletter</strong><p class="mt-1">Only after Wave 1–2 are underway. Never lead with mass blast to cold contacts.</p></div>
       </div>
       ${sectionTitle('Format & Timing That Boosts Turnout')}
@@ -482,13 +482,13 @@
         <li>Stop mass emailing — switch to personal calls/texts to top 30 A+/B contacts</li>
         <li>Post throwback photos from last year\'s event on social with "Save the date — [new date]"</li>
         <li>Ask 5 confirmed guests: "Who else should I make sure gets an invite?"</li>
-        <li>Co-host or realtor partner sends personal invite to their top 20 clients</li>
+        <li>Co-host or lender partner sends personal invite to their top 20 clients</li>
         <li>Offer a simple hook: free shred, kids\' activity, or local food truck — one memorable detail</li>
         <li>Extend personal invite deadline 5 days — then close RSVPs to create urgency</li>
       </ol>
       ${sectionTitle('Co-Host & Partner Tactics (Double Your Headcount)')}
       <ul class="text-sm space-y-1.5 mb-6 pl-5 list-disc">
-        <li>Realtor partner sends personal text to their top 20 — both names on the invite</li>
+        <li>Lender or co-broke partner sends personal text to their top 20 — both names on the invite</li>
         <li>Split promotion: you own past clients, they own sphere + active buyers</li>
         <li>Partner posts to social 2 weeks and 3 days before — tag you, tag the venue</li>
         <li>Offer agent a reason to come: "Bring your top buyer who\'s on the fence — no pressure environment"</li>
@@ -525,7 +525,7 @@
       <div class="grid md:grid-cols-2 gap-3 mb-6 text-sm">
         <div class="border border-[#00A89D]/30 bg-[#00A89D]/5 rounded-2xl p-4"><strong class="text-[#00A89D]">Past Clients</strong><br>Gratitude-first. Soft ask: who to invite next time.</div>
         <div class="border border-[#F15A29]/30 bg-[#F15A29]/5 rounded-2xl p-4"><strong class="text-[#F15A29]">+1 Guests</strong><br>Personal intro within 72h. CRM tag: Met at [Event] via [Host].</div>
-        <div class="border border-[#002B5C]/30 bg-[#002B5C]/5 rounded-2xl p-4"><strong>Realtors / Partners</strong><br>Partnership tone. Offer coffee. Ask who else in office should come.</div>
+        <div class="border border-[#002B5C]/30 bg-[#002B5C]/5 rounded-2xl p-4"><strong>Lenders / Fellow Agents</strong><br>Partnership tone. Offer coffee. Ask who else in their office or network should come.</div>
         <div class="border border-gray-200 rounded-2xl p-4"><strong>Sphere</strong><br>Light social tone. Invite to next event. Zero business talk unless they bring it up.</div>
       </div>
       <div class="space-y-4 mb-6">
@@ -548,7 +548,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">ANNUAL CADENCE</span></div>
       ${whyBox('Why These Events Compound Referrals',
-        'Events turn satisfied clients into raving fans who bring photos, stories, and referrals. The photos become months of content and the personal interactions become the stories they tell their friends and realtors.',
+        'Events turn satisfied clients into raving fans who bring photos, stories, and referrals. The photos become months of content and the personal interactions become the stories they tell their friends and coworkers.',
         'teal')}
       ${sectionTitle('Recommended 4-Event Annual Cadence')}
       <div class="grid md:grid-cols-2 gap-4 mb-6 text-sm">
@@ -599,7 +599,7 @@
       ${nextStepsHtml([
         { label: 'Life Event Playbooks', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('database-nurturing');", style: 'primary' },
         { label: 'Value Vault (Gift Ideas)', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('value-vault');", style: 'accent' },
-        { label: 'Equity Scanner', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('equity-scanner');" }
+        { label: 'Annual Home Review', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('value-vault'); if(typeof window.openVaultItemWhenReady==='function')window.openVaultItemWhenReady('annual-home-equity-review');" }
       ])}
       ${bridgeRow([
         { label: 'Anniversary nurture template', action: 'nurture-anniversary', primary: true },

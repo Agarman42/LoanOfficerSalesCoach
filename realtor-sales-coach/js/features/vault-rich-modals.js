@@ -67,8 +67,11 @@
         setTimeout(() => {
           if (action === 'weekly' && typeof window.showSection === 'function') {
             window.showSection('weekly-win-plan');
-          } else if (action === 'equity' && typeof window.showSection === 'function') {
-            window.showSection('equity-scanner');
+          } else if (action === 'equity') {
+            if (typeof window.showSection === 'function') window.showSection('value-vault');
+            if (typeof window.openVaultItemWhenReady === 'function') {
+              setTimeout(() => window.openVaultItemWhenReady('annual-home-equity-review'), 200);
+            }
           } else if (action === 'social' && typeof window.showSection === 'function') {
             window.showSection('social');
           } else if (action === 'scripts' && typeof window.showSection === 'function') {
@@ -203,7 +206,7 @@
       </div>
 
       <div class="flex flex-wrap gap-2 mb-6">
-        <button type="button" data-vault-bridge="equity" class="text-xs px-3 py-2 rounded-xl bg-[#F15A29] text-white font-semibold hover:bg-orange-600 transition"><i class="fas fa-chart-line mr-1"></i>Run Equity Scanner</button>
+        <button type="button" data-vault-bridge="equity" class="text-xs px-3 py-2 rounded-xl bg-[#F15A29] text-white font-semibold hover:bg-orange-600 transition"><i class="fas fa-chart-line mr-1"></i>Annual Home Review</button>
         <button type="button" data-vault-bridge="modal:post-closing-7day" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition">7-Day call framework →</button>
         <button type="button" data-vault-bridge="weekly" class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition">Weekly Win Plan →</button>
       </div>
@@ -423,7 +426,7 @@
   function renderObjectionPartnerBusiness(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
       { title: '"I\'m too busy right now"', text: 'I completely get it — this market is wild. I\'m not here to take more of your time. I wanted to drop off something small that might help you on your next few deals. No meeting required.', tip: 'Value-first, zero pressure.' },
-      { title: '"I already have a preferred lender"', text: 'Totally respect loyalty. I\'m not asking you to switch anyone. I\'m offering to be a no-pressure second set of eyes on listings, pricing strategy, or tough negotiations. A lot of lenders keep me in their back pocket for clients who need a great agent.', tip: 'Position as backup expert.' },
+      { title: '"I already have agents I work with"', text: 'Totally fair. Most top partners keep a short list for different situations — relocation, luxury, investor deals, tough negotiations. I\'d love to earn a spot on your bench by proving it on one client: white-glove updates, no drama, and I\'ll make you look brilliant.', tip: 'Position as specialist backup, not replacement.' },
       { title: '"I don\'t refer clients to agents they don\'t know"', text: 'Fair — that\'s how I want to work with you too. I\'m happy to prove value first: run a CMA, show up at your open house, or co-brand something useful. No expectation until you\'ve seen the difference.', tip: 'Earn trust before asking.' },
       { title: '"Your commission/fees aren\'t competitive"', text: 'I hear you — every dollar matters. In this market the difference between winning and losing is often communication, negotiation, and certainty. I focus on making your client\'s offer the strongest on the table and keeping the deal together.', tip: 'Shift from price to certainty and results.' }
     ], 'Value-first partner responses for earning business from lenders and fellow agents — never pushy, never sleazy.', 'teal');
@@ -605,7 +608,7 @@
     ], '2026 objections — ChatGPT, Zillow, and "market is crashing" claims.', 'amber');
   }
 
-  // ─── LTV & REFERRAL FLYWHEEL MINDSET ─────────────────────────────────
+  // ─── CLIENT LIFETIME VALUE & REFERRAL FLYWHEEL ───────────────────────
   function renderPostClosingLtv(item, contentEl, modal) {
     setKicker(modal, 'Value Vault • Lifetime Value Math');
     contentEl.innerHTML = `
@@ -637,7 +640,7 @@
         <button type="button" data-vault-bridge="modal:referral-flywheel-system" class="text-xs px-3 py-2 rounded-xl border border-teal-500 text-teal-700 font-semibold hover:bg-teal-100 transition">Full flywheel →</button>
         <button type="button" data-vault-bridge="weekly" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">Block Power Hour →</button>
       </div>
-      ${footerActions('Copy LTV Framework')}
+      ${footerActions('Copy Lifetime Value Framework')}
     `;
     window.attachRichVaultModalHandlers(contentEl, item);
   }
@@ -1942,7 +1945,7 @@
       { title: 'First-Time Buyer Seminar', format: 'In-person or Zoom · 45 min', you: 'Present market reality, neighborhood data, buying process', them: 'Lender presents programs and pre-qualification', script: 'Happy to co-host a first-time buyer seminar — I\'ll handle market education if you invite your database and cover lending programs. Zero sales pitch, pure education.' },
       { title: 'Lunch & Learn (Brokerage)', format: '30 min during office meeting', you: 'Market update + listing strategy tips', them: 'Books the room and introduces you', script: 'I can do a tight 20-minute market reality check for your agents — no pitch, just useful intel they can use today.' },
       { title: 'Co-Hosted Webinar', format: 'Virtual · 30–40 min', you: 'Slides, Q&A, neighborhood breakdowns', them: 'Lender promotes to email list + social', script: 'Let\'s co-host a "What $X buys right now" session — I\'ll build the market deck, you invite, we both win.' },
-      { title: 'Open House Co-Host', format: 'On-site · 2 hours', you: 'Host the property, capture leads, run the experience', them: 'Lender brings buyer welcome materials and follows up on financing leads', script: 'Happy to co-host your Saturday open house — I\'ll run the property, you handle buyer financing questions. Win-win for both our pipelines.' }
+      { title: 'Open House Co-Host', format: 'On-site · 2 hours', you: 'Host the property, capture leads, run the experience', them: 'Lender brings pre-qual station materials and follows up on financing leads', script: 'I\'m running an open house Saturday at [address] — would love you there for a quick pre-qual station if you\'re free. I\'ll handle the property and leads; you handle financing questions for serious buyers.' }
     ];
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500/10 text-indigo-600">HIGH-IMPACT PARTNERSHIP</span></div>
@@ -2095,7 +2098,7 @@
         'Send on exact anniversary. Follow up with text 3 days later if no reply.')}
       <div class="flex flex-wrap gap-2 mb-6">
         <button type="button" data-vault-bridge="modal:annual-mortgage-review" class="text-xs px-3 py-2 rounded-xl bg-[#002B5C] text-white font-semibold hover:bg-black transition">Review framework →</button>
-        <button type="button" data-vault-bridge="equity" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] font-semibold hover:bg-[#00A89D]/5 transition">Equity Scanner →</button>
+        <button type="button" data-vault-bridge="equity" class="text-xs px-3 py-2 rounded-xl border border-[#00A89D] font-semibold hover:bg-[#00A89D]/5 transition">Annual Home Review →</button>
       </div>
       ${footerActions('Copy Annual Home Review Invite')}
     `;
@@ -2419,6 +2422,8 @@
     'post-closing-ltv-framework': renderPostClosingLtv,
     '7day-objections': render7DayObjections,
     'annual-mortgage-review': renderAnnualMortgageReview,
+    'annual-home-equity-review': renderAnnualMortgageReview,
+    'annual-real estate-review': renderAnnualMortgageReview,
     'client-anniversary-system': renderClientAnniversarySystem,
     'gift-cadence-system': renderGiftCadenceSystem,
     'giftology-mindset': renderGiftologyMindset,

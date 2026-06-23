@@ -359,7 +359,7 @@ function setupChatSuggestions() {
   const prompts = [
     "Give me 3 social post ideas this week that match my personality and hobbies",
     "Help me handle a 'rates are too high' objection with a warm script",
-    "Brainstorm a high-impact pop-by or client appreciation idea for realtors",
+    "Brainstorm a high-impact pop-by or client appreciation idea for my sphere",
     "What's a good 7-day post-closing touch sequence for a first-time buyer?",
     "Motivate me — I'm feeling in a slump this week",
     "Turn one of my hobbies into 2 evergreen content angles for social or blog",

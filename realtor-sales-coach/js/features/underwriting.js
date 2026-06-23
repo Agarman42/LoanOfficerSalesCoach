@@ -267,7 +267,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
     // For follow-up we already cleared the input in askUwFollowUp (if it came from there)
     // or we will clear below if needed.
 
-    const loadingTitle = isFollowUp ? 'Analyzing Follow-up Question...' : 'Searching Underwriting Guidelines...';
+    const loadingTitle = isFollowUp ? 'Analyzing Follow-up Question...' : 'Analyzing Buyer Qualification Scenario...';
     const loadingSub = isFollowUp 
         ? 'Incorporating your new details into the full scenario context.' 
         : 'Cross-referencing agency guidelines, any uploaded overlays/manuals, and compensating factors.';
@@ -586,7 +586,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
   <div class="mb-4">
     <div class="flex items-center gap-2 mb-2">
       <i class="fas fa-search-dollar text-[#00A89D]"></i>
-      <span class="text-xs uppercase tracking-widest font-bold text-[#00A89D]">Underwriting Scenario</span>
+      <span class="text-xs uppercase tracking-widest font-bold text-[#00A89D]">Buyer Qualification Scenario</span>
     </div>
     <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
       <div class="text-sm font-semibold mb-1">Question:</div>
@@ -604,13 +604,13 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
       ${answer}
     </div>
   </div>
-  <div class="mt-3 text-[10px] text-gray-500">Saved from Underwriting Guideline Search • Verify against current manuals</div>
+  <div class="mt-3 text-[10px] text-gray-500">Saved from Buyer Qualification Analysis • Verify with your lender partner</div>
 </div>`;
 
     window.toggleSaveIdea(title, content, null, 'underwriting');
 
     if (window.showToast) {
-      window.showToast('Full underwriting scenario saved to My Saved Items', 'success');
+      window.showToast('Full buyer qualification scenario saved to My Saved Items', 'success');
     } else {
       alert('Saved to My Saved Items');
     }
@@ -646,8 +646,13 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
   // =====================================================
   window.openUwQuestionTips = function() {
     const modal = document.getElementById('uw-question-tips-modal');
-    if (modal) {
+    if (!modal) return;
+    if (typeof window.openNamedModal === 'function') {
+      window.openNamedModal(modal);
+    } else {
       modal.style.display = 'flex';
+      modal.style.pointerEvents = 'auto';
+      document.body.classList.add('modal-open');
     }
   };
 
@@ -713,7 +718,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
     // Expose a couple helpers
     window.resetUwScenario = resetCurrentScenario;
 
-    console.log('%c[underwriting.js] Premium Underwriting Guideline Search initialized', 'color:#00A89D');
+    console.log('%c[underwriting.js] Buyer Qualification Analysis initialized', 'color:#00A89D');
   }
 
   // Auto-init when script loads
