@@ -329,7 +329,7 @@
         { title: 'First-Time Buyer Question', text: 'What’s one thing you wish you knew before buying your first home? No judgment — real answers for anyone looking now.' },
         { title: 'Fun Personality', text: 'Real tree or fake tree this year? I’m team fake. Fight me in the comments (nicely).' },
         { title: 'Tag a Friend', text: 'Tag the friend who still thinks you need 20% down. I have a 3-minute voice note ready that might change their mind.' },
-        { title: 'Lunch Spot Poll', text: 'Favorite local spot for a quick client or realtor lunch? I’m always looking for recommendations that feel special but not stuffy.' }
+        { title: 'Lunch Spot Poll', text: 'Favorite local spot for a quick client or partner lunch? I’m always looking for recommendations that feel special but not stuffy.' }
       ],
       proTips: [
         '2–3 polls/questions per week minimum.',

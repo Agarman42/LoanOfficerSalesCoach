@@ -19,7 +19,7 @@
       "Write two personal handwritten notes or thank-you cards.",
       "Make at least five outbound relationship calls to past clients or partners.",
       "Send personalized birthday/anniversary video messages.",
-      "Engage on social (comment/like 10 posts from realtors & clients).",
+      "Engage on social (comment/like 10 posts from agents & clients).",
       "Record and post one short-form video about listing tips, open house strategies, or market updates.",
       "Follow up with new online leads within 24 hours.",
       "Reach out to one past client for a pure relationship check-in.",
@@ -52,7 +52,7 @@
       "Host a first-time homebuyer seminar.",
       "Send handwritten birthday/anniversary cards.",
       "Record a long-form video on a trending topic.",
-      "Partner with a realtor for co-branded campaign.",
+      "Partner with a lender for a co-branded campaign.",
       "Attend a local community event.",
       "Host a passion-blended event (wine & canvas, golf, etc.).",
       "Mail a 'Just Because' value pack to database.",
@@ -62,7 +62,7 @@
     quarterly: [
       "Host a full Lunch & Learn for agents/partners.",
       "Run a local market update webinar.",
-      "Organize a Realtor Mastermind event.",
+      "Organize an Agent Mastermind event.",
       "Sponsor a local charity or community event.",
       "Host a networking happy hour.",
       "Run a contest/giveaway for clients and partners.",
@@ -624,7 +624,7 @@
     { id: "book-016", title: "This Is Marketing", author: "Seth Godin", category: "Personal Branding & Content", level: "Intermediate", readTime: "4-6 hrs", whyUseful: "Helps you understand how to create meaningful work that spreads. Excellent for agents building a personal brand instead of just chasing transactions.", keyTakeaway: "Marketing is the generous act of helping someone solve a problem.", amazonLink: "https://www.amazon.com/This-Marketing-You-Cant-Advertise/dp/0525542795" },
 
     // Leadership & Team Building
-    { id: "book-017", title: "The 21 Irrefutable Laws of Leadership", author: "John C. Maxwell", category: "Leadership & Team Building", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "Foundational leadership principles. Invaluable once you start building a team or want to lead by influence with realtors and partners.", keyTakeaway: "Leadership is influence. Nothing more, nothing less.", amazonLink: "https://www.amazon.com/21-Irrefutable-Laws-Leadership-Anniversary/dp/0785288376" },
+    { id: "book-017", title: "The 21 Irrefutable Laws of Leadership", author: "John C. Maxwell", category: "Leadership & Team Building", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "Foundational leadership principles. Invaluable once you start building a team or want to lead by influence with referral partners and clients.", keyTakeaway: "Leadership is influence. Nothing more, nothing less.", amazonLink: "https://www.amazon.com/21-Irrefutable-Laws-Leadership-Anniversary/dp/0785288376" },
     { id: "book-018", title: "Extreme Ownership", author: "Jocko Willink & Leif Babin", category: "Leadership & Team Building", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "Navy SEAL principles applied to business. Brutally honest look at personal accountability — highly relevant for real estate agents who want to own their results.", keyTakeaway: "Leaders must own everything in their world.", amazonLink: "https://www.amazon.com/Extreme-Ownership-U-S-Navy-SEALs/dp/1250067057" },
 
     // Business & Financial Intelligence
@@ -674,7 +674,7 @@
     { id: "book-057", title: "The Total Money Makeover", author: "Dave Ramsey", category: "Business & Financial Intelligence", level: "Beginner", readTime: "6-8 hrs", whyUseful: "Practical debt elimination and wealth-building steps. Useful when helping clients get their financial house in order before or after buying.", keyTakeaway: "Live like no one else so later you can live like no one else.", amazonLink: "https://www.amazon.com/Total-Money-Makeover-Classic-Financial/dp/1400205298" },
 
     // Phil M. Jones — Essential for agents (objection handling) (added per request)
-    { id: "book-093", title: "Exactly What to Say: The Magic Words for Influence and Impact", author: "Phil M. Jones", category: "Sales & Negotiation", level: "Beginner", readTime: "3-4 hrs", whyUseful: "The definitive short guide to using precise, psychologically smart language to influence conversations, handle objections, and guide clients toward decisions without sounding pushy. Invaluable for every client conversation and realtor interaction.", keyTakeaway: "The right words at the right time change everything.", amazonLink: "https://www.amazon.com/Exactly-What-Say-Influence-Impact/dp/1989025005" },
+    { id: "book-093", title: "Exactly What to Say: The Magic Words for Influence and Impact", author: "Phil M. Jones", category: "Sales & Negotiation", level: "Beginner", readTime: "3-4 hrs", whyUseful: "The definitive short guide to using precise, psychologically smart language to influence conversations, handle objections, and guide clients toward decisions without sounding pushy. Invaluable for every client conversation and partner interaction.", keyTakeaway: "The right words at the right time change everything.", amazonLink: "https://www.amazon.com/Exactly-What-Say-Influence-Impact/dp/1989025005" },
     { id: "book-094", title: "Exactly What to Say: For Real Estate Agents", author: "Phil M. Jones, Chris Smith & Jimmy Mackin", category: "Sales & Negotiation", level: "Beginner", readTime: "3-4 hrs", whyUseful: "30 targeted 'magic words' and phrases specifically for real estate conversations — listing presentations, buyer consultations, price objections, follow-up, and asking for referrals. Extremely practical for agents who want sharper conversations with buyers and partners.", keyTakeaway: "Small changes in language create massive shifts in outcomes.", amazonLink: "https://www.amazon.com/Exactly-What-Say-Estate-Agents/dp/1989603297" },
 
     // Additional high-value books (new additions)
@@ -718,7 +718,7 @@
     { id: "book-122", title: "AI Superpowers", author: "Kai-Fu Lee", category: "AI & Modern Tools", level: "Intermediate", readTime: "7-9 hrs", whyUseful: "A global perspective on the AI revolution from one of the world's leading experts. Helps real estate agents understand both the opportunities and the human elements that will remain irreplaceable.", keyTakeaway: "The future belongs to those who blend AI with uniquely human strengths like empathy and creativity.", amazonLink: "https://www.amazon.com/AI-Superpowers-China-Silicon-Valley/dp/1328547205" },
 
     // User-requested additions
-    { id: "book-123", title: "Creating Superfans", author: "Brittany Hodak", category: "Networking & Relationships", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "A practical five-step system for turning ordinary clients and referral partners into passionate advocates who refer business consistently. Extremely relevant for real estate agents who want realtors and past clients to become their biggest growth engine.", keyTakeaway: "Superfans don't just buy — they bring their friends.", amazonLink: "https://www.amazon.com/Creating-Superfans-Five-Step-Multiplying-Reputation/dp/1774580780" },
+    { id: "book-123", title: "Creating Superfans", author: "Brittany Hodak", category: "Networking & Relationships", level: "Intermediate", readTime: "5-7 hrs", whyUseful: "A practical five-step system for turning ordinary clients and referral partners into passionate advocates who refer business consistently. Extremely relevant for agents who want past clients and partners to become their biggest growth engine.", keyTakeaway: "Superfans don't just buy — they bring their friends.", amazonLink: "https://www.amazon.com/Creating-Superfans-Five-Step-Multiplying-Reputation/dp/1774580780" },
     { id: "book-124", title: "Rethink Everything You Know About Social Media", author: "Kyle Draper", category: "Personal Branding & Content", level: "Beginner", readTime: "4-6 hrs", whyUseful: "A no-BS reset for real estate professionals (including real estate agents) on how to actually use social media to build real relationships instead of chasing vanity metrics. Heavy emphasis on video, authenticity, and storytelling that converts.", keyTakeaway: "Stop posting like everyone else. Start connecting like a human.", amazonLink: "https://www.amazon.com/Rethink-Everything-About-Social-Media/dp/B0C126KFMX" },
     { id: "book-125", title: "Good to Great", author: "Jim Collins", category: "Leadership & Team Building", level: "Advanced", readTime: "8-10 hrs", whyUseful: "The definitive research-backed book on what separates good companies (and professionals) from truly great ones. Timeless lessons on disciplined people, thought, and action — highly valuable once you start scaling your business or building a team.", keyTakeaway: "Good is the enemy of great.", amazonLink: "https://www.amazon.com/Good-Great-Some-Companies-Others/dp/0066620996" },
     { id: "book-126", title: "Trump: The Art of the Deal", author: "Donald J. Trump & Tony Schwartz", category: "Sales & Negotiation", level: "Intermediate", readTime: "6-8 hrs", whyUseful: "A classic (and controversial) look at aggressive deal-making, leverage, promotion, and negotiation psychology. Useful for understanding high-stakes real estate transactions and bold positioning, even if you adapt the style heavily.", keyTakeaway: "Think big, use leverage, and always promote.", amazonLink: "https://www.amazon.com/Trump-Art-Deal-Donald-J/dp/0399594493" },

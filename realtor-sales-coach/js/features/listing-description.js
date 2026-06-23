@@ -40,7 +40,7 @@
       output.innerHTML = '';
     }
 
-    let prompt = `You are an elite real estate copywriter crafting emotionally compelling listing descriptions for top-producing realtors. Use as many of the selected features as possible to create rich, differentiated copy that highlights what makes this home special.
+    let prompt = `You are an elite real estate copywriter crafting emotionally compelling listing descriptions for top-producing agents. Use as many of the selected features as possible to create rich, differentiated copy that highlights what makes this home special.
 
 Tone: ${tone}
 Property Type: ${propertyType}
@@ -62,7 +62,7 @@ Write exactly 3 distinct, ready-to-use descriptions in this order:
 2. Zillow / Social Media Length (~400 words) — emotional, lifestyle-focused storytelling that makes buyers imagine living there
 3. Short Teaser / Social Hook (75–100 words) — captivating headline + hook for Instagram, Facebook, email, or print ads
 
-After the three descriptions, also provide 2 short ready-to-film Reel / video scripts (15–30 seconds each) that a realtor can record on their phone the same day. For each Reel script include:
+After the three descriptions, also provide 2 short ready-to-film Reel / video scripts (15–30 seconds each) that an agent can record on their phone the same day. For each Reel script include:
 - A strong 2-3 second visual hook + on-screen text suggestion
 - 2-3 lines of natural voiceover that pulls from the emotional hook or key features
 - A soft CTA to comment or DM for a private tour
@@ -74,7 +74,7 @@ Rules for all copy:
 - Include natural GEO / lifestyle keywords if address or market is provided
 - End each version with a soft, confident call-to-action that feels helpful
 - Do NOT mention price or force beds/baths/sqft unless explicitly provided
-- Make the language sound like it came from a confident, successful local realtor who knows their market
+- Make the language sound like it came from a confident, successful local agent who knows their market
 
 Make buyers fall in love and want to reach out immediately.`;
 
@@ -135,7 +135,7 @@ Make buyers fall in love and want to reach out immediately.`;
       // Premium output with pro tip callout (updated to reflect new Reel inclusion)
       html += `
         <div class="mt-4 p-4 bg-[#002B5C]/5 border border-[#002B5C]/15 rounded-2xl text-xs text-[#002B5C] dark:text-white">
-          <strong>Realtor Pro Tip:</strong> Use the short teaser as the caption and the Reel scripts for quick vertical video the day the listing hits the market. Save winners to your Value Vault — they become templates for similar homes.
+          <strong>Agent Pro Tip:</strong> Use the short teaser as the caption and the Reel scripts for quick vertical video the day the listing hits the market. Save winners to your Value Vault — they become templates for similar homes.
         </div>`;
       output.innerHTML = html;
       output.classList.remove('hidden');

@@ -75,7 +75,7 @@ Make everything warm, client-centered, and confidence-building. Use emotional la
             </div>
           </div>
           <div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">${text.replace(/</g,'&lt;')}</div>
-          <div class="mt-4 p-3 bg-[#002B5C]/5 border border-[#002B5C]/15 rounded-2xl text-xs">Realtor Pro Tip: Bring printed net sheets or affordability breakdowns. End the consult by booking the next step on the spot ("Shall we lock in the listing appointment for Thursday at 2pm?").</div>
+          <div class="mt-4 p-3 bg-[#002B5C]/5 border border-[#002B5C]/15 rounded-2xl text-xs">Agent Pro Tip: Bring printed net sheets or affordability breakdowns. End the consult by booking the next step on the spot ("Shall we lock in the listing appointment for Thursday at 2pm?").</div>
         </div>`;
       output.classList.remove('hidden');
     } catch (e) {

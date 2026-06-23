@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  // Realtor tool — no Ruoff LO blog publishing portal
+  // Agent tool — no Ruoff LO blog publishing portal
   const BLOG_ENABLE_RUOFF_PUBLISH = false;
 
   function getRuoffPublishButtonHtml() {
@@ -175,7 +175,7 @@
   // ORIGINAL BLOG CREATOR CODE (moved verbatim)
   // =====================================================
 
-// ==================== REALTOR BLOG DOCUMENT UPLOAD ====================
+// ==================== AGENT BLOG DOCUMENT UPLOAD ====================
 let blogUploadedFileText = '';
 let lastBlogBundle = null; // { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput }
 
@@ -359,7 +359,7 @@ if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
     const richProfile = getEffectiveSetup();
     const personalization = buildBlogPersonalization(richProfile);
 
-    const systemPrompt = `You are an expert real estate content writer creating high-quality, GEO-optimized, authority-building content for real estate agents. Write in the exact voice and style of this specific realtor: ${personalization}
+    const systemPrompt = `You are an expert real estate content writer creating high-quality, GEO-optimized, authority-building content for real estate agents. Write in the exact voice and style of this specific agent: ${personalization}
 
 Key Requirements:
 - Length: Exactly aim for the middle of ${lengthGuide} range (e.g., ~1,750 words for 1,500–2,000). Do not generate shorter—expand with more detailed explanations, additional examples, sub-sections, or relevant anecdotes to reach the word count while keeping it engaging and reader-focused. 
@@ -381,7 +381,7 @@ ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-ou
 - SEO/GEO: Reader-first writing, natural keywords, local relevance where it fits the topic
 - Avoid: Any "trigger terms" that could lead to fair housing or compliance issues
 - Do not start the blog with Imagine this or Picture this. 
-- Voice: Match the realtor's personality and voice traits above — helpful, trustworthy, conversational, and authentic — never salesy.
+- Voice: Match the agent's personality and voice traits above — helpful, trustworthy, conversational, and authentic — never salesy.
 - Language: Check the "Additional instructions" / additional context field. If the user requests a different language there (e.g. "Prepare the full blog in Spanish", "Generate in French", "in German", "en español"), produce the **entire output** — the blog post, the social media caption, the Google Business post, **and** the Reel script — fully in that requested language. Translate everything naturally and accurately while preserving the exact required structure, headings, SEO intent, and professional tone.
 
 After the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**). Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags. **Do NOT include any character count at the end — output clean caption text only.**
@@ -907,7 +907,7 @@ function downloadBlogWord() {
     a.href = url;
 
     const titleEl = blogEl.querySelector('h1');
-    const filename = titleEl ? titleEl.innerText.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_blog.doc' : 'realtor_blog.doc';
+    const filename = titleEl ? titleEl.innerText.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_blog.doc' : 'agent_blog.doc';
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);

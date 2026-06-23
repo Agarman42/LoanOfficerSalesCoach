@@ -56,7 +56,7 @@ Provide the following clearly labeled sections:
 5. Lead Capture & Follow-Up Strategy (sign-in sheet, text/email templates, 48hr and 1-week touches, nurturing sequence)
 6. 3 Ready-to-Post Social / Reel Angles + Captions from this open house (including one that tags the listing agent/partner)
 
-Keep it actionable, warm, professional, and lead-focused. Use bullet points and short, natural scripts that a realtor would actually say.`;
+Keep it actionable, warm, professional, and lead-focused. Use bullet points and short, natural scripts that an agent would actually say.`;
 
     try {
       const raw = await window.callGrokAPI(prompt, { temperature: 0.7, max_tokens: 2600 });
@@ -74,7 +74,7 @@ Keep it actionable, warm, professional, and lead-focused. Use bullet points and 
             </div>
           </div>
           <div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-[15px]">${text.replace(/</g,'&lt;')}</div>
-          <div class="mt-4 p-3 bg-[#002B5C]/5 border border-[#002B5C]/15 rounded-2xl text-xs">Realtor Pro Tip: Print the checklist and scripts. Bring branded sign-in sheets and a small branded notepad for notes on each lead. Follow up within 4 hours for highest conversion.</div>
+          <div class="mt-4 p-3 bg-[#002B5C]/5 border border-[#002B5C]/15 rounded-2xl text-xs">Agent Pro Tip: Print the checklist and scripts. Bring branded sign-in sheets and a small branded notepad for notes on each lead. Follow up within 4 hours for highest conversion.</div>
         </div>`;
       output.classList.remove('hidden');
     } catch (e) {

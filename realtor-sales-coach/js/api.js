@@ -78,7 +78,7 @@
     const msg = [
       '🔑 Enable Smart AI Tools',
       '',
-      'This realtor coach uses advanced AI to power the listing descriptions, scripts, blogs, and other generators.',
+      'This agent coach uses advanced AI to power the listing descriptions, scripts, blogs, and other generators.',
       'Paste your access key below to unlock them.',
       '',
       'Keys are stored only in your browser and used exclusively for this tool. In hosted versions the key is provided automatically.',

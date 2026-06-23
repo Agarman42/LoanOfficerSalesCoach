@@ -347,7 +347,7 @@ function clearChat() {
   // Show fresh welcome
   setTimeout(() => {
     if (messagesDiv) {
-      addMessage('assistant', "Hi! I'm your AI Realtor Coach — profile-aware and connected to every tool in this coach. What are we winning at today?", false);
+      addMessage('assistant', "Hi! I'm your AI Agent Coach — profile-aware and connected to every tool in this coach. What are we winning at today?", false);
     }
   }, 50);
 }
@@ -410,7 +410,7 @@ function setupChatSuggestions() {
     // If no messages yet (fresh), show a warm personalized welcome
     const messagesDiv = document.getElementById('chat-messages');
     if (messagesDiv && messagesDiv.children.length === 0) {
-      const welcome = "Hi! I'm your AI Realtor Coach. I know your profile, your tools, and your goals. What are we winning at today?";
+      const welcome = "Hi! I'm your AI Agent Coach. I know your profile, your tools, and your goals. What are we winning at today?";
       addMessage('assistant', welcome, false);
     }
 

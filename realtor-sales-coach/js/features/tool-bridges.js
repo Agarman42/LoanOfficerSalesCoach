@@ -30,7 +30,7 @@
     },
     'past-clients': {
       categoryKey: 'relationship-nurturing',
-      scenarioValue: "Reinforce 'I'm your realtor for life'",
+      scenarioValue: "Reinforce 'I'm your agent for life'",
       contextPrefix: 'Past clients — stay top-of-mind for referrals and move-ups.'
     },
     'sphere-of-influence': {
