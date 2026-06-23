@@ -595,7 +595,7 @@
   function renderObjectionCompetitor(item, contentEl, modal) {
     renderObjectionMulti(item, contentEl, modal, [
       { title: 'The Respectful Approach', text: 'Totally understand — loyalty matters. I\'m not here to badmouth anyone. The only reason I\'m asking for 10 minutes is because this market has changed dramatically in the last 18 months. If after 10 minutes you feel your agent is still the best fit, I\'ll respect that completely. Fair?', tip: 'Ask for a micro-commitment, not a switch.' },
-      { title: 'Second Opinion Frame', text: 'I\'m happy to be your second opinion at no obligation. I do this for a lot of people who already have a relationship — just to confirm they\'re getting the best strategy and pricing.', tip: 'Position as verification, not replacement.' },
+      { title: 'Second Opinion Frame', text: 'I\'m happy to be your second opinion at no obligation. I do this for a lot of families who already have an agent — just to confirm they\'re getting current local pricing, marketing, and negotiation advice.', tip: 'Position as verification, not replacement.' },
       { title: 'Referral Leverage', text: 'The person who referred you to me specifically asked me to reach out because they felt you might be missing some current market options. Would it hurt to compare?', tip: 'Use only when there\'s a real mutual connection.' }
     ], 'Non-sleazy ways to earn the right to compete when they already have an agent.', 'amber');
   }

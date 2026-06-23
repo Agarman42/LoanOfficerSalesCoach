@@ -15,7 +15,35 @@
     return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
   }
 
+  function ensureSocialModalShell() {
+    if (document.getElementById('social-modal-body')) return document.getElementById('content-modal');
+
+    const wrap = document.createElement('div');
+    wrap.id = 'content-modal';
+    wrap.setAttribute('onclick', "if(event.target.id==='content-modal'&&typeof window.closeSocialContentModal==='function')window.closeSocialContentModal()");
+    wrap.className = 'app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4';
+    wrap.innerHTML = `<div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col max-h-[92vh]">
+        <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-start gap-4 flex-shrink-0">
+            <div class="min-w-0">
+                <div id="social-modal-eyebrow" class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Social Media Strategy Playbooks</div>
+                <h3 id="social-modal-title" class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white leading-tight"></h3>
+                <p id="social-modal-badge" class="text-sm text-gray-500 dark:text-gray-400 mt-1 hidden"></p>
+            </div>
+            <button type="button" onclick="if(typeof window.closeSocialContentModal==='function')window.closeSocialContentModal();" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition flex-shrink-0" aria-label="Close">&times;</button>
+        </div>
+        <div id="social-modal-body" class="p-6 md:p-8 overflow-y-auto flex-1 text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 custom-modal-scroll"></div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center gap-3 flex-shrink-0">
+            <button type="button" id="social-modal-back" class="hidden text-sm px-4 py-2 rounded-2xl border border-gray-300 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-800 font-medium transition">&larr; Back to Summary</button>
+            <div class="flex-1"></div>
+            <button type="button" onclick="if(typeof window.closeSocialContentModal==='function')window.closeSocialContentModal();" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800 transition">Close Guide</button>
+        </div>
+    </div>`;
+    document.body.appendChild(wrap);
+    return wrap;
+  }
+
   function getEls() {
+    ensureSocialModalShell();
     return {
       modal: document.getElementById('content-modal'),
       eyebrow: document.getElementById('social-modal-eyebrow'),
@@ -26,15 +54,26 @@
     };
   }
 
+  function forceHideModal(modal) {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.pointerEvents = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
   function openShell() {
     const { modal } = getEls();
     if (!modal) return;
-    if (typeof window.openNamedModal === 'function') window.openNamedModal(modal);
+    if (typeof window.openNamedModal === 'function') window.openNamedModal('content-modal');
     else if (typeof window.openAppModal === 'function') window.openAppModal(modal);
     else {
+      if (typeof window.ensureModalInViewport === 'function') window.ensureModalInViewport(modal);
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       modal.style.display = 'flex';
+      modal.style.pointerEvents = 'auto';
       document.body.classList.add('modal-open');
     }
   }
@@ -44,16 +83,12 @@
     _view = { pillar: null, mode: 'summary' };
     if (backBtn) backBtn.classList.add('hidden');
     if (!modal) return;
-    if (typeof window.closeNamedModal === 'function') window.closeNamedModal(modal);
+    if (typeof window.closeNamedModal === 'function') window.closeNamedModal('content-modal');
     else if (typeof window.closeAppModal === 'function') window.closeAppModal(modal);
-    else {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      modal.style.display = 'none';
-      modal.style.pointerEvents = 'none';
-      if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
-      else document.body.classList.remove('modal-open');
-    }
+    else forceHideModal(modal);
+    if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
+    else document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
   }
 
   function renderExampleCard(pillar, title, text, prefix) {
@@ -123,30 +158,30 @@
     Personal: {
       title: 'Personal Content Pillar',
       badge: '50% of your feed',
-      whyWorks: 'People follow YOU, not a mortgage company. When 50%+ of your content is genuinely personal — hobbies, family (with permission), travel, pets, Sunday resets — you become a real human in their feed. Mortgage posts get likes from tire-kickers. Personal posts get comments from future clients and their realtors.',
+      whyWorks: 'People follow YOU, not a real estate billboard. When 50%+ of your content is genuinely personal — hobbies, family (with permission), travel, pets, Sunday resets — you become a real human in their feed. Generic listing posts get scroll-past likes. Personal posts get comments from future clients and your sphere.',
       cadence: 'Aim for <strong>3–4 personal posts per week</strong> (weekends + 1 weekday evening). Batch captions Sunday night; post when people scroll for fun, not during business hours only.',
       execution: [
         'Pick one real moment from the last 7 days — no staging required.',
-        'Write 2–3 sentences + one open question (never “DM me for rates”).',
+        'Write 2–3 sentences + one open question (never “DM me for a CMA”).',
         'Use a photo you actually took; skip stock imagery.',
         'Reply to every comment same-day; save high-engagement posts to My Saved Items.'
       ],
       reelTips: [
-        'Same photo + 15-sec voiceover: “Here’s what my Sunday actually looks like as an LO…”',
+        'Same photo + 15-sec voiceover: “Here’s what my Sunday actually looks like as an agent…”',
         'Use trending audio at low volume under your voice — authenticity beats production.',
         'End with a question on screen text so silent viewers still engage.'
       ],
       examples: [
-        { title: 'Sunday Reset Routine', text: 'Sunday reset ritual: coffee on the porch, planning the week, and walking the dog before pre-approvals start Monday. What does your Sunday look like?' },
+        { title: 'Sunday Reset Routine', text: 'Sunday reset ritual: coffee on the porch, planning the week, and walking the dog before showings start Monday. What does your Sunday look like?' },
         { title: 'Family + Local Love', text: 'Took the kids to the new splash pad in town this weekend. Zero emails, full presence. These are the moments that make all the late nights worth it. What’s one thing you’re doing this weekend to actually unplug?' },
         { title: 'Hobby Share', text: 'Finally finished that book I’ve been dragging through for 3 months. The last chapter wrecked me. Drop your current read below — I need my next one.' },
-        { title: 'Behind the Scenes', text: 'My desk right now: three half-drunk coffees, a stack of rate sheets, and my dog asleep under it. This is the glamorous life of helping families buy homes. Worth every second.' },
+        { title: 'Behind the Scenes', text: 'My desk right now: three half-drunk coffees, a stack of listing prep notes, and my dog asleep under it. This is the glamorous life of helping families move. Worth every second.' },
         { title: 'Travel / Perspective', text: 'Just got back from a quick trip to the mountains. Standing on that ridge made me realize how small day-to-day worries are — and how big the decision to buy a home really is. Perspective is everything.' },
         { title: 'Gratitude + Why Moment', text: 'Grateful for this job today. Helped a young couple get the keys to their first home — the look on their faces when they realized “we actually did it” never gets old. What reminded you this week why you do what you do?' }
       ],
       proTips: [
         'Always get explicit permission before posting family or clients.',
-        'End with a real, open question — not “DM me for rates.”',
+        'End with a real, open question — not “DM me for a home search.”',
         'Post evenings/weekends when people scroll for fun.',
         'Turn your best personal posts into Reels within 48 hours.'
       ]
@@ -154,13 +189,13 @@
     Local: {
       title: 'Local & Community Pillar',
       badge: '10–15% of your feed',
-      whyWorks: 'Local content converts followers into referral partners faster than almost anything else. When you celebrate your town, spotlight businesses, and cover neighborhood events, you become the trusted local expert realtors want on their team.',
+      whyWorks: 'Local content converts followers into clients and referral partners faster than almost anything else. When you celebrate your town, spotlight businesses, and cover neighborhood events, you become the trusted local expert your sphere recommends first.',
       cadence: '<strong>1–2 local posts per week minimum.</strong> Mix business spotlights, event coverage, and “hidden gem” recommendations. Tag locations — the algorithm and locals both reward it.',
       execution: [
         'Snap a photo on your phone while out in the community (coffee run, event, park).',
         'Name the place specifically; say why you love it in one sentence.',
         'Tag the business or location when appropriate.',
-        'Log which posts get realtor comments — double down on that format next month.'
+        'Log which posts get the most local comments — double down on that format next month.'
       ],
       reelTips: [
         'Walk-and-talk 30 sec outside the spot you’re featuring.',
@@ -173,7 +208,7 @@
         { title: 'Neighborhood Market Note', text: 'Inventory in [Your Neighborhood] is up about 14% from last month. Real movement for buyers who’ve been waiting. If you’ve been on the fence about looking, this is the window.' },
         { title: 'Hidden Gem', text: 'Random local win: the little park behind the library has the best sunset view in town and almost nobody knows about it. Perfect 20-minute reset between appointments.' },
         { title: 'Community Pride', text: 'So proud of our local high school robotics team — top 5 at state this weekend. These kids are building the future right here in our backyard.' },
-        { title: 'Realtor Partner Shoutout', text: 'Huge thank you to the realtors who communicate like partners instead of competitors. You make this job 10x better. Tag one who’s in your corner.' }
+        { title: 'Partner Shoutout', text: 'Huge thank you to the lenders, title reps, and fellow agents who communicate like true partners. You make this job 10x better. Tag one who’s in your corner.' }
       ],
       proTips: [
         'Tag actual businesses and locations — they often repost you.',
@@ -199,28 +234,28 @@
         'Use a whiteboard or notepad prop — feels teacher-like, not salesy.'
       ],
       examples: [
-        { title: '20% Down Myth', text: 'Myth: You need 20% down to buy.\nReality: Many programs let you buy with 3–5% (sometimes 0%). The 20% number keeps good people renting longer than they need to.' },
-        { title: 'PMI Explained', text: 'PMI isn’t a punishment — it’s a tool. Buy with less than 20% today, remove it when you hit 20% equity. I walk every client through exactly when that happens before we start.' },
-        { title: '2-1 Buydown', text: 'A 2-1 buydown can lower your rate a full point for the first two years. For many buyers right now, that temporary payment reduction is the difference between waiting and moving in.' },
-        { title: 'Credit Quick Win', text: 'Fastest score boost before applying: get card balances under 30% of limits. Do it 30–45 days before you apply and watch what happens.' },
-        { title: 'Rent vs Own Math', text: 'Rent vs own: I just helped a family whose new payment was only $87 more than rent — and they’re building equity. The numbers often surprise people when you run them properly.' }
+        { title: '20% Down Myth', text: 'Myth: You need 20% down to buy.\nReality: Many buyers get in with 3–5% (sometimes 0%) through programs your lender partner can walk through. The 20% myth keeps great people renting longer than they need to.' },
+        { title: 'Earnest Money Explained', text: 'Earnest money isn’t “extra cost” — it’s skin in the game that shows sellers you’re serious. I walk every buyer through how much, when it’s due, and what happens if something falls through before we write an offer.' },
+        { title: 'Inspection Period Reality', text: 'Myth: Inspections are just a formality.\nReality: This is your chance to understand the home, negotiate repairs or credits, or walk away with your earnest money protected. I treat it like due diligence, not a checkbox.' },
+        { title: 'Pre-Approval Before Touring', text: 'You wouldn’t shop for a car without knowing your budget. Same with homes — get fully pre-approved with a trusted lender before we tour. It makes your offer stronger and saves everyone time.' },
+        { title: 'Rent vs Own Math', text: 'Rent vs own: I just helped a family whose new payment was only $87 more than rent — and they’re building equity. Run the numbers with your lender partner before you assume renting is cheaper.' }
       ],
       proTips: [
         'If a 7th grader can’t understand it, rewrite it.',
         'Include one real (anonymized) story per post.',
         'Save winners — they become blogs, newsletters, and Reels.',
-        'Never post rates without full context — myth-bust instead.'
+        'Educate on the process — leave rates and loan products to your lender partners.'
       ]
     },
     'Client Wins': {
       title: 'Client Wins & Testimonials',
       badge: 'High-engagement subset',
-      whyWorks: 'Social proof without sleaze. Real stories (with permission) show your value better than rate graphics and spark shares from realtors who want to be associated with wins.',
+      whyWorks: 'Social proof without sleaze. Real stories (with permission) show your value better than generic market graphics and spark shares from clients and partners who want to be associated with wins.',
       cadence: '<strong>1–2 client win posts per month</strong> when you have permission. Quality over quantity — one great story beats four generic “another closing” posts.',
       execution: [
         'Get written permission + ask what details they’re comfortable sharing.',
-        'Focus on emotion and obstacle overcome — not loan amount.',
-        'Tag the realtor when appropriate (they share it).',
+        'Focus on emotion and obstacle overcome — not sale price.',
+        'Tag partners when appropriate (they often share it).',
         'Follow up privately with a thank-you; ask if anyone else in their world needs help.'
       ],
       reelTips: [
@@ -229,11 +264,11 @@
         'Keys photo (with permission) + 20-sec story of the journey.'
       ],
       examples: [
-        { title: 'First-Time Buyer Win', text: 'Helped a couple close in 28 days. They’d been told “impossible right now” by three lenders. We found the right program, moved fast, and they got keys before rates moved again.' },
-        { title: 'Self-Employed Success', text: 'Self-employed borrower, wild tax returns, dream house under contract. Most lenders passed. We got creative with bank statements and closed on time.' },
-        { title: 'Rate Lock Save', text: 'Locked Tuesday. By Friday the market moved 0.375% against us. Because we moved fast and communicated every step, they still got the payment they needed.' },
-        { title: 'Teacher 3% Down', text: 'Helped a teacher buy with 3% down using a state program she didn’t know existed. Another lender said it wasn’t possible. The smile at closing was everything.' },
-        { title: 'Partner Win Shoutout', text: 'Favorite realtor partner brought a tough file last month. We got it done together. These partnerships are the real engine of this business.' }
+        { title: 'First-Time Buyer Win', text: 'Helped a couple win their first home in 28 days after losing two other offers. We tightened strategy, moved fast with their lender partner, and they got the keys. Moments like this never get old.' },
+        { title: 'Multiple-Offer Win', text: 'Four offers by Friday on a hot listing. Because we moved fast, communicated every step, and had a strong lender partner lined up, our buyers still won the home.' },
+        { title: 'Tough Negotiation Save', text: 'Inspection revealed major issues — deal looked dead. We renegotiated credits, kept everyone calm, and still closed on time. Communication saved the transaction.' },
+        { title: 'Listing Sold Over Ask', text: 'Listed on Thursday, multiple offers by Sunday, closed above ask. The sellers were thrilled — and three neighbors called asking for a market opinion.' },
+        { title: 'Partner Win Shoutout', text: 'Favorite lender partner sent a tough pre-approval last month. We got it to the closing table together. These partnerships are the real engine of this business.' }
       ],
       proTips: [
         'Permission first — always.',
@@ -263,12 +298,12 @@
         { title: 'Post-Close Checklist', text: 'Just closed? Here’s my 7-day, 30-day, and 90-day checklist so you feel supported after the keys. Comment “POST CLOSE” and I’ll send it.' },
         { title: 'Vendor List', text: 'My go-to inspectors, movers, painters, and handymen who actually show up. Updated quarterly. Happy to share if you’re under contract.' },
         { title: 'Maintenance Calendar', text: 'Seasonal home maintenance calendar — one task per month so nothing falls through the cracks. Comment “MAINTENANCE” if you want it.' },
-        { title: 'Current Programs Sheet', text: '2026 first-time buyer programs actually working in our area — DPA, low down, buydown strategies. DM “PROGRAMS” for the latest one-pager.' }
+        { title: 'First-Time Buyer Roadmap', text: 'My step-by-step “from pre-approval to keys” roadmap — what happens when, who does what, and how to avoid surprises. DM “ROADMAP” and I’ll send the latest version.' }
       ],
       proTips: [
         'Genuinely valuable — not disguised lead magnets.',
         'Personal delivery beats auto-DM bots when you can.',
-        'Co-brand with realtors on buyer guides.',
+        'Co-brand buyer guides with your go-to lender partners.',
         'Best resources become permanent site/blog assets.'
       ]
     },
@@ -279,7 +314,7 @@
       cadence: '<strong>2–3 engagement posts per week.</strong> Run the same question in Stories and feed. Reply to every comment the same day.',
       execution: [
         'Ask one clear question — binary poll or open-ended.',
-        'Keep it fun or local when possible (not always mortgage).',
+        'Keep it fun or local when possible (not always market stats).',
         'Reply to every comment with a real sentence, not “Thanks!”',
         'Mine comments for next week’s content ideas — log in CRM.'
       ],
@@ -289,7 +324,7 @@
         '“Answer in the comments” hook in first 2 seconds.'
       ],
       examples: [
-        { title: 'This or That', text: 'Beach house or mountain cabin? Vote below — I’ll tell you which financing angles actually matter for each (most people get it wrong).' },
+        { title: 'This or That', text: 'Beach house or mountain cabin? Vote below — I’ll tell you which lifestyle and market trade-offs actually matter for each (most people get it wrong).' },
         { title: 'Local Poll', text: 'Best taco truck in town? Drop it below — winner gets a shoutout in next week’s Stories.' },
         { title: 'First-Time Buyer Question', text: 'What’s one thing you wish you knew before buying your first home? No judgment — real answers for anyone looking now.' },
         { title: 'Fun Personality', text: 'Real tree or fake tree this year? I’m team fake. Fight me in the comments (nicely).' },
@@ -376,20 +411,20 @@
       { title: 'Market Walk-Through', text: 'Walked [Street] open houses Saturday — seeing real price movement buyers can use. Happy to share what I noticed if you’re shopping.' }
     ],
     Educational: [
-      { title: 'VA Benefits', text: 'VA loans: more than no down payment — funding fee waiver, no PMI, assumability. Huge advantages right now for eligible buyers.' },
-      { title: 'DTI Explained Simply', text: 'DTI isn’t arbitrary — here’s how lenders actually calculate it and what moves the needle before you apply.' }
+      { title: 'Appraisal Gap Reality', text: 'Myth: If the appraisal comes in low, the deal is dead.\nReality: You have options — renegotiate price, bring additional funds, or walk away if your contract allows. I map this out before we ever write the offer.' },
+      { title: 'Days on Market Decoded', text: 'High days on market doesn’t always mean “bad house.” Sometimes it means room to negotiate, motivated seller, or a pricing reset. Context matters — that’s why local expertise beats Zillow guesses.' }
     ],
     'Client Wins': [
       { title: 'Appraisal Save', text: 'Appraisal came in low — we renegotiated, restructured, and still closed on time. Communication saved the deal.' },
-      { title: 'Short Close Timeline', text: '30-day close on a jumbo purchase. Speed + transparency turned a stressed agent into a repeat referrer.' }
+      { title: 'Short Close Timeline', text: '30-day close on a tough purchase. Speed + transparency turned a stressed buyer into a raving fan and referral source.' }
     ],
     Value: [
       { title: 'New Homeowner Insurance Prompts', text: 'One-page “after closing” insurance review prompts I send with every keys delivery. Comment INSURANCE for a copy.' },
-      { title: 'Rate Watch Explainer', text: 'How I help clients think about rate moves without panic — a simple framework, not a sales pitch. DM FRAMEWORK.' }
+      { title: 'Market Timing Framework', text: 'How I help buyers think about “wait vs move” without panic — price, inventory, and personal timeline in one simple framework. DM FRAMEWORK.' }
     ],
     Engagement: [
       { title: 'Would You Rather (Housing)', text: 'Would you rather: smaller home in your dream neighborhood OR bigger home with a commute? There’s no wrong answer — curious what wins in the comments.' },
-      { title: 'Realtor Shoutout Ask', text: 'Drop the name of a realtor who communicates like a true partner. I want to follow and learn from the best in our market.' }
+      { title: 'Partner Shoutout Ask', text: 'Drop the name of a lender, title rep, or fellow agent who communicates like a true partner. I want to follow and learn from the best in our market.' }
     ]
   };
 
