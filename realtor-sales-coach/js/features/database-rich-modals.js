@@ -537,7 +537,7 @@
       ${proTip('Never ask for referrals in the first 3–6 months of a new partner relationship. When they send a file, treat the client like gold and over-communicate back to the partner.', 'orange')}
       ${bridgeRow([
         { label: 'Referral Partners Tool', action: 'referrals', primary: true },
-        { label: 'Realtor onboarding process', action: 'nurture:referral-ask' }
+        { label: 'Lender partner onboarding process', action: 'nurture:referral-ask' }
       ])}
       ${nextStepsHtml([
         { label: 'Open Referral Partners Tool', onclick: "closeDetailModal(); if(typeof window.openReferralPartnersTool==='function')window.openReferralPartnersTool();", style: 'primary' }

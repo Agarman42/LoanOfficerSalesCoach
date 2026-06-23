@@ -57,7 +57,7 @@
 
     return {
       ...local,
-      name: central.name || local.name || "Realtor",
+      name: central.name || local.name || "Agent",
       email: central.email || '',
       // Unit goal (number of loans) — this is what the Weekly Win Plan cares about for "Monthly Target"
       monthlyUnits: central.monthlyUnits || local.monthlyGoal || local.monthlyUnits || 8,
@@ -2312,7 +2312,7 @@ function clearBusinessPlan() {
 
 // Setup & Persistence
 let userSetup = JSON.parse(localStorage.getItem('winPlanSetup')) || {
-    name: "Realtor",
+    name: "Agent",
     email: "",
     monthlyGoal: 8,
     focus: "Balanced",
@@ -2337,7 +2337,7 @@ let currentWeeklyDays = null;
 
 function updateSetupDisplays() {
     const effective = getEffectiveSetup();
-    const name = (effective.name || '').trim() || "Realtor";
+    const name = (effective.name || '').trim() || "Agent";
 
     const titleEl = document.getElementById('personalized-title');
     if (titleEl) titleEl.textContent = `${name}'s Weekly Win Plan`;
@@ -2398,7 +2398,7 @@ function syncWeeklyPreferencesToUserSetup() {
     const lastMonthEl = document.getElementById('setup-last-month');
     const hobbiesOtherEl = document.getElementById('setup-hobbies-other');
 
-    if (nameEl) userSetup.name = nameEl.value.trim() || "Realtor";
+    if (nameEl) userSetup.name = nameEl.value.trim() || "Agent";
     if (goalEl) userSetup.monthlyGoal = parseInt(goalEl.value) || 8;
     if (hoursEl) userSetup.hours = hoursEl.value;
     if (focusEl) userSetup.focus = focusEl.value;

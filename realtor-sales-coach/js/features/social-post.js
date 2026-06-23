@@ -152,7 +152,7 @@ Create THREE distinct, ready-to-post social media captions (Instagram/Facebook/L
 Requirements for EACH caption:
 - Use the exact voice, personality, tone, and local flavor described above — make it feel like this specific person wrote it.
 - Warm, authentic, relationship-focused first. Never salesy or pushy.
-- Engaging and conversational — like texting a friend who happens to be a great realtor.
+- Engaging and conversational — like texting a friend who happens to be a great agent.
 - Include relevant emojis naturally (not spammy).
 - End with a subtle, human CTA (question, "Comment below", "DM me if this is you", "Tag a friend who needs this", etc.).
 - Add 6–10 relevant hashtags at the very end (mix broad + local + niche).
@@ -456,7 +456,7 @@ function createMonthSheet(month, year, monthIndex, weekStart) {
         const fullDateKey = `${month.name} ${day.date}`;
         const holidayNote = holidays[fullDateKey] || '';
 
-        let hashtags = '#RealtorLife #LocalRealEstate #YourCityHere';
+        let hashtags = '#AgentLife #LocalRealEstate #YourCityHere';
         if (day.weekday === 'Mon') hashtags += ' #MotivationMonday';
         if (day.weekday === 'Tue') hashtags += ' #TipTuesday';
         if (day.weekday === 'Wed') hashtags += ' #WinsWednesday';
@@ -652,7 +652,7 @@ Weave in these themes naturally: ${themes.length ? themes.join(', ') : 'balanced
 
 Custom instructions: ${customPrompt || 'None — use best judgment'}.
 
-REALTOR PROFILE & VOICE (make the overview + every single post idea feel like it was written by *this exact realtor* — use their personality, voice traits, tone, hobbies, challenges, and target partners for authentic, personal, non-generic content):
+AGENT PROFILE & VOICE (make the overview + every single post idea feel like it was written by *this exact agent* — use their personality, voice traits, tone, hobbies, challenges, and target partners for authentic, personal, non-generic content):
 ${personalization}
 ${eff.localArea ? `Primary market: ${eff.localArea}.` : ''}
 

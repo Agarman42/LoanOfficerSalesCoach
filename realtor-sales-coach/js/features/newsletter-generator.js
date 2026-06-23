@@ -1371,7 +1371,7 @@ async function generateNewsletter(feedback = '') {
     let html = '';
 
     // === FIRST NAME EXTRACTION (moved to top for safety) ===
-    const fullName = document.getElementById('nl-name').value || 'Your Realtor';
+    const fullName = document.getElementById('nl-name').value || 'Your Agent';
     const firstName = fullName.split(' ')[0].trim();
 
     // === SAVE ORIGINAL LOADING CONTENT (after force so we capture the clean base card) ===
