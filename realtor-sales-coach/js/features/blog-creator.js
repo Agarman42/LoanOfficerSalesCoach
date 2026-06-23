@@ -885,7 +885,7 @@ function downloadBlogWord() {
         return;
     }
 
-    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Mortgage Blog Post</title><style>
+    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Real Estate Blog Post</title><style>
         body {font-family: Calibri, Arial, sans-serif; margin: 60px; line-height: 1.6; color: #000; background: white;}
         h1 {color: #002B5C; text-align: center; font-size: 32px; margin-bottom: 40px;}
         h2 {color: #00A89D; border-bottom: 2px solid #00A89D; padding-bottom: 8px; font-size: 24px; margin-top: 40px;}

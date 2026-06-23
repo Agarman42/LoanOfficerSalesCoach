@@ -16,7 +16,7 @@
   const SOCIAL_CALENDAR_NOTE = `For every Saturday and Sunday in the calendar: ideas must be personal/lifestyle/authentic (family, hobbies, rest, community fun, gratitude) — NOT work assignments, networking tasks, or "go prospect" captions. Weekends are recharge content, not hustle content.`;
 
   const WEEKEND_DAYS = ['Saturday', 'Sunday'];
-  const HEAVY_WORK_RE = /networking|collect \d+|open house|pop-?by|phone block|cold (call|outreach)|outreach block|exec(utive)? (call|leadership)|quality conversation|referral partner|realtor contact|attend .+ event|host .+ event|prospecting block|partner (meeting|lunch|coffee)|shape (calls|outreach)|linkedin outreach|facebook outreach/i;
+  const HEAVY_WORK_RE = /networking|collect \d+|open house|pop-?by|phone block|cold (call|outreach)|outreach block|exec(utive)? (call|leadership)|quality conversation|referral partner|partner contact|attend .+ event|host .+ event|prospecting block|partner (meeting|lunch|coffee)|shape (calls|outreach)|linkedin outreach|facebook outreach/i;
 
   const LIGHT_WEEKEND_BLOCKS = {
     Saturday: {

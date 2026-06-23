@@ -267,9 +267,290 @@
     console.log('%c[ui.js] Header search initialized (type in the top bar to filter sections)', 'color:#00A89D');
   }
 
+  // =====================================================
+  // MODAL VIEWPORT HELPERS — keep overlays centered + reliable close
+  // (mirrors LO tool; fixes modals nested inside <main> sections)
+  // =====================================================
+  const MODAL_ROOT_IDS = [
+    'global-loading',
+    'task-help-modal',
+    'detail-modal',
+    'equity-detail-modal',
+    'nurture-template-modal',
+    'process-template-modal',
+    'process-stage-modal',
+    'scaling-modal',
+    'communication-modal',
+    'client-appreciation-modal',
+    'referral-modal',
+    'blog-tips-modal',
+    'newsletter-tips-modal',
+    'api-key-modal',
+    'content-modal',
+    'newsletter-choice-modal',
+    'idea-modal',
+    'user-profile-modal',
+    'modal-drive-attendance',
+    'modal-client-appreciation',
+    'modal-partner-mastermind',
+    'modal-social-networking',
+    'modal-community-charity',
+    'modal-value-first',
+    'modal-invite-plus-one',
+    'modal-co-host-leverage',
+    'modal-frequency-goal',
+    'modal-post-event-followup',
+    'context-tips-modal',
+    'my-saved-items-library'
+  ];
+
+  function isModalVisible(el) {
+    if (!el) return false;
+    if (el.classList.contains('hidden')) return false;
+    const style = window.getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') return false;
+    return el.classList.contains('flex') || style.display === 'flex';
+  }
+
+  function countOpenAppModals() {
+    let count = 0;
+    const seen = new Set();
+    document.querySelectorAll('.app-modal-overlay').forEach(el => {
+      if (!el.id || seen.has(el.id)) return;
+      seen.add(el.id);
+      if (isModalVisible(el)) count++;
+    });
+    MODAL_ROOT_IDS.forEach(id => {
+      if (seen.has(id)) return;
+      const el = document.getElementById(id);
+      if (el && isModalVisible(el)) count++;
+    });
+    return count;
+  }
+
+  window.ensureModalInViewport = function ensureModalInViewport(modal) {
+    if (!modal) return null;
+    if (modal.parentElement !== document.body) {
+      document.body.appendChild(modal);
+    }
+    modal.classList.add('app-modal-overlay');
+    return modal;
+  };
+
+  function clearModalForceHide(modal) {
+    if (!modal) return;
+    modal.style.removeProperty('display');
+    modal.style.removeProperty('pointer-events');
+    modal.style.removeProperty('visibility');
+    modal.style.removeProperty('opacity');
+  }
+  window.clearModalForceHide = clearModalForceHide;
+
+  function resetModalScroll(modal) {
+    if (!modal) return;
+    const scrollables = new Set([modal]);
+    modal.querySelectorAll('*').forEach((el) => {
+      const style = window.getComputedStyle(el);
+      if (style.overflowY === 'auto' || style.overflowY === 'scroll' || el.scrollTop > 0) {
+        scrollables.add(el);
+      }
+    });
+    const resetAll = () => {
+      scrollables.forEach((el) => {
+        el.scrollTop = 0;
+        el.scrollLeft = 0;
+      });
+    };
+    resetAll();
+    requestAnimationFrame(() => {
+      resetAll();
+      requestAnimationFrame(resetAll);
+    });
+  }
+  window.resetModalScroll = resetModalScroll;
+
+  window.openAppModal = function openAppModal(modal) {
+    if (!modal) return;
+    window.ensureModalInViewport(modal);
+    clearModalForceHide(modal);
+    resetModalScroll(modal);
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.pointerEvents = 'auto';
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.zIndex = modal.style.zIndex || '9999';
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+  };
+
+  window.closeAppModal = function closeAppModal(modal) {
+    if (!modal) return;
+    resetModalScroll(modal);
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    modal.style.display = 'none';
+    modal.style.pointerEvents = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    window.releaseModalScrollLock();
+  };
+
+  window.releaseModalScrollLock = function releaseModalScrollLock() {
+    if (countOpenAppModals() === 0) {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    }
+  };
+
+  window.closeNamedModal = function closeNamedModal(idOrEl) {
+    const modal = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      window.releaseModalScrollLock();
+    }
+  };
+
+  window.openNamedModal = function openNamedModal(idOrEl) {
+    const modal = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+    if (!modal) return;
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      window.ensureModalInViewport(modal);
+      resetModalScroll(modal);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.display = 'flex';
+      modal.style.pointerEvents = 'auto';
+      document.body.classList.add('modal-open');
+    }
+  };
+
+  window.closeDetailModal = function closeDetailModal() {
+    const dbModal = document.getElementById('detail-modal');
+    const equityModal = document.getElementById('equity-detail-modal');
+    if (typeof window.closeAppModal === 'function') {
+      if (dbModal) window.closeAppModal(dbModal);
+      if (equityModal) window.closeAppModal(equityModal);
+    } else {
+      [dbModal, equityModal].forEach((m) => {
+        if (!m) return;
+        m.classList.remove('flex');
+        m.classList.add('hidden');
+        m.style.display = 'none';
+      });
+    }
+    window.releaseModalScrollLock();
+  };
+
+  window.closeDynamicModals = function closeDynamicModals() {
+    document.querySelectorAll('.fixed.inset-0[data-event-fallback-modal="true"]').forEach((el) => el.remove());
+  };
+
+  const EQUITY_MODAL_INNER_IDS = new Set([
+    'modal-client-name', 'modal-address', 'modal-type-badge', 'modal-phone-link',
+    'modal-phone-na', 'modal-email-link', 'modal-email-na', 'modal-buyers-agent-section',
+    'modal-transaction-type', 'modal-buyers-agent', 'modal-program', 'modal-closing-date',
+    'modal-current-rate', 'modal-term', 'modal-original-ltv', 'modal-balance',
+    'modal-value', 'modal-original-pi', 'modal-original-mi', 'modal-original-insurance',
+    'modal-original-taxes', 'modal-pmi-alert', 'modal-scripts',
+    'social-modal-title', 'social-modal-body', 'social-modal-eyebrow', 'social-modal-badge', 'social-modal-back'
+  ]);
+
+  function portalModalRoot(el) {
+    if (!el || EQUITY_MODAL_INNER_IDS.has(el.id)) return;
+    if (el.parentElement && el.parentElement !== document.body) {
+      document.body.appendChild(el);
+    }
+    el.classList.add('app-modal-overlay');
+  }
+
+  function repairMisportaledModalParts() {
+    EQUITY_MODAL_INNER_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('app-modal-overlay');
+      if (el.parentElement === document.body) {
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  function portalNestedFixedModals() {
+    const seen = new Set();
+    document.querySelectorAll('.app-modal-overlay').forEach(el => {
+      if (!el.id || seen.has(el.id) || EQUITY_MODAL_INNER_IDS.has(el.id)) return;
+      seen.add(el.id);
+      portalModalRoot(el);
+    });
+    MODAL_ROOT_IDS.forEach(id => {
+      if (seen.has(id)) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      seen.add(id);
+      portalModalRoot(el);
+    });
+    repairMisportaledModalParts();
+  }
+
+  window.ensureModalBackdropClose = function ensureModalBackdropClose(modal) {
+    if (!modal || modal._backdropHandlerAttached) return;
+    const id = modal.id || '';
+    modal.addEventListener('click', (e) => {
+      if (e.target !== modal) return;
+      if (id === 'content-modal' && typeof window.closeSocialContentModal === 'function') {
+        window.closeSocialContentModal();
+      } else if (id === 'detail-modal' && typeof window.closeDetailModal === 'function') {
+        window.closeDetailModal();
+      } else if (id === 'task-help-modal' && typeof window.closeTaskHelp === 'function') {
+        window.closeTaskHelp();
+      } else if (id.startsWith('modal-') && typeof window.closeEventModal === 'function') {
+        window.closeEventModal(id.replace('modal-', ''));
+      } else {
+        window.closeNamedModal(modal);
+      }
+    });
+    modal._backdropHandlerAttached = true;
+  };
+
+  function wireModalBackdropCloses() {
+    MODAL_ROOT_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      window.ensureModalBackdropClose(el);
+    });
+  }
+
+  window.unstickPage = function unstickPage() {
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    MODAL_ROOT_IDS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+      el.style.display = 'none';
+      el.style.pointerEvents = 'none';
+      el.setAttribute('aria-hidden', 'true');
+    });
+    window.releaseModalScrollLock();
+    if (typeof window.hideLoading === 'function') window.hideLoading();
+    if (typeof window.closeDynamicModals === 'function') window.closeDynamicModals();
+  };
+
   // Boot the UI helpers when DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
     initHeaderSearch();
+    portalNestedFixedModals();
+    wireModalBackdropCloses();
   });
 
   // Also expose a manual clear if needed

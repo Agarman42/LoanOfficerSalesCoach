@@ -379,7 +379,7 @@ function showSocialPostCreator() {
 function createOverviewSheet(year) {
     const data = [
         [`Your ${year} Social Media Success Plan`, "", "", "", "", "", "", ""],
-        ["Built for Realtors — Consistency Made Simple", "", "", "", "", "", "", ""],
+        ["Built for Agents — Consistency Made Simple", "", "", "", "", "", "", ""],
         [],
         ["Core Strategy", "", "", "", "", "", "", ""],
         ["75% Personal/Engagement/Community → Build authentic relationships", "", "", "", "", "", "", ""],
@@ -530,7 +530,7 @@ function createMonthSheet(month, year, monthIndex, weekStart) {
 // Your createTipsSheet (kept as-is — it's solid)
 function createTipsSheet() {
     const data = [
-        ["Social Media Success Tips for Realtors", "", "", "", "", "", "", ""],
+        ["Social Media Success Tips for Agents", "", "", "", "", "", "", ""],
         [],
         ["Key Principle: ~75% personal/community/engagement — people connect with YOU first.", "", "", "", "", "", "", ""],
         ["~25% business/educational — provide genuine value.", "", "", "", "", "", "", ""],
@@ -644,7 +644,7 @@ async function generateMonthlyPlan() {
     // Dynamic days in month (handles 28/29/30/31 correctly, including leap years)
     const daysInMonth = new Date(year, month, 0).getDate();  // month is 1-based in select, but Date expects 0-based for month
 
-    const fullPrompt = `You are the world's best social media coach for realtors. Generate a full month content calendar for ${monthName} ${year} (exactly ${daysInMonth} days) for a realtor primarily in ${localArea}.
+    const fullPrompt = `You are the world's best social media coach for real estate agents. Generate a full month content calendar for ${monthName} ${year} (exactly ${daysInMonth} days) for an agent primarily in ${localArea}.
 
 Core philosophy: 70% relationship-building (personal, local, fun, engaging) and 30% real estate value. Make people WANT to see posts — be entertaining, human, and trust-building.
 
@@ -752,7 +752,7 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
         // Centralized API call (Phase 0) - supports system message
         const rawPlan = await window.callGrokAPI(null, {
             messages: [
-                { role: 'system', content: 'You are an expert social media strategist for realtors following the 70/30 relationship rule.' },
+                { role: 'system', content: 'You are an expert social media strategist for real estate agents following the 70/30 relationship rule.' },
                 { role: 'user', content: fullPrompt }
             ],
             temperature: 0.7,
@@ -1181,9 +1181,9 @@ themeIds.forEach(id => {
         let helperText = "e.g., Describe what you'd like the post to say";
         let placeholder = "e.g., Tell me your idea and I'll craft it";
 
-        if (val.includes('myth') || val.includes('pre-qual') || val.includes('buydown') || val.includes('credit') || val.includes('pmi') || val.includes('lenders really') || val.includes('red flags')) {
-          helperText = "e.g., Explain a common misconception or how a program actually works";
-          placeholder = "e.g., The truth about PMI — it’s not as scary as most buyers think";
+        if (val.includes('myth') || val.includes('pre-qual') || val.includes('earnest') || val.includes('inspection') || val.includes('appraisal') || val.includes('credit') || val.includes('pre-approved') || val.includes('red flags')) {
+          helperText = "e.g., Explain a common misconception or how part of the buying process actually works";
+          placeholder = "e.g., Earnest money isn’t extra cost — here’s what it actually does for buyers";
         } else if (val.includes('market') || val.includes('inventory') || val.includes('rates trending') || val.includes('fed') || val.includes('home prices')) {
           helperText = "e.g., Local stats, rate trends, or inventory insight for your area";
           placeholder = "e.g., Inventory is up 14% this month — here’s what it means for buyers";
@@ -1198,10 +1198,10 @@ themeIds.forEach(id => {
           placeholder = "e.g., Helped a self-employed buyer get pre-qualified fast for their dream home";
         } else if (val.includes('poll') || val.includes('this or that') || val.includes('tag a friend') || val.includes('dream home') || val.includes('fixer-upper')) {
           helperText = "e.g., A fun poll or engagement prompt to drive comments";
-          placeholder = "e.g., Beach house or mountain cabin? Vote below — I’ll tell you which loans work best for both";
-        } else if (val.includes('realtor') || val.includes('agent partner') || val.includes('co-branded') || val.includes('support my realtor') || val.includes('co-broke') || val.includes('collaboration')) {
-          helperText = "e.g., How you help your referral partners win";
-          placeholder = "e.g., 4 things I do for every one of my agent partners’ buyers";
+          placeholder = "e.g., Beach house or mountain cabin? Vote below — I’ll tell you which lifestyle trade-offs actually matter";
+        } else if (val.includes('realtor') || val.includes('agent partner') || val.includes('co-branded') || val.includes('lender partner') || val.includes('co-broke') || val.includes('collaboration')) {
+          helperText = "e.g., How your go-to partners make transactions smoother";
+          placeholder = "e.g., 4 things my favorite lender partner does that make my buyers’ offers stronger";
         } else if (val.includes('motivational') || val.includes('dream home is worth') || val.includes('builds wealth') || val.includes('small steps')) {
           helperText = "e.g., An encouraging or mindset-focused message";
           placeholder = "e.g., The keys you hand over today will be the biggest wealth-building move of their life";

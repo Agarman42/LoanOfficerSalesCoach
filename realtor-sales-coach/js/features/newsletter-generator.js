@@ -873,8 +873,14 @@ function regenerateRandom(category) {
     updatePreviews();
 }
 
+const NL_CHOICE_MODAL_ID = 'newsletter-choice-modal';
+
+function getNewsletterChoiceModal() {
+    return document.getElementById(NL_CHOICE_MODAL_ID);
+}
+
 function openModal(category) {
-    const modal = document.getElementById('content-modal');
+    const modal = getNewsletterChoiceModal();
     if (!modal) return;
 
     const title = modal.querySelector('#modal-title');
@@ -897,11 +903,15 @@ function openModal(category) {
         data = [];
     }
 
-    // Force visible with both classList (for Tailwind .hidden + .flex rules) and inline style
-    // This fixes cases where the header looked like an "empty box" with no title
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    modal.style.display = 'flex';
+    if (typeof window.openNamedModal === 'function') {
+        window.openNamedModal(modal);
+    } else {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+        modal.style.pointerEvents = 'auto';
+        document.body.classList.add('modal-open');
+    }
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
 
@@ -986,17 +996,15 @@ function openModal(category) {
     };
 }
 
-// Close modal
+// Close newsletter choice modal (separate from social pillar #content-modal)
 function closeModal() {
-    const modal = document.getElementById('content-modal');
+    const modal = getNewsletterChoiceModal();
     if (modal) {
         modal.style.display = 'none';
         modal.classList.remove('flex');
         modal.classList.add('hidden');
-        modal.onclick = null;   // clean up event listener
+        modal.onclick = null;
     }
-    // Clean up any search that was injected just for the newsletter custom choice lists
-    // (keeps social pillar modals that reuse #content-modal free of stray search bars)
     const search = document.getElementById('modal-search');
     if (search && search.parentElement) {
         search.parentElement.removeChild(search);
@@ -1040,7 +1048,7 @@ function openSocialModal(category) {
                 "Quick kitchen hack I used this week (recipe in comments)",
                 "Throwback to my very first closing — 5 years ago today!",
                 "Pet photo Friday! Meet my dog [name] 🐶",
-                "What I’m grateful for this week as a realtor",
+                "What I’m grateful for this week as an agent",
                 "My non-work passion project I’ve been working on",
                 "A funny story from a recent client meeting",
                 "How I stay productive on busy days",
@@ -1158,19 +1166,18 @@ function openSocialModal(category) {
         list.appendChild(li);
     });
 
-    modal.style.display = 'flex';
+    if (typeof window.openNamedModal === 'function') {
+        window.openNamedModal(modal);
+    } else {
+        modal.style.display = 'flex';
+        modal.style.pointerEvents = 'auto';
+        document.body.classList.add('modal-open');
+    }
 }
 
-// Close modal (single definition)
-function closeModal() {
-    let modal = document.getElementById('content-modal');
-    if (!modal) modal = document.getElementById('content-modal-legacy');
-    if (modal) {
-      modal.style.display = 'none';
-      modal.classList.add('hidden');
-    }
-    const search = document.getElementById('modal-search');
-    if (search) search.value = '';
+// Legacy alias — newsletter choice modal only (social pillars use social-modals.js)
+function closeNewsletterModalLegacy() {
+    closeModal();
 }
 
 // Close on Esc key (idempotent)
@@ -1501,7 +1508,7 @@ async function generateNewsletter(feedback = '') {
                 '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
                 '- Audience guidance: ' + getAudienceGuidance(document.getElementById('nl-audience')?.value || 'full'),
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
-                '- Match the full "REALTOR PROFILE & VOICE CONTEXT" section above for this specific realtor (use their personality, voice traits, hobbies, and challenges to make the personal note + any relatable language feel authentic to them — blend naturally, never salesy).',
+                '- Match the full "AGENT PROFILE & VOICE CONTEXT" section above for this specific agent (use their personality, voice traits, hobbies, and challenges to make the personal note + any relatable language feel authentic to them — blend naturally, never salesy).',
                 '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Local Market & Home Insights'),
                 '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
@@ -1512,7 +1519,7 @@ async function generateNewsletter(feedback = '') {
                 '- Specific topics / special requests (including any language requests such as "in Spanish" or "prepare the newsletter in French"): "' + (document.getElementById('nl-specific').value || 'None') + '"',
                 '',
                 'Branding:',
-                '- Name: ' + (document.getElementById('nl-name').value || 'Your Realtor'),
+                '- Name: ' + (document.getElementById('nl-name').value || 'Your Agent'),
                 '- Email: ' + (document.getElementById('nl-email').value || ''),
                 // Branding from profile (or page overrides) so AI can reference team naturally
                 '- Company/Team Name: ' + (document.getElementById('brand-company')?.value || (window.getUserProfile ? (window.getUserProfile().companyName || '') : '')),
@@ -1520,7 +1527,7 @@ async function generateNewsletter(feedback = '') {
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
-                'REALTOR PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* realtor. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
+                'AGENT PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* agent. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
                 '- Name: ' + (p.name || document.getElementById('nl-name').value || ''),
                 '- Email: ' + (p.email || document.getElementById('nl-email').value || ''),
                 '- Personality / lifestyle: ' + (p.personality || ''),
@@ -2356,10 +2363,9 @@ function copyForOutlook() {
   // Expose both the generic name (for back-compat) and a dedicated stable name for the custom content choice modals
   // so later inline scripts that redefine window.openModal / closeModal do not break "Choose Specific"
   if (typeof openModal === 'function') {
-    window.openModal = openModal;
     window.openNewsletterChoiceModal = openModal;
   }
-  if (typeof closeModal === 'function') window.closeModal = closeModal;
+  if (typeof closeModal === 'function') window.closeNewsletterChoiceModal = closeModal;
   if (typeof regenerateRandom === 'function') window.regenerateRandom = regenerateRandom;
 
   // Tiny helper for the inline onclicks in the custom content <details> (survives clobbering of openModal)

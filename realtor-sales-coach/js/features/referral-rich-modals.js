@@ -183,8 +183,20 @@
             window.openEventModal(action.split(':')[1]);
           } else if (action?.startsWith('section:') && typeof window.showSection === 'function') {
             window.showSection(action.split(':')[1]);
-          } else if (action === 'referral:realtors' && typeof window.openReferralModal === 'function') {
-            window.openReferralModal('Realtors');
+          } else if ((action === 'referral:fellow-agents' || action === 'referral:realtors') && typeof window.openReferralModal === 'function') {
+            window.openReferralModal('FellowAgents');
+          } else if (action?.startsWith('referral:') && typeof window.openReferralModal === 'function') {
+            const partnerKey = action.split(':').slice(1).join(':');
+            const partnerMap = {
+              lenders: 'Lenders',
+              title: 'Title',
+              builders: 'Builders',
+              'financial-planners': 'Financial Planners',
+              attorneys: 'Attorneys',
+              'insurance-agents': 'Insurance Agents',
+              other: 'Other'
+            };
+            window.openReferralModal(partnerMap[partnerKey] || partnerKey);
           }
         }, 220);
       });
@@ -521,6 +533,222 @@
     attachHandlers(contentEl);
   }
 
+  // ─── PARTNER TYPE PLAYBOOKS (Fellow Agents, Lenders, Title, etc.) ───
+  const PARTNER_TITLES = {
+    'fellow-agents': 'Fellow Agents & Co-Broke Partners — Playbook',
+    lenders: 'Lenders & Mortgage Partners — Playbook',
+    title: 'Title & Escrow Partners — Playbook',
+    builders: 'Builders — New Construction Playbook',
+    'financial-planners': 'Financial Planners & CPAs — HNW Playbook',
+    attorneys: 'Attorneys — Trust & Referral Protocol Playbook',
+    'insurance-agents': 'Insurance Agents — Bundling & Joint Touches Playbook',
+    other: 'Other Professionals — Adaptable Outreach Playbook'
+  };
+
+  function normalizePartnerType(type) {
+    const raw = String(type || '').trim();
+    const lower = raw.toLowerCase();
+    if (lower === 'fellowagents' || lower === 'fellow agents' || lower === 'realtors' || lower === 'realtor') return 'fellow-agents';
+    if (lower === 'lenders' || lower === 'lender' || lower === 'mortgage') return 'lenders';
+    if (lower === 'title' || lower === 'escrow') return 'title';
+    if (lower === 'builders' || lower === 'builder') return 'builders';
+    if (lower === 'financial planners' || lower === 'financial-planners' || lower === 'cpa' || lower === 'cpas') return 'financial-planners';
+    if (lower === 'attorneys' || lower === 'attorney') return 'attorneys';
+    if (lower === 'insurance agents' || lower === 'insurance-agents' || lower === 'insurance') return 'insurance-agents';
+    if (lower === 'other') return 'other';
+    return null;
+  }
+
+  function renderPartnerPlaybook(contentEl, cfg) {
+    contentEl.innerHTML = `
+      ${cfg.badges ? `<div class="mb-4 flex flex-wrap gap-2">${cfg.badges}</div>` : ''}
+      ${whyBox(cfg.whyLabel, cfg.whyText, cfg.accent || 'teal')}
+      ${cfg.sectionTitle ? sectionTitle(cfg.sectionTitle) : ''}
+      ${cfg.bullets ? bulletList(cfg.bullets) : ''}
+      ${cfg.scripts ? `<div class="space-y-4 mb-6">${cfg.scripts.map((s) => scriptCard(s.title, s.script, s.tip, s.saveKey)).join('')}</div>` : ''}
+      ${cfg.proTip ? proTip(cfg.proTip) : ''}
+      ${cfg.bridges ? bridgeRow(cfg.bridges) : ''}
+      ${footerSave(cfg.saveKey, cfg.saveLabel || 'Save Playbook')}
+    `;
+    attachHandlers(contentEl);
+  }
+
+  function renderPartnerFellowAgents(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      badges: '<span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">CO-BROKE ENGINE</span>',
+      whyLabel: 'Why Co-Broke Relationships Compound',
+      whyText: 'Your fellow agents are both competitors and collaborators. The agents who show up reliably on co-broke files, communicate proactively, and make the other side look good earn referrals that no marketing spend can buy. One great co-broke experience often turns into years of mutual business.',
+      sectionTitle: 'Core Plays & Scripts',
+      scripts: [
+        { title: 'Co-Broke Kickoff Text', script: 'Hey [Agent Name] — excited to co-broke this one with you on [address]. I\'ll keep you copied on every milestone from my side and loop in our lender partner as needed. What\'s the best way for us to stay in sync — text, email, or a quick call at offer acceptance?', tip: 'Send within hours of offer acceptance.', saveKey: 'Partner: Co-Broke Kickoff' },
+        { title: 'Post-Close Co-Broke Thank You', script: 'Great working with you on [address] — [Client] is thrilled and I hope the closing felt smooth on your end too. If you ever have buyers or sellers in [area] who need the same white-glove experience, I\'d love to return the favor.', tip: 'Follow with a handwritten note within 48 hours.', saveKey: 'Partner: Co-Broke Thank You' },
+        { title: 'Open House Co-Broke Offer', script: 'I\'m holding an open house at [address] Saturday — would love to have you stop by if you have buyers in the area. Happy to co-broke any serious interest and keep communication tight from day one.', tip: 'Builds goodwill before you need a referral.', saveKey: 'Partner: Open House Co-Broke' }
+      ],
+      proTip: 'After every smooth co-broke, send a handwritten note within 48 hours. Agents remember who made them look good — and they refer accordingly.',
+      bridges: [
+        { label: '60-Day Partner Onboarding', action: 'play:60-day-realtor-onboarding', primary: true },
+        { label: 'Partner Objections', action: 'play:referral-objections' },
+        { label: 'Open House Domination', action: 'play:open-house-domination' }
+      ],
+      saveKey: 'Partner-FellowAgents',
+      saveLabel: 'Save Co-Broke Playbook'
+    });
+  }
+
+  function renderPartnerLenders(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      badges: '<span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C] dark:text-gray-300">TRANSACTION POWER</span>',
+      whyLabel: 'Your Lender Bench Wins Deals',
+      whyText: 'Top agents don\'t have one lender — they have a bench of 2–3 loan officers who communicate fast, pre-qualify thoroughly, and protect your contracts. Build these relationships with value-first touches and flawless co-marketing on shared files.',
+      sectionTitle: 'Core Scripts',
+      scripts: [
+        { title: 'Day 0 Lender Handoff', script: 'Hey [Lender Name] — I just put [Buyer Name] under contract on [address]. I\'ve already welcomed them and sent a simple roadmap. I\'ll keep you in the loop on every step from my side — inspection, appraisal, repairs, and closing prep. What\'s the best way for us to stay in sync on this one?', tip: 'Copy buyer agent + client on first intro when appropriate.', saveKey: 'Partner: Lender Handoff' },
+        { title: 'Monthly Value Touch', script: 'Quick market note for your buyers — inventory in [Area] shifted this month and we\'re seeing more negotiation room. Happy to co-host a buyer Q&A or open house if that would help your pipeline. No pitch, just partnership.', tip: 'Batch for top 5 lenders — personalize area only.', saveKey: 'Partner: Lender Value Touch' },
+        { title: 'Post-Close Lender Thank You', script: 'Smooth close on [address] — appreciate how you kept [Buyer] calm and the listing side informed. If you have buyers who need an agent who communicates like this, I\'d love to return the favor.', tip: 'Send within 48 hours while energy is high.', saveKey: 'Partner: Lender Thank You' }
+      ],
+      proTip: 'Run the 60-Day Partnership Onboarding sequence on your first shared file with any new lender. Over-communication on file one earns you the go-to spot.',
+      bridges: [
+        { label: '60-Day Onboarding', action: 'play:60-day-realtor-onboarding', primary: true },
+        { label: 'Open House Domination', action: 'play:open-house-domination' },
+        { label: 'Weekly Value Cadence', action: 'play:weekly-value-cadence' }
+      ],
+      saveKey: 'Partner-Lenders',
+      saveLabel: 'Save Lender Playbook'
+    });
+  }
+
+  function renderPartnerTitle(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      badges: '<span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">CLEAN CLOSINGS</span>',
+      whyLabel: 'Clean Closings Start with Title Relationships',
+      whyText: 'Responsive escrow officers and title reps who pick up the phone keep your deals on track — and send you referrals when agents in their network need someone reliable. Treat them like VIP partners, not vendors.',
+      sectionTitle: 'High-Value Plays',
+      scripts: [
+        { title: 'Opening Escrow Handoff', script: 'Hey [Name] — putting [address] into escrow with you on [date]. Buyer and seller agents are both copied. Please flag anything you need from my side early — I\'d rather over-communicate than surprise anyone at the table.', tip: 'Set the tone before problems arise.', saveKey: 'Partner: Title Handoff' },
+        { title: 'Proactive Status Check', script: 'Quick check on [address] — anything you need from my side before we hit [milestone]? Happy to chase docs or loop in the lender if that helps keep us on track.', tip: 'Agents who prevent surprises earn title referrals.', saveKey: 'Partner: Title Status Check' },
+        { title: 'Post-Close Title Thank You', script: 'Thanks for keeping [address] smooth to the finish line. If any agents in your network need someone who communicates and protects the closing timeline, I\'d be honored to help.', tip: 'Title reps remember who made their job easier.', saveKey: 'Partner: Title Thank You' }
+      ],
+      proTip: 'Invite your top title rep to one client appreciation event per year. They meet your sphere and remember you when agents ask for referrals.',
+      bridges: [
+        { label: 'Client Appreciation Events', action: 'event:client-appreciation', primary: true },
+        { label: 'Relationship Management', action: 'play:relationship-management' }
+      ],
+      saveKey: 'Partner-Title',
+      saveLabel: 'Save Title Playbook'
+    });
+  }
+
+  function renderPartnerBuilders(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      badges: '<span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C]">NEW CONSTRUCTION</span>',
+      whyLabel: 'Why Builders Deliver Predictable Volume',
+      whyText: 'Getting on the preferred agent list with even one active builder can give you 10–30+ transactions per year with relatively low relationship maintenance. The key is making their sales team look like heroes and moving buyers from model-home visit to keys faster than any competitor.',
+      scripts: [
+        { title: 'Sales Team Training Offer', script: 'I\'d love to become a go-to agent for your community. I can offer your sales team a 30-minute lunch-and-learn on how buyers win in today\'s market (with my lender partner covering financing basics), plus a simple one-pager they can keep at their desk. Would next Tuesday or Thursday work for a quick session?', tip: 'Bring lunch — they bring the room.', saveKey: 'Builder: Sales Training Offer' },
+        { title: 'Builder Sales Rep Update', script: 'Quick update on [Buyer Name] — they\'re fully pre-approved and we\'re targeting clear to close by [date]. I\'ll keep you posted the moment anything moves so your team can keep the buyer excited and on track.', tip: 'Same-day updates win preferred-agent status.', saveKey: 'Builder: Sales Rep Update' }
+      ],
+      proTip: 'Be the fastest agent to return calls on builder deals. Offer joint buyer consultations at the model home with your lender partner.',
+      bridges: [
+        { label: 'Builder Training Play', action: 'play:builder-training', primary: true },
+        { label: '60-Day Onboarding', action: 'play:60-day-realtor-onboarding' }
+      ],
+      saveKey: 'Partner-Builders',
+      saveLabel: 'Save Builder Playbook'
+    });
+  }
+
+  function renderPartnerFinancialPlanners(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      whyLabel: 'Why These Partners Send High-Quality Business',
+      whyText: 'Financial planners and CPAs work with clients who have real equity and complex needs (investment properties, retirement moves, divorce-related listings, etc.). They refer when they trust you to protect their client\'s wealth and make them look smart.',
+      scripts: [
+        { title: 'Educational Coffee/Zoom Invite', script: 'I\'d love to be a resource for your clients who are thinking about buying, selling, or using home equity strategically. Would you be open to a 20-minute coffee or Zoom where I can share the current real estate strategies that actually make sense for high-net-worth families right now?', tip: 'No pitch — education only.', saveKey: 'HNW: Educational Invite' }
+      ],
+      proTip: 'Offer a joint client workshop titled “Downsizing & Equity Strategies for Pre-Retirees.” Co-branded value builds massive trust.',
+      bridges: [
+        { label: 'Professional Referral Scripts', action: 'play:professional-referral-request', primary: true },
+        { label: 'Relationship Management', action: 'play:relationship-management' }
+      ],
+      saveKey: 'Partner-FinancialPlanners',
+      saveLabel: 'Save HNW Playbook'
+    });
+  }
+
+  function renderPartnerAttorneys(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      whyLabel: 'Why Attorneys Are Extremely Loyal When Treated Right',
+      whyText: 'Divorce, probate, estate planning, and real estate attorneys send very high-quality referrals. They value protecting their client\'s timeline and looking like the competent professional who chose the right agent.',
+      scripts: [
+        { title: 'Attorney Handoff + Trust Builder', script: 'I\'ll treat your client like family and keep you copied on every major update so you can focus on the legal side. Here\'s my direct cell if anything comes up on their file — I\'m usually the fastest one to answer on the approved list.', tip: 'Discretion and speed are everything.', saveKey: 'Attorney: Handoff Script' }
+      ],
+      proTip: 'Create a simple one-page “Agent Handoff Packet” for their office (what you need to list or consult, typical timelines, your direct contact).',
+      bridges: [
+        { label: 'Professional Referral Scripts', action: 'play:professional-referral-request', primary: true }
+      ],
+      saveKey: 'Partner-Attorneys',
+      saveLabel: 'Save Attorney Playbook'
+    });
+  }
+
+  function renderPartnerInsurance(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      whyLabel: 'Why Insurance Agents Are Natural Partners',
+      whyText: 'They already have the home + auto relationship. When you help their clients with a smooth real estate or equity strategy, you become the obvious person they recommend for the next life event.',
+      scripts: [
+        { title: 'Joint Client Event Invite', script: 'Would you be open to co-hosting a small “Home Protection Night” for some of our mutual clients? I\'ll handle the real estate/equity side, you cover insurance gaps. Low pressure, good food, and we both look like the helpful team.', tip: 'Pairs with Co-Host for Leverage event play.', saveKey: 'Insurance: Joint Event' }
+      ],
+      proTip: 'After every smooth closing with their client, send a short text thanking them and offering to loop them in on future home conversations.',
+      bridges: [
+        { label: 'Co-Host for Leverage', action: 'event:co-host-leverage', primary: true }
+      ],
+      saveKey: 'Partner-Insurance',
+      saveLabel: 'Save Insurance Playbook'
+    });
+  }
+
+  function renderPartnerOther(contentEl) {
+    renderPartnerPlaybook(contentEl, {
+      whyLabel: 'The Universal Framework That Works for Any Professional',
+      whyText: 'HR directors, relocation companies, wealth managers, etc. The relationship math is the same: deliver exceptional experiences, make them look good, and give them an easy, low-pressure way to refer you when the moment is right.',
+      scripts: [
+        { title: 'Professional Soft Referral Ask', script: 'If you ever have someone who needs a smooth, low-stress real estate experience, I\'d be honored to help them the way I helped the people you\'ve already sent my way. No pressure at all — just wanted you to know I\'m here.', tip: 'Send after you\'ve delivered value at least once.', saveKey: 'Partner: Soft Referral Ask' },
+        { title: 'Discovery Coffee Invite', script: 'I\'ve been working with several [their profession] professionals in [area] and would love 15 minutes to understand the challenges you see most often — and see if there are ways I can support the people you work with. No pitch, just curiosity.', tip: 'Listen 80%, talk 20%.', saveKey: 'Partner: Discovery Invite' }
+      ],
+      proTip: 'Identify what keeps them up at night, then become the person who removes that friction for their clients. Give before you ask — always.',
+      bridges: [
+        { label: '60-Day Onboarding', action: 'play:60-day-realtor-onboarding', primary: true },
+        { label: 'Weekly Value Cadence', action: 'play:weekly-value-cadence' }
+      ],
+      saveKey: 'Partner-Other',
+      saveLabel: 'Save Outreach Playbook'
+    });
+  }
+
+  const PARTNER_RENDERERS = {
+    'fellow-agents': renderPartnerFellowAgents,
+    lenders: renderPartnerLenders,
+    title: renderPartnerTitle,
+    builders: renderPartnerBuilders,
+    'financial-planners': renderPartnerFinancialPlanners,
+    attorneys: renderPartnerAttorneys,
+    'insurance-agents': renderPartnerInsurance,
+    other: renderPartnerOther
+  };
+
+  window.renderRichReferralPartner = function renderRichReferralPartner(partnerType, contentEl) {
+    const key = normalizePartnerType(partnerType);
+    if (!key || !contentEl) return false;
+    const fn = PARTNER_RENDERERS[key];
+    if (!fn) return false;
+    fn(contentEl);
+    return true;
+  };
+
+  window.getReferralPartnerModalTitle = function getReferralPartnerModalTitle(partnerType) {
+    const key = normalizePartnerType(partnerType);
+    return key ? PARTNER_TITLES[key] : null;
+  };
+
   // ─── PARTNER TIERS (A+ / B / C) ──────────────────────────────────────
   function renderPartnerTierAPlus(contentEl) {
     contentEl.innerHTML = `
@@ -559,7 +787,7 @@
       ${proTip('These partners should feel like you only have five clients total. If you are too busy to nurture A+ relationships, something else on your calendar needs to go — not these touches.')}
       ${bridgeRow([
         { label: 'Partner Mastermind Events', action: 'event:partner-mastermind', primary: true },
-        { label: 'Referral Partner Playbook', action: 'referral:realtors' },
+        { label: 'Fellow Agent Playbook', action: 'referral:fellow-agents' },
         { label: 'Turn 1 Partner Into 5 More', action: 'play:realtor-to-5-more' }
       ])}
       ${footerSave('Tier-A+', 'Save A+ Tier Playbook')}
@@ -692,7 +920,9 @@
 
   window.__REFERRAL_MODALS_EXPORTS = {
     renderRichReferralPlay: window.renderRichReferralPlay,
+    renderRichReferralPartner: window.renderRichReferralPartner,
     renderRichPartnerTierModal: window.renderRichPartnerTierModal,
+    getReferralPartnerModalTitle: window.getReferralPartnerModalTitle,
     getPartnerTierModalTitle: window.getPartnerTierModalTitle
   };
 
@@ -704,7 +934,8 @@
     });
   };
 
-  console.log('%c[referral-rich-modals] Premium plays + partner tiers ready (' +
+  console.log('%c[referral-rich-modals] Premium plays + partner playbooks + tiers ready (' +
     Object.keys(RENDERERS).length + ' plays, ' +
+    Object.keys(PARTNER_RENDERERS).length + ' partner types, ' +
     Object.keys(TIER_RENDERERS).length + ' tiers)', 'color:#00A89D');
 })();

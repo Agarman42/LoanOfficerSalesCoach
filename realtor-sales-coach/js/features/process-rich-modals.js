@@ -7,7 +7,7 @@
 
   const TITLES = {
     'weekly-pipeline': 'Weekly Pipeline Review Agenda',
-    'post-closing-7day': '7-Day Post-Closing Check-In — Full Scripts + LTV Strategy',
+    'post-closing-7day': '7-Day Post-Closing Check-In — Full Scripts + Client Lifetime Value Strategy',
     'realtor-onboarding': 'Building Lender Partner Relationships — 6-Step Playbook + Scripts',
     'monday-status': 'Monday Status Update Scripts — 4 Ready-to-Record Videos',
     'pre-close-confirmation': 'Pre-Closing Confirmation Scripts — 48h Playbook + Wire Safety'
@@ -271,15 +271,15 @@
         ${scriptCard('Wire safety script (text or email)',
           'Important: Before you send any wire, call this number to verbally verify the instructions — [insert verified title company callback number]. I will never email you new wire instructions at the last minute. If anything looks different or you get an email asking you to change the wire, call me immediately before sending anything. This is how we keep you safe.',
           'Send wire safety language every purchase — no exceptions.', 'Process: Wire Safety Language')}
-        ${scriptCard('CD walk-through invite',
-          'We just received Clear to Close. The Closing Disclosure will hit your email in the next hour. Rather than you trying to read 10 pages of legal language alone, I\'d love to walk through it with you on a quick 10–15 minute call or video this afternoon or tomorrow morning. No surprises — just making sure you feel 100% comfortable with every number before you sign. What time works?',
-          'Never let clients sign CD alone on complex files.', 'Process: CD Walk-Through Invite')}
+        ${scriptCard('Final walkthrough + lender CD coordination',
+          'Your lender just confirmed Clear to Close — huge milestone! The Closing Disclosure will hit your email soon. I recommend a quick walk-through call with your lender (I\'m happy to join if you want). On my side, let\'s lock in your final walkthrough and I\'ll send a simple closing-day checklist so there are zero surprises. What time works for the walkthrough?',
+          'Coordinate walkthrough + lender CD review — never let buyers feel alone at the finish line.', 'Process: Final Walkthrough + CD Coordination')}
         ${scriptCard('Closing celebration + handoff',
           'Congratulations [Name]! We did it — you officially own the home! I\'m so happy for you and your family. I sent a short celebration video to your text. If you\'d like a quick photo with the keys at the table, let me know — I\'d love to capture the moment. Here\'s exactly what happens next: title will record [today/tomorrow], you\'ll get the keys once it records, and I\'m your point of contact for anything that comes up in the first 30 days. Welcome home!',
           'Sets up the 7-day call naturally.', 'Process: Closing Celebration Handoff')}
       </div>
       <div class="rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 p-4 text-sm mb-6">
-        <strong>Pre-closing checklist:</strong> ID confirmed · Wire verified verbally · CD walk-through scheduled · Final walkthrough coordinated with realtor · 5-item buyer checklist sent night before
+        <strong>Pre-closing checklist:</strong> ID confirmed · Wire verified verbally · Lender CD review scheduled · Final walkthrough coordinated with listing agent · 5-item buyer checklist sent night before
       </div>
       ${bridgeRow([
         { label: '7-day post-closing framework', action: 'vault:post-closing-7day', primary: true },

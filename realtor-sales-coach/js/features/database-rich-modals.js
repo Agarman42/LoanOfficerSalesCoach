@@ -146,7 +146,8 @@
           } else if (action === 'scripts' && typeof window.showSection === 'function') {
             window.showSection('sales-script');
           } else if (action === 'equity' && typeof window.showSection === 'function') {
-            window.showSection('equity-scanner');
+            if (typeof window.showSection === 'function') window.showSection('value-vault');
+            if (typeof window.openVaultItemWhenReady === 'function') window.openVaultItemWhenReady('annual-home-equity-review');
           } else if (action === 'social' && typeof window.showSection === 'function') {
             window.showSection('social');
           } else if (action === 'segment' && typeof window.showDetailModal === 'function') {
@@ -310,7 +311,7 @@
       ${sectionTitle('Identification Criteria (Be Ruthless)')}
       ${bulletList([
         'Referred you at least once in 24 months OR sent multiple clients historically',
-        'Real influence: top-producing realtors, busy business owners, natural connectors',
+        'Real influence: busy business owners, natural connectors, active sphere members',
         'Genuine personal relationship beyond the transaction (kids\' names, hobbies, challenges)',
         'Losing regular contact would cost meaningful business or relationships you care about'
       ])}
@@ -433,7 +434,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#002B5C]/10 text-[#002B5C]">PILLAR 1 • PLATINUM</span></div>
       ${whyBox('Why This Segment Is Everything',
-        'Your top 50 people — power realtors, influential past clients, family/friends who refer consistently, community leaders — generate more closed business than the other 950 combined when nurtured at platinum level. These relationships send 2–5 referrals per year without you asking.',
+        'Your top 50 people — influential past clients, sphere connectors, referral partners, family, and community leaders — generate more closed business than the other 950 combined when nurtured at platinum level. These relationships send 2–5 referrals per year without you asking.',
         'teal')}
       ${sectionTitle('Identification Criteria')}
       ${bulletList([
@@ -521,7 +522,7 @@
     contentEl.innerHTML = `
       <div class="mb-4"><span class="px-3 py-1 text-xs font-semibold rounded-full bg-[#00A89D]/10 text-[#00A89D]">PILLAR 4 • GROWTH ENGINE</span></div>
       ${whyBox('Why This Is Your Real Growth Engine',
-        'Realtors, builders, financial planners, attorneys who regularly send you business are the A+ VIPs of your actual business. Value-first, ridiculously consistent, always making their life easier. Focus 80% of partner energy on the 10–15 who actually send files.',
+        'Fellow agents, lenders, builders, financial planners, and attorneys who regularly send you referrals are the A+ VIPs of your actual business. Value-first, ridiculously consistent, always making their life easier. Focus 80% of partner energy on the 10–15 who actually send business.',
         'teal')}
       ${sectionTitle('Core System (Quarterly + Trigger-Based)')}
       ${bulletList([

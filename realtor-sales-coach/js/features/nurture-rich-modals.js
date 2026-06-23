@@ -118,7 +118,8 @@
           if (action === 'weekly' && typeof window.showSection === 'function') {
             window.showSection('weekly-win-plan');
           } else if (action === 'equity' && typeof window.showSection === 'function') {
-            window.showSection('equity-scanner');
+            if (typeof window.showSection === 'function') window.showSection('value-vault');
+            if (typeof window.openVaultItemWhenReady === 'function') window.openVaultItemWhenReady('annual-home-equity-review');
           } else if (action === 'social' && typeof window.showSection === 'function') {
             window.showSection('social');
           } else if (action === 'referrals' && typeof window.showSection === 'function') {
@@ -168,13 +169,13 @@
         <strong>Gift ideas:</strong> Cutting board, doormat, plant, local treat, wine with custom label. Photo the gift before sending — great social content with permission.
       </div>
       ${bridgeRow([
-        { label: 'Home anniversary check-in framework', action: 'vault:annual-mortgage-review', primary: true },
+        { label: 'Home anniversary check-in framework', action: 'vault:annual-home-equity-review', primary: true },
         { label: 'Client anniversary system', action: 'vault:client-anniversary-system' },
         { label: 'Equity scanner', action: 'equity' }
       ])}
       ${nextStepsHtml([
         { label: 'High-ROI Personal Touches', onclick: "closeNamedModal('nurture-template-modal'); if(typeof showClientAppreciationModal==='function')showClientAppreciationModal('touches');", style: 'primary' },
-        { label: 'Equity Scanner', onclick: "closeNamedModal('nurture-template-modal'); if(typeof window.showSection==='function')window.showSection('equity-scanner');", style: 'accent' }
+        { label: 'Annual Home Review', onclick: "closeNamedModal('nurture-template-modal'); if(typeof window.showSection==='function')window.showSection('value-vault'); if(typeof window.openVaultItemWhenReady==='function')window.openVaultItemWhenReady('annual-home-equity-review');", style: 'accent' }
       ])}
     `;
     attachHandlers(contentEl);
@@ -234,10 +235,10 @@
 
   function renderScalableTouches(contentEl) {
     const categories = [
-      { label: 'Social & Visibility', color: 'border-[#00A89D]', items: ['Like/comment on 10+ client/realtor posts per week', 'Post photos from client events or local happenings', 'Share local business spotlights (tag them)', 'Post fun polls or "this or that" questions'] },
+      { label: 'Social & Visibility', color: 'border-[#00A89D]', items: ['Like/comment on 10+ client/partner posts per week', 'Post photos from client events or local happenings', 'Share local business spotlights (tag them)', 'Post fun polls or "this or that" questions'] },
       { label: 'Value & Content', color: 'border-purple-400', items: ['Monthly value-first newsletter', 'Quarterly market update video', 'Share one useful article/tool per week', 'Forward local market news with personal note', '"Just sold in your neighborhood" touch'] },
       { label: 'Light Personal', color: 'border-[#002B5C]/30', items: ['Quarterly "just checking in" text to B-tier', 'Quick voice note instead of text occasionally', 'Tag people in relevant local posts', 'Quarterly equity snapshot email (1-pager)'] },
-      { label: 'Higher-Impact (1–2/month)', color: 'border-[#F15A29]/40', items: ['Co-host quarterly lunch & learn or buyer workshop', 'Seasonal value emails (recipes, maintenance tips)', 'End-of-year thank-you video to top 100', 'Thoughtful comments on realtor posts'] }
+      { label: 'Higher-Impact (1–2/month)', color: 'border-[#F15A29]/40', items: ['Co-host quarterly lunch & learn or buyer workshop', 'Seasonal value emails (recipes, maintenance tips)', 'End-of-year thank-you video to top 100', 'Thoughtful comments on partner and sphere posts'] }
     ];
     contentEl.innerHTML = `
       <div class="mb-4 flex flex-wrap gap-2">

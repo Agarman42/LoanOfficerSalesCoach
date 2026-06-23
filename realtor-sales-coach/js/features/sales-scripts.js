@@ -119,14 +119,14 @@
       icon: "fa-bolt",
       color: "#00A89D",
       scenarios: [
-        { value: "Rates are too high right now", label: "Rates are too high right now", contextTip: "Helpful details: How long have they been looking? Do they have a target monthly payment? Any upcoming life events (baby, job change, lease ending)?" },
+        { value: "Prices feel too high right now", label: "Prices feel too high right now", contextTip: "Helpful details: How long have they been looking? Do they have a target monthly payment? Any upcoming life events (baby, job change, lease ending)?" },
         { value: "We're going to wait for rates to drop", label: "We're going to wait for rates to drop", contextTip: "Helpful details: How long have they been looking? Do they have a specific target monthly payment they're trying to stay under? Any upcoming deadlines (lease ending, job relocation, baby due)?" },
         { value: "I want to wait until after the election / things settle", label: "Wait until after the election / things settle", contextTip: "Useful context: What specific uncertainty are they worried about (rates, economy, job market)? How long do they expect to wait?" },
-        { value: "I'm happy with my current lender", label: "I'm happy with my current lender (realtor)", contextTip: "Helpful details: How long have you worked with this realtor? Have you closed any transactions together before? Do you know why they're happy with their current lender?" },
-        { value: "I already have a lender / I'm working with someone else", label: "I already have a lender", contextTip: "Useful context: How did they get connected with their current lender? Have they signed anything yet, or are they still early in the process?" },
-        { value: "My credit isn't good enough / I'm worried about getting approved", label: "Credit isn't good enough / worried about approval", contextTip: "Helpful details: Do they know their approximate credit score? Have they been turned down before? Are there any recent changes to their credit (new job, paid off debt)?" },
-        { value: "I don't have enough for a down payment", label: "Don't have enough for down payment", contextTip: "Great context: Are they open to down payment assistance programs, gifts from family, or seller concessions? What's their rough target purchase price?" },
-        { value: "I'm just shopping around / getting information", label: "Just shopping around / getting info", contextTip: "Helpful details: How far along are they (just browsing vs. under contract)? Have they spoken with any other lenders yet? What's their biggest concern right now?" }
+        { value: "A friend or family member is a realtor and we feel obligated to use them", label: "Friend/family member is a realtor", contextTip: "Helpful context: How close are they to this person? Are they feeling pressure or genuine loyalty? What would they want most — relationship harmony or the best representation?" },
+        { value: "Your commission feels too high / can you discount your fee?", label: "Commission feels too high", contextTip: "Useful details: What are they comparing against (another agent quote, online discount broker)? What value do they care about most — marketing, negotiation, communication, speed?" },
+        { value: "We want to sell FSBO and skip the agent", label: "Want to sell FSBO", contextTip: "Helpful details: Why FSBO (save money, control, bad past experience)? Do they understand net proceeds vs. list price? Any timeline pressure?" },
+        { value: "I'm not sure I'm ready to commit to an agent yet", label: "Not ready to commit to an agent", contextTip: "Helpful details: What would need to happen for them to feel ready? Are they early-stage browsing or actively touring? Any past bad agent experience?" },
+        { value: "We found a home online and want to work directly with the listing agent", label: "Want to work directly with listing agent", contextTip: "Useful context: Do they understand dual agency or who represents whom? How strong is their offer strategy? Any financing or inspection concerns?" }
       ]
     },
     "buyer-conversations": {
@@ -209,7 +209,7 @@
         { value: "Reach out for an annual home & equity check-in or move-up review", label: "Annual home & equity / move-up review", contextTip: "Helpful details: When did they close their current home? Any life events or equity growth that might signal a future move-up, investment, or downsizing conversation?" },
         { value: "Help a past client who is relocating", label: "Help past client relocating", contextTip: "Useful context: Where are they moving to? Do they need a referral to a lender in the new area, or are they keeping the current home as a rental?" },
         { value: "Congratulate another agent on a new listing or sale", label: "Congratulate agent on win", contextTip: "Nice touch: Do you know any details about the transaction (price, days on market, any challenges)? Have you worked or co-broke'd with this agent before? Great way to stay top-of-mind." },
-        { value: "Check in after a big rate news day", label: "Check in after rate news", contextTip: "Helpful context: How did rates move (up or down significantly)? Do you have any clients or realtors who were on the fence and might be affected?" }
+        { value: "Check in after major market or rate news", label: "Check in after market/rate news", contextTip: "Helpful context: What changed in your local market (inventory, pricing, or financing conditions)? Do you have any clients or partners who were on the fence and might need a quick update?" }
       ]
     },
     "special-situations": {
@@ -220,7 +220,7 @@
         { value: "Client is moving out of state", label: "Client moving out of state", contextTip: "Helpful details: Are they selling their current home or keeping it as a rental? Do they need a lender referral in the new state, or are they financing the new purchase while keeping the old one?" },
         { value: "Client is buying a second home or vacation property", label: "Buying second home / vacation property", contextTip: "Useful context: Is this purely for personal use or do they plan to rent it out part-time? Do they have strong income/credit, or is this stretching them a bit?" },
         { value: "Client is going through a divorce", label: "Going through divorce", contextTip: "Sensitive context: How far along is the divorce process? Are both parties still on the loan, or is one person trying to buy the other out? Is an attorney involved?" },
-        { value: "Client is inheriting property", label: "Inheriting property", contextTip: "Helpful details: Are they keeping the property or selling it? Is this a cash-out refinance situation or are they taking title and financing improvements?" },
+        { value: "Client is inheriting property", label: "Inheriting property", contextTip: "Helpful details: Are they keeping the property or selling it? Are they taking title and planning to live there, rent it, or finance improvements?" },
         { value: "Client has non-traditional income (self-employed, gig, etc.)", label: "Non-traditional / self-employed income", contextTip: "Very useful: How long have they been self-employed? Do they have 2 years of tax returns? Are they using bank statement or asset-based programs?" },
         { value: "Client has a recent credit event (bankruptcy, foreclosure)", label: "Recent credit event", contextTip: "Important context: How long ago was the credit event? Have they been rebuilding credit? Are they working with a credit repair company or housing counselor?" },
         { value: "Client is a veteran using VA benefits", label: "Veteran using VA benefits", contextTip: "Helpful details: Is this their first VA loan? Do they have their Certificate of Eligibility yet? Are they aware of the funding fee and how it can be waived?" },
@@ -635,20 +635,20 @@ window.showContextTipsModal = function() {
             </div>
             <div class="p-6 overflow-y-auto max-h-[65vh] space-y-6 text-sm">
                 <div>
-                    <strong class="text-[#00A89D]">For Rate Objections / Waiting Situations</strong>
+                    <strong class="text-[#00A89D]">For Market Timing / Wait-and-See Objections</strong>
                     <ul class="mt-2 list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
                         <li>How long have they been looking?</li>
-                        <li>Have they been pre-approved yet?</li>
-                        <li>Is there a specific monthly payment they're trying to hit?</li>
+                        <li>Are they pre-approved or still exploring options?</li>
+                        <li>What monthly payment or price range are they trying to stay within?</li>
                         <li>Any upcoming life events (baby, job change, lease ending)?</li>
                     </ul>
                 </div>
                 <div>
-                    <strong class="text-[#00A89D]">For Realtor Pushback Situations</strong>
+                    <strong class="text-[#00A89D]">For Partner / Referral Pushback</strong>
                     <ul class="mt-2 list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
-                        <li>How long have you worked with this realtor?</li>
-                        <li>Have you closed any deals together before?</li>
-                        <li>Do they have a specific pain point with their current lender?</li>
+                        <li>Who is the partner (lender, title rep, builder, fellow agent)?</li>
+                        <li>How long have you known them and have you closed a file together?</li>
+                        <li>What value could you offer first (CMA, open house support, co-branded asset)?</li>
                         <li>Any co-marketing or events you've done together?</li>
                     </ul>
                 </div>

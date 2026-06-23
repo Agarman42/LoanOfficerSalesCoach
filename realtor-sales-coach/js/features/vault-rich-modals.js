@@ -476,7 +476,7 @@
     const objections = [
       { pushback: '"I\'m really busy right now."', script: 'I completely understand — this will only take 2–3 minutes. I just want to make sure you\'re not running into any surprises as a new homeowner in the first month.', tip: 'Acknowledge + name the tiny time commitment.' },
       { pushback: '"Everything is fine, I don\'t really have any questions."', script: 'That\'s great to hear! Before I let you go, can I quickly cover two things that catch most people off guard in the first month?', tip: 'Validate + create curiosity.' },
-      { pushback: '"I already have a guy for that."', script: 'Totally fair. I\'m not trying to sell you anything — this is literally just a quick check-in to make sure your first month goes smoothly. Most people appreciate the heads-up on homestead exemptions and junk mail.', tip: 'Remove sales pressure. Position as free insurance.' },
+      { pushback: '"I already have someone for that."', script: 'Totally fair — I\'m your agent, not trying to sell you anything new. This is just a quick check-in to make sure your first month goes smoothly. Most people appreciate the heads-up on homestead exemptions, utility transfers, and junk mail.', tip: 'Remove sales pressure. Position as free insurance.' },
       { pushback: '"Can you just email it to me?"', script: 'Happy to — the reason I called is these first-month gotchas are easy to miss in an email. It\'s literally two minutes and most people say they\'re glad we talked live.', tip: 'Honor the request while explaining why live is better.' },
       { pushback: '"I don\'t want to think about real estate stuff right now."', script: 'Totally get that — you just moved in! The only reason I\'m calling is to make sure the boring stuff (tax bills, utility transfers, junk mail) doesn\'t surprise you in the next 30 days. After this you\'re good for the year.', tip: 'Empathize with honeymoon phase + limit scope.' }
     ];
@@ -1106,7 +1106,7 @@
   function renderGiftYetiTumbler(item, contentEl, modal) {
     renderPremiumGift(item, contentEl, modal, {
       badge: 'PARTNER + CLIENT FAVORITE',
-      whyWorks: ['Used daily — commute, gym, open houses', 'High perceived value at mid price point', 'Works for realtors and clients equally', 'Engraving makes it feel custom'],
+      whyWorks: ['Used daily — commute, gym, open houses', 'High perceived value at mid price point', 'Works for partners and clients equally', 'Engraving makes it feel custom'],
       timing: 'Pop-by for partners or 6-month client touch. Great for busy-season appreciation.',
       proUpgrade: 'Engrave first name or brokerage — never big logo on front.',
       noteScript: 'Hope your coffee stays hot and your week stays smooth. Appreciate everything you do.',

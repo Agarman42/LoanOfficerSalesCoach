@@ -35,13 +35,13 @@
     weekly: [
       "Pipeline review with key referral partners.",
       "Send weekly updates to active clients.",
-      "Host a 15-min coaching Zoom for realtors.",
+      "Host a 15-min market update Zoom for referral partners.",
       "Attend at least one networking event.",
       "Send value-first 'Who do you know?' texts to partners.",
       "Create and send a value-packed email/newsletter.",
       "Host casual coffee or lunch with a partner.",
       "Review past transactions for equity or move-up opportunities.",
-      "Host a passion-blended activity with 2-3 realtors.",
+      "Host a passion-blended activity with 2-3 referral partners.",
       "Send 10–15 birthday/anniversary videos.",
       "Post client success stories on social.",
       "Review CRM and re-engage dormant contacts."
