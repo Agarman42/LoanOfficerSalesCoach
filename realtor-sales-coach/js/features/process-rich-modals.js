@@ -1,6 +1,6 @@
 /**
  * js/features/process-rich-modals.js
- * Bespoke premium modals for Transaction Process journey templates (Realtor Sales Coach).
+ * Bespoke premium modals for Transaction Process journey templates (Agent Sales Coach).
  */
 (function () {
   'use strict';

@@ -1,7 +1,7 @@
 /**
  * js/features/calculator.js
  *
- * Advanced Payment Calculator + Home Financing Math Helpers (Legacy - for realtor reference)
+ * Advanced Payment Calculator + Home Financing Math Helpers (Legacy - for agent reference when advising buyers)
  * Extracted from monolithic index.html (Phase 1)
  *
  * Includes:

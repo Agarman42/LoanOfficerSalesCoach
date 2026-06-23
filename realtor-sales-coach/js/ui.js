@@ -1,6 +1,6 @@
 /**
  * js/ui.js
- * Shared UI utilities for the Ultimate Realtor Sales Coach.
+ * Shared UI utilities for the Ultimate Agent Sales Coach.
  *
  * Phase 0:
  * - Toast notification system (replaces alert() calls over time)

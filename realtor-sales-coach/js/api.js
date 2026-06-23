@@ -1,6 +1,6 @@
 /**
  * js/api.js
- * Centralized Grok / xAI API client for the Realtor Sales Coach.
+ * Centralized Grok / xAI API client for the Agent Sales Coach.
  *
  * Phase 0 refactor goals:
  * - Single place for all API calls

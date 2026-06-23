@@ -1,6 +1,6 @@
 /**
  * js/features/user-profile.js
- * Central user profile modal — powers personalization across all Realtor Sales Coach tools.
+ * Central user profile modal — powers personalization across all Agent Sales Coach tools.
  */
 (function () {
   'use strict';

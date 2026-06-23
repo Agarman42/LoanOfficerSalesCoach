@@ -365,7 +365,7 @@
     attachHandlers(contentEl);
   }
 
-  // ─── REALTOR TO 5 MORE ───────────────────────────────────────────────
+  // ─── PARTNER TO 5 MORE ───────────────────────────────────────────────
   function renderRealtorTo5(contentEl) {
     const steps = [
       { n: '1', title: 'Earn the ask', desc: 'After 3+ successful referrals exchanged, you\'ve earned the right to ask for introductions.', script: null },

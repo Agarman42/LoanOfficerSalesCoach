@@ -159,35 +159,51 @@ function smartRouteChat(message) {
         return false; // Stay in chat
     }
 
-    // === PRIMARY: Must have at least one strict underwriting keyword ===
+    // === PRIMARY: Must have at least one strict qualification / guideline keyword ===
     const primaryKeywords = [
-        'guideline', 'guidelines', 'financing', 'pre-approval', 'qualification', 'scenario', 
-        'dti', 'credit', 'self-employed', 'conventional', 'fha', 'va', 'jumbo', 'buydown', 'cash out'
+        'guideline', 'guidelines', 'underwriting', 'financing', 'pre-approval', 'qualification', 'scenario',
+        'dti', 'credit', 'self-employed', 'conventional', 'fha', 'va', 'jumbo', 'buydown', 'cash out',
+        'overlay', 'compensating factor', 'aus finding'
     ];
     const hasPrimary = primaryKeywords.some(kw => lower.includes(kw));
 
     if (!hasPrimary) return false;
 
-    // === SECONDARY: Loan/underwriting context terms (optional but boosts accuracy) ===
+    // === SECONDARY: Loan/qualification context terms (optional but boosts accuracy) ===
     const secondaryKeywords = [
         'dti', 'debt to income', 'credit score', 'fico', 'ltv', 'cltv', 'self-employed',
-        'bankruptcy', 'foreclosure', 'fha', 'va', 'conventional', 'jumbo',
-        'non-qm', 'buydown', 'cash out'
+        'bankruptcy', 'foreclosure', 'fha', 'va', 'usda', 'conventional', 'jumbo',
+        'non-qm', 'buydown', 'cash out', 'gift funds', 'manufactured home'
     ];
     const hasSecondary = secondaryKeywords.some(kw => lower.includes(kw));
 
     // === QUESTION STRUCTURE: Boost if it's phrased as a question ===
-    const isQuestion = lower.includes('?') || 
-                       lower.includes('what is') || 
-                       lower.includes('can i') || 
-                       lower.includes('qualify') || 
+    const isQuestion = lower.includes('?') ||
+                       lower.includes('what is') ||
+                       lower.includes('can i') ||
+                       lower.includes('can they') ||
+                       lower.includes('qualify') ||
                        lower.includes('eligible');
 
     // === ROUTE ONLY IF STRONG SIGNAL ===
     if (hasPrimary && (hasSecondary || isQuestion)) {
-        // For realtor version: specialized financing questions detected — keep in chat and let user use dedicated tools (listing, open house, consultation, prospecting)
-        console.log('[ai-chat] Specialized buyer/financing question detected — staying in chat for seamless experience. User can switch to dedicated tools.');
-        return false; // Routed
+        if (typeof window.showSection === 'function') {
+            window.showSection('underwriting-search');
+        } else {
+            document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+            const uwSection = document.getElementById('underwriting-search');
+            if (uwSection) uwSection.classList.remove('hidden');
+        }
+
+        const uwInput = document.getElementById('uw-question');
+        if (uwInput) {
+            uwInput.value = message;
+            uwInput.focus();
+            uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        console.log('[ai-chat] Buyer financing question routed to Financing Reference tool.');
+        return true;
     }
 
     // Default: Stay in general chat

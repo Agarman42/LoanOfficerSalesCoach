@@ -1,6 +1,6 @@
 /**
  * js/main.js
- * Core UI initialization for the Ultimate Realtor Sales Coach.
+ * Core UI initialization for the Ultimate Agent Sales Coach.
  *
  * Responsibilities (Phase 0.5):
  * - Sidebar / mobile menu toggle
@@ -1077,6 +1077,27 @@
           messageEl.style.opacity = '1';
         }, 250);
       }, 4200);
+    }
+  };
+
+  /** @deprecated Use showAgentLoading — kept for backward compatibility */
+  window.showRealtorLoading = function showRealtorLoading(title, tip) {
+    if (typeof window.showAgentLoading === 'function') {
+      window.showAgentLoading(title, tip);
+      return;
+    }
+    if (typeof window.showLoadingWithTips === 'function') {
+      window.showLoadingWithTips(tip ? [tip] : [], title || 'Working on it...');
+    } else if (typeof window.forceShowGlobalLoading === 'function') {
+      window.forceShowGlobalLoading(title || 'Working on it...');
+    }
+  };
+
+  window.showAgentLoading = function showAgentLoading(title, tip) {
+    if (typeof window.showLoadingWithTips === 'function') {
+      window.showLoadingWithTips(tip ? [tip] : [], title || 'Working on it...');
+    } else if (typeof window.forceShowGlobalLoading === 'function') {
+      window.forceShowGlobalLoading(title || 'Working on it...');
     }
   };
 

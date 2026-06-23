@@ -863,7 +863,7 @@ function renderWeeklyCustomTaskTimeUI(dayName, blockIndex, taskIndex, task, cust
     </div>`;
 }
 
-// Distinct realtor focus pipelines — sphere and past clients are separate on purpose
+// Distinct agent focus pipelines — sphere and past clients are separate on purpose
 const WWP_FOCUS_OPTIONS = [
   ['wwp-emphasis-sphere', 'Sphere of influence'],
   ['wwp-emphasis-past', 'Past clients'],

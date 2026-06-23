@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "================================================"
-echo "  Starting Grok API Proxy for Realtor Sales Coach"
+echo "  Starting Grok API Proxy for Agent Sales Coach"
 echo "================================================"
 echo ""
 

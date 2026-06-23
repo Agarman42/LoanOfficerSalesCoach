@@ -1,7 +1,7 @@
 /**
  * js/features/underwriting.js
  *
- * Financing & Qualification Reference (Legacy - for realtor reference when advising clients on buyer scenarios)
+ * Buyer Financing & Qualification Reference — agent tool for advising clients with lender partner context
  * Polished to match the style and depth of Newsletter, Blog, Social, and Weekly Win tools.
  *
  * Key improvements:

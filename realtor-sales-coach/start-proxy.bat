@@ -2,12 +2,12 @@
 setlocal enabledelayedexpansion
 
 :: ================================================
-::  Realtor Sales Coach - Grok API Proxy (One-Click Launcher)
+::  Agent Sales Coach - Grok API Proxy (One-Click Launcher)
 :: ================================================
 
 echo.
 echo ================================================
-echo   Realtor Sales Coach - Grok API Proxy
+echo   Agent Sales Coach - Grok API Proxy
 echo ================================================
 echo.
 

@@ -28,7 +28,9 @@
       return;
     }
 
-    if (typeof window.showRealtorLoading === 'function') {
+    if (typeof window.showAgentLoading === 'function') {
+      window.showAgentLoading('Crafting 3 powerful listing descriptions...');
+    } else if (typeof window.showRealtorLoading === 'function') {
       window.showRealtorLoading('Crafting 3 powerful listing descriptions...');
     } else if (document.getElementById('global-loading')) {
       document.getElementById('global-loading').classList.remove('hidden');

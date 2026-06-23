@@ -413,7 +413,7 @@ const proTips = [
     "Smart Money Moves: Build Equity Through Home Improvements — Kitchen and bath updates often give the best return on investment in Midwest markets.",
     "Smart Ownership: Pay Down High-Interest Debt Before a Move — Stronger finances mean more options when you're ready to buy or sell.",
 
-    // ==================== EQUITY & MOVE-UP CHECKUP (Realtor client advice) ====================
+    // ==================== EQUITY & MOVE-UP CHECKUP (Agent client advice) ====================
     "Equity & Move-Up: When to Consider Selling & Moving Up — Equity gains + life changes (growing family, new job) often signal it's time to explore options.",
     "Equity & Move-Up: Renovation Budget Planning — Phase big projects or bundle for one contractor bid. Your agent can suggest which upgrades add the most value locally.",
     "Equity & Move-Up: Build Equity Faster — Complete value-adding projects, maintain the home well, and avoid deferred repairs that buyers notice at inspection.",
@@ -1624,7 +1624,7 @@ async function generateNewsletter(feedback = '') {
         
         html = html.replace(/<head>[\s\S]*?<\/head>/gi, '<head><meta charset="UTF-8"></head>');
 
-        // === REALTOR CUSTOM BRANDING INJECTION (logo + company + tagline + contact + social links) ===
+        // === AGENT CUSTOM BRANDING INJECTION (logo + company + tagline + contact + social links) ===
         // Primary source: central userProfile (set in Profile & Preferences).
         // Newsletter page fields act as per-newsletter overrides.
         // Social links are skipped if not provided.
@@ -2085,7 +2085,7 @@ function getCleanOutlookHTML() {
 
     let cleanHTML = rawEl.value;
 
-    // === REALTOR CUSTOM BRANDING (also ensure in clean/saved Outlook copies) ===
+    // === AGENT CUSTOM BRANDING (also ensure in clean/saved Outlook copies) ===
     // Uses same profile + page override + social links logic as main generation.
     try {
       const profile = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};

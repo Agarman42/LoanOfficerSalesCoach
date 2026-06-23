@@ -43,10 +43,10 @@
     <link rel="stylesheet" href="css/main.css">
 
     <!-- Centralized API client (Phase 0) - must load early -->
-    <script src="js/api.js?v=20260623-realtor-v236"></script>
+    <script src="js/api.js?v=20260623-realtor-v237"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-realtor-v236"></script>
+    <script src="js/ui.js?v=20260623-realtor-v237"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -166,6 +166,7 @@
                 <li><a href="#listing-description" class="sidebar-link px-4 py-2.5"><i class="fas fa-pen-fancy w-5"></i> Listing Description Generator</a></li>
                 <li><a href="#open-house" class="sidebar-link px-4 py-2.5"><i class="fas fa-home w-5"></i> Open House Script &amp; Strategy</a></li>
                 <li><a href="#consultation" class="sidebar-link px-4 py-2.5"><i class="fas fa-handshake w-5"></i> Buyer/Seller Consultation Kit</a></li>
+                <li><a href="#underwriting-search" class="sidebar-link px-4 py-2.5"><i class="fas fa-search-dollar w-5"></i> Buyer Financing Reference</a></li>
                 <li><a href="#sales-script" class="sidebar-link px-4 py-2.5"><i class="fas fa-comment-dots w-5"></i> Sales Script Generator</a></li>
             </ul>
 
@@ -1195,6 +1196,143 @@
 
             <div id="consult-output" class="space-y-12 hidden"></div>
         </section>
+
+        <section id="underwriting-search" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+    <div class="text-center mb-6">
+        <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Buyer Financing &amp; Qualification Reference</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Ask layered buyer qualification questions and get structured guidance you can use with clients and your lender partner. <strong>For the most accurate answers, upload relevant sections from current agency guides</strong> (Fannie Mae Selling Guide, FHA Handbook 4000.1, VA Pamphlet 26-7, etc.) or your lender&apos;s overlays. Continue the conversation on the same scenario with follow-ups.</p>
+    </div>
+
+    <div id="uw-pregen-guidance" class="mb-8">
+      <div class="text-center mb-3">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">AGENT-READY ANSWERS</span>
+      </div>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How this tool works — and how agents get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Describe the real buyer file — credit, income, assets, property, timeline, program — and get practical next steps. Upload agency guide sections or lender overlays when you need source-grounded answers instead of generic summaries.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-layer-group text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">1. Describe the Full Scenario</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Layer credit, employment, assets, property, and program details. Context drives the answer.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#F15A29]/10 flex items-center justify-center">
+            <i class="fas fa-file-upload text-xl text-[#F15A29]"></i>
+          </div>
+          <div class="font-semibold mb-1">2. Upload Guide Sections</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Paste or upload Fannie/Freddie/FHA/VA/USDA pages or lender overlays. Uploaded text is treated as highest authority.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
+            <i class="fas fa-comments text-xl text-[#002B5C]"></i>
+          </div>
+          <div class="font-semibold mb-1">3. Continue the Thread</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Follow up on the same file — alternative programs, compensating factors, conditions lists, or client scripts.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-red-50 dark:bg-red-900/30 border-2 border-red-500 dark:border-red-600 rounded-2xl p-5 mb-8">
+        <p class="text-sm font-semibold text-red-800 dark:text-red-200 flex items-start gap-2">
+            <i class="fas fa-exclamation-triangle mt-0.5"></i>
+            <span>AI-assisted analysis only. Always verify with your lender partner and current official guideline manuals. Final underwriting decisions are made by the lender on the file.</span>
+        </p>
+    </div>
+
+    <div class="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-3xl mb-8 space-y-6">
+        <div>
+            <label class="block text-sm font-semibold mb-2 text-[#00A89D] tracking-wide">YOUR QUESTION / SCENARIO</label>
+            <textarea id="uw-question" rows="5"
+                      class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-[#F15A29]/30 text-[15px] resize-y"
+                      placeholder="Describe the layered situation... e.g. FHA purchase, 695 credit, Chapter 7 BK discharged 20 months ago, gift funds for down payment, DTI 49% with the new payment. What compensating factors might help? What should I ask my lender partner?"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-semibold mb-2 text-[#00A89D] tracking-wide">LOAN TYPE (OPTIONAL)</label>
+                <select id="uw-loan-type" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-[#F15A29]/30">
+                    <option value="any">Any / General</option>
+                    <option value="conventional">Conventional</option>
+                    <option value="fha">FHA</option>
+                    <option value="va">VA</option>
+                    <option value="usda">USDA</option>
+                    <option value="non-qm">Non-QM / Portfolio / Jumbo</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-2 text-[#00A89D] tracking-wide">UPLOAD AGENCY GUIDE SECTIONS OR LENDER OVERLAYS (RECOMMENDED)</label>
+                <p class="text-[11px] text-gray-500 -mt-1 mb-2">Copy relevant pages from official guides (selling-guide.fanniemae.com, hud.gov for FHA 4000.1, etc.) into a .txt or .pdf and upload. The AI treats uploaded text as the highest authority.</p>
+                <div id="uw-upload-area"
+                     class="border-2 border-dashed border-[#00A89D] hover:border-[#F15A29] rounded-2xl p-5 text-center cursor-pointer transition-all bg-white dark:bg-gray-800">
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-[#00A89D] mb-2"></i>
+                        <div class="text-sm font-medium">Drop lender overlays, agency manual, or guideline PDF here</div>
+                        <div class="text-[11px] text-gray-500 mt-1">or click to browse (PDF or .txt)</div>
+                    </div>
+                    <input type="file" id="uw-file-upload" accept=".pdf,.txt,.md" class="hidden">
+                </div>
+                <div id="uw-uploaded-list" class="mt-2 text-xs min-h-[22px]"></div>
+            </div>
+        </div>
+
+        <div class="pt-2">
+            <button onclick="searchUnderwriting()"
+                    class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] hover:opacity-90 transition-all text-white font-bold text-xl py-5 rounded-full shadow-xl flex items-center justify-center gap-3">
+                <i class="fas fa-search"></i>
+                <span>Analyze Scenario</span>
+            </button>
+            <div class="text-center text-[11px] text-gray-500 mt-2">The more specific your scenario, the sharper the guidance for you and your buyer.</div>
+        </div>
+    </div>
+
+    <div class="mb-8">
+        <div onclick="window.openUwQuestionTips()"
+             class="group cursor-pointer bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-[#00A89D] hover:shadow-md transition-all rounded-3xl p-6 flex items-center justify-between">
+            <div class="flex-1">
+                <div class="flex items-center gap-2 text-[#00A89D] font-semibold mb-1">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Get Better Answers</span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300 pr-4">Learn exactly what details to include for the most accurate, actionable guidance on complex buyer scenarios.</p>
+            </div>
+            <div class="text-[#00A89D] text-2xl group-hover:translate-x-0.5 transition-transform ml-4">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+    </div>
+
+    <div id="uw-output" class="hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 shadow-inner min-h-[220px]">
+    </div>
+
+    <div id="uw-follow-up-area" class="hidden mt-6 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+        <div class="text-sm font-semibold text-[#00A89D] mb-3 flex items-center gap-2">
+            <i class="fas fa-comments"></i>
+            <span>CONTINUE THIS SCENARIO</span>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4" id="uw-quick-follow-ups">
+            <button onclick="window.useUwQuickFollowUp('What compensating factors would most help this file?')" class="text-xs px-3 py-1 rounded-full border border-gray-300 hover:bg-white dark:hover:bg-gray-700">Compensating factors that help?</button>
+            <button onclick="window.useUwQuickFollowUp('How would this look under a different program (e.g. FHA vs Conventional)?')" class="text-xs px-3 py-1 rounded-full border border-gray-300 hover:bg-white dark:hover:bg-gray-700">Alternative program?</button>
+            <button onclick="window.useUwQuickFollowUp('Generate a conditions / documentation checklist for this scenario')" class="text-xs px-3 py-1 rounded-full border border-gray-300 hover:bg-white dark:hover:bg-gray-700">Build conditions checklist</button>
+            <button onclick="window.useUwQuickFollowUp('Write a short, professional explanation I can send the buyer or lender partner')" class="text-xs px-3 py-1 rounded-full border border-gray-300 hover:bg-white dark:hover:bg-gray-700">Client / partner script</button>
+        </div>
+
+        <div class="flex gap-3">
+            <textarea id="uw-follow-up-input" rows="2"
+                      class="flex-1 p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#F15A29]/40 resize-y"
+                      placeholder="Ask a follow-up... (e.g. What compensating factors would move confidence to High?)"></textarea>
+            <button id="uw-send-follow-up"
+                    class="self-end bg-[#002B5C] hover:bg-black text-white px-8 rounded-2xl font-bold text-sm transition-all">
+                Ask
+            </button>
+        </div>
+        <div class="text-[10px] text-gray-500 mt-2 px-1">The full scenario + previous answers stay in context for this conversation.</div>
+    </div>
+</section>
 
         <section id="prospecting" class="hidden" aria-hidden="true"></section>
         <!-- MAIN SOCIAL MEDIA TIPS PAGE -->
@@ -4418,6 +4556,68 @@
     
 </section>
 
+<!-- Underwriting Question Structuring Tips Modal -->
+<div id="uw-question-tips-modal" class="fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center" onclick="if (event.target.id === 'uw-question-tips-modal') closeUwQuestionTips()">
+  <div class="bg-white dark:bg-gray-800 w-full max-w-3xl mx-4 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
+    <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-8 py-6 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-lightbulb text-white text-2xl"></i>
+        <h3 class="text-2xl md:text-3xl font-bold text-white tracking-tight">How to Ask Better Qualification Questions</h3>
+      </div>
+      <button onclick="window.closeUwQuestionTips()" class="text-white/80 hover:text-white text-4xl leading-none transition">×</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto custom-modal-scroll p-8 md:p-10 space-y-6 text-[15px] leading-relaxed">
+      <p class="text-gray-700 dark:text-gray-300">Buyer qualification questions are rarely simple. The more specific context you provide about layered details, the more accurate and actionable the guidance will be — for you, your client, and your lender partner.</p>
+
+      <div>
+        <div class="font-semibold text-[#002B5C] dark:text-white mb-2 flex items-center gap-2">
+          <i class="fas fa-check-circle text-[#00A89D]"></i>
+          <span>Key information to include (when relevant):</span>
+        </div>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-700 dark:text-gray-300">
+          <li><strong>Core numbers:</strong> Credit score, DTI, LTV/CLTV, loan amount, reserves, property type/occupancy.</li>
+          <li><strong>The specific issue:</strong> What the lender or AUS is flagging, or your exact concern.</li>
+          <li><strong>Timeline &amp; events:</strong> Dates for recent BK, foreclosure, late payments, job changes, etc.</li>
+          <li><strong>Employment &amp; income:</strong> Self-employed? How long? Any gaps or multiple jobs?</li>
+          <li><strong>Compensating factors:</strong> Strengths the buyer has (strong credit history, large down payment, low LTV, stable employment, etc.).</li>
+        </ul>
+      </div>
+
+      <div class="bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl p-5">
+        <div class="font-semibold text-[#00A89D] mb-2 flex items-center gap-2">
+          <i class="fas fa-upload"></i>
+          <span>Pro move: Upload your documents</span>
+        </div>
+        <p class="text-sm text-gray-700 dark:text-gray-300">Drop your lender partner&apos;s overlays, the specific agency guideline section, or AUS findings. The analysis will reference them directly for much more precise results.</p>
+      </div>
+
+      <div>
+        <div class="font-semibold text-[#002B5C] dark:text-white mb-2">Example of a strong, detailed question:</div>
+        <div class="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-sm font-mono text-gray-700 dark:text-gray-300">
+          "FHA purchase. Buyer 695 credit, Chapter 7 BK discharged 20 months ago. Gift funds from parents for full down payment + closing costs. DTI 49% with new payment. Self-employed 18 months. Strong reserves otherwise. What compensating factors or documentation should I discuss with my lender partner? Any red flags with the gift funds?"
+        </div>
+      </div>
+
+      <p class="text-xs text-gray-500 dark:text-gray-400">After you receive an answer, use the &quot;Continue this scenario&quot; area to ask follow-ups like &quot;What if we add a co-borrower with 720 credit?&quot; or &quot;Generate a conditions checklist for the file.&quot;</p>
+    </div>
+
+    <div class="mt-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 rounded-b-3xl p-8 text-center flex-shrink-0">
+      <div class="text-[#00A89D] text-xs font-bold tracking-[2px] mb-2">NEXT LEVEL</div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Turn guidelines into client wins</p>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-5 max-w-md mx-auto">Save scenarios to My Saved Items, use answers in buyer consults, and loop back with follow-ups.</p>
+      <button onclick="if(typeof window.showSection==='function') window.showSection('sales-script')" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002B5C] hover:bg-black text-white text-sm font-semibold transition">
+        <i class="fas fa-comment-dots"></i>
+        <span>Open Sales Script Generator → Use the guidance in real conversations</span>
+      </button>
+    </div>
+
+    <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-gray-50 dark:bg-gray-900 flex-shrink-0">
+      <button onclick="window.closeUwQuestionTips()" class="px-6 py-2.5 bg-[#002B5C] hover:bg-black text-white rounded-xl font-semibold transition">Got it — thanks!</button>
+    </div>
+  </div>
+</div>
+
 <!-- Event Type Modals were relocated to the very end of <body> for maximum reliability (never nested inside hidden sections) -->
 
 
@@ -6836,13 +7036,13 @@
    </section> 
 
 <!-- Rich modal modules (LO polish mirror) -->
-<script src="js/features/social-modals.js?v=20260623-realtor-v236"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v236"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-realtor-v236"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v236"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-realtor-v236"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-realtor-v236"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v236"></script>
+<script src="js/features/social-modals.js?v=20260623-realtor-v237"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v237"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-realtor-v237"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v237"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-realtor-v237"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-realtor-v237"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v237"></script>
 
 <script>
 // Reusable toggle for Supporting Systems sections (makes them behave like the main 6 pillars)
@@ -13460,8 +13660,8 @@ window.toggleSupportingSection = function(sectionId) {
   }
 })();
 </script>
-<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v236"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v236"></script>
+<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v237"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v237"></script>
 
 </main>
 <!-- Global Centered Loading Modal — Premium style matching Social & Blog Creator -->
@@ -13653,25 +13853,26 @@ window.toggleSupportingSection = function(sectionId) {
 </div>
 
 <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-<script src="js/main.js"></script>
+<script src="js/main.js?v=20260623-realtor-v237"></script>
 
 <!-- Extracted Features (Phase 1) -->
 <script src="js/features/save-ribbon.js"></script>
-<script src="js/features/sales-scripts.js?v=20260623-realtor-v236"></script>
-<script src="js/features/listing-description.js?v=20260623-realtor-v236"></script>
-<script src="js/features/open-house.js?v=20260623-realtor-v236"></script>
-<script src="js/features/consultation-kit.js?v=20260623-realtor-v236"></script>
-<script src="js/features/social-post.js?v=20260623-realtor-v236"></script>
-<script src="js/features/mindset-lab.js?v=20260623-realtor-v236"></script>
+<script src="js/features/sales-scripts.js?v=20260623-realtor-v237"></script>
+<script src="js/features/listing-description.js?v=20260623-realtor-v237"></script>
+<script src="js/features/open-house.js?v=20260623-realtor-v237"></script>
+<script src="js/features/consultation-kit.js?v=20260623-realtor-v237"></script>
+<script src="js/features/social-post.js?v=20260623-realtor-v237"></script>
+<script src="js/features/mindset-lab.js?v=20260623-realtor-v237"></script>
 <script src="js/data/weekend-plan-policy.js"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v236"></script>
-<script src="js/features/tool-bridges.js?v=20260623-realtor-v236"></script>
+<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v237"></script>
+<script src="js/features/tool-bridges.js?v=20260623-realtor-v237"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
-<script src="js/features/blog-creator.js?v=20260623-realtor-v236"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-realtor-v236"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-realtor-v236"></script>
-<script src="js/features/ai-chat.js?v=20260623-realtor-v236"></script>
-<script src="js/features/value-vault.js?v=20260623-realtor-v236"></script>
+<script src="js/features/blog-creator.js?v=20260623-realtor-v237"></script>
+<script src="js/features/legacy-helpers.js?v=20260623-realtor-v237"></script>
+<script src="js/features/newsletter-generator.js?v=20260623-realtor-v237"></script>
+<script src="js/features/ai-chat.js?v=20260623-realtor-v237"></script>
+<script src="js/features/underwriting.js?v=20260623-realtor-v237"></script>
+<script src="js/features/value-vault.js?v=20260623-realtor-v237"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
 
@@ -15154,7 +15355,7 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260623-realtor-v236"></script>
+<script src="js/features/user-profile.js?v=20260623-realtor-v237"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -15303,7 +15504,7 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Agent Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Agent Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v236"></script>
+<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v237"></script>
 <script src="js/app-version.js"></script>
 
 </body>

@@ -23,7 +23,9 @@
     const checked = featContainer.querySelectorAll('input[type="checkbox"]:checked');
     const features = Array.from(checked).map(cb => cb.value).filter(Boolean);
 
-    if (typeof window.showRealtorLoading === 'function') {
+    if (typeof window.showAgentLoading === 'function') {
+      window.showAgentLoading('Building your complete open house script & strategy kit...');
+    } else if (typeof window.showRealtorLoading === 'function') {
       window.showRealtorLoading('Building your complete open house script & strategy kit...');
     } else if (document.getElementById('global-loading')) {
       document.getElementById('global-loading').classList.remove('hidden');

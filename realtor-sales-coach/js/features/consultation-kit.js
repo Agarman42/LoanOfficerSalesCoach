@@ -23,7 +23,9 @@
     const focusChecks = focusContainer.querySelectorAll('input[type="checkbox"]:checked');
     const prepFocuses = Array.from(focusChecks).map(cb => (cb.value || '').trim()).filter(Boolean);
 
-    if (typeof window.showRealtorLoading === 'function') {
+    if (typeof window.showAgentLoading === 'function') {
+      window.showAgentLoading('Building your complete buyer/seller consultation prep kit...');
+    } else if (typeof window.showRealtorLoading === 'function') {
       window.showRealtorLoading('Building your complete buyer/seller consultation prep kit...');
     } else if (document.getElementById('global-loading')) {
       document.getElementById('global-loading').classList.remove('hidden');
