@@ -695,7 +695,7 @@
       whyLabel: 'Why Insurance Agents Are Natural Partners',
       whyText: 'They already have the home + auto relationship. When you help their clients with a smooth real estate or equity strategy, you become the obvious person they recommend for the next life event.',
       scripts: [
-        { title: 'Joint Client Event Invite', script: 'Would you be open to co-hosting a small “Home Protection Night” for some of our mutual clients? I\'ll handle the real estate/equity side, you cover insurance gaps. Low pressure, good food, and we both look like the helpful team.', tip: 'Pairs with Co-Host for Leverage event play.', saveKey: 'Insurance: Joint Event' }
+        { title: 'Joint Client Event Invite', script: 'Would you be open to co-hosting a small “Home Protection Night” for some of our mutual clients? I\'ll handle the buying/selling/homeownership side, you cover insurance gaps. Low pressure, good food, and we both look like the helpful team.', tip: 'Pairs with Co-Host for Leverage event play.', saveKey: 'Insurance: Joint Event' }
       ],
       proTip: 'After every smooth closing with their client, send a short text thanking them and offering to loop them in on future home conversations.',
       bridges: [

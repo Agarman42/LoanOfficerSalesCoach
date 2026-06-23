@@ -58,7 +58,7 @@
     if (eff.goals) parts.push(`Current focus/goals: ${eff.goals}`);
     if (eff.challenges) parts.push(`Key client challenges you solve: ${eff.challenges}`);
 
-    const base = 'Warm, authentic, relationship-first realtor who posts like a real person — never salesy. Heavy on personal, local, and engagement content (70-80% non-business).';
+    const base = 'Warm, authentic, relationship-first agent who posts like a real person — never salesy. Heavy on personal, local, and engagement content (70-80% non-business).';
     return parts.length ? `${base} ${parts.join('. ')}.` : base;
   }
 
@@ -137,9 +137,9 @@ async function generateSocialPost() {
       loadingEl.style.display = 'flex';
     }
 
-    let prompt = `You are creating social media content for a specific realtor.
+    let prompt = `You are creating social media content for a specific real estate agent.
 
-REALTOR PROFILE & VOICE:
+AGENT PROFILE & VOICE:
 ${personalization}
 ${localContext}
 

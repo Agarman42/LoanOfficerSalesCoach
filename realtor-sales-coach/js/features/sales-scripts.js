@@ -53,7 +53,7 @@
     if (eff.localArea) parts.push(`Primary market: ${eff.localArea}`);
     if (eff.targetPartners && eff.targetPartners.length) parts.push(`Key referral partners: ${eff.targetPartners.join(', ')}`);
 
-    const base = 'Warm, authentic, relationship-first realtor who speaks like a trusted advisor.';
+    const base = 'Warm, authentic, relationship-first agent who speaks like a trusted advisor.';
     return parts.length ? `${base} ${parts.join('. ')}.` : base;
   }
 
@@ -177,7 +177,7 @@
         { value: "Welcome a new real estate agent to the market or office", label: "Welcome new agent to market/office", contextTip: "Helpful context: How new are they to the business? Do they have any background (previous career, family in real estate)? What kind of support would be most valuable (market intel, co-broke tips, lender intros)?" },
         { value: "Support a fellow agent who's having a slow month", label: "Support fellow agent having slow month", contextTip: "Useful details: How well do you know them? Have you worked or co-broke'd together before? Would they appreciate a lead, co-marketing idea, market intel, or just a supportive conversation?" },
         { value: "Ask another agent to introduce you to their sphere or for a referral", label: "Ask agent for sphere intro or referral", contextTip: "Helpful context: How strong is your current relationship with this agent? Have you done any co-broke deals or joint events together? What value (leads, expertise, co-marketing) can you offer in return?" },
-        { value: "Offer to co-host a first-time buyer seminar", label: "Co-host first-time buyer event", contextTip: "Useful details: Has this realtor done any educational events before? Do they have a specific target audience (first-time buyers, move-up, investors)?" }
+        { value: "Offer to co-host a first-time buyer seminar", label: "Co-host first-time buyer event", contextTip: "Useful details: Has this partner done any educational events before? Do they have a specific target audience (first-time buyers, move-up, investors)?" }
       ]
     },
     "post-closing-surveys": {
@@ -198,14 +198,14 @@
       icon: "fa-heart",
       color: "#00A89D",
       scenarios: [
-        { value: "Follow up after sending a buyer qualification packet or realtor resources", label: "Follow up after buyer resources / qualification share", contextTip: "Helpful details: How long ago did you send the qualification overview or resources to the realtor/buyer? Did the realtor or buyer respond? Any specific questions about process, lenders, or next steps?" },
+        { value: "Follow up after sending a buyer qualification packet or buyer resources", label: "Follow up after buyer resources / qualification share", contextTip: "Helpful details: How long ago did you send the qualification overview or resources to the buyer? Did they respond? Any specific questions about process, lenders, or next steps?" },
         { value: "Respond to an Experience.com or Google review", label: "Respond to review/survey", contextTip: "Very helpful: Was the review positive or critical? Did it come from a buyer/client or a realtor/partner? What specific part of the experience did they mention?" },
         { value: "Thank a client for completing a post-closing survey or review", label: "Thank client for completing survey/review", contextTip: "Nice touch: What did they specifically say in the review that stood out? Was there anything particularly stressful about their transaction that you helped with?" },
         { value: "Thank a past client for sending a referral", label: "Thank past client for a referral", contextTip: "Great context: How did the referral turn out? Did the new client end up closing? Any specific things the referring client might appreciate being acknowledged for (their intro, their sphere trust)?" },
         { value: "Offer value to another agent (no ask)", label: "Offer value to another agent (no ask)", contextTip: "Useful details: What kind of value are you thinking of offering (hot buyer lead in their area, market update, co-marketing idea, introduction to a lender)? Have you done anything like this with them before?" },
         { value: "Thank another agent after a smooth co-broke closing", label: "Thank agent after smooth co-broke", contextTip: "Nice touch: What made the collaboration particularly smooth or memorable? Was there anything the other agent did that you especially appreciated (communication, flexibility, bringing a strong buyer)?" },
         { value: "Birthday, closing anniversary, or home anniversary check-in", label: "Birthday or anniversary check-in", contextTip: "Helpful details: How long ago did you close their purchase? Do you have any personal details about them (kids' names, hobbies, pets, life events) that would make the note feel more genuine?" },
-        { value: "Reinforce 'I'm your realtor for life'", label: "Reinforce 'realtor for life'", contextTip: "Good context: How long ago did you help them purchase their home? Have they referred anyone to you yet? Any life events coming up (new baby, job change, growing family) that might mean a future move?" },
+        { value: "Reinforce 'I'm your agent for life'", label: "Reinforce 'agent for life'", contextTip: "Good context: How long ago did you help them purchase their home? Have they referred anyone to you yet? Any life events coming up (new baby, job change, growing family) that might mean a future move?" },
         { value: "Reach out for an annual home & equity check-in or move-up review", label: "Annual home & equity / move-up review", contextTip: "Helpful details: When did they close their current home? Any life events or equity growth that might signal a future move-up, investment, or downsizing conversation?" },
         { value: "Help a past client who is relocating", label: "Help past client relocating", contextTip: "Useful context: Where are they moving to? Do they need a referral to a lender in the new area, or are they keeping the current home as a rental?" },
         { value: "Congratulate another agent on a new listing or sale", label: "Congratulate agent on win", contextTip: "Nice touch: Do you know any details about the transaction (price, days on market, any challenges)? Have you worked or co-broke'd with this agent before? Great way to stay top-of-mind." },
@@ -313,9 +313,9 @@ async function generateSalesScript() {
 
     const personalization = buildSalesPersonalization();
 
-    const prompt = `You are an expert real estate communication coach helping realtors build better relationships.
+    const prompt = `You are an expert real estate communication coach helping agents build better relationships.
 
-REALTOR PROFILE:
+AGENT PROFILE:
 ${personalization}
 
 Generate exactly 4 varied, natural scripts for this situation:
@@ -331,7 +331,7 @@ Requirements for each script:
 - Use open-ended questions
 - Include a soft next step
 - End with a gentle call-to-action
-- Tone: Match the realtor's natural voice and personality from the profile above
+- Tone: Match the agent's natural voice and personality from the profile above
 - Make it sound like this specific person wrote it
 
 CRITICAL FORMATTING:

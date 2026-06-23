@@ -1299,7 +1299,7 @@ function openDetailModal(client) {
                 aiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enhancing...';
                 aiBtn.disabled = true;
 
-                // Pull agent voice/profile so the enhanced message matches how *this* realtor speaks (consistent with sales scripts, social, blog, etc.)
+                // Pull agent voice/profile so the enhanced message matches how *this* agent speaks (consistent with sales scripts, social, blog, etc.)
                 const loVoice = [
                     profile.personality ? `Personality: ${profile.personality}` : '',
                     (profile.voiceTraits && profile.voiceTraits.length) ? `Voice traits: ${profile.voiceTraits.join(', ')}` : '',
@@ -1308,10 +1308,10 @@ function openDetailModal(client) {
                 ].filter(Boolean).join('. ');
 
                 try {
-                    const enhancePrompt = `You are an expert realtor advisor known for warm, authentic, non-salesy communication that builds real relationships.
+                    const enhancePrompt = `You are an expert real estate advisor known for warm, authentic, non-salesy communication that builds real relationships.
 
-REALTOR PROFILE & VOICE (match this exact style and personality — make it sound like this specific person wrote it):
-- Name: ${profile.name || 'the realtor'}
+AGENT PROFILE & VOICE (match this exact style and personality — make it sound like this specific person wrote it):
+- Name: ${profile.name || 'the agent'}
 ${loVoice ? loVoice + '\n' : ''}
 
 Client details:
@@ -1322,7 +1322,7 @@ Client details:
 Original script:
 ${origText}
 
-Rewrite this as a warmer, more personalized, relationship-first outreach message. Keep it under 120 words. Match the LO's natural voice from the profile above (helpful, low-pressure, focused on client's goals, weave personality/hobbies if it fits naturally). End with a soft, easy next step. Do not add rates or specific promises. Just the message body.`;
+Rewrite this as a warmer, more personalized, relationship-first outreach message. Keep it under 120 words. Match the agent's natural voice from the profile above (helpful, low-pressure, focused on the client's goals, weave personality/hobbies if it fits naturally). End with a soft, easy next step. Do not add specific rate or price promises. Just the message body.`;
 
                     const enhanced = await window.callGrokAPI(enhancePrompt, { temperature: 0.7, max_tokens: 400 });
                     scriptText.textContent = enhanced.trim();

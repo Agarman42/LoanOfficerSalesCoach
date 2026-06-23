@@ -1688,8 +1688,8 @@
         <ul class="text-sm space-y-1.5">${items.map((i) => `<li class="flex gap-2"><span class="text-[#00A89D]">☐</span>${esc(i)}</li>`).join('')}</ul>
       </div>
       ${scriptCard('Invite a lender partner (optional co-host)',
-        'Happy to co-host your open house Saturday — I\'ll handle the buyer welcome station and you focus on the property. I\'ll bring materials and follow up on every sign-in lead. Want me there?',
-        'Send 3–5 days before. Co-hosting doubles your reach.')}
+        'I\'m running an open house Saturday at [address] — would love you there for a quick pre-qual station if you\'re free. I\'ll handle the property and leads; you handle financing questions for serious buyers.',
+        'Send 3–5 days before. Lender co-host doubles your reach and buyer confidence.')}
       <div class="flex flex-wrap gap-2 mb-6 mt-4">
         <button type="button" data-vault-bridge="play:open-house-domination" class="text-xs px-3 py-2 rounded-xl bg-[#F15A29] text-white font-semibold hover:bg-orange-600 transition">Open house play →</button>
         <button type="button" data-vault-bridge="modal:popby-open-house-kit" class="text-xs px-3 py-2 rounded-xl border border-gray-300 font-semibold hover:bg-gray-100 transition">Partner gift idea →</button>
@@ -1899,7 +1899,7 @@
     renderPremiumGift(item, contentEl, modal, { badge: 'PROFESSIONAL DAILY', whyWorks: ['Used for signing, notes, and planning', 'Feels substantial vs cheap promo pens', 'Pairs beautifully with a leather journal', 'Works for business-owner clients too'], timing: 'Closing gift supplement or 6-month touch for clients who journal or run a business from home.', proUpgrade: 'Metal or gel pen set in a small gift box. Engrave initials if budget allows.', noteScript: 'For all the signatures, lists, and plans that come with this new chapter.', copyLabel: 'Copy Pen Set Guide' });
   }
   function renderGiftDeskOrganizer(item, contentEl, modal) {
-    renderPremiumGift(item, contentEl, modal, { badge: 'HIGHEST ROI PRACTICAL', whyWorks: ['Solves real chaos in cars, garages, and desks', 'Used weekly — not forgotten in a drawer', 'Especially powerful for busy families and realtors', 'Feels like you understand their actual life'], timing: '6-month touch or closing gift for clients with kids, long commutes, or home offices.', proUpgrade: 'Collapsible trunk organizer or premium desk caddy. Avoid flimsy plastic.', noteScript: 'A little organization for the beautiful chaos of life in your new home.', copyLabel: 'Copy Organizer Gift Guide' });
+    renderPremiumGift(item, contentEl, modal, { badge: 'HIGHEST ROI PRACTICAL', whyWorks: ['Solves real chaos in cars, garages, and desks', 'Used weekly — not forgotten in a drawer', 'Especially powerful for busy families and on-the-go agents', 'Feels like you understand their actual life'], timing: '6-month touch or closing gift for clients with kids, long commutes, or home offices.', proUpgrade: 'Collapsible trunk organizer or premium desk caddy. Avoid flimsy plastic.', noteScript: 'A little organization for the beautiful chaos of life in your new home.', copyLabel: 'Copy Organizer Gift Guide' });
   }
 
   // ─── PARTNER TOOLS ───────────────────────────────────────────────────
