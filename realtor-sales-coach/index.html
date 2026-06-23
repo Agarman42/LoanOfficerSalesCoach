@@ -3988,6 +3988,21 @@
         <p class="mt-2 text-lg font-semibold">Great events create emotional connections — and emotional connections create referrals.</p>
     </div>
 
+    <!-- Getting People to Show Up — attendance playbook -->
+    <div onclick="openEventModal('drive-attendance')" class="mb-10 cursor-pointer group border-2 border-[#F15A29]/40 bg-gradient-to-br from-[#F15A29]/8 via-white to-[#00A89D]/8 dark:from-[#F15A29]/15 dark:via-gray-900 dark:to-gray-900 rounded-3xl p-8 transition-all hover:shadow-xl hover:border-[#F15A29]/60">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+            <div class="w-14 h-14 rounded-2xl bg-[#F15A29]/15 flex items-center justify-center shrink-0">
+                <i class="fas fa-users text-[#F15A29] text-2xl"></i>
+            </div>
+            <div class="flex-1">
+                <div class="text-[10px] font-bold tracking-[1.5px] text-[#F15A29] uppercase mb-1">Team Playbook • Fill the Room</div>
+                <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white mb-2">Getting People to Show Up</h3>
+                <p class="text-[15px] text-gray-700 dark:text-gray-300 mb-3">Struggling with attendance? The full system: 5-touch invite sequence, A+/B tier invite waves, RSVP math, low-RSVP recovery, and copy-ready scripts.</p>
+            </div>
+            <div class="text-sm font-semibold text-[#F15A29] group-hover:underline shrink-0 md:text-right">Open full attendance playbook →</div>
+        </div>
+    </div>
+
     <!-- 1. Event Planning Philosophy (now rich clickable cards that open detailed modals) -->
     <div class="mb-10">
         <h3 class="text-2xl font-bold mb-4 text-[#002B5C] dark:text-white">Event Planning Philosophy</h3>
@@ -6862,6 +6877,15 @@
 
     </div>
    </section> 
+
+<!-- Rich modal modules (LO polish mirror) -->
+<script src="js/features/social-modals.js?v=20260623-realtor-v217"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v217"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-realtor-v217"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v217"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-realtor-v217"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-realtor-v217"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v217"></script>
 
 <script>
 // Early defensive stub for Social Strategy rich modals (ensures clicks work even if main IIFE is delayed by cache/load)
@@ -14077,7 +14101,8 @@ window.openExpandedSocialExamplesModal = function(pillar) {
   }
 })();
 </script>
-
+<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v217"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v217"></script>
 
 </main>
 <!-- Global Centered Loading Modal — Premium style matching Social & Blog Creator -->
@@ -15654,6 +15679,7 @@ if (document.readyState === 'loading') {
     }
 })();
 </script>
+<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v217"></script>
 
 <!-- =====================================================
      CENTRAL USER PROFILE / PREFERENCES MODAL
@@ -16050,6 +16076,20 @@ if (document.readyState === 'loading') {
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
 <!-- ===================================================== -->
+<div id="modal-drive-attendance" onclick="if (event.target.id === 'modal-drive-attendance') closeEventModal('drive-attendance')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
+  <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F15A29]/10 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] font-bold tracking-[1.5px] text-[#F15A29] uppercase mb-0.5">Event Planning Playbooks</div>
+        <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Getting People to Show Up</h3>
+      </div>
+      <button onclick="closeEventModal('drive-attendance')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">&times;</button>
+    </div>
+    <div data-event-content class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300"></div>
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end"><button onclick="closeEventModal('drive-attendance')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button></div>
+  </div>
+</div>
+
 <div id="modal-client-appreciation" onclick="closeEventModal('client-appreciation')" class="hidden fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
@@ -16180,6 +16220,7 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Realtor Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Realtor Sales Coach • v… • … • Render
 </div>
+<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v217"></script>
 <script src="js/app-version.js"></script>
 
 </body>
