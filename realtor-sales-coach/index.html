@@ -40,13 +40,13 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v239">
 
     <!-- Centralized API client (Phase 0) - must load early -->
-    <script src="js/api.js?v=20260623-realtor-v238"></script>
+    <script src="js/api.js?v=20260623-realtor-v239"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-realtor-v238"></script>
+    <script src="js/ui.js?v=20260623-realtor-v239"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -167,6 +167,7 @@
                 <li><a href="#open-house" class="sidebar-link px-4 py-2.5"><i class="fas fa-home w-5"></i> Open House Script &amp; Strategy</a></li>
                 <li><a href="#consultation" class="sidebar-link px-4 py-2.5"><i class="fas fa-handshake w-5"></i> Buyer/Seller Consultation Kit</a></li>
                 <li><a href="#underwriting-search" class="sidebar-link px-4 py-2.5"><i class="fas fa-search-dollar w-5"></i> Buyer Financing Reference</a></li>
+                <li><a href="#calculator" class="sidebar-link px-4 py-2.5"><i class="fas fa-calculator w-5"></i> Buyer Payment Calculator</a></li>
                 <li><a href="#sales-script" class="sidebar-link px-4 py-2.5"><i class="fas fa-comment-dots w-5"></i> Sales Script Generator</a></li>
             </ul>
 
@@ -1332,6 +1333,148 @@
         </div>
         <div class="text-[10px] text-gray-500 mt-2 px-1">The full scenario + previous answers stay in context for this conversation.</div>
     </div>
+</section>
+
+<section id="calculator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+    <div class="text-center mb-6">
+        <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Buyer Payment Calculator</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Model purchase and refinance payments for buyer conversations — taxes, insurance, PMI, extra payments, and biweekly options. Share ballpark numbers with clients, then confirm final figures with your lender partner.</p>
+    </div>
+
+    <!-- Mode Toggle -->
+    <div class="flex justify-center mb-10">
+        <div class="inline-flex rounded-full bg-gray-200 dark:bg-gray-700 p-1 shadow-lg">
+            <button type="button" id="mode-purchase" class="px-10 py-4 rounded-full font-bold text-xl transition-all bg-gradient-to-r from-[#00A89D] to-[#00A89D]/80 text-white shadow-md">Purchase</button>
+            <button type="button" id="mode-refinance" class="px-10 py-4 rounded-full font-bold text-xl transition-all text-gray-700 dark:text-gray-300">Refinance</button>
+        </div>
+    </div>
+
+    <!-- World-class quick presets -->
+    <div class="flex flex-wrap justify-center gap-2 mb-6">
+      <button type="button" onclick="applyCalcPreset('firsttime')" class="text-xs px-4 py-1.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">First-Time Buyer (DPA 3.5%)</button>
+      <button type="button" onclick="applyCalcPreset('investor')" class="text-xs px-4 py-1.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Investor / 25% Down + Extra</button>
+      <button type="button" onclick="applyCalcPreset('refi')" class="text-xs px-4 py-1.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Refi + $200 Extra</button>
+    </div>
+ 
+    <form id="calc-form" class="max-w-5xl mx-auto space-y-8">
+        <!-- Purchase Mode Inputs -->
+        <div id="purchase-inputs" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Home Price ($)</strong></label>
+                <input type="number" id="homePrice" min="0" value="375000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Down Payment</strong></label>
+                <input type="number" id="downPayment" min="0" step="0.01" value="20" placeholder="e.g., 20 or 75000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl mb-2">
+                <div class="flex gap-0">
+                    <button type="button" id="dp-percent-btn" class="flex-1 py-2 px-4 rounded-l-xl bg-gradient-to-r from-[#00A89D] to-[#00A89D]/80 text-white font-bold text-base transition-all shadow-inner">%</button>
+                    <button type="button" id="dp-dollar-btn" class="flex-1 py-2 px-4 rounded-r-xl bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-base transition-all shadow-inner">$</button>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Loan Amount ($)</strong></label>
+                <input type="number" id="loanAmountManual" min="0" value="300000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Auto-calculated or type directly</p>
+            </div>
+        </div>
+
+        <!-- Refinance Mode Input -->
+        <div id="refinance-inputs" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Loan Amount ($)</strong></label>
+                <input type="number" id="loanAmountDirect" min="0" value="300000" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+            <div></div><div></div>
+        </div>
+
+        <!-- Rest of inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Interest Rate (%)</strong></label>
+                <input type="number" id="rate" min="0" step="0.001" value="6.5" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Loan Term (years)</strong></label>
+                <input type="number" id="term" min="1" max="40" value="30" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Annual Property Taxes ($)</strong></label>
+                <input type="number" id="taxes" min="0" value="3600" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Annual Homeowners Insurance ($)</strong></label>
+                <input type="number" id="insurance" min="0" value="1500" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>PMI Rate (% of loan, if &lt;20% down)</strong></label>
+                <input type="number" id="pmi" min="0" step="0.01" value="0" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-lg font-bold text-[#002B5C] dark:text-[#00A89D]"><strong>Extra Monthly Payment ($)</strong></label>
+                <input type="number" id="extraMonthly" min="0" value="0" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-gray-50 dark:bg-gray-900 focus:ring-4 focus:ring-[#F15A29]/30 focus:border-[#F15A29] transition-all text-xl">
+            </div>
+        </div>
+
+        <label class="flex items-center justify-center text-xl">
+            <input type="checkbox" id="biweekly" class="mr-4 h-7 w-7 text-[#00A89D] rounded focus:ring-[#F15A29]">
+            <strong>Make Biweekly Payments (26 per year)</strong>
+        </label>
+    </form>
+<!-- ==================== HOMENOW DPA (v2 PREMIUM COMPACT) ==================== -->
+<div id="homenow-wrapper" class="mt-8 p-6 bg-white dark:bg-gray-800 border-2 border-[#00A89D] rounded-3xl shadow-sm max-w-5xl mx-auto">
+  <div class="flex items-start gap-3">
+    <div class="pt-1">
+      <input type="checkbox" id="homenow-checkbox" class="w-5 h-5 accent-[#00A89D]" onchange="toggleHomeNow()">
+    </div>
+    <div class="flex-1">
+      <div class="font-bold text-[#002B5C] dark:text-white text-lg flex items-center gap-2">
+        <i class="fas fa-home text-[#00A89D]"></i>
+        DPA / 100% Financing Scenario (FHA + Second)
+      </div>
+      <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Model a zero-down FHA first mortgage with financed UFMIP plus a DPA second mortgage. Programs vary by lender and state — confirm eligibility with your lender partner before sharing with buyers.</div>
+
+      <div id="dpa-options" class="hidden mt-4">
+        <div class="text-xs font-semibold text-[#00A89D] mb-1.5">Select DPA Percentage</div>
+        <div class="inline-flex bg-gray-100 dark:bg-gray-700 p-1 rounded-2xl shadow-inner">
+          <button onclick="setDPA(3.5)" id="dpa35-btn" 
+                  class="px-5 py-2 rounded-xl font-semibold text-sm transition-all bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-[#00A89D] hover:text-white active:scale-[0.985]">3.5% DPA</button>
+          <button onclick="setDPA(5)" id="dpa5-btn" 
+                  class="px-5 py-2 rounded-xl font-semibold text-sm transition-all bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-[#00A89D] hover:text-white ml-1 active:scale-[0.985]">5% DPA</button>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">Double-check Down Payment (recommend 0) and Loan Amount above. The DPA becomes your 2nd mortgage.</p>
+      </div>
+
+      <div id="homenow-breakdown" class="hidden mt-4 p-4 bg-gradient-to-br from-[#00A89D]/5 to-white dark:from-gray-700 rounded-2xl border border-[#00A89D]/20 text-sm">
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-gray-500">DPA 2nd Loan</div>
+            <div id="dpa-amt" class="text-2xl font-extrabold text-[#F15A29]">$0</div>
+          </div>
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-gray-500">2nd Mortgage Rate</div>
+            <div id="second-rate" class="text-2xl font-extrabold text-[#002B5C] dark:text-white">X.XX%</div>
+          </div>
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-gray-500">Monthly 2nd Pmt</div>
+            <div id="second-pmt" class="text-2xl font-extrabold text-[#00A89D]">$0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div id="calc-output" class="mt-16 max-w-5xl mx-auto"></div>
 </section>
 
         <section id="prospecting" class="hidden" aria-hidden="true"></section>
@@ -7036,13 +7179,13 @@
    </section> 
 
 <!-- Rich modal modules (LO polish mirror) -->
-<script src="js/features/social-modals.js?v=20260623-realtor-v238"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v238"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-realtor-v238"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v238"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-realtor-v238"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-realtor-v238"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v238"></script>
+<script src="js/features/social-modals.js?v=20260623-realtor-v239"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v239"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-realtor-v239"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v239"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-realtor-v239"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-realtor-v239"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v239"></script>
 
 <script>
 // Reusable toggle for Supporting Systems sections (makes them behave like the main 6 pillars)
@@ -13660,8 +13803,8 @@ window.toggleSupportingSection = function(sectionId) {
   }
 })();
 </script>
-<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v238"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v238"></script>
+<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v239"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v239"></script>
 
 </main>
 <!-- Global Centered Loading Modal — Premium style matching Social & Blog Creator -->
@@ -13853,26 +13996,27 @@ window.toggleSupportingSection = function(sectionId) {
 </div>
 
 <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-<script src="js/main.js?v=20260623-realtor-v238"></script>
+<script src="js/main.js?v=20260623-realtor-v239"></script>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/save-ribbon.js"></script>
-<script src="js/features/sales-scripts.js?v=20260623-realtor-v238"></script>
-<script src="js/features/listing-description.js?v=20260623-realtor-v238"></script>
-<script src="js/features/open-house.js?v=20260623-realtor-v238"></script>
-<script src="js/features/consultation-kit.js?v=20260623-realtor-v238"></script>
-<script src="js/features/social-post.js?v=20260623-realtor-v238"></script>
-<script src="js/features/mindset-lab.js?v=20260623-realtor-v238"></script>
-<script src="js/data/weekend-plan-policy.js"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v238"></script>
-<script src="js/features/tool-bridges.js?v=20260623-realtor-v238"></script>
-<script src="js/features/prospecting-time-blocks.js"></script>
-<script src="js/features/blog-creator.js?v=20260623-realtor-v238"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-realtor-v238"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-realtor-v238"></script>
-<script src="js/features/ai-chat.js?v=20260623-realtor-v238"></script>
-<script src="js/features/underwriting.js?v=20260623-realtor-v238"></script>
-<script src="js/features/value-vault.js?v=20260623-realtor-v238"></script>
+<script src="js/features/save-ribbon.js?v=20260623-realtor-v239"></script>
+<script src="js/features/sales-scripts.js?v=20260623-realtor-v239"></script>
+<script src="js/features/listing-description.js?v=20260623-realtor-v239"></script>
+<script src="js/features/open-house.js?v=20260623-realtor-v239"></script>
+<script src="js/features/consultation-kit.js?v=20260623-realtor-v239"></script>
+<script src="js/features/social-post.js?v=20260623-realtor-v239"></script>
+<script src="js/features/mindset-lab.js?v=20260623-realtor-v239"></script>
+<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v239"></script>
+<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v239"></script>
+<script src="js/features/tool-bridges.js?v=20260623-realtor-v239"></script>
+<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v239"></script>
+<script src="js/features/blog-creator.js?v=20260623-realtor-v239"></script>
+<script src="js/features/legacy-helpers.js?v=20260623-realtor-v239"></script>
+<script src="js/features/newsletter-generator.js?v=20260623-realtor-v239"></script>
+<script src="js/features/ai-chat.js?v=20260623-realtor-v239"></script>
+<script src="js/features/calculator.js?v=20260623-realtor-v239"></script>
+<script src="js/features/underwriting.js?v=20260623-realtor-v239"></script>
+<script src="js/features/value-vault.js?v=20260623-realtor-v239"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
 
@@ -15355,7 +15499,7 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260623-realtor-v238"></script>
+<script src="js/features/user-profile.js?v=20260623-realtor-v239"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -15504,8 +15648,8 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Agent Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Agent Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v238"></script>
-<script src="js/app-version.js"></script>
+<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v239"></script>
+<script src="js/app-version.js?v=20260623-realtor-v239"></script>
 
 </body>
 </html>

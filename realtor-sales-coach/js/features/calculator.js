@@ -116,7 +116,7 @@ function calculateAdvanced() {
 
         homenowHTML = `
             <div class="mt-4 p-3 bg-[#00A89D]/5 border border-[#00A89D]/30 rounded-2xl text-sm">
-                <span class="font-semibold text-[#00A89D]">+ HomeNow 2nd:</span> $${Math.round(secondPmt).toLocaleString()}/mo @ ${secondRate.toFixed(3)}% (10yr term)
+                <span class="font-semibold text-[#00A89D]">+ DPA 2nd:</span> $${Math.round(secondPmt).toLocaleString()}/mo @ ${secondRate.toFixed(3)}% (10yr term)
             </div>`;
     }
 
@@ -222,7 +222,7 @@ function calculateAdvanced() {
                     ${interestDiff > 0 ? 'Save' : interestDiff < 0 ? 'Extra' : 'No change'}: $${Math.abs(interestDiff).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                   </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-4 italic">* Estimates only. Confirm with your lender for exact figures, rounding rules, and program eligibility (especially HomeNow DPA).</p>
+                <p class="text-xs text-gray-500 mt-4 italic">* Estimates only. Confirm final numbers and program eligibility with your lender partner before sharing with buyers.</p>
             </div>
         </div>
     </div>
@@ -594,7 +594,7 @@ function autoSetFHA_MIP() {
     // Initial calc
     calculateAdvanced();
 
-    console.log('%c[calculator.js] Advanced Payment Calculator initialized (v2 polished)', 'color:#00A89D');
+    console.log('%c[calculator.js] Buyer Payment Calculator initialized (Agent Sales Coach)', 'color:#00A89D');
   }
 
   if (document.readyState === 'loading') {

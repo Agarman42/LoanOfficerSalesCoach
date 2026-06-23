@@ -25,6 +25,7 @@ When asked what the tool does or about its features, ALWAYS highlight the AI TOO
 • Open House Script & Strategy – Full kit: setup checklist, opening scripts, talking points, objections, lead capture, and social angles
 • Buyer/Seller Consultation Prep Kit – Personalized market snapshots, comps, pricing/affordability, objections, and follow-up plans
 • Buyer Financing & Qualification Reference – Layered scenario analysis with lender-partner guidance and follow-up threads
+• Buyer Payment Calculator – Purchase/refinance payment modeling with taxes, PMI, extra payments, and DPA scenarios for client conversations
 • Sales Script Generator – Instant objection handlers and conversation scripts
 • Social Media Post & Calendar Creator – Ready-to-post content + full monthly plans (6 pillars, 14 Reels, 120+ Evergreen)
 • Blog Creator – Full SEO + GEO optimized blog posts with matching social + Google + Reel assets in seconds
@@ -153,11 +154,30 @@ function smartRouteChat(message) {
         'what is this tool', 'what does this tool do', 'what can this tool do', 'features',
         'tell me about this app', 'how does this help', 'what are the tools', 'ai tools',
         'help me with', 'sales script', 'marketing idea', 'motivation', 'weekly plan',
-        'win plan', 'equity scanner', 'social media planner', 'chat assistant',
+        'win plan', 'social media planner', 'chat assistant',
         'how do i use', 'what sections', 'navigate', 'dashboard'
     ];
     if (blockPhrases.some(phrase => lower.includes(phrase))) {
         return false; // Stay in chat
+    }
+
+    // === PAYMENT CALCULATOR: monthly payment / PMI / affordability math ===
+    const calcKeywords = [
+        'monthly payment', 'payment calculator', 'how much would', 'pmi', 'principal and interest',
+        'p&i', 'mortgage payment', 'total payment', 'biweekly payment', 'extra payment',
+        'payoff timeline', 'lifetime interest', 'down payment of', 'what would the payment'
+    ];
+    const calcContext = ['payment', 'mortgage', 'loan', 'buy', 'purchase', 'refinance', 'afford', 'rate', 'home price', 'down'];
+    if (calcKeywords.some(kw => lower.includes(kw)) && calcContext.some(kw => lower.includes(kw))) {
+        if (typeof window.showSection === 'function') {
+            window.showSection('calculator');
+        } else {
+            document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+            const calcSection = document.getElementById('calculator');
+            if (calcSection) calcSection.classList.remove('hidden');
+        }
+        console.log('[ai-chat] Payment math question noted — routed to Buyer Payment Calculator.');
+        return true;
     }
 
     // === PRIMARY: Must have at least one strict qualification / guideline keyword ===
