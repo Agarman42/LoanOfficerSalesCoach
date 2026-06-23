@@ -40,13 +40,13 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v244">
+    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v245">
 
     <!-- Centralized API client (Phase 0) - must load early -->
-    <script src="js/api.js?v=20260623-realtor-v244"></script>
+    <script src="js/api.js?v=20260623-realtor-v245"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-realtor-v244"></script>
+    <script src="js/ui.js?v=20260623-realtor-v245"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -3321,35 +3321,35 @@
 </section>
 
 <!-- Process Stage Modal -->
-<div id="process-stage-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'process-stage-modal') { const m = document.getElementById('process-stage-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none'; }">
+<div id="process-stage-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'process-stage-modal') closeNamedModal('process-stage-modal')">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
                 <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Transaction Journey</div>
                 <h3 id="process-stage-title" class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white"></h3>
             </div>
-            <button onclick="const m=document.getElementById('process-stage-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
+            <button onclick="closeNamedModal('process-stage-modal')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
         </div>
         <div id="process-stage-content" class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300"></div>
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
-            <button onclick="const m=document.getElementById('process-stage-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
+            <button onclick="closeNamedModal('process-stage-modal')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
         </div>
     </div>
 </div>
 
 <!-- Process Template Modal (premium rich playbooks — matches journey + database polish) -->
-<div id="process-template-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'process-template-modal') { const m = document.getElementById('process-template-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none'; }">
+<div id="process-template-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'process-template-modal') closeNamedModal('process-template-modal')">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
                 <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Transaction Process Templates &amp; Scripts</div>
                 <h3 id="process-template-title" class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white"></h3>
             </div>
-            <button onclick="const m=document.getElementById('process-template-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
+            <button onclick="closeNamedModal('process-template-modal')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
         </div>
         <div id="process-template-content" class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300"></div>
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
-            <button onclick="const m=document.getElementById('process-template-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
+            <button onclick="closeNamedModal('process-template-modal')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
         </div>
     </div>
 </div>
@@ -3406,35 +3406,35 @@
 </div>
 
 <!-- Scaling Level Modal -->
-<div id="scaling-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'scaling-modal') { const m = document.getElementById('scaling-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none'; }">
+<div id="scaling-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'scaling-modal') closeNamedModal('scaling-modal')">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
                 <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Transaction Process • White-Glove Scaling</div>
                 <h3 id="scaling-modal-title" class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white"></h3>
             </div>
-            <button onclick="const m=document.getElementById('scaling-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
+            <button onclick="closeNamedModal('scaling-modal')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
         </div>
         <div id="scaling-modal-content" class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300"></div>
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
-            <button onclick="const m=document.getElementById('scaling-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
+            <button onclick="closeNamedModal('scaling-modal')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
         </div>
     </div>
 </div>
 
 <!-- Communication Deep-Dive Modal -->
-<div id="communication-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'communication-modal') { const m = document.getElementById('communication-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none'; }">
+<div id="communication-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'communication-modal') closeNamedModal('communication-modal')">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
                 <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Communication Cadence</div>
                 <h3 id="communication-modal-title" class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white"></h3>
             </div>
-            <button onclick="const m=document.getElementById('communication-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
+            <button onclick="closeNamedModal('communication-modal')" class="text-4xl leading-none text-gray-400 hover:text-red-500 transition">×</button>
         </div>
         <div id="communication-modal-content" class="p-6 md:p-8 overflow-y-auto max-h-[68vh] text-[15px] leading-relaxed text-gray-700 dark:text-gray-300"></div>
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
-            <button onclick="const m=document.getElementById('communication-modal'); m.classList.remove('flex'); m.classList.add('hidden'); m.style.display='none';" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
+            <button onclick="closeNamedModal('communication-modal')" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800">Close Guide</button>
         </div>
     </div>
 </div>
@@ -7037,13 +7037,13 @@
    </section> 
 
 <!-- Rich modal modules (LO polish mirror) -->
-<script src="js/features/social-modals.js?v=20260623-realtor-v244"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v244"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-realtor-v244"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v244"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-realtor-v244"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-realtor-v244"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v244"></script>
+<script src="js/features/social-modals.js?v=20260623-realtor-v245"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v245"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-realtor-v245"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v245"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-realtor-v245"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-realtor-v245"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v245"></script>
 
 <script>
 // Reusable toggle for Supporting Systems sections (makes them behave like the main 6 pillars)
@@ -7504,10 +7504,17 @@ window.toggleSupportingSection = function(sectionId) {
     titleEl.textContent = stage.title;
     contentEl.innerHTML = stage.content;
 
-    // Force visibility (matches the pattern that fixed Database Nurturing modals)
-    modal.style.display = '';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    if (typeof window.openNamedModal === 'function') {
+      window.openNamedModal(modal);
+    } else {
+      modal.style.display = '';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('modal-open');
+    }
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
   };
 
   window.saveProcessItem = function(title, btnElement) {
@@ -7739,10 +7746,17 @@ window.toggleSupportingSection = function(sectionId) {
     titleEl.textContent = data.title;
     contentEl.innerHTML = data.content;
 
-    // Force visibility (same pattern used to fix other Transaction Process + Database modals)
-    modal.style.display = '';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    if (typeof window.openNamedModal === 'function') {
+      window.openNamedModal(modal);
+    } else {
+      modal.style.display = '';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('modal-open');
+    }
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
   };
 
   const COMMUNICATION_MODALS = {
@@ -7903,10 +7917,17 @@ window.toggleSupportingSection = function(sectionId) {
     titleEl.textContent = data.title;
     contentEl.innerHTML = data.content;
 
-    // Force visibility (matches the pattern that fixed Database Nurturing modals)
-    modal.style.display = '';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    if (typeof window.openNamedModal === 'function') {
+      window.openNamedModal(modal);
+    } else {
+      modal.style.display = '';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('modal-open');
+    }
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
   };
 
   // Rich Template Modals for Transaction Process section — fully upgraded with Why boxes, multiple Copy+Save ready-to-use scripts, detailed playbooks, and pro tips (matches journey stage polish)
@@ -13640,8 +13661,8 @@ window.toggleSupportingSection = function(sectionId) {
   }
 })();
 </script>
-<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v244"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v244"></script>
+<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v245"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v245"></script>
 
 </main>
 <!-- Global Centered Loading Modal — Premium style matching Social & Blog Creator -->
@@ -13730,26 +13751,26 @@ window.toggleSupportingSection = function(sectionId) {
 </div>
 
 <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-<script src="js/main.js?v=20260623-realtor-v244"></script>
+<script src="js/main.js?v=20260623-realtor-v245"></script>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/save-ribbon.js?v=20260623-realtor-v244"></script>
-<script src="js/features/sales-scripts.js?v=20260623-realtor-v244"></script>
-<script src="js/features/listing-description.js?v=20260623-realtor-v244"></script>
-<script src="js/features/open-house.js?v=20260623-realtor-v244"></script>
-<script src="js/features/consultation-kit.js?v=20260623-realtor-v244"></script>
-<script src="js/features/social-post.js?v=20260623-realtor-v244"></script>
-<script src="js/features/mindset-lab.js?v=20260623-realtor-v244"></script>
-<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v244"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v244"></script>
-<script src="js/features/tool-bridges.js?v=20260623-realtor-v244"></script>
-<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v244"></script>
-<script src="js/features/blog-creator.js?v=20260623-realtor-v244"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-realtor-v244"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-realtor-v244"></script>
-<script src="js/features/ai-chat.js?v=20260623-realtor-v244"></script>
-<script src="js/features/underwriting.js?v=20260623-realtor-v244"></script>
-<script src="js/features/value-vault.js?v=20260623-realtor-v244"></script>
+<script src="js/features/save-ribbon.js?v=20260623-realtor-v245"></script>
+<script src="js/features/sales-scripts.js?v=20260623-realtor-v245"></script>
+<script src="js/features/listing-description.js?v=20260623-realtor-v245"></script>
+<script src="js/features/open-house.js?v=20260623-realtor-v245"></script>
+<script src="js/features/consultation-kit.js?v=20260623-realtor-v245"></script>
+<script src="js/features/social-post.js?v=20260623-realtor-v245"></script>
+<script src="js/features/mindset-lab.js?v=20260623-realtor-v245"></script>
+<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v245"></script>
+<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v245"></script>
+<script src="js/features/tool-bridges.js?v=20260623-realtor-v245"></script>
+<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v245"></script>
+<script src="js/features/blog-creator.js?v=20260623-realtor-v245"></script>
+<script src="js/features/legacy-helpers.js?v=20260623-realtor-v245"></script>
+<script src="js/features/newsletter-generator.js?v=20260623-realtor-v245"></script>
+<script src="js/features/ai-chat.js?v=20260623-realtor-v245"></script>
+<script src="js/features/underwriting.js?v=20260623-realtor-v245"></script>
+<script src="js/features/value-vault.js?v=20260623-realtor-v245"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
 
@@ -15247,8 +15268,8 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260623-realtor-v244"></script>
-<script src="js/features/onboarding-coach.js?v=20260623-realtor-v244"></script>
+<script src="js/features/user-profile.js?v=20260623-realtor-v245"></script>
+<script src="js/features/onboarding-coach.js?v=20260623-realtor-v245"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -15397,8 +15418,8 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Agent Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Agent Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v244"></script>
-<script src="js/app-version.js?v=20260623-realtor-v244"></script>
+<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v245"></script>
+<script src="js/app-version.js?v=20260623-realtor-v245"></script>
 
 </body>
 </html>

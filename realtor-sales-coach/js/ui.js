@@ -388,7 +388,7 @@
     if (!modal) return;
     resetModalScroll(modal);
     modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.classList.remove('flex', 'items-center', 'justify-center');
     modal.style.display = 'none';
     modal.style.pointerEvents = 'none';
     modal.setAttribute('aria-hidden', 'true');
