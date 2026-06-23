@@ -8,7 +8,7 @@
  * - PDF.js document upload + text extraction (processBlogFile)
  * - generateBlog with reference document injection
  * - Blog tips modal (open/close)
- * - Copy with formatting, jump to publisher, download as .doc
+ * - Copy with formatting, download as .doc
  * - All related state (blogUploadedFileText) and listeners
  *
  * Self-initializes. Exposes public API on window.
@@ -16,17 +16,6 @@
 
 (function () {
   'use strict';
-
-  // Agent tool — no Ruoff LO blog publishing portal
-  const BLOG_ENABLE_RUOFF_PUBLISH = false;
-
-  function getRuoffPublishButtonHtml() {
-    if (!BLOG_ENABLE_RUOFF_PUBLISH) return '';
-    return `
-        <button id="jump-publish-btn" class="bg-[#00A89D] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#008F85] transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-external-link-alt"></i> Publish on Site
-        </button>`;
-  }
 
   function getBlogFeedbackHtml() {
     return `
@@ -44,12 +33,6 @@
 
   function patchRestoredBlogOutput(html) {
     let patched = html || '';
-    if (BLOG_ENABLE_RUOFF_PUBLISH && !patched.includes('id="jump-publish-btn"')) {
-      patched = patched.replace(
-        /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
-        `$1${getRuoffPublishButtonHtml()}`
-      );
-    }
     if (!patched.includes('id="blog-feedback"')) {
       patched += getBlogFeedbackHtml();
     }
@@ -489,7 +472,6 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         <button id="download-blog-btn" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-download"></i> Download .doc
         </button>
-        ${getRuoffPublishButtonHtml()}
         <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-bookmark"></i> Save Bundle to Vault
         </button>
@@ -569,9 +551,6 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         document.getElementById('download-blog-btn').onclick = downloadBlogWord;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
         document.getElementById('copy-google-btn').onclick = copyGooglePostWithFormatting;
-        const jumpPublishBtn = document.getElementById('jump-publish-btn');
-        if (jumpPublishBtn) jumpPublishBtn.onclick = copyBlogAndJumpToPublisher;
-
         const copyReelBtn = document.getElementById('copy-reel-btn');
         if (copyReelBtn) {
             copyReelBtn.onclick = () => {
@@ -683,15 +662,6 @@ function copyBlogWithFormatting() {
         });
     });
 }
-function copyBlogAndJumpToPublisher() {
-    copyBlogWithFormatting();   // Runs the exact same rich copy + shows your alert
-
-    // Tiny delay so the clipboard finishes before we open the tab (feels instant)
-    setTimeout(() => {
-        window.open('https://sales.ruoff.com/blog', '_blank');
-    }, 250);
-}
-
 window.saveBlogAsset = function(assetType, btnEl) {
     if (typeof window.toggleSaveIdea !== 'function') {
         alert('Saved Items system not ready yet.');
@@ -843,9 +813,6 @@ function attachBlogOutputListeners() {
   if (capBtn) capBtn.onclick = copySocialCaption;
   const googBtn = document.getElementById('copy-google-btn');
   if (googBtn) googBtn.onclick = copyGooglePostWithFormatting;
-  const jumpBtn = document.getElementById('jump-publish-btn');
-  if (jumpBtn) jumpBtn.onclick = copyBlogAndJumpToPublisher;
-
   const refineBtn = document.getElementById('blog-refine-btn');
   if (refineBtn) {
     refineBtn.onclick = () => {
@@ -972,7 +939,6 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   window.generateBlog = generateBlog;
   window.processBlogFile = processBlogFile;
   window.copyBlogWithFormatting = copyBlogWithFormatting;
-  window.copyBlogAndJumpToPublisher = copyBlogAndJumpToPublisher;
   window.downloadBlogWord = downloadBlogWord;
   window.copySocialCaption = copySocialCaption;
   window.copyGooglePostWithFormatting = copyGooglePostWithFormatting;

@@ -537,7 +537,7 @@
       ${bridgeRow([
         { label: 'Getting People to Show Up', action: 'event:drive-attendance', primary: true },
         { label: 'Client Appreciation Events', action: 'event:client-appreciation', accent: true },
-        { label: 'Database Nurturing', action: 'section:database-nurturing' }
+        { label: 'Database Nurturing', action: 'section:database' }
       ])}
     `;
     attachHandlers(contentEl);
@@ -597,7 +597,7 @@
       </ul>
       ${proTip('Keep a private CRM note with kids\' names, hobbies, last vacation. Reference it before every touch.')}
       ${nextStepsHtml([
-        { label: 'Life Event Playbooks', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('database-nurturing');", style: 'primary' },
+        { label: 'Life Event Playbooks', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('database');", style: 'primary' },
         { label: 'Value Vault (Gift Ideas)', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('value-vault');", style: 'accent' },
         { label: 'Annual Home Review', onclick: "closeNamedModal('client-appreciation-modal'); if(typeof window.showSection==='function')window.showSection('value-vault'); if(typeof window.openVaultItemWhenReady==='function')window.openVaultItemWhenReady('annual-home-equity-review');" }
       ])}

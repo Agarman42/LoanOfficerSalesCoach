@@ -561,7 +561,8 @@
     const aliases = {
       'social-media-strategy': 'social',
       'referral-partners': 'referrals',
-      'prospecting': 'weekly-win-plan'
+      'prospecting': 'weekly-win-plan',
+      'database-nurturing': 'database'
     };
     if (aliases[id]) {
       id = aliases[id];
