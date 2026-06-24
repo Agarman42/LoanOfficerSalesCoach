@@ -7335,7 +7335,8 @@ Repeat this cycle every 90 days.`
     ['restoreNurtureModals', 'nurture-rich-modals.js'],
     ['restoreDatabaseModals', 'database-rich-modals.js'],
     ['restoreEventModals', 'event-rich-modals.js'],
-    ['restoreReferralModals', 'referral-rich-modals.js']
+    ['restoreReferralModals', 'referral-rich-modals.js'],
+    ['restoreNewsletterModals', 'newsletter-generator.js']
   ];
   modules.forEach(([fn, label]) => {
     if (typeof window[fn] === 'function') {

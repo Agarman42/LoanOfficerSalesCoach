@@ -903,12 +903,25 @@ function getNewsletterChoiceModal() {
     return document.getElementById(NL_CHOICE_MODAL_ID);
 }
 
+function getNewsletterChoiceTitleEl(modal) {
+    return document.getElementById('nl-choice-modal-title')
+        || (modal && modal.querySelector('#modal-title'));
+}
+
+function getNewsletterChoiceListEl(modal) {
+    return document.getElementById('nl-choice-modal-list')
+        || (modal && modal.querySelector('#modal-list'));
+}
+
 function openModal(category) {
     const modal = getNewsletterChoiceModal();
-    if (!modal) return;
+    if (!modal) {
+        console.error('[newsletter] #newsletter-choice-modal not found in DOM');
+        return;
+    }
 
-    const title = modal.querySelector('#modal-title');
-    const list = modal.querySelector('#modal-list');
+    const title = getNewsletterChoiceTitleEl(modal);
+    const list = getNewsletterChoiceListEl(modal);
 
     let data = [];
     let modalTitleText = '';
@@ -929,6 +942,8 @@ function openModal(category) {
 
     if (typeof window.openNamedModal === 'function') {
         window.openNamedModal(modal);
+    } else if (typeof window.openAppModal === 'function') {
+        window.openAppModal(modal);
     } else {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -936,6 +951,7 @@ function openModal(category) {
         modal.style.pointerEvents = 'auto';
         document.body.classList.add('modal-open');
     }
+    modal.setAttribute('aria-hidden', 'false');
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
 
@@ -1024,7 +1040,9 @@ function openModal(category) {
 function closeModal() {
     const modal = getNewsletterChoiceModal();
     if (modal) {
-        if (typeof window.closeNamedModal === 'function') {
+        if (typeof window.closeAppModal === 'function') {
+            window.closeAppModal(modal);
+        } else if (typeof window.closeNamedModal === 'function') {
             window.closeNamedModal(modal);
         } else {
             modal.style.display = 'none';
@@ -1034,6 +1052,7 @@ function closeModal() {
             else document.body.classList.remove('modal-open');
         }
         modal.onclick = null;
+        modal.setAttribute('aria-hidden', 'true');
     }
     const search = document.getElementById('modal-search');
     if (search && search.parentElement) {
@@ -1041,12 +1060,53 @@ function closeModal() {
     }
 }
 
-// Close on Esc key
+function isNewsletterChoiceModalOpen() {
+    const modal = getNewsletterChoiceModal();
+    if (!modal) return false;
+    return modal.classList.contains('flex') && !modal.classList.contains('hidden');
+}
+
+// Close on Esc key — only when the newsletter choice modal is the active overlay
 if (!window._nlEscListener) {
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape' && isNewsletterChoiceModalOpen()) closeModal();
   });
   window._nlEscListener = true;
+}
+
+function wireNewsletterChoiceButtons() {
+    document.querySelectorAll('[data-nl-choice], .nl-choice-btn').forEach((btn) => {
+        if (btn._nlChoiceWired) return;
+        btn._nlChoiceWired = true;
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const cat = btn.getAttribute('data-nl-choice');
+            if (!cat) return;
+            if (typeof window.openNewsletterChoiceModal === 'function') {
+                window.openNewsletterChoiceModal(cat);
+            } else if (typeof openModal === 'function') {
+                openModal(cat);
+            }
+        });
+    });
+}
+
+if (!window._nlChoiceDelegate) {
+    document.addEventListener('click', (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest('[data-nl-choice]') : null;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const cat = btn.getAttribute('data-nl-choice');
+        if (!cat) return;
+        if (typeof window.openNewsletterChoiceModal === 'function') {
+            window.openNewsletterChoiceModal(cat);
+        } else if (typeof openModal === 'function') {
+            openModal(cat);
+        }
+    }, true);
+    window._nlChoiceDelegate = true;
 }
 
 // === SOCIAL MEDIA PILLAR MODAL (Improved - Rich Content, No Search Bar) ===
@@ -2243,20 +2303,32 @@ function copyForOutlook() {
   // Expose both the generic name (for back-compat) and a dedicated stable name for the custom content choice modals
   // so later inline scripts that redefine window.openModal / closeModal do not break "Choose Specific"
   if (typeof openModal === 'function') {
-    window.openModal = openModal;
     window.openNewsletterChoiceModal = openModal;
   }
   if (typeof closeModal === 'function') {
-    window.closeModal = closeModal;
     window.closeNewsletterChoiceModal = closeModal;
   }
   if (typeof regenerateRandom === 'function') window.regenerateRandom = regenerateRandom;
 
-  // Tiny helper for the inline onclicks in the custom content <details> (survives clobbering of openModal)
   window._nlOpenChoice = function (cat) {
-    if (window.openNewsletterChoiceModal) return window.openNewsletterChoiceModal(cat);
-    if (window.openModal) return window.openModal(cat);
+    if (typeof window.openNewsletterChoiceModal === 'function') return window.openNewsletterChoiceModal(cat);
     if (typeof openModal === 'function') return openModal(cat);
+  };
+
+  window.__NEWSLETTER_MODALS_EXPORTS = {
+    openNewsletterChoiceModal: window.openNewsletterChoiceModal,
+    closeNewsletterChoiceModal: window.closeNewsletterChoiceModal,
+    _nlOpenChoice: window._nlOpenChoice,
+    wireNewsletterChoiceButtons: wireNewsletterChoiceButtons
+  };
+
+  window.restoreNewsletterModals = function restoreNewsletterModals() {
+    const exp = window.__NEWSLETTER_MODALS_EXPORTS;
+    if (!exp) return;
+    if (exp.openNewsletterChoiceModal) window.openNewsletterChoiceModal = exp.openNewsletterChoiceModal;
+    if (exp.closeNewsletterChoiceModal) window.closeNewsletterChoiceModal = exp.closeNewsletterChoiceModal;
+    if (exp._nlOpenChoice) window._nlOpenChoice = exp._nlOpenChoice;
+    if (typeof exp.wireNewsletterChoiceButtons === 'function') exp.wireNewsletterChoiceButtons();
   };
 
   // =====================================================
@@ -2417,8 +2489,12 @@ function copyForOutlook() {
   window.fillPersonalFromProfile = fillPersonalFromProfile;
 
   function initNewsletterGenerator() {
-    // The original DOMContentLoaded blocks and auto-save listeners are included
-    // in the code above. They will run when this module executes.
+    if (typeof window.restoreNewsletterModals === 'function') {
+      try { window.restoreNewsletterModals(); } catch (e) {}
+    }
+    if (typeof wireNewsletterChoiceButtons === 'function') {
+      try { wireNewsletterChoiceButtons(); } catch (e) {}
+    }
 
     // Initial profile sync (non-destructive)
     setTimeout(() => {

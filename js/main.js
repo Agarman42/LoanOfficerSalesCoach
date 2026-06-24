@@ -747,9 +747,8 @@
           if (typeof window.updatePreviews === 'function') {
             try { window.updatePreviews(); } catch(e){}
           }
-          // Re-expose choice modal helpers in case any later code clobbered (belt + suspenders)
-          if (typeof window.openNewsletterChoiceModal === 'function') {
-            window.openModal = window.openNewsletterChoiceModal;
+          if (typeof window.restoreNewsletterModals === 'function') {
+            try { window.restoreNewsletterModals(); } catch (e) {}
           }
         }, 80);
       }

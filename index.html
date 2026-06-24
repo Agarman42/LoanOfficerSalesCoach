@@ -40,17 +40,17 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260623-lo-v219">
+    <link rel="stylesheet" href="css/main.css?v=20260623-lo-v220">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-lo-v219"></script>
+    <script src="js/ui.js?v=20260623-lo-v220"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-    <script defer src="js/main.js?v=20260623-lo-v219"></script>
-    <script src="js/early-boot.js?v=20260623-lo-v219"></script>
+    <script defer src="js/main.js?v=20260623-lo-v220"></script>
+    <script src="js/early-boot.js?v=20260623-lo-v220"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -4890,22 +4890,6 @@
     </div>
 </div>
 
-<!-- Newsletter fun-fact / pro-tip / quote picker (separate from social pillar modal) -->
-<div id="newsletter-choice-modal" onclick="if(event.target.id==='newsletter-choice-modal'&&typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal()" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
-    <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-6 md:px-8 py-5 flex items-center justify-between">
-            <div class="flex items-center gap-3 min-w-0">
-                <i class="fas fa-lightbulb text-white text-xl flex-shrink-0"></i>
-                <h3 id="modal-title" class="text-2xl md:text-3xl font-bold text-white tracking-tight" style="color: #fff !important;"></h3>
-            </div>
-            <button type="button" onclick="if(typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal();" class="text-white/80 hover:text-white text-4xl leading-none transition flex-shrink-0" aria-label="Close">&times;</button>
-        </div>
-        <div class="p-6 md:p-8">
-            <div id="modal-list" class="space-y-4 max-h-[62vh] overflow-y-auto pr-1"></div>
-        </div>
-    </div>
-</div>
-
 <!-- ==================== REFERRAL PARTNER MODAL ==================== -->
 <div id="referral-modal" onclick="if (event.target.id === 'referral-modal') closeReferralModal()" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
     <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -6655,7 +6639,7 @@
                   <h4 class="text-lg font-semibold text-[#F15A29]">Fun Fact</h4>
                   <div class="flex flex-wrap gap-2">
                     <button onclick="regenerateRandom('funFact')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                    <button onclick="if(window._nlOpenChoice)window._nlOpenChoice('funFact')" class="text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
+                    <button type="button" data-nl-choice="funFact" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
                     <button onclick="resetUsed('funFacts')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
                   </div>
                 </div>
@@ -6668,7 +6652,7 @@
                   <h4 class="text-lg font-semibold text-[#F15A29]">Pro Tip</h4>
                   <div class="flex flex-wrap gap-2">
                     <button onclick="regenerateRandom('proTip')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                    <button onclick="if(window._nlOpenChoice)window._nlOpenChoice('proTip')" class="text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
+                    <button type="button" data-nl-choice="proTip" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
                     <button onclick="resetUsed('proTips')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
                   </div>
                 </div>
@@ -6681,7 +6665,7 @@
                   <h4 class="text-lg font-semibold text-[#F15A29]">Motivational Quote</h4>
                   <div class="flex flex-wrap gap-2">
                     <button onclick="regenerateRandom('quote')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                    <button onclick="if(window._nlOpenChoice)window._nlOpenChoice('quote')" class="text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
+                    <button type="button" data-nl-choice="quote" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
                     <button onclick="resetUsed('quotes')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
                   </div>
                 </div>
@@ -7063,16 +7047,16 @@
 
 </main>
 
-<script src="js/data/popby-library.js?v=20260623-lo-v219"></script>
-<script src="js/data/lo-fact-vault.js?v=20260623-lo-v219"></script>
-<script src="js/features/social-modals.js?v=20260623-lo-v219"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-lo-v219"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-lo-v219"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-lo-v219"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-lo-v219"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-lo-v219"></script>
-<script defer src="js/features/app-bulk.js?v=20260623-lo-v219"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-lo-v219"></script>
+<script src="js/data/popby-library.js?v=20260623-lo-v220"></script>
+<script src="js/data/lo-fact-vault.js?v=20260623-lo-v220"></script>
+<script src="js/features/social-modals.js?v=20260623-lo-v220"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-lo-v220"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-lo-v220"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-lo-v220"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-lo-v220"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-lo-v220"></script>
+<script defer src="js/features/app-bulk.js?v=20260623-lo-v220"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-lo-v220"></script>
 
 
 <!-- Equity Scanner Detail Modal -->
@@ -7231,29 +7215,29 @@
 </div>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/user-profile.js?v=20260623-lo-v219"></script>
-<script src="js/features/saved-items-library.js?v=20260623-lo-v219"></script>
+<script src="js/features/user-profile.js?v=20260623-lo-v220"></script>
+<script src="js/features/saved-items-library.js?v=20260623-lo-v220"></script>
 <script src="js/features/save-ribbon.js"></script>
-<script src="js/features/equity-scanner.js?v=20260623-lo-v219"></script>
+<script src="js/features/equity-scanner.js?v=20260623-lo-v220"></script>
 <script src="js/features/calculator.js"></script>
-<script src="js/features/sales-scripts.js?v=20260623-lo-v219"></script>
+<script src="js/features/sales-scripts.js?v=20260623-lo-v220"></script>
 <script src="js/features/social-post.js"></script>
 <script src="js/features/mindset-lab.js"></script>
 <script src="js/data/weekend-plan-policy.js"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-lo-v219"></script>
+<script src="js/features/weekly-win-plan.js?v=20260623-lo-v220"></script>
 <script src="js/features/tool-bridges.js"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
-<script src="js/features/blog-creator.js?v=20260623-lo-v219"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-lo-v219"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-lo-v219"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-lo-v219"></script>
-<script src="js/features/ai-chat.js?v=20260623-lo-v219"></script>
+<script src="js/features/blog-creator.js?v=20260623-lo-v220"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-lo-v220"></script>
+<script src="js/features/legacy-helpers.js?v=20260623-lo-v220"></script>
+<script src="js/features/newsletter-generator.js?v=20260623-lo-v220"></script>
+<script src="js/features/ai-chat.js?v=20260623-lo-v220"></script>
 <script src="js/features/underwriting.js"></script>
-<script src="js/features/value-vault.js?v=20260623-lo-v219"></script>
-<script src="js/features/onboarding-coach.js?v=20260623-lo-v219"></script>
-<script src="js/features/fact-vault-ui.js?v=20260623-lo-v219"></script>
+<script src="js/features/value-vault.js?v=20260623-lo-v220"></script>
+<script src="js/features/onboarding-coach.js?v=20260623-lo-v220"></script>
+<script src="js/features/fact-vault-ui.js?v=20260623-lo-v220"></script>
 
-<script defer src="js/features/referral-event-modals.js?v=20260623-lo-v219"></script>
+<script defer src="js/features/referral-event-modals.js?v=20260623-lo-v220"></script>
 
 
 <!-- =====================================================
@@ -8444,10 +8428,26 @@
   Bump APP_VERSION in js/app-version.js before every Git push + Render deploy.
   Footer shows e.g. v2.14 so you can instantly confirm which build is live.
 -->
+<!-- Newsletter fun-fact / pro-tip / quote picker (global shell — portaled to body on load) -->
+<div id="newsletter-choice-modal" onclick="if(event.target.id==='newsletter-choice-modal'&&typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal()" class="modal app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4" aria-hidden="true">
+    <div onclick="event.stopImmediatePropagation()" class="modal-content bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-6 md:px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-3 min-w-0">
+                <i class="fas fa-lightbulb text-white text-xl flex-shrink-0"></i>
+                <h3 id="nl-choice-modal-title" class="text-2xl md:text-3xl font-bold text-white tracking-tight" style="color: #fff !important;"></h3>
+            </div>
+            <button type="button" onclick="if(typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal();" class="text-white/80 hover:text-white text-4xl leading-none transition flex-shrink-0" aria-label="Close">&times;</button>
+        </div>
+        <div class="p-6 md:p-8">
+            <ul id="nl-choice-modal-list" class="space-y-4 max-h-[62vh] overflow-y-auto pr-1 list-none m-0 p-0"></ul>
+        </div>
+    </div>
+</div>
+
 <div id="app-version-line" data-app-name="Ultimate Loan Officer Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Ultimate Loan Officer Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-lo-v219"></script>
+<script src="js/features/section-bottom-banners.js?v=20260623-lo-v220"></script>
 <script src="js/app-version.js"></script>
 
 </body>
