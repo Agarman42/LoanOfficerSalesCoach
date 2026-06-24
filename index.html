@@ -40,17 +40,17 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260623-lo-v217">
+    <link rel="stylesheet" href="css/main.css?v=20260623-lo-v219">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-lo-v217"></script>
+    <script src="js/ui.js?v=20260623-lo-v219"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-    <script defer src="js/main.js?v=20260623-lo-v217"></script>
-    <script src="js/early-boot.js?v=20260623-lo-v217"></script>
+    <script defer src="js/main.js?v=20260623-lo-v219"></script>
+    <script src="js/early-boot.js?v=20260623-lo-v219"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -4864,7 +4864,9 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">Creates a full blog post + social caption + Google post + 30-45s Reel script in one go.</p>
     </div>
 
-    
+    <!-- Output Area — blog + reel + social assets rendered here -->
+    <div id="blog-output" class="bg-white dark:bg-gray-800 p-6 md:p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden"></div>
+
 </section>
 
 
@@ -4884,6 +4886,22 @@
             <button type="button" id="social-modal-back" class="hidden text-sm px-4 py-2 rounded-2xl border border-gray-300 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-800 font-medium transition">&larr; Back to Summary</button>
             <div class="flex-1"></div>
             <button type="button" onclick="if(typeof window.closeSocialContentModal==='function')window.closeSocialContentModal();" class="px-5 py-2 rounded-2xl border text-sm font-medium hover:bg-white dark:hover:bg-gray-800 transition">Close Guide</button>
+        </div>
+    </div>
+</div>
+
+<!-- Newsletter fun-fact / pro-tip / quote picker (separate from social pillar modal) -->
+<div id="newsletter-choice-modal" onclick="if(event.target.id==='newsletter-choice-modal'&&typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal()" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+    <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-6 md:px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-3 min-w-0">
+                <i class="fas fa-lightbulb text-white text-xl flex-shrink-0"></i>
+                <h3 id="modal-title" class="text-2xl md:text-3xl font-bold text-white tracking-tight" style="color: #fff !important;"></h3>
+            </div>
+            <button type="button" onclick="if(typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal();" class="text-white/80 hover:text-white text-4xl leading-none transition flex-shrink-0" aria-label="Close">&times;</button>
+        </div>
+        <div class="p-6 md:p-8">
+            <div id="modal-list" class="space-y-4 max-h-[62vh] overflow-y-auto pr-1"></div>
         </div>
     </div>
 </div>
@@ -7045,16 +7063,16 @@
 
 </main>
 
-<script src="js/data/popby-library.js?v=20260623-lo-v217"></script>
-<script src="js/data/lo-fact-vault.js?v=20260623-lo-v217"></script>
-<script src="js/features/social-modals.js?v=20260623-lo-v217"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-lo-v217"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-lo-v217"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-lo-v217"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-lo-v217"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-lo-v217"></script>
-<script defer src="js/features/app-bulk.js?v=20260623-lo-v217"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-lo-v217"></script>
+<script src="js/data/popby-library.js?v=20260623-lo-v219"></script>
+<script src="js/data/lo-fact-vault.js?v=20260623-lo-v219"></script>
+<script src="js/features/social-modals.js?v=20260623-lo-v219"></script>
+<script src="js/features/vault-rich-modals.js?v=20260623-lo-v219"></script>
+<script src="js/features/process-rich-modals.js?v=20260623-lo-v219"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260623-lo-v219"></script>
+<script src="js/features/database-rich-modals.js?v=20260623-lo-v219"></script>
+<script src="js/features/event-rich-modals.js?v=20260623-lo-v219"></script>
+<script defer src="js/features/app-bulk.js?v=20260623-lo-v219"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260623-lo-v219"></script>
 
 
 <!-- Equity Scanner Detail Modal -->
@@ -7213,29 +7231,29 @@
 </div>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/user-profile.js?v=20260623-lo-v217"></script>
-<script src="js/features/saved-items-library.js?v=20260623-lo-v217"></script>
+<script src="js/features/user-profile.js?v=20260623-lo-v219"></script>
+<script src="js/features/saved-items-library.js?v=20260623-lo-v219"></script>
 <script src="js/features/save-ribbon.js"></script>
-<script src="js/features/equity-scanner.js?v=20260623-lo-v217"></script>
+<script src="js/features/equity-scanner.js?v=20260623-lo-v219"></script>
 <script src="js/features/calculator.js"></script>
-<script src="js/features/sales-scripts.js?v=20260623-lo-v217"></script>
+<script src="js/features/sales-scripts.js?v=20260623-lo-v219"></script>
 <script src="js/features/social-post.js"></script>
 <script src="js/features/mindset-lab.js"></script>
 <script src="js/data/weekend-plan-policy.js"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-lo-v217"></script>
+<script src="js/features/weekly-win-plan.js?v=20260623-lo-v219"></script>
 <script src="js/features/tool-bridges.js"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
-<script src="js/features/blog-creator.js?v=20260623-lo-v217"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-lo-v217"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-lo-v217"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-lo-v217"></script>
-<script src="js/features/ai-chat.js?v=20260623-lo-v217"></script>
+<script src="js/features/blog-creator.js?v=20260623-lo-v219"></script>
+<script src="js/features/referral-rich-modals.js?v=20260623-lo-v219"></script>
+<script src="js/features/legacy-helpers.js?v=20260623-lo-v219"></script>
+<script src="js/features/newsletter-generator.js?v=20260623-lo-v219"></script>
+<script src="js/features/ai-chat.js?v=20260623-lo-v219"></script>
 <script src="js/features/underwriting.js"></script>
-<script src="js/features/value-vault.js?v=20260623-lo-v217"></script>
-<script src="js/features/onboarding-coach.js?v=20260623-lo-v217"></script>
-<script src="js/features/fact-vault-ui.js?v=20260623-lo-v217"></script>
+<script src="js/features/value-vault.js?v=20260623-lo-v219"></script>
+<script src="js/features/onboarding-coach.js?v=20260623-lo-v219"></script>
+<script src="js/features/fact-vault-ui.js?v=20260623-lo-v219"></script>
 
-<script defer src="js/features/referral-event-modals.js?v=20260623-lo-v217"></script>
+<script defer src="js/features/referral-event-modals.js?v=20260623-lo-v219"></script>
 
 
 <!-- =====================================================
@@ -8429,7 +8447,7 @@
 <div id="app-version-line" data-app-name="Ultimate Loan Officer Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Ultimate Loan Officer Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-lo-v217"></script>
+<script src="js/features/section-bottom-banners.js?v=20260623-lo-v219"></script>
 <script src="js/app-version.js"></script>
 
 </body>

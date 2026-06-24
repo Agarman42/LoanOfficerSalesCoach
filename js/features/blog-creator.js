@@ -377,11 +377,11 @@ const blogLoadingContent = `
 
 if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
 
-    output.classList.add('hidden');
+    if (output) output.classList.add('hidden');
     if (loadingEl) {
         loadingEl.classList.remove('hidden');
     }
-    output.innerHTML = '';
+    if (output) output.innerHTML = '';
 
     const lengthGuide = lengthSelect === 'long' ? '1,500–2,000 words' : lengthSelect === 'medium' ? '1,000-1,500 words' : '600-1,000 words';
 

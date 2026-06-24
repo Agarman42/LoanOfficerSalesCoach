@@ -897,8 +897,14 @@ function regenerateRandom(category) {
     updatePreviews();
 }
 
+const NL_CHOICE_MODAL_ID = 'newsletter-choice-modal';
+
+function getNewsletterChoiceModal() {
+    return document.getElementById(NL_CHOICE_MODAL_ID);
+}
+
 function openModal(category) {
-    const modal = document.getElementById('content-modal');
+    const modal = getNewsletterChoiceModal();
     if (!modal) return;
 
     const title = modal.querySelector('#modal-title');
@@ -921,11 +927,15 @@ function openModal(category) {
         data = [];
     }
 
-    // Force visible with both classList (for Tailwind .hidden + .flex rules) and inline style
-    // This fixes cases where the header looked like an "empty box" with no title
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    modal.style.display = 'flex';
+    if (typeof window.openNamedModal === 'function') {
+        window.openNamedModal(modal);
+    } else {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+        modal.style.pointerEvents = 'auto';
+        document.body.classList.add('modal-open');
+    }
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
 
@@ -1010,17 +1020,21 @@ function openModal(category) {
     };
 }
 
-// Close modal
+// Close newsletter choice modal (separate from social pillar #content-modal)
 function closeModal() {
-    const modal = document.getElementById('content-modal');
+    const modal = getNewsletterChoiceModal();
     if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
-        modal.onclick = null;   // clean up event listener
+        if (typeof window.closeNamedModal === 'function') {
+            window.closeNamedModal(modal);
+        } else {
+            modal.style.display = 'none';
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
+            else document.body.classList.remove('modal-open');
+        }
+        modal.onclick = null;
     }
-    // Clean up any search that was injected just for the newsletter custom choice lists
-    // (keeps social pillar modals that reuse #content-modal free of stray search bars)
     const search = document.getElementById('modal-search');
     if (search && search.parentElement) {
         search.parentElement.removeChild(search);
@@ -1028,9 +1042,12 @@ function closeModal() {
 }
 
 // Close on Esc key
-document.addEventListener('keydown', (e) => {
+if (!window._nlEscListener) {
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
-});
+  });
+  window._nlEscListener = true;
+}
 
 // === SOCIAL MEDIA PILLAR MODAL (Improved - Rich Content, No Search Bar) ===
 function openSocialModal(category) {
@@ -1183,26 +1200,6 @@ function openSocialModal(category) {
     });
 
     modal.style.display = 'flex';
-}
-
-// Close modal (single definition)
-function closeModal() {
-    let modal = document.getElementById('content-modal');
-    if (!modal) modal = document.getElementById('content-modal-legacy');
-    if (modal) {
-      modal.style.display = 'none';
-      modal.classList.add('hidden');
-    }
-    const search = document.getElementById('modal-search');
-    if (search) search.value = '';
-}
-
-// Close on Esc key (idempotent)
-if (!window._nlEscListener) {
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
-  });
-  window._nlEscListener = true;
 }
 
 // === PERSISTENCE SETUP ===
@@ -2249,7 +2246,10 @@ function copyForOutlook() {
     window.openModal = openModal;
     window.openNewsletterChoiceModal = openModal;
   }
-  if (typeof closeModal === 'function') window.closeModal = closeModal;
+  if (typeof closeModal === 'function') {
+    window.closeModal = closeModal;
+    window.closeNewsletterChoiceModal = closeModal;
+  }
   if (typeof regenerateRandom === 'function') window.regenerateRandom = regenerateRandom;
 
   // Tiny helper for the inline onclicks in the custom content <details> (survives clobbering of openModal)
