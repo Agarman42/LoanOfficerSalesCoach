@@ -899,8 +899,44 @@ function regenerateRandom(category) {
 
 const NL_CHOICE_MODAL_ID = 'newsletter-choice-modal';
 
+function ensureNewsletterChoiceModal() {
+    let modal = document.getElementById(NL_CHOICE_MODAL_ID);
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = NL_CHOICE_MODAL_ID;
+    modal.setAttribute('aria-hidden', 'true');
+    modal.className = 'modal app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="modal-content bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-6 md:px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i class="fas fa-lightbulb text-white text-xl flex-shrink-0"></i>
+                    <h3 id="nl-choice-modal-title" class="text-2xl md:text-3xl font-bold text-white tracking-tight" style="color: #fff !important;"></h3>
+                </div>
+                <button type="button" data-nl-choice-close class="text-white/80 hover:text-white text-4xl leading-none transition flex-shrink-0" aria-label="Close">&times;</button>
+            </div>
+            <div class="p-6 md:p-8">
+                <ul id="nl-choice-modal-list" class="space-y-4 max-h-[62vh] overflow-y-auto pr-1 list-none m-0 p-0"></ul>
+            </div>
+        </div>`;
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal && typeof window.closeNewsletterChoiceModal === 'function') {
+            window.closeNewsletterChoiceModal();
+        }
+    });
+    modal.querySelector('[data-nl-choice-close]')?.addEventListener('click', () => {
+        if (typeof window.closeNewsletterChoiceModal === 'function') window.closeNewsletterChoiceModal();
+    });
+
+    const root = document.body || document.documentElement;
+    root.appendChild(modal);
+    return modal;
+}
+
 function getNewsletterChoiceModal() {
-    return document.getElementById(NL_CHOICE_MODAL_ID);
+    return ensureNewsletterChoiceModal();
 }
 
 function getNewsletterChoiceTitleEl(modal) {
@@ -914,11 +950,8 @@ function getNewsletterChoiceListEl(modal) {
 }
 
 function openModal(category) {
-    const modal = getNewsletterChoiceModal();
-    if (!modal) {
-        console.error('[newsletter] #newsletter-choice-modal not found in DOM');
-        return;
-    }
+    const modal = ensureNewsletterChoiceModal();
+    if (!modal) return;
 
     const title = getNewsletterChoiceTitleEl(modal);
     const list = getNewsletterChoiceListEl(modal);
@@ -2315,11 +2348,14 @@ function copyForOutlook() {
     if (typeof openModal === 'function') return openModal(cat);
   };
 
+  window.ensureNewsletterChoiceModal = ensureNewsletterChoiceModal;
+
   window.__NEWSLETTER_MODALS_EXPORTS = {
     openNewsletterChoiceModal: window.openNewsletterChoiceModal,
     closeNewsletterChoiceModal: window.closeNewsletterChoiceModal,
     _nlOpenChoice: window._nlOpenChoice,
-    wireNewsletterChoiceButtons: wireNewsletterChoiceButtons
+    wireNewsletterChoiceButtons: wireNewsletterChoiceButtons,
+    ensureNewsletterChoiceModal: ensureNewsletterChoiceModal
   };
 
   window.restoreNewsletterModals = function restoreNewsletterModals() {
@@ -2329,6 +2365,10 @@ function copyForOutlook() {
     if (exp.closeNewsletterChoiceModal) window.closeNewsletterChoiceModal = exp.closeNewsletterChoiceModal;
     if (exp._nlOpenChoice) window._nlOpenChoice = exp._nlOpenChoice;
     if (typeof exp.wireNewsletterChoiceButtons === 'function') exp.wireNewsletterChoiceButtons();
+    if (typeof exp.ensureNewsletterChoiceModal === 'function') {
+      window.ensureNewsletterChoiceModal = exp.ensureNewsletterChoiceModal;
+      try { exp.ensureNewsletterChoiceModal(); } catch (e) {}
+    }
   };
 
   // =====================================================
@@ -2489,6 +2529,7 @@ function copyForOutlook() {
   window.fillPersonalFromProfile = fillPersonalFromProfile;
 
   function initNewsletterGenerator() {
+    try { ensureNewsletterChoiceModal(); } catch (e) {}
     if (typeof window.restoreNewsletterModals === 'function') {
       try { window.restoreNewsletterModals(); } catch (e) {}
     }
