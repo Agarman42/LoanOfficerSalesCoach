@@ -1365,7 +1365,8 @@ persistentFields.forEach(id => {
 document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
     cb.addEventListener('change', () => {
         const checked = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked'))
-                             .map(c => c.id);
+                             .map(c => c.id)
+                             .filter((id) => id.startsWith('nl-'));
         localStorage.setItem('nl-sections', JSON.stringify(checked));
 
         // Visual toggles for expandable sections
@@ -1416,6 +1417,183 @@ document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', 
     }
     generateNewsletter(feedback);
 });
+
+/** Content section checkboxes only (not personal/blog/media toggles). */
+const NL_CONTENT_SECTIONS = {
+    market: {
+        id: 'nl-market',
+        label: 'Market Updates',
+        headings: ['Market Update', 'Market Updates', 'Market Insights', 'Market Snapshot', 'Housing Market Update']
+    },
+    industry: {
+        id: 'nl-industry',
+        label: 'Industry News',
+        headings: ['Industry News', 'Industry Insights', 'Industry Update', 'Mortgage Industry News']
+    },
+    local: {
+        id: 'nl-local',
+        label: 'Local Update',
+        headings: ['Local Update', 'Local Spotlight', 'Local Flavor', 'Around Town', 'Community Spotlight']
+    },
+    recipes: {
+        id: 'nl-recipes',
+        label: 'Recipes',
+        headings: ['Recipe', 'Recipes', 'Quick Recipe', 'Kitchen Corner', 'Recipe of the Month']
+    },
+    fun: {
+        id: 'nl-fun',
+        label: 'Fun Facts',
+        headings: ['Fun Fact', 'Fun Facts'],
+        placeholderId: 'fun-fact-placeholder'
+    },
+    tip: {
+        id: 'nl-tip',
+        label: 'Homeownership Tip',
+        headings: ['Pro Tip', 'Homeownership Tip', 'Tip of the Month', 'Home Tip', 'Homeowner Tip'],
+        placeholderId: 'pro-tip-placeholder'
+    },
+    quote: {
+        id: 'nl-quote',
+        label: 'Motivational Quote',
+        headings: ['Motivational Quote', 'Quote of the Month', 'Inspiration', 'Weekly Inspiration'],
+        placeholderId: 'quote-placeholder'
+    }
+};
+
+function getNewsletterSelections() {
+    const personal = !!document.getElementById('nl-personal')?.checked;
+    const includePhoto = personal && !!document.getElementById('nl-include-photo')?.checked;
+    const includeVideo = personal && !!document.getElementById('nl-include-video')?.checked;
+    const includeBlog = !!document.getElementById('nl-include-blog')?.checked;
+    const contentSections = {};
+    Object.keys(NL_CONTENT_SECTIONS).forEach((key) => {
+        contentSections[key] = !!document.getElementById(NL_CONTENT_SECTIONS[key].id)?.checked;
+    });
+    return { personal, includePhoto, includeVideo, includeBlog, contentSections };
+}
+
+function escapeRegex(str) {
+    return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function stripNewsletterSectionByHeadings(html, headings) {
+    if (!html || !headings?.length) return html;
+    let out = html;
+    const headingPattern = headings.map(escapeRegex).join('|');
+    const tealCardRe = new RegExp(
+        `<tr>\\s*<td[^>]*>\\s*<table[^>]*border-left:\\s*8px[^>]*>[\\s\\S]*?<h2[^>]*>\\s*(?:${headingPattern})\\s*</h2>[\\s\\S]*?</table>\\s*</td>\\s*</tr>\\s*(?:<tr>\\s*<td[^>]*height=["']?20["']?[^>]*>\\s*</td>\\s*</tr>\\s*)?`,
+        'gi'
+    );
+    out = out.replace(tealCardRe, '');
+    const looseRe = new RegExp(
+        `<table[^>]*border-left:\\s*8px[^>]*>[\\s\\S]*?<h2[^>]*>\\s*(?:${headingPattern})\\s*</h2>[\\s\\S]*?</table>\\s*(?:<tr>\\s*<td[^>]*height=["']?20["']?[^>]*>\\s*</td>\\s*</tr>\\s*)?`,
+        'gi'
+    );
+    return out.replace(looseRe, '');
+}
+
+function stripNewsletterPlaceholderBlock(html, placeholderId, headings) {
+    if (!html) return html;
+    let out = html;
+    if (placeholderId) {
+        out = out.replace(
+            new RegExp(`<h2[^>]*>\\s*(?:${(headings || []).map(escapeRegex).join('|')})\\s*</h2>\\s*<p[^>]*id=["']?${escapeRegex(placeholderId)}["']?[^>]*>\\s*</p>`, 'gi'),
+            ''
+        );
+        out = out.replace(
+            new RegExp(`<p[^>]*id=["']?${escapeRegex(placeholderId)}["']?[^>]*>[\\s\\S]*?</p>`, 'gi'),
+            ''
+        );
+    }
+    return stripNewsletterSectionByHeadings(out, headings || []);
+}
+
+function applyUncheckedNewsletterSectionFilters(html, selections) {
+    if (!html || !selections) return html;
+    let out = html;
+
+    Object.entries(NL_CONTENT_SECTIONS).forEach(([key, cfg]) => {
+        if (selections.contentSections[key]) return;
+        if (cfg.placeholderId) {
+            out = stripNewsletterPlaceholderBlock(out, cfg.placeholderId, cfg.headings);
+        } else {
+            out = stripNewsletterSectionByHeadings(out, cfg.headings);
+        }
+    });
+
+    if (!selections.personal) {
+        out = stripNewsletterSectionByHeadings(out, ['A Note From', 'Personal Update', 'Personal Note']);
+        out = out.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, '');
+        out = out.replace(/<!--\s*Personal Note Section\s*-->/gi, '');
+    }
+
+    if (!selections.includeVideo) {
+        out = out.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
+    }
+
+    return out;
+}
+
+function buildNewsletterSectionsPrompt(selections) {
+    const included = [];
+    const excluded = [];
+    Object.entries(NL_CONTENT_SECTIONS).forEach(([key, cfg]) => {
+        if (selections.contentSections[key]) included.push(cfg.label);
+        else excluded.push(cfg.label);
+    });
+
+    const lines = [
+        '**SECTION SELECTION (NON-NEGOTIABLE — respect every checkbox):**',
+        '- User checked INCLUDE only: ' + (included.length ? included.join(', ') : '(none — no optional content sections selected)'),
+        '- User checked EXCLUDE (do NOT generate these sections or headings): ' + (excluded.length ? excluded.join(', ') : '(none)'),
+        '- Generate exactly ' + included.length + ' optional content section card(s) from the INCLUDE list. Do not add bonus sections.',
+        '- If Market Updates is EXCLUDED, do not write anything about market conditions, housing trends, or rate movement — not even a sentence.',
+        '- If Industry News is EXCLUDED, do not mention industry headlines, MBA/NAR news, or lender/regulatory updates.',
+        '- If Local Update is EXCLUDED, do not include local spotlight/community content.',
+        '- If Recipes is EXCLUDED, do not include any recipe or food content.',
+    ];
+
+    if (selections.contentSections.fun) {
+        lines.push('- Fun Facts (INCLUDE): output ONLY <h2>Fun Fact</h2> and empty <p id="fun-fact-placeholder"></p> — we inject the fact later.');
+    } else {
+        lines.push('- Fun Facts (EXCLUDE): do not include Fun Fact heading, text, or fun-fact-placeholder.');
+    }
+    if (selections.contentSections.tip) {
+        lines.push('- Homeownership Tip (INCLUDE): output ONLY <h2>Pro Tip</h2> or <h2>Homeownership Tip</h2> and empty <p id="pro-tip-placeholder"></p> — we inject the tip later.');
+    } else {
+        lines.push('- Homeownership Tip (EXCLUDE): do not include tip heading, text, or pro-tip-placeholder.');
+    }
+    if (selections.contentSections.quote) {
+        lines.push('- Motivational Quote (INCLUDE): output ONLY <h2>Motivational Quote</h2> and empty <p id="quote-placeholder"></p> — we inject the quote later.');
+    } else {
+        lines.push('- Motivational Quote (EXCLUDE): do not include quote heading, text, or quote-placeholder.');
+    }
+
+    if (selections.personal) {
+        lines.push('- Personal Update (INCLUDE): include the Personal Note section titled "A Note From [First Name]" using the personal update text provided.');
+        if (selections.includePhoto) {
+            lines.push('- Personal photo: leave [PERSONAL PHOTO PLACEHOLDER] untouched — we embed the photo in post-processing.');
+        } else {
+            lines.push('- Personal photo: EXCLUDE — remove [PERSONAL PHOTO PLACEHOLDER] and do not show a photo.');
+        }
+        if (selections.includeVideo) {
+            lines.push('- Personal video: we may inject a video block in post-processing; do not duplicate with your own video section unless placeholder instructions say otherwise.');
+        } else {
+            lines.push('- Personal video: EXCLUDE — do not include any video section or Personal Video Update block.');
+        }
+    } else {
+        lines.push('- Personal Update (EXCLUDE): do NOT include Personal Note, "A Note From", personal photo, or personal video sections.');
+        lines.push('- Remove <!-- Personal Note Section --> and [PERSONAL PHOTO PLACEHOLDER] from output.');
+    }
+
+    if (selections.includeBlog) {
+        lines.push('- Blog link (INCLUDE): leave <!-- BLOG SECTION PLACEHOLDER --> untouched — we inject the blog card in post-processing if URL provided.');
+    } else {
+        lines.push('- Blog (EXCLUDE): do NOT create any blog section. Remove <!-- BLOG SECTION PLACEHOLDER -->.');
+    }
+
+    return lines.join('\n');
+}
 
 async function generateNewsletter(feedback = '') {
     const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
@@ -1526,12 +1704,21 @@ async function generateNewsletter(feedback = '') {
     }
 
     try {
-        const sections = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked'))
-                         .map(c => c.id.replace('nl-', ''))
-                         .join(', ');
+        const selections = getNewsletterSelections();
+        const includedLabels = Object.entries(NL_CONTENT_SECTIONS)
+            .filter(([key]) => selections.contentSections[key])
+            .map(([, cfg]) => cfg.label);
+        const sectionsSummary = includedLabels.length ? includedLabels.join(', ') : '(no optional content sections selected)';
 
-        const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
-        const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
+        const personalPhotoUrl = selections.includePhoto
+            ? (document.getElementById('nl-personal-photo')?.value.trim() || '')
+            : '';
+        const personalVideoUrl = selections.includeVideo
+            ? (document.getElementById('nl-personal-video')?.value.trim() || '')
+            : '';
+        const personalUpdateText = selections.personal
+            ? (document.getElementById('nl-personal-text')?.value.trim() || 'Excited to help more families achieve homeownership this year!')
+            : '';
 
 
 
@@ -1575,21 +1762,20 @@ async function generateNewsletter(feedback = '') {
                 '**ACCURACY RULES (NON-NEGOTIABLE):**',
                 '- EVERY fact, statistic, trend, event, or claim MUST be 100% accurate and verifiable.',
                 '- NEVER guess, hallucinate, or invent information. If uncertain, OMIT it or use safe evergreen phrasing.',
-                '- Local Spotlight: Use ONLY fun, interesting, or little known facts about the area. NEVER dated events. Verify and confirm accuracy above all else.',
-                '- Fun Facts: If the Fun Fact section is included, output ONLY the heading <h2>Fun Fact</h2> and an empty paragraph <p id="fun-fact-placeholder"></p>.',
-                '- Pro Tip: If the Pro Tip section is included, output ONLY the heading <h2>Pro Tip</h2> and an empty paragraph <p id="pro-tip-placeholder"></p>.',
-                '- Motivational Quote: If the Motivational Quote section is included, output ONLY the heading <h2>Motivational Quote</h2> and an empty paragraph <p id="quote-placeholder"></p>.',
+                '- Local Spotlight (only if Local Update is INCLUDED): Use ONLY fun, interesting, or little known facts about the area. NEVER dated events. Verify and confirm accuracy above all else.',
                 '- Prefer safe, educational, evergreen content.',
+                '',
+                buildNewsletterSectionsPrompt(selections),
                 '',
                 'User Inputs:',
                 '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
-                '- Match the full "LO PROFILE & VOICE CONTEXT" section above for this specific loan officer (use their personality, voice traits, hobbies, and challenges to make the personal note + any relatable language feel authentic to them — blend naturally, never salesy).',
+                '- Match the full "LO PROFILE & VOICE CONTEXT" section below for this specific loan officer (use their personality, voice traits, hobbies, and challenges to make the personal note + any relatable language feel authentic to them — blend naturally, never salesy).',
                 '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
                 '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
-                '- Sections: ' + (sections || 'Market Update, Industry News, Local Spotlight, Quick Recipe'),
-                '- Personal update: "' + (document.getElementById('nl-personal-text').value || 'Excited to help more families achieve homeownership this year!') + '"',
+                '- Sections to generate: ' + sectionsSummary,
+                '- Personal update: "' + personalUpdateText + '"',
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
                 '- Specific topics / special requests (including any language requests such as "in Spanish" or "prepare the newsletter in French"): "' + (document.getElementById('nl-specific').value || 'None') + '"',
@@ -1617,10 +1803,19 @@ async function generateNewsletter(feedback = '') {
                 '',
                 '',
                 'CRITICAL RULES:',
-                '- Sources hyperlinks in Market/Industry sections are NON-NEGOTIABLE — always include clickable links using the exact format and real URLs provided.',
-                '- PERSONAL UPDATE: Rewrite/polish the raw input — warm, relatable, newsletter-perfect.',
-                '- PERSONAL NOTE TITLE RULE: The personal note section MUST be titled exactly "A Note From [Name]" where [Name] is replaced with ONLY THE FIRST NAME from the Name field (e.g. if Name is "Adam Garman", use "Adam" only — NEVER use the last name or full name in the title). NEVER output "A Note From Adam" or any other hardcoded name unless it exactly matches the first name. Use only the first name.',
-                '- PERSONAL MEDIA: If a video URL is provided, we will embed a clean responsive video player. Otherwise use the photo if provided. Leave the exact placeholder [PERSONAL PHOTO PLACEHOLDER] untouched so post-processing can handle photo or video correctly. Convert YouTube Shorts URLs automatically for better compatibility.',
+                (selections.contentSections.market
+                    ? '- Market Updates section (ONLY if included): ALWAYS end with a "Sources" paragraph containing 1-2 HYPERLINKED credible sources. REQUIRED FORMAT: <p style="font-size:14px; color:#666; margin-top:20px;">Sources: <a href="https://www.freddiemac.com/pmms" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Freddie Mac PMMS</a>, <a href="https://www.mortgagenewsdaily.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage News Daily</a></p>. Use ONLY real URLs from trusted sites.'
+                    : '- Market Updates is EXCLUDED — do not create a Market section or mention market trends.'),
+                (selections.contentSections.industry
+                    ? '- Industry News section (ONLY if included): ALWAYS include 1-2 HYPERLINKED sources (MBA, HousingWire, National Mortgage News, etc.) in the same Sources paragraph format as Market Updates.'
+                    : '- Industry News is EXCLUDED — do not create an Industry section.'),
+                (selections.personal
+                    ? '- PERSONAL UPDATE: Rewrite/polish the raw personal update input — warm, relatable, newsletter-perfect.'
+                    : '- PERSONAL UPDATE: User did not check Personal Update — skip the entire personal note block.'),
+                '- PERSONAL NOTE TITLE RULE (only when Personal Update is included): Title exactly "A Note From [Name]" using ONLY THE FIRST NAME from the Name field.',
+                (selections.personal && (selections.includePhoto || selections.includeVideo)
+                    ? '- PERSONAL MEDIA: Leave [PERSONAL PHOTO PLACEHOLDER] untouched when photo is enabled; we handle photo/video in post-processing.'
+                    : '- PERSONAL MEDIA: Do not include photo or video blocks.'),
                 '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
@@ -1630,11 +1825,9 @@ async function generateNewsletter(feedback = '') {
                 '- Main container: <table width="600" align="center"...> with background white.',
                 '- Use consistent module spacing of 20px between sections. Main content tables should be width="600".',
                 '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
-                '- For the Market Update / Market section ONLY: ALWAYS end with a "Sources" paragraph containing 1-2 HYPERLINKED credible sources. REQUIRED FORMAT (use exactly): <p style="font-size:14px; color:#666; margin-top:20px;">Sources: <a href="https://www.freddiemac.com/pmms" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Freddie Mac PMMS</a>, <a href="https://www.mortgagenewsdaily.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage News Daily</a></p>. Use ONLY real, permanent URLs from trusted sites like Freddie Mac, Mortgage News Daily, NAR, HousingWire, or MBA. NEVER plain text names — links are mandatory.',
-                '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.mba.org/news-and-research" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">Mortgage Bankers Association</a>, <a href="https://nationalmortgagenews.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">National Mortgage News</a>.',
-                '- BLOG RULE (VERY IMPORTANT): DO NOT create any "From the Blog", "Blog Highlight", "My Recent Blog", or similar blog section yourself. Leave the exact placeholder <!-- BLOG SECTION PLACEHOLDER --> untouched (it goes right before the Personal Note Section). The blog section will be automatically injected in post-processing ONLY if the user checked the "Include Blog" box and provided a URL. Never output a blog section on your own.',
+                '- BLOG RULE (VERY IMPORTANT): DO NOT create any blog section yourself unless instructed in SECTION SELECTION. Leave <!-- BLOG SECTION PLACEHOLDER --> only when blog is included.',
                 '',
-                'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate 4 or more full main content sections (Market Update, Industry Insights, Local Flavor, Client Story/Win, etc.) as complete teal cards using the exact format shown in the example cards below. Fill with real content per the CRITICAL RULES. Do not leave the comment or output placeholders for sections - expand them. After the sections, append exactly the skeleton for the placeholders and footer (do not change it). Leave the placeholders untouched for post-processing.',
+                'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate ONLY the optional content sections listed in SECTION SELECTION — each as its own teal card. Do not invent extra sections (no Client Story, no bonus Market block, etc.). After included sections, append the skeleton placeholders/footer below. Leave untouched placeholders only for sections marked INCLUDE.',
                 '',
 '<!DOCTYPE html>',
     '<html lang="en">',
@@ -1659,25 +1852,33 @@ async function generateNewsletter(feedback = '') {
     '    </td></tr>',
     '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
-    '    <!-- MAIN CONTENT SECTIONS: generate 4+ full teal cards here (copy the format of the example cards below, but use real generated content per rules) -->',
+    '    <!-- MAIN CONTENT SECTIONS: generate ONLY the checked sections from SECTION SELECTION as full teal cards here -->',
     '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <!-- BLOG SECTION PLACEHOLDER -->',
-    '    <!-- Personal Note Section -->',
-    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
-    '      <tr><td style="padding:30px;">',
-    '        <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">A Note From [Name]</h2>',
-    '        <p style="margin:15px 0 25px; font-size:18px; line-height:1.6;">[Polished personal update]</p>',
-    '        [PERSONAL PHOTO PLACEHOLDER]',
-    '      </td></tr>',
-    '    </table></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <!-- REFERRAL CTA PLACEHOLDER -->',
-    '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
-    '  </table>',
-    '</bo' + 'dy>',
-    '</ht' + 'ml>'
+    '    <tr><td height="20"></td></tr>'
 ];
+            if (selections.includeBlog) {
+                promptLines.push('    <!-- BLOG SECTION PLACEHOLDER -->');
+            }
+            if (selections.personal) {
+                promptLines.push(
+                    '    <!-- Personal Note Section -->',
+                    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
+                    '      <tr><td style="padding:30px;">',
+                    '        <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">A Note From [Name]</h2>',
+                    '        <p style="margin:15px 0 25px; font-size:18px; line-height:1.6;">[Polished personal update]</p>',
+                    selections.includePhoto ? '        [PERSONAL PHOTO PLACEHOLDER]' : '',
+                    '      </td></tr>',
+                    '    </table></td></tr>',
+                    '    <tr><td height="20"></td></tr>'
+                );
+            }
+            promptLines.push(
+                '    <!-- REFERRAL CTA PLACEHOLDER -->',
+                '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
+                '  </table>',
+                '</bo' + 'dy>',
+                '</ht' + 'ml>'
+            );
         }
 
         const prompt = promptLines.join('\n');
@@ -1757,27 +1958,41 @@ async function generateNewsletter(feedback = '') {
         }
 
         if (html && html.trim() !== '') {
-            // Core replacements (always safe)
-            html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
-            html = html.replace(/<p[^>]*id=["']?pro-tip-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedProTip}</p>`);
-            html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
-         
+            const postSelections = feedback ? null : getNewsletterSelections();
+
+            if (postSelections && !feedback) {
+                html = applyUncheckedNewsletterSectionFilters(html, postSelections);
+            }
+
+            // Inject curated placeholders only for checked content sections
+            if (!feedback && postSelections?.contentSections?.fun) {
+                html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
+            }
+            if (!feedback && postSelections?.contentSections?.tip) {
+                html = html.replace(/<p[^>]*id=["']?pro-tip-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedProTip}</p>`);
+            }
+            if (!feedback && postSelections?.contentSections?.quote) {
+                html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
+            }
+            if (feedback) {
+                html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
+                html = html.replace(/<p[^>]*id=["']?pro-tip-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedProTip}</p>`);
+                html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
+            }
+
             // === ONLY RUN HEAVY INJECTION LOGIC ON FRESH GENERATION, NOT ON FEEDBACK EDITS ===
             // When editing with feedback, the model was explicitly told to return the COMPLETE modified full HTML.
             // Running the placeholder injections + section removals on an already-edited document was causing
             // large parts of the user's previous work to be stripped or overwritten.
             if (!feedback) {
-                // === PERSONAL PHOTO AND VIDEO - CRM / HubSpot Friendly ===
-                // FIXED: Do not nest the media tables inside the Personal Note's inner <td style="padding:30px">.
-                // Previously, 600px-wide tables (photo + video) inside a padded cell caused width overflows in email clients,
-                // breaking the personal note box, slicing the video thumbnail into strips, and mis-aligning later sections.
-                // Now: photo (if any) is inserted cleanly *inside* the note (fitted to ~540px to respect padding + left border).
-                // Video (if any) is inserted as its own top-level peer section (like referral/others) right before the referral.
-                // This keeps the flat <tr><td><table teal...> structure intact for all email clients.
-                const includePhoto = document.getElementById('nl-include-photo')?.checked || false;
-                const includeVideo = document.getElementById('nl-include-video')?.checked || false;
-                const personalPhotoUrl = document.getElementById('nl-personal-photo')?.value.trim() || '';
-                const personalVideoUrl = document.getElementById('nl-personal-video')?.value.trim() || '';
+                const includePhoto = postSelections?.includePhoto || false;
+                const includeVideo = postSelections?.includeVideo || false;
+                const personalPhotoUrl = includePhoto
+                    ? (document.getElementById('nl-personal-photo')?.value.trim() || '')
+                    : '';
+                const personalVideoUrl = includeVideo
+                    ? (document.getElementById('nl-personal-video')?.value.trim() || '')
+                    : '';
 
                 let photoInsert = '';
                 if (includePhoto && personalPhotoUrl) {
@@ -1864,7 +2079,7 @@ async function generateNewsletter(feedback = '') {
             html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, photoInsert);
 
 // Blog injection - robust version using dedicated placeholder + fallbacks
-const includeBlog = document.getElementById('nl-include-blog')?.checked || false;
+const includeBlog = postSelections?.includeBlog || false;
 if (includeBlog) {
     // Remove any blog-like section the AI might have (defensively) created
     html = html.replace(/<tr>\s*<td>\s*<table[^>]*>\s*<tr>\s*<td[^>]*>\s*<h2[^>]*>(?:From the Blog|Blog Highlight|My Recent Blog|Recent Blog)[^<]*<\/h2>[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
@@ -1931,12 +2146,13 @@ if (includeBlog) {
 // Clean up the placeholder if it wasn't used (e.g. user had the box unchecked or no URL)
 html = html.replace(/<!--\s*BLOG SECTION PLACEHOLDER\s*-->/gi, '');
 
-// === PERSONAL NOTE HEADLINE - Force ONLY first name (no last name) ===
-html = html.replace(/A Note From \[Name\]/gi, `A Note From ${firstName}`);
-html = html.replace(/A Note From Adam/gi, `A Note From ${firstName}`);
-html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
-// Force personal note title to ALWAYS use only the first name (no last name allowed)
-html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
+// === PERSONAL NOTE HEADLINE - Force ONLY first name when personal section is included ===
+if (postSelections?.personal) {
+    html = html.replace(/A Note From \[Name\]/gi, `A Note From ${firstName}`);
+    html = html.replace(/A Note From Adam/gi, `A Note From ${firstName}`);
+    html = html.replace(/A Note from Adam/gi, `A Note From ${firstName}`);
+    html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
+}
 
 // === ROBUST VIDEO INCLUSION: always force if UI enabled (checkbox + URL), strip any AI version first ===
 if (includeVideo && personalVideoUrl) {
@@ -2001,6 +2217,11 @@ if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
         simpleReferralHTML + '\n<tr><td height="20"></td></tr>\n$1'
     );
 }
+
+                // Final pass — strip any sections the user unchecked that the model may have added anyway
+                if (postSelections) {
+                    html = applyUncheckedNewsletterSectionFilters(html, postSelections);
+                }
             } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
 
     // Normalize before saving the raw HTML (for downloads/copying)
@@ -2033,14 +2254,15 @@ if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
                 iframe.onload = () => {
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
+                    const previewSel = getNewsletterSelections();
                     const funFactP = iframeDoc.querySelector('#fun-fact-placeholder');
-                    if (funFactP) funFactP.innerHTML = selectedFunFact;
+                    if (funFactP && previewSel.contentSections.fun) funFactP.innerHTML = selectedFunFact;
 
                     const proTipP = iframeDoc.querySelector('#pro-tip-placeholder');
-                    if (proTipP) proTipP.innerHTML = selectedProTip;
+                    if (proTipP && previewSel.contentSections.tip) proTipP.innerHTML = selectedProTip;
 
                     const quoteP = iframeDoc.querySelector('#quote-placeholder');
-                    if (quoteP) quoteP.innerHTML = `<em>${selectedQuote}</em>`;
+                    if (quoteP && previewSel.contentSections.quote) quoteP.innerHTML = `<em>${selectedQuote}</em>`;
 
                     // === RELIABLE LEFT BORDER ALIGNMENT NORMALIZATION (inside iframe) ===
                     // This runs after all placeholders are filled so we catch everything
