@@ -402,22 +402,99 @@
     });
   }
 
-  function collapseAllVaultPillars() {
-    if (typeof window.closeValueVaultPillar === 'function') {
-      for (let i = 1; i <= 6; i++) window.closeValueVaultPillar(i);
-      return;
-    }
-    document.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
-      el.style.removeProperty('display');
-      el.classList.add('hidden');
-    });
+  function isVaultPillarOpen(el) {
+    if (!el) return false;
+    return window.getComputedStyle(el).display !== 'none';
+  }
+
+  function setVaultPillarOpen(el, open) {
+    if (!el) return;
+    el.style.removeProperty('display');
+    el.classList.toggle('hidden', !open);
+  }
+
+  function getVaultPillarContent(pillarNumber) {
+    const vault = document.getElementById('value-vault');
+    if (!vault) return null;
+    return vault.querySelector('#value-vault-pillar-' + pillarNumber);
+  }
+
+  function clearVaultPillarCardHighlights() {
     const grid = document.getElementById('value-vault-pillars-grid');
-    if (grid) {
-      grid.querySelectorAll('.pillar-card').forEach((c) => {
-        c.classList.remove('!border-[#00A89D]', 'ring-1', 'ring-[#00A89D]');
-      });
+    if (!grid) return;
+    grid.querySelectorAll('.pillar-card').forEach((c) => {
+      c.classList.remove('!border-[#00A89D]', 'ring-1', 'ring-[#00A89D]');
+    });
+  }
+
+  function highlightVaultPillarCard(clickedElement) {
+    const grid = document.getElementById('value-vault-pillars-grid');
+    if (!grid) return;
+    clearVaultPillarCardHighlights();
+    const card = clickedElement?.classList?.contains('pillar-card')
+      ? clickedElement
+      : clickedElement?.closest?.('.pillar-card[data-pillar]');
+    if (card) {
+      card.classList.add('!border-[#00A89D]', 'ring-1', 'ring-[#00A89D]');
     }
   }
+
+  function collapseAllVaultPillars() {
+    for (let i = 1; i <= 6; i++) {
+      const content = getVaultPillarContent(i);
+      if (content) setVaultPillarOpen(content, false);
+    }
+    clearVaultPillarCardHighlights();
+  }
+
+  window.closeValueVaultPillar = function closeValueVaultPillar(pillarNumber) {
+    const content = getVaultPillarContent(pillarNumber);
+    if (!content) return;
+    setVaultPillarOpen(content, false);
+    clearVaultPillarCardHighlights();
+  };
+
+  window.openValueVaultPillar = function openValueVaultPillar(pillarNumber, clickedElement, scrollMode) {
+    const vault = document.getElementById('value-vault');
+    if (!vault) return;
+
+    const contentId = 'value-vault-pillar-' + pillarNumber;
+    const content = vault.querySelector('#' + contentId);
+    if (!content) return;
+
+    vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
+      if (el.id !== contentId) setVaultPillarOpen(el, false);
+    });
+    setVaultPillarOpen(content, true);
+    highlightVaultPillarCard(clickedElement);
+
+    const scrollTarget = scrollMode || 'pillar';
+    if (scrollTarget !== 'none') {
+      setTimeout(() => {
+        if (scrollTarget === 'toolbar' && typeof window.scrollVaultToToolbar === 'function') {
+          window.scrollVaultToToolbar();
+        } else {
+          content.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
+    }
+
+    if (pillarNumber === 1) {
+      setTimeout(() => {
+        if (typeof window.renderValueVault === 'function') window.renderValueVault();
+      }, 80);
+    }
+  };
+
+  window.toggleValueVaultPillar = function toggleValueVaultPillar(pillarNumber, clickedElement, scrollMode) {
+    const content = getVaultPillarContent(pillarNumber);
+    if (!content) return;
+    if (isVaultPillarOpen(content)) {
+      window.closeValueVaultPillar(pillarNumber);
+    } else {
+      window.openValueVaultPillar(pillarNumber, clickedElement, scrollMode);
+    }
+  };
 
   window.clearVaultView = function clearVaultView() {
     const searchInput = document.getElementById('value-vault-search');
@@ -648,11 +725,7 @@
         }
       });
 
-      // New modern pillar system
-      vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
-        el.style.removeProperty('display');
-        el.classList.remove('hidden');
-      });
+      vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => setVaultPillarOpen(el, true));
     });
 
     collapseBtn.addEventListener('click', () => {
@@ -673,15 +746,7 @@
         }
       });
 
-      // New modern pillar system
-      if (typeof window.closeValueVaultPillar === 'function') {
-        for (let i = 1; i <= 6; i++) window.closeValueVaultPillar(i);
-      } else {
-        vault.querySelectorAll('[id^="value-vault-pillar-"]').forEach((el) => {
-          el.style.removeProperty('display');
-          el.classList.add('hidden');
-        });
-      }
+      collapseAllVaultPillars();
     });
   }
 

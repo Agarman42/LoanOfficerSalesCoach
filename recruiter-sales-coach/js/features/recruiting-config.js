@@ -214,19 +214,42 @@
     ];
 
     const objections = playbook.objectionResponses || {};
-    const objectionEntries = Object.keys(objections).map(key => ({
-      key,
-      label: formatObjectionLabel(key),
-      responses: objections[key] || []
-    }));
+    const objectionEntries = Object.keys(objections).map(key => {
+      const raw = objections[key];
+      if (Array.isArray(raw)) {
+        return { key, label: formatObjectionLabel(key), questions: [], responses: raw };
+      }
+      return {
+        key,
+        label: raw.label || formatObjectionLabel(key),
+        questions: raw.questions || [],
+        responses: raw.responses || []
+      };
+    });
 
-    const objectionCardsHtml = objectionEntries.map(entry => `
-      <div class="objection-card border border-gray-200 dark:border-gray-700 rounded-2xl p-5" data-search="${escapeHtml((entry.label + ' ' + entry.responses.join(' ')).toLowerCase())}">
+    const objectionCardsHtml = objectionEntries.map(entry => {
+      const searchBlob = (entry.label + ' ' + entry.questions.join(' ') + ' ' + entry.responses.join(' ')).toLowerCase();
+      const questionsHtml = entry.questions.length
+        ? `<div class="mb-4">
+            <div class="text-[10px] font-bold tracking-wider text-[#00A89D] uppercase mb-2">Rebuttal Questions</div>
+            ${renderBulletList(entry.questions, 'playbook')}
+          </div>`
+        : '';
+      const responsesHtml = entry.responses.length
+        ? `<div>
+            <div class="text-[10px] font-bold tracking-wider text-[#002B5C] dark:text-white uppercase mb-2">Response Scripts</div>
+            <div class="space-y-3">
+              ${entry.responses.map((resp, i) => renderTextCard(`${entry.label} — Response ${i + 1}`, resp, 'playbook')).join('')}
+            </div>
+          </div>`
+        : '';
+      return `
+      <div class="objection-card border border-gray-200 dark:border-gray-700 rounded-2xl p-5" data-search="${escapeHtml(searchBlob)}">
         <h4 class="font-semibold text-[#F15A29] mb-3">${escapeHtml(entry.label)}</h4>
-        <div class="space-y-3">
-          ${entry.responses.map((resp, i) => renderTextCard(`${entry.label} — Response ${i + 1}`, resp, 'playbook')).join('')}
-        </div>
-      </div>`).join('');
+        ${questionsHtml}
+        ${responsesHtml}
+      </div>`;
+    }).join('');
 
     const panelsHtml = [
       renderPlaybookPanel('philosophy', 'Core Philosophy', `
@@ -249,7 +272,8 @@
       renderPlaybookPanel('discovery', 'Discovery & Power Questions', `
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Let the candidate speak more than you do. These questions uncover real motivations.</p>
         ${renderBulletList(playbook.discoveryQuestions, 'playbook')}`, false),
-      renderPlaybookPanel('objections', 'Objection Handling', `
+      renderPlaybookPanel('objections', 'Objection Handling & Rebuttal Questions', `
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Use rebuttal questions to stay curious and uncover the real concern. Pair with response scripts when you need a full warm reply — especially on "happy where I'm at" and leadership-meeting hesitations.</p>
         <div class="mb-4 p-4 rounded-2xl bg-[#F15A29]/5 border border-[#F15A29]/20">
           <div class="font-semibold text-[#002B5C] dark:text-white mb-2">Objection Mindset</div>
           ${renderBulletList(playbook.objectionMindset, 'playbook')}

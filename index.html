@@ -6464,12 +6464,12 @@
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Sync your profile first</strong> (name, market, voice, hobbies). The more complete it is, the more the personal sections and tone feel like you wrote them.</span></div>
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, hobby, family moment, or Sunday reset — it humanizes everything else.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Sync your profile for branding &amp; tone</strong> (name, market, voice). The Personal Update itself is always written fresh each issue — specific beats generic.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, family moment, or community story — and describe any photo/video you're including.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use Specific Topics / Local Headlines.</strong> Give the AI exact events, stats, or recipes. Generic = lower engagement; hyper-local and timely = shares and replies.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pick a sustainable cadence</strong> (monthly is fine). Use the generator every time so the voice and mix stay consistent. Block the send date in your Weekly Win Plan.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Repurpose winners.</strong> A great issue becomes 3–4 social posts, a Reel script, or a blog angle. The output is designed for this — copy the sections and save ideas to your vault.</span></div>
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>End with the soft CTA every time.</strong> “Know anyone thinking about buying or refinancing? Happy to help — no pressure.” Track what gets forwarded or replied to and double down.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Referral section is optional.</strong> Leave it on for the soft “know anyone buying or refinancing?” ask, or turn it off when you want a pure value send with no CTA.</span></div>
         </div>
         <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
           <i class="fas fa-info-circle"></i>
@@ -6560,6 +6560,8 @@
           <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-fun" checked class="w-6 h-6 text-[#F15A29]"> Fun Facts 🤓</label>
           <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-tip" checked class="w-6 h-6 text-[#F15A29]"> Homeownership Tip 🏡</label>
           <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-quote" class="w-6 h-6 text-[#F15A29]"> Motivational Quote 💪</label>
+          <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-dadjoke" class="w-6 h-6 text-[#F15A29]"> Dad Joke 😄</label>
+          <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-puzzle" class="w-6 h-6 text-[#F15A29]"> Weekly Brain Teaser 🧩</label>
         </div>
       </div>
 
@@ -6571,9 +6573,12 @@
         </div>
         <div id="personal-fields" class="hidden ml-2 space-y-6">
           <div>
-            <textarea id="nl-personal-text" rows="4" placeholder="Share a quick life update, recent win, family moment, hobby, or fun story..." 
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
+              <strong class="text-[#002B5C] dark:text-white">Write this fresh every issue</strong> — we won't pull hobbies, goals, or wins from your profile. Be specific and real: a recent closing, client win, family moment, community event, hobby, or Sunday reset. If you're including a photo or video below, describe what's in it so readers know what they're about to see.
+            </p>
+            <textarea id="nl-personal-text" rows="5" placeholder="e.g., Just wrapped an amazing closing for the Martinez family — their first home after years of saving. The kids were thrilled to pick their bedrooms! (Photo: us at the front door with their new keys.)&#10;&#10;Or: Spent Saturday at the local food bank — grateful for this community we get to serve. (Video: quick clip from our volunteer shift.)" 
                       class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
-            <button onclick="if(typeof window.fillPersonalFromProfile==='function'){window.fillPersonalFromProfile();}else{alert('Profile helper ready after refresh');}" class="mt-1 text-xs text-[#00A89D] hover:text-[#F15A29] underline">Auto-fill from my profile (hobbies, personality, recent wins)</button>
+            <p class="text-xs text-gray-500 mt-1.5">Required when Personal Update is checked — at least a few sentences with real details. We'll polish your words, not invent them.</p>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -6583,7 +6588,7 @@
               </div>
               <input type="text" id="nl-personal-photo" placeholder="Paste direct image URL" 
                      class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#F15A29]/50">
-              <p class="text-xs text-gray-500 mt-1">Appears below your personal note.</p>
+              <p class="text-xs text-gray-500 mt-1">Appears below your personal note — mention the photo in your update above.</p>
             </div>
             <div>
               <div class="flex items-center mb-2">
@@ -6592,7 +6597,7 @@
               </div>
               <input type="text" id="nl-personal-video" placeholder="Paste YouTube video or Shorts URL" 
                      class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#F15A29]/50">
-              <p class="text-xs text-gray-500 mt-1">Video appears below note (or photo).</p>
+              <p class="text-xs text-gray-500 mt-1">Video appears below note (or photo) — describe it in your update above.</p>
             </div>
           </div>
         </div>
@@ -6614,7 +6619,18 @@
         </div>
       </div>
 
-      <!-- Card 6: Specific Topics / Headlines / Recipes (separate card as requested) -->
+      <!-- Card 6: Referral CTA -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="nl-include-referral" checked class="mt-1 h-5 w-5 text-[#00A89D]">
+          <div>
+            <label for="nl-include-referral" class="text-lg font-semibold text-[#00A89D] cursor-pointer">Include Referral Section 🤝</label>
+            <p class="text-xs text-gray-500 mt-1">Adds the &ldquo;Know Someone Ready to Buy or Refinance?&rdquo; card with a mailto referral button before the footer. Uncheck for a softer close with no ask.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 7: Specific Topics / Headlines / Recipes (separate card as requested) -->
       <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
         <label class="block text-lg font-semibold text-[#00A89D] mb-1">Specific Topics / Headlines / Recipes (Optional)</label>
         <p class="text-xs text-gray-500 mb-3">Give very specific direction here — e.g., exact local event name/date, a particular market stat or trend, industry news headline, or a precise recipe (holiday drinks/meals, family favorite, etc.). This prevents generic or inaccurate AI filler and keeps content hyper-relevant to your audience.</p>
@@ -6628,10 +6644,11 @@
     <!-- Custom Content Choices (expandable dropdown - kept as requested, styled to match cards) -->
     <details class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-sm p-6 mb-12">
             <summary class="text-xl font-bold text-[#002B5C] dark:text-white cursor-pointer flex items-center gap-2 list-none">
-              <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-magic text-[#00A89D]"></i></span> Custom Content Choices (Fun Facts / Pro Tips / Quotes — Random by default)
+              <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-magic text-[#00A89D]"></i></span> Custom Content Choices (Facts / Tips / Quotes / Dad Jokes / Brain Teaser)
               <span class="text-xs font-normal text-gray-500 ml-2">(click to expand)</span>
             </summary>
             <div class="mt-6 space-y-6">
+              <p class="text-sm text-gray-600 dark:text-gray-400 p-4 rounded-2xl bg-[#00A89D]/5 border border-[#00A89D]/20 mb-2">To include any of these in your newsletter, check the matching box in <strong>Sections to Include</strong> above (Fun Facts, Homeownership Tip, Motivational Quote, Dad Joke, Weekly Brain Teaser). Then pick from the library, regenerate random, or write your own — your choices are injected after generation.</p>
 
               <!-- Fun Fact -->
               <div>
@@ -6672,8 +6689,135 @@
                 <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm italic border border-gray-200 dark:border-gray-700" id="quote-preview"></div>
               </div>
 
+              <!-- Dad Joke -->
+              <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                  <h4 class="text-lg font-semibold text-[#F15A29]">Dad Joke of the Week</h4>
+                  <div class="flex flex-wrap gap-2">
+                    <button onclick="regenerateRandom('dadJoke')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
+                    <button type="button" data-nl-choice="dadJoke" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
+                    <button onclick="resetUsed('dadJokes')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
+                  </div>
+                </div>
+                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm border border-gray-200 dark:border-gray-700" id="dad-joke-preview"></div>
+                <details class="mt-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+                  <summary class="text-sm font-semibold text-[#002B5C] dark:text-white cursor-pointer select-none">✏️ Write your own joke</summary>
+                  <div class="mt-3 space-y-3">
+                    <textarea id="nl-custom-dadjoke-input" rows="3" placeholder="Type your dad joke here…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
+                    <button type="button" id="nl-custom-dadjoke-apply" class="text-xs px-4 py-2 bg-[#F15A29] text-white rounded-full font-semibold hover:opacity-90">Use my joke</button>
+                  </div>
+                </details>
+              </div>
+
+              <!-- Weekly Brain Teaser -->
+              <div id="brain-teaser-panel" class="pt-4 border-t border-gray-200 dark:border-gray-700 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                  <div>
+                    <h4 class="text-lg font-semibold text-[#F15A29]">Weekly Brain Teaser</h4>
+                    <p class="text-xs text-gray-500 mt-1">Pick one format per edition. You&apos;ll see the answer here while setting up; subscribers only get it in fine print at the bottom of the newsletter.</p>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                  <label class="nl-puzzle-type-card flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:border-[#00A89D]/60 text-center">
+                    <input type="radio" name="nl-puzzle-type" value="trivia" class="sr-only" checked>
+                    <span class="text-2xl">🧠</span>
+                    <span class="font-semibold text-[#002B5C] dark:text-white">Trivia</span>
+                    <span class="text-xs text-gray-500">One question</span>
+                  </label>
+                  <label class="nl-puzzle-type-card flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:border-[#00A89D]/60 text-center">
+                    <input type="radio" name="nl-puzzle-type" value="scramble" class="sr-only">
+                    <span class="text-2xl">🔤</span>
+                    <span class="font-semibold text-[#002B5C] dark:text-white">Word Scramble</span>
+                    <span class="text-xs text-gray-500">Unscramble letters</span>
+                  </label>
+                  <label class="nl-puzzle-type-card flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:border-[#00A89D]/60 text-center">
+                    <input type="radio" name="nl-puzzle-type" value="riddle" class="sr-only">
+                    <span class="text-2xl">❓</span>
+                    <span class="font-semibold text-[#002B5C] dark:text-white">Riddle</span>
+                    <span class="text-xs text-gray-500">Classic brain teaser</span>
+                  </label>
+                </div>
+
+                <div id="nl-puzzle-filter-panel" class="mb-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-800/60">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                    <p class="text-sm font-semibold text-[#002B5C] dark:text-white">Filter trivia &amp; word scrambles</p>
+                    <p class="text-xs text-gray-500" id="nl-puzzle-filter-count">—</p>
+                  </div>
+                  <div class="flex flex-wrap gap-2 mb-3" id="nl-puzzle-topic-filters" role="group" aria-label="Trivia and scramble topic filter">
+                    <button type="button" data-nl-topic="all" class="nl-puzzle-topic-pill text-xs px-3 py-1.5 rounded-full border-2 font-semibold transition-all">All topics</button>
+                    <button type="button" data-nl-topic="mortgage" class="nl-puzzle-topic-pill text-xs px-3 py-1.5 rounded-full border-2 font-semibold transition-all">🏠 Mortgage &amp; Home</button>
+                  </div>
+                  <div id="nl-puzzle-category-wrap" class="hidden">
+                    <label for="nl-puzzle-category-select" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1.5">Trivia category</label>
+                    <select id="nl-puzzle-category-select" class="w-full sm:w-auto min-w-[200px] px-3 py-2 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                      <option value="all">All categories</option>
+                    </select>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">Filters apply to <strong>trivia</strong> and <strong>word scrambles</strong> only. Use category + search in <strong>Choose Specific</strong> to browse the full trivia library.</p>
+                </div>
+
+                <div id="nl-puzzle-riddle-hint" class="hidden mb-4 p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+                  <p class="text-xs text-gray-500 m-0">Riddles use the full library — no topic filters. Use <strong>Choose Specific</strong> and search to browse all riddles. Dad jokes work the same way.</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-2">
+                  <button onclick="regenerateRandom('puzzle')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
+                  <button type="button" data-nl-choice="puzzle" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
+                  <button onclick="resetUsed('puzzleAll')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh (all types)</button>
+                </div>
+                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm border border-gray-200 dark:border-gray-700" id="brain-teaser-preview"></div>
+                <details class="mt-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4" id="nl-custom-puzzle-panel">
+                  <summary class="text-sm font-semibold text-[#002B5C] dark:text-white cursor-pointer select-none">✏️ Write your own <span id="nl-custom-puzzle-type-label">trivia</span></summary>
+                  <div class="mt-3 space-y-3">
+                    <div id="nl-custom-fields-trivia" class="space-y-3">
+                      <div>
+                        <label for="nl-custom-trivia-question" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Question</label>
+                        <textarea id="nl-custom-trivia-question" rows="2" placeholder="e.g., What does PMI stand for?" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
+                      </div>
+                      <div>
+                        <label for="nl-custom-trivia-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer</label>
+                        <input type="text" id="nl-custom-trivia-answer" placeholder="e.g., Private Mortgage Insurance" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                      </div>
+                    </div>
+                    <div id="nl-custom-fields-scramble" class="space-y-3 hidden">
+                      <div>
+                        <label for="nl-custom-scramble-prompt" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Prompt</label>
+                        <textarea id="nl-custom-scramble-prompt" rows="2" placeholder="e.g., Unscramble this word every homeowner hopes to build:" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
+                      </div>
+                      <div>
+                        <label for="nl-custom-scramble-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer (unscrambled word)</label>
+                        <div class="flex flex-wrap gap-2">
+                          <input type="text" id="nl-custom-scramble-answer" placeholder="e.g., Equity" class="flex-1 min-w-[140px] p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                          <button type="button" id="nl-custom-scramble-shuffle" class="text-xs px-3 py-2 border-2 border-[#00A89D] text-[#00A89D] rounded-full font-semibold hover:bg-[#00A89D]/10 whitespace-nowrap">Scramble letters</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label for="nl-custom-scramble-letters" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Scrambled letters</label>
+                        <input type="text" id="nl-custom-scramble-letters" placeholder="e.g., YTUIQE" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm uppercase tracking-widest focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                      </div>
+                      <div>
+                        <label for="nl-custom-scramble-hint" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Hint (optional)</label>
+                        <input type="text" id="nl-custom-scramble-hint" placeholder="e.g., Grows as you pay down the loan" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                      </div>
+                    </div>
+                    <div id="nl-custom-fields-riddle" class="space-y-3 hidden">
+                      <div>
+                        <label for="nl-custom-riddle-text" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Riddle</label>
+                        <textarea id="nl-custom-riddle-text" rows="3" placeholder="e.g., What has hands but cannot clap?" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
+                      </div>
+                      <div>
+                        <label for="nl-custom-riddle-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer</label>
+                        <input type="text" id="nl-custom-riddle-answer" placeholder="e.g., A clock" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                      </div>
+                    </div>
+                    <button type="button" id="nl-custom-puzzle-apply" class="text-xs px-4 py-2 bg-[#F15A29] text-white rounded-full font-semibold hover:opacity-90">Use my brain teaser</button>
+                  </div>
+                </details>
+              </div>
+
             </div>
-            <p class="text-xs text-gray-500 mt-4">Pulled from large curated lists (no repeats until reset). AI leaves placeholders for injection.</p>
+            <p class="text-xs text-gray-500 mt-4">Curated lists avoid repeats until you hit <strong>Start fresh</strong>. Unchecked sections above are omitted from the generated newsletter.</p>
         </details>
 
       <!-- Generate Button -->
@@ -7246,7 +7390,10 @@
 <script src="js/features/blog-creator.js?v=20260623-lo-v222"></script>
 <script src="js/features/referral-rich-modals.js?v=20260623-lo-v222"></script>
 <script src="js/features/legacy-helpers.js?v=20260623-lo-v222"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-lo-v222"></script>
+<script src="js/data/newsletter-dad-jokes.js?v=20260625-lo-v231"></script>
+<script src="js/data/newsletter-brain-teasers.js?v=20260625-lo-v233"></script>
+<script src="js/features/newsletter-entertainment.js?v=20260625-lo-v234"></script>
+<script src="js/features/newsletter-generator.js?v=20260625-lo-v229"></script>
 <script src="js/features/ai-chat.js?v=20260623-lo-v222"></script>
 <script src="js/features/underwriting.js"></script>
 <script src="js/features/value-vault.js?v=20260623-lo-v222"></script>

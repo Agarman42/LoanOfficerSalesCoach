@@ -841,6 +841,9 @@ function resetUsed(category) {
     } else if (category === 'quotes') {
         usedQuotes = [];
         selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    } else if (window.NlEntertainment && typeof window.NlEntertainment.resetUsed === 'function') {
+        window.NlEntertainment.resetUsed(category);
+        return;
     }
 
     localStorage.setItem('used' + category.charAt(0).toUpperCase() + category.slice(1), JSON.stringify([]));
@@ -882,13 +885,20 @@ function updatePreviews() {
     if (funFactEl) funFactEl.innerText = selectedFunFact || 'No fun fact selected';
     if (proTipEl) proTipEl.innerText = selectedProTip || 'No pro tip selected';
     if (quoteEl) quoteEl.innerText = selectedQuote || 'No quote selected';
+    if (window.NlEntertainment && typeof window.NlEntertainment.updatePreviews === 'function') {
+        window.NlEntertainment.updatePreviews();
+    }
 }
 
 // Regenerate random for a category
 function regenerateRandom(category) {
     if (category === 'funFact') selectedFunFact = getRandomItem(funFacts, usedFunFacts);
-    if (category === 'proTip') selectedProTip = getRandomItem(proTips, usedProTips);
-    if (category === 'quote') selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    else if (category === 'proTip') selectedProTip = getRandomItem(proTips, usedProTips);
+    else if (category === 'quote') selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    else if (window.NlEntertainment && typeof window.NlEntertainment.regenerateRandom === 'function') {
+        window.NlEntertainment.regenerateRandom(category);
+        return;
+    }
 
     localStorage.setItem('usedFunFacts', JSON.stringify(usedFunFacts));
     localStorage.setItem('usedProTips', JSON.stringify(usedProTips));
@@ -958,6 +968,29 @@ function openModal(category) {
 
     let data = [];
     let modalTitleText = '';
+
+    if (category === 'dadJoke' || category === 'puzzle') {
+        if (window.NlEntertainment && typeof window.NlEntertainment.openChoiceModal === 'function') {
+            window.NlEntertainment.openChoiceModal(category, {
+                ensureModal: ensureNewsletterChoiceModal,
+                getTitleEl: getNewsletterChoiceTitleEl,
+                getListEl: getNewsletterChoiceListEl,
+                showModal: (m) => {
+                    if (typeof window.openNamedModal === 'function') window.openNamedModal(m);
+                    else if (typeof window.openAppModal === 'function') window.openAppModal(m);
+                    else {
+                        m.classList.remove('hidden');
+                        m.classList.add('flex');
+                        m.style.display = 'flex';
+                        document.body.classList.add('modal-open');
+                    }
+                    m.setAttribute('aria-hidden', 'false');
+                },
+                hideModal: () => closeModal()
+            });
+        }
+        return;
+    }
 
     if (category === 'funFact') {
         modalTitleText = 'Choose a Fun Fact';
@@ -1332,7 +1365,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const savedSections = JSON.parse(localStorage.getItem('nl-sections') || '[]');
     document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
-        cb.checked = savedSections.includes(cb.id);
+        if (savedSections.includes(cb.id)) {
+            cb.checked = true;
+        } else if (cb.id === 'nl-include-referral') {
+            cb.checked = true;
+        } else if (savedSections.length > 0) {
+            cb.checked = false;
+        }
     });
 
     // Load used items and selections
@@ -1374,9 +1413,21 @@ document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEac
             const fields = document.getElementById('personal-fields');
             if (fields) fields.classList.toggle('hidden', !cb.checked);
         }
+        if (cb.id === 'nl-include-video' && cb.checked) {
+            const personalCb = document.getElementById('nl-personal');
+            const fields = document.getElementById('personal-fields');
+            if (personalCb && !personalCb.checked) {
+                personalCb.checked = true;
+                if (fields) fields.classList.remove('hidden');
+            }
+        }
         if (cb.id === 'nl-include-blog') {
             const fields = document.getElementById('blog-fields');
             if (fields) fields.classList.toggle('hidden', !cb.checked);
+        }
+        if (cb.id === 'nl-puzzle') {
+            const panel = document.getElementById('brain-teaser-panel');
+            if (panel) panel.classList.toggle('hidden', !cb.checked);
         }
     });
 });
@@ -1393,6 +1444,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const blogFields = document.getElementById('blog-fields');
     if (blogCb && blogFields) {
         blogFields.classList.toggle('hidden', !blogCb.checked);
+    }
+
+    const puzzleCb = document.getElementById('nl-puzzle');
+    const puzzlePanel = document.getElementById('brain-teaser-panel');
+    if (puzzleCb && puzzlePanel) {
+        puzzlePanel.classList.toggle('hidden', !puzzleCb.checked);
+    }
+    if (window.NlEntertainment && typeof window.NlEntertainment.wireUI === 'function') {
+        window.NlEntertainment.wireUI();
     }
 
     // Profile sync on this load path too
@@ -1457,19 +1517,281 @@ const NL_CONTENT_SECTIONS = {
         label: 'Motivational Quote',
         headings: ['Motivational Quote', 'Quote of the Month', 'Inspiration', 'Weekly Inspiration'],
         placeholderId: 'quote-placeholder'
+    },
+    dadjoke: {
+        id: 'nl-dadjoke',
+        label: 'Dad Joke',
+        headings: ['Dad Joke', 'Dad Joke of the Week', 'Groaner of the Week'],
+        placeholderId: 'dad-joke-placeholder'
+    },
+    puzzle: {
+        id: 'nl-puzzle',
+        label: 'Weekly Brain Teaser',
+        headings: ['Trivia Time', 'Word Scramble', 'Riddle of the Week', 'Weekly Brain Teaser', 'Brain Teaser'],
+        placeholderId: 'brain-teaser-placeholder'
     }
 };
+
+function extractYouTubeVideoId(url) {
+    if (!url) return '';
+    const raw = String(url).trim();
+    let id = '';
+    try {
+        const parsed = new URL(raw.startsWith('http') ? raw : `https://${raw}`);
+        const host = parsed.hostname.replace(/^www\./, '');
+        if (host === 'youtu.be') {
+            id = parsed.pathname.split('/').filter(Boolean)[0] || '';
+        } else if (host.includes('youtube.com') || host.includes('youtube-nocookie.com')) {
+            if (parsed.pathname.includes('/shorts/')) {
+                id = parsed.pathname.split('/shorts/')[1]?.split('/')[0] || '';
+            } else if (parsed.pathname.includes('/embed/')) {
+                id = parsed.pathname.split('/embed/')[1]?.split('/')[0] || '';
+            } else if (parsed.pathname.includes('/live/')) {
+                id = parsed.pathname.split('/live/')[1]?.split('/')[0] || '';
+            } else {
+                id = parsed.searchParams.get('v') || '';
+            }
+        }
+    } catch (e) {
+        if (raw.includes('youtu.be/')) id = raw.split('youtu.be/')[1]?.split(/[?&#]/)[0] || '';
+        else if (raw.includes('shorts/')) id = raw.split('shorts/')[1]?.split(/[?&#]/)[0] || '';
+        else if (raw.includes('v=')) id = raw.split('v=')[1]?.split(/[?&#]/)[0] || '';
+        else if (raw.includes('embed/')) id = raw.split('embed/')[1]?.split(/[?&#]/)[0] || '';
+    }
+    id = (id || '').trim();
+    return id.length === 11 ? id : '';
+}
+
+function buildPersonalVideoTable(personalVideoUrl) {
+    const url = String(personalVideoUrl || '').trim();
+    if (!url) return '';
+    const href = url.startsWith('http') ? url : `https://${url}`;
+    const videoId = extractYouTubeVideoId(href);
+    const thumbnailUrl = videoId
+        ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+        : 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
+
+    return `
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+  <tr>
+    <td style="padding:30px;">
+      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto;">
+        <tr>
+          <td align="center" style="padding-bottom:16px;">
+            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center">
+            <a href="${href}" target="_blank" rel="noopener" style="text-decoration:none;">
+              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:560px;">
+                <tr>
+                  <td style="padding:0;">
+                    <img src="${thumbnailUrl}"
+                         alt="Watch Personal Video"
+                         width="560"
+                         style="width:100%; max-width:560px; height:auto; display:block; border:0;">
+                  </td>
+                </tr>
+              </table>
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding-top:18px;">
+            <table align="center" cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
+                  <a href="${href}" target="_blank" rel="noopener"
+                     style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
+                      ▶ Watch Video
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
+}
+
+function wrapNewsletterSectionRows(innerHtml) {
+    if (!innerHtml) return '';
+    return `
+<tr><td height="20"></td></tr>
+<tr>
+  <td align="center" style="padding:0;">
+${innerHtml}
+  </td>
+</tr>
+<tr><td height="20"></td></tr>`;
+}
+
+function wrapPersonalVideoRows(videoTable) {
+    return wrapNewsletterSectionRows(videoTable);
+}
+
+function insertRowsInsideMainTable(html, rows) {
+    if (!rows) return html;
+    const beforeMainClose = /<\/table>\s*<\/body>/i;
+    if (beforeMainClose.test(html)) {
+        return html.replace(beforeMainClose, rows + '\n</table></body>');
+    }
+    return html.replace(/<\/body>/i, '<table width="600" align="center" cellpadding="0" cellspacing="0">' + rows + '</table></body>');
+}
+
+const NL_BLOG_HEADING_RE = '(?:My Recent Blog|From the Blog|Blog Highlight|Recent Blog|Latest Blog Post)';
+
+function stripReferralSections(html) {
+    let out = String(html || '');
+    out = out.replace(
+        /<tr>\s*<td[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi,
+        ''
+    );
+    out = out.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, '');
+    out = out.replace(/<!--\s*REFERRAL CTA PLACEHOLDER\s*-->/gi, '');
+    return out;
+}
+
+function stripBlogSections(html) {
+    let out = String(html || '');
+    out = out.replace(
+        new RegExp(
+            `<tr>\\s*<td[^>]*>\\s*<table[^>]*>[\\s\\S]*?${NL_BLOG_HEADING_RE}[\\s\\S]*?<\\/table>\\s*<\\/td>\\s*<\\/tr>\\s*(?:<tr>\\s*<td[^>]*height=["']?20["']?[^>]*>\\s*<\\/td>\\s*<\\/tr>\\s*)?`,
+            'gi'
+        ),
+        ''
+    );
+    out = out.replace(/<!--\s*BLOG SECTION PLACEHOLDER\s*-->/gi, '');
+    return out;
+}
+
+/** Index where the blog card should be inserted — immediately before the personal-note outer <tr>. */
+function findBlogInsertBeforePersonalIndex(html) {
+    const src = String(html || '');
+    const h2Re = /<h2[^>]*>\s*A\s*Note\s*From\b[^<]*<\/h2>/i;
+    const h2Match = h2Re.exec(src);
+    if (!h2Match) return -1;
+
+    const h2End = h2Match.index + h2Match[0].length;
+    let searchFrom = h2Match.index;
+
+    // Walk back from the h2 to find the OUTER <tr><td><table> card — skip the inner content <tr>.
+    while (searchFrom > 0) {
+        const trPos = src.lastIndexOf('<tr', searchFrom);
+        if (trPos < 0) break;
+
+        const segment = src.substring(trPos, h2End);
+        const isOuterCard = /<tr>\s*<td[^>]*>[\s\S]*?<table\b/i.test(segment)
+            && /<h2[^>]*>\s*A\s*Note\s*From\b/i.test(segment);
+        if (isOuterCard) {
+            let insertAt = trPos;
+            const beforeCard = src.substring(0, insertAt);
+            const spacerRe = /<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*$/i;
+            const spacerMatch = spacerRe.exec(beforeCard);
+            if (spacerMatch) insertAt = spacerMatch.index;
+            return insertAt;
+        }
+        searchFrom = trPos - 1;
+    }
+
+    return -1;
+}
+
+function injectBlogBeforePersonal(html, blogSection, options) {
+    if (!blogSection) return html;
+    const personalIncluded = !!(options && options.personalIncluded);
+
+    // Never trust placeholder position — AI often leaves it right after the hero.
+    let out = stripBlogSections(html);
+
+    const personalIdx = findBlogInsertBeforePersonalIndex(out);
+    if (personalIdx >= 0) {
+        return out.slice(0, personalIdx) + blogSection + out.slice(personalIdx);
+    }
+
+    if (personalIncluded) {
+        const personalComment = /<!--\s*Personal Note Section\s*-->/i;
+        const commentMatch = personalComment.exec(out);
+        if (commentMatch) {
+            const heroIdx = out.search(/<img[^>]*alt=["'][^"']*hero[^"']*["']/i);
+            if (heroIdx === -1 || commentMatch.index > heroIdx + 400) {
+                return out.slice(0, commentMatch.index) + blogSection + out.slice(commentMatch.index);
+            }
+        }
+        return insertRowsInsideMainTable(out, blogSection);
+    }
+
+    // Personal block not included — tuck blog before video / referral / footer.
+    if (out.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
+        return out.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', blogSection + '\n<!-- PERSONAL VIDEO PLACEHOLDER -->');
+    }
+
+    if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
+        return out.replace('[REFERRAL CTA PLACEHOLDER]', blogSection + '\n[REFERRAL CTA PLACEHOLDER]');
+    }
+
+    const referralBlock = /<tr>\s*<td[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/tr>/i;
+    if (referralBlock.test(out)) {
+        return out.replace(referralBlock, blogSection + '$&');
+    }
+
+    const footerRow = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i;
+    if (footerRow.test(out)) {
+        return out.replace(footerRow, blogSection + '$1');
+    }
+
+    return insertRowsInsideMainTable(out, blogSection);
+}
+
+function stripPersonalVideoBlocks(html) {
+    return String(html || '').replace(
+        /<tr>\s*<td[^>]*>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi,
+        ''
+    );
+}
+
+function injectPersonalVideoSection(html, personalVideoUrl) {
+    const url = String(personalVideoUrl || '').trim();
+    if (!url) return html;
+
+    const videoTable = buildPersonalVideoTable(url);
+    const videoSection = wrapPersonalVideoRows(videoTable);
+    let out = stripPersonalVideoBlocks(html);
+
+    if (out.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
+        return out.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', videoSection);
+    }
+
+    const afterPersonalNote = /(<tr>\s*<td[^>]*>\s*<table[^>]*border-left:\s*8px[^>]*>[\s\S]*?A Note From[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>\s*<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>)/i;
+    if (afterPersonalNote.test(out)) {
+        return out.replace(afterPersonalNote, '$1' + videoSection);
+    }
+
+    if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
+        return out.replace('[REFERRAL CTA PLACEHOLDER]', videoSection + '\n[REFERRAL CTA PLACEHOLDER]');
+    }
+
+    return insertRowsInsideMainTable(out, videoSection);
+}
 
 function getNewsletterSelections() {
     const personal = !!document.getElementById('nl-personal')?.checked;
     const includePhoto = personal && !!document.getElementById('nl-include-photo')?.checked;
-    const includeVideo = personal && !!document.getElementById('nl-include-video')?.checked;
+    const includeVideo = !!document.getElementById('nl-include-video')?.checked;
     const includeBlog = !!document.getElementById('nl-include-blog')?.checked;
+    const referralEl = document.getElementById('nl-include-referral');
+    const includeReferral = referralEl ? referralEl.checked : true;
     const contentSections = {};
     Object.keys(NL_CONTENT_SECTIONS).forEach((key) => {
         contentSections[key] = !!document.getElementById(NL_CONTENT_SECTIONS[key].id)?.checked;
     });
-    return { personal, includePhoto, includeVideo, includeBlog, contentSections };
+    const extra = (window.NlEntertainment && typeof window.NlEntertainment.getSelectionsExtra === 'function')
+        ? window.NlEntertainment.getSelectionsExtra()
+        : { puzzleType: 'trivia' };
+    return { personal, includePhoto, includeVideo, includeBlog, includeReferral, contentSections, puzzleType: extra.puzzleType || 'trivia' };
 }
 
 function escapeRegex(str) {
@@ -1504,6 +1826,10 @@ function stripNewsletterPlaceholderBlock(html, placeholderId, headings) {
             new RegExp(`<p[^>]*id=["']?${escapeRegex(placeholderId)}["']?[^>]*>[\\s\\S]*?</p>`, 'gi'),
             ''
         );
+        out = out.replace(
+            new RegExp(`<div[^>]*id=["']?${escapeRegex(placeholderId)}["']?[^>]*>[\\s\\S]*?</div>`, 'gi'),
+            ''
+        );
     }
     return stripNewsletterSectionByHeadings(out, headings || []);
 }
@@ -1529,6 +1855,10 @@ function applyUncheckedNewsletterSectionFilters(html, selections) {
 
     if (!selections.includeVideo) {
         out = out.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
+    }
+
+    if (!selections.includeReferral) {
+        out = stripReferralSections(out);
     }
 
     return out;
@@ -1569,33 +1899,71 @@ function buildNewsletterSectionsPrompt(selections) {
         lines.push('- Motivational Quote (EXCLUDE): do not include quote heading, text, or quote-placeholder.');
     }
 
+    if (window.NlEntertainment && typeof window.NlEntertainment.buildPromptLines === 'function') {
+        lines.push(...window.NlEntertainment.buildPromptLines(selections));
+    }
+
     if (selections.personal) {
-        lines.push('- Personal Update (INCLUDE): include the Personal Note section titled "A Note From [First Name]" using the personal update text provided.');
+        lines.push('- Personal Update (INCLUDE): include the Personal Note section titled "A Note From [First Name]" using ONLY the personal update text the user typed in the Personal Update field — polish grammar and warmth, but do NOT add hobbies, goals, challenges, or life details from profile or elsewhere.');
         if (selections.includePhoto) {
             lines.push('- Personal photo: leave [PERSONAL PHOTO PLACEHOLDER] untouched — we embed the photo in post-processing.');
         } else {
             lines.push('- Personal photo: EXCLUDE — remove [PERSONAL PHOTO PLACEHOLDER] and do not show a photo.');
         }
-        if (selections.includeVideo) {
-            lines.push('- Personal video: we may inject a video block in post-processing; do not duplicate with your own video section unless placeholder instructions say otherwise.');
-        } else {
-            lines.push('- Personal video: EXCLUDE — do not include any video section or Personal Video Update block.');
-        }
     } else {
-        lines.push('- Personal Update (EXCLUDE): do NOT include Personal Note, "A Note From", personal photo, or personal video sections.');
+        lines.push('- Personal Update (EXCLUDE): do NOT include Personal Note, "A Note From", or personal photo sections.');
         lines.push('- Remove <!-- Personal Note Section --> and [PERSONAL PHOTO PLACEHOLDER] from output.');
+    }
+    if (selections.includeVideo) {
+        lines.push('- Personal video (INCLUDE): leave <!-- PERSONAL VIDEO PLACEHOLDER --> untouched — we inject the video card in post-processing. Do NOT create your own Personal Video Update block.');
+    } else {
+        lines.push('- Personal video (EXCLUDE): do not include any video section, Personal Video Update block, or PERSONAL VIDEO PLACEHOLDER.');
     }
 
     if (selections.includeBlog) {
-        lines.push('- Blog link (INCLUDE): leave <!-- BLOG SECTION PLACEHOLDER --> untouched — we inject the blog card in post-processing if URL provided.');
+        lines.push('- Blog link (INCLUDE): leave <!-- BLOG SECTION PLACEHOLDER --> untouched — we inject the blog card in post-processing if URL provided. The blog MUST appear AFTER all main content sections (market, local, trivia, etc.) and IMMEDIATELY BEFORE the Personal Note — never at the top of the newsletter.');
     } else {
         lines.push('- Blog (EXCLUDE): do NOT create any blog section. Remove <!-- BLOG SECTION PLACEHOLDER -->.');
+    }
+
+    if (selections.includeReferral) {
+        lines.push('- Referral CTA (INCLUDE): leave [REFERRAL CTA PLACEHOLDER] untouched — we inject the referral card in post-processing. Do NOT add your own referral CTA or duplicate "Know Someone Ready to Buy or Refinance?" block.');
+    } else {
+        lines.push('- Referral CTA (EXCLUDE): do NOT include any referral ask, "Know Someone" heading, referral button, or [REFERRAL CTA PLACEHOLDER]. End with personal note / video / blog then go straight to the footer disclaimer.');
     }
 
     return lines.join('\n');
 }
 
+const NL_PERSONAL_UPDATE_MIN_CHARS = 40;
+
+function validatePersonalUpdateForGeneration() {
+    const personalCb = document.getElementById('nl-personal');
+    if (!personalCb?.checked) return true;
+
+    const textEl = document.getElementById('nl-personal-text');
+    const text = textEl?.value.trim() || '';
+    if (text.length >= NL_PERSONAL_UPDATE_MIN_CHARS) return true;
+
+    if (textEl) {
+        textEl.focus();
+        textEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    alert(
+        'Please write your Personal Update before generating.\n\n' +
+        'This section is not auto-filled from your profile — share something specific from this week or month: ' +
+        'a recent closing, family moment, community story, or hobby update. ' +
+        'If you are including a photo or video, describe what is in it.\n\n' +
+        `(At least ${NL_PERSONAL_UPDATE_MIN_CHARS} characters — a few real sentences.)`
+    );
+    return false;
+}
+
 async function generateNewsletter(feedback = '') {
+    if (!feedback && !validatePersonalUpdateForGeneration()) {
+        return;
+    }
+
     const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
     const displayTitle = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
 
@@ -1717,7 +2085,7 @@ async function generateNewsletter(feedback = '') {
             ? (document.getElementById('nl-personal-video')?.value.trim() || '')
             : '';
         const personalUpdateText = selections.personal
-            ? (document.getElementById('nl-personal-text')?.value.trim() || 'Excited to help more families achieve homeownership this year!')
+            ? (document.getElementById('nl-personal-text')?.value.trim() || '')
             : '';
 
 
@@ -1770,7 +2138,7 @@ async function generateNewsletter(feedback = '') {
                 'User Inputs:',
                 '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
-                '- Match the full "LO PROFILE & VOICE CONTEXT" section below for this specific loan officer (use their personality, voice traits, hobbies, and challenges to make the personal note + any relatable language feel authentic to them — blend naturally, never salesy).',
+                '- Match the full "LO PROFILE & VOICE CONTEXT" section below for overall newsletter tone and voice — but the Personal Update must use ONLY what the user typed in the Personal Update field. Never substitute profile hobbies, goals, or challenges into the personal note.',
                 '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
                 '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
@@ -1786,7 +2154,7 @@ async function generateNewsletter(feedback = '') {
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
-                'LO PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* loan officer. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
+                'LO PROFILE & VOICE CONTEXT (use for overall tone, local flavor, and relatable language — NOT for personal update facts. The personal note uses only user-typed Personal Update text. Blend voice naturally elsewhere; do not force profile hobbies/challenges into the personal section):',
                 (typeof window.buildProfileAiContext === 'function'
                   ? window.buildProfileAiContext(p)
                   : [
@@ -1810,13 +2178,15 @@ async function generateNewsletter(feedback = '') {
                     ? '- Industry News section (ONLY if included): ALWAYS include 1-2 HYPERLINKED sources (MBA, HousingWire, National Mortgage News, etc.) in the same Sources paragraph format as Market Updates.'
                     : '- Industry News is EXCLUDED — do not create an Industry section.'),
                 (selections.personal
-                    ? '- PERSONAL UPDATE: Rewrite/polish the raw personal update input — warm, relatable, newsletter-perfect.'
+                    ? '- PERSONAL UPDATE: Rewrite/polish ONLY the raw personal update input the user provided — warm, relatable, newsletter-perfect. Do NOT invent personal details, hobbies, family facts, or wins that are not in that input. If they mentioned a photo or video, weave that context in naturally.'
                     : '- PERSONAL UPDATE: User did not check Personal Update — skip the entire personal note block.'),
                 '- PERSONAL NOTE TITLE RULE (only when Personal Update is included): Title exactly "A Note From [Name]" using ONLY THE FIRST NAME from the Name field.',
                 (selections.personal && (selections.includePhoto || selections.includeVideo)
                     ? '- PERSONAL MEDIA: Leave [PERSONAL PHOTO PLACEHOLDER] untouched when photo is enabled; we handle photo/video in post-processing.'
                     : '- PERSONAL MEDIA: Do not include photo or video blocks.'),
-                '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.',
+                (selections.includeReferral
+                    ? '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.'
+                    : '- REFERRAL CTA: User excluded the referral section — do NOT include [REFERRAL CTA PLACEHOLDER], referral headings, referral buttons, or any "know someone" ask.'),
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
                 '- Compliance: Use the exact footer disclaimer provided below. NEVER quote specific rates anywhere.',
@@ -1872,9 +2242,15 @@ async function generateNewsletter(feedback = '') {
                     '    <tr><td height="20"></td></tr>'
                 );
             }
+            if (selections.includeVideo) {
+                promptLines.push('    <!-- PERSONAL VIDEO PLACEHOLDER -->');
+            }
+            if (selections.includeReferral) {
+                promptLines.push('    <!-- REFERRAL CTA PLACEHOLDER -->');
+            }
             promptLines.push(
-                '    <!-- REFERRAL CTA PLACEHOLDER -->',
-                '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
+                '    <tr><td align="center" style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
+                (selections.contentSections.puzzle ? '    <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->' : ''),
                 '  </table>',
                 '</bo' + 'dy>',
                 '</ht' + 'ml>'
@@ -1974,10 +2350,16 @@ async function generateNewsletter(feedback = '') {
             if (!feedback && postSelections?.contentSections?.quote) {
                 html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
             }
+            if (window.NlEntertainment && typeof window.NlEntertainment.injectIntoHtml === 'function') {
+                html = window.NlEntertainment.injectIntoHtml(html, postSelections || getNewsletterSelections());
+            }
             if (feedback) {
                 html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
                 html = html.replace(/<p[^>]*id=["']?pro-tip-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedProTip}</p>`);
                 html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
+                if (window.NlEntertainment && typeof window.NlEntertainment.injectIntoHtml === 'function') {
+                    html = window.NlEntertainment.injectIntoHtml(html, getNewsletterSelections());
+                }
             }
 
             // === ONLY RUN HEAVY INJECTION LOGIC ON FRESH GENERATION, NOT ON FEEDBACK EDITS ===
@@ -1996,155 +2378,11 @@ async function generateNewsletter(feedback = '') {
 
                 let photoInsert = '';
                 if (includePhoto && personalPhotoUrl) {
-                    photoInsert = `
-<table align="center" width="100%" cellpadding="0" cellspacing="0" style="margin:15px 0; max-width:100%;">
-    <tr>
-        <td align="center" style="padding:4px; background:#00A89D; text-align:center; border-radius:12px;">
-            <img src="${personalPhotoUrl}" alt="Personal photo" 
-                 style="width:100%; max-width:540px; height:auto; display:block; border-radius:8px;">
-        </td>
-    </tr>
-</table>`;
+                    photoInsert = `<p style="margin:16px 0 0; text-align:center;"><img src="${personalPhotoUrl}" alt="Personal photo" width="540" style="display:block; margin:0 auto; max-width:100%; width:100%; height:auto; border:0; border-radius:8px;" /></p>`;
                 }
-
-                let videoTable = '';
-                if (includeVideo && personalVideoUrl) {
-                let videoId = '';
-                let thumbnailUrl = 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
-
-                const url = personalVideoUrl.trim();
-
-                if (url.includes('youtube.com/shorts/')) {
-                    videoId = url.split('shorts/')[1]?.split(/[?&]/)[0];
-                } else if (url.includes('youtu.be/')) {
-                    videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
-                } else if (url.includes('v=')) {
-                    videoId = url.split('v=')[1]?.split('&')[0];
-                } else if (url.includes('embed/')) {
-                    videoId = url.split('embed/')[1]?.split(/[?&]/)[0];
-                }
-
-                if (videoId && videoId.length === 11) {
-                    thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-                }
-
-                videoTable = `
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
-  <tr>
-    <td style="padding:30px;">
-      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto;">
-        <tr>
-          <td align="center" style="padding-bottom:16px;">
-            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
-          </td>
-        </tr>
-        <tr>
-          <td align="center">
-            <a href="${personalVideoUrl}" target="_blank" rel="noopener" style="text-decoration:none;">
-              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:560px;">
-                <tr>
-                  <td style="padding:0;">
-                    <img src="${thumbnailUrl}" 
-                         alt="Watch Personal Video" 
-                         width="560" 
-                         style="width:100%; max-width:560px; height:auto; display:block; border:0;">
-                  </td>
-                </tr>
-              </table>
-            </a>
-          </td>
-        </tr>
-        <tr>
-          <td align="center" style="padding-top:18px;">
-            <!-- Outlook-friendly button -->
-            <table align="center" cellpadding="0" cellspacing="0" role="presentation">
-              <tr>
-                <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
-                  <a href="${personalVideoUrl}" target="_blank" rel="noopener" 
-                     style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
-                      ▶ Watch Video
-                  </a>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>`;
-            }
 
             // Clean placeholder inside personal note (photo goes here if provided; keeps note + photo together)
             html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, photoInsert);
-
-// Blog injection - robust version using dedicated placeholder + fallbacks
-const includeBlog = postSelections?.includeBlog || false;
-if (includeBlog) {
-    // Remove any blog-like section the AI might have (defensively) created
-    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>\s*<tr>\s*<td[^>]*>\s*<h2[^>]*>(?:From the Blog|Blog Highlight|My Recent Blog|Recent Blog)[^<]*<\/h2>[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
-    html = html.replace(/<tr><td height="20"><\/td><\/tr>\s*<tr>\s*<td>\s*<table[^>]*>\s*<tr>\s*<td[^>]*>\s*<h2[^>]*>(?:From the Blog|Blog Highlight|My Recent Blog)[^<]*<\/h2>[\s\S]*?<\/table>[\s\S]*?<\/tr>/gi, '');
-
-    const blogUrl = (document.getElementById('nl-blog-url')?.value || '').trim();
-    const blogTitle = (document.getElementById('nl-blog-title')?.value || '').trim() || 'Latest Blog Post';
-    if (blogUrl && blogUrl.length > 3) {
-        const fullBlogUrl = blogUrl.startsWith('http') ? blogUrl : 'https://' + blogUrl;
-        const blogSection = `
-            <tr>
-                <td>
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
-                        <tr>
-                            <td style="padding:30px;">
-                                <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">My Recent Blog</h2>
-                                <p style="font-size:18px; font-weight:bold; margin-bottom:10px;">${blogTitle}</p>
-                                <p style="margin-bottom:15px;">Discover the latest insights on homeownership and mortgage strategies in this recent article.</p>
-                                <a href="${fullBlogUrl}" target="_blank" rel="noopener" style="color:#00A89D; font-weight:bold; text-decoration:underline; display:inline-block;">Read full article →</a>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr><td height="20"></td></tr>
-        `;
-
-        let injected = false;
-
-        // 1. Preferred: explicit placeholder we put in the prompt structure
-        if (html.includes('<!-- BLOG SECTION PLACEHOLDER -->')) {
-            html = html.replace('<!-- BLOG SECTION PLACEHOLDER -->', blogSection);
-            injected = true;
-        }
-
-        // 2. Fallback: the old spacer + comment pattern (handles older generations)
-        if (!injected) {
-            const spacerComment = /<tr><td height="20"><\/td><\/tr>\s*<!-- Personal Note Section -->/i;
-            if (spacerComment.test(html)) {
-                html = html.replace(spacerComment, '$&' + blogSection);
-                injected = true;
-            }
-        }
-
-        // 3. Last-resort fallback: insert right before the Personal Note table or its heading
-        if (!injected) {
-            const noteHeading = /(<tr><td[^>]*>\s*<table[^>]*>[\s\S]{0,80}?A Note From)/i;
-            if (noteHeading.test(html)) {
-                html = html.replace(noteHeading, blogSection + '$1');
-                injected = true;
-            }
-        }
-
-        // 4. Absolute last resort: shove it in before the footer/disclaimer area so it doesn't get lost
-        if (!injected && !html.includes('My Recent Blog')) {
-            html = html.replace(
-                /(<tr><td style="padding:20px; background:#002B5C; color:white;)/i,
-                blogSection + '\n<tr><td height="20"></td></tr>\n$1'
-            );
-        }
-    }
-}
-
-// Clean up the placeholder if it wasn't used (e.g. user had the box unchecked or no URL)
-html = html.replace(/<!--\s*BLOG SECTION PLACEHOLDER\s*-->/gi, '');
 
 // === PERSONAL NOTE HEADLINE - Force ONLY first name when personal section is included ===
 if (postSelections?.personal) {
@@ -2154,33 +2392,47 @@ if (postSelections?.personal) {
     html = html.replace(/A Note From [^<]+/gi, `A Note From ${firstName}`);
 }
 
-// === ROBUST VIDEO INCLUSION: always force if UI enabled (checkbox + URL), strip any AI version first ===
-if (includeVideo && personalVideoUrl) {
-    // Strip AI-generated video
-    html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/gi, '');
-    const videoSection = `
-<tr><td height="20"></td></tr>
-<tr>
-  <td>
-${videoTable}
-  </td>
-</tr>
-<tr><td height="20"></td></tr>`;
-    // Insert before referral text if present, else before footer
-    if (html.includes('Know Someone Ready to Buy or Refinance?')) {
-        html = html.replace(/<tr>\s*<td>\s*<table[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>/i, videoSection + '$&');
+// Blog injection — always immediately before personal note (after all main content)
+const includeBlog = postSelections?.includeBlog || false;
+if (includeBlog) {
+    html = stripBlogSections(html);
+
+    const blogUrl = (document.getElementById('nl-blog-url')?.value || '').trim();
+    const blogTitle = (document.getElementById('nl-blog-title')?.value || '').trim() || 'Latest Blog Post';
+    if (blogUrl && blogUrl.length > 3) {
+        const fullBlogUrl = blogUrl.startsWith('http') ? blogUrl : 'https://' + blogUrl;
+        const blogSection = wrapNewsletterSectionRows(`
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+        <tr>
+            <td style="padding:30px;">
+                <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">My Recent Blog</h2>
+                <p style="font-size:18px; font-weight:bold; margin-bottom:10px;">${blogTitle}</p>
+                <p style="margin-bottom:15px;">Discover the latest insights on homeownership and mortgage strategies in this recent article.</p>
+                <a href="${fullBlogUrl}" target="_blank" rel="noopener" style="color:#00A89D; font-weight:bold; text-decoration:underline; display:inline-block;">Read full article →</a>
+            </td>
+        </tr>
+    </table>`);
+        html = injectBlogBeforePersonal(html, blogSection, { personalIncluded: !!postSelections?.personal });
     } else {
-        html = html.replace(
-            /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
-            videoSection + '\n<tr><td height="20"></td></tr>\n$1'
-        );
+        html = html.replace(/<!--\s*BLOG SECTION PLACEHOLDER\s*-->/gi, '');
     }
+} else {
+    html = stripBlogSections(html);
+    html = html.replace(/<!--\s*BLOG SECTION PLACEHOLDER\s*-->/gi, '');
+}
+
+// === PERSONAL VIDEO (after personal note, before referral) ===
+if (includeVideo && personalVideoUrl) {
+    html = injectPersonalVideoSection(html, personalVideoUrl);
+} else {
+    html = html.replace(/<!--\s*PERSONAL VIDEO PLACEHOLDER\s*-->/gi, '');
+    html = stripPersonalVideoBlocks(html);
 }
 
 // === REFERRAL - Updated (no phone number) ===
 const simpleReferralHTML = `
 <tr>
-  <td>
+  <td align="center" style="padding:0;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
       <tr>
         <td style="padding:30px 30px 30px 30px; text-align:center;">
@@ -2204,23 +2456,30 @@ const simpleReferralHTML = `
   </td>
 </tr>`;
 
-html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
 
-// === ROBUST FALLBACK ENSURE: Always include referral section at the bottom ===
-// The AI occasionally omits the [REFERRAL CTA PLACEHOLDER] or generates its own version.
-// This (combined with the pre-referral video insert) guarantees video (when checked) + referral.
-if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
-    html = html.replace(
-        /(<tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;)/i,
-        simpleReferralHTML + '\n<tr><td height="20"></td></tr>\n$1'
-    );
+if (postSelections?.includeReferral) {
+    html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
+    // The AI occasionally omits the placeholder or generates its own version — guarantee referral when included.
+    if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
+        html = html.replace(
+            /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i,
+            simpleReferralHTML + '\n<tr><td height="20"></td></tr>\n$1'
+        );
+    }
+} else {
+    html = stripReferralSections(html);
 }
 
                 // Final pass — strip any sections the user unchecked that the model may have added anyway
                 if (postSelections) {
                     html = applyUncheckedNewsletterSectionFilters(html, postSelections);
+                }
+
+                // Brain teaser answer — very last, below footer/disclaimer/referral
+                if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
+                    html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, postSelections || getNewsletterSelections());
                 }
             } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
 
@@ -2550,7 +2809,6 @@ function copyForOutlook() {
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
-  window.fillPersonalFromProfile = fillPersonalFromProfile;
 
   // These helpers are called from HTML onclick in the newsletter section
   if (typeof resetUsed === 'function') window.resetUsed = resetUsed;
@@ -2689,67 +2947,6 @@ function copyForOutlook() {
     }
   }
 
-  function fillPersonalFromProfile(silent = false) {
-    const personalCb = document.getElementById('nl-personal');
-    const personalFields = document.getElementById('personal-fields');
-    if (personalCb) {
-      personalCb.checked = true;
-    }
-    if (personalFields) {
-      personalFields.classList.remove('hidden');
-    }
-    const p = getCentralProfile();
-    const textEl = document.getElementById('nl-personal-text');
-    if (!textEl) return;
-
-    // Robust normalizer: profile stores arrays for hobbies/challenges/activities but older data or merges may be strings
-    const safeList = (val) => {
-      if (!val) return [];
-      if (Array.isArray(val)) return val.filter(Boolean);
-      if (typeof val === 'string') return val.split(/[,/&]+/).map(s => s.trim()).filter(Boolean);
-      return [String(val)];
-    };
-    const safeText = (val) => {
-      if (!val) return '';
-      if (Array.isArray(val)) return val.filter(Boolean).join(', ');
-      return String(val);
-    };
-
-    let parts = [];
-    if (p.name) parts.push(`Hi, it's ${p.name.split(' ')[0]}!`);
-
-    const hobbies = safeList(p.hobbies);
-    if (hobbies.length) {
-      parts.push(`Lately I've been enjoying ${hobbies.slice(0, 2).join(' and ')}.`);
-    }
-
-    if (p.personality) {
-      const pers = String(p.personality).trim();
-      if (pers) parts.push(`As someone who's ${pers.toLowerCase()}, I'm always looking for ways to help families like yours.`);
-    }
-
-    const goals = safeText(p.goals).trim();
-    if (goals) parts.push(goals);
-
-    const challenges = safeList(p.challenges);
-    if (challenges.length) {
-      parts.push(`Helping with things like ${challenges.join(', ').toLowerCase()}.`);
-    } else if (p.challenges && typeof p.challenges === 'string') {
-      const ch = p.challenges.trim();
-      if (ch) parts.push(`Helping with things like ${ch.toLowerCase()}.`);
-    }
-
-    const fill = parts.join(' ') || 'Excited to help more families achieve homeownership this year!';
-    textEl.value = fill;
-    if (!silent) {
-      textEl.focus();
-      textEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // No toast for auto-fill — keeps UI clean
-    }
-  }
-
-  window.fillPersonalFromProfile = fillPersonalFromProfile;
-
   function initNewsletterGenerator() {
     try { ensureNewsletterChoiceModal(); } catch (e) {}
     if (typeof window.restoreNewsletterModals === 'function') {
@@ -2781,14 +2978,6 @@ function copyForOutlook() {
         toggleBlog();
       }
     }, 80);
-
-    // Auto-populate personal update from profile on load (silently, so doesn't force focus/toast if not wanted)
-    // This ensures profile info (hobbies, personality, goals, challenges) comes over when page/section first loads.
-    setTimeout(() => {
-      if (typeof fillPersonalFromProfile === 'function') {
-        try { fillPersonalFromProfile(true); } catch(e){ console.warn('auto fill personal failed', e); }
-      }
-    }, 120);
 
     // Restore last generated newsletter (raw + visual preview) so the previous version is present after refresh
     // until the user Clears or generates a replacement.
