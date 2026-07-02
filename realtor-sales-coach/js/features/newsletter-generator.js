@@ -1318,13 +1318,26 @@ function buildAgentBrandHeader(ctx) {
     if (!ctx.includeSignature) return '';
     if (!ctx.logoUrl && !ctx.company && !ctx.tagline) return '';
 
-    const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#002B5C;color:#ffffff;max-width:600px;width:100%;">
+    const logoHtml = ctx.logoUrl
+        ? `<table align="center" cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 12px;">
   <tr>
-    <td style="padding:18px 24px;text-align:center;">
-      ${ctx.logoUrl ? `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="Logo" style="max-height:52px;max-width:200px;height:auto;display:block;margin:0 auto 10px;border:0;">` : ''}
-      ${ctx.company ? `<div style="font-size:20px;font-weight:700;letter-spacing:0.5px;color:#ffffff;">${escBrandingText(ctx.company)}</div>` : ''}
-      ${ctx.tagline ? `<div style="font-size:13px;opacity:0.92;margin-top:4px;color:#ffffff;">${escBrandingText(ctx.tagline)}</div>` : ''}
+    <td align="center" style="padding:12px 20px;background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;">
+      <img src="${escBrandingAttr(ctx.logoUrl)}" alt="Logo" width="200" style="max-height:56px;max-width:200px;width:auto;height:auto;display:block;border:0;">
     </td>
+  </tr>
+</table>`
+        : '';
+
+    const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;max-width:600px;width:100%;">
+  <tr>
+    <td style="padding:20px 24px 16px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+      ${logoHtml}
+      ${ctx.company ? `<div style="font-size:20px;font-weight:700;letter-spacing:0.3px;color:#002B5C;line-height:1.3;">${escBrandingText(ctx.company)}</div>` : ''}
+      ${ctx.tagline ? `<div style="font-size:13px;margin-top:6px;color:#555;line-height:1.4;">${escBrandingText(ctx.tagline)}</div>` : ''}
+    </td>
+  </tr>
+  <tr>
+    <td height="4" bgcolor="#00A89D" style="background:#00A89D;font-size:0;line-height:0;">&nbsp;</td>
   </tr>
 </table>`;
     return wrapBrandingForEmail(inner);
