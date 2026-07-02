@@ -1501,12 +1501,11 @@ function injectAgentBranding(html) {
     return html;
 }
 
-function profileStatusRow(label, value, ok) {
-    const display = value || '—';
-    const icon = ok
-        ? '<i class="fas fa-check-circle text-[#00A89D] text-[10px]"></i>'
-        : '<i class="fas fa-circle text-amber-400 text-[8px]"></i>';
-    return `<div class="flex items-start gap-2"><span class="mt-1">${icon}</span><span><span class="text-gray-500 dark:text-gray-400 text-xs">${label}</span><br><span class="font-medium ${ok ? '' : 'text-amber-700 dark:text-amber-300'}">${display}</span></span></div>`;
+function buildProfileSummaryLine(ctx) {
+    const parts = [ctx.name, ctx.location, ctx.company].filter(Boolean);
+    if (parts.length) return parts.join(' · ');
+    if (ctx.email) return ctx.email;
+    return 'Set up My Profile for name, market & branding';
 }
 
 function updateNewsletterProfileStatus() {
@@ -1515,74 +1514,37 @@ function updateNewsletterProfileStatus() {
     const warnEl = document.getElementById('nl-profile-status-warning');
     const warnTextEl = document.getElementById('nl-profile-status-warning-text');
     const badgeEl = document.getElementById('nl-profile-status-badge');
-    const marketInline = document.getElementById('nl-profile-market-inline');
 
     const missing = [];
     if (!ctx.name) missing.push('name');
     if (!ctx.email) missing.push('email');
-    if (!ctx.location) missing.push('market');
 
     if (summaryEl) {
-        summaryEl.innerHTML = [
-            profileStatusRow('Name', ctx.name, !!ctx.name),
-            profileStatusRow('Email', ctx.email, !!ctx.email),
-            profileStatusRow('Market', ctx.location, !!ctx.location),
-            profileStatusRow('Team / Company', ctx.company, !!ctx.company),
-            profileStatusRow('Headshot', ctx.headshotUrl ? 'On file' : '', !!ctx.headshotUrl),
-            profileStatusRow('Logo', ctx.logoUrl ? 'On file' : '', !!ctx.logoUrl),
-            profileStatusRow('Social links', ctx.socialCount ? `${ctx.socialCount} linked` : '', ctx.socialCount > 0),
-            profileStatusRow('Phone', ctx.phone, !!ctx.phone)
-        ].join('');
+        summaryEl.textContent = buildProfileSummaryLine(ctx);
+        summaryEl.title = [
+            ctx.name && `Name: ${ctx.name}`,
+            ctx.email && `Email: ${ctx.email}`,
+            ctx.location && `Market: ${ctx.location}`,
+            ctx.company && `Team: ${ctx.company}`
+        ].filter(Boolean).join(' · ');
     }
 
-    if (marketInline) {
-        marketInline.textContent = ctx.location || 'not set in profile';
-    }
-
-    const ready = missing.length === 0;
+    const ready = !missing.length;
     if (warnEl) warnEl.classList.toggle('hidden', ready);
     if (warnTextEl && !ready) {
-        const labels = { name: 'name', email: 'email', market: 'primary market' };
-        warnTextEl.textContent = `Add your ${missing.map((k) => labels[k] || k).join(' and ')} in My Profile before generating.`;
+        const labels = { name: 'name', email: 'email' };
+        warnTextEl.textContent = `Add ${missing.map((k) => labels[k] || k).join(' & ')} in Profile before generating.`;
     }
     if (badgeEl) {
-        badgeEl.textContent = ready ? 'Profile ready' : 'Profile incomplete';
+        badgeEl.textContent = ready ? 'Ready' : 'Setup';
         badgeEl.className = ready
-            ? 'text-[10px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 rounded-full bg-[#00A89D]/15 text-[#00A89D]'
-            : 'text-[10px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200';
+            ? 'text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded-full bg-[#00A89D]/15 text-[#00A89D] flex-shrink-0'
+            : 'text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 flex-shrink-0';
     }
-
-    updateBrandPreview();
 }
 
 function updateBrandPreview() {
-    const preview = document.getElementById('nl-brand-preview');
-    if (!preview) return;
-
-    const ctx = getAgentBrandingContext();
-    const parts = [];
-
-    if (!ctx.includeSignature && !ctx.includeSocial) {
-        preview.classList.add('hidden');
-        return;
-    }
-
-    if (ctx.includeSignature) {
-        parts.push('<strong>Signature:</strong> ' + [
-            ctx.headshotUrl ? 'headshot' : null,
-            ctx.logoUrl ? 'logo' : null,
-            ctx.name || null,
-            ctx.phone || null,
-            ctx.email || null
-        ].filter(Boolean).join(' · ') || 'complete branding in My Profile');
-    }
-    if (ctx.includeSocial) {
-        const count = SOCIAL_LINK_CONFIG.filter((s) => ctx.social[s.key]).length;
-        parts.push(`<strong>Social:</strong> ${count ? count + ' link(s)' : 'none in profile yet'}`);
-    }
-
-    preview.innerHTML = parts.join('<br>');
-    preview.classList.remove('hidden');
+    /* Branding preview removed — profile strip shows one-line summary */
 }
 
 // === GLOBAL EMAIL / CRM SETTINGS ===
@@ -2245,9 +2207,7 @@ function updateNewsletterPreflightSummary() {
     const profileCtx = getNewsletterProfileContext();
     const location = getNewsletterLocation();
     if (!profileCtx.name || !profileCtx.email) {
-        warnings.push('Add name and email in My Profile — required for your newsletter signature.');
-    } else if (!profileCtx.location) {
-        warnings.push('Add your primary market in My Profile for hyper-local content.');
+        warnings.push('Add name & email in Profile (see strip above).');
     }
     const toneLabel = document.getElementById('nl-tone')?.selectedOptions?.[0]?.textContent?.trim().replace(/\s*\(Recommended\)\s*/i, '') || '';
     const lengthLabel = getNewsletterLengthConfig().preflightLabel;
