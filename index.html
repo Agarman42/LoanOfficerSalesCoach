@@ -19,6 +19,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- === PDF.js — REQUIRED for Blog Document Upload === -->
@@ -213,6 +214,7 @@
             <div class="sidebar-group mt-5">SUPPORT TOOLS</div>
             <ul class="space-y-0.5 px-2 text-sm">
                 <li><a href="#" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link px-4 py-2.5"><i class="fas fa-bookmark w-5"></i> My Saved Items</a></li>
+                <li><a href="#client-translation" class="sidebar-link px-4 py-2.5"><i class="fas fa-language w-5"></i> Client Translation</a></li>
                 <li><a href="#sales-script" class="sidebar-link px-4 py-2.5"><i class="fas fa-comment-dots w-5"></i> Sales Script Generator</a></li>
                 <li><a href="#ai-chat" class="sidebar-link px-4 py-2.5"><i class="fas fa-robot w-5"></i> AI Coach <span class="text-[9px] opacity-60">(profile + tools)</span></a></li>
                 <li><a href="#underwriting-search" class="sidebar-link px-4 py-2.5"><i class="fas fa-search-dollar w-5"></i> Underwriting Guideline Search</a></li>
@@ -4206,6 +4208,118 @@
 
 <!-- Event Type Modals were relocated to the very end of <body> for maximum reliability (never nested inside hidden sections) -->
 
+                <section id="client-translation" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-6 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+    <div class="text-center mb-6">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">BILINGUAL OUTREACH</span>
+        <h2 id="tr-hero-title" class="text-3xl font-bold mb-2 text-[#F15A29]">Client Translation</h2>
+        <p id="tr-hero-subtitle" class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Translate client emails, texts, disclosures, and outreach — with mortgage-aware tone and glossary lock.</p>
+    </div>
+
+    <div class="mb-6 rounded-2xl border border-amber-300/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
+        <i class="fas fa-info-circle mr-1"></i>
+        <strong>Review before sending.</strong> AI translations help you communicate faster — they are not certified legal interpretations. Always verify meaning before client-facing use, especially on disclosures and contracts.
+    </div>
+
+    <!-- Controls row -->
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-4 sm:p-5 mb-4 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">From</label>
+                <select id="tr-source-lang" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></select>
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="button" id="tr-swap-langs" class="mb-0.5 w-10 h-10 rounded-xl border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition flex items-center justify-center flex-shrink-0" title="Swap languages">
+                    <i class="fas fa-right-left text-sm"></i>
+                </button>
+                <div class="flex-1">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">To</label>
+                    <select id="tr-target-lang" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Content type</label>
+                <select id="tr-content-type" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Tone</label>
+                <select id="tr-tone" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                    <option value="conversational">Warm &amp; conversational</option>
+                    <option value="simple">Plain language (simple)</option>
+                    <option value="formal">Formal / professional</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Quick target languages</div>
+            <div id="tr-favorite-chips" class="flex flex-wrap gap-1.5"></div>
+            <p class="text-[10px] text-gray-400 mt-1 m-0">Set your default in <strong>My Profile → Voice &amp; Links</strong>.</p>
+        </div>
+    </div>
+
+    <!-- Split pane -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="flex flex-col min-h-[320px]">
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-semibold text-[#002B5C] dark:text-white">Original</label>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="tr-load-sample" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Load sample</button>
+                    <button type="button" onclick="copyTranslationSource()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Copy</button>
+                    <button type="button" onclick="clearTranslationSource()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 hover:border-red-400 hover:text-red-500 transition" title="Clear original text and uploaded file">Clear</button>
+                </div>
+            </div>
+            <textarea id="tr-source-text" rows="14" placeholder="Paste client email, text message, or letter here…" class="flex-1 w-full p-4 rounded-2xl border-2 border-[#00A89D]/40 bg-white dark:bg-gray-800 text-sm leading-relaxed resize-y min-h-[220px] focus:ring-4 focus:ring-[#00A89D]/20 focus:outline-none"></textarea>
+            <div id="tr-char-count" class="text-[11px] text-gray-400 mt-1">0 / 50,000 characters</div>
+
+            <div id="tr-upload-area" class="mt-3 border-2 border-dashed border-[#00A89D]/50 rounded-2xl p-5 text-center hover:border-[#F15A29] hover:bg-[#F15A29]/5 transition-all cursor-pointer group">
+                <i class="fas fa-cloud-upload-alt text-2xl text-[#00A89D] mb-2 group-hover:scale-105 transition-transform"></i>
+                <p class="text-sm font-medium m-0">Drop a file to load text here</p>
+                <p class="text-[11px] text-gray-500 mt-1 m-0">PDF or .txt — full document translated section by section</p>
+                <label for="tr-file-input" class="inline-flex items-center px-4 py-1.5 mt-2 bg-[#00A89D] text-white rounded-xl cursor-pointer hover:bg-[#008F85] text-xs transition" onclick="event.stopImmediatePropagation()">
+                    <i class="fas fa-folder-open mr-1.5"></i>Browse
+                </label>
+                <input type="file" id="tr-file-input" accept=".pdf,.txt,.text" class="hidden">
+                <p id="tr-file-name" class="mt-2 text-xs font-medium text-[#00A89D] hidden"></p>
+            </div>
+            <button type="button" id="tr-remove-file" class="text-red-500 text-xs mt-1 hidden">Remove file</button>
+        </div>
+
+        <div class="flex flex-col min-h-[320px]">
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-semibold text-[#002B5C] dark:text-white">Translation</label>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="copyTranslationResult()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Copy</button>
+                    <button type="button" onclick="clearTranslationResult()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 hover:border-red-400 hover:text-red-500 transition" title="Clear translation output">Clear</button>
+                    <button type="button" onclick="downloadTranslationResult()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Download .txt</button>
+                    <button type="button" onclick="downloadTranslationPdf()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Download PDF</button>
+                    <button type="button" id="tr-qa-btn" class="text-[11px] px-2.5 py-1 rounded-lg border border-amber-400/60 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition"><i class="fas fa-shield-alt"></i> Check meaning</button>
+                    <button type="button" onclick="saveTranslationToLibrary()" class="text-[11px] px-2.5 py-1 rounded-lg border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Save</button>
+                </div>
+            </div>
+            <textarea id="tr-result-text" rows="14" readonly placeholder="Your translation will appear here…" class="flex-1 w-full p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm leading-relaxed resize-y min-h-[220px]"></textarea>
+            <div id="tr-qa-panel" class="hidden mt-3 p-4 rounded-2xl border border-amber-300/50 bg-amber-50/50 dark:bg-amber-900/10"></div>
+            <div id="tr-progress" class="hidden mt-2">
+                <div class="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div class="h-full w-1/2 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] animate-pulse"></div>
+                </div>
+                <p id="tr-progress-text" class="text-[11px] text-gray-500 mt-1 m-0"></p>
+            </div>
+            <p id="tr-status" class="text-xs text-gray-500 mt-2 m-0"></p>
+        </div>
+    </div>
+
+    <div class="text-center mb-6">
+        <button type="button" id="tr-translate-btn" class="w-full sm:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-10 py-4 rounded-full hover:opacity-90 transition-all font-bold text-lg shadow-xl inline-flex items-center justify-center gap-2">
+            <i class="fas fa-language"></i>
+            <span>Translate</span>
+        </button>
+    </div>
+
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+        <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">This session <span class="font-normal normal-case">(not saved unless you click Save)</span></div>
+        <div id="tr-session-history" class="flex flex-col gap-1.5 max-w-xl"></div>
+    </div>
+</section>
+
                 <section id="underwriting-search" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Underwriting Guideline Search</h2>
@@ -6736,8 +6850,8 @@
         <div class="flex items-start gap-3">
           <input type="checkbox" id="nl-include-referral" checked class="mt-1 h-5 w-5 text-[#00A89D]">
           <div>
-            <label for="nl-include-referral" class="text-lg font-semibold text-[#00A89D] cursor-pointer">Include Referral Section 🤝</label>
-            <p class="text-xs text-gray-500 mt-1">Adds the &ldquo;Know Someone Ready to Buy or Refinance?&rdquo; card with a mailto referral button before the footer. Uncheck for a softer close with no ask.</p>
+            <label for="nl-include-referral" class="text-lg font-semibold text-[#00A89D] cursor-pointer">Include Referral Ask 🤝</label>
+            <p class="text-xs text-gray-500 mt-1">Adds a short, subtle referral line immediately <strong>before the footer disclaimer</strong> — not a big card in the body. Uncheck for a softer close.</p>
           </div>
         </div>
       </div>
@@ -7519,9 +7633,11 @@
 <script src="js/data/newsletter-dad-jokes.js?v=20260625-lo-v231"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260625-lo-v233"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260625-lo-v234"></script>
-<script src="js/features/newsletter-generator.js?v=20260625-lo-v229"></script>
+<script src="js/features/newsletter-generator.js?v=20260702-lo-v265"></script>
 <script src="js/features/ai-chat.js?v=20260623-lo-v222"></script>
 <script src="js/features/underwriting.js"></script>
+<script>window.TRANSLATION_COACH_VARIANT = 'lo';</script>
+<script src="js/features/translation-tool.js?v=20260702-tr-v264"></script>
 <script src="js/features/value-vault.js?v=20260623-lo-v222"></script>
 <script src="js/features/onboarding-coach.js?v=20260623-lo-v222"></script>
 <script src="js/features/fact-vault-ui.js?v=20260623-lo-v222"></script>
@@ -7876,6 +7992,35 @@
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input type="url" id="profile-blog-url" placeholder="https://mortgage-column.ruoff.com/yourname" class="flex-1 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                             <button type="button" id="profile-ruoff-blog-preset" class="text-xs px-4 py-2.5 rounded-2xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition whitespace-nowrap">Ruoff column preset</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1"><i class="fas fa-language text-[#00A89D] mr-1"></i>Default translation language <span class="text-gray-400 font-normal text-xs">Client Translation tool</span></label>
+                            <select id="profile-translation-default" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                                <option value="es">Spanish</option>
+                                <option value="vi">Vietnamese</option>
+                                <option value="zh">Chinese (Simplified)</option>
+                                <option value="ar">Arabic</option>
+                                <option value="pt">Portuguese</option>
+                                <option value="fr">French</option>
+                                <option value="ko">Korean</option>
+                                <option value="ru">Russian</option>
+                                <option value="ht">Haitian Creole</option>
+                                <option value="tl">Tagalog</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Quick-pick languages <span class="text-gray-400 font-normal text-xs">chips in Client Translation</span></label>
+                            <div class="flex flex-wrap gap-2 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                                <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="es" checked> Spanish</label>
+                                <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="vi"> Vietnamese</label>
+                                <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="zh"> Chinese</label>
+                                <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="ar"> Arabic</label>
+                                <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="pt"> Portuguese</label>
+                                <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="tl"> Tagalog</label>
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">

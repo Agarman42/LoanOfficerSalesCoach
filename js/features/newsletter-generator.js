@@ -1940,16 +1940,55 @@ function insertRowsInsideMainTable(html, rows) {
 }
 
 const NL_BLOG_HEADING_RE = '(?:My Recent Blog|From the Blog|Blog Highlight|Recent Blog|Latest Blog Post)';
+const REFERRAL_CTA_HEADLINE = 'Know Someone Ready to Buy or Refinance?';
+
+function escNewsletterAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function stripReferralSections(html) {
     let out = String(html || '');
-    out = out.replace(
-        /<tr>\s*<td[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi,
-        ''
-    );
+    const headlines = [REFERRAL_CTA_HEADLINE, 'Know Someone Thinking About Buying or Selling?'];
+    headlines.forEach((h) => {
+        const re = new RegExp('<tr>\\s*<td[^>]*>[\\s\\S]*?' + h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?<\\/table>\\s*<\\/td>\\s*<\\/tr>\\s*(?:<tr>\\s*<td[^>]*height=["\']?20["\']?[^>]*>\\s*<\\/td>\\s*<\\/tr>\\s*)?', 'gi');
+        out = out.replace(re, '');
+    });
     out = out.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, '');
     out = out.replace(/<!--\s*REFERRAL CTA PLACEHOLDER\s*-->/gi, '');
     return out;
+}
+
+function buildCompactReferralRowHtml(firstName, email) {
+    const safeEmail = escNewsletterAttr(email);
+    const mailSubject = encodeURIComponent('Referral from a Friend — Ready for Mortgage Help!');
+    const mailBody = encodeURIComponent(`Hi ${firstName},\n\nI'd like to refer someone who's interested in mortgage options.\n\nName: \nPhone: \nEmail: \nThey're looking for: (buying / refinancing / other)\n\nThanks!\n`);
+    return `<tr>
+  <td align="center" style="padding:0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;border-top:1px solid #e5e5e5;border-collapse:separate;max-width:600px;">
+      <tr>
+        <td style="padding:14px 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
+          <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#666;">Know someone buying or refinancing? Forward this email — or tap below.</p>
+          <a href="mailto:${safeEmail}?subject=${mailSubject}&body=${mailBody}" style="display:inline-block;padding:9px 20px;background:#00A89D;color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;border-radius:20px;">Send a Referral</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr><td height="12"></td></tr>`;
+}
+
+function injectCompactReferralBeforeDisclaimer(html, referralRow) {
+    if (!referralRow) return html;
+    let out = String(html || '');
+    if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
+        return out.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, referralRow);
+    }
+    const footerRow = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i;
+    if (footerRow.test(out)) {
+        return out.replace(footerRow, referralRow + '\n$1');
+    }
+    return insertRowsInsideMainTable(out, referralRow);
 }
 
 function stripBlogSections(html) {
@@ -2224,7 +2263,7 @@ function buildNewsletterSectionsPrompt(selections) {
     }
 
     if (selections.includeReferral) {
-        lines.push('- Referral CTA (INCLUDE): leave [REFERRAL CTA PLACEHOLDER] untouched — we inject the referral card in post-processing. Do NOT add your own referral CTA or duplicate "Know Someone Ready to Buy or Refinance?" block.');
+        lines.push('- Referral CTA (INCLUDE): Do NOT place referral content in the newsletter body. We inject a compact referral block immediately before the footer disclaimer in post-processing. Do NOT add referral headings, buttons, or "Know Someone" asks in the main letter.');
     } else {
         lines.push('- Referral CTA (EXCLUDE): do NOT include any referral ask, "Know Someone" heading, referral button, or [REFERRAL CTA PLACEHOLDER]. End with personal note / video / blog then go straight to the footer disclaimer.');
     }
@@ -2465,7 +2504,7 @@ function updateNewsletterPreflightSummary() {
     }
 
     if (sel.includeReferral) {
-        chips.push({ text: 'Referral CTA', style: 'included', removeId: 'nl-include-referral' });
+        chips.push({ text: 'Referral CTA (before disclaimer)', style: 'included', removeId: 'nl-include-referral' });
     } else {
         chips.push({ text: 'Referral CTA off', style: 'off' });
     }
@@ -2790,7 +2829,7 @@ async function generateNewsletter(feedback = '') {
                     ? '- PERSONAL MEDIA: Leave [PERSONAL PHOTO PLACEHOLDER] untouched when photo is enabled; we handle photo/video in post-processing.'
                     : '- PERSONAL MEDIA: Do not include photo or video blocks.'),
                 (selections.includeReferral
-                    ? '- REFERRAL CTA: Leave the exact placeholder [REFERRAL CTA PLACEHOLDER] untouched. Do NOT add your own CTA or signature block here. We handle the final branded version in post-processing.'
+                    ? '- REFERRAL CTA: Do NOT include referral content in the newsletter body — we inject a compact referral block immediately before the footer disclaimer in post-processing.'
                     : '- REFERRAL CTA: User excluded the referral section — do NOT include [REFERRAL CTA PLACEHOLDER], referral headings, referral buttons, or any "know someone" ask.'),
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
@@ -2850,10 +2889,8 @@ async function generateNewsletter(feedback = '') {
             if (selections.includeVideo) {
                 promptLines.push('    <!-- PERSONAL VIDEO PLACEHOLDER -->');
             }
-            if (selections.includeReferral) {
-                promptLines.push('    <!-- REFERRAL CTA PLACEHOLDER -->');
-            }
             promptLines.push(
+                '    <!-- REFERRAL CTA: compact block added in post-processing immediately before disclaimer when enabled -->',
                 '    <tr><td align="center" style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
                 (selections.contentSections.puzzle ? '    <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->' : ''),
                 '  </table>',
@@ -3034,47 +3071,14 @@ if (includeVideo && personalVideoUrl) {
     html = stripPersonalVideoBlocks(html);
 }
 
-// === REFERRAL - Updated (no phone number) ===
-const simpleReferralHTML = `
-<tr>
-  <td align="center" style="padding:0;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
-      <tr>
-        <td style="padding:30px 30px 30px 30px; text-align:center;">
-          <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">Know Someone Ready to Buy or Refinance?</h2>
-          <p style="margin:0 0 25px; font-size:18px; line-height:1.6; color:#002B5C;">Hook me up – forward this or smash the button, I'll make 'em laugh all the way to closing!</p>
-          
-          <!-- Outlook-friendly button -->
-          <table align="center" cellpadding="0" cellspacing="0" role="presentation">
-            <tr>
-              <td align="center" bgcolor="#F15A29" style="border-radius:30px; padding:4px;">
-                <a href="mailto:${document.getElementById('nl-email').value || ''}?subject=Referral from a Friend — Ready for Mortgage Help!&body=Hi ${firstName},%0A%0AI'd like to refer someone who's interested in mortgage options.%0A%0AName: %0APhone: %0AEmail: %0AThey're looking for: (buying / refinancing / other)%0A%0AThanks!%0A%0A" 
-                   style="display:inline-block; padding:18px 40px; color:white; font-weight:bold; font-size:20px; text-decoration:none; border-radius:26px;">
-                    Send Me a Referral
-                </a>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </td>
-</tr>`;
-
 html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
 html = html.replace(/\[Name\]/g, firstName);
 
+html = stripReferralSections(html);
 if (postSelections?.includeReferral) {
-    html = html.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, simpleReferralHTML);
-    // The AI occasionally omits the placeholder or generates its own version — guarantee referral when included.
-    if (!html.includes('Know Someone Ready to Buy or Refinance?')) {
-        html = html.replace(
-            /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i,
-            simpleReferralHTML + '\n<tr><td height="20"></td></tr>\n$1'
-        );
-    }
-} else {
-    html = stripReferralSections(html);
+    const referralEmail = document.getElementById('nl-email')?.value || '';
+    const compactReferral = buildCompactReferralRowHtml(firstName, referralEmail);
+    html = injectCompactReferralBeforeDisclaimer(html, compactReferral);
 }
 
                 // Final pass — strip any sections the user unchecked that the model may have added anyway
