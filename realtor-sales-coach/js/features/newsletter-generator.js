@@ -1392,10 +1392,45 @@ function buildAgentSignatureFooter(ctx) {
     return wrapBrandingForEmail(innerTable);
 }
 
+const NL_DISCLAIMER_ROW_RE = /<tr>\s*<td[^>]*(?:background|bgcolor)[^>]*#002B5C[^>]*>[\s\S]*?<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi;
+
+function buildDefaultNewsletterDisclaimerHtml() {
+    const company = (document.getElementById('brand-company')?.value || '').trim();
+    const agentName = (document.getElementById('nl-name')?.value || '').trim();
+    const byline = company || agentName || 'Your real estate professional';
+    const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#002B5C;max-width:600px;width:100%;">
+  <tr>
+    <td style="padding:16px 24px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.55;color:#ffffff;">
+      <p style="margin:0;">This newsletter is for general informational purposes only and is not legal, financial, or tax advice. Market conditions vary by area and change over time. ${escBrandingText(byline)}. Equal Housing Opportunity.</p>
+    </td>
+  </tr>
+</table>`;
+    return wrapBrandingForEmail(inner);
+}
+
+function detachNewsletterDisclaimer(html) {
+    let out = String(html || '');
+    let disclaimer = '';
+    const matches = [...out.matchAll(NL_DISCLAIMER_ROW_RE)];
+    if (matches.length) {
+        const last = matches[matches.length - 1][0];
+        const inner = `<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">${last}</table>`;
+        disclaimer = wrapBrandingForEmail(inner);
+        out = out.replace(last, '');
+    } else {
+        disclaimer = buildDefaultNewsletterDisclaimerHtml();
+    }
+    out = out.replace(/<!--\s*BRAIN_TEASER_ANSWER_PLACEHOLDER\s*-->/gi, '');
+    return { html: out, disclaimer };
+}
+
 function injectAgentBranding(html) {
     const ctx = getAgentBrandingContext();
     const selections = getNewsletterSelections();
     const firstName = (ctx.name || '').split(' ')[0].trim() || 'Your Agent';
+    const detached = detachNewsletterDisclaimer(html);
+    html = detached.html;
+    const disclaimer = detached.disclaimer || buildDefaultNewsletterDisclaimerHtml();
     const header = buildAgentBrandHeader(ctx);
     const footer = buildAgentSignatureFooter(ctx);
     const referral = selections.includeReferral && ctx.email
@@ -1410,7 +1445,7 @@ function injectAgentBranding(html) {
         }
     }
 
-    const tail = footer + referral;
+    const tail = footer + referral + disclaimer;
     if (tail) {
         if (/<\/body>\s*<\/html>/i.test(html)) {
             html = html.replace(/<\/body>\s*<\/html>/i, tail + '</body></html>');
@@ -2000,10 +2035,15 @@ function updatePersonalMediaPreviews() {
     }
 }
 
+function getNewsletterGeneratorRoot() {
+    return document.getElementById('newsletter-generator');
+}
+
 function updateNewsletterPreflightSummary() {
-    const chipsEl = document.getElementById('nl-preflight-chips');
-    const warningsEl = document.getElementById('nl-preflight-warnings');
-    const badgeEl = document.getElementById('nl-preflight-ready-badge');
+    const root = getNewsletterGeneratorRoot();
+    const chipsEl = root?.querySelector('#nl-preflight-chips');
+    const warningsEl = root?.querySelector('#nl-preflight-warnings');
+    const badgeEl = root?.querySelector('#nl-preflight-ready-badge');
     if (!chipsEl) return;
     const sel = getNewsletterSelections();
     const chips = [];
@@ -2015,7 +2055,7 @@ function updateNewsletterPreflightSummary() {
     if (toneLabel) chips.push({ text: toneLabel, style: 'meta' });
     chips.push({ text: lengthLabel, style: 'meta' });
     Object.entries(NL_CONTENT_SECTIONS).forEach(([key, cfg]) => {
-        if (!sel.contentSections[key] || key === 'puzzle') return;
+        if (!sel.contentSections[key]) return;
         chips.push({ text: cfg.label, style: 'included', removeId: cfg.id });
     });
     if (sel.personal) {
@@ -2025,8 +2065,10 @@ function updateNewsletterPreflightSummary() {
         if (sel.includeVideo) chips.push({ text: `Video · ${getPersonalVideoWidthPercent()}%`, style: 'included', removeId: 'nl-include-video' });
         if (len < NL_PERSONAL_UPDATE_MIN_CHARS) warnings.push(`Personal Update needs ${NL_PERSONAL_UPDATE_MIN_CHARS - len} more characters.`);
     }
+    if (sel.includeBlog) chips.push({ text: 'Blog link', style: 'included', removeId: 'nl-include-blog' });
     if (sel.includeReferral) chips.push({ text: 'Referral CTA (below signature)', style: 'included', removeId: 'nl-include-referral' });
     else chips.push({ text: 'Referral CTA off', style: 'off' });
+    chips.push({ text: 'Disclaimer (very bottom)', style: 'meta' });
     chipsEl.innerHTML = chips.map((c) => buildPreflightChipHtml(c)).join('');
     if (warningsEl) {
         warningsEl.classList.toggle('hidden', !warnings.length);
@@ -2055,7 +2097,7 @@ function wireNewsletterLiveFeedback() {
         el.addEventListener('input', refresh);
         el.addEventListener('change', refresh);
     });
-    const preflight = document.getElementById('nl-preflight-summary');
+    const preflight = root.querySelector('#nl-preflight-summary');
     if (preflight && !preflight.dataset.nlRemoveWired) {
         preflight.dataset.nlRemoveWired = '1';
         preflight.addEventListener('click', (e) => {
@@ -2520,7 +2562,7 @@ async function generateNewsletter(feedback = '') {
                 promptLines.push('    <!-- PERSONAL VIDEO PLACEHOLDER -->');
             }
             promptLines.push(
-                '    <tr><td style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
+                '    <!-- DISCLAIMER: added in post-processing after signature + referral — do NOT include a disclaimer row in the body -->',
                 (selections.contentSections.puzzle ? '    <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->' : ''),
                 '  </table>',
                 '</bo' + 'dy>',
@@ -2727,10 +2769,6 @@ html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '
 html = html.replace(/\[Name\]/g, firstName);
 
 html = applyUncheckedNewsletterSectionFilters(html, postSelections);
-
-                if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
-                    html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, postSelections);
-                }
             } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
 
             if (!feedback) {
@@ -2738,6 +2776,9 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
                 try {
                     html = injectAgentBranding(html);
                 } catch (e) { /* non-fatal */ }
+                if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
+                    html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
+                }
             }
 
     // Normalize before saving the raw HTML (for downloads/copying)
