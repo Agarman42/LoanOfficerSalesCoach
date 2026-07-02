@@ -33,6 +33,7 @@
   const COMPLETENESS_CHECKS = [
     { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach' },
     { key: 'location', weight: 12, hint: 'Add your market', tools: 'Social, Newsletter' },
+    { key: 'blogPageUrl', weight: 8, hint: 'Add your blog page URL', tools: 'Newsletter, Blog' },
     { key: 'focus', weight: 10, hint: 'Pick your business focus', tools: 'Weekly Plan' },
     { key: 'monthlyUnits', weight: 10, hint: 'Set a monthly closing goal', tools: 'Weekly Plan' },
     { key: 'hobbies', weight: 10, hint: 'Add 1–2 hobbies', tools: 'Social, Content' },
@@ -109,6 +110,8 @@
         return !!(p.databaseSize && String(p.databaseSize).trim());
       case 'contentNotes':
         return !!(p.contentNotes && String(p.contentNotes).trim());
+      case 'blogPageUrl':
+        return !!(p.blogPageUrl && String(p.blogPageUrl).trim());
       default:
         return false;
     }
@@ -246,6 +249,7 @@
       previewRow('Personality', p.personality),
       previewRow('Formats', p.formats),
       previewRow('Guardrails', p.contentNotes),
+      previewRow('Blog', p.blogPageUrl),
       previewRow('Website', p.companyWebsite),
       previewRow('Headshot', p.headshotUrl ? 'Set' : ''),
       previewRow('Family', p.family)
@@ -289,6 +293,7 @@
     if (p.tone) lines.push(`Tone: ${p.tone}`);
     if (p.voiceTraits.length) lines.push(`Voice traits: ${p.voiceTraits.join(', ')}`);
     if (p.contentNotes) lines.push(`Content guardrails: ${p.contentNotes}`);
+    if (p.blogPageUrl) lines.push(`Blog page: ${p.blogPageUrl}`);
     if (p.companyWebsite) lines.push(`Company website: ${p.companyWebsite}`);
     if (p.headshotUrl) lines.push(`Headshot on file for newsletters`);
     return lines.length
@@ -351,6 +356,7 @@
       partnerTypes: Array.from(document.querySelectorAll('.profile-partner:checked')).map((c) => c.value),
       partnerTypesOther: getVal('profile-partner-other'),
       companyWebsite: getVal('profile-company-website'),
+      blogPageUrl: getVal('profile-blog-url'),
       linkedInUrl: socialLinks.linkedin,
       translationDefaultTarget: getRaw('profile-translation-default') || 'es',
       translationFavoriteLanguages: Array.from(document.querySelectorAll('.profile-translation-fav:checked')).map((c) => c.value),
@@ -398,14 +404,15 @@
       'monthly-units', 'monthly-goal', 'income', 'focus', 'hours',
       'database-size', 'partner-focus', 'family', 'personality', 'tone',
       'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other',
-      'company-website'
+      'company-website', 'blog-url'
     ];
 
     const fieldKeyMap = {
       'company-name': 'companyName',
       'logo-url': 'logoUrl',
       'headshot-url': 'headshotUrl',
-      'company-website': 'companyWebsite'
+      'company-website': 'companyWebsite',
+      'blog-url': 'blogPageUrl'
     };
 
     fields.forEach((field) => {
@@ -543,7 +550,8 @@
         () => p.contentNotes,
         () => p.voiceTraits.length,
         () => p.formats.length,
-        () => p.companyWebsite
+        () => p.companyWebsite,
+        () => p.blogPageUrl
       ],
       prospecting: [
         () => p.activities.length,
@@ -596,6 +604,7 @@
     if (toolsEl) {
       const toolChips = [];
       if (p.name && p.location) toolChips.push('Newsletter');
+      if (p.blogPageUrl) toolChips.push('Blog link');
       if (p.companyName || p.headshotUrl) toolChips.push('Branding');
       if (p.tone) toolChips.push('Social');
       if (p.focus) toolChips.push('Weekly Plan');
@@ -663,20 +672,18 @@
       .join('');
   }
 
-  function applyRuoffBlogPreset() {
-    const name = document.getElementById('profile-name')?.value.trim()
-      || document.getElementById('wizard-name')?.value.trim()
-      || '';
-    const slug = slugifyBlogName(name);
+  function applyBlogFromWebsite() {
+    const website = document.getElementById('profile-company-website')?.value.trim() || '';
     const el = document.getElementById('profile-blog-url');
     if (!el) return;
-    if (!slug) {
-      if (typeof window.showToast === 'function') window.showToast('Add your name first — we use it for your column URL.', 'info');
+    if (!website) {
+      if (typeof window.showToast === 'function') window.showToast('Add your company website first — we will append /blog.', 'info');
       return;
     }
-    el.value = `https://mortgage-column.ruoff.com/${slug}`;
+    const base = website.replace(/\/+$/, '');
+    el.value = `${base}/blog`;
     autoSaveProfile();
-    if (typeof window.showToast === 'function') window.showToast('Ruoff Mortgage Column URL applied — adjust if your slug differs.', 'success');
+    if (typeof window.showToast === 'function') window.showToast('Blog URL set from your website — adjust if your blog lives elsewhere.', 'success');
   }
 
   function showView(view) {
@@ -928,6 +935,7 @@
     document.getElementById('close-profile-modal')?.addEventListener('click', closeModal);
     document.getElementById('cancel-profile')?.addEventListener('click', closeModal);
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
+    document.getElementById('profile-blog-from-website')?.addEventListener('click', applyBlogFromWebsite);
 
     modal.addEventListener('input', autoSaveProfile);
     modal.addEventListener('change', autoSaveProfile);

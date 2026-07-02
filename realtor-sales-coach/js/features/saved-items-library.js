@@ -100,8 +100,9 @@
       postclosing: 'Post-Closing Retention',
       popby: 'Pop-By Idea',
       plan: title.includes('weekly') ? 'Weekly Win Plan' : '2026 Business Plan',
-      'equity-opportunity': 'Equity Opportunity',
-      'equity-scan': 'Full Equity Scan',
+      listings: 'Listing Content',
+      'equity-opportunity': 'Market Insight',
+      'equity-scan': 'Market Scan',
       underwriting: 'Underwriting Scenario',
       newsletter: 'Newsletter (Outlook)',
       blog: 'Blog Bundle',
@@ -128,6 +129,7 @@
       postclosing: 'bg-[#00A89D]/10 text-[#00A89D]',
       popby: 'bg-[#F15A29]/10 text-[#F15A29]',
       plan: 'bg-[#F15A29]/10 text-[#F15A29]',
+      listings: 'bg-[#002B5C]/10 text-[#002B5C]',
       'equity-opportunity': 'bg-green-100 text-green-700',
       'equity-scan': 'bg-emerald-100 text-emerald-700',
       underwriting: 'bg-violet-100 text-violet-700',
@@ -172,6 +174,9 @@
     }
     if (t === 'newsletter' || t === 'blog') {
       links.push({ label: 'Newsletter Generator', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('newsletter-generator');", style: 'primary' });
+    }
+    if (t === 'listings') {
+      links.push({ label: 'Listing Description Generator', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('listing-description');", style: 'primary' });
     }
     if (t === 'underwriting') {
       links.push({ label: 'Buyer Financing Reference', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('underwriting-search');", style: 'primary' });
@@ -491,7 +496,7 @@
       ['value-vault', 'fa-gem', 'Vault'],
       ['event', 'fa-calendar-alt', 'Events'],
       ['plan', 'fa-chart-line', 'Plans'],
-      ['equity-opportunity', 'fa-home', 'Equity'],
+      ['listings', 'fa-home', 'Listings'],
       ['underwriting', 'fa-file-alt', 'UW'],
       ['coach', 'fa-robot', 'Coach'],
       ['translation', 'fa-language', 'Translate'],

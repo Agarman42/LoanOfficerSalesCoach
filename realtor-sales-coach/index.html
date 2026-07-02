@@ -6593,12 +6593,12 @@
     <!-- Premium Form Cards (matching Blog Creator / Social Post / 2026 Plan) -->
     <div class="space-y-8 mb-12">
 
-      <!-- Card 1: Branding & Contact -->
+      <!-- Card 1: Signature & Contact (branding from Profile) -->
       <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
         <h3 class="text-xl font-bold mb-2 text-[#002B5C] dark:text-white flex items-center gap-2">
-          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-id-card text-[#00A89D]"></i></span> Agent Branding &amp; Signature
+          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-id-card text-[#00A89D]"></i></span> Signature &amp; Contact
         </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 ml-10">Unlike the LO tool, your brokerage may already append an email signature server-side. Control what this generator adds below.</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 ml-10">Team name, logo, headshot, phone, tagline, and social links live in <strong>My Profile</strong> — synced automatically. Your brokerage may also append a signature server-side; control what this generator adds below.</p>
 
         <div class="mb-5 p-4 rounded-2xl border border-amber-200/60 bg-amber-50/40 dark:bg-amber-900/10 dark:border-amber-800/40 space-y-3">
           <label class="flex items-start gap-2.5 cursor-pointer">
@@ -6617,7 +6617,7 @@
           </label>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <div>
             <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Your Name</label>
             <input type="text" id="nl-name" placeholder="Your Name"
@@ -6628,34 +6628,20 @@
             <input type="email" id="nl-email" placeholder="you@yourteam.com"
                    class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50">
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Company / Team Name</label>
-            <input type="text" id="brand-company" placeholder="The Smith Team"
-                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tagline (optional)</label>
-            <input type="text" id="brand-tagline" placeholder="Your Trusted Local Real Estate Experts"
-                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Phone (signature line)</label>
-            <input type="text" id="brand-contact" placeholder="555-123-4567"
-                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Company Logo URL</label>
-            <input type="url" id="brand-logo-data" placeholder="https://yourteam.com/logo.png"
-                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
-          </div>
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Professional Headshot URL</label>
-            <input type="url" id="brand-headshot" placeholder="https://yourteam.com/photos/you.jpg"
-                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
-            <p class="text-[10px] text-gray-500 mt-1">Set once in <strong>My Profile → Professional Branding</strong> — synced here automatically.</p>
-          </div>
         </div>
-        <div id="nl-brand-preview" class="hidden p-4 rounded-2xl border border-dashed border-[#00A89D]/40 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300"></div>
+
+        <input type="hidden" id="brand-company">
+        <input type="hidden" id="brand-tagline">
+        <input type="hidden" id="brand-contact">
+        <input type="hidden" id="brand-logo-data">
+        <input type="hidden" id="brand-headshot">
+
+        <div id="nl-brand-preview" class="hidden p-4 rounded-2xl border border-dashed border-[#00A89D]/40 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 mb-4"></div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="button" onclick="if (typeof window.syncNewsletterFromProfile === 'function') window.syncNewsletterFromProfile();" class="text-xs px-4 py-2 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold transition">Sync from Profile</button>
+          <button type="button" onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}" class="text-xs px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] font-medium transition">Edit branding in Profile →</button>
+        </div>
       </div>
 
       <!-- Card 2: Audience + Market + Tone + Length + Title -->
@@ -7073,19 +7059,6 @@
 
             <p id="nl-custom-content-footer" class="text-xs text-gray-500 mt-4">Curated lists avoid repeats until you hit <strong>Start fresh</strong>. Check Dad Joke or Brain Teaser above to include them in your edition.</p>
         </details>
-
-      <!-- Branding is now fully in Profile (cleaner UX) -->
-      <div class="mb-8 p-5 bg-gradient-to-r from-[#00A89D]/5 to-white dark:from-gray-900 dark:to-gray-800 border border-[#00A89D]/30 rounded-3xl text-sm">
-        <div class="flex items-start gap-3">
-          <i class="fas fa-magic text-[#00A89D] mt-0.5"></i>
-          <div>
-            <div class="font-semibold text-[#002B5C] dark:text-white">Branding lives in your Profile &amp; Preferences.</div>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Team name, logo URL, phone, tagline, and all your social links (LinkedIn, Instagram, etc.) are set once there and flow automatically into every newsletter header, footer, and social row. Complete those sections for the most polished, on-brand results with zero extra steps on this page.</p>
-            <button onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}" class="mt-3 text-xs px-4 py-1.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-medium transition">Open Profile &amp; Preferences →</button>
-          </div>
-        </div>
-      </div>
-
 
       <!-- Pre-flight summary -->
       <div id="nl-preflight-summary" class="mb-6 max-w-3xl mx-auto">
@@ -13759,7 +13732,7 @@ window.toggleSupportingSection = function(sectionId) {
 <script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v245"></script>
 <script src="js/features/blog-creator.js?v=20260623-realtor-v245"></script>
 <script src="js/features/legacy-helpers.js?v=20260623-realtor-v245"></script>
-<script src="js/features/saved-items-library.js?v=20260702-realtor-v252"></script>
+<script src="js/features/saved-items-library.js?v=20260702-realtor-v259"></script>
 <script src="js/data/newsletter-dad-jokes.js?v=20260702-realtor-v253"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260702-realtor-v253"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260702-realtor-v253"></script>
@@ -15195,6 +15168,14 @@ if (document.readyState === 'loading') {
                         <input type="url" id="profile-company-website" placeholder="https://yourteam.com" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium mb-1">Blog Page URL <span class="text-gray-400 font-normal text-xs">Newsletter + Blog</span></label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="url" id="profile-blog-url" placeholder="https://yourteam.com/blog" class="flex-1 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                            <button type="button" id="profile-blog-from-website" class="text-xs px-4 py-2.5 rounded-2xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition whitespace-nowrap">Use website + /blog</button>
+                        </div>
+                        <p class="text-[11px] text-gray-500 m-0 mt-1">Your blog home page — Newsletter uses this as a default; paste a specific post URL per issue when you want to feature one article.</p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium mb-1">Default translation language</label>
                         <select id="profile-translation-default" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                             <option value="es">Spanish</option>
@@ -15326,7 +15307,7 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260702-realtor-v254"></script>
+<script src="js/features/user-profile.js?v=20260702-realtor-v259"></script>
 <script src="js/features/onboarding-coach.js?v=20260623-realtor-v245"></script>
 
 <!-- ===================================================== -->
