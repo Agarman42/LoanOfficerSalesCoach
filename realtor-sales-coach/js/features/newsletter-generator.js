@@ -23,6 +23,30 @@
 
 let lastGeneratedHTML = '';
 
+  window.openNewsletterTips = function openNewsletterTips() {
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (!modal) return;
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.display = 'flex';
+    }
+  };
+
+  window.closeNewsletterTips = function closeNewsletterTips() {
+    const modal = document.getElementById('newsletter-tips-modal');
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  };
+
 // Hero Images (20 pre-approved Midwest homes)
 const heroImages = [
     'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/b19e864a-dd57-45c4-b14e-4a340bfeb685.jpg',
@@ -868,6 +892,8 @@ function updatePreviews() {
         updatePersonalCharMeter();
         updatePersonalMediaPreviews();
         updateNewsletterPreflightSummary();
+        updateSpecificTopicsPlaceholder();
+        updateCustomContentChoicesVisibility();
     } catch (e) {}
 }
 
@@ -1665,11 +1691,100 @@ const NL_CONTENT_SECTIONS = {
 
 const NL_CUSTOM_CONTENT_BLOCKS = {
     fun: { checkboxId: 'nl-fun', blockId: 'nl-custom-section-fun', shortLabel: 'Fun Facts' },
-    tip: { checkboxId: 'nl-tip', blockId: null, shortLabel: 'Pro Tip' },
-    quote: { checkboxId: 'nl-quote', blockId: null, shortLabel: 'Quote' },
+    tip: { checkboxId: 'nl-tip', blockId: 'nl-custom-section-tip', shortLabel: 'Pro Tip' },
+    quote: { checkboxId: 'nl-quote', blockId: 'nl-custom-section-quote', shortLabel: 'Quote' },
     dadjoke: { checkboxId: 'nl-dadjoke', blockId: 'nl-custom-section-dadjoke', shortLabel: 'Dad Joke' },
     puzzle: { checkboxId: 'nl-puzzle', blockId: 'brain-teaser-panel', shortLabel: 'Brain Teaser' }
 };
+
+const NL_SPECIFIC_SECTION_HINTS = [
+    { id: 'nl-market', label: 'Market Updates', example: 'Q1 inventory up 12% in Fort Wayne — or Market Updates: https://…' },
+    { id: 'nl-industry', label: 'Industry News', example: 'NAR membership trends — or Industry: https://…' },
+    { id: 'nl-local', label: 'Local Update', example: 'Komets playoff Sat 3/15 — or Local: https://…' },
+    { id: 'nl-recipes', label: 'Recipes', example: 'mulled wine recipe — or Recipes: https://…' }
+];
+
+function updateSpecificTopicsPlaceholder() {
+    const ta = document.getElementById('nl-specific');
+    const hintEl = document.getElementById('nl-specific-hint');
+    if (!ta) return;
+
+    const active = NL_SPECIFIC_SECTION_HINTS.filter((h) => document.getElementById(h.id)?.checked);
+    const langNote = 'Language requests work too (e.g. "Prepare the full newsletter in Spanish").';
+
+    let placeholder;
+    if (!active.length) {
+        placeholder = `Give specific direction for any sections you check — stats, headlines, or article URLs (e.g. Market Updates: https://…). ${langNote}`;
+    } else if (active.length === 1) {
+        placeholder = `e.g., ${active[0].label}: ${active[0].example}. ${langNote}`;
+    } else {
+        const parts = active.slice(0, 3).map((h) => `${h.label}: ${h.example}`);
+        const suffix = active.length > 3 ? '; …' : '';
+        placeholder = `e.g., ${parts.join('; ')}${suffix}. ${langNote}`;
+    }
+
+    ta.placeholder = placeholder;
+
+    if (hintEl) {
+        const urlNote = 'Article URLs you paste here will be cited and linked in the matching section.';
+        hintEl.textContent = !active.length
+            ? `Give very specific direction for the sections you checked — exact names, dates, stats, headlines, or article URLs. ${urlNote}`
+            : `Tailored to your ${active.length} checked section${active.length === 1 ? '' : 's'}: ${active.map((h) => h.label).join(', ')}. ${urlNote}`;
+    }
+}
+
+function scrollToNewsletterCustomContent(sectionKey) {
+    const details = document.getElementById('nl-custom-content-details');
+    if (details) details.open = true;
+    updateCustomContentChoicesVisibility();
+
+    let targetId = null;
+    if (sectionKey && NL_CUSTOM_CONTENT_BLOCKS[sectionKey]) {
+        const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
+        const cb = document.getElementById(cfg.checkboxId);
+        if (cb?.checked) targetId = cfg.blockId;
+    }
+    if (!targetId) {
+        for (const cfg of Object.values(NL_CUSTOM_CONTENT_BLOCKS)) {
+            const cb = document.getElementById(cfg.checkboxId);
+            if (cb?.checked) {
+                targetId = cfg.blockId;
+                break;
+            }
+        }
+    }
+
+    if (!targetId) {
+        if (window.showToast) window.showToast('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser first.', 'info');
+        else alert('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser in Sections to Include first.');
+        return;
+    }
+
+    const el = document.getElementById(targetId);
+    if (!el) return;
+
+    window.setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
+        window.setTimeout(() => {
+            el.classList.remove('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
+        }, 2200);
+    }, 120);
+}
+
+function wireCustomContentJumpControls() {
+    const sectionsCard = document.getElementById('nl-sections-card');
+    if (sectionsCard && !sectionsCard._nlInlineCustomizeWired) {
+        sectionsCard._nlInlineCustomizeWired = true;
+        sectionsCard.addEventListener('click', (e) => {
+            const btn = e.target.closest('.nl-inline-customize-btn');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToNewsletterCustomContent(btn.getAttribute('data-nl-jump-custom'));
+        });
+    }
+}
 
 function escapeRegex(str) {
     return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1820,12 +1935,44 @@ function updateCustomContentChoicesVisibility() {
         const block = cfg.blockId ? document.getElementById(cfg.blockId) : null;
         const show = !!cb?.checked;
         if (block) block.classList.toggle('hidden', !show);
+        const inlineBtn = document.querySelector(`.nl-inline-customize-btn[data-nl-jump-custom="${key}"]`);
+        if (inlineBtn) inlineBtn.classList.toggle('hidden', !show);
         if (show) activeLabels.push(cfg.shortLabel);
     });
+
+    const anyVisible = activeLabels.length > 0;
+    const emptyEl = document.getElementById('nl-custom-content-empty');
+    const bodyEl = document.getElementById('nl-custom-content-body');
+    const footerEl = document.getElementById('nl-custom-content-footer');
+    const introEl = document.getElementById('nl-custom-content-intro');
+    const summaryEl = document.getElementById('nl-custom-content-summary');
     const countEl = document.getElementById('nl-custom-content-count');
+    const detailsEl = document.getElementById('nl-custom-content-details');
+
+    if (emptyEl) emptyEl.classList.toggle('hidden', anyVisible);
+    if (bodyEl) bodyEl.classList.toggle('hidden', !anyVisible);
+    if (footerEl) footerEl.classList.toggle('hidden', !anyVisible);
+
+    if (introEl) {
+        introEl.innerHTML = anyVisible
+            ? `Customize <strong>${activeLabels.join(', ')}</strong> — pick from the library, regenerate random, or write your own.`
+            : '';
+    }
+
+    if (summaryEl) {
+        summaryEl.textContent = anyVisible
+            ? `Custom Content Choices (${activeLabels.join(', ')})`
+            : 'Custom Content Choices';
+    }
+
     if (countEl) {
-        countEl.textContent = activeLabels.length ? `${activeLabels.length} active` : '';
-        countEl.classList.toggle('hidden', !activeLabels.length);
+        countEl.textContent = anyVisible ? `${activeLabels.length} active` : '';
+        countEl.classList.toggle('hidden', !anyVisible);
+    }
+
+    if (detailsEl) {
+        detailsEl.classList.toggle('hidden', !anyVisible);
+        if (!anyVisible) detailsEl.open = false;
     }
 }
 
@@ -2092,6 +2239,7 @@ function wireNewsletterLiveFeedback() {
         updatePersonalMediaPreviews();
         updateCustomContentChoicesVisibility();
         updateNewsletterPreflightSummary();
+        updateSpecificTopicsPlaceholder();
     };
     root.querySelectorAll('input, select, textarea').forEach((el) => {
         el.addEventListener('input', refresh);
@@ -3243,6 +3391,12 @@ function copyForOutlook() {
         }
       }
 
+      const blogUrlEl = document.getElementById('nl-blog-url');
+      const profileBlog = (p.blogPageUrl || p.blogUrl || '').trim();
+      if (blogUrlEl && profileBlog && (overwrite || !blogUrlEl.value.trim())) {
+        blogUrlEl.value = profileBlog;
+      }
+
       updateBrandPreview();
 
       if (!silent && typeof window.showToast === 'function') {
@@ -3319,6 +3473,7 @@ function copyForOutlook() {
     // in the code above. They will run when this module executes.
 
     try { wireNewsletterLiveFeedback(); } catch (e) {}
+    try { wireCustomContentJumpControls(); } catch (e) {}
 
     setTimeout(() => {
       if (typeof syncNewsletterFromProfile === 'function') {
@@ -3400,10 +3555,17 @@ function copyForOutlook() {
       });
     });
 
+    try {
+      updateSpecificTopicsPlaceholder();
+      updateCustomContentChoicesVisibility();
+    } catch (e) {}
+
     console.log('%c[newsletter-generator.js] Newsletter Generator initialized', 'color:#00A89D');
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
+  window.updateCustomContentChoicesVisibility = updateCustomContentChoicesVisibility;
+  window.scrollToNewsletterCustomContent = scrollToNewsletterCustomContent;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initNewsletterGenerator);
