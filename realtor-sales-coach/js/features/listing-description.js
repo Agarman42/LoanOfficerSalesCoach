@@ -101,7 +101,7 @@ Make buyers fall in love and want to reach out immediately.`;
                 <div class="font-bold text-[#002B5C]">${titles[i]}</div>
                 <div class="flex gap-2">
                   <button onclick="navigator.clipboard.writeText(this.closest('.rounded-3xl').innerText.replace('Copy','').trim()); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1200)" class="text-xs px-3 py-1 border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white rounded-full">Copy</button>
-                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('${titles[i]} for ${address||'this property'}', this.closest('.rounded-3xl').innerText, this, 'social');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('${titles[i]} for ${address||'this property'}', this.closest('.rounded-3xl').innerText, this, 'listings');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
                 </div>
               </div>
               <div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">${clean}</div>
@@ -125,7 +125,7 @@ Make buyers fall in love and want to reach out immediately.`;
                 <div class="font-bold text-[#002B5C]">Ready-to-Film Reel Scripts (15–30s)</div>
                 <div class="flex gap-2">
                   <button onclick="navigator.clipboard.writeText(this.closest('.rounded-3xl').querySelector('.whitespace-pre-wrap')?.innerText?.trim()||''); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy All',1200)" class="text-xs px-3 py-1 border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white rounded-full">Copy All</button>
-                  <button onclick="if(typeof window.toggleSaveIdea==='function'){const b=this.closest('.rounded-3xl');window.toggleSaveIdea('Reel Scripts for ${(address||'this property').replace(/'/g,'')}', b.querySelector('.whitespace-pre-wrap')?.innerText?.trim()||'', this, 'social');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
+                  <button onclick="if(typeof window.toggleSaveIdea==='function'){const b=this.closest('.rounded-3xl');window.toggleSaveIdea('Reel Scripts for ${(address||'this property').replace(/'/g,'')}', b.querySelector('.whitespace-pre-wrap')?.innerText?.trim()||'', this, 'listings');}else{alert('Save ready after refresh');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
                 </div>
               </div>
               <div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-sm">${reelSection.replace(/</g,'&lt;')}</div>

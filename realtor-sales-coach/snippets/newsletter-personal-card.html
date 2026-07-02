@@ -1,0 +1,90 @@
+      <!-- Card 4: Personal Update (Highly Recommended) -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
+        <div class="flex items-center mb-4">
+          <input type="checkbox" id="nl-personal" class="mr-3 h-5 w-5 text-[#00A89D]">
+          <label for="nl-personal" class="text-xl font-semibold text-[#00A89D]">Personal Update ❤️ (Highly Recommended)</label>
+        </div>
+        <div id="personal-fields" class="hidden ml-2 space-y-6">
+          <div>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
+              <strong class="text-[#002B5C] dark:text-white">Write this fresh every issue</strong> — we won't pull hobbies from your profile. Be specific: a closing, family moment, or community story. If you include a photo or video, describe what's in it.
+            </p>
+            <textarea id="nl-personal-text" rows="5" placeholder="e.g., Just helped the Martinez family get keys to their first home — what a joy! (Photo: us at the front door.)" 
+                      class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50"></textarea>
+            <button type="button" onclick="if(typeof window.fillPersonalFromProfile==='function'){window.fillPersonalFromProfile();}" class="mt-1 text-xs text-[#00A89D] hover:underline">Optional: starter ideas from my profile</button>
+            <div id="nl-personal-char-meter" class="hidden mt-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Personal update length</span>
+                <span id="nl-personal-char-count" class="text-xs font-semibold text-gray-500">0 / 40 min</span>
+              </div>
+              <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                <div id="nl-personal-char-bar" class="h-full rounded-full bg-amber-400 transition-all duration-300" style="width:0%"></div>
+              </div>
+              <p id="nl-personal-char-hint" class="text-xs mt-1.5 text-gray-500 m-0">Write at least 40 characters with real details.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div class="flex items-center mb-2">
+                <input type="checkbox" id="nl-include-photo" class="mr-2 h-4 w-4 text-[#00A89D]" checked>
+                <label for="nl-include-photo" class="font-medium">Include Personal Photo</label>
+              </div>
+              <input type="text" id="nl-personal-photo" placeholder="Paste direct image URL" 
+                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
+              <div id="nl-personal-photo-size-wrap" class="hidden mt-2">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <label for="nl-personal-photo-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Photo size in newsletter</label>
+                  <span id="nl-personal-photo-size-label" class="text-xs font-semibold text-[#00A89D]">Full width (600px)</span>
+                </div>
+                <input type="range" id="nl-personal-photo-size" min="30" max="100" step="5" value="100"
+                       class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
+              </div>
+              <div id="nl-personal-photo-preview-wrap" class="hidden mt-2 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800/60">
+                <div class="p-3 bg-gray-100 dark:bg-gray-900/80 overflow-x-auto">
+                  <div id="nl-personal-photo-preview-stage" class="w-full max-w-[600px] mx-auto min-h-[80px] flex items-center justify-center rounded-lg border border-dashed border-gray-300/80 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 px-2 py-3">
+                    <img id="nl-personal-photo-preview-img" alt="Photo preview" class="block h-auto max-w-none rounded-lg shadow-sm">
+                  </div>
+                </div>
+                <p id="nl-personal-photo-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center mb-2">
+                <input type="checkbox" id="nl-include-video" class="mr-2 h-4 w-4 text-[#00A89D]">
+                <label for="nl-include-video" class="font-medium">Include Personal Video (YouTube/Shorts)</label>
+              </div>
+              <input type="text" id="nl-personal-video" placeholder="Paste YouTube video or Shorts URL" 
+                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
+              <div id="nl-personal-video-size-wrap" class="hidden mt-2">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <label for="nl-personal-video-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Video size in newsletter</label>
+                  <span id="nl-personal-video-size-label" class="text-xs font-semibold text-[#00A89D]">Full width (600px)</span>
+                </div>
+                <input type="range" id="nl-personal-video-size" min="30" max="100" step="5" value="100"
+                       class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
+              </div>
+              <div id="nl-personal-video-preview-wrap" class="hidden mt-2 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800/60">
+                <div class="p-3 bg-gray-100 dark:bg-gray-900/80 overflow-x-auto">
+                  <div id="nl-personal-video-preview-stage" class="w-full max-w-[600px] mx-auto min-h-[80px] flex items-center justify-center rounded-lg border border-dashed border-gray-300/80 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 px-2 py-3">
+                    <a id="nl-personal-video-preview-link" href="#" target="_blank" rel="noopener" class="block rounded-lg shadow-sm">
+                      <img id="nl-personal-video-preview-thumb" alt="Video thumbnail preview" class="block h-auto max-w-none rounded-lg">
+                    </a>
+                  </div>
+                </div>
+                <p id="nl-personal-video-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Referral CTA -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="nl-include-referral" checked class="mt-1 h-5 w-5 text-[#00A89D]">
+          <div>
+            <label for="nl-include-referral" class="text-lg font-semibold text-[#00A89D] cursor-pointer">Include Referral Ask 🤝</label>
+            <p class="text-xs text-gray-500 mt-1">Adds a short, subtle referral line <strong>below your email signature</strong> — not a big card in the body. Uncheck for a softer close.</p>
+          </div>
+        </div>
+      </div>

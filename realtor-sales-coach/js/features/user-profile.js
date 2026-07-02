@@ -32,6 +32,7 @@
 
   const COMPLETENESS_CHECKS = [
     { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach' },
+    { key: 'email', weight: 10, hint: 'Add your email', tools: 'Newsletter signature' },
     { key: 'location', weight: 12, hint: 'Add your market', tools: 'Social, Newsletter' },
     { key: 'blogPageUrl', weight: 8, hint: 'Add your blog page URL', tools: 'Newsletter, Blog' },
     { key: 'focus', weight: 10, hint: 'Pick your business focus', tools: 'Weekly Plan' },
@@ -110,6 +111,8 @@
         return !!(p.databaseSize && String(p.databaseSize).trim());
       case 'contentNotes':
         return !!(p.contentNotes && String(p.contentNotes).trim());
+      case 'email':
+        return !!(p.email && String(p.email).trim());
       case 'blogPageUrl':
         return !!(p.blogPageUrl && String(p.blogPageUrl).trim());
       default:
@@ -721,8 +724,10 @@
 
   function mergeWizardIntoProfile() {
     const existing = readRawProfile();
+    const website = document.getElementById('wizard-website')?.value.trim() || '';
     const step1 = {
       name: document.getElementById('wizard-name')?.value.trim() || existing.name || '',
+      email: document.getElementById('wizard-email')?.value.trim() || existing.email || '',
       location: document.getElementById('wizard-location')?.value.trim() || existing.location || '',
       focus: document.getElementById('wizard-focus')?.value || existing.focus || ''
     };
@@ -739,20 +744,27 @@
       intro: document.getElementById('wizard-intro')?.value.trim() || existing.intro || ''
     };
 
-    return normalizeProfile({
+    const merged = normalizeProfile({
       ...existing,
       ...step1,
       ...step2,
       ...step3,
       lastUpdated: new Date().toISOString()
     });
+    if (website) {
+      merged.companyWebsite = website;
+      if (!merged.blogPageUrl) merged.blogPageUrl = `${website.replace(/\/+$/, '')}/blog`;
+    }
+    return merged;
   }
 
   function prefillWizardFromProfile() {
     const p = normalizeProfile(readRawProfile());
     const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     set('wizard-name', p.name);
+    set('wizard-email', p.email);
     set('wizard-location', p.location);
+    set('wizard-website', p.companyWebsite);
     set('wizard-focus', p.focus);
     set('wizard-tone', p.tone);
     set('wizard-monthly-units', p.monthlyUnits);

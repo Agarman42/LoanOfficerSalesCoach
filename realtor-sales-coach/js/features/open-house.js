@@ -72,7 +72,7 @@ Keep it actionable, warm, professional, and lead-focused. Use bullet points and 
             <div class="font-bold text-[#002B5C] text-xl">Your Open House Kit</div>
             <div class="flex gap-2">
               <button onclick="navigator.clipboard.writeText(this.closest('.rounded-3xl').innerText); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy All', 1400)" class="text-xs px-3 py-1 border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white rounded-full">Copy All</button>
-              <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Open House Kit - ${propertyType}', this.closest('.rounded-3xl').innerText, this, 'social');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
+              <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Open House Kit - ${propertyType}', this.closest('.rounded-3xl').innerText, this, 'open-house');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
             </div>
           </div>
           <div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-[15px]">${text.replace(/</g,'&lt;')}</div>

@@ -63,6 +63,8 @@
     if (filter && filter !== 'all') {
       if (filter === 'equity-opportunity') {
         filtered = filtered.filter((item) => item.type === 'equity-opportunity' || item.type === 'equity-scan');
+      } else if (filter === 'listings') {
+        filtered = filtered.filter((item) => ['listings', 'open-house', 'consultation'].includes(item.type));
       } else {
         filtered = filtered.filter((item) => item.type === filter);
       }
@@ -101,6 +103,8 @@
       popby: 'Pop-By Idea',
       plan: title.includes('weekly') ? 'Weekly Win Plan' : '2026 Business Plan',
       listings: 'Listing Content',
+      'open-house': 'Open House Kit',
+      consultation: 'Consultation Kit',
       'equity-opportunity': 'Market Insight',
       'equity-scan': 'Market Scan',
       underwriting: 'Underwriting Scenario',
@@ -130,6 +134,8 @@
       popby: 'bg-[#F15A29]/10 text-[#F15A29]',
       plan: 'bg-[#F15A29]/10 text-[#F15A29]',
       listings: 'bg-[#002B5C]/10 text-[#002B5C]',
+      'open-house': 'bg-[#002B5C]/10 text-[#002B5C]',
+      consultation: 'bg-[#002B5C]/10 text-[#002B5C]',
       'equity-opportunity': 'bg-green-100 text-green-700',
       'equity-scan': 'bg-emerald-100 text-emerald-700',
       underwriting: 'bg-violet-100 text-violet-700',
@@ -177,6 +183,12 @@
     }
     if (t === 'listings') {
       links.push({ label: 'Listing Description Generator', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('listing-description');", style: 'primary' });
+    }
+    if (t === 'open-house') {
+      links.push({ label: 'Open House Script & Strategy', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('open-house');", style: 'primary' });
+    }
+    if (t === 'consultation') {
+      links.push({ label: 'Buyer/Seller Consultation Kit', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('consultation');", style: 'primary' });
     }
     if (t === 'underwriting') {
       links.push({ label: 'Buyer Financing Reference', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('underwriting-search');", style: 'primary' });

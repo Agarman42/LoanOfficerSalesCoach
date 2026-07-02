@@ -2226,6 +2226,12 @@ function updateNewsletterPreflightSummary() {
         if (len < NL_PERSONAL_UPDATE_MIN_CHARS) warnings.push(`Personal Update needs ${NL_PERSONAL_UPDATE_MIN_CHARS - len} more characters.`);
     }
     if (sel.includeBlog) chips.push({ text: 'Blog link', style: 'included', removeId: 'nl-include-blog' });
+    const includeSig = document.getElementById('nl-include-signature')?.checked !== false;
+    const includeSocial = document.getElementById('nl-include-social')?.checked !== false;
+    if (includeSig) chips.push({ text: 'Signature block', style: 'included', removeId: 'nl-include-signature' });
+    else chips.push({ text: 'Signature off', style: 'off' });
+    if (includeSocial) chips.push({ text: 'Social links', style: 'included', removeId: 'nl-include-social' });
+    else chips.push({ text: 'Social links off', style: 'off' });
     if (sel.includeReferral) chips.push({ text: 'Referral CTA (below signature)', style: 'included', removeId: 'nl-include-referral' });
     else chips.push({ text: 'Referral CTA off', style: 'off' });
     chips.push({ text: 'Disclaimer (very bottom)', style: 'meta' });
