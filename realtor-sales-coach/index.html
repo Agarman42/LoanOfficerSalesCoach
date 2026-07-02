@@ -19,6 +19,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- === PDF.js — REQUIRED for Blog Document Upload === -->
@@ -40,13 +41,14 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260623-realtor-v245">
+    <link rel="stylesheet" href="css/main.css?v=20260702-realtor-v252">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260623-realtor-v245"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
     <script src="js/ui.js?v=20260623-realtor-v245"></script>
+    <script defer src="js/features/sidebar-ai-indicators.js?v=20260702-realtor-v252"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -202,6 +204,7 @@
             <div class="sidebar-group mt-5">SUPPORT TOOLS</div>
             <ul class="space-y-0.5 px-2 text-sm">
                 <li><a href="#" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link px-4 py-2.5"><i class="fas fa-bookmark w-5"></i> My Saved Items</a></li>
+                <li><a href="#client-translation" class="sidebar-link px-4 py-2.5"><i class="fas fa-language w-5"></i> Client Translation</a></li>
                 <li><a href="#ai-chat" class="sidebar-link px-4 py-2.5"><i class="fas fa-robot w-5"></i> AI Coach <span class="text-[9px] opacity-60">(profile + tools)</span></a></li>
                 <li><a href="#books" class="sidebar-link px-4 py-2.5"><i class="fas fa-book w-5"></i> Book Vault</a></li>
             </ul>
@@ -1197,6 +1200,100 @@
 
             <div id="consult-output" class="space-y-12 hidden"></div>
         </section>
+
+        <section id="client-translation" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-6 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+    <div class="text-center mb-6">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">BILINGUAL OUTREACH</span>
+        <h2 id="tr-hero-title" class="text-3xl font-bold mb-2 text-[#F15A29]">Client Translation</h2>
+        <p id="tr-hero-subtitle" class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Translate buyer/seller emails, open house invites, and listing updates — clear, professional, and market-ready.</p>
+    </div>
+    <div class="mb-6 rounded-2xl border border-amber-300/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
+        <i class="fas fa-info-circle mr-1"></i>
+        <strong>Review before sending.</strong> AI translations help you communicate faster — they are not certified legal interpretations. Always verify meaning before client-facing use.
+    </div>
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-4 sm:p-5 mb-4 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">From</label>
+                <select id="tr-source-lang" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></select>
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="button" id="tr-swap-langs" class="mb-0.5 w-10 h-10 rounded-xl border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition flex items-center justify-center flex-shrink-0" title="Swap languages"><i class="fas fa-right-left text-sm"></i></button>
+                <div class="flex-1">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">To</label>
+                    <select id="tr-target-lang" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Content type</label>
+                <select id="tr-content-type" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Tone</label>
+                <select id="tr-tone" class="w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                    <option value="conversational">Warm &amp; conversational</option>
+                    <option value="simple">Plain language (simple)</option>
+                    <option value="formal">Formal / professional</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Quick target languages</div>
+            <div id="tr-favorite-chips" class="flex flex-wrap gap-1.5"></div>
+            <p class="text-[10px] text-gray-400 mt-1 m-0">Set your default in <strong>My Profile → Voice &amp; Links</strong>.</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="flex flex-col min-h-[320px]">
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-semibold text-[#002B5C] dark:text-white">Original</label>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="tr-load-sample" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Load sample</button>
+                    <button type="button" onclick="copyTranslationSource()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Copy</button>
+                    <button type="button" onclick="clearTranslationSource()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 hover:border-red-400 hover:text-red-500 transition" title="Clear original text and uploaded file">Clear</button>
+                </div>
+            </div>
+            <textarea id="tr-source-text" rows="14" placeholder="Paste client email, text message, or letter here…" class="flex-1 w-full p-4 rounded-2xl border-2 border-[#00A89D]/40 bg-white dark:bg-gray-800 text-sm leading-relaxed resize-y min-h-[220px] focus:ring-4 focus:ring-[#00A89D]/20 focus:outline-none"></textarea>
+            <div id="tr-char-count" class="text-[11px] text-gray-400 mt-1">0 / 50,000 characters</div>
+            <div id="tr-upload-area" class="mt-3 border-2 border-dashed border-[#00A89D]/50 rounded-2xl p-5 text-center hover:border-[#F15A29] hover:bg-[#F15A29]/5 transition-all cursor-pointer group">
+                <i class="fas fa-cloud-upload-alt text-2xl text-[#00A89D] mb-2 group-hover:scale-105 transition-transform"></i>
+                <p class="text-sm font-medium m-0">Drop a file to load text here</p>
+                <p class="text-[11px] text-gray-500 mt-1 m-0">PDF or .txt — full document translated section by section</p>
+                <label for="tr-file-input" class="inline-flex items-center px-4 py-1.5 mt-2 bg-[#00A89D] text-white rounded-xl cursor-pointer hover:bg-[#008F85] text-xs transition" onclick="event.stopImmediatePropagation()"><i class="fas fa-folder-open mr-1.5"></i>Browse</label>
+                <input type="file" id="tr-file-input" accept=".pdf,.txt,.text" class="hidden">
+                <p id="tr-file-name" class="mt-2 text-xs font-medium text-[#00A89D] hidden"></p>
+            </div>
+            <button type="button" id="tr-remove-file" class="text-red-500 text-xs mt-1 hidden">Remove file</button>
+        </div>
+        <div class="flex flex-col min-h-[320px]">
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-semibold text-[#002B5C] dark:text-white">Translation</label>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="copyTranslationResult()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Copy</button>
+                    <button type="button" onclick="clearTranslationResult()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 hover:border-red-400 hover:text-red-500 transition" title="Clear translation output">Clear</button>
+                    <button type="button" onclick="downloadTranslationResult()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Download .txt</button>
+                    <button type="button" onclick="downloadTranslationPdf()" class="text-[11px] px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] transition">Download PDF</button>
+                    <button type="button" id="tr-qa-btn" class="text-[11px] px-2.5 py-1 rounded-lg border border-amber-400/60 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition"><i class="fas fa-shield-alt"></i> Check meaning</button>
+                    <button type="button" onclick="saveTranslationToLibrary()" class="text-[11px] px-2.5 py-1 rounded-lg border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Save</button>
+                </div>
+            </div>
+            <textarea id="tr-result-text" rows="14" readonly placeholder="Your translation will appear here…" class="flex-1 w-full p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm leading-relaxed resize-y min-h-[220px]"></textarea>
+            <div id="tr-qa-panel" class="hidden mt-3 p-4 rounded-2xl border border-amber-300/50 bg-amber-50/50 dark:bg-amber-900/10"></div>
+            <div id="tr-progress" class="hidden mt-2">
+                <div class="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden"><div class="h-full w-1/2 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] animate-pulse"></div></div>
+                <p id="tr-progress-text" class="text-[11px] text-gray-500 mt-1 m-0"></p>
+            </div>
+            <p id="tr-status" class="text-xs text-gray-500 mt-2 m-0"></p>
+        </div>
+    </div>
+    <div class="text-center mb-6">
+        <button type="button" id="tr-translate-btn" class="w-full sm:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-10 py-4 rounded-full hover:opacity-90 transition-all font-bold text-lg shadow-xl inline-flex items-center justify-center gap-2"><i class="fas fa-language"></i><span>Translate</span></button>
+    </div>
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+        <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">This session <span class="font-normal normal-case">(not saved unless you click Save)</span></div>
+        <div id="tr-session-history" class="flex flex-col gap-1.5 max-w-xl"></div>
+    </div>
+</section>
 
         <section id="underwriting-search" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
@@ -6455,21 +6552,67 @@
 
       <!-- Card 1: Branding & Contact -->
       <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
-        <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
-          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-user text-[#00A89D]"></i></span> Branding & Contact Info (auto-saved to profile)
+        <h3 class="text-xl font-bold mb-2 text-[#002B5C] dark:text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-id-card text-[#00A89D]"></i></span> Agent Branding &amp; Signature
         </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 ml-10">Unlike the LO tool, your brokerage may already append an email signature server-side. Control what this generator adds below.</p>
+
+        <div class="mb-5 p-4 rounded-2xl border border-amber-200/60 bg-amber-50/40 dark:bg-amber-900/10 dark:border-amber-800/40 space-y-3">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" id="nl-include-signature" class="mt-1 accent-[#00A89D]" checked>
+            <span>
+              <span class="text-sm font-semibold text-[#002B5C] dark:text-white">Include agent signature block</span>
+              <span class="block text-[11px] text-gray-500 mt-0.5">Headshot, logo, name, phone, and email in the final HTML. Uncheck if your CRM/broker already attaches your signature.</span>
+            </span>
+          </label>
+          <label class="flex items-start gap-2.5 cursor-pointer" id="nl-include-social-wrap">
+            <input type="checkbox" id="nl-include-social" class="mt-1 accent-[#00A89D]" checked>
+            <span>
+              <span class="text-sm font-semibold text-[#002B5C] dark:text-white">Include social media links</span>
+              <span class="block text-[11px] text-gray-500 mt-0.5">Clickable links from your profile appear at the bottom of the newsletter.</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Your Name</label>
-            <input type="text" id="nl-name" placeholder="Your Name" 
+            <input type="text" id="nl-name" placeholder="Your Name"
                    class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Email Address</label>
-            <input type="email" id="nl-email" placeholder="you@yourteam.com" 
+            <input type="email" id="nl-email" placeholder="you@yourteam.com"
                    class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50">
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Company / Team Name</label>
+            <input type="text" id="brand-company" placeholder="The Smith Team"
+                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tagline (optional)</label>
+            <input type="text" id="brand-tagline" placeholder="Your Trusted Local Real Estate Experts"
+                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Phone (signature line)</label>
+            <input type="text" id="brand-contact" placeholder="555-123-4567"
+                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Company Logo URL</label>
+            <input type="url" id="brand-logo-data" placeholder="https://yourteam.com/logo.png"
+                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Professional Headshot URL</label>
+            <input type="url" id="brand-headshot" placeholder="https://yourteam.com/photos/you.jpg"
+                   class="w-full p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/30">
+            <p class="text-[10px] text-gray-500 mt-1">Set once in <strong>My Profile → Professional Branding</strong> — synced here automatically.</p>
+          </div>
         </div>
+        <div id="nl-brand-preview" class="hidden p-4 rounded-2xl border border-dashed border-[#00A89D]/40 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300"></div>
       </div>
 
       <!-- Card 2: Audience + Market + Tone + Length + Title -->
@@ -7107,60 +7250,11 @@ window.toggleSupportingSection = function(sectionId) {
     });
   }
 
-  // ==================== SAVED IDEAS SYSTEM (Toggle Support + Icon Sync) ====================
-  const STORAGE_KEY = 'socialSavedIdeas';
-
-  function getSavedIdeas() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    } catch (e) {
-      return [];
-    }
-  }
+  // ==================== SAVED IDEAS — toggle/count/library in saved-items-library.js ====================
 
   function isSaved(title) {
-    return getSavedIdeas().some(item => item.title === title);
-  }
-
-  function toggleSaveIdea(title, content, element, customType = null) {
-    const saved = getSavedIdeas();
-    const index = saved.findIndex(item => item.title === title);
-
-    if (index !== -1) {
-      saved.splice(index, 1);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-      updateSavedCount();
-      if (element) element.innerHTML = '<i class="far fa-bookmark"></i>';
-    } else {
-      const itemType = customType || 'social';
-      saved.push({ 
-        title, 
-        content: content || title, 
-        savedAt: new Date().toISOString(), 
-        type: itemType 
-      });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-      updateSavedCount();
-      if (element) element.innerHTML = '<i class="fas fa-bookmark"></i>';
-    }
-
-    // Keep generator page list in sync when bookmarking from Strategy view
-    if (typeof window.refreshGeneratorSavedIdeas === 'function') {
-      window.refreshGeneratorSavedIdeas();
-    }
-  }
-
-  // Expose to window so code in other files / suggesters / Value Vault can call it reliably
-  window.toggleSaveIdea = toggleSaveIdea;
-
-  function updateSavedCount() {
-    const savedLength = getSavedIdeas().length;
-
-    const socialCount = document.getElementById('social-saved-count');
-    if (socialCount) socialCount.textContent = savedLength;
-
-    const globalCount = document.getElementById('global-saved-count');
-    if (globalCount) globalCount.textContent = savedLength;
+    const saved = typeof window.getSavedIdeas === 'function' ? window.getSavedIdeas() : [];
+    return saved.some(item => item.title === title);
   }
 
   function syncBookmarkIcons() {
@@ -7183,7 +7277,7 @@ window.toggleSupportingSection = function(sectionId) {
 
 
   window.showSocialSavedIdeas = function() {
-    const saved = getSavedIdeas();
+    const saved = typeof window.getSavedIdeas === 'function' ? window.getSavedIdeas() : [];
     const panel = document.createElement('div');
     panel.className = 'fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4';
     panel.innerHTML = `
@@ -7215,10 +7309,10 @@ window.toggleSupportingSection = function(sectionId) {
   };
 
   window.removeSocialSavedIdea = function(title, element) {
-    let saved = getSavedIdeas();
+    let saved = typeof window.getSavedIdeas === 'function' ? window.getSavedIdeas() : [];
     saved = saved.filter(item => item.title !== title);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-    updateSavedCount();
+    localStorage.setItem('socialSavedIdeas', JSON.stringify(saved));
+    if (typeof window.updateSavedCount === 'function') window.updateSavedCount();
     if (element && element.closest('.border')) element.closest('.border').remove();
     syncBookmarkIcons();
 
@@ -13230,422 +13324,13 @@ window.toggleSupportingSection = function(sectionId) {
   });
 
 
-  // =====================================================
-  // NEW UNIFIED SAVED ITEMS LIBRARY (accessible from anywhere)
-  // =====================================================
-
-  window.clearAllSavedItems = function(btn) {
-    if (!confirm('Clear ALL saved items from your vault? This cannot be undone and will remove plans, newsletters, scripts, social ideas, etc.')) return;
-
-    try {
-      localStorage.removeItem('socialSavedIdeas');
-      // Defensive cleanup for any legacy per-tool keys
-      localStorage.removeItem('savedBusinessPlan');
-      localStorage.removeItem('savedWeeklyPlan');
-    } catch (e) {}
-
-    // Close the current library modal
-    const modal = btn ? btn.closest('.fixed') || btn.closest('#my-saved-items-library') : document.getElementById('my-saved-items-library');
-    if (modal) modal.remove();
-
-    // Update global saved count badges if they exist
-    document.querySelectorAll('#global-saved-count, #social-saved-count').forEach(el => {
-      if (el) el.textContent = '0';
-    });
-
-    if (typeof window.updateSavedCount === 'function') {
-      try { window.updateSavedCount(); } catch (e) {}
-    }
-
-    if (window.showToast) {
-      window.showToast('All saved items cleared.');
-    }
-  };
-
-  window.showSavedItemsLibrary = function(initialFilter = 'all') {
-    // Aggressive cleanup: remove any prior library panels, viewers, or legacy saved modals.
-    // Prevents items from visually overlapping/stacking when opening My Saved Items multiple times
-    // or saving while the library is already visible.
-    document.querySelectorAll('.saved-library-panel, .saved-viewer-modal, #my-saved-items-library').forEach(el => el.remove());
-    // Also remove any other high-z fixed "saved" overlays that may have been created by legacy paths
-    document.querySelectorAll('.fixed.inset-0').forEach(el => {
-      if (el.textContent && (el.textContent.includes('My Saved') || el.textContent.includes('Vault') || el.className.includes('saved'))) {
-        // only remove if it looks like a saved items UI, leave other modals alone
-        if (el.querySelector('#saved-items-content') || el.querySelector('.saved-library-panel')) el.remove();
-      }
-    });
-
-    const allItems = getSavedIdeas().map(item => ({
-      ...item,
-      type: item.type || 'social'   // backward compatibility
-    }));
-
-    const panel = document.createElement('div');
-    panel.id = 'my-saved-items-library';
-    panel.className = 'fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 saved-library-panel';
-
-    // Close modal when clicking on the backdrop (outside the content)
-    panel.addEventListener('click', function(e) {
-      if (e.target === panel) {
-        panel.remove();
-      }
-    });
-
-    function renderItems(filter = 'all', searchTerm = '') {
-      let filtered = allItems;
-
-      if (filter !== 'all') {
-        filtered = filtered.filter(item => item.type === filter);
-      }
-
-      if (searchTerm) {
-        const q = searchTerm.toLowerCase();
-        filtered = filtered.filter(item =>
-          (item.title || '').toLowerCase().includes(q) ||
-          (item.content || '').toLowerCase().includes(q)
-        );
-      }
-
-      if (filtered.length === 0) {
-        return `
-          <div class="flex flex-col items-center justify-center py-16 text-center">
-            <i class="fas fa-bookmark text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-            <p class="text-lg font-medium text-gray-600 dark:text-gray-300">Your library is empty</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-sm">
-              Save useful social posts, sales scripts, mindset principles, partner strategies, books, or custom situations from anywhere in the app.<br>
-              They’ll all appear here.
-            </p>
-          </div>
-        `;
-      }
-
-      return filtered.map((item, index) => {
-        const typeLabel = item.type === 'script' ? 'Sales Script' : 
-                          item.type === 'custom' ? 'Custom Situation' : 
-                          item.type === 'mindset' ? 'Mindset' : 
-                          item.type === 'partner' ? 'Partner Strategy' : 
-                          item.type === 'book' ? 'Book' : 
-                          item.type === 'process' ? 'Transaction Process' : 
-                          item.type === 'nurture' ? 'Nurturing Strategy' : 
-                          item.type === 'postclosing' ? 'Post-Closing Retention' : 
-                          item.type === 'popby' ? 'Pop-By Idea' : 
-                          item.type === 'plan' ? ( (item.title || '').toLowerCase().includes('weekly') ? 'Weekly Win Plan' : '2026 Business Plan' ) : 
-                          item.type === 'equity-opportunity' ? 'Equity Opportunity' : 
-                          item.type === 'equity-scan' ? 'Full Equity Scan' : 
-                          item.type === 'transaction coordination' ? 'Transaction Coordination' : 
-                          item.type === 'newsletter' ? 'Newsletter (Outlook)' : 
-                          item.type === 'blog' ? 'Blog Bundle' : 
-                          item.type === 'coach' ? 'AI Coach Response' : 'Social';
-        const typeColor = item.type === 'script' ? 'bg-orange-100 text-orange-700' : 
-                          item.type === 'custom' ? 'bg-blue-100 text-blue-700' : 
-                          item.type === 'mindset' ? 'bg-[#00A89D]/10 text-[#00A89D]' : 
-                          item.type === 'partner' ? 'bg-purple-100 text-purple-700' : 
-                          item.type === 'book' ? 'bg-amber-100 text-amber-700' : 
-                          item.type === 'process' ? 'bg-emerald-100 text-emerald-700' : 
-                          item.type === 'nurture' ? 'bg-violet-100 text-violet-700' : 
-                          item.type === 'postclosing' ? 'bg-[#00A89D]/10 text-[#00A89D]' : 
-                          item.type === 'popby' ? 'bg-[#00A89D]/10 text-[#00A89D]' : 
-                          item.type === 'plan' ? 'bg-[#00A89D]/10 text-[#00A89D]' : 
-                          item.type === 'equity-opportunity' ? 'bg-green-100 text-green-700' : 
-                          item.type === 'equity-scan' ? 'bg-emerald-100 text-emerald-700' : 
-                          item.type === 'transaction coordination' ? 'bg-violet-100 text-violet-700' : 
-                          item.type === 'newsletter' ? 'bg-[#00A89D]/10 text-[#00A89D]' : 
-                          item.type === 'blog' ? 'bg-[#00A89D]/10 text-[#00A89D]' : 'bg-teal-100 text-teal-700';
-
-        let shortContent = (item.content || '').substring(0, 180);
-        if (item.type === 'newsletter') {
-          // For newsletters in the list, strip tags for readable preview (full HTML shown on View in iframe)
-          shortContent = (item.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').substring(0, 180);
-        }
-        if (item.type === 'equity-opportunity' || item.type === 'equity-scan') {
-          // For equity saves (now HTML), extract readable text preview
-          shortContent = (item.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').substring(0, 140) + '...';
-        }
-        if (item.type === 'plan' || item.type === 'script' || item.type === 'social' || item.type === 'transaction coordination' || item.type === 'coach' || item.type === 'postclosing' || item.type === 'blog' || item.type === 'newsletter') {
-          // For rich HTML saves, strip for clean list preview
-          shortContent = (item.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').substring(0, 160) + '...';
-        }
-
-        return `
-          <div class="group border border-gray-200 dark:border-gray-700 rounded-3xl p-5 bg-white dark:bg-gray-800 hover:border-[#00A89D]/40 hover:shadow-md transition-all">
-            <div class="flex justify-between items-start gap-4">
-              <div class="flex-1 min-w-0">
-                <div class="mb-1">
-                  <span class="inline-block px-2 py-0.5 text-[10px] font-medium rounded-2xl ${typeColor} max-w-full break-words">${typeLabel}</span>
-                </div>
-                <strong class="text-base font-semibold leading-tight truncate block">${item.title}</strong>
-                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">${shortContent}</p>
-              </div>
-              <div class="flex flex-col gap-1.5 flex-shrink-0">
-                <button onclick="viewSavedItem(${index}, this)" 
-                        class="text-xs px-3.5 py-1.5 rounded-2xl border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                  View
-                </button>
-                <button onclick="deleteSavedItemFromLibrary(${index}, this)" 
-                        class="text-xs px-3.5 py-1.5 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    panel.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
-        <!-- Premium Header with sticky close treatment -->
-        <div class="sticky top-0 z-10 flex justify-between items-center p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase">Vault</div>
-            <h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">My Saved Items <span class="text-sm font-normal text-gray-500">(${allItems.length})</span></h3>
-          </div>
-          <button class="text-3xl leading-none text-gray-400 hover:text-red-500 transition w-10 h-10 flex items-center justify-center" onclick="this.closest('.fixed').remove()">&times;</button>
-        </div>
-
-        <!-- Filters -->
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-2 items-center bg-gray-50 dark:bg-gray-800/50">
-          <div class="flex gap-1.5 overflow-x-auto flex-nowrap pb-1" style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
-            <button data-filter="all" class="filter-btn active px-3 py-1 text-xs rounded-full bg-[#00A89D] text-white font-medium flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-layer-group"></i> <span>All</span>
-            </button>
-            <button data-filter="social" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-share-alt text-[#00A89D]"></i> <span>Social</span>
-            </button>
-            <button data-filter="script" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-comment-dots text-[#00A89D]"></i> <span>Scripts</span>
-            </button>
-            <button data-filter="mindset" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-brain text-[#00A89D]"></i> <span>Mindset</span>
-            </button>
-            <button data-filter="partner" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-handshake text-purple-600"></i> <span>Partners</span>
-            </button>
-            <button data-filter="book" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-book text-amber-600"></i> <span>Books</span>
-            </button>
-            <button data-filter="plan" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-chart-line text-[#00A89D]"></i> <span>Plans</span>
-            </button>
-            <button data-filter="blog" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-pen-fancy text-[#00A89D]"></i> <span>Blogs</span>
-            </button>
-            <button data-filter="newsletter" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-envelope text-[#00A89D]"></i> <span>Newsletters</span>
-            </button>
-            <button data-filter="custom" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-edit text-[#002B5C]"></i> <span>Custom</span>
-            </button>
-          </div>
-
-          <div class="flex-1"></div>
-          
-          <div class="relative w-64">
-            <i class="fas fa-search absolute left-3.5 top-3 text-gray-400 text-sm"></i>
-            <input type="text" id="saved-items-search" placeholder="Search saved items..." 
-                   class="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:border-[#00A89D]">
-          </div>
-        </div>
-
-        <!-- Content -->
-        <div class="p-6 overflow-y-auto flex-1" id="saved-items-content">
-          <div class="flex flex-col gap-4">
-            ${renderItems(initialFilter)}
-          </div>
-        </div>
-
-        <!-- Clear All footer, always at bottom right below the list -->
-        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-white dark:bg-gray-800">
-          <button onclick="clearAllSavedItems(this)" class="text-xs px-4 py-2 rounded-full border border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition font-medium">Clear All</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(panel);
-
-    // Filter buttons
-    panel.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.onclick = () => {
-        panel.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-[#00A89D]', 'text-white'));
-        btn.classList.add('bg-[#00A89D]', 'text-white');
-
-        const filter = btn.dataset.filter;
-        const search = panel.querySelector('#saved-items-search').value;
-        panel.querySelector('#saved-items-content').innerHTML = renderItems(filter, search);
-      };
-    });
-
-    // Search
-    const searchInput = panel.querySelector('#saved-items-search');
-    searchInput.oninput = () => {
-      const activeFilter = panel.querySelector('.filter-btn.bg-\\[\\#00A89D\\]')?.dataset.filter || 'all';
-      panel.querySelector('#saved-items-content').innerHTML = renderItems(activeFilter, searchInput.value);
-    };
-  };
-
-  // View full saved item (especially useful for long scripts)
-  window.copySavedItemText = function(btn) {
-    const text = btn.getAttribute('data-saved-copy-text') || '';
-    const cleanText = text.replace(/&quot;/g, '"').replace(/\\`/g, '`');
-
-    navigator.clipboard.writeText(cleanText).then(() => {
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-      setTimeout(() => {
-        if (btn && btn.isConnected) btn.innerHTML = original;
-      }, 1600);
-    }).catch(() => {
-      // Fallback
-      const textarea = document.createElement('textarea');
-      textarea.value = cleanText;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-      setTimeout(() => {
-        if (btn && btn.isConnected) btn.innerHTML = original;
-      }, 1600);
-    });
-  };
-
-  window.viewSavedItem = function(index, btn) {
-    const allItems = getSavedIdeas().map(item => ({ ...item, type: item.type || 'social' }));
-    const item = allItems[index];
-    if (!item) return;
-
-    // Close any previously open saved item viewer modals. This prevents stacking/overlap
-    // when viewing multiple items (e.g. a blog then a business plan) without closing the previous view.
-    document.querySelectorAll('.saved-viewer-modal').forEach(m => m.remove());
-
-    let contentHTML = item.content || '';
-    let contentWrapperClass = 'p-6 overflow-y-auto flex-1 prose prose-lg dark:prose-invert';
-
-    // For newsletters, render in an iframe with srcdoc so it shows the *exact* Outlook-cleaned version
-    if (item.type === 'newsletter') {
-      contentWrapperClass = 'p-4 overflow-hidden flex-1 bg-gray-100 dark:bg-gray-800';
-      const safeSrcdoc = (item.content || '').replace(/"/g, '&quot;');
-      contentHTML = `
-        <iframe 
-          style="width:100%; height:100%; min-height:500px; border:1px solid #ccc; border-radius:8px; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1);"
-          srcdoc="${safeSrcdoc}"
-        ></iframe>
-      `;
-    }
-
-    // For equity opportunities/scans: use the pre-formatted nice HTML, no prose (which expects markdown), clean container
-    if (item.type === 'equity-opportunity' || item.type === 'equity-scan') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 text-sm';
-      // contentHTML already contains the nice .equity-saved structured div from save
-    }
-
-    // Rich view for transaction coordination scenarios
-    if (item.type === 'transaction coordination') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm';
-      // content is already nice .uw-saved HTML
-    }
-
-    // Rich view for AI coach
-    if (item.type === 'coach') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm';
-    }
-
-    // Rich view for sales scripts (structured card)
-    if (item.type === 'script') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900';
-      // contentHTML already contains .script-saved structured div
-    }
-
-    // For social (generated posts now rich .social-saved; strategy cards are pre-formatted HTML)
-    // Render the HTML content directly without prose (which can add unwanted margins etc.)
-    if (item.type === 'social') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm';
-    }
-
-    // Rich view for business/weekly plans (structured or cleaned HTML)
-    if (item.type === 'plan') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900';
-      // content already wrapped in .plan-saved rich card
-    }
-
-    // Rich view for blog bundle (structured HTML with sections)
-    if (item.type === 'blog') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900';
-      // contentHTML contains .blog-saved
-    }
-
-    // Rich view for post-closing retention (7-day objections, follow-up texts, annual review)
-    if (item.type === 'postclosing') {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm';
-      // content is rich card HTML from the vault modal
-    }
-
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center p-4 saved-viewer-modal';
-    modal.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
-        <!-- Premium header matching other detail viewers -->
-        <div class="sticky top-0 z-10 flex justify-between items-center p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center gap-3">
-            <span class="text-xs px-2.5 py-1 rounded-full ${item.type === 'script' ? 'bg-[#00A89D]/10 text-[#00A89D]' : item.type === 'custom' ? 'bg-blue-500/10 text-blue-600' : item.type === 'mindset' ? 'bg-[#00A89D]/10 text-[#00A89D]' : item.type === 'partner' ? 'bg-purple-100 text-purple-700' : item.type === 'book' ? 'bg-amber-100 text-amber-700' : item.type === 'process' ? 'bg-emerald-100 text-emerald-700' : item.type === 'nurture' ? 'bg-violet-100 text-violet-700' : item.type === 'postclosing' ? 'bg-[#00A89D]/10 text-[#00A89D]' : item.type === 'popby' ? 'bg-[#00A89D]/10 text-[#00A89D]' : item.type === 'plan' ? 'bg-[#00A89D]/10 text-[#00A89D]' : item.type === 'equity-opportunity' ? 'bg-green-100 text-green-700' : item.type === 'equity-scan' ? 'bg-emerald-100 text-emerald-700' : item.type === 'transaction coordination' ? 'bg-violet-100 text-violet-700' : item.type === 'newsletter' ? 'bg-[#00A89D]/10 text-[#00A89D]' : item.type === 'social' ? 'bg-[#00A89D]/10 text-[#00A89D]' : item.type === 'blog' ? 'bg-[#00A89D]/10 text-[#00A89D]' : 'bg-[#00A89D]/10 text-[#00A89D]'}">
-              ${item.type === 'script' ? 'Sales Script' : item.type === 'custom' ? 'Custom Situation' : item.type === 'mindset' ? 'Mindset' : item.type === 'partner' ? 'Partner Strategy' : item.type === 'book' ? 'Book' : item.type === 'process' ? 'Transaction Process' : item.type === 'nurture' ? 'Nurturing Strategy' : item.type === 'postclosing' ? 'Post-Closing Retention' : item.type === 'popby' ? 'Pop-By Idea' : item.type === 'plan' ? ( (item.title || '').toLowerCase().includes('weekly') ? 'Weekly Win Plan' : '2026 Business Plan' ) : item.type === 'equity-opportunity' ? 'Equity Opportunity' : item.type === 'equity-scan' ? 'Full Equity Scan' : item.type === 'transaction coordination' ? 'Transaction Coordination' : item.type === 'newsletter' ? 'Newsletter (Outlook)' : item.type === 'social' ? 'Social Post / Idea' : 'Saved Item'}
-            </span>
-            <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white">${item.title}</h3>
-          </div>
-          <button class="text-3xl leading-none text-gray-400 hover:text-red-500 transition w-9 h-9 flex items-center justify-center" onclick="this.closest('.fixed').remove()">&times;</button>
-        </div>
-        
-        <div class="${contentWrapperClass} custom-modal-scroll">
-          ${contentHTML}
-        </div>
-        
-        <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0 bg-gray-50 dark:bg-gray-800/50">
-          <button data-saved-copy-text="${(item.content || '').replace(/"/g, '&quot;').replace(/`/g, '\\`')}" 
-                  onclick="copySavedItemText(this)"
-                  class="px-4 py-2 text-sm rounded-2xl border border-gray-300 hover:bg-white dark:hover:bg-gray-700 flex items-center gap-2">
-            <i class="fas fa-copy"></i> Copy
-          </button>
-          <button class="px-5 py-2 text-sm rounded-2xl bg-[#002B5C] text-white hover:bg-[#001f3f]" onclick="this.closest('.fixed').remove()">Close</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  };
-
-  window.deleteSavedItemFromLibrary = function(index, btn) {
-    if (!confirm('Delete this saved item?')) return;
-
-    let saved = getSavedIdeas();
-    saved.splice(index, 1);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-
-    // Refresh the library
-    const libraryModal = btn.closest('.fixed');
-    if (libraryModal) libraryModal.remove();
-
-    showSavedItemsLibrary();
-    updateSavedCount();
-  };
-
-  // =====================================================
-  // Consistent Save Feedback Helper (used across tools)
-  // =====================================================
-  window.showSavedFeedback = function(message = 'Saved to My Saved Items') {
-    if (typeof window.showToast === 'function') {
-      window.showToast(message);
-    }
-    // Also trigger count update if possible
-    if (typeof window.updateSavedCount === 'function') {
-      try { window.updateSavedCount(); } catch(e) {}
-    }
-  };
+  // My Saved Items library → js/features/saved-items-library.js
 
   // makeSaveable() legacy injection removed — all modern panels and pillars now ship with explicit Copy + Save buttons using the unified toggleSaveIdea(text, 'social')
 
   // Initialize
   setTimeout(() => {
-    updateSavedCount();
+    if (typeof window.updateSavedCount === 'function') window.updateSavedCount();
     setTimeout(syncBookmarkIcons, 50);
   }, 800);
 
@@ -13654,7 +13339,7 @@ window.toggleSupportingSection = function(sectionId) {
   if (socialSection) {
     const observer = new MutationObserver(() => {
       if (!socialSection.classList.contains('hidden')) {
-        updateSavedCount();
+        if (typeof window.updateSavedCount === 'function') window.updateSavedCount();
       }
     });
     observer.observe(socialSection, { attributes: true, attributeFilter: ['class'] });
@@ -13767,9 +13452,12 @@ window.toggleSupportingSection = function(sectionId) {
 <script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v245"></script>
 <script src="js/features/blog-creator.js?v=20260623-realtor-v245"></script>
 <script src="js/features/legacy-helpers.js?v=20260623-realtor-v245"></script>
-<script src="js/features/newsletter-generator.js?v=20260623-realtor-v245"></script>
+<script src="js/features/saved-items-library.js?v=20260702-realtor-v252"></script>
+<script src="js/features/newsletter-generator.js?v=20260702-realtor-v251"></script>
 <script src="js/features/ai-chat.js?v=20260623-realtor-v245"></script>
 <script src="js/features/underwriting.js?v=20260623-realtor-v245"></script>
+<script>window.TRANSLATION_COACH_VARIANT = 'realtor';</script>
+<script src="js/features/translation-tool.js?v=20260702-tr-v264"></script>
 <script src="js/features/value-vault.js?v=20260623-realtor-v245"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
@@ -14958,6 +14646,11 @@ if (document.readyState === 'loading') {
                         <input type="url" id="profile-logo-url" placeholder="https://yourteam.com/logo.png" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
                         <p class="text-[10px] text-gray-500 mt-0.5">Transparent PNG recommended, ~300px wide. Used in newsletter headers &amp; materials.</p>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Professional Headshot URL (https link)</label>
+                        <input type="url" id="profile-headshot-url" placeholder="https://yourteam.com/photos/you.jpg" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <p class="text-[10px] text-gray-500 mt-0.5">Square crop works best. Shown in your newsletter agent signature when enabled.</p>
+                    </div>
                 </div>
 
                 <div class="mt-4">
@@ -15213,6 +14906,36 @@ if (document.readyState === 'loading') {
                             </div>
                         </div>
 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-1"><i class="fas fa-language text-[#00A89D] mr-1"></i>Default translation language <span class="text-gray-400 font-normal text-xs">Client Translation tool</span></label>
+                                <select id="profile-translation-default" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                                    <option value="es">Spanish</option>
+                                    <option value="vi">Vietnamese</option>
+                                    <option value="zh">Chinese (Simplified)</option>
+                                    <option value="ar">Arabic</option>
+                                    <option value="pt">Portuguese</option>
+                                    <option value="fr">French</option>
+                                    <option value="ko">Korean</option>
+                                    <option value="ru">Russian</option>
+                                    <option value="ht">Haitian Creole</option>
+                                    <option value="tl">Tagalog</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Quick-pick languages <span class="text-gray-400 font-normal text-xs">chips in Client Translation</span></label>
+                                <div class="flex flex-wrap gap-2 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                                    <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="es" checked> Spanish</label>
+                                    <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="vi"> Vietnamese</label>
+                                    <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="zh"> Chinese</label>
+                                    <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="ar"> Arabic</label>
+                                    <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="pt"> Portuguese</label>
+                                    <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="tl"> Tagalog</label>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Voice Personality -->
                         <div>
                             <div class="flex items-center justify-between mb-1">
@@ -15268,7 +14991,7 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260623-realtor-v245"></script>
+<script src="js/features/user-profile.js?v=20260702-realtor-v252"></script>
 <script src="js/features/onboarding-coach.js?v=20260623-realtor-v245"></script>
 
 <!-- ===================================================== -->
@@ -15419,7 +15142,7 @@ if (document.readyState === 'loading') {
   Agent Sales Coach • v… • … • Render
 </div>
 <script src="js/features/section-bottom-banners.js?v=20260623-realtor-v245"></script>
-<script src="js/app-version.js?v=20260623-realtor-v245"></script>
+<script src="js/app-version.js?v=20260702-realtor-v246"></script>
 
 </body>
 </html>

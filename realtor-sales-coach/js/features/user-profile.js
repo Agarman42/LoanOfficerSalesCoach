@@ -102,7 +102,10 @@
       formats: Array.from(document.querySelectorAll('.profile-format:checked')).map((c) => c.value),
       voiceTraits: Array.from(document.querySelectorAll('.profile-voice:checked')).map((c) => c.value),
       partnerTypes: Array.from(document.querySelectorAll('.profile-partner:checked')).map((c) => c.value),
-      partnerTypesOther: document.getElementById('profile-partner-other')?.value.trim() || ''
+      partnerTypesOther: document.getElementById('profile-partner-other')?.value.trim() || '',
+      translationDefaultTarget: document.getElementById('profile-translation-default')?.value || 'es',
+      translationFavoriteLanguages: Array.from(document.querySelectorAll('.profile-translation-fav:checked')).map((c) => c.value),
+      headshotUrl: document.getElementById('profile-headshot-url')?.value.trim() || ''
     };
   }
 
@@ -171,8 +174,14 @@
         cancelBtn = document.getElementById('cancel-profile');
         saveBtn = document.getElementById('save-profile');
 
-        if (!modal || !openBtn) {
-            console.warn('[Profile Modal] Required elements not found');
+        if (!openBtn) {
+            console.warn('[Profile Modal] open-profile-btn not found');
+            paintHeaderProfileBadge();
+            return;
+        }
+
+        if (!modal) {
+            paintHeaderProfileBadge();
             return;
         }
 
@@ -271,7 +280,7 @@
             return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
         }
 
-        const fields = ['name', 'email', 'location', 'years', 'team', 'monthly-units', 'monthly-goal', 'income', 'focus', 'hours', 'family', 'personality', 'tone', 'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other', 'company-name', 'tagline', 'phone', 'logo-url'];
+        const fields = ['name', 'email', 'location', 'years', 'team', 'monthly-units', 'monthly-goal', 'income', 'focus', 'hours', 'family', 'personality', 'tone', 'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other', 'company-name', 'tagline', 'phone', 'logo-url', 'headshot-url'];
         
         fields.forEach(field => {
             const el = document.getElementById('profile-' + field);
@@ -330,6 +339,9 @@
         const logoEl = document.getElementById('profile-logo-url');
         if (logoEl) logoEl.value = profile.logoUrl || profile['logo-url'] || '';
 
+        const headshotEl = document.getElementById('profile-headshot-url');
+        if (headshotEl) headshotEl.value = profile.headshotUrl || profile['headshot-url'] || '';
+
         // Social links object
         const social = profile.socialLinks || {};
         const socialFields = ['linkedin','facebook','instagram','tiktok','youtube','x'];
@@ -354,6 +366,14 @@
         const partnerOther = document.getElementById('profile-partner-other');
         if (partnerOther) partnerOther.value = profile.partnerTypesOther || '';
 
+        const translationDefault = document.getElementById('profile-translation-default');
+        if (translationDefault) {
+            translationDefault.value = profile.translationDefaultTarget || 'es';
+        }
+        document.querySelectorAll('.profile-translation-fav').forEach((cb) => {
+            cb.checked = profile.translationFavoriteLanguages && profile.translationFavoriteLanguages.includes(cb.value);
+        });
+
         // Show the subtle auto-save status indicator when the form loads
         const statusEl = document.getElementById('profile-save-status');
         if (statusEl) {
@@ -371,6 +391,7 @@
             tagline: document.getElementById('profile-tagline')?.value.trim() || '',
             phone: document.getElementById('profile-phone')?.value.trim() || '',
             logoUrl: document.getElementById('profile-logo-url')?.value.trim() || '',
+            headshotUrl: document.getElementById('profile-headshot-url')?.value.trim() || '',
             socialLinks: {
                 linkedin: document.getElementById('profile-social-linkedin')?.value.trim() || '',
                 facebook: document.getElementById('profile-social-facebook')?.value.trim() || '',
@@ -497,9 +518,29 @@
         });
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initProfileModal);
-    } else {
-        initProfileModal();
+  function paintHeaderProfileBadge() {
+    const profile = typeof window.getUserProfile === 'function'
+      ? window.getUserProfile()
+      : (() => {
+          try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch (e) { return {}; }
+        })();
+    const { score } = getProfileCompleteness(profile);
+    updateHeaderProfileBadge(score);
+  }
+
+  // Paint header badge immediately from localStorage (no modal DOM required)
+  paintHeaderProfileBadge();
+
+  function bootProfileModal() {
+    initProfileModal();
+    if (!document.getElementById('user-profile-modal')) {
+      paintHeaderProfileBadge();
     }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootProfileModal);
+  } else {
+    bootProfileModal();
+  }
 })();
