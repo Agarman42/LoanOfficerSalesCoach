@@ -6516,13 +6516,16 @@
 <!-- Full Updated Weekly Win Plan Section -->
  <!-- NEWSLETTER GENERATOR TOOL -->
 <section id="newsletter-generator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-    <!-- Profile Awareness Banner (consistent with Blog, 2026 Plan, Social) -->
-    <div class="mb-6 flex items-center gap-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 px-5 py-3 text-sm">
-        <i class="fas fa-user-check text-[#00A89D]"></i>
-        <span class="text-gray-700 dark:text-gray-300">
-            Personalized using your profile (name, market, voice). Updates auto-sync from central profile.
-        </span>
-        <button onclick="if (typeof window.syncNewsletterFromProfile === 'function') window.syncNewsletterFromProfile(); else if (typeof syncNewsletterFromProfile === 'function') syncNewsletterFromProfile();" class="ml-auto text-xs px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-medium transition">Sync from Profile</button>
+    <!-- Profile powers branding — no duplicate fields on this form -->
+    <div id="nl-profile-banner" class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 px-5 py-4 text-sm">
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+            <i class="fas fa-user-check text-[#00A89D] mt-0.5 flex-shrink-0"></i>
+            <div class="min-w-0">
+                <div class="font-semibold text-[#002B5C] dark:text-white">Your profile powers this newsletter</div>
+                <p class="text-gray-600 dark:text-gray-400 m-0 mt-0.5 text-xs leading-relaxed">Name, email, market, branding, and social links are read directly from <strong>My Profile</strong> — set them once, use them everywhere. This form is only for edition-specific choices (sections, personal update, topics).</p>
+            </div>
+        </div>
+        <button type="button" onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}" class="flex-shrink-0 text-xs px-4 py-2 rounded-full bg-[#002B5C] hover:bg-black text-white font-semibold transition whitespace-nowrap">Open My Profile →</button>
     </div>
 
     <div class="text-center mb-6">
@@ -6576,7 +6579,7 @@
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Sync your profile first</strong> (name, market, voice, hobbies). The more complete it is, the more the personal sections and tone feel like you wrote them.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Complete your profile once</strong> (name, email, market, branding, voice). Everything else on this page is edition-specific — no need to re-enter contact info.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, hobby, family moment, or Sunday reset — it humanizes everything else.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use Specific Topics / Local Headlines.</strong> Give the AI exact events, stats, or recipes. Generic = lower engagement; hyper-local and timely = shares and replies.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pick a sustainable cadence</strong> (monthly is fine). Use the generator every time so the voice and mix stay consistent. Block the send date in your Weekly Win Plan.</span></div>
@@ -6593,19 +6596,34 @@
     <!-- Premium Form Cards (matching Blog Creator / Social Post / 2026 Plan) -->
     <div class="space-y-8 mb-12">
 
-      <!-- Card 1: Signature & Contact (branding from Profile) -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
+      <!-- Card 1: Profile branding (read-only) + signature options -->
+      <div id="nl-profile-status-card" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
         <h3 class="text-xl font-bold mb-2 text-[#002B5C] dark:text-white flex items-center gap-2">
-          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-id-card text-[#00A89D]"></i></span> Signature &amp; Contact
+          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-id-card text-[#00A89D]"></i></span> Your Branding <span class="text-xs font-normal text-gray-400">from Profile</span>
         </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 ml-10">Team name, logo, headshot, phone, tagline, and social links live in <strong>My Profile</strong> — synced automatically. Your brokerage may also append a signature server-side; control what this generator adds below.</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 ml-10">Contact info and visual branding are pulled live from <strong>My Profile</strong> — not duplicated here. Update your profile anytime; the next generate uses the latest details.</p>
 
-        <div class="mb-5 p-4 rounded-2xl border border-amber-200/60 bg-amber-50/40 dark:bg-amber-900/10 dark:border-amber-800/40 space-y-3">
+        <div id="nl-profile-status-warning" class="hidden mb-4 p-4 rounded-2xl border border-amber-300/70 bg-amber-50/80 dark:bg-amber-900/20 dark:border-amber-700/50">
+          <p class="text-sm text-amber-900 dark:text-amber-100 m-0 mb-3"><i class="fas fa-exclamation-circle mr-1"></i> <span id="nl-profile-status-warning-text">Add your name and email in My Profile before generating.</span></p>
+          <button type="button" onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}" class="text-xs px-4 py-2 rounded-full bg-[#002B5C] hover:bg-black text-white font-semibold transition">Complete My Profile →</button>
+        </div>
+
+        <div class="mb-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span id="nl-profile-status-badge" class="text-[10px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 rounded-full bg-[#00A89D]/15 text-[#00A89D]">Profile linked</span>
+          </div>
+          <div id="nl-profile-status-summary" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700 dark:text-gray-300">
+            <!-- Populated by JS from profile -->
+          </div>
+        </div>
+
+        <div class="mb-4 p-4 rounded-2xl border border-amber-200/60 bg-amber-50/40 dark:bg-amber-900/10 dark:border-amber-800/40 space-y-3">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 m-0">This edition only</p>
           <label class="flex items-start gap-2.5 cursor-pointer">
             <input type="checkbox" id="nl-include-signature" class="mt-1 accent-[#00A89D]" checked>
             <span>
               <span class="text-sm font-semibold text-[#002B5C] dark:text-white">Include agent signature block</span>
-              <span class="block text-[11px] text-gray-500 mt-0.5">Headshot, logo, name, phone, and email in the final HTML. Uncheck if your CRM/broker already attaches your signature.</span>
+              <span class="block text-[11px] text-gray-500 mt-0.5">Headshot, logo, name, phone, and email from your profile. Uncheck if your CRM/broker already attaches your signature.</span>
             </span>
           </label>
           <label class="flex items-start gap-2.5 cursor-pointer" id="nl-include-social-wrap">
@@ -6617,31 +6635,7 @@
           </label>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Your Name</label>
-            <input type="text" id="nl-name" placeholder="Your Name"
-                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Email Address</label>
-            <input type="email" id="nl-email" placeholder="you@yourteam.com"
-                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50">
-          </div>
-        </div>
-
-        <input type="hidden" id="brand-company">
-        <input type="hidden" id="brand-tagline">
-        <input type="hidden" id="brand-contact">
-        <input type="hidden" id="brand-logo-data">
-        <input type="hidden" id="brand-headshot">
-
-        <div id="nl-brand-preview" class="hidden p-4 rounded-2xl border border-dashed border-[#00A89D]/40 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 mb-4"></div>
-
-        <div class="flex flex-wrap items-center gap-3">
-          <button type="button" onclick="if (typeof window.syncNewsletterFromProfile === 'function') window.syncNewsletterFromProfile();" class="text-xs px-4 py-2 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold transition">Sync from Profile</button>
-          <button type="button" onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}" class="text-xs px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] font-medium transition">Edit branding in Profile →</button>
-        </div>
+        <div id="nl-brand-preview" class="hidden p-4 rounded-2xl border border-dashed border-[#00A89D]/40 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300"></div>
       </div>
 
       <!-- Card 2: Audience + Market + Tone + Length + Title -->
@@ -6649,6 +6643,7 @@
         <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-bullseye text-[#00A89D]"></i></span> Audience, Market & Style
         </h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 -mt-2">Local market comes from your profile (<span id="nl-profile-market-inline" class="font-medium text-[#002B5C] dark:text-white">—</span>). <button type="button" onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}" class="text-[#00A89D] underline hover:text-[#F15A29] font-medium">Update in Profile</button></p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
           <div>
             <label class="block text-lg font-semibold text-[#00A89D] mb-3">Audience Focus</label>
@@ -6660,8 +6655,8 @@
             </select>
           </div>
           <div>
-            <label class="block text-lg font-semibold text-[#00A89D] mb-3">Your Local Market</label>
-            <input type="text" id="nl-location" value="Fort Wayne, Indiana" 
+            <label class="block text-lg font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional)</label>
+            <input type="text" id="nl-title" placeholder="e.g., Keys &amp; Community | January 2026"
                    class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50">
           </div>
         </div>
@@ -6684,11 +6679,6 @@
               <option value="long">Long (~800–1,000+ words)</option>
             </select>
           </div>
-        </div>
-        <div>
-          <label class="block text-lg font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional)</label>
-          <input type="text" id="nl-title" placeholder="e.g., Keys &amp; Community | January 2026"
-                 class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50">
         </div>
       </div>
 
@@ -13736,7 +13726,7 @@ window.toggleSupportingSection = function(sectionId) {
 <script src="js/data/newsletter-dad-jokes.js?v=20260702-realtor-v253"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260702-realtor-v253"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260702-realtor-v253"></script>
-<script src="js/features/newsletter-generator.js?v=20260702-realtor-v258"></script>
+<script src="js/features/newsletter-generator.js?v=20260702-realtor-v260"></script>
 <script src="js/features/ai-chat.js?v=20260623-realtor-v245"></script>
 <script src="js/features/underwriting.js?v=20260623-realtor-v245"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'realtor';</script>

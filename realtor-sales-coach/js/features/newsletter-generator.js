@@ -1270,19 +1270,16 @@ if (!window._nlEscListener) {
   window._nlEscListener = true;
 }
 
-// === PERSISTENCE SETUP ===
+// === PERSISTENCE SETUP (edition-specific only — branding/contact from profile) ===
 const persistentFields = [
-    'nl-audience', 'nl-tone', 'nl-location', 'nl-title', 'nl-length',
-    'nl-name',
-    'nl-email',
+    'nl-audience', 'nl-tone', 'nl-title', 'nl-length',
     'nl-blog-url', 'nl-blog-title',
     'nl-include-blog',
     'nl-include-referral',
     'nl-personal-photo',
     'nl-personal-video',
     'nl-personal-photo-size',
-    'nl-personal-video-size',
-    'brand-company', 'brand-tagline', 'brand-contact', 'brand-logo-data', 'brand-headshot'
+    'nl-personal-video-size'
 ];
 
 const SOCIAL_LINK_CONFIG = [
@@ -1302,22 +1299,44 @@ function escBrandingText(str) {
     return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function getAgentBrandingContext() {
+function getNewsletterProfileContext() {
     const profile = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
+    const social = profile.socialLinks || {};
+    return {
+        name: (profile.name || '').trim(),
+        email: (profile.email || profile.workEmail || '').trim(),
+        location: (profile.location || profile.localArea || profile.market || '').trim(),
+        company: (profile.companyName || '').trim(),
+        tagline: (profile.tagline || '').trim(),
+        phone: (profile.phone || '').trim(),
+        logoUrl: (profile.logoUrl || '').trim(),
+        headshotUrl: (profile.headshotUrl || '').trim(),
+        social,
+        socialCount: SOCIAL_LINK_CONFIG.filter((s) => social[s.key] && String(social[s.key]).trim()).length
+    };
+}
+
+function getNewsletterLocation() {
+    const ctx = getNewsletterProfileContext();
+    return ctx.location || 'your local market';
+}
+
+function getAgentBrandingContext() {
+    const ctx = getNewsletterProfileContext();
     const includeSignature = document.getElementById('nl-include-signature')?.checked !== false;
     const includeSocial = document.getElementById('nl-include-social')?.checked !== false;
 
     return {
         includeSignature,
         includeSocial,
-        name: (document.getElementById('nl-name')?.value || '').trim() || profile.name || '',
-        email: (document.getElementById('nl-email')?.value || '').trim() || profile.email || '',
-        company: (document.getElementById('brand-company')?.value || '').trim() || profile.companyName || '',
-        tagline: (document.getElementById('brand-tagline')?.value || '').trim() || profile.tagline || '',
-        phone: (document.getElementById('brand-contact')?.value || '').trim() || profile.phone || '',
-        logoUrl: (document.getElementById('brand-logo-data')?.value || '').trim() || profile.logoUrl || '',
-        headshotUrl: (document.getElementById('brand-headshot')?.value || '').trim() || profile.headshotUrl || '',
-        social: profile.socialLinks || {}
+        name: ctx.name,
+        email: ctx.email,
+        company: ctx.company,
+        tagline: ctx.tagline,
+        phone: ctx.phone,
+        logoUrl: ctx.logoUrl,
+        headshotUrl: ctx.headshotUrl,
+        social: ctx.social
     };
 }
 
@@ -1421,9 +1440,8 @@ function buildAgentSignatureFooter(ctx) {
 const NL_DISCLAIMER_ROW_RE = /<tr>\s*<td[^>]*(?:background|bgcolor)[^>]*#002B5C[^>]*>[\s\S]*?<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi;
 
 function buildDefaultNewsletterDisclaimerHtml() {
-    const company = (document.getElementById('brand-company')?.value || '').trim();
-    const agentName = (document.getElementById('nl-name')?.value || '').trim();
-    const byline = company || agentName || 'Your real estate professional';
+    const ctx = getNewsletterProfileContext();
+    const byline = ctx.company || ctx.name || 'Your real estate professional';
     const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#002B5C;max-width:600px;width:100%;">
   <tr>
     <td style="padding:16px 24px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.55;color:#ffffff;">
@@ -1483,29 +1501,58 @@ function injectAgentBranding(html) {
     return html;
 }
 
-function saveBrandFieldsToProfile() {
-    try {
-        const raw = JSON.parse(localStorage.getItem('userProfile') || '{}');
-        const company = document.getElementById('brand-company')?.value.trim();
-        const tagline = document.getElementById('brand-tagline')?.value.trim();
-        const phone = document.getElementById('brand-contact')?.value.trim();
-        const logo = document.getElementById('brand-logo-data')?.value.trim();
-        const headshot = document.getElementById('brand-headshot')?.value.trim();
-        const name = document.getElementById('nl-name')?.value.trim();
-        const email = document.getElementById('nl-email')?.value.trim();
+function profileStatusRow(label, value, ok) {
+    const display = value || '—';
+    const icon = ok
+        ? '<i class="fas fa-check-circle text-[#00A89D] text-[10px]"></i>'
+        : '<i class="fas fa-circle text-amber-400 text-[8px]"></i>';
+    return `<div class="flex items-start gap-2"><span class="mt-1">${icon}</span><span><span class="text-gray-500 dark:text-gray-400 text-xs">${label}</span><br><span class="font-medium ${ok ? '' : 'text-amber-700 dark:text-amber-300'}">${display}</span></span></div>`;
+}
 
-        if (company) raw.companyName = company;
-        if (tagline) raw.tagline = tagline;
-        if (phone) raw.phone = phone;
-        if (logo) raw.logoUrl = logo;
-        if (headshot) raw.headshotUrl = headshot;
-        if (name) raw.name = name;
-        if (email) raw.email = email;
+function updateNewsletterProfileStatus() {
+    const ctx = getNewsletterProfileContext();
+    const summaryEl = document.getElementById('nl-profile-status-summary');
+    const warnEl = document.getElementById('nl-profile-status-warning');
+    const warnTextEl = document.getElementById('nl-profile-status-warning-text');
+    const badgeEl = document.getElementById('nl-profile-status-badge');
+    const marketInline = document.getElementById('nl-profile-market-inline');
 
-        localStorage.setItem('userProfile', JSON.stringify(raw));
-        const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
-        localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...raw }));
-    } catch (e) {}
+    const missing = [];
+    if (!ctx.name) missing.push('name');
+    if (!ctx.email) missing.push('email');
+    if (!ctx.location) missing.push('market');
+
+    if (summaryEl) {
+        summaryEl.innerHTML = [
+            profileStatusRow('Name', ctx.name, !!ctx.name),
+            profileStatusRow('Email', ctx.email, !!ctx.email),
+            profileStatusRow('Market', ctx.location, !!ctx.location),
+            profileStatusRow('Team / Company', ctx.company, !!ctx.company),
+            profileStatusRow('Headshot', ctx.headshotUrl ? 'On file' : '', !!ctx.headshotUrl),
+            profileStatusRow('Logo', ctx.logoUrl ? 'On file' : '', !!ctx.logoUrl),
+            profileStatusRow('Social links', ctx.socialCount ? `${ctx.socialCount} linked` : '', ctx.socialCount > 0),
+            profileStatusRow('Phone', ctx.phone, !!ctx.phone)
+        ].join('');
+    }
+
+    if (marketInline) {
+        marketInline.textContent = ctx.location || 'not set in profile';
+    }
+
+    const ready = missing.length === 0;
+    if (warnEl) warnEl.classList.toggle('hidden', ready);
+    if (warnTextEl && !ready) {
+        const labels = { name: 'name', email: 'email', market: 'primary market' };
+        warnTextEl.textContent = `Add your ${missing.map((k) => labels[k] || k).join(' and ')} in My Profile before generating.`;
+    }
+    if (badgeEl) {
+        badgeEl.textContent = ready ? 'Profile ready' : 'Profile incomplete';
+        badgeEl.className = ready
+            ? 'text-[10px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 rounded-full bg-[#00A89D]/15 text-[#00A89D]'
+            : 'text-[10px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200';
+    }
+
+    updateBrandPreview();
 }
 
 function updateBrandPreview() {
@@ -1527,7 +1574,7 @@ function updateBrandPreview() {
             ctx.name || null,
             ctx.phone || null,
             ctx.email || null
-        ].filter(Boolean).join(' · ') || 'add branding fields or sync from profile');
+        ].filter(Boolean).join(' · ') || 'complete branding in My Profile');
     }
     if (ctx.includeSocial) {
         const count = SOCIAL_LINK_CONFIG.filter((s) => ctx.social[s.key]).length;
@@ -2195,7 +2242,13 @@ function updateNewsletterPreflightSummary() {
     const sel = getNewsletterSelections();
     const chips = [];
     const warnings = [];
-    const location = document.getElementById('nl-location')?.value.trim() || '';
+    const profileCtx = getNewsletterProfileContext();
+    const location = getNewsletterLocation();
+    if (!profileCtx.name || !profileCtx.email) {
+        warnings.push('Add name and email in My Profile — required for your newsletter signature.');
+    } else if (!profileCtx.location) {
+        warnings.push('Add your primary market in My Profile for hyper-local content.');
+    }
     const toneLabel = document.getElementById('nl-tone')?.selectedOptions?.[0]?.textContent?.trim().replace(/\s*\(Recommended\)\s*/i, '') || '';
     const lengthLabel = getNewsletterLengthConfig().preflightLabel;
     if (location) chips.push({ text: `📍 ${location}`, style: 'meta' });
@@ -2238,6 +2291,7 @@ function wireNewsletterLiveFeedback() {
         updatePersonalCharMeter();
         updatePersonalMediaPreviews();
         updateCustomContentChoicesVisibility();
+        updateNewsletterProfileStatus();
         updateNewsletterPreflightSummary();
         updateSpecificTopicsPlaceholder();
     };
@@ -2261,7 +2315,24 @@ function wireNewsletterLiveFeedback() {
     refresh();
 }
 
+function validateProfileForGeneration() {
+    const ctx = getNewsletterProfileContext();
+    if (ctx.name && ctx.email) return true;
+    const missing = [];
+    if (!ctx.name) missing.push('name');
+    if (!ctx.email) missing.push('email');
+    updateNewsletterProfileStatus();
+    const msg = `Please add your ${missing.join(' and ')} in My Profile before generating — newsletters need them for your signature.`;
+    if (typeof window.openUserProfile === 'function') {
+        if (confirm(msg + '\n\nOpen My Profile now?')) window.openUserProfile();
+    } else {
+        alert(msg);
+    }
+    return false;
+}
+
 function validatePersonalUpdateForGeneration() {
+    if (!validateProfileForGeneration()) return false;
     const personalCb = document.getElementById('nl-personal');
     if (!personalCb?.checked) return true;
     const text = document.getElementById('nl-personal-text')?.value.trim() || '';
@@ -2444,7 +2515,7 @@ async function generateNewsletter(feedback = '') {
     let html = '';
 
     // === FIRST NAME EXTRACTION (moved to top for safety) ===
-    const fullName = document.getElementById('nl-name').value || 'Your Agent';
+    const fullName = p.name || 'Your Agent';
     const firstName = fullName.split(' ')[0].trim();
 
     // === SAVE ORIGINAL LOADING CONTENT (after force so we capture the clean base card) ===
@@ -2599,7 +2670,7 @@ async function generateNewsletter(feedback = '') {
                 '- Audience guidance: ' + getAudienceGuidance(document.getElementById('nl-audience')?.value || 'full'),
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
                 '- Match the full "AGENT PROFILE & VOICE CONTEXT" section below for overall tone — but the Personal Update must use ONLY what the user typed in the Personal Update field.',
-                '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
+                '- Location: ' + getNewsletterLocation(),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Local Market & Home Insights'),
                 '- Length selection: ' + getNewsletterLengthConfig().displayLabel,
                 '- Sections to generate: ' + sectionsSummary,
@@ -2610,19 +2681,19 @@ async function generateNewsletter(feedback = '') {
                 '',
                 ...buildNewsletterLengthPromptBlock(),
                 '',
-                'Branding:',
-                '- Name: ' + (document.getElementById('nl-name').value || 'Your Agent'),
-                '- Email: ' + (document.getElementById('nl-email').value || ''),
-                '- Company/Team Name: ' + (document.getElementById('brand-company')?.value || (window.getUserProfile ? (window.getUserProfile().companyName || '') : '')),
-                '- Tagline: ' + (document.getElementById('brand-tagline')?.value || (window.getUserProfile ? (window.getUserProfile().tagline || '') : '')),
+                'Branding (from profile):',
+                '- Name: ' + (p.name || 'Your Agent'),
+                '- Email: ' + (p.email || p.workEmail || ''),
+                '- Company/Team Name: ' + (p.companyName || ''),
+                '- Tagline: ' + (p.tagline || ''),
                 '- Agent signature block in final HTML: ' + (document.getElementById('nl-include-signature')?.checked !== false ? 'YES (post-processing adds headshot/logo/contact — do NOT add your own signature)' : 'NO (content only — no signature block)'),
                 '- Social media links in final HTML: ' + (document.getElementById('nl-include-social')?.checked !== false ? 'YES (post-processing adds links from profile)' : 'NO'),
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
                 'AGENT PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* agent. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
-                '- Name: ' + (p.name || document.getElementById('nl-name').value || ''),
-                '- Email: ' + (p.email || document.getElementById('nl-email').value || ''),
+                '- Name: ' + (p.name || ''),
+                '- Email: ' + (p.email || p.workEmail || ''),
                 '- Personality / lifestyle: ' + (p.personality || ''),
                 '- Voice traits: ' + ((p.voiceTraits && p.voiceTraits.length) ? p.voiceTraits.join(', ') : ''),
                 '- Preferred tone: ' + (p.tone || document.getElementById('nl-tone').value || 'warm and professional'),
@@ -2913,7 +2984,7 @@ if (includeVideo && personalVideoUrl) {
 
 // Strip any referral blocks from the letter body — compact referral goes below signature
 html = stripReferralFromBody(html);
-html = html.replace(/\[Email\]/g, document.getElementById('nl-email').value || '');
+html = html.replace(/\[Email\]/g, getNewsletterProfileContext().email || '');
 html = html.replace(/\[Name\]/g, firstName);
 
 html = applyUncheckedNewsletterSectionFilters(html, postSelections);
@@ -3364,43 +3435,17 @@ function copyForOutlook() {
       const p = getCentralProfile();
       const overwrite = silent !== true;
 
-      const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if (!el || !val) return;
-        if (overwrite || !el.value.trim()) el.value = val;
-      };
-
-      setVal('nl-name', p.name);
-      setVal('nl-email', p.email || p.workEmail);
-      setVal('brand-company', p.companyName);
-      setVal('brand-tagline', p.tagline);
-      setVal('brand-contact', p.phone);
-      setVal('brand-logo-data', p.logoUrl);
-      setVal('brand-headshot', p.headshotUrl);
-
-      ['brand-company', 'brand-tagline', 'brand-contact', 'brand-logo-data', 'brand-headshot', 'nl-name', 'nl-email'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) localStorage.setItem(id, el.value);
-      });
-
-      const locEl = document.getElementById('nl-location');
-      if (locEl && (p.location || p.localArea || p.market)) {
-        const market = p.location || p.localArea || p.market;
-        if (overwrite || !locEl.value || locEl.value === 'Fort Wayne, Indiana') {
-          locEl.value = market;
-        }
-      }
-
       const blogUrlEl = document.getElementById('nl-blog-url');
       const profileBlog = (p.blogPageUrl || p.blogUrl || '').trim();
       if (blogUrlEl && profileBlog && (overwrite || !blogUrlEl.value.trim())) {
         blogUrlEl.value = profileBlog;
       }
 
-      updateBrandPreview();
+      updateNewsletterProfileStatus();
+      try { updateNewsletterPreflightSummary(); } catch (e) {}
 
       if (!silent && typeof window.showToast === 'function') {
-        window.showToast('Branding synced from your profile', 'success');
+        window.showToast('Profile details refreshed for this newsletter', 'success');
       }
     } catch (e) {
       console.warn('[newsletter] profile sync failed', e);
@@ -3476,30 +3521,15 @@ function copyForOutlook() {
     try { wireCustomContentJumpControls(); } catch (e) {}
 
     setTimeout(() => {
-      if (typeof syncNewsletterFromProfile === 'function') {
-        try { syncNewsletterFromProfile(true); } catch (e) {}
-      } else {
-        updateBrandPreview();
+      try { syncNewsletterFromProfile(true); } catch (e) {
+        try { updateNewsletterProfileStatus(); } catch (e2) {}
       }
     }, 50);
-
-    ['brand-company', 'brand-tagline', 'brand-contact', 'brand-logo-data', 'brand-headshot', 'nl-name', 'nl-email'].forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const handler = () => {
-        saveBrandFieldsToProfile();
-        updateBrandPreview();
-      };
-      el.addEventListener('input', handler);
-      el.addEventListener('change', handler);
-    });
 
     const sigCb = document.getElementById('nl-include-signature');
     const socialCb = document.getElementById('nl-include-social');
     if (sigCb && socialCb) {
-      sigCb.addEventListener('change', () => {
-        updateBrandPreview();
-      });
+      sigCb.addEventListener('change', updateBrandPreview);
       socialCb.addEventListener('change', updateBrandPreview);
     }
 
@@ -3564,6 +3594,7 @@ function copyForOutlook() {
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
+  window.updateNewsletterProfileStatus = updateNewsletterProfileStatus;
   window.updateCustomContentChoicesVisibility = updateCustomContentChoicesVisibility;
   window.scrollToNewsletterCustomContent = scrollToNewsletterCustomContent;
 

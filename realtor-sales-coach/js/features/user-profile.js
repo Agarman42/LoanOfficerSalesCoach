@@ -373,7 +373,7 @@
     refreshProfileUI();
     if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
     if (typeof window.syncNewsletterFromProfile === 'function') {
-      try { window.syncNewsletterFromProfile(); } catch (e) {}
+      try { window.syncNewsletterFromProfile(true); } catch (e) {}
     }
 
     if (closeAfter) closeModal();
@@ -775,7 +775,7 @@
     switchProfileTab(getFirstIncompleteTab(merged));
     if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
     if (typeof window.syncNewsletterFromProfile === 'function') {
-      try { window.syncNewsletterFromProfile(); } catch (e) {}
+      try { window.syncNewsletterFromProfile(true); } catch (e) {}
     }
     if (typeof window.showToast === 'function') {
       window.showToast('Quick profile saved — add more anytime for even sharper content.');
