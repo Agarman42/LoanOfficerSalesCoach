@@ -711,6 +711,59 @@ header {
     transform: translateX(3px);
 }
 
+/* Sidebar AI indicators */
+.sidebar-link--has-ai {
+    padding-right: 0.65rem;
+}
+
+.sidebar-ai-pip {
+    margin-left: auto;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    background: rgba(0, 168, 157, 0.18);
+    color: #5eead4;
+    font-size: 8px;
+    line-height: 1;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.sidebar-ai-pip--assist {
+    background: rgba(241, 90, 41, 0.16);
+    color: #fdba74;
+}
+
+.sidebar-link:hover .sidebar-ai-pip {
+    opacity: 1;
+}
+
+.sidebar-ai-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+    margin-top: 1.25rem;
+    padding: 0.65rem 0.75rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.42);
+    letter-spacing: 0.02em;
+}
+
+.sidebar-ai-legend .sidebar-ai-pip {
+    margin-left: 0;
+    pointer-events: none;
+}
+
+.sidebar-ai-legend-sep {
+    opacity: 0.35;
+}
+
 /* Main content spacing to prevent sidebar overlap */
 header,
 main {

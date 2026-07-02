@@ -888,6 +888,10 @@ function updatePreviews() {
     if (window.NlEntertainment && typeof window.NlEntertainment.updatePreviews === 'function') {
         window.NlEntertainment.updatePreviews();
     }
+    updatePersonalCharMeter();
+    updatePersonalMediaPreviews();
+    updateCustomContentChoicesVisibility();
+    updateNewsletterPreflightSummary();
 }
 
 // Regenerate random for a category
@@ -1336,8 +1340,183 @@ const persistentFields = [
     'nl-blog-url', 'nl-blog-title',
     'nl-include-blog',
     'nl-personal-photo',
-    'nl-personal-video'
+    'nl-personal-photo-size',
+    'nl-personal-video',
+    'nl-personal-video-size'
 ];
+
+const NL_MEDIA_SIZE_DEFAULT = 100;
+const NL_MEDIA_SIZE_MIN = 30;
+const NL_MEDIA_SIZE_MAX = 100;
+const NL_PHOTO_SIZE_DEFAULT = NL_MEDIA_SIZE_DEFAULT;
+const NL_PHOTO_SIZE_MIN = NL_MEDIA_SIZE_MIN;
+const NL_PHOTO_SIZE_MAX = NL_MEDIA_SIZE_MAX;
+
+const NL_LENGTH_CONFIG = {
+    short: {
+        preflightLabel: 'Short edition',
+        displayLabel: 'Short (~500–600 words)',
+        wordRange: '500–600 words total',
+        sectionDepth: 'Keep each included section to 2–4 tight paragraphs or bullet clusters. Prioritize scannability — shorter sentences, fewer sub-points per section.',
+        personalNote: 'Personal update: 3–5 sentences max unless the user wrote more.',
+        overall: 'Quick, mobile-friendly read. Do not pad with filler.'
+    },
+    medium: {
+        preflightLabel: 'Standard edition',
+        displayLabel: 'Standard (~650–750 words)',
+        wordRange: '650–750 words total',
+        sectionDepth: 'Each included section: 3–5 paragraphs with one clear takeaway. Balance depth and scannability.',
+        personalNote: 'Personal update: 4–7 sentences — warm but concise.',
+        overall: 'Default monthly newsletter depth — the most common send.'
+    },
+    long: {
+        preflightLabel: 'Long edition',
+        displayLabel: 'Long (~800–1,000+ words)',
+        wordRange: '800–1,000+ words total',
+        sectionDepth: 'Each included section: fuller context, 4–6 paragraphs, optional bullet lists for key points. Add one extra concrete detail per section where accurate.',
+        personalNote: 'Personal update: can run longer (up to ~10 sentences) if the user provided rich detail.',
+        overall: 'Deep-dive edition — still scannable with headers, more substance per section. Never invent facts to hit word count.'
+    }
+};
+
+function getNewsletterLengthKey() {
+    const raw = (document.getElementById('nl-length')?.value || 'medium').trim().toLowerCase();
+    if (raw === 'short' || raw === 'long') return raw;
+    return 'medium';
+}
+
+function getNewsletterLengthConfig() {
+    const key = getNewsletterLengthKey();
+    return { key, ...NL_LENGTH_CONFIG[key] };
+}
+
+function buildNewsletterLengthPromptBlock() {
+    const cfg = getNewsletterLengthConfig();
+    return [
+        '**LENGTH RULE (important — user selected ' + cfg.displayLabel + '):**',
+        '- Target total newsletter body: ' + cfg.wordRange + ' (all included sections combined, excluding footer/disclaimer).',
+        '- Section depth: ' + cfg.sectionDepth,
+        '- ' + cfg.personalNote,
+        '- ' + cfg.overall,
+        '- If many sections are included, keep each section slightly shorter to stay within the word band; if few sections are included, allow a bit more depth per section.'
+    ];
+}
+
+function getPersonalPhotoWidthPercent() {
+    const el = document.getElementById('nl-personal-photo-size');
+    const raw = el ? parseInt(el.value, 10) : NL_PHOTO_SIZE_DEFAULT;
+    if (Number.isNaN(raw)) return NL_PHOTO_SIZE_DEFAULT;
+    return Math.min(NL_PHOTO_SIZE_MAX, Math.max(NL_PHOTO_SIZE_MIN, raw));
+}
+
+function getPersonalPhotoWidthPx() {
+    return Math.round(EMAIL_WIDTH * getPersonalPhotoWidthPercent() / 100);
+}
+
+function formatPersonalPhotoSizeLabel() {
+    const pct = getPersonalPhotoWidthPercent();
+    const px = getPersonalPhotoWidthPx();
+    if (pct >= 100) return `Full width (${px}px)`;
+    return `${pct}% (${px}px)`;
+}
+
+function buildPersonalPhotoInsert(photoUrl) {
+    const px = getPersonalPhotoWidthPx();
+    const safeUrl = String(photoUrl || '').trim();
+    return `<p style="margin:16px 0 0; text-align:center;"><img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block; margin:0 auto; max-width:100%; width:${px}px; height:auto; border:0; border-radius:8px;" /></p>`;
+}
+
+function updatePersonalPhotoSizeUI() {
+    const sizeWrap = document.getElementById('nl-personal-photo-size-wrap');
+    const labelEl = document.getElementById('nl-personal-photo-size-label');
+    const photoEnabled = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
+    if (sizeWrap) sizeWrap.classList.toggle('hidden', !photoEnabled);
+    if (labelEl) labelEl.textContent = formatPersonalPhotoSizeLabel();
+}
+
+/** Size preview image as % of the 600px email column so slider tracks 30–100% accurately. */
+function applyPersonalPhotoPreviewSizing() {
+    const photoImg = document.getElementById('nl-personal-photo-preview-img');
+    if (!photoImg) return;
+    const pct = getPersonalPhotoWidthPercent();
+    photoImg.style.width = `${pct}%`;
+    photoImg.style.maxWidth = 'none';
+    photoImg.style.height = 'auto';
+    photoImg.style.maxHeight = 'none';
+}
+
+function getPersonalVideoWidthPercent() {
+    const el = document.getElementById('nl-personal-video-size');
+    const raw = el ? parseInt(el.value, 10) : NL_MEDIA_SIZE_DEFAULT;
+    if (Number.isNaN(raw)) return NL_MEDIA_SIZE_DEFAULT;
+    return Math.min(NL_MEDIA_SIZE_MAX, Math.max(NL_MEDIA_SIZE_MIN, raw));
+}
+
+function getPersonalVideoWidthPx() {
+    return Math.round(EMAIL_WIDTH * getPersonalVideoWidthPercent() / 100);
+}
+
+function formatPersonalVideoSizeLabel() {
+    const pct = getPersonalVideoWidthPercent();
+    const px = getPersonalVideoWidthPx();
+    if (pct >= 100) return `Full width (${px}px)`;
+    return `${pct}% (${px}px)`;
+}
+
+function updatePersonalVideoSizeUI() {
+    const sizeWrap = document.getElementById('nl-personal-video-size-wrap');
+    const labelEl = document.getElementById('nl-personal-video-size-label');
+    const videoEnabled = !!document.getElementById('nl-include-video')?.checked && !!document.getElementById('nl-personal')?.checked;
+    if (sizeWrap) sizeWrap.classList.toggle('hidden', !videoEnabled);
+    if (labelEl) labelEl.textContent = formatPersonalVideoSizeLabel();
+}
+
+function applyPersonalVideoPreviewSizing() {
+    const videoThumb = document.getElementById('nl-personal-video-preview-thumb');
+    if (!videoThumb) return;
+    const pct = getPersonalVideoWidthPercent();
+    videoThumb.style.width = `${pct}%`;
+    videoThumb.style.maxWidth = 'none';
+    videoThumb.style.height = 'auto';
+    videoThumb.style.maxHeight = 'none';
+}
+
+/** Hints for Specific Topics placeholder — core content sections only. */
+const NL_SPECIFIC_SECTION_HINTS = [
+    { id: 'nl-market', label: 'Market Updates', example: 'Q1 inventory up 12% — or Market Updates: https://…' },
+    { id: 'nl-industry', label: 'Industry News', example: "Fed rate headline — or Industry: https://…" },
+    { id: 'nl-local', label: 'Local Update', example: 'Komets playoff Sat 3/15 — or Local: https://…' },
+    { id: 'nl-recipes', label: 'Recipes', example: 'mulled wine recipe — or Recipes: https://…' }
+];
+
+function updateSpecificTopicsPlaceholder() {
+    const ta = document.getElementById('nl-specific');
+    const hintEl = document.getElementById('nl-specific-hint');
+    if (!ta) return;
+
+    const active = NL_SPECIFIC_SECTION_HINTS.filter((h) => document.getElementById(h.id)?.checked);
+    const langNote = 'Language requests work too (e.g. "Prepare the full newsletter in Spanish").';
+
+    let placeholder;
+    if (!active.length) {
+        placeholder = `Give specific direction for any sections you check — stats, headlines, or article URLs (e.g. Market Updates: https://…). ${langNote}`;
+    } else if (active.length === 1) {
+        placeholder = `e.g., ${active[0].label}: ${active[0].example}. ${langNote}`;
+    } else {
+        const parts = active.slice(0, 3).map((h) => `${h.label}: ${h.example}`);
+        const suffix = active.length > 3 ? '; …' : '';
+        placeholder = `e.g., ${parts.join('; ')}${suffix}. ${langNote}`;
+    }
+
+    ta.placeholder = placeholder;
+
+    if (hintEl) {
+        const urlNote = 'Article URLs you paste here will be cited and linked in the matching section.';
+        hintEl.textContent = !active.length
+            ? `Give very specific direction for the sections you checked — exact names, dates, stats, headlines, or article URLs. ${urlNote}`
+            : `Tailored to your ${active.length} checked section${active.length === 1 ? '' : 's'}: ${active.map((h) => h.label).join(', ')}. ${urlNote}`;
+    }
+}
 
 // === GLOBAL EMAIL / CRM SETTINGS ===
 const EMAIL_WIDTH = 600;
@@ -1425,9 +1604,19 @@ document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEac
             const fields = document.getElementById('blog-fields');
             if (fields) fields.classList.toggle('hidden', !cb.checked);
         }
-        if (cb.id === 'nl-puzzle') {
-            const panel = document.getElementById('brain-teaser-panel');
-            if (panel) panel.classList.toggle('hidden', !cb.checked);
+        if (Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)) {
+            updateCustomContentChoicesVisibility();
+            const details = document.getElementById('nl-custom-content-details');
+            if (details) {
+                if (cb.checked) {
+                    details.open = true;
+                } else {
+                    const anyCurated = Object.values(NL_CUSTOM_CONTENT_BLOCKS).some(
+                        (cfg) => document.getElementById(cfg.checkboxId)?.checked
+                    );
+                    if (!anyCurated) details.open = false;
+                }
+            }
         }
     });
 });
@@ -1446,11 +1635,8 @@ document.addEventListener('DOMContentLoaded', () => {
         blogFields.classList.toggle('hidden', !blogCb.checked);
     }
 
-    const puzzleCb = document.getElementById('nl-puzzle');
-    const puzzlePanel = document.getElementById('brain-teaser-panel');
-    if (puzzleCb && puzzlePanel) {
-        puzzlePanel.classList.toggle('hidden', !puzzleCb.checked);
-    }
+    updateCustomContentChoicesVisibility();
+    updateSpecificTopicsPlaceholder();
     if (window.NlEntertainment && typeof window.NlEntertainment.wireUI === 'function') {
         window.NlEntertainment.wireUI();
     }
@@ -1532,6 +1718,116 @@ const NL_CONTENT_SECTIONS = {
     }
 };
 
+/** Curated library blocks inside Custom Content Choices (mirrors section checkboxes). */
+const NL_CUSTOM_CONTENT_BLOCKS = {
+    fun: { checkboxId: 'nl-fun', blockId: 'nl-custom-section-fun', shortLabel: 'Fun Facts' },
+    tip: { checkboxId: 'nl-tip', blockId: 'nl-custom-section-tip', shortLabel: 'Pro Tip' },
+    quote: { checkboxId: 'nl-quote', blockId: 'nl-custom-section-quote', shortLabel: 'Quote' },
+    dadjoke: { checkboxId: 'nl-dadjoke', blockId: 'nl-custom-section-dadjoke', shortLabel: 'Dad Joke' },
+    puzzle: { checkboxId: 'nl-puzzle', blockId: 'brain-teaser-panel', shortLabel: 'Brain Teaser' }
+};
+
+function scrollToNewsletterCustomContent(sectionKey) {
+    const details = document.getElementById('nl-custom-content-details');
+    if (details) details.open = true;
+    updateCustomContentChoicesVisibility();
+
+    let targetId = null;
+    if (sectionKey && NL_CUSTOM_CONTENT_BLOCKS[sectionKey]) {
+        const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
+        const cb = document.getElementById(cfg.checkboxId);
+        if (cb?.checked) targetId = cfg.blockId;
+    }
+    if (!targetId) {
+        for (const cfg of Object.values(NL_CUSTOM_CONTENT_BLOCKS)) {
+            const cb = document.getElementById(cfg.checkboxId);
+            if (cb?.checked) {
+                targetId = cfg.blockId;
+                break;
+            }
+        }
+    }
+
+    if (!targetId) {
+        if (window.showToast) window.showToast('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser first.', 'info');
+        else alert('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser in Sections to Include first.');
+        return;
+    }
+
+    const el = document.getElementById(targetId);
+    if (!el) return;
+
+    window.setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
+        window.setTimeout(() => {
+            el.classList.remove('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
+        }, 2200);
+    }, 120);
+}
+
+function updateCustomContentChoicesVisibility() {
+    const activeLabels = [];
+    Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([key, cfg]) => {
+        const cb = document.getElementById(cfg.checkboxId);
+        const block = document.getElementById(cfg.blockId);
+        const show = !!cb?.checked;
+        if (block) block.classList.toggle('hidden', !show);
+        const inlineBtn = document.querySelector(`.nl-inline-customize-btn[data-nl-jump-custom="${key}"]`);
+        if (inlineBtn) inlineBtn.classList.toggle('hidden', !show);
+        if (show) activeLabels.push(cfg.shortLabel);
+    });
+
+    const anyVisible = activeLabels.length > 0;
+    const emptyEl = document.getElementById('nl-custom-content-empty');
+    const bodyEl = document.getElementById('nl-custom-content-body');
+    const footerEl = document.getElementById('nl-custom-content-footer');
+    const introEl = document.getElementById('nl-custom-content-intro');
+    const summaryEl = document.getElementById('nl-custom-content-summary');
+    const countEl = document.getElementById('nl-custom-content-count');
+    const detailsEl = document.getElementById('nl-custom-content-details');
+
+    if (emptyEl) emptyEl.classList.toggle('hidden', anyVisible);
+    if (bodyEl) bodyEl.classList.toggle('hidden', !anyVisible);
+    if (footerEl) footerEl.classList.toggle('hidden', !anyVisible);
+
+    if (introEl) {
+        introEl.innerHTML = anyVisible
+            ? `Customize <strong>${activeLabels.join(', ')}</strong> — pick from the library, regenerate random, or write your own.`
+            : '';
+    }
+
+    if (summaryEl) {
+        summaryEl.textContent = anyVisible
+            ? `Custom Content Choices (${activeLabels.join(', ')})`
+            : 'Custom Content Choices';
+    }
+
+    if (countEl) {
+        countEl.textContent = anyVisible ? `${activeLabels.length} active` : '';
+        countEl.classList.toggle('hidden', !anyVisible);
+    }
+
+    if (detailsEl) {
+        detailsEl.classList.toggle('hidden', !anyVisible);
+        if (!anyVisible) detailsEl.open = false;
+    }
+}
+
+function wireCustomContentJumpControls() {
+    const sectionsCard = document.getElementById('nl-sections-card');
+    if (sectionsCard && !sectionsCard._nlInlineCustomizeWired) {
+        sectionsCard._nlInlineCustomizeWired = true;
+        sectionsCard.addEventListener('click', (e) => {
+            const btn = e.target.closest('.nl-inline-customize-btn');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToNewsletterCustomContent(btn.getAttribute('data-nl-jump-custom'));
+        });
+    }
+}
+
 function extractYouTubeVideoId(url) {
     if (!url) return '';
     const raw = String(url).trim();
@@ -1567,6 +1863,7 @@ function buildPersonalVideoTable(personalVideoUrl) {
     if (!url) return '';
     const href = url.startsWith('http') ? url : `https://${url}`;
     const videoId = extractYouTubeVideoId(href);
+    const videoWidthPx = getPersonalVideoWidthPx();
     const thumbnailUrl = videoId
         ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
         : 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
@@ -1575,7 +1872,7 @@ function buildPersonalVideoTable(personalVideoUrl) {
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
   <tr>
     <td style="padding:30px;">
-      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; margin:0 auto;">
+      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:${videoWidthPx}px; margin:0 auto;">
         <tr>
           <td align="center" style="padding-bottom:16px;">
             <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
@@ -1584,13 +1881,13 @@ function buildPersonalVideoTable(personalVideoUrl) {
         <tr>
           <td align="center">
             <a href="${href}" target="_blank" rel="noopener" style="text-decoration:none;">
-              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:560px;">
+              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:${videoWidthPx}px;">
                 <tr>
                   <td style="padding:0;">
                     <img src="${thumbnailUrl}"
                          alt="Watch Personal Video"
-                         width="560"
-                         style="width:100%; max-width:560px; height:auto; display:block; border:0;">
+                         width="${videoWidthPx}"
+                         style="width:100%; max-width:${videoWidthPx}px; height:auto; display:block; border:0;">
                   </td>
                 </tr>
               </table>
@@ -1937,6 +2234,306 @@ function buildNewsletterSectionsPrompt(selections) {
 
 const NL_PERSONAL_UPDATE_MIN_CHARS = 40;
 
+const NL_PREFLIGHT_CHIP_BASE = 'nl-preflight-chip inline-flex items-center gap-1 text-xs font-semibold pl-3 pr-1 py-1.5 rounded-full';
+const NL_PREFLIGHT_CHIP_CLASS = {
+    included: `${NL_PREFLIGHT_CHIP_BASE} border-2 border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C] dark:text-white`,
+    personal: `${NL_PREFLIGHT_CHIP_BASE} border-2 border-[#F15A29] bg-[#F15A29]/10 text-[#002B5C] dark:text-white`,
+    meta: `${NL_PREFLIGHT_CHIP_BASE} border border-gray-200 dark:border-gray-600 bg-[#002B5C]/5 dark:bg-[#002B5C]/30 text-[#002B5C] dark:text-gray-300 font-medium`,
+    warn: `${NL_PREFLIGHT_CHIP_BASE} border-2 border-amber-400 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200`,
+    off: `${NL_PREFLIGHT_CHIP_BASE} border border-dashed border-gray-300 dark:border-gray-600 text-gray-500 font-medium`
+};
+
+const NL_PREFLIGHT_CHIP_REMOVE_BTN = 'nl-preflight-chip-remove ml-0.5 flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full text-[15px] leading-none text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors';
+
+function buildPreflightChipHtml(chip) {
+    const cls = NL_PREFLIGHT_CHIP_CLASS[chip.style] || NL_PREFLIGHT_CHIP_CLASS.included;
+    const label = chip.text;
+    if (!chip.removeId) {
+        return `<span class="${cls} pr-3">${label}</span>`;
+    }
+    const safeId = String(chip.removeId).replace(/"/g, '');
+    return `<span class="${cls}"><span>${label}</span><button type="button" class="${NL_PREFLIGHT_CHIP_REMOVE_BTN}" data-nl-preflight-remove="${safeId}" aria-label="Remove ${label.replace(/"/g, '')}" title="Remove">×</button></span>`;
+}
+
+function applyPreflightChipRemove(controlId) {
+    const el = document.getElementById(controlId);
+    if (!el) return;
+    el.checked = false;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function looksLikeImageUrl(url) {
+    const u = String(url || '').trim();
+    if (!u) return false;
+    if (/^data:image\//i.test(u)) return true;
+    if (/\.(jpe?g|png|gif|webp|avif|bmp|svg)(\?|#|$)/i.test(u)) return true;
+    return /\/(image|img|photo|media|upload|assets)\//i.test(u) || /[?&](format|fm)=(jpe?g|png|webp|gif)/i.test(u);
+}
+
+function updatePersonalCharMeter() {
+    const personalCb = document.getElementById('nl-personal');
+    const meter = document.getElementById('nl-personal-char-meter');
+    const countEl = document.getElementById('nl-personal-char-count');
+    const barEl = document.getElementById('nl-personal-char-bar');
+    const hintEl = document.getElementById('nl-personal-char-hint');
+    const textEl = document.getElementById('nl-personal-text');
+    if (!meter || !textEl) return;
+
+    const active = !!personalCb?.checked;
+    meter.classList.toggle('hidden', !active);
+    if (!active) return;
+
+    const len = textEl.value.trim().length;
+    const pct = Math.min(100, Math.round((len / NL_PERSONAL_UPDATE_MIN_CHARS) * 100));
+    const remaining = Math.max(0, NL_PERSONAL_UPDATE_MIN_CHARS - len);
+    const ready = len >= NL_PERSONAL_UPDATE_MIN_CHARS;
+
+    if (countEl) {
+        countEl.textContent = `${len} / ${NL_PERSONAL_UPDATE_MIN_CHARS} min`;
+        countEl.classList.toggle('text-[#00A89D]', ready);
+        countEl.classList.toggle('text-amber-600', !ready);
+    }
+    if (barEl) {
+        barEl.style.width = `${pct}%`;
+        barEl.classList.toggle('bg-[#00A89D]', ready);
+        barEl.classList.toggle('bg-amber-400', !ready && len > 0);
+        barEl.classList.toggle('bg-gray-300', len === 0);
+    }
+    if (hintEl) {
+        if (ready) {
+            hintEl.innerHTML = '<span class="text-[#00A89D] font-semibold">✓ Good to go</span> — we&apos;ll polish your words, not invent them.';
+        } else if (len === 0) {
+            hintEl.textContent = `Required — write at least ${NL_PERSONAL_UPDATE_MIN_CHARS} characters with real details.`;
+        } else {
+            hintEl.textContent = `${remaining} more character${remaining === 1 ? '' : 's'} needed before you can generate.`;
+        }
+    }
+}
+
+function updatePersonalMediaPreviews() {
+    updatePersonalPhotoSizeUI();
+    updatePersonalVideoSizeUI();
+    const photoEnabled = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
+    const videoEnabled = !!document.getElementById('nl-include-video')?.checked;
+    const photoUrl = (document.getElementById('nl-personal-photo')?.value || '').trim();
+    const videoUrl = (document.getElementById('nl-personal-video')?.value || '').trim();
+
+    const photoWrap = document.getElementById('nl-personal-photo-preview-wrap');
+    const photoImg = document.getElementById('nl-personal-photo-preview-img');
+    const photoStatus = document.getElementById('nl-personal-photo-preview-status');
+    const videoWrap = document.getElementById('nl-personal-video-preview-wrap');
+    const videoThumb = document.getElementById('nl-personal-video-preview-thumb');
+    const videoLink = document.getElementById('nl-personal-video-preview-link');
+    const videoStatus = document.getElementById('nl-personal-video-preview-status');
+
+    if (photoWrap && photoImg && photoStatus) {
+        if (!photoEnabled || !photoUrl) {
+            photoWrap.classList.add('hidden');
+            photoImg.removeAttribute('src');
+            delete photoImg.dataset.nlPreviewUrl;
+        } else if (!looksLikeImageUrl(photoUrl) && !/^https?:\/\//i.test(photoUrl)) {
+            photoWrap.classList.remove('hidden');
+            photoImg.removeAttribute('src');
+            photoStatus.innerHTML = '<span class="text-amber-700 dark:text-amber-300">⚠ Paste a full image URL (https://…)</span>';
+        } else {
+            photoWrap.classList.remove('hidden');
+            const markPhotoPreviewLoaded = () => {
+                photoStatus.innerHTML = '<span class="text-[#00A89D] font-medium">✓ Image loaded — will appear below your personal note</span>';
+            };
+            const markPhotoPreviewFailed = () => {
+                photoStatus.innerHTML = '<span class="text-amber-700 dark:text-amber-300">⚠ Could not load image — double-check the URL is public and direct</span>';
+            };
+            photoImg.onload = () => {
+                applyPersonalPhotoPreviewSizing();
+                markPhotoPreviewLoaded();
+            };
+            photoImg.onerror = markPhotoPreviewFailed;
+            applyPersonalPhotoPreviewSizing();
+
+            const cachedUrl = photoImg.dataset.nlPreviewUrl || '';
+            if (cachedUrl === photoUrl && photoImg.complete) {
+                if (photoImg.naturalWidth > 0) markPhotoPreviewLoaded();
+                else markPhotoPreviewFailed();
+            } else {
+                photoImg.dataset.nlPreviewUrl = photoUrl;
+                photoStatus.textContent = 'Loading preview…';
+                photoImg.src = photoUrl;
+            }
+        }
+    }
+
+    if (videoWrap && videoThumb && videoLink && videoStatus) {
+        if (!videoEnabled || !videoUrl) {
+            videoWrap.classList.add('hidden');
+            videoThumb.removeAttribute('src');
+            videoLink.removeAttribute('href');
+        } else {
+            const href = videoUrl.startsWith('http') ? videoUrl : `https://${videoUrl}`;
+            const videoId = extractYouTubeVideoId(href);
+            videoWrap.classList.remove('hidden');
+            videoLink.href = href;
+            if (videoId) {
+                videoThumb.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                videoThumb.alt = 'YouTube video thumbnail';
+                videoThumb.onload = () => applyPersonalVideoPreviewSizing();
+                videoStatus.innerHTML = '<span class="text-[#00A89D] font-medium">✓ YouTube link recognized — thumbnail preview</span>';
+            } else {
+                videoThumb.src = 'https://via.placeholder.com/560x200/002B5C/FFFFFF?text=Video+link';
+                videoStatus.innerHTML = '<span class="text-amber-700 dark:text-amber-300">⚠ Use a YouTube or YouTube Shorts URL for best results</span>';
+            }
+            applyPersonalVideoPreviewSizing();
+        }
+    }
+}
+
+function updateNewsletterPreflightSummary() {
+    const chipsEl = document.getElementById('nl-preflight-chips');
+    const warningsEl = document.getElementById('nl-preflight-warnings');
+    const badgeEl = document.getElementById('nl-preflight-ready-badge');
+    if (!chipsEl) return;
+
+    const sel = getNewsletterSelections();
+    const chips = [];
+    const warnings = [];
+
+    const location = document.getElementById('nl-location')?.value.trim() || '';
+    const toneLabel = document.getElementById('nl-tone')?.selectedOptions?.[0]?.textContent?.trim().replace(/\s*\(Recommended\)\s*/i, '') || '';
+    const title = document.getElementById('nl-title')?.value.trim() || '';
+    const audienceLabel = document.getElementById('nl-audience')?.selectedOptions?.[0]?.textContent?.trim() || '';
+    const lengthLabel = getNewsletterLengthConfig().preflightLabel;
+
+    if (location) chips.push({ text: `📍 ${location}`, style: 'meta' });
+    if (audienceLabel) chips.push({ text: audienceLabel, style: 'meta' });
+    if (toneLabel) chips.push({ text: toneLabel, style: 'meta' });
+    chips.push({ text: lengthLabel, style: 'meta' });
+    chips.push({ text: title ? `Title: ${title}` : 'Title: Auto-generated', style: 'meta' });
+
+    Object.entries(NL_CONTENT_SECTIONS).forEach(([key, cfg]) => {
+        if (!sel.contentSections[key] || key === 'puzzle') return;
+        chips.push({ text: cfg.label, style: 'included', removeId: cfg.id });
+    });
+
+    if (sel.contentSections.puzzle) {
+        const extra = (window.NlEntertainment && typeof window.NlEntertainment.getSelectionsExtra === 'function')
+            ? window.NlEntertainment.getSelectionsExtra()
+            : { puzzleType: 'trivia', puzzleTopicFilter: 'all', puzzleCategoryFilter: 'all' };
+        const typeLabels = { trivia: 'Trivia', scramble: 'Word Scramble', riddle: 'Riddle' };
+        let teaserLabel = `Brain Teaser: ${typeLabels[extra.puzzleType] || extra.puzzleType}`;
+        if (extra.puzzleType !== 'riddle' && extra.puzzleTopicFilter === 'mortgage') teaserLabel += ' · Mortgage';
+        if (extra.puzzleType === 'trivia' && extra.puzzleCategoryFilter && extra.puzzleCategoryFilter !== 'all') {
+            teaserLabel += ` · ${extra.puzzleCategoryFilter}`;
+        }
+        chips.push({ text: teaserLabel, style: 'included', removeId: 'nl-puzzle' });
+        if (window.NlEntertainment && typeof window.NlEntertainment.getFilteredPuzzleList === 'function') {
+            const pool = window.NlEntertainment.getFilteredPuzzleList(extra.puzzleType);
+            if (!pool.length) warnings.push('Brain Teaser filters match no items — widen filters or write your own.');
+        }
+    }
+
+    if (sel.personal) {
+        const len = document.getElementById('nl-personal-text')?.value.trim().length || 0;
+        chips.push({ text: 'Personal Update ❤️', style: 'personal', removeId: 'nl-personal' });
+        if (sel.includePhoto) {
+            const photoSize = getPersonalPhotoWidthPercent();
+            chips.push({
+                text: photoSize >= 100 ? 'Personal photo' : `Personal photo · ${photoSize}%`,
+                style: 'included',
+                removeId: 'nl-include-photo'
+            });
+        }
+        if (sel.includeVideo) {
+            const videoSize = getPersonalVideoWidthPercent();
+            chips.push({
+                text: videoSize >= 100 ? 'Personal video' : `Personal video · ${videoSize}%`,
+                style: 'included',
+                removeId: 'nl-include-video'
+            });
+        }
+        if (len < NL_PERSONAL_UPDATE_MIN_CHARS) {
+            warnings.push(`Personal Update needs ${NL_PERSONAL_UPDATE_MIN_CHARS - len} more character${NL_PERSONAL_UPDATE_MIN_CHARS - len === 1 ? '' : 's'} before Generate.`);
+        }
+    }
+
+    if (sel.includeBlog) {
+        const blogUrl = document.getElementById('nl-blog-url')?.value.trim() || '';
+        chips.push({
+            text: blogUrl ? 'Blog link' : 'Blog (no URL yet)',
+            style: blogUrl ? 'included' : 'warn',
+            removeId: 'nl-include-blog'
+        });
+        if (!blogUrl) warnings.push('Blog is checked but no URL — the blog card will be skipped.');
+    }
+
+    if (sel.includeReferral) {
+        chips.push({ text: 'Referral CTA', style: 'included', removeId: 'nl-include-referral' });
+    } else {
+        chips.push({ text: 'Referral CTA off', style: 'off' });
+    }
+
+    const anyContent = Object.values(sel.contentSections).some(Boolean) || sel.personal;
+    if (!anyContent) warnings.push('No content sections or Personal Update selected — your newsletter may be very thin.');
+
+    chipsEl.innerHTML = chips.length
+        ? chips.map((chip) => buildPreflightChipHtml(chip)).join('')
+        : '<span class="text-xs text-gray-500">Check sections above to build your edition.</span>';
+
+    if (warningsEl) {
+        if (warnings.length) {
+            warningsEl.classList.remove('hidden');
+            warningsEl.innerHTML = warnings.map((w) => `<li>${w}</li>`).join('');
+        } else {
+            warningsEl.classList.add('hidden');
+            warningsEl.innerHTML = '';
+        }
+    }
+
+    const personalOk = !sel.personal || (document.getElementById('nl-personal-text')?.value.trim().length || 0) >= NL_PERSONAL_UPDATE_MIN_CHARS;
+    const ready = personalOk && !warnings.some((w) => w.includes('Brain Teaser filters'));
+    if (badgeEl) {
+        if (ready && anyContent) {
+            badgeEl.textContent = 'READY TO GENERATE';
+            badgeEl.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/15 px-2.5 py-1 rounded-full mb-2';
+        } else {
+            badgeEl.textContent = 'REVIEW SETUP';
+            badgeEl.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[2px] text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 rounded-full mb-2';
+        }
+    }
+}
+
+function wireNewsletterLiveFeedback() {
+    const root = document.getElementById('newsletter-generator');
+    if (!root || root.dataset.nlLiveFeedbackWired === '1') return;
+    root.dataset.nlLiveFeedbackWired = '1';
+
+    const refresh = () => {
+        updatePersonalCharMeter();
+        updatePersonalMediaPreviews();
+        updateSpecificTopicsPlaceholder();
+        updateCustomContentChoicesVisibility();
+        updateNewsletterPreflightSummary();
+    };
+
+    root.querySelectorAll('input, select, textarea').forEach((el) => {
+        el.addEventListener('input', refresh);
+        el.addEventListener('change', refresh);
+    });
+
+    const preflight = document.getElementById('nl-preflight-summary');
+    if (preflight && !preflight.dataset.nlRemoveWired) {
+        preflight.dataset.nlRemoveWired = '1';
+        preflight.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-nl-preflight-remove]');
+            if (!btn) return;
+            e.preventDefault();
+            const controlId = btn.getAttribute('data-nl-preflight-remove');
+            if (controlId) applyPreflightChipRemove(controlId);
+            refresh();
+        });
+    }
+
+    refresh();
+}
+
 function validatePersonalUpdateForGeneration() {
     const personalCb = document.getElementById('nl-personal');
     if (!personalCb?.checked) return true;
@@ -2141,12 +2738,20 @@ async function generateNewsletter(feedback = '') {
                 '- Match the full "LO PROFILE & VOICE CONTEXT" section below for overall newsletter tone and voice — but the Personal Update must use ONLY what the user typed in the Personal Update field. Never substitute profile hobbies, goals, or challenges into the personal note.',
                 '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
-                '- Length: ' + (document.getElementById('nl-length').value || 'medium'),
+                '- Length selection: ' + getNewsletterLengthConfig().displayLabel,
                 '- Sections to generate: ' + sectionsSummary,
                 '- Personal update: "' + personalUpdateText + '"',
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
                 '- Specific topics / special requests (including any language requests such as "in Spanish" or "prepare the newsletter in French"): "' + (document.getElementById('nl-specific').value || 'None') + '"',
+                '',
+                '**SPECIFIC TOPICS & ARTICLE URL RULE:**',
+                '- If the user pasted URLs, article titles, or named sources in Specific Topics, use them in the matching INCLUDED section only (e.g. "Market Updates: https://..." goes in Market Updates).',
+                '- Summarize the relevant takeaway in your own words, cite the source by name, and include a clickable hyperlink (<a href="..." target="_blank" rel="noopener">) to the exact URL they provided.',
+                '- If they did not map a URL to a section, place it in the most logical included section and still link and cite it.',
+                '- Do not invent or substitute different URLs when the user supplied one.',
+                '',
+                ...buildNewsletterLengthPromptBlock(),
                 '',
                 'Branding:',
                 '- Name: ' + (document.getElementById('nl-name').value || 'Your Loan Officer'),
@@ -2378,7 +2983,7 @@ async function generateNewsletter(feedback = '') {
 
                 let photoInsert = '';
                 if (includePhoto && personalPhotoUrl) {
-                    photoInsert = `<p style="margin:16px 0 0; text-align:center;"><img src="${personalPhotoUrl}" alt="Personal photo" width="540" style="display:block; margin:0 auto; max-width:100%; width:100%; height:auto; border:0; border-radius:8px;" /></p>`;
+                    photoInsert = buildPersonalPhotoInsert(personalPhotoUrl);
                 }
 
             // Clean placeholder inside personal note (photo goes here if provided; keeps note + photo together)
@@ -2940,6 +3545,11 @@ function copyForOutlook() {
       if (locEl && (p.localArea || p.market) && (!locEl.value || locEl.value === 'Fort Wayne, Indiana')) {
         locEl.value = p.localArea || p.market || locEl.value;
       }
+      const blogUrlEl = document.getElementById('nl-blog-url');
+      const profileBlog = (p.blogPageUrl || p.blogUrl || '').trim();
+      if (blogUrlEl && profileBlog && !blogUrlEl.value.trim()) {
+        blogUrlEl.value = profileBlog;
+      }
       // Silent profile sync — no toast to avoid corner popups on load
 
     } catch (e) {
@@ -2955,6 +3565,8 @@ function copyForOutlook() {
     if (typeof wireNewsletterChoiceButtons === 'function') {
       try { wireNewsletterChoiceButtons(); } catch (e) {}
     }
+    try { wireNewsletterLiveFeedback(); } catch (e) {}
+    try { wireCustomContentJumpControls(); } catch (e) {}
 
     // Initial profile sync (non-destructive)
     setTimeout(() => {
@@ -2989,6 +3601,8 @@ function copyForOutlook() {
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
+  window.updateCustomContentChoicesVisibility = updateCustomContentChoicesVisibility;
+  window.scrollToNewsletterCustomContent = scrollToNewsletterCustomContent;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initNewsletterGenerator);

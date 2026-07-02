@@ -688,13 +688,21 @@
       const categoryOptions = ['<option value="all">All categories</option>']
         .concat(categories.map((cat) => `<option value="${escapeHtml(cat)}"${nlPuzzleCategoryFilter === cat ? ' selected' : ''}>${escapeHtml(cat)}</option>`))
         .join('');
+      const categoryInline = puzzleType === 'trivia'
+        ? `<div class="flex items-center gap-2 border-l border-gray-200 dark:border-gray-600 pl-3">
+            <label for="modal-puzzle-category" class="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Category</label>
+            <select id="modal-puzzle-category" class="min-w-[160px] max-w-[220px] px-3 py-1.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">${categoryOptions}</select>
+          </div>`
+        : '';
       filterBar.innerHTML = `
         <p class="text-xs text-gray-500 mb-2">${filteredCount} of ${totalCount} items match · Topic: <strong>${escapeHtml(getTopicFilterLabel(nlPuzzleTopicFilter))}</strong></p>
-        <div class="flex flex-wrap gap-2 mb-2">
-          <button type="button" data-modal-topic="all" class="text-xs px-3 py-1.5 rounded-full border-2 font-semibold ${nlPuzzleTopicFilter === 'all' ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C]' : 'border-gray-200 text-gray-600'}">All topics</button>
-          <button type="button" data-modal-topic="mortgage" class="text-xs px-3 py-1.5 rounded-full border-2 font-semibold ${nlPuzzleTopicFilter === 'mortgage' ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C]' : 'border-gray-200 text-gray-600'}">🏠 Mortgage &amp; Home</button>
-        </div>
-        ${puzzleType === 'trivia' ? `<select id="modal-puzzle-category" class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">${categoryOptions}</select>` : ''}`;
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-modal-topic="all" class="text-xs px-3 py-1.5 rounded-full border-2 font-semibold ${nlPuzzleTopicFilter === 'all' ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C]' : 'border-gray-200 text-gray-600'}">All topics</button>
+            <button type="button" data-modal-topic="mortgage" class="text-xs px-3 py-1.5 rounded-full border-2 font-semibold ${nlPuzzleTopicFilter === 'mortgage' ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C]' : 'border-gray-200 text-gray-600'}">🏠 Mortgage &amp; Home</button>
+          </div>
+          ${categoryInline}
+        </div>`;
       filterBar.querySelectorAll('[data-modal-topic]').forEach((btn) => {
         btn.addEventListener('click', () => {
           setTopicFilter(btn.getAttribute('data-modal-topic'));
@@ -925,15 +933,8 @@
       categorySelect.addEventListener('change', () => setCategoryFilter(categorySelect.value));
     }
 
-    const puzzleCb = document.getElementById('nl-puzzle');
-    const puzzlePanel = document.getElementById('brain-teaser-panel');
-    if (puzzleCb && puzzlePanel) {
-      const toggle = () => puzzlePanel.classList.toggle('hidden', !puzzleCb.checked);
-      if (!puzzleCb._nlPuzzlePanelWired) {
-        puzzleCb._nlPuzzlePanelWired = true;
-        puzzleCb.addEventListener('change', toggle);
-      }
-      toggle();
+    if (typeof window.updateCustomContentChoicesVisibility === 'function') {
+      window.updateCustomContentChoicesVisibility();
     }
 
     const savedType = localStorage.getItem('nl-puzzle-type') || 'trivia';
