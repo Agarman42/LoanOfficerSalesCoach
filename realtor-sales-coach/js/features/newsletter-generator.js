@@ -817,6 +817,9 @@ function resetUsed(category) {
     } else if (category === 'quotes') {
         usedQuotes = [];
         selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    } else if (window.NlEntertainment && typeof window.NlEntertainment.resetUsed === 'function') {
+        window.NlEntertainment.resetUsed(category);
+        return;
     }
 
     localStorage.setItem('used' + category.charAt(0).toUpperCase() + category.slice(1), JSON.stringify([]));
@@ -858,13 +861,20 @@ function updatePreviews() {
     if (funFactEl) funFactEl.innerText = selectedFunFact || 'No fun fact selected';
     if (proTipEl) proTipEl.innerText = selectedProTip || 'No pro tip selected';
     if (quoteEl) quoteEl.innerText = selectedQuote || 'No quote selected';
+    if (window.NlEntertainment && typeof window.NlEntertainment.updatePreviews === 'function') {
+        window.NlEntertainment.updatePreviews();
+    }
 }
 
 // Regenerate random for a category
 function regenerateRandom(category) {
     if (category === 'funFact') selectedFunFact = getRandomItem(funFacts, usedFunFacts);
-    if (category === 'proTip') selectedProTip = getRandomItem(proTips, usedProTips);
-    if (category === 'quote') selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    else if (category === 'proTip') selectedProTip = getRandomItem(proTips, usedProTips);
+    else if (category === 'quote') selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    else if (window.NlEntertainment && typeof window.NlEntertainment.regenerateRandom === 'function') {
+        window.NlEntertainment.regenerateRandom(category);
+        return;
+    }
 
     localStorage.setItem('usedFunFacts', JSON.stringify(usedFunFacts));
     localStorage.setItem('usedProTips', JSON.stringify(usedProTips));
@@ -875,11 +885,56 @@ function regenerateRandom(category) {
 
 const NL_CHOICE_MODAL_ID = 'newsletter-choice-modal';
 
+function getNewsletterSelections() {
+    const contentSections = {
+        fun: !!document.getElementById('nl-fun')?.checked,
+        tip: !!document.getElementById('nl-tip')?.checked,
+        quote: !!document.getElementById('nl-quote')?.checked,
+        dadjoke: !!document.getElementById('nl-dadjoke')?.checked,
+        puzzle: !!document.getElementById('nl-puzzle')?.checked
+    };
+    const extra = (window.NlEntertainment && typeof window.NlEntertainment.getSelectionsExtra === 'function')
+        ? window.NlEntertainment.getSelectionsExtra()
+        : { puzzleType: 'trivia' };
+    return {
+        personal: !!document.getElementById('nl-personal')?.checked,
+        includePhoto: !!document.getElementById('nl-include-photo')?.checked,
+        includeVideo: !!document.getElementById('nl-include-video')?.checked,
+        includeBlog: !!document.getElementById('nl-include-blog')?.checked,
+        contentSections,
+        puzzleType: extra.puzzleType || 'trivia'
+    };
+}
+
 function getNewsletterChoiceModal() {
     return document.getElementById(NL_CHOICE_MODAL_ID);
 }
 
 function openModal(category) {
+    if (category === 'dadJoke' || category === 'puzzle') {
+        if (window.NlEntertainment && typeof window.NlEntertainment.openChoiceModal === 'function') {
+            window.NlEntertainment.openChoiceModal(category, {
+                ensureModal: getNewsletterChoiceModal,
+                getTitleEl: (m) => m && m.querySelector('#modal-title'),
+                getListEl: (m) => m && m.querySelector('#modal-list'),
+                showModal: (m) => {
+                    if (typeof window.openNamedModal === 'function') window.openNamedModal(m);
+                    else if (typeof window.openAppModal === 'function') window.openAppModal(m);
+                    else {
+                        m.classList.remove('hidden');
+                        m.classList.add('flex');
+                        m.style.display = 'flex';
+                        document.body.classList.add('modal-open');
+                    }
+                    m.style.alignItems = 'center';
+                    m.style.justifyContent = 'center';
+                },
+                hideModal: () => closeModal()
+            });
+        }
+        return;
+    }
+
     const modal = getNewsletterChoiceModal();
     if (!modal) return;
 
@@ -1191,13 +1246,205 @@ if (!window._nlEscListener) {
 // === PERSISTENCE SETUP ===
 const persistentFields = [
     'nl-audience', 'nl-tone', 'nl-location', 'nl-title', 'nl-length',
-    'nl-name',                    // keep
-    'nl-email',                   // keep
+    'nl-name',
+    'nl-email',
     'nl-blog-url', 'nl-blog-title',
     'nl-include-blog',
     'nl-personal-photo',
-    'nl-personal-video'
+    'nl-personal-video',
+    'brand-company', 'brand-tagline', 'brand-contact', 'brand-logo-data', 'brand-headshot'
 ];
+
+const SOCIAL_LINK_CONFIG = [
+    { key: 'linkedin', label: 'LinkedIn' },
+    { key: 'facebook', label: 'Facebook' },
+    { key: 'instagram', label: 'Instagram' },
+    { key: 'tiktok', label: 'TikTok' },
+    { key: 'youtube', label: 'YouTube' },
+    { key: 'x', label: 'X' }
+];
+
+function escBrandingAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escBrandingText(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function getAgentBrandingContext() {
+    const profile = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
+    const includeSignature = document.getElementById('nl-include-signature')?.checked !== false;
+    const includeSocial = document.getElementById('nl-include-social')?.checked !== false;
+
+    return {
+        includeSignature,
+        includeSocial,
+        name: (document.getElementById('nl-name')?.value || '').trim() || profile.name || '',
+        email: (document.getElementById('nl-email')?.value || '').trim() || profile.email || '',
+        company: (document.getElementById('brand-company')?.value || '').trim() || profile.companyName || '',
+        tagline: (document.getElementById('brand-tagline')?.value || '').trim() || profile.tagline || '',
+        phone: (document.getElementById('brand-contact')?.value || '').trim() || profile.phone || '',
+        logoUrl: (document.getElementById('brand-logo-data')?.value || '').trim() || profile.logoUrl || '',
+        headshotUrl: (document.getElementById('brand-headshot')?.value || '').trim() || profile.headshotUrl || '',
+        social: profile.socialLinks || {}
+    };
+}
+
+function buildSocialLinksHtml(social) {
+    const links = SOCIAL_LINK_CONFIG
+        .filter((s) => social[s.key] && String(social[s.key]).trim())
+        .map((s) => {
+            const url = String(social[s.key]).trim();
+            return `<a href="${escBrandingAttr(url)}" style="color:#00A89D;text-decoration:underline;margin:0 10px;font-size:12px;font-weight:600;" target="_blank" rel="noopener">${escBrandingText(s.label)}</a>`;
+        });
+    if (!links.length) return '';
+    return `<div style="text-align:center;padding:10px 0 4px;border-top:1px solid #e5e5e5;margin-top:12px;">${links.join('')}</div>`;
+}
+
+function buildAgentBrandHeader(ctx) {
+    if (!ctx.includeSignature) return '';
+    if (!ctx.logoUrl && !ctx.company && !ctx.tagline) return '';
+
+    return `
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#002B5C;color:#ffffff;">
+  <tr>
+    <td style="padding:18px 24px;text-align:center;">
+      ${ctx.logoUrl ? `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="Logo" style="max-height:52px;max-width:200px;height:auto;display:block;margin:0 auto 10px;border:0;">` : ''}
+      ${ctx.company ? `<div style="font-size:20px;font-weight:700;letter-spacing:0.5px;color:#ffffff;">${escBrandingText(ctx.company)}</div>` : ''}
+      ${ctx.tagline ? `<div style="font-size:13px;opacity:0.92;margin-top:4px;color:#ffffff;">${escBrandingText(ctx.tagline)}</div>` : ''}
+    </td>
+  </tr>
+</table>`;
+}
+
+function buildAgentSignatureFooter(ctx) {
+    if (!ctx.includeSignature && !ctx.includeSocial) return '';
+
+    const hasSignatureContent = ctx.includeSignature && (
+        ctx.headshotUrl || ctx.name || ctx.company || ctx.phone || ctx.email || ctx.logoUrl
+    );
+    const socialHtml = ctx.includeSocial ? buildSocialLinksHtml(ctx.social) : '';
+
+    if (!hasSignatureContent && !socialHtml) return '';
+
+    let inner = '';
+
+    if (hasSignatureContent) {
+        inner += '<table width="100%" cellpadding="0" cellspacing="0"><tr>';
+        if (ctx.headshotUrl) {
+            inner += `<td width="96" valign="top" style="padding-right:18px;">
+              <img src="${escBrandingAttr(ctx.headshotUrl)}" alt="${escBrandingAttr(ctx.name || 'Agent')}" width="80" height="80" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #00A89D;display:block;">
+            </td>`;
+        }
+        inner += '<td valign="top" style="font-family:Arial,sans-serif;">';
+        if (ctx.name) inner += `<div style="font-size:17px;font-weight:bold;color:#002B5C;margin-bottom:4px;">${escBrandingText(ctx.name)}</div>`;
+        if (ctx.company) inner += `<div style="font-size:13px;color:#444;margin-bottom:2px;">${escBrandingText(ctx.company)}</div>`;
+        if (ctx.tagline) inner += `<div style="font-size:12px;color:#666;font-style:italic;margin-bottom:8px;">${escBrandingText(ctx.tagline)}</div>`;
+        const contact = [];
+        if (ctx.phone) contact.push(escBrandingText(ctx.phone));
+        if (ctx.email) {
+            contact.push(`<a href="mailto:${escBrandingAttr(ctx.email)}" style="color:#00A89D;text-decoration:underline;">${escBrandingText(ctx.email)}</a>`);
+        }
+        if (contact.length) {
+            inner += `<div style="font-size:12px;color:#555;margin-top:6px;">${contact.join(' &nbsp;|&nbsp; ')}</div>`;
+        }
+        if (ctx.logoUrl && ctx.headshotUrl) {
+            inner += `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="Logo" style="max-height:36px;margin-top:12px;border:0;display:block;">`;
+        }
+        inner += '</td></tr></table>';
+    }
+
+    inner += socialHtml;
+
+    return `
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-top:3px solid #00A89D;margin-top:8px;">
+  <tr>
+    <td style="padding:24px 28px;font-family:Arial,sans-serif;">
+      ${inner}
+    </td>
+  </tr>
+</table>`;
+}
+
+function injectAgentBranding(html) {
+    const ctx = getAgentBrandingContext();
+    const header = buildAgentBrandHeader(ctx);
+    const footer = buildAgentSignatureFooter(ctx);
+
+    if (header) {
+        if (/<body[^>]*>/i.test(html)) {
+            html = html.replace(/<body[^>]*>/i, '$&' + header);
+        } else {
+            html = header + html;
+        }
+    }
+
+    if (footer) {
+        if (/<\/body>\s*<\/html>/i.test(html)) {
+            html = html.replace(/<\/body>\s*<\/html>/i, footer + '</body></html>');
+        } else {
+            html += footer;
+        }
+    }
+
+    return html;
+}
+
+function saveBrandFieldsToProfile() {
+    try {
+        const raw = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const company = document.getElementById('brand-company')?.value.trim();
+        const tagline = document.getElementById('brand-tagline')?.value.trim();
+        const phone = document.getElementById('brand-contact')?.value.trim();
+        const logo = document.getElementById('brand-logo-data')?.value.trim();
+        const headshot = document.getElementById('brand-headshot')?.value.trim();
+        const name = document.getElementById('nl-name')?.value.trim();
+        const email = document.getElementById('nl-email')?.value.trim();
+
+        if (company) raw.companyName = company;
+        if (tagline) raw.tagline = tagline;
+        if (phone) raw.phone = phone;
+        if (logo) raw.logoUrl = logo;
+        if (headshot) raw.headshotUrl = headshot;
+        if (name) raw.name = name;
+        if (email) raw.email = email;
+
+        localStorage.setItem('userProfile', JSON.stringify(raw));
+        const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+        localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...raw }));
+    } catch (e) {}
+}
+
+function updateBrandPreview() {
+    const preview = document.getElementById('nl-brand-preview');
+    if (!preview) return;
+
+    const ctx = getAgentBrandingContext();
+    const parts = [];
+
+    if (!ctx.includeSignature && !ctx.includeSocial) {
+        preview.classList.add('hidden');
+        return;
+    }
+
+    if (ctx.includeSignature) {
+        parts.push('<strong>Signature:</strong> ' + [
+            ctx.headshotUrl ? 'headshot' : null,
+            ctx.logoUrl ? 'logo' : null,
+            ctx.name || null,
+            ctx.phone || null,
+            ctx.email || null
+        ].filter(Boolean).join(' · ') || 'add branding fields or sync from profile');
+    }
+    if (ctx.includeSocial) {
+        const count = SOCIAL_LINK_CONFIG.filter((s) => ctx.social[s.key]).length;
+        parts.push(`<strong>Social:</strong> ${count ? count + ' link(s)' : 'none in profile yet'}`);
+    }
+
+    preview.innerHTML = parts.join('<br>');
+    preview.classList.remove('hidden');
+}
 
 // === GLOBAL EMAIL / CRM SETTINGS ===
 const EMAIL_WIDTH = 600;
@@ -1241,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ensure profile sync on this legacy load path too (for name/email/market etc)
     if (typeof syncNewsletterFromProfile === 'function') {
-      setTimeout(() => { try { syncNewsletterFromProfile(); } catch(e){} }, 60);
+      setTimeout(() => { try { syncNewsletterFromProfile(true); } catch(e){} }, 60);
     }
 });
 
@@ -1270,6 +1517,9 @@ document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEac
             const fields = document.getElementById('blog-fields');
             if (fields) fields.classList.toggle('hidden', !cb.checked);
         }
+        if (cb.id === 'nl-include-signature' || cb.id === 'nl-include-social') {
+            updateBrandPreview();
+        }
     });
 });
 
@@ -1289,7 +1539,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Profile sync on this load path too
     if (typeof syncNewsletterFromProfile === 'function') {
-      setTimeout(() => { try { syncNewsletterFromProfile(); } catch(e){} }, 70);
+      setTimeout(() => { try { syncNewsletterFromProfile(true); } catch(e){} }, 70);
     }
 });
 
@@ -1521,9 +1771,10 @@ async function generateNewsletter(feedback = '') {
                 'Branding:',
                 '- Name: ' + (document.getElementById('nl-name').value || 'Your Agent'),
                 '- Email: ' + (document.getElementById('nl-email').value || ''),
-                // Branding from profile (or page overrides) so AI can reference team naturally
                 '- Company/Team Name: ' + (document.getElementById('brand-company')?.value || (window.getUserProfile ? (window.getUserProfile().companyName || '') : '')),
                 '- Tagline: ' + (document.getElementById('brand-tagline')?.value || (window.getUserProfile ? (window.getUserProfile().tagline || '') : '')),
+                '- Agent signature block in final HTML: ' + (document.getElementById('nl-include-signature')?.checked !== false ? 'YES (post-processing adds headshot/logo/contact — do NOT add your own signature)' : 'NO (content only — no signature block)'),
+                '- Social media links in final HTML: ' + (document.getElementById('nl-include-social')?.checked !== false ? 'YES (post-processing adds links from profile)' : 'NO'),
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
@@ -1603,6 +1854,10 @@ async function generateNewsletter(feedback = '') {
 ];
         }
 
+        if (!feedback && window.NlEntertainment && typeof window.NlEntertainment.buildPromptLines === 'function') {
+            promptLines.push(...window.NlEntertainment.buildPromptLines(getNewsletterSelections()));
+        }
+
         const prompt = promptLines.join('\n');
 
         // Centralized API call (Phase 0)
@@ -1624,58 +1879,9 @@ async function generateNewsletter(feedback = '') {
         
         html = html.replace(/<head>[\s\S]*?<\/head>/gi, '<head><meta charset="UTF-8"></head>');
 
-        // === AGENT CUSTOM BRANDING INJECTION (logo + company + tagline + contact + social links) ===
-        // Primary source: central userProfile (set in Profile & Preferences).
-        // Newsletter page fields act as per-newsletter overrides.
-        // Social links are skipped if not provided.
         try {
-          const profile = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
-          const pageCompany = (document.getElementById('brand-company')?.value || '').trim();
-          const pageTag = (document.getElementById('brand-tagline')?.value || '').trim();
-          const pageContact = (document.getElementById('brand-contact')?.value || '').trim();
-          const pageLogoData = (document.getElementById('brand-logo-data')?.value || '').trim();
-
-          const bCompany = pageCompany || profile.companyName || '';
-          const bTag = pageTag || profile.tagline || '';
-          const bContact = pageContact || (profile.phone ? `Call/text ${profile.phone}` : '') || (profile.email || '');
-          const bLogo = pageLogoData || profile.logoUrl || '';
-
-          const social = profile.socialLinks || {};
-          const socialLinks = [];
-          if (social.linkedin) socialLinks.push(`LinkedIn: ${social.linkedin}`);
-          if (social.facebook) socialLinks.push(`Facebook: ${social.facebook}`);
-          if (social.instagram) socialLinks.push(`Instagram: ${social.instagram}`);
-          if (social.tiktok) socialLinks.push(`TikTok: ${social.tiktok}`);
-          if (social.youtube) socialLinks.push(`YouTube: ${social.youtube}`);
-          if (social.x) socialLinks.push(`X: ${social.x}`);
-
-          if (bCompany || bLogo || bTag || bContact || socialLinks.length) {
-            const brandHeader = `
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#002B5C; color:white;">
-                <tr>
-                  <td style="padding:16px 24px; text-align:center;">
-                    ${bLogo ? `<img src="${bLogo}" alt="Logo" style="max-height:52px; max-width:180px; height:auto; display:block; margin:0 auto 8px; border:0;">` : ''}
-                    <div style="font-size:20px; font-weight:700; letter-spacing:0.5px;">${bCompany || 'Your Team'}</div>
-                    ${bTag ? `<div style="font-size:13px; opacity:0.9; margin-top:2px;">${bTag}</div>` : ''}
-                  </td>
-                </tr>
-              </table>`;
-            if (/<body[^>]*>/i.test(html)) {
-              html = html.replace(/<body[^>]*>/i, '$&' + brandHeader);
-            } else {
-              html = brandHeader + html;
-            }
-
-            if (bContact || socialLinks.length) {
-              let footer = '';
-              if (bContact) footer += `<div style="text-align:center; font-size:12px; color:#555; padding:8px 0 4px;">${bContact}</div>`;
-              if (socialLinks.length) {
-                footer += `<div style="text-align:center; font-size:11px; color:#666; padding:4px 0 12px; border-top:1px solid #eee;">${socialLinks.join(' &nbsp;|&nbsp; ')}</div>`;
-              }
-              html = html.replace(/<\/body>\s*<\/html>/i, footer + '</body></html>');
-            }
-          }
-        } catch(e){ /* non-fatal */ }
+          html = injectAgentBranding(html);
+        } catch (e) { /* non-fatal */ }
 
                // === OUTLOOK-PROOF FULL-WIDTH HERO ===
 
@@ -1738,6 +1944,10 @@ async function generateNewsletter(feedback = '') {
             html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
             html = html.replace(/<p[^>]*id=["']?pro-tip-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedProTip}</p>`);
             html = html.replace(/<p[^>]*id=["']?quote-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p><em>${selectedQuote}</em></p>`);
+            const nlSelections = getNewsletterSelections();
+            if (window.NlEntertainment && typeof window.NlEntertainment.injectIntoHtml === 'function') {
+                html = window.NlEntertainment.injectIntoHtml(html, nlSelections);
+            }
          
             // === ONLY RUN HEAVY INJECTION LOGIC ON FRESH GENERATION, NOT ON FEEDBACK EDITS ===
             // When editing with feedback, the model was explicitly told to return the COMPLETE modified full HTML.
@@ -1980,6 +2190,10 @@ if (!htmlIncludesReferralCta(html)) {
 }
             } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
 
+            if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
+                html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
+            }
+
     // Normalize before saving the raw HTML (for downloads/copying)
     lastGeneratedHTML = normalizeRawNewsletterHTML(html);
 
@@ -2085,55 +2299,9 @@ function getCleanOutlookHTML() {
 
     let cleanHTML = rawEl.value;
 
-    // === AGENT CUSTOM BRANDING (also ensure in clean/saved Outlook copies) ===
-    // Uses same profile + page override + social links logic as main generation.
     try {
-      const profile = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
-      const pageCompany = (document.getElementById('brand-company')?.value || '').trim();
-      const pageTag = (document.getElementById('brand-tagline')?.value || '').trim();
-      const pageContact = (document.getElementById('brand-contact')?.value || '').trim();
-      const pageLogoData = (document.getElementById('brand-logo-data')?.value || '').trim();
-
-      const bCompany = pageCompany || profile.companyName || '';
-      const bTag = pageTag || profile.tagline || '';
-      const bContact = pageContact || (profile.phone ? `Call/text ${profile.phone}` : '') || (profile.email || '');
-      const bLogo = pageLogoData || profile.logoUrl || '';
-
-      const social = profile.socialLinks || {};
-      const socialLinks = [];
-      if (social.linkedin) socialLinks.push(`LinkedIn: ${social.linkedin}`);
-      if (social.facebook) socialLinks.push(`Facebook: ${social.facebook}`);
-      if (social.instagram) socialLinks.push(`Instagram: ${social.instagram}`);
-      if (social.tiktok) socialLinks.push(`TikTok: ${social.tiktok}`);
-      if (social.youtube) socialLinks.push(`YouTube: ${social.youtube}`);
-      if (social.x) socialLinks.push(`X: ${social.x}`);
-
-      if (bCompany || bLogo || bTag || bContact || socialLinks.length) {
-        const brandHeader = `
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#002B5C; color:white;">
-            <tr>
-              <td style="padding:16px 24px; text-align:center;">
-                ${bLogo ? `<img src="${bLogo}" alt="Logo" style="max-height:52px; max-width:180px; height:auto; display:block; margin:0 auto 8px; border:0;">` : ''}
-                <div style="font-size:20px; font-weight:700; letter-spacing:0.5px;">${bCompany || 'Your Team'}</div>
-                ${bTag ? `<div style="font-size:13px; opacity:0.9; margin-top:2px;">${bTag}</div>` : ''}
-              </td>
-            </tr>
-          </table>`;
-        if (/<body[^>]*>/i.test(cleanHTML)) {
-          cleanHTML = cleanHTML.replace(/<body[^>]*>/i, '$&' + brandHeader);
-        } else {
-          cleanHTML = brandHeader + cleanHTML;
-        }
-        if (bContact || socialLinks.length) {
-          let footer = '';
-          if (bContact) footer += `<div style="text-align:center; font-size:12px; color:#555; padding:8px 0 4px;">${bContact}</div>`;
-          if (socialLinks.length) {
-            footer += `<div style="text-align:center; font-size:11px; color:#666; padding:4px 0 12px; border-top:1px solid #eee;">${socialLinks.join(' &nbsp;|&nbsp; ')}</div>`;
-          }
-          cleanHTML = cleanHTML.replace(/<\/body>\s*<\/html>/i, footer + '</body></html>');
-        }
-      }
-    } catch(e){}
+      cleanHTML = injectAgentBranding(cleanHTML);
+    } catch (e) {}
 
     // === BRAND COLOR NORMALIZATION for clean Outlook / vault copies ===
     // Replaces obnoxious orange (#00A89D) headers/buttons with professional navy (#002B5C)
@@ -2453,19 +2621,43 @@ function copyForOutlook() {
     };
   }
 
-  function syncNewsletterFromProfile() {
+  function syncNewsletterFromProfile(silent) {
     try {
       const p = getCentralProfile();
-      const nameEl = document.getElementById('nl-name');
-      const emailEl = document.getElementById('nl-email');
-      const locEl = document.getElementById('nl-location');
-      if (nameEl && p.name && !nameEl.value) nameEl.value = p.name;
-      if (emailEl && (p.email || p.workEmail) && !emailEl.value) emailEl.value = p.email || p.workEmail || '';
-      if (locEl && (p.localArea || p.market) && (!locEl.value || locEl.value === 'Fort Wayne, Indiana')) {
-        locEl.value = p.localArea || p.market || locEl.value;
-      }
-      // Silent profile sync — no toast to avoid corner popups on load
+      const overwrite = silent !== true;
 
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (!el || !val) return;
+        if (overwrite || !el.value.trim()) el.value = val;
+      };
+
+      setVal('nl-name', p.name);
+      setVal('nl-email', p.email || p.workEmail);
+      setVal('brand-company', p.companyName);
+      setVal('brand-tagline', p.tagline);
+      setVal('brand-contact', p.phone);
+      setVal('brand-logo-data', p.logoUrl);
+      setVal('brand-headshot', p.headshotUrl);
+
+      ['brand-company', 'brand-tagline', 'brand-contact', 'brand-logo-data', 'brand-headshot', 'nl-name', 'nl-email'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) localStorage.setItem(id, el.value);
+      });
+
+      const locEl = document.getElementById('nl-location');
+      if (locEl && (p.location || p.localArea || p.market)) {
+        const market = p.location || p.localArea || p.market;
+        if (overwrite || !locEl.value || locEl.value === 'Fort Wayne, Indiana') {
+          locEl.value = market;
+        }
+      }
+
+      updateBrandPreview();
+
+      if (!silent && typeof window.showToast === 'function') {
+        window.showToast('Branding synced from your profile', 'success');
+      }
     } catch (e) {
       console.warn('[newsletter] profile sync failed', e);
     }
@@ -2536,10 +2728,33 @@ function copyForOutlook() {
     // The original DOMContentLoaded blocks and auto-save listeners are included
     // in the code above. They will run when this module executes.
 
-    // Initial profile sync (non-destructive)
     setTimeout(() => {
-      if (typeof syncNewsletterFromProfile === 'function') syncNewsletterFromProfile();
+      if (typeof syncNewsletterFromProfile === 'function') {
+        try { syncNewsletterFromProfile(true); } catch (e) {}
+      } else {
+        updateBrandPreview();
+      }
     }, 50);
+
+    ['brand-company', 'brand-tagline', 'brand-contact', 'brand-logo-data', 'brand-headshot', 'nl-name', 'nl-email'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const handler = () => {
+        saveBrandFieldsToProfile();
+        updateBrandPreview();
+      };
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    });
+
+    const sigCb = document.getElementById('nl-include-signature');
+    const socialCb = document.getElementById('nl-include-social');
+    if (sigCb && socialCb) {
+      sigCb.addEventListener('change', () => {
+        updateBrandPreview();
+      });
+      socialCb.addEventListener('change', updateBrandPreview);
+    }
 
     // Ensure conditional fields (personal / blog) show/hide work
     setTimeout(() => {
@@ -2572,6 +2787,19 @@ function copyForOutlook() {
     if (typeof restoreLastNewsletter === 'function') {
       try { restoreLastNewsletter(); } catch (e) {}
     }
+
+    if (window.NlEntertainment && typeof window.NlEntertainment.wireUI === 'function') {
+      try { window.NlEntertainment.wireUI(); } catch (e) { console.warn('[newsletter] NlEntertainment wireUI', e); }
+    }
+
+    document.querySelectorAll('.nl-choice-btn[data-nl-choice]').forEach((btn) => {
+      if (btn._nlChoiceWired) return;
+      btn._nlChoiceWired = true;
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-nl-choice');
+        if (cat && typeof openModal === 'function') openModal(cat);
+      });
+    });
 
     console.log('%c[newsletter-generator.js] Newsletter Generator initialized', 'color:#00A89D');
   }
