@@ -1,9 +1,34 @@
 /**
  * js/features/user-profile.js
- * Central user profile modal — powers personalization across all Agent Sales Coach tools.
+ * Central profile for Agent Sales Coach — tabs, wizard, completeness meter, tool wiring.
  */
 (function () {
   'use strict';
+
+  const STORAGE_KEY = 'userProfile';
+  const WIZARD_DONE_KEY = 'coachProfileWizardDone';
+
+  const FOCUS_OPTIONS = {
+    'balanced-growth': 'Balanced Growth',
+    'agent-network': 'Heavy Agent Network & Co-Broke Focus',
+    database: 'Past Client / Sphere / Database Focus',
+    listings: 'Listing Dominance & Seller Focus',
+    buyers: 'Buyer Specialist & Relocation'
+  };
+
+  const FOCUS_LEGACY = {
+    'Balanced Growth': 'balanced-growth',
+    'Heavy Agent Network & Co-Broke Focus': 'agent-network',
+    'Past Client / Sphere / Database Focus': 'database',
+    'Listing Dominance & Seller Focus': 'listings',
+    'Buyer Specialist & Relocation': 'buyers'
+  };
+
+  const DATABASE_LABELS = {
+    'under-50': 'Under 50 past clients',
+    '50-200': '50–200 past clients',
+    '200-plus': '200+ past clients'
+  };
 
   const COMPLETENESS_CHECKS = [
     { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach' },
@@ -18,10 +43,44 @@
     { key: 'contentNotes', weight: 10, hint: 'Content guardrails', tools: 'All AI tools' }
   ];
 
+  const PROFILE_TABS = ['identity', 'business', 'content', 'prospecting', 'personal'];
+
   function asArray(val) {
     if (Array.isArray(val)) return val.filter(Boolean);
     if (typeof val === 'string' && val.trim()) return val.split(',').map((s) => s.trim()).filter(Boolean);
     return [];
+  }
+
+  function normalizeFocus(raw) {
+    if (!raw) return { value: '', label: '' };
+    if (FOCUS_OPTIONS[raw]) return { value: raw, label: FOCUS_OPTIONS[raw] };
+    if (FOCUS_LEGACY[raw]) return { value: FOCUS_LEGACY[raw], label: raw };
+    const lower = String(raw).toLowerCase();
+    if (lower.includes('agent network') || lower.includes('co-broke') || lower.includes('co broke')) {
+      return { value: 'agent-network', label: FOCUS_OPTIONS['agent-network'] };
+    }
+    if (lower.includes('database') || lower.includes('past client') || lower.includes('sphere')) {
+      return { value: 'database', label: FOCUS_OPTIONS.database };
+    }
+    if (lower.includes('listing') || lower.includes('seller')) {
+      return { value: 'listings', label: FOCUS_OPTIONS.listings };
+    }
+    if (lower.includes('buyer') || lower.includes('relocation')) {
+      return { value: 'buyers', label: FOCUS_OPTIONS.buyers };
+    }
+    return { value: raw, label: raw };
+  }
+
+  function readRawProfile() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (raw && Object.keys(raw).length) return raw;
+      const legacy = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+      if (legacy && (legacy.name || legacy.location || legacy.focus)) return legacy;
+      return raw;
+    } catch (e) {
+      return {};
+    }
   }
 
   function checkComplete(p, key) {
@@ -39,11 +98,15 @@
       case 'tone':
         return !!(p.tone || p.personality);
       case 'partnerTypes':
-        return asArray(p.partnerTypes).length > 0 || !!(p.partnerTypesOther && p.partnerTypesOther.trim());
+        return asArray(p.partnerTypes).length > 0;
       case 'challenges':
-        return asArray(p.challenges).length > 0 || !!(p.challengesOther && p.challengesOther.trim());
+        return asArray(p.challenges).length > 0;
+      case 'intro':
+        return !!(p.intro && String(p.intro).trim());
       case 'activities':
         return asArray(p.activities).length > 0;
+      case 'databaseSize':
+        return !!(p.databaseSize && String(p.databaseSize).trim());
       case 'contentNotes':
         return !!(p.contentNotes && String(p.contentNotes).trim());
       default:
@@ -51,8 +114,81 @@
     }
   }
 
+  function normalizeProfile(raw) {
+    const p = raw || {};
+    const focus = normalizeFocus(p.focus);
+    const hobbies = asArray(p.hobbies);
+    const activities = asArray(p.activities);
+    const partnerTypes = asArray(p.partnerTypes).length
+      ? asArray(p.partnerTypes)
+      : asArray(p.targetPartners);
+    const challenges = asArray(p.challenges);
+    const niches = asArray(p.niches);
+    const voiceTraits = asArray(p.voiceTraits);
+    const formats = asArray(p.formats);
+    const location = (p.location || p.localArea || p.market || '').trim();
+
+    const goals = [
+      p.monthlyUnits ? `${p.monthlyUnits} loans/mo` : '',
+      p.monthlyGoal ? `Volume: ${p.monthlyGoal}` : ''
+    ].filter(Boolean).join('; ');
+
+    return {
+      ...p,
+      name: (p.name || '').trim(),
+      email: (p.email || '').trim(),
+      phone: (p.phone || '').trim(),
+      nmls: (p.nmls || '').trim(),
+      intro: (p.intro || '').trim(),
+      location,
+      localArea: location,
+      market: location,
+      focus: focus.value,
+      focusLabel: focus.label,
+      years: p.years || '',
+      team: p.team || '',
+      monthlyUnits: p.monthlyUnits || '',
+      monthlyGoal: p.monthlyGoal || '',
+      income: p.income || '',
+      hours: p.hours || '',
+      databaseSize: p.databaseSize || '',
+      databaseSizeLabel: DATABASE_LABELS[p.databaseSize] || '',
+      partnerFocus: (p.partnerFocus || '').trim(),
+      family: (p.family || '').trim(),
+      personality: (p.personality || '').trim(),
+      tone: p.tone || '',
+      contentNotes: (p.contentNotes || '').trim(),
+      hobbiesOther: (p.hobbiesOther || '').trim(),
+      hobbies,
+      activities,
+      partnerTypes,
+      targetPartners: partnerTypes,
+      partnerTypesOther: (p.partnerTypesOther || '').trim(),
+      niches,
+      nichesOther: (p.nichesOther || '').trim(),
+      challenges,
+      challengesOther: (p.challengesOther || '').trim(),
+      formats,
+      voiceTraits,
+      goals,
+      companyName: (p.companyName || p['company-name'] || '').trim(),
+      tagline: (p.tagline || '').trim(),
+      logoUrl: (p.logoUrl || p['logo-url'] || '').trim(),
+      headshotUrl: (p.headshotUrl || p['headshot-url'] || '').trim(),
+      socialLinks: p.socialLinks || {},
+      blogPageUrl: (p.blogPageUrl || p.blogUrl || '').trim(),
+      linkedInUrl: (p.linkedInUrl || p.linkedin || p.socialLinks?.linkedin || '').trim(),
+      companyWebsite: (p.companyWebsite || p.website || '').trim(),
+      translationDefaultTarget: p.translationDefaultTarget || 'es',
+      translationFavoriteLanguages: asArray(p.translationFavoriteLanguages).length
+        ? asArray(p.translationFavoriteLanguages)
+        : ['es', 'vi', 'zh'],
+      lastUpdated: p.lastUpdated || ''
+    };
+  }
+
   function getProfileCompleteness(profile) {
-    const p = profile || (typeof window.getUserProfile === 'function' ? window.getUserProfile() : {});
+    const p = profile || normalizeProfile(readRawProfile());
     let score = 0;
     const missing = [];
 
@@ -71,48 +207,265 @@
     };
   }
 
-  function isProfileModalOpen() {
-    const el = document.getElementById('user-profile-modal');
-    return !!(el && !el.classList.contains('hidden') && (el.classList.contains('flex') || el.style.display === 'flex'));
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
+  function previewRow(label, value) {
+    if (!value || (Array.isArray(value) && !value.length)) return '';
+    const text = Array.isArray(value) ? value.join(', ') : String(value);
+    if (!text.trim()) return '';
+    return `<div class="flex gap-2 py-0.5"><span class="font-semibold text-[#002B5C] dark:text-[#00A89D] min-w-[6.5rem] flex-shrink-0">${escapeHtml(label)}</span><span class="text-gray-700 dark:text-gray-300">${escapeHtml(text)}</span></div>`;
+  }
+
+  function buildPreviewHtml(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    const rows = [
+      previewRow('Name', p.name),
+      previewRow('Email', p.email),
+      previewRow('Phone', p.phone),
+      previewRow('Company', p.companyName),
+      previewRow('Market', p.location),
+      previewRow('Intro', p.intro),
+      previewRow('Focus', p.focusLabel || p.focus),
+      previewRow('Goals', [p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(' · ')),
+      previewRow('Hours/wk', p.hours),
+      previewRow('Database', p.databaseSizeLabel || p.databaseSize),
+      previewRow('Partners', [...p.partnerTypes, p.partnerTypesOther].filter(Boolean).join(', ')),
+      previewRow('Partner focus', p.partnerFocus),
+      previewRow('Hobbies', [...p.hobbies, p.hobbiesOther].filter(Boolean).join(', ')),
+      previewRow('Activities', p.activities),
+      previewRow('Challenges', [...p.challenges, p.challengesOther].filter(Boolean).join(', ')),
+      previewRow('Niches', [...p.niches, p.nichesOther].filter(Boolean).join(', ')),
+      previewRow('Tone', p.tone),
+      previewRow('Voice', p.voiceTraits),
+      previewRow('Personality', p.personality),
+      previewRow('Formats', p.formats),
+      previewRow('Guardrails', p.contentNotes),
+      previewRow('Website', p.companyWebsite),
+      previewRow('Headshot', p.headshotUrl ? 'Set' : ''),
+      previewRow('Family', p.family)
+    ].filter(Boolean);
+
+    if (!rows.length) {
+      return '<p class="text-gray-500 italic">No fields filled yet — complete the form below and every tool will personalize from it.</p>';
+    }
+    return rows.join('');
+  }
+
+  function buildPreviewText(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    if (p.intro) return p.intro;
+    const bits = [p.name, p.location, p.focusLabel, p.tone].filter(Boolean);
+    return bits.length ? bits.join(' · ') : 'Complete your profile so every tool sounds like you.';
+  }
+
+  function buildAiContext(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    const lines = [];
+    if (p.name) lines.push(`Name: ${p.name}`);
+    if (p.email) lines.push(`Email: ${p.email}`);
+    if (p.phone) lines.push(`Phone: ${p.phone}`);
+    if (p.companyName) lines.push(`Company/team: ${p.companyName}`);
+    if (p.tagline) lines.push(`Tagline: ${p.tagline}`);
+    if (p.location) lines.push(`Primary market: ${p.location}`);
+    if (p.intro) lines.push(`One-line intro: ${p.intro}`);
+    if (p.focusLabel) lines.push(`Business focus: ${p.focusLabel}`);
+    if (p.monthlyUnits || p.monthlyGoal) {
+      lines.push(`Goals: ${[p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(', ')}`);
+    }
+    if (p.databaseSizeLabel) lines.push(`Past client database: ${p.databaseSizeLabel}`);
+    if (p.partnerFocus) lines.push(`Partner focus: ${p.partnerFocus}`);
+    if (p.personality) lines.push(`Personality: ${p.personality}`);
+    if (p.hobbies.length) lines.push(`Hobbies: ${p.hobbies.join(', ')}`);
+    if (p.activities.length) lines.push(`Preferred activities: ${p.activities.join(', ')}`);
+    if (p.partnerTypes.length) lines.push(`Target partners: ${p.partnerTypes.join(', ')}`);
+    if (p.challenges.length) lines.push(`Challenges: ${p.challenges.join(', ')}`);
+    if (p.niches.length) lines.push(`Ideal clients: ${p.niches.join(', ')}`);
+    if (p.tone) lines.push(`Tone: ${p.tone}`);
+    if (p.voiceTraits.length) lines.push(`Voice traits: ${p.voiceTraits.join(', ')}`);
+    if (p.contentNotes) lines.push(`Content guardrails: ${p.contentNotes}`);
+    if (p.companyWebsite) lines.push(`Company website: ${p.companyWebsite}`);
+    if (p.headshotUrl) lines.push(`Headshot on file for newsletters`);
+    return lines.length
+      ? lines.join('. ') + '.'
+      : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
+  }
+
+  // --- Modal state ---
+  let modal;
+  let autoSaveTimer = null;
+  let wizardStep = 1;
+
   function collectProfileFromForm() {
+    const get = (id) => document.getElementById(id);
+    const getVal = (id) => (get(id)?.value || '').trim();
+    const getRaw = (id) => get(id)?.value || '';
+
+    const socialLinks = {
+      linkedin: getVal('profile-social-linkedin'),
+      facebook: getVal('profile-social-facebook'),
+      instagram: getVal('profile-social-instagram'),
+      tiktok: getVal('profile-social-tiktok'),
+      youtube: getVal('profile-social-youtube'),
+      x: getVal('profile-social-x')
+    };
+
     return {
-      name: document.getElementById('profile-name')?.value.trim() || '',
-      email: document.getElementById('profile-email')?.value.trim() || '',
-      location: document.getElementById('profile-location')?.value.trim() || '',
-      years: document.getElementById('profile-years')?.value || '',
-      team: document.getElementById('profile-team')?.value || '',
-      monthlyUnits: document.getElementById('profile-monthly-units')?.value || '',
-      monthlyGoal: document.getElementById('profile-monthly-goal')?.value || '',
-      income: document.getElementById('profile-income')?.value || '',
-      focus: document.getElementById('profile-focus')?.value || '',
-      hours: document.getElementById('profile-hours')?.value || '',
-      family: document.getElementById('profile-family')?.value.trim() || '',
-      personality: document.getElementById('profile-personality')?.value.trim() || '',
-      tone: document.getElementById('profile-tone')?.value || '',
-      contentNotes: document.getElementById('profile-content-notes')?.value.trim() || '',
-      hobbiesOther: document.getElementById('profile-hobbies-other')?.value.trim() || '',
+      name: getVal('profile-name'),
+      email: getVal('profile-email'),
+      phone: getVal('profile-phone'),
+      intro: getVal('profile-intro'),
+      location: getVal('profile-location'),
+      years: getRaw('profile-years'),
+      team: getRaw('profile-team'),
+      companyName: getVal('profile-company-name'),
+      tagline: getVal('profile-tagline'),
+      logoUrl: getVal('profile-logo-url'),
+      headshotUrl: getVal('profile-headshot-url'),
+      socialLinks,
+      monthlyUnits: getRaw('profile-monthly-units'),
+      monthlyGoal: getRaw('profile-monthly-goal'),
+      income: getRaw('profile-income'),
+      focus: getRaw('profile-focus'),
+      hours: getRaw('profile-hours'),
+      databaseSize: getRaw('profile-database-size'),
+      partnerFocus: getVal('profile-partner-focus'),
+      family: getVal('profile-family'),
+      personality: getVal('profile-personality'),
+      tone: getRaw('profile-tone'),
+      contentNotes: getVal('profile-content-notes'),
+      hobbiesOther: getVal('profile-hobbies-other'),
       hobbies: Array.from(document.querySelectorAll('.profile-hobby:checked')).map((c) => c.value),
       activities: Array.from(document.querySelectorAll('.profile-activity:checked')).map((c) => c.value),
       niches: Array.from(document.querySelectorAll('.profile-niche:checked')).map((c) => c.value),
-      nichesOther: document.getElementById('profile-niche-other')?.value.trim() || '',
+      nichesOther: getVal('profile-niche-other'),
       challenges: Array.from(document.querySelectorAll('.profile-challenge:checked')).map((c) => c.value),
-      challengesOther: document.getElementById('profile-challenge-other')?.value.trim() || '',
+      challengesOther: getVal('profile-challenge-other'),
       formats: Array.from(document.querySelectorAll('.profile-format:checked')).map((c) => c.value),
       voiceTraits: Array.from(document.querySelectorAll('.profile-voice:checked')).map((c) => c.value),
       partnerTypes: Array.from(document.querySelectorAll('.profile-partner:checked')).map((c) => c.value),
-      partnerTypesOther: document.getElementById('profile-partner-other')?.value.trim() || '',
-      translationDefaultTarget: document.getElementById('profile-translation-default')?.value || 'es',
+      partnerTypesOther: getVal('profile-partner-other'),
+      companyWebsite: getVal('profile-company-website'),
+      linkedInUrl: socialLinks.linkedin,
+      translationDefaultTarget: getRaw('profile-translation-default') || 'es',
       translationFavoriteLanguages: Array.from(document.querySelectorAll('.profile-translation-fav:checked')).map((c) => c.value),
-      headshotUrl: document.getElementById('profile-headshot-url')?.value.trim() || ''
+      lastUpdated: new Date().toISOString()
     };
   }
 
+  function persistProfile(profile, showFeedback, closeAfter) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+
+    const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...profile }));
+
+    refreshProfileUI();
+    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
+    if (typeof window.syncNewsletterFromProfile === 'function') {
+      try { window.syncNewsletterFromProfile(); } catch (e) {}
+    }
+
+    if (closeAfter) closeModal();
+
+    if (showFeedback) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Profile saved! All tools will now use your updated preferences.');
+      } else {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#00A89D] text-white px-6 py-3 rounded-2xl shadow-xl z-[9999]';
+        toast.textContent = 'Profile saved! All tools will now use your updated preferences.';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+      }
+    }
+  }
+
+  function performSave(showFeedback, closeAfter) {
+    persistProfile(collectProfileFromForm(), showFeedback, closeAfter);
+  }
+
+  function loadProfileIntoForm() {
+    const profile = normalizeProfile(readRawProfile());
+
+    const fields = [
+      'name', 'email', 'phone', 'intro', 'location', 'years', 'team',
+      'company-name', 'tagline', 'logo-url', 'headshot-url',
+      'monthly-units', 'monthly-goal', 'income', 'focus', 'hours',
+      'database-size', 'partner-focus', 'family', 'personality', 'tone',
+      'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other',
+      'company-website'
+    ];
+
+    const fieldKeyMap = {
+      'company-name': 'companyName',
+      'logo-url': 'logoUrl',
+      'headshot-url': 'headshotUrl',
+      'company-website': 'companyWebsite'
+    };
+
+    fields.forEach((field) => {
+      const el = document.getElementById('profile-' + field);
+      if (!el) return;
+      const key = fieldKeyMap[field] || field.replace(/-([a-z])/g, (_, l) => l.toUpperCase());
+      const val = profile[key] || profile[field] || '';
+      el.value = val;
+    });
+
+    const yearsEl = document.getElementById('profile-years');
+    if (yearsEl?.type === 'number') {
+      const num = parseInt(yearsEl.value, 10);
+      yearsEl.value = isNaN(num) ? '' : String(num);
+    }
+
+    const sets = [
+      ['.profile-hobby', 'hobbies'],
+      ['.profile-activity', 'activities'],
+      ['.profile-niche', 'niches'],
+      ['.profile-challenge', 'challenges'],
+      ['.profile-format', 'formats'],
+      ['.profile-voice', 'voiceTraits'],
+      ['.profile-partner', 'partnerTypes']
+    ];
+
+    sets.forEach(([sel, key]) => {
+      document.querySelectorAll(sel).forEach((cb) => {
+        cb.checked = profile[key] && profile[key].includes(cb.value);
+      });
+    });
+
+    const translationDefault = document.getElementById('profile-translation-default');
+    if (translationDefault) {
+      translationDefault.value = profile.translationDefaultTarget || 'es';
+    }
+    document.querySelectorAll('.profile-translation-fav').forEach((cb) => {
+      cb.checked = profile.translationFavoriteLanguages && profile.translationFavoriteLanguages.includes(cb.value);
+    });
+
+    const social = profile.socialLinks || {};
+    ['linkedin', 'facebook', 'instagram', 'tiktok', 'youtube', 'x'].forEach((s) => {
+      const el = document.getElementById('profile-social-' + s);
+      if (el) el.value = social[s] || '';
+    });
+
+    syncSelectAllStates();
+    refreshProfileUI();
+  }
+
+  function isProfileModalOpen() {
+    const m = modal || document.getElementById('user-profile-modal');
+    return !!(m && !m.classList.contains('hidden'));
+  }
+
   function refreshProfileUI() {
+    // Score from localStorage when modal is closed — form fields are empty until loadProfileIntoForm runs
     const profile = isProfileModalOpen()
-      ? collectProfileFromForm()
-      : (typeof window.getUserProfile === 'function' ? window.getUserProfile() : {});
+      ? normalizeProfile(collectProfileFromForm())
+      : normalizeProfile(readRawProfile());
     const { score, missing } = getProfileCompleteness(profile);
 
     const scoreEl = document.getElementById('profile-strength-score');
@@ -131,6 +484,10 @@
         hintsEl.innerHTML = '<span class="text-[11px] text-[#00A89D]"><i class="fas fa-check-circle"></i> Profile is strong — tools will personalize well.</span>';
       }
     }
+
+    updateProfileTabBadges(profile);
+    updateLivePreview(profile);
+    updateProfileLastUpdated(profile);
 
     updateHeaderProfileBadge(score);
 
@@ -163,370 +520,447 @@
     openBtn.title = `My Profile — ${score}% complete`;
   }
 
-  window.getProfileCompleteness = getProfileCompleteness;
+  function getSectionFillCount(section, profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    const maps = {
+      identity: [
+        () => p.name,
+        () => p.email,
+        () => p.location,
+        () => p.companyName,
+        () => p.headshotUrl || p.logoUrl
+      ],
+      business: [
+        () => p.focus,
+        () => p.monthlyUnits || p.monthlyGoal,
+        () => p.databaseSize,
+        () => p.hours,
+        () => p.challenges.length || p.challengesOther,
+        () => p.niches.length || p.nichesOther
+      ],
+      content: [
+        () => p.tone,
+        () => p.contentNotes,
+        () => p.voiceTraits.length,
+        () => p.formats.length,
+        () => p.companyWebsite
+      ],
+      prospecting: [
+        () => p.activities.length,
+        () => p.partnerTypes.length || p.partnerTypesOther,
+        () => p.partnerFocus
+      ],
+      personal: [
+        () => p.hobbies.length || p.hobbiesOther,
+        () => p.family,
+        () => p.personality
+      ]
+    };
+    const checks = maps[section] || [];
+    const done = checks.filter((fn) => fn()).length;
+    const total = checks.length;
+    return { done, total, label: total ? `${done}/${total}` : '' };
+  }
 
-    let modal, openBtn, closeBtn, cancelBtn, saveBtn;
+  function updateProfileTabBadges(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    PROFILE_TABS.forEach((tab) => {
+      const { done, total, label } = getSectionFillCount(tab, p);
+      const btn = document.querySelector(`.profile-tab-btn[data-profile-tab="${tab}"]`);
+      const badge = btn?.querySelector('.profile-tab-badge');
+      if (badge) badge.textContent = total ? ` ${label}` : '';
+      if (btn) {
+        btn.classList.toggle('opacity-60', total > 0 && done === 0);
+      }
+    });
+  }
 
-    function initProfileModal() {
-        modal = document.getElementById('user-profile-modal');
-        openBtn = document.getElementById('open-profile-btn');
-        closeBtn = document.getElementById('close-profile-modal');
-        cancelBtn = document.getElementById('cancel-profile');
-        saveBtn = document.getElementById('save-profile');
+  function updateLivePreview(profile) {
+    const p = profile || normalizeProfile(collectProfileFromForm());
+    const textEl = document.getElementById('profile-live-preview-text');
+    const toolsEl = document.getElementById('profile-live-preview-tools');
+    if (!textEl) return;
 
-        if (!openBtn) {
-            console.warn('[Profile Modal] open-profile-btn not found');
-            paintHeaderProfileBadge();
-            return;
-        }
+    const bits = [
+      p.name,
+      p.companyName,
+      p.location,
+      p.focusLabel || p.focus,
+      p.tone ? p.tone.replace(/\s*\(.*\)\s*/, '').trim() : ''
+    ].filter(Boolean);
 
-        if (!modal) {
-            paintHeaderProfileBadge();
-            return;
-        }
+    textEl.textContent = bits.length
+      ? bits.join(' · ')
+      : 'Complete your profile so every tool sounds like you.';
 
-        openBtn.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-        if (saveBtn) saveBtn.addEventListener('click', saveProfile);
+    if (toolsEl) {
+      const toolChips = [];
+      if (p.name && p.location) toolChips.push('Newsletter');
+      if (p.companyName || p.headshotUrl) toolChips.push('Branding');
+      if (p.tone) toolChips.push('Social');
+      if (p.focus) toolChips.push('Weekly Plan');
+      if (p.activities.length) toolChips.push('Prospecting');
+      toolsEl.innerHTML = [...new Set(toolChips)].map((t) =>
+        `<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/15 text-[#00A89D] font-semibold">${escapeHtml(t)}</span>`
+      ).join('');
+    }
+  }
 
-        // Prevent accidental close on backdrop click or Escape — only X / Close / Save can close
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                // Do nothing — user must use X or footer buttons
-            }
-        });
+  function updateProfileLastUpdated(profile) {
+    const el = document.getElementById('profile-last-updated');
+    if (!el) return;
+    const raw = (profile || normalizeProfile(readRawProfile())).lastUpdated;
+    if (!raw) {
+      el.classList.add('hidden');
+      return;
+    }
+    try {
+      const d = new Date(raw);
+      el.textContent = `Updated ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      el.classList.remove('hidden');
+    } catch (e) {
+      el.classList.add('hidden');
+    }
+  }
 
-        // Block Escape key from closing the modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden') && modal.classList.contains('flex')) {
-                e.preventDefault();
-                // Optionally flash the modal or do nothing — data is auto-saved
-            }
-        });
+  function switchProfileTab(tabId) {
+    if (!PROFILE_TABS.includes(tabId)) tabId = 'identity';
+    PROFILE_TABS.forEach((tab) => {
+      const panel = document.getElementById(`profile-tab-panel-${tab}`);
+      const btn = document.querySelector(`.profile-tab-btn[data-profile-tab="${tab}"]`);
+      const active = tab === tabId;
+      if (panel) panel.classList.toggle('hidden', !active);
+      if (btn) {
+        btn.classList.toggle('active', active);
+        btn.classList.toggle('border-[#00A89D]', active);
+        btn.classList.toggle('text-[#00A89D]', active);
+        btn.classList.toggle('bg-white', active);
+        btn.classList.toggle('dark:bg-gray-900', active);
+        btn.classList.toggle('border-transparent', !active);
+        btn.classList.toggle('text-gray-500', !active);
+      }
+    });
+    const scroll = document.getElementById('profile-form-scroll');
+    if (scroll) scroll.scrollTop = 0;
+  }
 
-        // Set up auto-save on any change inside the form (debounced)
-        setupAutoSave();
+  function getFirstIncompleteTab(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    for (const tab of PROFILE_TABS) {
+      const { done, total } = getSectionFillCount(tab, p);
+      if (total && done < total) return tab;
+    }
+    return 'identity';
+  }
 
-        // Wire the "Select all" masters for the checkbox categories in the personalization accordions
-        setupSelectAllToggles();
+  function slugifyBlogName(name) {
+    return String(name || '')
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .map((part) => part.replace(/[^a-z0-9]/g, ''))
+      .filter(Boolean)
+      .join('');
+  }
 
-        console.log('%c[Profile Modal] Initialized (auto-save + protected close)', 'color:#00A89D');
+  function applyRuoffBlogPreset() {
+    const name = document.getElementById('profile-name')?.value.trim()
+      || document.getElementById('wizard-name')?.value.trim()
+      || '';
+    const slug = slugifyBlogName(name);
+    const el = document.getElementById('profile-blog-url');
+    if (!el) return;
+    if (!slug) {
+      if (typeof window.showToast === 'function') window.showToast('Add your name first — we use it for your column URL.', 'info');
+      return;
+    }
+    el.value = `https://mortgage-column.ruoff.com/${slug}`;
+    autoSaveProfile();
+    if (typeof window.showToast === 'function') window.showToast('Ruoff Mortgage Column URL applied — adjust if your slug differs.', 'success');
+  }
 
-        refreshProfileUI();
+  function showView(view) {
+    const wizard = document.getElementById('profile-wizard-view');
+    const full = document.getElementById('profile-full-view');
+    if (wizard) wizard.classList.toggle('hidden', view !== 'wizard');
+    if (full) full.classList.toggle('hidden', view !== 'full');
+    const scroll = document.getElementById('profile-form-scroll');
+    if (scroll) scroll.scrollTop = 0;
+  }
 
-        // Expose globally so tools can open the profile easily
-        window.openUserProfile = openModal;
+  function shouldShowWizard() {
+    if (localStorage.getItem(WIZARD_DONE_KEY) === '1') return false;
+    return getProfileCompleteness().score < 55;
+  }
 
-        // Expose a clean getter for other feature modules (Weekly Win Plan, Prospecting, etc.)
-        window.getUserProfile = function() {
-            try {
-                return JSON.parse(localStorage.getItem('userProfile') || '{}');
-            } catch (e) {
-                return {};
-            }
-        };
+  function needsFullProfile() {
+    return getProfileCompleteness().score < 70;
+  }
+
+  function renderWizardStep() {
+    const steps = document.querySelectorAll('.profile-wizard-step');
+    steps.forEach((el) => el.classList.add('hidden'));
+    const active = document.getElementById(`profile-wizard-step-${wizardStep}`);
+    if (active) active.classList.remove('hidden');
+
+    const progress = document.getElementById('profile-wizard-progress');
+    if (progress) progress.textContent = `Step ${wizardStep} of 3`;
+
+    const back = document.getElementById('profile-wizard-back');
+    const next = document.getElementById('profile-wizard-next');
+    if (back) back.classList.toggle('hidden', wizardStep === 1);
+    if (next) next.textContent = wizardStep === 3 ? 'Save & finish' : 'Continue';
+  }
+
+  function mergeWizardIntoProfile() {
+    const existing = readRawProfile();
+    const step1 = {
+      name: document.getElementById('wizard-name')?.value.trim() || existing.name || '',
+      location: document.getElementById('wizard-location')?.value.trim() || existing.location || '',
+      focus: document.getElementById('wizard-focus')?.value || existing.focus || ''
+    };
+    const hobbies = Array.from(document.querySelectorAll('.wizard-hobby:checked')).map((c) => c.value);
+    const step2 = {
+      tone: document.getElementById('wizard-tone')?.value || existing.tone || '',
+      hobbies: hobbies.length ? hobbies : (existing.hobbies || [])
+    };
+    const challenge = document.getElementById('wizard-challenge')?.value;
+    const step3 = {
+      monthlyUnits: document.getElementById('wizard-monthly-units')?.value || existing.monthlyUnits || '',
+      hours: document.getElementById('wizard-hours')?.value || existing.hours || '',
+      challenges: challenge ? [challenge] : (existing.challenges || []),
+      intro: document.getElementById('wizard-intro')?.value.trim() || existing.intro || ''
+    };
+
+    return normalizeProfile({
+      ...existing,
+      ...step1,
+      ...step2,
+      ...step3,
+      lastUpdated: new Date().toISOString()
+    });
+  }
+
+  function prefillWizardFromProfile() {
+    const p = normalizeProfile(readRawProfile());
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    set('wizard-name', p.name);
+    set('wizard-location', p.location);
+    set('wizard-focus', p.focus);
+    set('wizard-tone', p.tone);
+    set('wizard-monthly-units', p.monthlyUnits);
+    set('wizard-hours', p.hours);
+    set('wizard-intro', p.intro);
+    if (p.challenges[0]) set('wizard-challenge', p.challenges[0]);
+    document.querySelectorAll('.wizard-hobby').forEach((cb) => {
+      cb.checked = p.hobbies.includes(cb.value);
+    });
+  }
+
+  function finishWizard() {
+    const merged = mergeWizardIntoProfile();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    localStorage.setItem(WIZARD_DONE_KEY, '1');
+    const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
+    loadProfileIntoForm();
+    showView('full');
+    switchProfileTab(getFirstIncompleteTab(merged));
+    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
+    if (typeof window.syncNewsletterFromProfile === 'function') {
+      try { window.syncNewsletterFromProfile(); } catch (e) {}
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast('Quick profile saved — add more anytime for even sharper content.');
+    }
+  }
+
+  function openModal(forceFull) {
+    modal = document.getElementById('user-profile-modal');
+    if (!modal) return;
+
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.display = 'flex';
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
     }
 
-    function openModal() {
-        if (!modal) {
-            modal = document.getElementById('user-profile-modal');
-        }
-        if (!modal) return;
+    const openFull = forceFull || needsFullProfile();
 
-        loadProfileIntoForm();
-        if (typeof window.openAppModal === 'function') {
-            window.openAppModal(modal);
-        } else if (typeof window.openNamedModal === 'function') {
-            window.openNamedModal(modal);
-        } else {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            modal.style.display = 'flex';
-        }
+    if (!openFull && shouldShowWizard()) {
+      wizardStep = 1;
+      prefillWizardFromProfile();
+      renderWizardStep();
+      showView('wizard');
+    } else {
+      loadProfileIntoForm();
+      showView('full');
+      const p = normalizeProfile(readRawProfile());
+      switchProfileTab(getFirstIncompleteTab(p));
+    }
+  }
+
+  function closeModal() {
+    if (!modal) modal = document.getElementById('user-profile-modal');
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
     }
 
-    function closeModal() {
-        if (!modal) return;
-        if (typeof window.closeAppModal === 'function') {
-            window.closeAppModal(modal);
-        } else if (typeof window.closeNamedModal === 'function') {
-            window.closeNamedModal(modal);
-        } else {
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
+    if (typeof window.renderWeeklyProfileSummary === 'function') window.renderWeeklyProfileSummary();
+    if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
+    if (typeof window.updatePTBProfileDisplay === 'function') window.updatePTBProfileDisplay();
+  }
 
-        // Refresh any open Weekly Win Plan profile summary when user returns
-        if (window.renderWeeklyProfileSummary) {
-            window.renderWeeklyProfileSummary();
-        }
-        // Also refresh the business plan extended profile info
-        if (window.renderExtendedProfileInfo) {
-            window.renderExtendedProfileInfo();
-        }
-        // Refresh PTB profile display
-        if (typeof window.updatePTBProfileDisplay === 'function') {
-          window.updatePTBProfileDisplay();
-        }
-    }
-
-    function loadProfileIntoForm() {
-        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-
-        // Helper to convert kebab-case (e.g. 'monthly-units') to camelCase ('monthlyUnits')
-        function kebabToCamel(str) {
-            return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-        }
-
-        const fields = ['name', 'email', 'location', 'years', 'team', 'monthly-units', 'monthly-goal', 'income', 'focus', 'hours', 'family', 'personality', 'tone', 'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other', 'company-name', 'tagline', 'phone', 'logo-url', 'headshot-url'];
-        
-        fields.forEach(field => {
-            const el = document.getElementById('profile-' + field);
-            if (el) {
-                const key = kebabToCamel(field);
-                el.value = profile[key] || profile[field] || '';
-            }
-        });
-
-        // Legacy compat for years: old profiles may have range strings like "3-5 years"; number input needs clean int or empty
-        const yearsEl = document.getElementById('profile-years');
-        if (yearsEl && yearsEl.type === 'number') {
-            const raw = yearsEl.value || '';
-            const num = parseInt(raw, 10);
-            yearsEl.value = isNaN(num) ? '' : String(num);
-        }
-
-        // Handle hobbies checkboxes
-        document.querySelectorAll('.profile-hobby').forEach(cb => {
-            cb.checked = profile.hobbies && profile.hobbies.includes(cb.value);
-        });
-
-        // Handle activities checkboxes
-        document.querySelectorAll('.profile-activity').forEach(cb => {
-            cb.checked = profile.activities && profile.activities.includes(cb.value);
-        });
-
-        // Handle new profile sections
-        document.querySelectorAll('.profile-niche').forEach(cb => {
-            cb.checked = profile.niches && profile.niches.includes(cb.value);
-        });
-        document.querySelectorAll('.profile-challenge').forEach(cb => {
-            cb.checked = profile.challenges && profile.challenges.includes(cb.value);
-        });
-        document.querySelectorAll('.profile-format').forEach(cb => {
-            cb.checked = profile.formats && profile.formats.includes(cb.value);
-        });
-
-        // Voice traits
-        document.querySelectorAll('.profile-voice').forEach(cb => {
-            cb.checked = profile.voiceTraits && profile.voiceTraits.includes(cb.value);
-        });
-
-        // Target Partner Types
-
-        // Branding fields (new)
-        const companyEl = document.getElementById('profile-company-name');
-        if (companyEl) companyEl.value = profile.companyName || profile['company-name'] || '';
-
-        const taglineEl = document.getElementById('profile-tagline');
-        if (taglineEl) taglineEl.value = profile.tagline || '';
-
-        const phoneEl = document.getElementById('profile-phone');
-        if (phoneEl) phoneEl.value = profile.phone || '';
-
-        const logoEl = document.getElementById('profile-logo-url');
-        if (logoEl) logoEl.value = profile.logoUrl || profile['logo-url'] || '';
-
-        const headshotEl = document.getElementById('profile-headshot-url');
-        if (headshotEl) headshotEl.value = profile.headshotUrl || profile['headshot-url'] || '';
-
-        // Social links object
-        const social = profile.socialLinks || {};
-        const socialFields = ['linkedin','facebook','instagram','tiktok','youtube','x'];
-        socialFields.forEach(s => {
-            const el = document.getElementById('profile-social-' + s);
-            if (el) el.value = social[s] || '';
-        });
-        document.querySelectorAll('.profile-partner').forEach(cb => {
-            cb.checked = profile.partnerTypes && profile.partnerTypes.includes(cb.value);
-        });
-
-        // Sync any "Select all" masters based on whether every item in their group is checked
-        syncSelectAllStates();
-
-        // Other text fields for new sections
-        const nicheOther = document.getElementById('profile-niche-other');
-        if (nicheOther) nicheOther.value = profile.nichesOther || '';
-
-        const challengeOther = document.getElementById('profile-challenge-other');
-        if (challengeOther) challengeOther.value = profile.challengesOther || '';
-
-        const partnerOther = document.getElementById('profile-partner-other');
-        if (partnerOther) partnerOther.value = profile.partnerTypesOther || '';
-
-        const translationDefault = document.getElementById('profile-translation-default');
-        if (translationDefault) {
-            translationDefault.value = profile.translationDefaultTarget || 'es';
-        }
-        document.querySelectorAll('.profile-translation-fav').forEach((cb) => {
-            cb.checked = profile.translationFavoriteLanguages && profile.translationFavoriteLanguages.includes(cb.value);
-        });
-
-        // Show the subtle auto-save status indicator when the form loads
-        const statusEl = document.getElementById('profile-save-status');
-        if (statusEl) {
-            statusEl.innerHTML = `<i class="fas fa-check text-[#00A89D]"></i> <span>All changes saved automatically</span>`;
-        }
-
-        refreshProfileUI();
-    }
-
-    // Core save logic (can be called silently for auto-save or with feedback for explicit Save)
-    function performSave(showFeedback = true, closeAfter = true) {
-        const profile = {
-            ...collectProfileFromForm(),
-            companyName: document.getElementById('profile-company-name')?.value.trim() || '',
-            tagline: document.getElementById('profile-tagline')?.value.trim() || '',
-            phone: document.getElementById('profile-phone')?.value.trim() || '',
-            logoUrl: document.getElementById('profile-logo-url')?.value.trim() || '',
-            headshotUrl: document.getElementById('profile-headshot-url')?.value.trim() || '',
-            socialLinks: {
-                linkedin: document.getElementById('profile-social-linkedin')?.value.trim() || '',
-                facebook: document.getElementById('profile-social-facebook')?.value.trim() || '',
-                instagram: document.getElementById('profile-social-instagram')?.value.trim() || '',
-                tiktok: document.getElementById('profile-social-tiktok')?.value.trim() || '',
-                youtube: document.getElementById('profile-social-youtube')?.value.trim() || '',
-                x: document.getElementById('profile-social-x')?.value.trim() || ''
-            },
-            lastUpdated: new Date().toISOString()
-        };
-
-        localStorage.setItem('userProfile', JSON.stringify(profile));
-        refreshProfileUI();
-
-        // Backward compatibility with older tools
-        const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
-        const merged = { ...oldSetup, ...profile };
-        localStorage.setItem('winPlanSetup', JSON.stringify(merged));
-
-        if (closeAfter) {
-            closeModal();
-        }
-
-        if (showFeedback) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#00A89D] text-white px-6 py-3 rounded-2xl shadow-xl z-[999]';
-            toast.textContent = 'Profile saved! All tools will now use your updated preferences.';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
-        }
-    }
-
-    function saveProfile() {
-        // Explicit Save button: save + show confirmation + close
-        performSave(true, true);
-    }
-
-    // Debounced auto-save (no toast, no close)
-    let autoSaveTimer = null;
-    function autoSaveProfile() {
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(() => {
-            performSave(false, false);
-            showAutoSaveIndicator();
-        }, 450); // save ~0.45s after user stops typing/clicking
-    }
-
-    function showAutoSaveIndicator() {
-        const statusEl = document.getElementById('profile-save-status');
-        if (!statusEl) return;
-
-        // Brief "just saved" confirmation
-        const originalHTML = statusEl.innerHTML;
-        statusEl.innerHTML = `<i class="fas fa-check text-[#00A89D]"></i> <span>Saved just now</span>`;
-
+  function autoSaveProfile() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+      if (!isProfileModalOpen()) return;
+      performSave(false, false);
+      const statusEl = document.getElementById('profile-save-status');
+      if (statusEl) {
+        statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]"></i> <span>Saved just now</span>';
         setTimeout(() => {
-            if (statusEl) {
-                statusEl.innerHTML = `<i class="fas fa-check text-[#00A89D]"></i> <span>All changes saved automatically</span>`;
-            }
+          if (statusEl) statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]"></i> <span>All changes saved automatically</span>';
         }, 2400);
-    }
+      }
+    }, 450);
+  }
 
-    function setupAutoSave() {
-        if (!modal) return;
+  function syncSelectAllStates() {
+    if (!modal) modal = document.getElementById('user-profile-modal');
+    if (!modal) return;
+    modal.querySelectorAll('.profile-select-all').forEach((master) => {
+      const sel = master.getAttribute('data-target');
+      if (!sel) return;
+      const boxes = modal.querySelectorAll(sel);
+      if (!boxes.length) return;
+      master.checked = Array.prototype.every.call(boxes, (b) => b.checked);
+    });
+  }
 
-        let liveUiTimer = null;
-        function scheduleLiveProfileUI() {
-            clearTimeout(liveUiTimer);
-            liveUiTimer = setTimeout(refreshProfileUI, 120);
+  function setupSelectAllToggles() {
+    if (!modal) return;
+    modal.addEventListener('change', (e) => {
+      const master = e.target.closest('.profile-select-all');
+      if (master) {
+        const targetSelector = master.getAttribute('data-target');
+        if (targetSelector) {
+          modal.querySelectorAll(targetSelector).forEach((cb) => { cb.checked = master.checked; });
+          autoSaveProfile();
         }
+      }
+      const t = e.target;
+      if (t.matches('input[type="checkbox"].profile-hobby, input[type="checkbox"].profile-activity, input[type="checkbox"].profile-partner, input[type="checkbox"].profile-niche, input[type="checkbox"].profile-challenge, input[type="checkbox"].profile-voice, input[type="checkbox"].profile-format')) {
+        syncSelectAllStates();
+      }
+    });
+  }
 
-        // Event delegation on the whole modal: any typing, selecting, or checkbox toggle auto-saves
-        modal.addEventListener('input', () => {
-            scheduleLiveProfileUI();
-            autoSaveProfile();
-        });
-        modal.addEventListener('change', () => {
-            scheduleLiveProfileUI();
-            autoSaveProfile();
-        });
-    }
+  function setupProfileTabHandlers() {
+    document.querySelectorAll('.profile-tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-profile-tab');
+        if (tab) switchProfileTab(tab);
+      });
+    });
+  }
 
-    // --- Select All toggles for the multi-select checkbox categories (in the 4 bottom accordions) ---
-    function syncSelectAllStates() {
-        if (!modal) return;
-        modal.querySelectorAll('.profile-select-all').forEach(master => {
-            const sel = master.getAttribute('data-target');
-            if (!sel) return;
-            const boxes = modal.querySelectorAll(sel);
-            if (!boxes.length) return;
-            const allOn = Array.prototype.every.call(boxes, b => b.checked);
-            master.checked = allOn;
-        });
-    }
+  function setupWizardHandlers() {
+    document.getElementById('profile-wizard-skip')?.addEventListener('click', () => {
+      localStorage.setItem(WIZARD_DONE_KEY, '1');
+      loadProfileIntoForm();
+      showView('full');
+      switchProfileTab(getFirstIncompleteTab());
+    });
 
-    function setupSelectAllToggles() {
-        if (!modal) return;
+    document.getElementById('profile-wizard-back')?.addEventListener('click', () => {
+      if (wizardStep > 1) { wizardStep -= 1; renderWizardStep(); }
+    });
 
-        // Master checkbox -> check/uncheck all in its group + trigger auto-save
-        modal.addEventListener('change', function(e) {
-            const master = e.target.closest('.profile-select-all');
-            if (!master) return;
-            const targetSelector = master.getAttribute('data-target');
-            if (!targetSelector) return;
-            const isChecked = master.checked;
-            modal.querySelectorAll(targetSelector).forEach(cb => {
-                cb.checked = isChecked;
-            });
-            autoSaveProfile();
-        });
+    document.getElementById('profile-wizard-next')?.addEventListener('click', () => {
+      if (wizardStep < 3) {
+        wizardStep += 1;
+        renderWizardStep();
+      } else {
+        finishWizard();
+      }
+    });
 
-        // When individual items change, keep the master in sync (all checked = master checked)
-        modal.addEventListener('change', function(e) {
-            const t = e.target;
-            if (t.matches('input[type="checkbox"].profile-hobby') ||
-                t.matches('input[type="checkbox"].profile-activity') ||
-                t.matches('input[type="checkbox"].profile-partner') ||
-                t.matches('input[type="checkbox"].profile-niche') ||
-                t.matches('input[type="checkbox"].profile-challenge') ||
-                t.matches('input[type="checkbox"].profile-voice') ||
-                t.matches('input[type="checkbox"].profile-format')) {
-                syncSelectAllStates();
-            }
-        });
-    }
+    document.getElementById('profile-open-wizard')?.addEventListener('click', () => {
+      wizardStep = 1;
+      prefillWizardFromProfile();
+      renderWizardStep();
+      showView('wizard');
+    });
+  }
 
   function paintHeaderProfileBadge() {
-    const profile = typeof window.getUserProfile === 'function'
-      ? window.getUserProfile()
-      : (() => {
-          try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch (e) { return {}; }
-        })();
+    const profile = normalizeProfile(readRawProfile());
     const { score } = getProfileCompleteness(profile);
     updateHeaderProfileBadge(score);
   }
+
+  function initProfileModal() {
+    const openBtn = document.getElementById('open-profile-btn');
+    if (!openBtn) {
+      console.warn('[user-profile] open-profile-btn not found');
+      return;
+    }
+
+    if (!openBtn.dataset.profileBound) {
+      openBtn.addEventListener('click', () => openModal(false));
+      openBtn.dataset.profileBound = '1';
+    }
+
+    modal = document.getElementById('user-profile-modal');
+    if (!modal) {
+      paintHeaderProfileBadge();
+      return;
+    }
+    document.getElementById('close-profile-modal')?.addEventListener('click', closeModal);
+    document.getElementById('cancel-profile')?.addEventListener('click', closeModal);
+    document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
+
+    modal.addEventListener('input', autoSaveProfile);
+    modal.addEventListener('change', autoSaveProfile);
+    setupSelectAllToggles();
+    setupWizardHandlers();
+    setupProfileTabHandlers();
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) e.preventDefault();
+    });
+
+    loadProfileIntoForm();
+    refreshProfileUI();
+
+    console.log('%c[user-profile] Initialized — wizard, meter, normalized schema', 'color:#00A89D');
+  }
+
+  window.getUserProfile = function getUserProfile() {
+    return normalizeProfile(readRawProfile());
+  };
+
+  window.getProfileCompleteness = getProfileCompleteness;
+  window.buildProfileAiContext = buildAiContext;
+  window.buildProfilePreviewText = buildPreviewText;
+  window.buildProfilePreviewHtml = buildPreviewHtml;
+  window.normalizeUserProfile = normalizeProfile;
+
+  window.openUserProfile = function openUserProfile(forceFull) {
+    openModal(!!forceFull);
+  };
+
+  window.switchProfileTab = switchProfileTab;
+  window.refreshProfileUI = refreshProfileUI;
 
   // Paint header badge immediately from localStorage (no modal DOM required)
   paintHeaderProfileBadge();

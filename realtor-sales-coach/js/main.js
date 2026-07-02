@@ -388,15 +388,11 @@
     const modal = document.getElementById('api-key-modal');
     if (!apiBtn || !modal) return;
 
-    // In production hosted mode the server manages the key — adjust the UI
-    const hosted = (typeof window.isProductionHosted === 'function' && window.isProductionHosted()) ||
-                   (typeof window !== 'undefined' && window.location && !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname));
+    // In production hosted mode the server may manage the key — adjust the UI
+    const hosted = typeof window.isProductionHosted === 'function' && window.isProductionHosted();
 
     if (hosted) {
-      // Change button to be informative instead of "enter your key"
-      apiBtn.innerHTML = `<i class="fas fa-shield-alt"></i> <span class="hidden md:inline">API Managed</span>`;
-      apiBtn.title = 'API key is managed server-side for this hosted version. No user key required.';
-      // Still allow opening the modal for transparency / status
+      apiBtn.title = 'View API key status — server-managed; you can add a personal override if needed.';
     }
 
     const statusEl = document.getElementById('api-key-status');
@@ -424,33 +420,36 @@
     }
 
     function showModal() {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      if (typeof window.openAppModal === 'function') {
+        window.openAppModal(modal);
+      } else {
+        if (typeof window.ensureModalInViewport === 'function') {
+          window.ensureModalInViewport(modal);
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex', 'items-center', 'justify-center');
+        modal.style.display = 'flex';
+      }
       updateStatus();
 
-      const hosted = (typeof window.isProductionHosted === 'function' && window.isProductionHosted()) ||
-                     (typeof window !== 'undefined' && window.location && !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname));
+      const hosted = typeof window.isProductionHosted === 'function' && window.isProductionHosted();
 
-      if (hosted) {
-        // Hosted production: server has the key. Make the modal informative.
+      const hint = modal.querySelector('#api-hosted-hint');
+      const hasLocalKey = !!(window.getGrokApiKey && window.getGrokApiKey());
+
+      if (hosted && !hasLocalKey) {
         if (statusEl) {
-          statusEl.textContent = 'Managed by server (no user key needed)';
+          statusEl.textContent = 'Server-managed (add a key below to override)';
           statusEl.className = 'font-mono text-sm px-3 py-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200';
         }
-        const hint = modal.querySelector('#api-hosted-hint');
         if (hint) hint.classList.remove('hidden');
-
-        if (inputEl) inputEl.style.display = 'none';
-        if (saveBtn) saveBtn.style.display = 'none';
-        if (clearBtn) clearBtn.style.display = 'none';
       } else {
-        const hint = modal.querySelector('#api-hosted-hint');
         if (hint) hint.classList.add('hidden');
-
-        if (inputEl) inputEl.style.display = '';
-        if (saveBtn) saveBtn.style.display = '';
-        if (clearBtn) clearBtn.style.display = '';
       }
+
+      if (inputEl) inputEl.style.display = '';
+      if (saveBtn) saveBtn.style.display = '';
+      if (clearBtn) clearBtn.style.display = '';
 
       if (inputEl && inputEl.style.display !== 'none') {
         inputEl.value = '';
@@ -459,12 +458,22 @@
     }
 
     function hideModal() {
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
+      if (typeof window.closeAppModal === 'function') {
+        window.closeAppModal(modal);
+      } else {
+        modal.classList.remove('flex', 'items-center', 'justify-center');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
     }
 
-    // Open modal
-    apiBtn.addEventListener('click', showModal);
+    // Open modal — expose globally so header button can use onclick fallback too
+    window.openApiKeyModal = showModal;
+    apiBtn.type = 'button';
+    if (!apiBtn.dataset.apiKeyBound) {
+      apiBtn.addEventListener('click', showModal);
+      apiBtn.dataset.apiKeyBound = '1';
+    }
 
     // Close handlers
     if (closeBtn) closeBtn.addEventListener('click', hideModal);
@@ -1006,10 +1015,17 @@
       attachTo.appendChild(loadingEl);
     }
 
+    if (typeof window.ensureModalInViewport === 'function') {
+      window.ensureModalInViewport(loadingEl);
+    } else if (loadingEl.parentElement !== document.body) {
+      document.body.appendChild(loadingEl);
+    }
+
     console.log('%c[forceShowGlobalLoading] FORCING overlay visible for: ' + title, 'color:#00A89D; font-weight:bold');
 
     loadingEl.classList.remove('hidden');
     loadingEl.removeAttribute('hidden');
+    loadingEl.classList.add('flex', 'items-center', 'justify-center');
 
     // Set every critical property with !important so no Tailwind class, ancestor, or late stylesheet can hide it
     const forceStyles = {

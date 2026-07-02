@@ -1302,12 +1302,19 @@ function buildSocialLinksHtml(social) {
     return `<div style="text-align:center;padding:10px 0 4px;border-top:1px solid #e5e5e5;margin-top:12px;">${links.join('')}</div>`;
 }
 
+function wrapBrandingForEmail(innerTableHtml) {
+    return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;max-width:600px;width:100%;">
+  <tr><td align="center" style="padding:0;">
+${innerTableHtml}
+  </td></tr>
+</table>`;
+}
+
 function buildAgentBrandHeader(ctx) {
     if (!ctx.includeSignature) return '';
     if (!ctx.logoUrl && !ctx.company && !ctx.tagline) return '';
 
-    return `
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#002B5C;color:#ffffff;">
+    const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#002B5C;color:#ffffff;max-width:600px;width:100%;">
   <tr>
     <td style="padding:18px 24px;text-align:center;">
       ${ctx.logoUrl ? `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="Logo" style="max-height:52px;max-width:200px;height:auto;display:block;margin:0 auto 10px;border:0;">` : ''}
@@ -1316,6 +1323,7 @@ function buildAgentBrandHeader(ctx) {
     </td>
   </tr>
 </table>`;
+    return wrapBrandingForEmail(inner);
 }
 
 function buildAgentSignatureFooter(ctx) {
@@ -1357,14 +1365,14 @@ function buildAgentSignatureFooter(ctx) {
 
     inner += socialHtml;
 
-    return `
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-top:3px solid #00A89D;margin-top:8px;">
+    const innerTable = `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-top:3px solid #00A89D;margin-top:8px;max-width:600px;width:100%;">
   <tr>
     <td style="padding:24px 28px;font-family:Arial,sans-serif;">
       ${inner}
     </td>
   </tr>
 </table>`;
+    return wrapBrandingForEmail(innerTable);
 }
 
 function injectAgentBranding(html) {
@@ -1632,8 +1640,7 @@ async function generateNewsletter(feedback = '') {
 
     // === INJECT RICH PROGRESS CONTENT — styled to exactly match the Weekly/Social/Blog loading cards ===
     const loadingTipsContent = `
-        <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
-            <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700">
                 
                 <div class="text-center mb-8">
                     <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#00A89D] mb-5"></div>
@@ -1682,20 +1689,29 @@ async function generateNewsletter(feedback = '') {
                 <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5">
                     You got this — one newsletter at a time, you're building an unstoppable network! 🔥
                 </p>
-            </div>
-        </div>
     `;
 
     if (loadingEl) {
+        if (typeof window.ensureModalInViewport === 'function') {
+            window.ensureModalInViewport(loadingEl);
+        } else if (loadingEl.parentElement !== document.body) {
+            document.body.appendChild(loadingEl);
+        }
         loadingEl.innerHTML = loadingTipsContent;
-        // Re-force after replacing innerHTML (custom card has no original title/message children)
         loadingEl.classList.remove('hidden');
+        loadingEl.classList.add('flex', 'items-center', 'justify-center');
         loadingEl.style.setProperty('display', 'flex', 'important');
+        loadingEl.style.setProperty('align-items', 'center', 'important');
+        loadingEl.style.setProperty('justify-content', 'center', 'important');
         loadingEl.style.setProperty('z-index', '99999', 'important');
         loadingEl.style.setProperty('visibility', 'visible', 'important');
         loadingEl.style.setProperty('opacity', '1', 'important');
         loadingEl.style.setProperty('position', 'fixed', 'important');
-        loadingEl.style.setProperty('inset', '0', 'important');
+        loadingEl.style.setProperty('top', '0', 'important');
+        loadingEl.style.setProperty('left', '0', 'important');
+        loadingEl.style.setProperty('right', '0', 'important');
+        loadingEl.style.setProperty('bottom', '0', 'important');
+        loadingEl.style.setProperty('margin', '0', 'important');
     }
 
     try {
