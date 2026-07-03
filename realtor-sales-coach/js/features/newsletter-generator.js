@@ -1721,15 +1721,20 @@ ${innerTableHtml}
 </table>`;
 }
 
+/** Display caps for branding images in generated newsletters (see profile upload tips). */
+const NL_HEADER_LOGO_MAX_W = 360;
+const NL_HEADER_LOGO_MAX_H = 96;
+
 function buildAgentBrandHeader(ctx) {
     if (!ctx.includeSignature) return '';
     if (!ctx.logoUrl && !ctx.company && !ctx.tagline) return '';
 
+    const logoAlt = escBrandingAttr(ctx.company ? `${ctx.company} logo` : 'Company logo');
     const logoHtml = ctx.logoUrl
-        ? `<table align="center" cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 12px;">
+        ? `<table align="center" cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 18px;width:100%;">
   <tr>
-    <td align="center" style="padding:12px 20px;background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;">
-      <img src="${escBrandingAttr(ctx.logoUrl)}" alt="Logo" width="200" style="max-height:56px;max-width:200px;width:auto;height:auto;display:block;border:0;">
+    <td align="center" style="padding:20px 36px 22px;background:#ffffff;border:1px solid #dde3ea;border-radius:12px;">
+      <img src="${escBrandingAttr(ctx.logoUrl)}" alt="${logoAlt}" width="${NL_HEADER_LOGO_MAX_W}" style="display:block;width:100%;max-width:${NL_HEADER_LOGO_MAX_W}px;height:auto;max-height:${NL_HEADER_LOGO_MAX_H}px;margin:0 auto;border:0;object-fit:contain;object-position:center center;">
     </td>
   </tr>
 </table>`
@@ -1737,9 +1742,9 @@ function buildAgentBrandHeader(ctx) {
 
     const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;max-width:600px;width:100%;">
   <tr>
-    <td style="padding:20px 24px 16px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+    <td style="padding:${ctx.logoUrl ? '26px' : '20px'} 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
       ${logoHtml}
-      ${ctx.company ? `<div style="font-size:20px;font-weight:700;letter-spacing:0.3px;color:#002B5C;line-height:1.3;">${escBrandingText(ctx.company)}</div>` : ''}
+      ${ctx.company ? `<div style="font-size:${ctx.logoUrl ? '18px' : '20px'};font-weight:700;letter-spacing:0.3px;color:#002B5C;line-height:1.3;margin-top:${ctx.logoUrl ? '4px' : '0'};">${escBrandingText(ctx.company)}</div>` : ''}
       ${ctx.tagline ? `<div style="font-size:13px;margin-top:6px;color:#555;line-height:1.4;">${escBrandingText(ctx.tagline)}</div>` : ''}
     </td>
   </tr>
@@ -1770,7 +1775,7 @@ function buildSignatureLogoCell(logoUrl) {
       <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
         <tr>
           <td align="center" valign="middle" style="padding:10px 12px;background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;line-height:0;">
-            <img src="${escBrandingAttr(logoUrl)}" alt="Company logo" style="max-height:58px;max-width:92px;width:auto;height:auto;display:block;border:0;margin:0 auto;">
+            <img src="${escBrandingAttr(logoUrl)}" alt="Company logo" width="100" style="display:block;width:100%;max-width:100px;height:auto;max-height:68px;margin:0 auto;border:0;object-fit:contain;object-position:center center;">
           </td>
         </tr>
       </table>
