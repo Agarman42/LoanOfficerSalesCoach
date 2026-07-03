@@ -102,7 +102,7 @@
   }
 
   function getTopicFilterLabel(topic) {
-    if (topic === 'mortgage') return 'Mortgage & Home';
+    if (topic === 'mortgage') return 'Real Estate & Home';
     return 'All topics';
   }
 
@@ -422,7 +422,7 @@
     const meta = [];
     if (isCustomPuzzleItem(item)) meta.push('Your custom');
     else if (item.category && item.category !== 'General') meta.push(escapeHtml(item.category));
-    if (!isCustomPuzzleItem(item) && puzzleTypeSupportsFilters(type) && isMortgageRelated(item)) meta.push('Mortgage & Home');
+    if (!isCustomPuzzleItem(item) && puzzleTypeSupportsFilters(type) && isMortgageRelated(item)) meta.push('Real Estate & Home');
     const metaLine = meta.length
       ? `<p class="text-xs text-[#00A89D] font-medium mb-2">${meta.join(' · ')}</p>`
       : '';
@@ -631,7 +631,7 @@
       const cfg = PUZZLE_TYPES[type];
       const data = getFilteredPuzzleList(type);
       let title = `Choose ${cfg.label}`;
-      if (puzzleTypeSupportsFilters(type) && nlPuzzleTopicFilter === 'mortgage') title += ' — Mortgage & Home';
+      if (puzzleTypeSupportsFilters(type) && nlPuzzleTopicFilter === 'mortgage') title += ' — Real Estate & Home';
       if (type === 'trivia' && nlPuzzleCategoryFilter !== 'all') title += ` — ${nlPuzzleCategoryFilter}`;
       return {
         title,
@@ -699,7 +699,7 @@
         <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
           <div class="flex flex-wrap gap-2">
             <button type="button" data-modal-topic="all" class="text-xs px-3 py-1.5 rounded-full border-2 font-semibold ${nlPuzzleTopicFilter === 'all' ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C]' : 'border-gray-200 text-gray-600'}">All topics</button>
-            <button type="button" data-modal-topic="mortgage" class="text-xs px-3 py-1.5 rounded-full border-2 font-semibold ${nlPuzzleTopicFilter === 'mortgage' ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C]' : 'border-gray-200 text-gray-600'}">🏠 Mortgage &amp; Home</button>
+            <button type="button" data-modal-topic="mortgage" class="text-xs px-3 py-1.5 rounded-full border-2 font-semibold ${nlPuzzleTopicFilter === 'mortgage' ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C]' : 'border-gray-200 text-gray-600'}">🏠 Real Estate &amp; Home</button>
           </div>
           ${categoryInline}
         </div>`;
@@ -768,7 +768,7 @@
           const badges = [];
           if (item.category) badges.push(`<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">${escapeHtml(item.category)}</span>`);
           if (puzzleTypeSupportsFilters(meta.puzzleType) && isMortgageRelated(item)) {
-            badges.push('<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D]">Mortgage & Home</span>');
+            badges.push('<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D]">Real Estate & Home</span>');
           }
           li.className = `p-4 bg-white dark:bg-gray-800 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-gray-900 dark:text-gray-100 text-base border ${isCurrent ? 'border-[#00A89D] ring-1 ring-[#00A89D]/30' : 'border-gray-200 dark:border-gray-700 hover:border-[#00A89D]'} flex items-start gap-3`;
           const answerLine = item.answer ? `<span class="block text-sm font-medium text-[#002B5C] dark:text-white mt-1.5">Answer: ${escapeHtml(item.answer)}</span>` : '';

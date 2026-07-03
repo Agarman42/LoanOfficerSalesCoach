@@ -45,7 +45,7 @@
     "Why did the stadium get hot? All the fans left!",
     "Why don't bicycles stand up by themselves? They're two-tired!",
     "Why did the banker switch careers? He lost interest!",
-    "How do loan officers party? They refi-nance the night away!",
+    "Why did the real estate agent bring a ladder to the open house? They heard the market was looking up!",
     "What do you call a house that tells jokes? A pun-galow!",
     "Parallel lines have so much in common. It's a shame they'll never meet.",
     "I used to play piano by ear, but now I use my hands.",

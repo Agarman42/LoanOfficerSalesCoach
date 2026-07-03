@@ -1309,6 +1309,152 @@ function openProTipChoiceModal(modal, titleEl) {
     setTimeout(() => searchInput.focus(), 80);
 }
 
+function parseQuoteItem(raw) {
+    const s = String(raw || '').trim();
+    const m = s.match(/^["']?(.+?)["']?\s*[–—-]\s*(.+)$/);
+    if (m) {
+        return {
+            raw: s,
+            text: m[1].replace(/^["']|["']$/g, '').trim(),
+            author: m[2].trim()
+        };
+    }
+    return { raw: s, text: s.replace(/^["']|["']$/g, ''), author: '' };
+}
+
+function createContentChoiceCard(opts) {
+    const { icon, iconBg, iconColor, category, title, body, isCurrent, onPick } = opts;
+    const li = document.createElement('li');
+    li.className = `nl-tip-card${isCurrent ? ' is-current' : ''}`;
+    li.dataset.search = `${category} ${title} ${body}`.toLowerCase();
+
+    const inner = document.createElement('div');
+    inner.className = 'nl-tip-card-inner';
+    inner.innerHTML = `
+      <div class="nl-tip-card-icon" style="background:${iconBg};color:${iconColor};">
+        <i class="fas ${icon}"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="nl-tip-card-cat" style="color:${iconColor};">${escBrandingText(category)}</div>
+        ${title ? `<div class="nl-tip-card-title">${escBrandingText(title)}</div>` : ''}
+        <div class="nl-tip-card-body">${escBrandingText(body)}</div>
+      </div>
+      ${isCurrent ? '<span class="text-[10px] px-2 py-0.5 bg-[#00A89D]/15 text-[#00A89D] rounded-full self-start font-bold shrink-0">Current</span>' : ''}
+    `;
+    inner.addEventListener('click', onPick);
+    li.appendChild(inner);
+    return li;
+}
+
+function openContentChoiceModal(category) {
+    const modal = getNewsletterChoiceModal();
+    if (!modal) return;
+
+    cleanupProTipPickerChrome(modal);
+    const titleEl = modal.querySelector('#modal-title');
+    const list = modal.querySelector('#modal-list');
+    const body = document.getElementById('modal-choice-body') || list?.parentElement;
+    if (!list || !body) return;
+
+    const isQuote = category === 'quote';
+    const modalTitleText = isQuote ? 'Choose a Motivational Quote' : 'Choose a Fun Fact';
+    const data = isQuote ? (motivationalQuotes || []) : (funFacts || []);
+    const current = isQuote ? selectedQuote : selectedFunFact;
+
+    if (titleEl) {
+        titleEl.textContent = modalTitleText;
+        titleEl.style.color = '#fff';
+        titleEl.style.setProperty('color', '#fff', 'important');
+    }
+
+    showNewsletterChoiceModalShell(modal);
+
+    const toolbar = document.createElement('div');
+    toolbar.id = 'modal-tip-toolbar';
+    toolbar.className = 'space-y-3';
+    toolbar.innerHTML = `
+      <div class="relative">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+        <input id="modal-search" type="text" placeholder="Search ${isQuote ? 'quotes or authors' : 'fun facts'}…"
+          class="w-full pl-10 pr-4 py-2.5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm placeholder-gray-400 focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30" />
+      </div>
+      <div id="modal-tip-result-count" class="text-xs text-gray-500 dark:text-gray-400 font-medium"></div>
+    `;
+    body.insertBefore(toolbar, list);
+
+    const countEl = toolbar.querySelector('#modal-tip-result-count');
+    const searchInput = toolbar.querySelector('#modal-search');
+    let search = '';
+
+    function pickItem(raw) {
+        if (isQuote) selectedQuote = raw;
+        else selectedFunFact = raw;
+        updatePreviews();
+        closeModal();
+    }
+
+    function renderList() {
+        list.innerHTML = '';
+        const q = search.trim().toLowerCase();
+        const filtered = q
+            ? data.filter((item) => String(item).toLowerCase().includes(q))
+            : data.slice();
+
+        const randomLi = document.createElement('li');
+        randomLi.className = 'nl-tip-card nl-tip-random-row';
+        const randomInner = document.createElement('div');
+        randomInner.className = 'nl-tip-card-inner';
+        randomInner.innerHTML = `<i class="fas fa-dice text-[#00A89D]"></i><span>Surprise me — pick a random ${isQuote ? 'quote' : 'fun fact'}</span>`;
+        randomInner.addEventListener('click', () => {
+            const pool = filtered.length ? filtered : data;
+            if (!pool.length) return;
+            pickItem(pool[Math.floor(Math.random() * pool.length)]);
+        });
+        randomLi.appendChild(randomInner);
+        list.appendChild(randomLi);
+
+        filtered.forEach((item) => {
+            if (isQuote) {
+                const parsed = parseQuoteItem(item);
+                list.appendChild(createContentChoiceCard({
+                    icon: 'fa-quote-right',
+                    iconBg: 'rgba(0,43,92,0.08)',
+                    iconColor: '#002B5C',
+                    category: parsed.author || 'Motivation',
+                    title: parsed.text.length > 100 ? parsed.text.slice(0, 100) + '…' : '',
+                    body: parsed.text,
+                    isCurrent: item === current,
+                    onPick: () => pickItem(item)
+                }));
+            } else {
+                list.appendChild(createContentChoiceCard({
+                    icon: 'fa-star',
+                    iconBg: 'rgba(241,90,41,0.1)',
+                    iconColor: '#F15A29',
+                    category: 'Fun Fact',
+                    title: '',
+                    body: item,
+                    isCurrent: item === current,
+                    onPick: () => pickItem(item)
+                }));
+            }
+        });
+
+        countEl.textContent = filtered.length
+            ? `Showing ${filtered.length} ${isQuote ? 'quote' : 'fun fact'}${filtered.length === 1 ? '' : 's'}`
+            : 'No matches — try a different search.';
+    }
+
+    searchInput.addEventListener('input', () => {
+        search = searchInput.value;
+        renderList();
+    });
+
+    renderList();
+    attachNewsletterChoiceBackdropClose(modal);
+    setTimeout(() => searchInput.focus(), 80);
+}
+
 function openModal(category) {
     if (category === 'dadJoke' || category === 'puzzle') {
         if (window.NlEntertainment && typeof window.NlEntertainment.openChoiceModal === 'function') {
@@ -1347,97 +1493,13 @@ function openModal(category) {
         return;
     }
 
-    let data = [];
-    let modalTitleText = '';
-
-    if (category === 'funFact') {
-        modalTitleText = 'Choose a Fun Fact';
-        data = funFacts || [];
-    } else if (category === 'quote') {
-        modalTitleText = 'Choose a Motivational Quote';
-        data = motivationalQuotes || [];
-    } else {
-        modalTitleText = 'Choose Content';
-        data = [];
+    if (category === 'funFact' || category === 'quote') {
+        openContentChoiceModal(category);
+        return;
     }
 
+    if (title) title.textContent = 'Choose Content';
     showNewsletterChoiceModalShell(modal);
-
-    // Force title into the header (gradient bar) — use textContent + color guard for reliability
-    if (title) {
-        title.textContent = modalTitleText;
-        title.style.color = '#fff';
-        title.style.setProperty('color', '#fff', 'important');
-    }
-
-    // Dynamically inject a search input for this choice modal only (so it does not pollute social pillar modals)
-    let search = modal.querySelector('#modal-search');
-    const contentBody = list ? list.parentElement : null;
-    if (!search && contentBody) {
-        search = document.createElement('input');
-        search.id = 'modal-search';
-        search.type = 'text';
-        search.className = 'w-full px-4 py-2.5 mb-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm placeholder-gray-400 focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30';
-        contentBody.insertBefore(search, list);
-    }
-
-    if (list) {
-        list.innerHTML = '';
-
-        // Quick "Pick Random" at top for convenience
-        const randomLi = document.createElement('li');
-        randomLi.className = 'p-4 mb-2 bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-2xl cursor-pointer hover:bg-[#00A89D]/20 transition-all text-[#00A89D] font-semibold flex items-center gap-3';
-        randomLi.innerHTML = `<i class="fas fa-dice"></i> <span>Pick a Random ${modalTitleText.replace('Choose a ', '')} for me</span>`;
-        randomLi.addEventListener('click', () => {
-            if (!data.length) return;
-            const randomItem = data[Math.floor(Math.random() * data.length)];
-            if (category === 'funFact') selectedFunFact = randomItem;
-            else if (category === 'proTip') selectedProTip = randomItem;
-            else if (category === 'quote') selectedQuote = randomItem;
-            updatePreviews();
-            closeModal();
-            if (search) search.value = '';
-        });
-        list.appendChild(randomLi);
-
-        // Current selected for context
-        let currentSelected = '';
-        if (category === 'funFact') currentSelected = selectedFunFact;
-        else if (category === 'proTip') currentSelected = selectedProTip;
-        else if (category === 'quote') currentSelected = selectedQuote;
-
-        data.forEach(item => {
-            const li = document.createElement('li');
-            const isCurrent = item === currentSelected;
-            li.className = `p-4 bg-white dark:bg-gray-800 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-gray-900 dark:text-gray-100 text-base border ${isCurrent ? 'border-[#00A89D] ring-1 ring-[#00A89D]/30' : 'border-gray-200 dark:border-gray-700 hover:border-[#00A89D]'} flex items-start gap-3`;
-            li.innerHTML = `<i class="fas fa-quote-left text-[#00A89D] mt-0.5 flex-shrink-0"></i> <span class="flex-1">${item}</span> ${isCurrent ? '<span class="text-[10px] px-2 py-0.5 bg-[#00A89D]/10 text-[#00A89D] rounded-full self-start">current</span>' : ''}`;
-
-            li.addEventListener('click', () => {
-                if (category === 'funFact') selectedFunFact = item;
-                else if (category === 'proTip') selectedProTip = item;
-                else if (category === 'quote') selectedQuote = item;
-                updatePreviews();
-                closeModal();
-                if (search) search.value = '';
-            });
-
-            list.appendChild(li);
-        });
-    }
-
-    if (search) {
-        search.placeholder = `Search ${modalTitleText.toLowerCase().replace('choose a ', '')}...`;
-        search.oninput = () => {
-            const filter = search.value.toLowerCase();
-            Array.from(list.children).forEach((li, idx) => {
-                // keep the random pick always visible at top
-                if (idx === 0) return;
-                li.style.display = li.innerText.toLowerCase().includes(filter) ? '' : 'none';
-            });
-        };
-        search.focus();
-    }
-
     attachNewsletterChoiceBackdropClose(modal);
 }
 
