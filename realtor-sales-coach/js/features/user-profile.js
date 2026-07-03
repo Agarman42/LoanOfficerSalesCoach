@@ -951,6 +951,10 @@
     }
     document.getElementById('close-profile-modal')?.addEventListener('click', closeModal);
     document.getElementById('cancel-profile')?.addEventListener('click', closeModal);
+
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
     document.getElementById('profile-blog-from-website')?.addEventListener('click', applyBlogFromWebsite);
 
@@ -982,6 +986,10 @@
 
   window.openUserProfile = function openUserProfile(forceFull) {
     openModal(!!forceFull);
+  };
+
+  window.closeUserProfile = function closeUserProfile() {
+    closeModal();
   };
 
   window.switchProfileTab = switchProfileTab;

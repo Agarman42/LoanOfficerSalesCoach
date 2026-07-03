@@ -511,23 +511,48 @@
     repairMisportaledModalParts();
   }
 
+  function closeModalFromBackdrop(modal, id) {
+    if (id === 'content-modal' && typeof window.closeSocialContentModal === 'function') {
+      window.closeSocialContentModal();
+    } else if (id === 'detail-modal' && typeof window.closeDetailModal === 'function') {
+      window.closeDetailModal();
+    } else if (id === 'task-help-modal' && typeof window.closeTaskHelp === 'function') {
+      window.closeTaskHelp();
+    } else if (id === 'user-profile-modal' && typeof window.closeUserProfile === 'function') {
+      window.closeUserProfile();
+    } else if (id.startsWith('modal-') && typeof window.closeEventModal === 'function') {
+      window.closeEventModal(id.replace('modal-', ''));
+    } else {
+      window.closeNamedModal(modal);
+    }
+  }
+
+  /**
+   * Close on intentional backdrop click only — not when the user drags a text
+   * selection from inside the panel and releases outside (mousedown ≠ mouseup target).
+   */
   window.ensureModalBackdropClose = function ensureModalBackdropClose(modal) {
     if (!modal || modal._backdropHandlerAttached) return;
     const id = modal.id || '';
-    modal.addEventListener('click', (e) => {
-      if (e.target !== modal) return;
-      if (id === 'content-modal' && typeof window.closeSocialContentModal === 'function') {
-        window.closeSocialContentModal();
-      } else if (id === 'detail-modal' && typeof window.closeDetailModal === 'function') {
-        window.closeDetailModal();
-      } else if (id === 'task-help-modal' && typeof window.closeTaskHelp === 'function') {
-        window.closeTaskHelp();
-      } else if (id.startsWith('modal-') && typeof window.closeEventModal === 'function') {
-        window.closeEventModal(id.replace('modal-', ''));
-      } else {
-        window.closeNamedModal(modal);
-      }
+    let pressedOnBackdrop = false;
+
+    modal.addEventListener('mousedown', (e) => {
+      pressedOnBackdrop = (e.target === modal);
     });
+
+    modal.addEventListener('mouseup', (e) => {
+      if (!pressedOnBackdrop || e.target !== modal) {
+        pressedOnBackdrop = false;
+        return;
+      }
+      pressedOnBackdrop = false;
+
+      const sel = window.getSelection && window.getSelection();
+      if (sel && sel.toString().trim().length > 0) return;
+
+      closeModalFromBackdrop(modal, id);
+    });
+
     modal._backdropHandlerAttached = true;
   };
 

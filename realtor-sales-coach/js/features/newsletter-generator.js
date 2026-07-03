@@ -511,7 +511,57 @@ const proTips = [
     "Home Maintenance & Care: Inspect Chimney Crown for Cracks — Prevents water from entering the chimney structure.",
     "Smart Money Moves: Take Photos of Major Repairs — Document work for insurance and future buyers.",
     "Home Maintenance & Care: Check for Proper Grading Around Foundation — Ensure water flows away from the house.",
-    "Smart Money Moves: Consider Energy Audits — Many utilities offer free or low-cost audits to identify savings opportunities."
+    "Smart Money Moves: Consider Energy Audits — Many utilities offer free or low-cost audits to identify savings opportunities.",
+
+    // ==================== REAL ESTATE TIPS (Buying, Selling & Market — agent newsletter favorites) ====================
+    "Buyer Strategy: Get Pre-Approved Before You Tour — A pre-approval letter shows sellers you're serious and helps you shop in the right price range from day one.",
+    "Buyer Strategy: Don't Skip the Final Walk-Through — It's your last chance to confirm repairs, appliances, and condition before closing. Schedule it 24–48 hours before keys.",
+    "Buyer Strategy: Compare Total Monthly Cost, Not Just Price — Taxes, HOA, insurance, and utilities can swing affordability by hundreds per month.",
+    "Buyer Strategy: Write a Personal Letter Only When It Helps — In competitive markets, a sincere note about why you love the home can stand out — but never share protected-class details.",
+    "Buyer Strategy: Understand Contingencies Before You Offer — Inspection, appraisal, and financing contingencies protect you; know what you're giving up if you waive them.",
+    "Buyer Strategy: Ask About Seller Motivation — Timeline, lease-back needs, and preferred closing date can matter as much as price in negotiations.",
+    "Buyer Strategy: Tour at Different Times of Day — Noise, light, traffic, and neighbor activity change morning vs. evening. Drive the commute once during rush hour.",
+    "Buyer Strategy: Budget for Move-In Surprises — Plan 1–2% of purchase price for immediate fixes, window treatments, and essentials in the first 30 days.",
+    "Seller Prep: Price to the Market, Not Your Memory — Buyers compare your home to what's active and what closed last month — not what you paid or what your neighbor hoped for.",
+    "Seller Prep: Professional Photos Pay for Themselves — Listings with strong photography get more showings. Declutter and stage before the photographer arrives.",
+    "Seller Prep: Fix the Obvious Before Listing — Leaky faucets, burned-out bulbs, and scuffed walls signal deferred maintenance to buyers and inspectors.",
+    "Seller Prep: Disclose Early — Known issues disclosed upfront build trust and reduce renegotiation after inspection.",
+    "Seller Prep: Make the First 10 Feet Count — Fresh mulch, a clean door, and working porch light set the tone before buyers walk in.",
+    "Seller Prep: Remove Personal Items for Photos — Buyers imagine themselves in the space faster when family photos and clutter are minimized.",
+    "Seller Prep: Plan for Pets During Showings — A quick crate, neighbor walk, or day-boarding plan keeps showings smooth and stress-free.",
+    "Market Awareness: Days on Market Tells a Story — Rising DOM in your area often means more negotiation room for buyers; falling DOM favors prepared sellers.",
+    "Market Awareness: List-to-Sale Ratio Matters — If homes are selling below list, price aggressively. If above list, strong prep and timing can capture a premium.",
+    "Market Awareness: Inventory Months Drive Strategy — Under 3 months of supply tends to favor sellers; over 5 months gives buyers more leverage.",
+    "Market Awareness: Seasonal Patterns Are Real — Spring often brings more buyers in the Midwest, but less competition in fall/winter can help serious shoppers.",
+    "Market Awareness: Rate Moves Change Buyer Math — A small rate shift can affect monthly payment more than a $10K price change — run the numbers with your lender partner.",
+    "Negotiation: Focus on Net, Not Just Price — Seller credits, closing cost help, and repair requests all affect what you actually pay or walk away with.",
+    "Negotiation: Inspection Is for Facts, Not Fishing — Use the report to address safety and major systems — nitpicking minor items can sour a deal both sides want.",
+    "Negotiation: Appraisal Gap Plans Save Deals — If you're competing above list, discuss appraisal-gap coverage or flexible terms with your agent before you write.",
+    "Negotiation: Earnest Money Shows Commitment — Stronger earnest money (with sensible contingencies) can make your offer stand out without raising price.",
+    "Negotiation: Timeline Can Win — A flexible closing date that fits the seller's move often beats a slightly higher offer with a painful timeline.",
+    "Open House Tip: Arrive Early, Stay Late — The best conversations often happen in the first and last 15 minutes when traffic is lighter.",
+    "Open House Tip: Capture Every Visitor — A simple sign-in (digital or paper) turns foot traffic into follow-up opportunities.",
+    "Open House Tip: Highlight One Memorable Feature — Whether it's the view, kitchen flow, or backyard — give visitors a story to repeat to their agent.",
+    "Open House Tip: Pair with a Market Mini-Report — A one-page neighborhood stat sheet positions you as the local expert, not just the door opener.",
+    "First-Time Buyer: Understand Earnest Money — It's not a second down payment — it applies toward closing and is protected by your contract contingencies when used correctly.",
+    "First-Time Buyer: Learn HOA Rules Before You Offer — Rental restrictions, pet limits, and special assessments can affect lifestyle and budget.",
+    "First-Time Buyer: Don't Max Out Your Approval — Leave room in the budget for maintenance, furniture, and life — the right payment matters more than the max number.",
+    "First-Time Buyer: Ask About Closing Cost Assistance — Grants, seller credits, and lender programs can reduce cash needed at the table.",
+    "Listing Strategy: Launch With Momentum — Strong MLS photos, accurate description, and coordinated open house in week one beat a slow drip of price cuts later.",
+    "Listing Strategy: Update the MLS When Something Changes — Fresh photos after staging, price adjustments, or new features keep the listing active in search alerts.",
+    "Listing Strategy: Respond Fast to Showing Feedback — Same-day follow-up with sellers keeps pricing and prep decisions ahead of the market.",
+    "Inspection & Appraisal: Be at the Inspection — Buyers learn more in 3 hours on site than from a 40-page PDF alone. Sellers: consider a pre-list inspection for surprises.",
+    "Inspection & Appraisal: Appraisal Is Independent — It protects the lender and buyer; understanding comps before offer helps set realistic expectations.",
+    "Relocation: Line Up Your Team in Both Cities — Agent, lender, and inspector contacts in your destination market save weeks when timelines are tight.",
+    "Relocation: Virtual Tours Are a Start, Not the Finish — Follow with a local drive-through, video walk, or short scouting trip before you commit.",
+    "Investment: Run the Real Numbers — Vacancy, maintenance, property management, taxes, and insurance belong in every rental analysis — not just the mortgage.",
+    "Investment: Know Local Landlord Rules — Licensing, occupancy limits, and short-term rental ordinances vary by city — verify before you buy.",
+    "Neighborhood Intel: Schools, Commute, and Walkability — Buyers rank these differently; knowing your buyer's priorities helps you show the right pockets of town.",
+    "Neighborhood Intel: Check Future Development — Planned roads, commercial builds, and zoning changes can affect value and lifestyle — city planning sites are public.",
+    "Client Care: Annual Home Check-In — A quick market snapshot for past clients keeps you top of mind for referrals and repeat business.",
+    "Client Care: Celebrate Closing Anniversaries — A short note or small gift on the one-year home anniversary builds loyalty that outlasts any ad campaign.",
+    "Co-Broke Etiquette: Communicate Like the Deal Depends on It — Clear timelines, inspection updates, and appraisal status keep co-broke partners confident in your professionalism.",
+    "Co-Broke Etiquette: Respect the Other Agent's Client — Loop the listing agent on all communication; direct outreach to their client can kill trust fast."
 ];
 // Motivational Quotes (placeholder — send your list and I'll add)
 const motivationalQuotes = [
@@ -975,7 +1025,7 @@ function openModal(category) {
         modalTitleText = 'Choose a Fun Fact';
         data = funFacts || [];
     } else if (category === 'proTip') {
-        modalTitleText = 'Choose a Pro Tip';
+        modalTitleText = 'Choose a Real Estate Tip';
         data = proTips || [];
     } else if (category === 'quote') {
         modalTitleText = 'Choose a Motivational Quote';
@@ -1072,9 +1122,20 @@ function openModal(category) {
         search.focus();
     }
 
-    // === PREMIUM OPEN + CLICK ANYWHERE OUTSIDE TO CLOSE ===
-    modal.onclick = function(e) {
-        if (e.target === modal) closeModal();   // clicks on dark backdrop close it
+    // Backdrop close — intentional click only (not drag-select release outside panel)
+    let nlChoiceBackdropDown = false;
+    modal.onmousedown = function (e) {
+        nlChoiceBackdropDown = (e.target === modal);
+    };
+    modal.onmouseup = function (e) {
+        if (!nlChoiceBackdropDown || e.target !== modal) {
+            nlChoiceBackdropDown = false;
+            return;
+        }
+        nlChoiceBackdropDown = false;
+        const sel = window.getSelection && window.getSelection();
+        if (sel && sel.toString().trim().length > 0) return;
+        closeModal();
     };
 }
 
