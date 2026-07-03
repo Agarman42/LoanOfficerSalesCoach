@@ -452,6 +452,7 @@ input[type="range"]:active::-moz-range-thumb {
     border-radius:50%; 
     border:5px solid #00A89D; 
     object-fit:cover;
+    object-position:center 22%;
     display:block;
 }
 

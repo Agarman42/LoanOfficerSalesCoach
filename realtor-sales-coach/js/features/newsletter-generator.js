@@ -1449,6 +1449,50 @@ function buildAgentBrandHeader(ctx) {
     return wrapBrandingForEmail(inner);
 }
 
+/** Portrait crop — keeps faces centered in the circle (avoids chopping foreheads). */
+const NL_SIGNATURE_HEADSHOT_POS = 'center 22%';
+
+function buildSignatureHeadshotCell(headshotUrl, name) {
+    return `<td width="100" align="center" valign="middle" style="width:100px;padding-right:10px;vertical-align:middle;">
+      <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
+        <tr>
+          <td width="86" height="86" align="center" valign="middle" style="width:86px;height:86px;line-height:0;border-radius:43px;border:3px solid #00A89D;overflow:hidden;background:#eef7f6;">
+            <img src="${escBrandingAttr(headshotUrl)}" alt="${escBrandingAttr(name || 'Agent')}" width="86" height="86" style="width:86px;height:86px;display:block;border:0;object-fit:cover;object-position:${NL_SIGNATURE_HEADSHOT_POS};">
+          </td>
+        </tr>
+      </table>
+    </td>`;
+}
+
+function buildSignatureLogoCell(logoUrl) {
+    return `<td width="112" align="center" valign="middle" style="width:112px;padding-left:10px;vertical-align:middle;">
+      <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
+        <tr>
+          <td align="center" valign="middle" style="padding:10px 12px;background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;line-height:0;">
+            <img src="${escBrandingAttr(logoUrl)}" alt="Company logo" style="max-height:58px;max-width:92px;width:auto;height:auto;display:block;border:0;margin:0 auto;">
+          </td>
+        </tr>
+      </table>
+    </td>`;
+}
+
+function buildSignatureContactCell(ctx) {
+    let block = '<td align="center" valign="middle" style="vertical-align:middle;text-align:center;font-family:Arial,Helvetica,sans-serif;padding:0 6px;">';
+    if (ctx.name) block += `<div style="font-size:17px;font-weight:bold;color:#002B5C;margin-bottom:4px;line-height:1.3;">${escBrandingText(ctx.name)}</div>`;
+    if (ctx.company) block += `<div style="font-size:13px;color:#444;margin-bottom:2px;line-height:1.35;">${escBrandingText(ctx.company)}</div>`;
+    if (ctx.tagline) block += `<div style="font-size:12px;color:#666;font-style:italic;margin-bottom:8px;line-height:1.4;">${escBrandingText(ctx.tagline)}</div>`;
+    const contact = [];
+    if (ctx.phone) contact.push(escBrandingText(ctx.phone));
+    if (ctx.email) {
+        contact.push(`<a href="mailto:${escBrandingAttr(ctx.email)}" style="color:#00A89D;text-decoration:underline;">${escBrandingText(ctx.email)}</a>`);
+    }
+    if (contact.length) {
+        block += `<div style="font-size:12px;color:#555;margin-top:6px;line-height:1.5;">${contact.join(' &nbsp;|&nbsp; ')}</div>`;
+    }
+    block += '</td>';
+    return block;
+}
+
 function buildAgentSignatureFooter(ctx) {
     if (!ctx.includeSignature && !ctx.includeSocial) return '';
 
@@ -1462,28 +1506,21 @@ function buildAgentSignatureFooter(ctx) {
     let inner = '';
 
     if (hasSignatureContent) {
-        inner += '<table width="100%" cellpadding="0" cellspacing="0"><tr>';
-        if (ctx.headshotUrl) {
-            inner += `<td width="96" valign="top" style="padding-right:18px;">
-              <img src="${escBrandingAttr(ctx.headshotUrl)}" alt="${escBrandingAttr(ctx.name || 'Agent')}" width="80" height="80" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #00A89D;display:block;">
-            </td>`;
+        const hasHeadshot = !!ctx.headshotUrl;
+        const hasLogo = !!ctx.logoUrl;
+        inner += '<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>';
+        if (hasHeadshot) {
+            inner += buildSignatureHeadshotCell(ctx.headshotUrl, ctx.name);
+        } else if (hasLogo) {
+            inner += '<td width="20" style="width:20px;font-size:0;line-height:0;">&nbsp;</td>';
         }
-        inner += '<td valign="top" style="font-family:Arial,sans-serif;">';
-        if (ctx.name) inner += `<div style="font-size:17px;font-weight:bold;color:#002B5C;margin-bottom:4px;">${escBrandingText(ctx.name)}</div>`;
-        if (ctx.company) inner += `<div style="font-size:13px;color:#444;margin-bottom:2px;">${escBrandingText(ctx.company)}</div>`;
-        if (ctx.tagline) inner += `<div style="font-size:12px;color:#666;font-style:italic;margin-bottom:8px;">${escBrandingText(ctx.tagline)}</div>`;
-        const contact = [];
-        if (ctx.phone) contact.push(escBrandingText(ctx.phone));
-        if (ctx.email) {
-            contact.push(`<a href="mailto:${escBrandingAttr(ctx.email)}" style="color:#00A89D;text-decoration:underline;">${escBrandingText(ctx.email)}</a>`);
+        inner += buildSignatureContactCell(ctx);
+        if (hasLogo) {
+            inner += buildSignatureLogoCell(ctx.logoUrl);
+        } else if (hasHeadshot) {
+            inner += '<td width="20" style="width:20px;font-size:0;line-height:0;">&nbsp;</td>';
         }
-        if (contact.length) {
-            inner += `<div style="font-size:12px;color:#555;margin-top:6px;">${contact.join(' &nbsp;|&nbsp; ')}</div>`;
-        }
-        if (ctx.logoUrl && ctx.headshotUrl) {
-            inner += `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="Logo" style="max-height:36px;margin-top:12px;border:0;display:block;">`;
-        }
-        inner += '</td></tr></table>';
+        inner += '</tr></table>';
     }
 
     inner += socialHtml;
