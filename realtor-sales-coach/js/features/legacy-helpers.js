@@ -87,7 +87,7 @@
   // =====================================================
   window.cycleActivities = function cycleActivities() {
     const freqEl = document.getElementById('frequency');
-    if (!freqEl) return alert('Frequency selector not found.');
+    if (!freqEl) { window.notifyUser('Frequency selector not found.', 'error', 5000); return; }
 
     const freq = freqEl.value.toLowerCase();
     const list = activities[freq] || activities.daily;

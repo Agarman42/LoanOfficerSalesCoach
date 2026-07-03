@@ -871,7 +871,7 @@
           f();
         } else if (attempts > 20) {
           clearInterval(interval);
-          alert('Weekly Win Plan script failed to load. Please hard refresh the page (Ctrl+Shift+R).');
+          window.notifyUser('Weekly Win Plan script failed to load. Please hard refresh the page (Ctrl+Shift+R).', 'error', 5000);
         }
       }, 100);
     }

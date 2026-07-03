@@ -21,7 +21,7 @@
 
   function save(title, content, btn, type) {
     if (typeof window.toggleSaveIdea !== 'function') {
-      alert('Save system not ready — please refresh.');
+      window.saveNotReady();
       return false;
     }
     const body = getContent(content);

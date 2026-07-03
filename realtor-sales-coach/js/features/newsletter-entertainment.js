@@ -215,7 +215,7 @@
     const input = document.getElementById('nl-custom-dadjoke-input');
     const text = (input?.value || '').trim();
     if (!text) {
-      alert('Please type a joke first.');
+      window.notifyUser('Please type a joke first.', 'warning', 3200);
       return;
     }
     selectedDadJoke = text;
@@ -232,7 +232,7 @@
       const question = (document.getElementById('nl-custom-trivia-question')?.value || '').trim();
       const answer = (document.getElementById('nl-custom-trivia-answer')?.value || '').trim();
       if (!question || !answer) {
-        alert('Please enter both a trivia question and answer.');
+        window.notifyUser('Please enter both a trivia question and answer.', 'warning', 3200);
         return;
       }
       item = {
@@ -249,7 +249,7 @@
       let scrambled = (document.getElementById('nl-custom-scramble-letters')?.value || '').trim().toUpperCase();
       const hint = (document.getElementById('nl-custom-scramble-hint')?.value || '').trim();
       if (!prompt || !answer) {
-        alert('Please enter a prompt and the unscrambled answer.');
+        window.notifyUser('Please enter a prompt and the unscrambled answer.', 'warning', 3200);
         return;
       }
       if (!scrambled) scrambled = scrambleLetters(answer);
@@ -269,7 +269,7 @@
       const riddle = (document.getElementById('nl-custom-riddle-text')?.value || '').trim();
       const answer = (document.getElementById('nl-custom-riddle-answer')?.value || '').trim();
       if (!riddle || !answer) {
-        alert('Please enter both the riddle and its answer.');
+        window.notifyUser('Please enter both the riddle and its answer.', 'warning', 3200);
         return;
       }
       item = {
@@ -572,14 +572,14 @@
       const type = getActivePuzzleType();
       const pool = getFilteredPuzzleList(type);
       if (!pool.length) {
-        alert('No items match your current filters. Try All topics or a different category.');
+        window.notifyUser('No items match your current filters. Try All topics or a different category.', 'warning', 3200);
         return;
       }
       setSelectedPuzzle(type, getRandomObject(pool, getUsedIds(type)));
     } else if (PUZZLE_TYPES[category]) {
       const pool = getFilteredPuzzleList(category);
       if (!pool.length) {
-        alert('No items match your current filters. Try All topics or a different category.');
+        window.notifyUser('No items match your current filters. Try All topics or a different category.', 'warning', 3200);
         return;
       }
       setSelectedPuzzle(category, getRandomObject(pool, getUsedIds(category)));
@@ -619,7 +619,7 @@
       puzzleRiddle: 'Riddles',
       puzzleAll: 'All Brain Teasers'
     };
-    alert(`"${labels[category] || category}" tracking reset! Random selections refreshed.`);
+    window.notifyUser(`"${labels[category] || category}" tracking reset! Random selections refreshed.`, 'success', 3200);
   }
 
   function getChoiceModalMeta(category) {
@@ -962,7 +962,7 @@
       scrambleShuffle.addEventListener('click', () => {
         const answer = (document.getElementById('nl-custom-scramble-answer')?.value || '').trim();
         if (!answer) {
-          alert('Enter the unscrambled answer first, then scramble.');
+          window.notifyUser('Enter the unscrambled answer first, then scramble.', 'warning', 3200);
           return;
         }
         const lettersEl = document.getElementById('nl-custom-scramble-letters');

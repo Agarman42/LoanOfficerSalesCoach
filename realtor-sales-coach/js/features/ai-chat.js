@@ -324,7 +324,7 @@ function saveChatMessage(btn) {
 </div>`;
     window.toggleSaveIdea('AI Coach Response', content, null, 'coach');
     if (window.showToast) window.showToast('Saved to My Saved Items!', 'success');
-    else alert('Saved!');
+    else window.notifyUser('Saved!', 'success', 3200);
   }
 }
 

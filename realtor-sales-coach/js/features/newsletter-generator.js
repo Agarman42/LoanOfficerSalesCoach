@@ -849,7 +849,7 @@ function resetUsed(category) {
     localStorage.setItem('used' + category.charAt(0).toUpperCase() + category.slice(1), JSON.stringify([]));
 
     updatePreviews();
-    alert(`"${category === 'funFacts' ? 'Fun Facts' : category === 'proTips' ? 'Pro Tips' : 'Motivational Quotes'}" tracking reset! Random selections refreshed.`);
+    window.notifyUser(`"${category === 'funFacts' ? 'Fun Facts' : category === 'proTips' ? 'Pro Tips' : 'Motivational Quotes'}" tracking reset! Random selections refreshed.`, 'success', 3200);
 }
 
 
@@ -1242,7 +1242,7 @@ function openSocialModal(category) {
         li.className = 'p-6 bg-white dark:bg-gray-800 rounded-3xl cursor-pointer hover:bg-[#00A89D]/10 transition-all border border-transparent hover:border-[#00A89D] text-lg';
         li.innerHTML = `→ ${item}`;
         li.onclick = () => {
-            alert(`✅ Great choice!\n\n"${item}"\n\nCopy and paste this into your next post!`);
+            window.notifyUser(`✅ Great choice!\n\n"${item}"\n\nCopy and paste this into your next post!`, 'success', 3200);
             closeModal();
         };
         list.appendChild(li);
@@ -1765,7 +1765,7 @@ function scrollToNewsletterCustomContent(sectionKey) {
 
     if (!targetId) {
         if (window.showToast) window.showToast('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser first.', 'info');
-        else alert('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser in Sections to Include first.');
+        else window.notifyUser('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser in Sections to Include first.', 'warning', 3200);
         return;
     }
 
@@ -2292,7 +2292,7 @@ function validateProfileForGeneration() {
     if (typeof window.openUserProfile === 'function') {
         if (confirm(msg + '\n\nOpen My Profile now?')) window.openUserProfile();
     } else {
-        alert(msg);
+        window.notifyUser(msg, 'info', 3200);
     }
     return false;
 }
@@ -2304,7 +2304,7 @@ function validatePersonalUpdateForGeneration() {
     const text = document.getElementById('nl-personal-text')?.value.trim() || '';
     if (text.length >= NL_PERSONAL_UPDATE_MIN_CHARS) return true;
     document.getElementById('nl-personal-text')?.focus();
-    alert(`Please write your Personal Update (${NL_PERSONAL_UPDATE_MIN_CHARS}+ characters) before generating.`);
+    window.notifyUser(`Please write your Personal Update (${NL_PERSONAL_UPDATE_MIN_CHARS}+ characters) before generating.`, 'warning', 3200);
     return false;
 }
 
@@ -2436,11 +2436,11 @@ function getAudienceGuidance(audience) {
 document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', async () => {
     const feedback = document.getElementById('nl-feedback')?.value.trim() || '';
     if (!feedback) {
-        alert('Please enter feedback or specific edits first!');
+        window.notifyUser('Please enter feedback or specific edits first!', 'warning', 3200);
         return;
     }
     if (!lastGeneratedHTML) {
-        alert('No previous newsletter to edit — generate one first!');
+        window.notifyUser('No previous newsletter to edit — generate one first!', 'warning', 3200);
         return;
     }
     generateNewsletter(feedback);
@@ -2809,7 +2809,7 @@ async function generateNewsletter(feedback = '') {
         const rawEl = document.getElementById('nl-html-raw');
         if (rawEl) rawEl.value = '';
         
-        alert('Newsletter generation failed. No content created — please try again.');
+        window.notifyUser('Newsletter generation failed. No content created — please try again.', 'error', 5000);
         
         gtag('event', feedback ? 'edit_newsletter_failed' : 'generate_newsletter_failed', {
             event_category: 'Tool Usage',
@@ -3060,7 +3060,7 @@ function downloadNewsletterHTML() {
     a.download = 'newsletter_' + new Date().toISOString().slice(0,10) + '.html';
     a.click();
     URL.revokeObjectURL(url);
-    alert('Newsletter downloaded! Double-click the file to preview.');
+    window.notifyUser('Newsletter downloaded! Double-click the file to preview.', 'success', 3200);
 }
 
 function getCleanOutlookHTML() {
@@ -3211,7 +3211,7 @@ function getCleanOutlookHTML() {
 function copyForOutlook() {
     const cleanHTML = getCleanOutlookHTML();
     if (!cleanHTML) {
-        alert('Generate the newsletter first!');
+        window.notifyUser('Generate the newsletter first!', 'warning', 3200);
         return;
     }
 
@@ -3219,10 +3219,10 @@ function copyForOutlook() {
     const data = [new ClipboardItem({ 'text/html': blob })];
 
     navigator.clipboard.write(data).then(() => {
-        alert('✅ Outlook-optimized HTML copied!\n\nPaste into a NEW email in Outlook.');
+        window.notifyUser('✅ Outlook-optimized HTML copied!\n\nPaste into a NEW email in Outlook.', 'success', 3200);
     }).catch(err => {
         console.error(err);
-        alert('Clipboard issue — try the regular Copy HTML button instead.');
+        window.notifyUser('Clipboard issue — try the regular Copy HTML button instead.', 'error', 5000);
     });
 }
 
@@ -3239,12 +3239,12 @@ function copyForOutlook() {
   // has the orange headers that the raw/preview might.
   window.saveNewsletterToVault = function() {
     if (typeof window.toggleSaveIdea !== 'function') {
-      alert('Saved Items system not ready yet. Please try again in a moment.');
+      window.notifyUser('Saved Items system not ready yet. Please try again in a moment.', 'success', 3200);
       return;
     }
     const clean = getCleanOutlookHTML();
     if (!clean) {
-      alert('Generate the newsletter first!');
+      window.notifyUser('Generate the newsletter first!', 'warning', 3200);
       return;
     }
     const baseTitle = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter';
@@ -3254,7 +3254,7 @@ function copyForOutlook() {
     if (window.showToast) {
       window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success');
     } else {
-      alert('Newsletter (Outlook version) saved to My Saved Items!');
+      window.notifyUser('Newsletter (Outlook version) saved to My Saved Items!', 'success', 3200);
     }
   };
 

@@ -246,7 +246,7 @@ async function generateSalesScript() {
     const scriptElements = Array.from(elemChecks).map(cb => (cb.value || '').trim()).filter(Boolean);
 
     if (!scenario) {
-        alert('Please select or type a scenario');
+        window.notifyUser('Please select or type a scenario', 'warning', 3200);
         return;
     }
 
@@ -479,7 +479,7 @@ Focus on building connection and trust — not closing the deal.`;
 function copySingleScript(scriptId, buttonEl) {
     const scriptEl = document.getElementById(scriptId);
     if (!scriptEl || !buttonEl) {
-        alert('Script or button not found!');
+        window.notifyUser('Script or button not found!', 'error', 5000);
         return;
     }
 
@@ -505,9 +505,9 @@ function copySingleScript(scriptId, buttonEl) {
     }).catch(() => {
         // Fallback
         navigator.clipboard.writeText(plainText).then(() => {
-            alert('Copied as plain text (rich formatting not supported)');
+            window.notifyUser('Copied as plain text (rich formatting not supported)', 'success', 3200);
         }).catch(() => {
-            alert('Copy failed — please select and copy manually');
+            window.notifyUser('Copy failed — please select and copy manually', 'error', 5000);
         });
     });
 }

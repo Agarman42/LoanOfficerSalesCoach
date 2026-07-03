@@ -72,7 +72,7 @@
       } else if (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
         extractedText = await file.text();
       } else {
-        alert('Please upload a PDF or plain text file (.txt, .md).');
+        window.notifyUser('Please upload a PDF or plain text file (.txt, .md).', 'warning', 3200);
         return;
       }
 
@@ -97,7 +97,7 @@
 
     } catch (e) {
       console.error('UW file processing error', e);
-      alert('Could not read the file. Please try a different PDF or text file.');
+      window.notifyUser('Could not read the file. Please try a different PDF or text file.', 'error', 5000);
     }
   }
 
@@ -254,7 +254,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
     }
 
     if (!question) {
-      if (!isFollowUp) alert('Please enter a question');
+      if (!isFollowUp) window.notifyUser('Please enter a question', 'warning', 3200);
       return;
     }
 
@@ -542,7 +542,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
         btns[0].innerHTML = '<i class="fas fa-check"></i> Copied';
         setTimeout(() => { if (btns[0]) btns[0].innerHTML = orig; }, 1400);
       }
-    }).catch(() => alert('Copy failed — please select and copy manually.'));
+    }).catch(() => window.notifyUser('Copy failed — please select and copy manually.', 'error', 5000));
   };
 
   window.copyUwSection = function(sectionName, btn) {
@@ -564,14 +564,14 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
 
   window.saveUwScenarioToVault = function() {
     if (typeof window.toggleSaveIdea !== 'function') {
-      alert('Saved Items system not ready yet.');
+      window.notifyUser('Saved Items system not ready yet.', 'success', 3200);
       return;
     }
 
     const output = document.getElementById('uw-output');
     const answer = output ? output.dataset.latestAnswer : '';
     if (!answer) {
-      alert('Generate an answer first.');
+      window.notifyUser('Generate an answer first.', 'warning', 3200);
       return;
     }
 
@@ -612,7 +612,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced financing
     if (window.showToast) {
       window.showToast('Full buyer qualification scenario saved to My Saved Items', 'success');
     } else {
-      alert('Saved to My Saved Items');
+      window.notifyUser('Saved to My Saved Items', 'success', 3200);
     }
   };
 

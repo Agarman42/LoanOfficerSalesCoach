@@ -268,7 +268,7 @@ function copySpecificPost(index) {
                 }, 1800);
             }
         }).catch(() => {
-            alert('Copy failed — try manually selecting the text.');
+            window.notifyUser('Copy failed — try manually selecting the text.', 'error', 5000);
         });
     }
 }
@@ -954,7 +954,7 @@ function saveCalendarPost(postId, day, pIdx, btnEl) {
 
 function saveFullSocialCalendar(monthName, btnEl) {
     const plan = document.getElementById('printable-plan');
-    if (!plan) return alert('Generate a calendar first.');
+    if (!plan) { window.notifyUser('Generate a calendar first.', 'warning', 3200); return; }
     const title = `${monthName || 'Monthly'} Social Media Calendar (Full Plan)`;
     const content = plan.innerHTML;
     if (typeof window.toggleSaveIdea === 'function') {

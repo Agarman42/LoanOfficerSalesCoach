@@ -91,6 +91,29 @@
     return toast;
   };
 
+  /**
+   * Unified user notification — prefers toast, falls back to console.
+   * @param {string} message
+   * @param {'success'|'error'|'info'|'warning'} [type='info']
+   * @param {number} [duration=3200]
+   */
+  window.notifyUser = function notifyUser(message, type = 'info', duration = 3200) {
+    if (typeof window.showToast === 'function') {
+      return window.showToast(message, type, duration);
+    }
+    console.warn('[notify]', type + ':', message);
+    return null;
+  };
+
+  /** Shown when toggleSaveIdea / vault save isn't loaded yet. */
+  window.saveNotReady = function saveNotReady(message) {
+    window.notifyUser(
+      message || 'Save ready after refresh — try again in a moment.',
+      'warning',
+      4000
+    );
+  };
+
   // =====================================================
   // HEADER SEARCH BAR (fully functional)
   // =====================================================

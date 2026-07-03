@@ -1131,7 +1131,7 @@ function updateWeeklyResultsHeader() {
 // ICS export (from former Prospecting Time Blocks)
 function exportWeeklyPlanToICS() {
   if (!currentWeeklyDays || !currentWeeklyDays.length) {
-    alert('No plan available to export.');
+    window.notifyUser('No plan available to export.', 'warning', 3200);
     return;
   }
   const ics = generateWeeklyICS(currentWeeklyDays);
@@ -1914,7 +1914,7 @@ function updatePlanProgress(days, checkedTasks = []) {
 
 function copyWeeklyPlan() {
     if (!currentWeeklyDays || !currentWeeklyDays.length) {
-        alert('No weekly plan to copy yet.');
+        window.notifyUser('No weekly plan to copy yet.', 'warning', 3200);
         return;
     }
 
@@ -2124,9 +2124,9 @@ function copyPlanFormatted() {
 
     try {
         document.execCommand('copy');
-        alert('Formatted plan copied! Paste into Word.');
+        window.notifyUser('Formatted plan copied! Paste into Word.', 'success', 3200);
     } catch (err) {
-        alert('Copy failed — select text manually.');
+        window.notifyUser('Copy failed — select text manually.', 'error', 5000);
     }
 
     window.getSelection().removeAllRanges();
@@ -2281,13 +2281,13 @@ function saveFullPlanToVault() {
                 if (typeof window.showToast === 'function') window.showToast('Full plan saved to My Saved Items (fallback)');
             } else {
                 if (window.showToast) window.showToast('Already saved in your vault.');
-                else alert('Already saved in your vault.');
+                else window.notifyUser('Already saved in your vault.', 'success', 3200);
             }
         }
     } catch (err) {
         console.error('[saveFullPlanToVault] failed:', err);
         if (window.showToast) window.showToast('Could not save plan — see console.', 'error');
-        else alert('Could not save plan. Check console for details.');
+        else window.notifyUser('Could not save plan. Check console for details.', 'error', 5000);
     }
 }
 window.saveFullPlanToVault = saveFullPlanToVault;
@@ -2537,12 +2537,12 @@ window.applyWeeklyPlanFeedbackAndRegenerate = function() {
   const val = (input.value || '').trim();
   if (!val) {
     if (window.showToast) window.showToast('Enter feedback first — e.g. "keep Saturday/Sunday fully off"', 'warning');
-    else alert('Enter feedback first — e.g. "keep Saturday/Sunday fully off"');
+    else window.notifyUser('Enter feedback first — e.g. "keep Saturday/Sunday fully off"', 'warning', 3200);
     return;
   }
   if (!currentWeeklyDays || !currentWeeklyDays.length) {
     if (window.showToast) window.showToast('Generate a plan first, then refine with feedback.', 'warning');
-    else alert('Generate a plan first, then refine with feedback.');
+    else window.notifyUser('Generate a plan first, then refine with feedback.', 'warning', 3200);
     return;
   }
   generateWeeklyPlan({ feedback: val });
@@ -2557,7 +2557,7 @@ window.applyPlanFeedbackAndRegenerate = function() {
   const val = (input.value || '').trim();
   if (!val) {
     if (window.showToast) window.showToast('Enter some feedback first (e.g. "more focus on social and golf").');
-    else alert('Enter some feedback first.');
+    else window.notifyUser('Enter some feedback first.', 'warning', 3200);
     return;
   }
   window.lastPlanFeedback = val;
@@ -2779,7 +2779,7 @@ window.savePlanBaseline = function() {
   if (typeof window.showToast === 'function') {
     window.showToast('Form state saved as your Baseline. Use Load to restore anytime.');
   } else {
-    alert('Saved as My Baseline!');
+    window.notifyUser('Saved as My Baseline!', 'success', 3200);
   }
 };
 
@@ -2788,7 +2788,7 @@ window.loadPlanBaseline = function() {
   const raw = localStorage.getItem('planBaseline');
   if (!raw) {
     if (typeof window.showToast === 'function') window.showToast('No baseline saved yet — use the Save button first.');
-    else alert('No baseline saved yet. Fill the form and click "Save as My Baseline".');
+    else window.notifyUser('No baseline saved yet. Fill the form and click "Save as My Baseline".', 'success', 3200);
     return;
   }
   const state = JSON.parse(raw);

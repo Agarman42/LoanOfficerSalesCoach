@@ -270,7 +270,7 @@ async function generateBlog(feedback = '') {
     const fileContext = blogUploadedFileText || '';
 
     if (!topicInput) {
-        alert('Please select or type a blog topic');
+        window.notifyUser('Please select or type a blog topic', 'warning', 3200);
         return;
     }
 
@@ -405,7 +405,7 @@ let finalPrompt = systemPrompt;
 
     if (feedback) {
         if (!lastBlogBundle) {
-            alert('Generate a blog first, then use feedback to refine it.');
+            window.notifyUser('Generate a blog first, then use feedback to refine it.', 'warning', 3200);
             window.hideLoading?.();
             return;
         }
@@ -472,7 +472,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         <button id="download-blog-btn" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-download"></i> Download .doc
         </button>
-        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
+        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else window.saveNotReady();" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-bookmark"></i> Save Bundle to Vault
         </button>
         <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="bg-red-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-red-600 transition-all flex items-center justify-center gap-2 flex-1">
@@ -558,7 +558,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
                 if (!reelEl) return;
                 const text = reelEl.innerText || reelEl.textContent || '';
                 navigator.clipboard.writeText(text.trim()).then(() => {
-                    alert('Reel script & video idea copied!');
+                    window.notifyUser('Reel script & video idea copied!', 'success', 3200);
                 }).catch(() => {
                     // fallback
                     const range = document.createRange();
@@ -568,7 +568,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
                     sel.addRange(range);
                     document.execCommand('copy');
                     sel.removeAllRanges();
-                    alert('Reel script & video idea copied!');
+                    window.notifyUser('Reel script & video idea copied!', 'success', 3200);
                 });
             };
         }
@@ -586,7 +586,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         if (refineBtn) {
             refineBtn.onclick = () => {
                 const fb = document.getElementById('blog-feedback')?.value.trim() || '';
-                if (!fb) { alert('Please enter feedback or specific edits first!'); return; }
+                if (!fb) { window.notifyUser('Please enter feedback or specific edits first!', 'warning', 3200); return; }
                 generateBlog(fb);
             };
         }
@@ -642,7 +642,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 function copyBlogWithFormatting() {
     const blogContent = document.querySelector('#blog-output .prose');
     if (!blogContent) {
-        alert('No blog content to copy!');
+        window.notifyUser('No blog content to copy!', 'warning', 3200);
         return;
     }
     const html = blogContent.innerHTML;
@@ -654,17 +654,17 @@ function copyBlogWithFormatting() {
     });
 
     navigator.clipboard.write([clipboardItem]).then(() => {
-        alert('Blog copied with formatting!');
+        window.notifyUser('Blog copied with formatting!', 'success', 3200);
     }).catch(err => {
         console.error('Rich copy failed:', err);
         navigator.clipboard.writeText(plainText).then(() => {
-            alert('Copied as plain text (rich formatting not supported in this browser)');
+            window.notifyUser('Copied as plain text (rich formatting not supported in this browser)', 'success', 3200);
         });
     });
 }
 window.saveBlogAsset = function(assetType, btnEl) {
     if (typeof window.toggleSaveIdea !== 'function') {
-        alert('Saved Items system not ready yet.');
+        window.notifyUser('Saved Items system not ready yet.', 'success', 3200);
         return;
     }
     const output = document.getElementById('blog-output');
@@ -679,7 +679,7 @@ window.saveBlogAsset = function(assetType, btnEl) {
     const node = document.getElementById(cfg.el);
     const text = node ? (node.innerText || node.textContent || '').trim() : '';
     if (!text) {
-        alert(`No ${cfg.label.toLowerCase()} to save yet.`);
+        window.notifyUser(`No ${cfg.label.toLowerCase()} to save yet.`, 'warning', 3200);
         return;
     }
     const title = `Blog Asset — ${cfg.label}: ${blogTitle.substring(0, 50)}`;
@@ -691,12 +691,12 @@ window.saveBlogAsset = function(assetType, btnEl) {
 
 window.saveBlogToVault = function() {
     if (typeof window.toggleSaveIdea !== 'function') {
-        alert('Saved Items system not ready yet.');
+        window.notifyUser('Saved Items system not ready yet.', 'success', 3200);
         return;
     }
     const output = document.getElementById('blog-output');
     if (!output || !output.innerHTML.trim()) {
-        alert('Generate a blog first.');
+        window.notifyUser('Generate a blog first.', 'warning', 3200);
         return;
     }
 
@@ -786,7 +786,7 @@ window.saveBlogToVault = function() {
     if (window.showToast) {
         window.showToast('Full blog bundle saved to My Saved Items', 'success');
     } else {
-        alert('Saved to My Saved Items');
+        window.notifyUser('Saved to My Saved Items', 'success', 3200);
     }
 };
 
@@ -817,7 +817,7 @@ function attachBlogOutputListeners() {
   if (refineBtn) {
     refineBtn.onclick = () => {
       const fb = document.getElementById('blog-feedback')?.value.trim() || '';
-      if (!fb) { alert('Please enter feedback or specific edits first!'); return; }
+      if (!fb) { window.notifyUser('Please enter feedback or specific edits first!', 'warning', 3200); return; }
       generateBlog(fb);
     };
   }
@@ -829,7 +829,7 @@ function attachBlogOutputListeners() {
       if (!reelEl) return;
       const text = reelEl.innerText || reelEl.textContent || '';
       navigator.clipboard.writeText(text.trim()).then(() => {
-        alert('Reel script & video idea copied!');
+        window.notifyUser('Reel script & video idea copied!', 'success', 3200);
       }).catch(() => {
         const range = document.createRange();
         range.selectNodeContents(reelEl);
@@ -838,7 +838,7 @@ function attachBlogOutputListeners() {
         sel.addRange(range);
         document.execCommand('copy');
         sel.removeAllRanges();
-        alert('Reel script & video idea copied!');
+        window.notifyUser('Reel script & video idea copied!', 'success', 3200);
       });
     };
   }
@@ -848,7 +848,7 @@ function attachBlogOutputListeners() {
 function downloadBlogWord() {
     const blogEl = document.querySelector('#blog-output .prose');
     if (!blogEl) {
-        alert('No blog content to download!');
+        window.notifyUser('No blog content to download!', 'warning', 3200);
         return;
     }
 
@@ -878,17 +878,17 @@ function downloadBlogWord() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    alert('Blog downloaded as Word doc! Open in Word for best formatting.');
+    window.notifyUser('Blog downloaded as Word doc! Open in Word for best formatting.', 'success', 3200);
 }
 
 // === Missing helper: Copy the suggested social caption ===
 window.copySocialCaption = function copySocialCaption() {
     const captionEl = document.getElementById('social-caption');
-    if (!captionEl) return alert('No social caption to copy!');
+    if (!captionEl) { window.notifyUser('No social caption to copy!', 'warning', 3200); return; }
 
     const text = captionEl.innerText || captionEl.textContent || '';
     navigator.clipboard.writeText(text.trim()).then(() => {
-        alert('Social caption copied!');
+        window.notifyUser('Social caption copied!', 'success', 3200);
     }).catch(() => {
         // Fallback
         const range = document.createRange();
@@ -898,14 +898,14 @@ window.copySocialCaption = function copySocialCaption() {
         sel.addRange(range);
         document.execCommand('copy');
         sel.removeAllRanges();
-        alert('Social caption copied!');
+        window.notifyUser('Social caption copied!', 'success', 3200);
     });
 };
 
 // === Missing helper: Copy the suggested Google post with formatting ===
 window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
     const googleEl = document.getElementById('google-post');
-    if (!googleEl) return alert('No Google post to copy!');
+    if (!googleEl) { window.notifyUser('No Google post to copy!', 'warning', 3200); return; }
 
     const html = googleEl.innerHTML;
     const plainText = googleEl.innerText || '';
@@ -917,17 +917,17 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
             'text/plain': new Blob([plainText], { type: 'text/plain' })
         });
         navigator.clipboard.write([clipboardItem]).then(() => {
-            alert('Google post copied with formatting!');
+            window.notifyUser('Google post copied with formatting!', 'success', 3200);
         }).catch(() => {
             // Fallback to plain text
             navigator.clipboard.writeText(plainText).then(() => {
-                alert('Google post copied (plain text).');
+                window.notifyUser('Google post copied (plain text).', 'success', 3200);
             });
         });
     } catch (e) {
         // Very old browser fallback
         navigator.clipboard.writeText(plainText).then(() => {
-            alert('Google post copied.');
+            window.notifyUser('Google post copied.', 'success', 3200);
         });
     }
 };

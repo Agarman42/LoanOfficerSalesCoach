@@ -678,7 +678,7 @@
   function showRandomIdea() {
     const ideas = collectAllIdeas();
     if (ideas.length === 0) {
-      alert('No ideas available yet. Please try again after the page fully loads, or add more content to the Value Vault.');
+      window.notifyUser('No ideas available yet. Please try again after the page fully loads, or add more content to the Value Vault.', 'warning', 3200);
       return;
     }
 
@@ -934,7 +934,7 @@ AFTER THE CALL
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      alert('Checklist copied to clipboard!');
+      window.notifyUser('Checklist copied to clipboard!', 'success', 3200);
     });
   }
 
@@ -1056,7 +1056,7 @@ DAY OF
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      alert('Checklist copied to clipboard!');
+      window.notifyUser('Checklist copied to clipboard!', 'success', 3200);
     });
   }
 
@@ -1247,7 +1247,7 @@ DAY OF
           <p class="text-sm mt-2 text-gray-600 dark:text-gray-300">${idea.desc}</p>
           
           <div class="mt-4 flex gap-2">
-            <button onclick="if (typeof window.toggleSaveIdea === 'function') { window.toggleSaveIdea('${safeTitle}', '${safeDesc}', this, 'event'); } else { alert('Saved (system will be ready after refresh).'); }" 
+            <button onclick="if (typeof window.toggleSaveIdea === 'function') { window.toggleSaveIdea('${safeTitle}', '${safeDesc}', this, 'event'); } else { window.saveNotReady(); }" 
                     class="flex-1 text-sm px-4 py-2 bg-[#00A89D] hover:bg-[#008f85] text-white rounded-xl font-medium flex items-center justify-center gap-2 transition">
               <i class="fas fa-bookmark"></i> 
               <span>Save Idea</span>
