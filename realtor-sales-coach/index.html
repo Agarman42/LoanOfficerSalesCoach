@@ -41,15 +41,15 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260703-realtor-v268">
+    <link rel="stylesheet" href="css/main.css?v=20260703-realtor-v269">
 
     <!-- Centralized API client (Phase 0) - must load early -->
-    <script src="js/api.js?v=20260703-realtor-v268"></script>
+    <script src="js/api.js?v=20260703-realtor-v269"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260703-realtor-v268"></script>
-    <script defer src="js/features/sidebar-ai-indicators.js?v=20260703-realtor-v268"></script>
-    <script src="js/early-boot.js?v=20260703-realtor-v268"></script>
+    <script src="js/ui.js?v=20260703-realtor-v269"></script>
+    <script defer src="js/features/sidebar-ai-indicators.js?v=20260703-realtor-v269"></script>
+    <script src="js/early-boot.js?v=20260703-realtor-v269"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -5324,8 +5324,8 @@
             </div>
             <button type="button" onclick="if(typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal();" class="text-white/80 hover:text-white text-4xl leading-none transition" aria-label="Close">&times;</button>
         </div>
-        <div class="p-6 md:p-8">
-            <div id="modal-list" class="space-y-4 max-h-[62vh] overflow-y-auto pr-1"></div>
+        <div id="modal-choice-body" class="p-6 md:p-8 flex flex-col min-h-0">
+            <div id="modal-list" class="space-y-3 max-h-[58vh] overflow-y-auto pr-1 flex-1 min-h-0"></div>
         </div>
     </div>
 </div>
@@ -7659,13 +7659,13 @@
    </section> 
 
 <!-- Rich modal modules (LO polish mirror) -->
-<script src="js/features/social-modals.js?v=20260703-realtor-v268"></script>
-<script src="js/features/vault-rich-modals.js?v=20260703-realtor-v268"></script>
-<script src="js/features/process-rich-modals.js?v=20260703-realtor-v268"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260703-realtor-v268"></script>
-<script src="js/features/database-rich-modals.js?v=20260703-realtor-v268"></script>
-<script src="js/features/event-rich-modals.js?v=20260703-realtor-v268"></script>
-<script src="js/features/referral-rich-modals.js?v=20260703-realtor-v268"></script>
+<script src="js/features/social-modals.js?v=20260703-realtor-v269"></script>
+<script src="js/features/vault-rich-modals.js?v=20260703-realtor-v269"></script>
+<script src="js/features/process-rich-modals.js?v=20260703-realtor-v269"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260703-realtor-v269"></script>
+<script src="js/features/database-rich-modals.js?v=20260703-realtor-v269"></script>
+<script src="js/features/event-rich-modals.js?v=20260703-realtor-v269"></script>
+<script src="js/features/referral-rich-modals.js?v=20260703-realtor-v269"></script>
 
 <script>
 // Reusable toggle for Supporting Systems sections (makes them behave like the main 6 pillars)
@@ -13825,8 +13825,8 @@ window.toggleSupportingSection = function(sectionId) {
   }
 })();
 </script>
-<script src="js/features/rich-modals-restore.js?v=20260703-realtor-v268"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260703-realtor-v268"></script>
+<script src="js/features/rich-modals-restore.js?v=20260703-realtor-v269"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260703-realtor-v269"></script>
 
 </main>
     <script>
@@ -13890,32 +13890,32 @@ window.toggleSupportingSection = function(sectionId) {
 </div>
 
 <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-<script src="js/main.js?v=20260703-realtor-v268"></script>
+<script src="js/main.js?v=20260703-realtor-v269"></script>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/save-ribbon.js?v=20260703-realtor-v268"></script>
-<script src="js/features/sales-scripts.js?v=20260703-realtor-v268"></script>
-<script src="js/features/listing-description.js?v=20260703-realtor-v268"></script>
-<script src="js/features/open-house.js?v=20260703-realtor-v268"></script>
-<script src="js/features/consultation-kit.js?v=20260703-realtor-v268"></script>
-<script src="js/features/social-post.js?v=20260703-realtor-v268"></script>
-<script src="js/features/mindset-lab.js?v=20260703-realtor-v268"></script>
-<script src="js/data/weekend-plan-policy.js?v=20260703-realtor-v268"></script>
-<script src="js/features/weekly-win-plan.js?v=20260703-realtor-v268"></script>
-<script src="js/features/tool-bridges.js?v=20260703-realtor-v268"></script>
-<script src="js/features/prospecting-time-blocks.js?v=20260703-realtor-v268"></script>
-<script src="js/features/blog-creator.js?v=20260703-realtor-v268"></script>
-<script src="js/features/legacy-helpers.js?v=20260703-realtor-v268"></script>
-<script src="js/features/saved-items-library.js?v=20260703-realtor-v268"></script>
-<script src="js/data/newsletter-dad-jokes.js?v=20260703-realtor-v268"></script>
-<script src="js/data/newsletter-brain-teasers.js?v=20260703-realtor-v268"></script>
-<script src="js/features/newsletter-entertainment.js?v=20260703-realtor-v268"></script>
-<script src="js/features/newsletter-generator.js?v=20260703-realtor-v268"></script>
-<script src="js/features/ai-chat.js?v=20260703-realtor-v268"></script>
-<script src="js/features/underwriting.js?v=20260703-realtor-v268"></script>
+<script src="js/features/save-ribbon.js?v=20260703-realtor-v269"></script>
+<script src="js/features/sales-scripts.js?v=20260703-realtor-v269"></script>
+<script src="js/features/listing-description.js?v=20260703-realtor-v269"></script>
+<script src="js/features/open-house.js?v=20260703-realtor-v269"></script>
+<script src="js/features/consultation-kit.js?v=20260703-realtor-v269"></script>
+<script src="js/features/social-post.js?v=20260703-realtor-v269"></script>
+<script src="js/features/mindset-lab.js?v=20260703-realtor-v269"></script>
+<script src="js/data/weekend-plan-policy.js?v=20260703-realtor-v269"></script>
+<script src="js/features/weekly-win-plan.js?v=20260703-realtor-v269"></script>
+<script src="js/features/tool-bridges.js?v=20260703-realtor-v269"></script>
+<script src="js/features/prospecting-time-blocks.js?v=20260703-realtor-v269"></script>
+<script src="js/features/blog-creator.js?v=20260703-realtor-v269"></script>
+<script src="js/features/legacy-helpers.js?v=20260703-realtor-v269"></script>
+<script src="js/features/saved-items-library.js?v=20260703-realtor-v269"></script>
+<script src="js/data/newsletter-dad-jokes.js?v=20260703-realtor-v269"></script>
+<script src="js/data/newsletter-brain-teasers.js?v=20260703-realtor-v269"></script>
+<script src="js/features/newsletter-entertainment.js?v=20260703-realtor-v269"></script>
+<script src="js/features/newsletter-generator.js?v=20260703-realtor-v269"></script>
+<script src="js/features/ai-chat.js?v=20260703-realtor-v269"></script>
+<script src="js/features/underwriting.js?v=20260703-realtor-v269"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'realtor';</script>
-<script src="js/features/translation-tool.js?v=20260703-realtor-v268"></script>
-<script src="js/features/value-vault.js?v=20260703-realtor-v268"></script>
+<script src="js/features/translation-tool.js?v=20260703-realtor-v269"></script>
+<script src="js/features/value-vault.js?v=20260703-realtor-v269"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
 
@@ -15493,8 +15493,8 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260703-realtor-v268"></script>
-<script src="js/features/onboarding-coach.js?v=20260703-realtor-v268"></script>
+<script src="js/features/user-profile.js?v=20260703-realtor-v269"></script>
+<script src="js/features/onboarding-coach.js?v=20260703-realtor-v269"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -15643,8 +15643,8 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Agent Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Agent Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260703-realtor-v268"></script>
-<script src="js/app-version.js?v=20260703-realtor-v268"></script>
+<script src="js/features/section-bottom-banners.js?v=20260703-realtor-v269"></script>
+<script src="js/app-version.js?v=20260703-realtor-v269"></script>
 
 </body>
 </html>

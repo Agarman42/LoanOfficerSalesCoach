@@ -987,6 +987,328 @@ function getNewsletterChoiceModal() {
     return document.getElementById(NL_CHOICE_MODAL_ID);
 }
 
+// ─── Real Estate Tip picker — grouped UX (Home Care vs Real Estate vs Money) ───
+const NL_PRO_TIP_HOME_CATS = new Set(['Home Maintenance & Care', 'Renovation Tip', 'Staging ROI']);
+const NL_PRO_TIP_MONEY_CATS = new Set(['Smart Money Moves', 'Smart Ownership', 'Equity & Move-Up', 'Local Living Perks']);
+
+const NL_PRO_TIP_GROUPS = [
+    { id: 'all', label: 'All Tips', icon: 'fa-layer-group' },
+    { id: 'realestate', label: 'Real Estate', icon: 'fa-sign-hanging' },
+    { id: 'home', label: 'Home Care', icon: 'fa-house-chimney' },
+    { id: 'money', label: 'Money & Equity', icon: 'fa-piggy-bank' }
+];
+
+const NL_PRO_TIP_GROUP_LABELS = {
+    realestate: 'Real Estate & Market',
+    home: 'Home & Maintenance',
+    money: 'Money & Ownership'
+};
+
+const NL_PRO_TIP_CAT_STYLE = {
+    'Home Maintenance & Care': { icon: 'fa-wrench', color: '#00A89D', bg: 'rgba(0,168,157,0.12)' },
+    'Smart Money Moves': { icon: 'fa-dollar-sign', color: '#002B5C', bg: 'rgba(0,43,92,0.08)' },
+    'Equity & Move-Up': { icon: 'fa-chart-line', color: '#F15A29', bg: 'rgba(241,90,41,0.1)' },
+    'Local Living Perks': { icon: 'fa-map-marker-alt', color: '#00A89D', bg: 'rgba(0,168,157,0.1)' },
+    'Buyer Strategy': { icon: 'fa-key', color: '#002B5C', bg: 'rgba(0,43,92,0.08)' },
+    'Seller Prep': { icon: 'fa-home', color: '#F15A29', bg: 'rgba(241,90,41,0.1)' },
+    'Market Awareness': { icon: 'fa-chart-bar', color: '#002B5C', bg: 'rgba(0,43,92,0.08)' },
+    'Negotiation': { icon: 'fa-handshake', color: '#00A89D', bg: 'rgba(0,168,157,0.12)' },
+    'Open House Tip': { icon: 'fa-door-open', color: '#F15A29', bg: 'rgba(241,90,41,0.1)' },
+    'First-Time Buyer': { icon: 'fa-seedling', color: '#00A89D', bg: 'rgba(0,168,157,0.12)' },
+    'Listing Strategy': { icon: 'fa-camera', color: '#002B5C', bg: 'rgba(0,43,92,0.08)' },
+    'Inspection & Appraisal': { icon: 'fa-clipboard-check', color: '#00A89D', bg: 'rgba(0,168,157,0.12)' },
+    'Smart Ownership': { icon: 'fa-house-user', color: '#002B5C', bg: 'rgba(0,43,92,0.08)' },
+    'Client Care': { icon: 'fa-heart', color: '#F15A29', bg: 'rgba(241,90,41,0.1)' },
+    'Co-Broke Etiquette': { icon: 'fa-people-arrows', color: '#00A89D', bg: 'rgba(0,168,157,0.12)' }
+};
+
+function getProTipGroupId(category) {
+    if (NL_PRO_TIP_HOME_CATS.has(category)) return 'home';
+    if (NL_PRO_TIP_MONEY_CATS.has(category)) return 'money';
+    return 'realestate';
+}
+
+function parseProTipItem(raw) {
+    const s = String(raw || '');
+    const idx = s.indexOf(':');
+    if (idx < 1) {
+        return { raw: s, category: 'General', title: s, body: s, group: 'realestate' };
+    }
+    const category = s.slice(0, idx).trim();
+    const rest = s.slice(idx + 1).trim();
+    const dash = rest.indexOf(' — ');
+    const title = dash > 0 ? rest.slice(0, dash).trim() : (rest.length > 72 ? rest.slice(0, 72) + '…' : rest);
+    const body = dash > 0 ? rest.slice(dash + 3).trim() : rest;
+    return { raw: s, category, title, body, group: getProTipGroupId(category) };
+}
+
+function buildProTipIndex() {
+    const parsed = (proTips || []).map(parseProTipItem);
+    const byGroup = { all: parsed, realestate: [], home: [], money: [] };
+    const byCategory = {};
+    parsed.forEach((tip) => {
+        byGroup[tip.group].push(tip);
+        if (!byCategory[tip.category]) byCategory[tip.category] = [];
+        byCategory[tip.category].push(tip);
+    });
+    ['realestate', 'home', 'money'].forEach((g) => {
+        byGroup[g] = sortProTips(byGroup[g]);
+    });
+    byGroup.all = sortProTips(parsed);
+    return { parsed: byGroup.all, byGroup, byCategory };
+}
+
+const NL_PRO_TIP_GROUP_ORDER = { realestate: 0, money: 1, home: 2 };
+
+function sortProTips(tips) {
+    return tips.slice().sort((a, b) => {
+        const ga = NL_PRO_TIP_GROUP_ORDER[a.group] ?? 9;
+        const gb = NL_PRO_TIP_GROUP_ORDER[b.group] ?? 9;
+        if (ga !== gb) return ga - gb;
+        if (a.category !== b.category) return a.category.localeCompare(b.category);
+        return a.title.localeCompare(b.title);
+    });
+}
+
+function cleanupProTipPickerChrome(modal) {
+    document.getElementById('modal-tip-toolbar')?.remove();
+    const search = document.getElementById('modal-search');
+    if (search) search.remove();
+    if (modal) {
+        const content = modal.querySelector('.modal-content');
+        if (content) content.classList.remove('max-w-4xl');
+    }
+}
+
+function attachNewsletterChoiceBackdropClose(modal) {
+    let nlChoiceBackdropDown = false;
+    modal.onmousedown = function (e) {
+        nlChoiceBackdropDown = (e.target === modal);
+    };
+    modal.onmouseup = function (e) {
+        if (!nlChoiceBackdropDown || e.target !== modal) {
+            nlChoiceBackdropDown = false;
+            return;
+        }
+        nlChoiceBackdropDown = false;
+        const sel = window.getSelection && window.getSelection();
+        if (sel && sel.toString().trim().length > 0) return;
+        closeModal();
+    };
+}
+
+function showNewsletterChoiceModalShell(modal) {
+    if (typeof window.openNamedModal === 'function') {
+        window.openNamedModal(modal);
+    } else {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+        modal.style.pointerEvents = 'auto';
+        document.body.classList.add('modal-open');
+    }
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+}
+
+function createProTipCard(tip, isCurrent, onPick) {
+    const li = document.createElement('li');
+    li.className = `nl-tip-card${isCurrent ? ' is-current' : ''}`;
+    li.dataset.category = tip.category;
+    li.dataset.group = tip.group;
+    li.dataset.search = `${tip.category} ${tip.title} ${tip.body}`.toLowerCase();
+
+    const style = NL_PRO_TIP_CAT_STYLE[tip.category] || { icon: 'fa-lightbulb', color: '#00A89D', bg: 'rgba(0,168,157,0.1)' };
+
+    const inner = document.createElement('div');
+    inner.className = 'nl-tip-card-inner';
+    inner.innerHTML = `
+      <div class="nl-tip-card-icon" style="background:${style.bg};color:${style.color};">
+        <i class="fas ${style.icon}"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="nl-tip-card-cat" style="color:${style.color};">${escBrandingText(tip.category)}</div>
+        <div class="nl-tip-card-title">${escBrandingText(tip.title)}</div>
+        <div class="nl-tip-card-body">${escBrandingText(tip.body)}</div>
+      </div>
+      ${isCurrent ? '<span class="text-[10px] px-2 py-0.5 bg-[#00A89D]/15 text-[#00A89D] rounded-full self-start font-bold shrink-0">Current</span>' : ''}
+    `;
+    inner.addEventListener('click', () => onPick(tip.raw));
+    li.appendChild(inner);
+    return li;
+}
+
+function openProTipChoiceModal(modal, titleEl) {
+    cleanupProTipPickerChrome(modal);
+    const list = modal.querySelector('#modal-list');
+    const body = document.getElementById('modal-choice-body') || list?.parentElement;
+    if (!list || !body) return;
+
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) modalContent.classList.add('max-w-4xl');
+
+    if (titleEl) {
+        titleEl.textContent = 'Choose a Real Estate Tip';
+        titleEl.style.color = '#fff';
+        titleEl.style.setProperty('color', '#fff', 'important');
+    }
+
+    showNewsletterChoiceModalShell(modal);
+
+    const index = buildProTipIndex();
+    const state = { group: 'all', category: 'all', search: '' };
+
+    const toolbar = document.createElement('div');
+    toolbar.id = 'modal-tip-toolbar';
+    toolbar.className = 'space-y-3';
+    toolbar.innerHTML = `
+      <div class="relative">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+        <input id="modal-search" type="text" placeholder="Search tips by topic or keyword…"
+          class="w-full pl-10 pr-4 py-2.5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm placeholder-gray-400 focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30" />
+      </div>
+      <div id="modal-tip-group-filters" class="flex flex-wrap gap-2"></div>
+      <div id="modal-tip-category-filters" class="nl-tip-cat-scroll"></div>
+      <div id="modal-tip-result-count" class="text-xs text-gray-500 dark:text-gray-400 font-medium"></div>
+    `;
+    body.insertBefore(toolbar, list);
+
+    const groupFiltersEl = toolbar.querySelector('#modal-tip-group-filters');
+    const catFiltersEl = toolbar.querySelector('#modal-tip-category-filters');
+    const countEl = toolbar.querySelector('#modal-tip-result-count');
+    const searchInput = toolbar.querySelector('#modal-search');
+
+    function pickTip(raw) {
+        selectedProTip = raw;
+        updatePreviews();
+        closeModal();
+    }
+
+    function renderGroupFilters() {
+        groupFiltersEl.innerHTML = '';
+        NL_PRO_TIP_GROUPS.forEach((g) => {
+            const count = g.id === 'all' ? index.parsed.length : index.byGroup[g.id].length;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `nl-tip-group-chip${state.group === g.id ? ' is-active' : ''}`;
+            btn.innerHTML = `<i class="fas ${g.icon} text-[10px]"></i><span>${g.label}</span><span class="nl-tip-chip-count">${count}</span>`;
+            btn.addEventListener('click', () => {
+                state.group = g.id;
+                state.category = 'all';
+                renderGroupFilters();
+                renderCategoryFilters();
+                renderTipList();
+            });
+            groupFiltersEl.appendChild(btn);
+        });
+    }
+
+    function categoriesForActiveGroup() {
+        const tips = state.group === 'all' ? index.parsed : index.byGroup[state.group];
+        const cats = {};
+        tips.forEach((t) => { cats[t.category] = (cats[t.category] || 0) + 1; });
+        return Object.entries(cats).sort((a, b) => b[1] - a[1]);
+    }
+
+    function renderCategoryFilters() {
+        catFiltersEl.innerHTML = '';
+        const cats = categoriesForActiveGroup();
+        if (cats.length < 2) {
+            catFiltersEl.style.display = 'none';
+            return;
+        }
+        catFiltersEl.style.display = '';
+
+        const allBtn = document.createElement('button');
+        allBtn.type = 'button';
+        allBtn.className = `nl-tip-cat-chip${state.category === 'all' ? ' is-active' : ''}`;
+        allBtn.textContent = 'All topics';
+        allBtn.addEventListener('click', () => { state.category = 'all'; renderCategoryFilters(); renderTipList(); });
+        catFiltersEl.appendChild(allBtn);
+
+        cats.forEach(([cat, n]) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `nl-tip-cat-chip${state.category === cat ? ' is-active' : ''}`;
+            btn.textContent = `${cat} (${n})`;
+            btn.addEventListener('click', () => { state.category = cat; renderCategoryFilters(); renderTipList(); });
+            catFiltersEl.appendChild(btn);
+        });
+    }
+
+    function filteredTips() {
+        let tips = state.group === 'all' ? index.parsed.slice() : index.byGroup[state.group].slice();
+        if (state.category !== 'all') tips = tips.filter((t) => t.category === state.category);
+        const q = state.search.trim().toLowerCase();
+        if (q) tips = tips.filter((t) => t.raw.toLowerCase().includes(q) || `${t.category} ${t.title} ${t.body}`.toLowerCase().includes(q));
+        return sortProTips(tips);
+    }
+
+    function renderTipList() {
+        list.innerHTML = '';
+        const tips = filteredTips();
+        const current = selectedProTip;
+
+        const randomLi = document.createElement('li');
+        randomLi.className = 'nl-tip-card nl-tip-random-row';
+        randomLi.dataset.search = '';
+        const randomInner = document.createElement('div');
+        randomInner.className = 'nl-tip-card-inner';
+        randomInner.innerHTML = '<i class="fas fa-dice text-[#00A89D]"></i><span>Surprise me — pick a random tip</span>';
+        randomInner.addEventListener('click', () => {
+            const pool = state.group === 'all' && !state.search && state.category === 'all'
+                ? index.parsed
+                : tips;
+            if (!pool.length) return;
+            pickTip(pool[Math.floor(Math.random() * pool.length)].raw);
+        });
+        randomLi.appendChild(randomInner);
+        list.appendChild(randomLi);
+
+        const showSectionHeads = state.group === 'all' && state.category === 'all' && !state.search.trim();
+        let lastGroup = null;
+        let lastCategory = null;
+
+        tips.forEach((tip) => {
+            if (showSectionHeads && tip.group !== lastGroup) {
+                lastGroup = tip.group;
+                lastCategory = null;
+                const head = document.createElement('li');
+                head.className = 'nl-tip-section-head';
+                head.dataset.section = '1';
+                head.innerHTML = `<i class="fas ${tip.group === 'home' ? 'fa-house-chimney' : tip.group === 'money' ? 'fa-piggy-bank' : 'fa-sign-hanging'}"></i> ${NL_PRO_TIP_GROUP_LABELS[tip.group] || tip.group}`;
+                list.appendChild(head);
+            }
+            if (showSectionHeads && tip.category !== lastCategory) {
+                lastCategory = tip.category;
+                const sub = document.createElement('li');
+                sub.className = 'text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 px-1 pt-2 pb-0.5';
+                sub.dataset.section = '1';
+                sub.textContent = tip.category;
+                list.appendChild(sub);
+            }
+            list.appendChild(createProTipCard(tip, tip.raw === current, pickTip));
+        });
+
+        const visibleCount = tips.length;
+        const groupLabel = NL_PRO_TIP_GROUPS.find((g) => g.id === state.group)?.label || 'Tips';
+        countEl.textContent = visibleCount
+            ? `Showing ${visibleCount} tip${visibleCount === 1 ? '' : 's'}${state.group !== 'all' ? ` in ${groupLabel}` : ''}${state.category !== 'all' ? ` · ${state.category}` : ''}`
+            : 'No tips match — try another topic or clear your search.';
+    }
+
+    searchInput.addEventListener('input', () => {
+        state.search = searchInput.value;
+        renderTipList();
+    });
+
+    renderGroupFilters();
+    renderCategoryFilters();
+    renderTipList();
+    attachNewsletterChoiceBackdropClose(modal);
+    setTimeout(() => searchInput.focus(), 80);
+}
+
 function openModal(category) {
     if (category === 'dadJoke' || category === 'puzzle') {
         if (window.NlEntertainment && typeof window.NlEntertainment.openChoiceModal === 'function') {
@@ -1015,8 +1337,15 @@ function openModal(category) {
     const modal = getNewsletterChoiceModal();
     if (!modal) return;
 
+    cleanupProTipPickerChrome(modal);
+
     const title = modal.querySelector('#modal-title');
     const list = modal.querySelector('#modal-list');
+
+    if (category === 'proTip') {
+        openProTipChoiceModal(modal, title);
+        return;
+    }
 
     let data = [];
     let modalTitleText = '';
@@ -1024,9 +1353,6 @@ function openModal(category) {
     if (category === 'funFact') {
         modalTitleText = 'Choose a Fun Fact';
         data = funFacts || [];
-    } else if (category === 'proTip') {
-        modalTitleText = 'Choose a Real Estate Tip';
-        data = proTips || [];
     } else if (category === 'quote') {
         modalTitleText = 'Choose a Motivational Quote';
         data = motivationalQuotes || [];
@@ -1035,17 +1361,7 @@ function openModal(category) {
         data = [];
     }
 
-    if (typeof window.openNamedModal === 'function') {
-        window.openNamedModal(modal);
-    } else {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        modal.style.display = 'flex';
-        modal.style.pointerEvents = 'auto';
-        document.body.classList.add('modal-open');
-    }
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
+    showNewsletterChoiceModalShell(modal);
 
     // Force title into the header (gradient bar) — use textContent + color guard for reliability
     if (title) {
@@ -1122,21 +1438,7 @@ function openModal(category) {
         search.focus();
     }
 
-    // Backdrop close — intentional click only (not drag-select release outside panel)
-    let nlChoiceBackdropDown = false;
-    modal.onmousedown = function (e) {
-        nlChoiceBackdropDown = (e.target === modal);
-    };
-    modal.onmouseup = function (e) {
-        if (!nlChoiceBackdropDown || e.target !== modal) {
-            nlChoiceBackdropDown = false;
-            return;
-        }
-        nlChoiceBackdropDown = false;
-        const sel = window.getSelection && window.getSelection();
-        if (sel && sel.toString().trim().length > 0) return;
-        closeModal();
-    };
+    attachNewsletterChoiceBackdropClose(modal);
 }
 
 // Close newsletter choice modal (separate from social pillar #content-modal)
@@ -1147,11 +1449,10 @@ function closeModal() {
         modal.classList.remove('flex');
         modal.classList.add('hidden');
         modal.onclick = null;
+        modal.onmousedown = null;
+        modal.onmouseup = null;
     }
-    const search = document.getElementById('modal-search');
-    if (search && search.parentElement) {
-        search.parentElement.removeChild(search);
-    }
+    cleanupProTipPickerChrome(modal);
 }
 
 // Close on Esc key
