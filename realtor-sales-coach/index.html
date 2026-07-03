@@ -41,15 +41,15 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260702-realtor-v252">
+    <link rel="stylesheet" href="css/main.css?v=20260702-realtor-v265">
 
     <!-- Centralized API client (Phase 0) - must load early -->
-    <script src="js/api.js?v=20260623-realtor-v245"></script>
+    <script src="js/api.js?v=20260702-realtor-v265"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-realtor-v245"></script>
-    <script defer src="js/features/sidebar-ai-indicators.js?v=20260702-realtor-v264"></script>
-    <script src="js/early-boot.js?v=20260702-realtor-v264"></script>
+    <script src="js/ui.js?v=20260702-realtor-v265"></script>
+    <script defer src="js/features/sidebar-ai-indicators.js?v=20260702-realtor-v265"></script>
+    <script src="js/early-boot.js?v=20260702-realtor-v265"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -439,7 +439,7 @@
           <div class="profile-actions-box bg-gradient-to-br from-[#00A89D]/5 to-white dark:from-gray-900 dark:to-gray-800 border border-[#00A89D]/30 rounded-3xl p-3 shadow-sm">
             <!-- Buttons laid out in 2-col grid on narrow (much cleaner than previous squeezed flex), flex-wrap on wider screens -->
             <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5">
-              <button onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}else{alert('Profile editor ready after refresh');}" 
+              <button onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}else if(typeof window.showToast==='function'){window.showToast('Profile loading — refresh if this persists','info');}"
                       class="px-2.5 py-1 sm:px-4 sm:py-2 rounded-2xl border-2 border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition">
                 <i class="fas fa-cog text-xs"></i> <span>Edit Full Profile</span>
               </button>
@@ -864,7 +864,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button onclick="if (typeof window.generateListingDescription === 'function') window.generateListingDescription(); else alert('Tool loading... please refresh');" 
+                    <button onclick="if (typeof window.generateListingDescription === 'function') window.generateListingDescription(); else if(typeof window.showToast==='function') window.showToast('Listing tool still loading — try again in a moment','info');"
                             class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
                         Generate Descriptions
                     </button>
@@ -1090,7 +1090,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button onclick="if (typeof window.generateOpenHouse === 'function') window.generateOpenHouse(); else alert('Tool loading... refresh');" 
+                    <button onclick="if (typeof window.generateOpenHouse === 'function') window.generateOpenHouse(); else if(typeof window.showToast==='function') window.showToast('Open House tool still loading — try again in a moment','info');"
                             class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
                         Generate Open House Kit
                     </button>
@@ -1259,7 +1259,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button onclick="if (typeof window.generateConsultationKit === 'function') window.generateConsultationKit(); else alert('Tool loading... refresh');" 
+                    <button onclick="if (typeof window.generateConsultationKit === 'function') window.generateConsultationKit(); else if(typeof window.showToast==='function') window.showToast('Consultation tool still loading — try again in a moment','info');"
                             class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
                         Generate My Consultation Prep Kit
                     </button>
@@ -1552,7 +1552,7 @@
     </div>
 </section>
 
-<section id="prospecting" class="hidden" aria-hidden="true"></section>
+
         <!-- MAIN SOCIAL MEDIA TIPS PAGE -->
 <!-- MAIN SOCIAL MEDIA TIPS PAGE -->
 <section id="social" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -5357,32 +5357,53 @@
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Curated books that actually move the needle for agents. Sales psychology, prospecting discipline, sphere-building, listing & buyer systems, and leadership that top producers swear by.</p>
     </div>
 
-    <!-- Rich Philosophy, Direction & How to Use (full width within the tool for consistent, premium visual flow) -->
-    <div class="mb-8">
-      <div class="rounded-3xl border-2 border-[#00A89D]/20 bg-gradient-to-br from-[#00A89D]/5 via-white to-white dark:from-[#00A89D]/10 dark:via-gray-800 dark:to-gray-800 p-8 shadow-xl">
-        <div class="flex items-start gap-4 mb-6">
-          <div class="w-12 h-12 rounded-2xl bg-[#00A89D] flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-book text-white text-2xl"></i>
+    <!-- Pre-Generate Explanatory Header -->
+    <div id="books-pregen-guidance" class="mb-8">
+      <div class="text-center mb-3">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">READERS OUT-PRODUCE</span>
+      </div>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Book Vault works — and how to get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">This isn't a reading list. It's a competitive advantage — curated titles that upgrade prospecting discipline, objection handling, partner psychology, branding, and leadership.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-play text-xl text-[#00A89D]"></i>
           </div>
+          <div class="font-semibold mb-1">1. Start With One Book</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Pick one title this month. Ten pages a day beats binge-reading and forgetting. Note one action per chapter you'll actually take.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
+            <i class="fas fa-link text-xl text-[#002B5C]"></i>
+          </div>
+          <div class="font-semibold mb-1">2. Apply It Fast</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Save key takeaways to My Saved Items. Drop insights into Weekly Win Plan mindset blocks, Social posts, or your next partner conversation.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-handshake text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">3. Multiply the Edge</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Share the best idea with a client, fellow agent, or sphere contact. Teaching what you learn makes you referable and sharpens your own understanding.</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+        <div class="flex items-start gap-3 mb-3">
+          <i class="fas fa-tachometer-alt text-[#00A89D] mt-0.5 text-lg"></i>
           <div class="flex-1">
-            <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white mb-2">This isn't a reading list. It's a competitive advantage.</h3>
-            <p class="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed">The agents who consistently out-produce everyone else aren't necessarily smarter or luckier — they just consume better inputs and turn them into daily actions faster. Every title here was chosen because it directly upgrades prospecting discipline, objection handling, referral partner psychology, personal branding, leadership, or financial intelligence.</p>
+            <div class="font-bold text-[#002B5C] dark:text-white">How to maximize value from the Book Vault</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Better inputs → better daily actions. Top agents treat reading like prospecting — non-negotiable.</div>
           </div>
         </div>
-
-        <div class="grid md:grid-cols-3 gap-4 text-sm">
-          <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-700">
-            <div class="font-semibold text-[#00A89D] mb-1 flex items-center gap-2"><i class="fas fa-play"></i> <span>Start here</span></div>
-            <p class="text-gray-600 dark:text-gray-400">Choose one book this month. Read 10 pages a day. Write down the single action you will take from each chapter in your notes.</p>
-          </div>
-          <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-700">
-            <div class="font-semibold text-[#00A89D] mb-1 flex items-center gap-2"><i class="fas fa-link"></i> <span>Apply it fast</span></div>
-            <p class="text-gray-600 dark:text-gray-400">Save the key takeaway. Drop it into your Weekly Win Plan as a daily mindset focus or use the language in your next Social post or partner conversation.</p>
-          </div>
-          <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-700">
-            <div class="font-semibold text-[#00A89D] mb-1 flex items-center gap-2"><i class="fas fa-handshake"></i> <span>Multiply the edge</span></div>
-            <p class="text-gray-600 dark:text-gray-400">The fastest way to become referable is to make your partners smarter. Send a one-page summary of the best idea to a top client, fellow agent, or sphere contact this week.</p>
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Filter by category</strong> — Mindset, Sales, Leadership, Sphere — to match what you're working on this quarter.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Start with Foundational 3</strong> if you're new — the highest-ROI reads for most agents.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save book notes</strong> so quotes and frameworks live in your vault for scripts and content.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pair with Mindset Lab</strong> — book principle + daily mindset card = compounding discipline.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Discuss with partners</strong> — a shared read deepens referral relationships fast.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Revisit winners yearly</strong> — the same chapter hits differently after 50 more transactions.</span></div>
         </div>
       </div>
     </div>
@@ -7321,7 +7342,8 @@
             <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">EXECUTION IS EVERYTHING</span>
           </div>
           <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Weekly Win Plan works — and how to get the most from it</h3>
-          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">One unified plan: protected calendar blocks (when) with specific tasks inside each block (what). Built from your goals, hours, focus areas, and hobbies — no more juggling two separate tools.</p>
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-2">One unified plan: protected calendar blocks (when) with specific tasks inside each block (what). Built from your goals, hours, focus areas, and hobbies — no more juggling two separate tools.</p>
+          <p class="text-center text-xs text-[#002B5C]/80 dark:text-gray-400 mb-5 max-w-3xl mx-auto"><i class="fas fa-layer-group text-[#00A89D] mr-1"></i><strong>Prospecting Time Blocks live here.</strong> Former standalone PTB is merged into Weekly Win Plan — protected blocks + daily tasks in one flow.</p>
 
           <!-- 3 value / step cards (premium rounded, icon-led, matching equity style) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -7637,13 +7659,13 @@
    </section> 
 
 <!-- Rich modal modules (LO polish mirror) -->
-<script src="js/features/social-modals.js?v=20260623-realtor-v245"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-realtor-v245"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-realtor-v245"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-realtor-v245"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-realtor-v245"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-realtor-v245"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-realtor-v245"></script>
+<script src="js/features/social-modals.js?v=20260702-realtor-v265"></script>
+<script src="js/features/vault-rich-modals.js?v=20260702-realtor-v265"></script>
+<script src="js/features/process-rich-modals.js?v=20260702-realtor-v265"></script>
+<script src="js/features/nurture-rich-modals.js?v=20260702-realtor-v265"></script>
+<script src="js/features/database-rich-modals.js?v=20260702-realtor-v265"></script>
+<script src="js/features/event-rich-modals.js?v=20260702-realtor-v265"></script>
+<script src="js/features/referral-rich-modals.js?v=20260702-realtor-v265"></script>
 
 <script>
 // Reusable toggle for Supporting Systems sections (makes them behave like the main 6 pillars)
@@ -13803,8 +13825,8 @@ window.toggleSupportingSection = function(sectionId) {
   }
 })();
 </script>
-<script src="js/features/rich-modals-restore.js?v=20260623-realtor-v245"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v245"></script>
+<script src="js/features/rich-modals-restore.js?v=20260702-realtor-v265"></script>
+<script defer src="js/features/popby-seasonal.js?v=20260702-realtor-v265"></script>
 
 </main>
     <script>
@@ -13868,32 +13890,32 @@ window.toggleSupportingSection = function(sectionId) {
 </div>
 
 <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-<script src="js/main.js?v=20260702-realtor-v254"></script>
+<script src="js/main.js?v=20260702-realtor-v265"></script>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/save-ribbon.js?v=20260623-realtor-v245"></script>
-<script src="js/features/sales-scripts.js?v=20260623-realtor-v245"></script>
-<script src="js/features/listing-description.js?v=20260702-realtor-v262"></script>
-<script src="js/features/open-house.js?v=20260702-realtor-v262"></script>
-<script src="js/features/consultation-kit.js?v=20260702-realtor-v262"></script>
-<script src="js/features/social-post.js?v=20260623-realtor-v245"></script>
-<script src="js/features/mindset-lab.js?v=20260623-realtor-v245"></script>
-<script src="js/data/weekend-plan-policy.js?v=20260623-realtor-v245"></script>
-<script src="js/features/weekly-win-plan.js?v=20260623-realtor-v245"></script>
-<script src="js/features/tool-bridges.js?v=20260623-realtor-v245"></script>
-<script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v245"></script>
-<script src="js/features/blog-creator.js?v=20260623-realtor-v245"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-realtor-v245"></script>
-<script src="js/features/saved-items-library.js?v=20260702-realtor-v264"></script>
-<script src="js/data/newsletter-dad-jokes.js?v=20260702-realtor-v253"></script>
-<script src="js/data/newsletter-brain-teasers.js?v=20260702-realtor-v253"></script>
-<script src="js/features/newsletter-entertainment.js?v=20260702-realtor-v253"></script>
-<script src="js/features/newsletter-generator.js?v=20260702-realtor-v262"></script>
-<script src="js/features/ai-chat.js?v=20260623-realtor-v245"></script>
-<script src="js/features/underwriting.js?v=20260623-realtor-v245"></script>
+<script src="js/features/save-ribbon.js?v=20260702-realtor-v265"></script>
+<script src="js/features/sales-scripts.js?v=20260702-realtor-v265"></script>
+<script src="js/features/listing-description.js?v=20260702-realtor-v265"></script>
+<script src="js/features/open-house.js?v=20260702-realtor-v265"></script>
+<script src="js/features/consultation-kit.js?v=20260702-realtor-v265"></script>
+<script src="js/features/social-post.js?v=20260702-realtor-v265"></script>
+<script src="js/features/mindset-lab.js?v=20260702-realtor-v265"></script>
+<script src="js/data/weekend-plan-policy.js?v=20260702-realtor-v265"></script>
+<script src="js/features/weekly-win-plan.js?v=20260702-realtor-v265"></script>
+<script src="js/features/tool-bridges.js?v=20260702-realtor-v265"></script>
+<script src="js/features/prospecting-time-blocks.js?v=20260702-realtor-v265"></script>
+<script src="js/features/blog-creator.js?v=20260702-realtor-v265"></script>
+<script src="js/features/legacy-helpers.js?v=20260702-realtor-v265"></script>
+<script src="js/features/saved-items-library.js?v=20260702-realtor-v265"></script>
+<script src="js/data/newsletter-dad-jokes.js?v=20260702-realtor-v265"></script>
+<script src="js/data/newsletter-brain-teasers.js?v=20260702-realtor-v265"></script>
+<script src="js/features/newsletter-entertainment.js?v=20260702-realtor-v265"></script>
+<script src="js/features/newsletter-generator.js?v=20260702-realtor-v265"></script>
+<script src="js/features/ai-chat.js?v=20260702-realtor-v265"></script>
+<script src="js/features/underwriting.js?v=20260702-realtor-v265"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'realtor';</script>
-<script src="js/features/translation-tool.js?v=20260702-tr-v264"></script>
-<script src="js/features/value-vault.js?v=20260623-realtor-v245"></script>
+<script src="js/features/translation-tool.js?v=20260702-realtor-v265"></script>
+<script src="js/features/value-vault.js?v=20260702-realtor-v265"></script>
 
 <!-- (Branding preview handler removed — now fully managed in Profile & Preferences + automatic injection in newsletter generator) -->
 
@@ -15471,8 +15493,8 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260702-realtor-v264"></script>
-<script src="js/features/onboarding-coach.js?v=20260623-realtor-v245"></script>
+<script src="js/features/user-profile.js?v=20260702-realtor-v265"></script>
+<script src="js/features/onboarding-coach.js?v=20260702-realtor-v265"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -15621,8 +15643,8 @@ if (document.readyState === 'loading') {
 <div id="app-version-line" data-app-name="Agent Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Agent Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260623-realtor-v245"></script>
-<script src="js/app-version.js?v=20260702-realtor-v264"></script>
+<script src="js/features/section-bottom-banners.js?v=20260702-realtor-v265"></script>
+<script src="js/app-version.js?v=20260702-realtor-v265"></script>
 
 </body>
 </html>
