@@ -61,7 +61,8 @@
   const GLOSSARY = [
     'pre-approval', 'pre-qualification', 'escrow', 'PMI', 'APR', 'LTV', 'DTI',
     'closing costs', 'down payment', 'contingency', 'earnest money', 'title insurance',
-    'underwriting', 'rate lock', 'refinance', 'HELOC', 'FHA', 'VA', 'USDA', 'conventional'
+    'underwriting', 'rate lock', 'refinance', 'HELOC', 'FHA', 'VA', 'USDA', 'conventional',
+    'CMA', 'MLS', 'listing agreement', 'showing', 'open house', 'buyer representation', 'seller net sheet'
   ];
 
   let uploadedFileName = '';

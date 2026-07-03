@@ -48,9 +48,25 @@
 
     <!-- Shared UI (toast + search) - Phase 0 -->
     <script src="js/ui.js?v=20260623-realtor-v245"></script>
-    <script defer src="js/features/sidebar-ai-indicators.js?v=20260702-realtor-v252"></script>
+    <script defer src="js/features/sidebar-ai-indicators.js?v=20260702-realtor-v264"></script>
+    <script src="js/early-boot.js?v=20260702-realtor-v264"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
+
+<!-- Boot guard: hide stuck overlays immediately (before the heavy inline script block parses) -->
+<div id="global-loading" class="hidden fixed inset-0 z-[99999] items-center justify-center bg-black/60 backdrop-blur-md" aria-hidden="true" style="display:none!important;pointer-events:none!important;visibility:hidden!important;">
+    <div class="bg-white dark:bg-gray-900 p-8 md:p-10 rounded-3xl shadow-2xl text-center w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700">
+        <div class="flex justify-center mb-6">
+            <div class="relative">
+                <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
+            </div>
+        </div>
+        <h3 id="global-loading-title" class="text-3xl font-bold text-[#00A89D] mb-3 tracking-tight">Working on it...</h3>
+        <div id="global-loading-message" class="text-lg text-gray-600 dark:text-gray-300 min-h-[60px] transition-opacity duration-300 leading-relaxed">Personalized content incoming — this can take up to a minute.</div>
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">Good things take time. We’re building something great for you.</div>
+        <div id="plan-enrich-panel"></div>
+    </div>
+</div>
 
 <header class="text-white">
     <div class="max-w-7xl mx-auto px-6 py-4">
@@ -347,6 +363,57 @@
             <span class="text-gray-700 dark:text-gray-300 flex-1 min-w-0">
                 Fully personalized from your central profile (goals, hobbies, personality, challenges, preferred activities &amp; tone). Edit profile anytime for better results across every tool.
             </span>
+        </div>
+
+        <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value -->
+        <div id="plan-pregen-guidance" class="mb-8">
+          <div class="text-center mb-3">
+            <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">YOUR YEAR, YOUR RULES</span>
+          </div>
+          <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the 2026 Business Plan works — and how to get the most from it</h3>
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">This isn't a corporate template. It's a living roadmap built from your real goals, hobbies, transaction targets, and how you actually want to work — then refined with AI so it feels doable instead of overwhelming.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+              <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+                <i class="fas fa-user-cog text-xl text-[#00A89D]"></i>
+              </div>
+              <div class="font-semibold mb-1">1. Profile-Powered Foundation</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Syncs goals, hobbies, activities, personality, and challenges from your central profile. The plan only works if it reflects your real life — not a generic agent playbook.</div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+              <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
+                <i class="fas fa-route text-xl text-[#002B5C]"></i>
+              </div>
+              <div class="font-semibold mb-1">2. Structured + Flexible Output</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Vision, income math, weekly rhythm, partner strategy, and hobby-driven prospecting — all in one plan you can save, refine with feedback, and revisit as the year evolves.</div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+              <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+                <i class="fas fa-link text-xl text-[#00A89D]"></i>
+              </div>
+              <div class="font-semibold mb-1">3. Feeds Every Other Tool</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">A strong plan powers Weekly Win Plan, Social, Newsletter, and partner outreach. Fill this once — then execute everywhere else with clarity.</div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+            <div class="flex items-start gap-3 mb-3">
+              <i class="fas fa-tachometer-alt text-[#00A89D] mt-0.5 text-lg"></i>
+              <div class="flex-1">
+                <div class="font-bold text-[#002B5C] dark:text-white">How to maximize the value of your 2026 Business Plan</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">The best plans are honest, specific, and revisited. Here's how top agents use this tool.</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Sync from profile first.</strong> Hit Sync from Profile so goals, hobbies, and activities flow in before you generate.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use a preset if you're stuck.</strong> Conservative, Realistic, Stretch, or Hobby-First — then customize from there.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Watch plan strength climb.</strong> More specifics (income target, notes, activities) = dramatically better AI output.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Refine with feedback.</strong> After generation, use the feedback section to tighten tone, focus, or emphasis without starting over.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save your baseline.</strong> Lock in a version that feels right so you can reload and iterate instead of rebuilding from scratch.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Execute downstream.</strong> Take the rhythm and focus areas straight into Weekly Win Plan and your daily blocks.</span></div>
+            </div>
+          </div>
         </div>
 
         <!-- PROMINENT PROFILE LEVERAGE (addresses the "leverage the profile section" request + reduces anxiety by showing it's already personalized) -->
@@ -1208,6 +1275,58 @@
         <h2 id="tr-hero-title" class="text-3xl font-bold mb-2 text-[#F15A29]">Client Translation</h2>
         <p id="tr-hero-subtitle" class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Translate buyer/seller emails, open house invites, and listing updates — clear, professional, and market-ready.</p>
     </div>
+
+    <!-- Pre-Generate Explanatory Header -->
+    <div id="tr-pregen-guidance" class="mb-8">
+      <div class="text-center mb-3">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">SERVE EVERY CLIENT WITH CONFIDENCE</span>
+      </div>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How Client Translation works — and how to get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Bridge language gaps without losing warmth or professionalism. Built for agent outreach — emails, texts, open house invites, and listing updates — with real-estate-aware glossary lock and a meaning-check pass before you hit send.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-language text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">1. Agent-Ready Tone</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Warm, plain-language, or formal — tuned for buyer/seller communication, not literal word-for-word awkwardness.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
+            <i class="fas fa-shield-alt text-xl text-[#002B5C]"></i>
+          </div>
+          <div class="font-semibold mb-1">2. Glossary + Meaning Check</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Keeps key real estate terms recognizable (CMA, earnest money, contingency). Run Check meaning before client-facing sends.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-file-upload text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">3. Paste or Upload</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Drop in a quick text or upload a PDF/.txt — great for longer letters, market updates, or multi-section documents.</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+        <div class="flex items-start gap-3 mb-3">
+          <i class="fas fa-tachometer-alt text-[#00A89D] mt-0.5 text-lg"></i>
+          <div class="flex-1">
+            <div class="font-bold text-[#002B5C] dark:text-white">How to maximize value from Client Translation</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Speed + clarity — always review before anything legal or contractual goes out.</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Set default languages</strong> in My Profile → Voice &amp; Links for one-tap target chips.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pick content type</strong> (email, text, listing update) so tone and structure match the channel.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use Plain language</strong> for first-time buyers or sellers who need simpler explanations.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Run Check meaning</strong> on anything important — catches nuance drift before send.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save strong translations</strong> to My Saved Items as templates for your sphere.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Never auto-send contracts</strong> — AI assists communication; you verify final meaning.</span></div>
+        </div>
+      </div>
+    </div>
+
     <div class="mb-6 rounded-2xl border border-amber-300/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
         <i class="fas fa-info-circle mr-1"></i>
         <strong>Review before sending.</strong> AI translations help you communicate faster — they are not certified legal interpretations. Always verify meaning before client-facing use.
@@ -3013,6 +3132,57 @@
         <div class="mt-2 inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-medium">
           <i class="fas fa-user-check"></i> Personalizes from your profile • Saves to Vault • Links to every tool
         </div>
+    </div>
+
+    <!-- Pre-Generate Explanatory Header -->
+    <div id="ai-chat-pregen-guidance" class="mb-8">
+      <div class="text-center mb-3">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">MORE THAN A CHAT BOX</span>
+      </div>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the AI Coach works — and how to get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Your always-on coach that knows your profile, remembers the conversation, and bridges you into every other tool — scripts, listing copy, content ideas, objections, and real execution help.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-user-check text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">1. Profile-Aware Answers</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Pulls from your goals, market, voice, hobbies, and challenges so responses sound like you — not generic AI filler.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
+            <i class="fas fa-puzzle-piece text-xl text-[#002B5C]"></i>
+          </div>
+          <div class="font-semibold mb-1">2. Connected to Your Toolkit</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Ask for help, then jump into Social, Scripts, Weekly Win Plan, Newsletter, or Listing tools when you're ready to execute.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-bookmark text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">3. Save What Lands</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Strong scripts, captions, or reframes go straight to My Saved Items so good language compounds across the week.</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+        <div class="flex items-start gap-3 mb-3">
+          <i class="fas fa-tachometer-alt text-[#00A89D] mt-0.5 text-lg"></i>
+          <div class="flex-1">
+            <div class="font-bold text-[#002B5C] dark:text-white">How to maximize the value of your AI Coach</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Treat it like a senior producer on call — specific beats vague every time.</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use Quick Starts</strong> when you're blank — they're built from your profile context.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Give scenario detail:</strong> who, objection, channel, tone. "Help with a buyer text" beats "write a script."</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Follow up in-thread</strong> to refine length, warmth, or urgency without starting over.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save winners</strong> to the vault, then reuse in Social Post Creator or Sales Scripts.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Bridge to generators</strong> when you need formatted output (newsletter, blog, calendar) instead of chat text.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Clear chat</strong> when you switch to a totally different topic so context stays clean.</span></div>
+        </div>
+      </div>
     </div>
 
     <!-- Quick value prompts (brings immediate benefit beyond plain chat) -->
@@ -5284,11 +5454,61 @@
 </section>
                        
 
-                <!-- MISSING SECTION: Value Vault -->
                 <section id="value-vault" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Value Vault – Your Ultimate Resource Library</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Strategic tools, scripts, and ideas to help you give massive value first. Organized into six focused pillars covering pop-bys, client gifts, post-closing systems, objections, content, and nurture templates.</p>
+    </div>
+
+    <!-- Pre-Generate Explanatory Header -->
+    <div id="vault-pregen-guidance" class="mb-8">
+      <div class="text-center mb-3">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">GIVE VALUE FIRST</span>
+      </div>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Value Vault works — and how to get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Your searchable library of pop-bys, partner plays, objection handlers, nurture templates, and content sparks — built to compound trust with clients, sphere, and referral partners.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-gem text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">1. Six Focused Pillars</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Pop-bys, partnerships, objections, post-close, content, and database nurture — each with rich playbooks, scripts, and execution notes.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
+            <i class="fas fa-search text-xl text-[#002B5C]"></i>
+          </div>
+          <div class="font-semibold mb-1">2. Search + Idea of the Day</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Find exactly what you need in seconds, or let Idea of the Day surface a timely touch you might not have thought of.</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+          <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+            <i class="fas fa-bookmark text-xl text-[#00A89D]"></i>
+          </div>
+          <div class="font-semibold mb-1">3. Save &amp; Execute</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Bookmark winners to My Saved Items, then pull them into Weekly Win Plan tasks, social posts, or partner outreach the same week.</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+        <div class="flex items-start gap-3 mb-3">
+          <i class="fas fa-tachometer-alt text-[#00A89D] mt-0.5 text-lg"></i>
+          <div class="flex-1">
+            <div class="font-bold text-[#002B5C] dark:text-white">How to maximize value from the Vault</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">The vault rewards consistency — one great touch per week beats a quarterly blast.</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Start with Idea of the Day</strong> when you need a fresh partner or client touch.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Search by situation</strong> — "open house," "past client," "objection" — not just pillar name.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Open rich modals</strong> for full scripts, timing, and follow-up cadence before you execute.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save favorites</strong> so your best pop-bys and nurture plays are one click away.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Repurpose into content</strong> — a vault idea often becomes a Reel, newsletter local bit, or social post.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Block vault time</strong> in Weekly Win Plan — 15 minutes weekly keeps your touch system alive.</span></div>
+        </div>
+      </div>
     </div>
 
     <!-- Value Vault Toolbar: Search + Expand/Collapse -->
@@ -13587,31 +13807,6 @@ window.toggleSupportingSection = function(sectionId) {
 <script defer src="js/features/popby-seasonal.js?v=20260623-realtor-v245"></script>
 
 </main>
-<!-- Global Centered Loading Modal — Premium style matching Social & Blog Creator -->
-<div id="global-loading" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-md">
-    <div class="bg-white dark:bg-gray-900 p-8 md:p-10 rounded-3xl shadow-2xl text-center w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700">
-        
-        <!-- Spinner + Icon Area -->
-        <div class="flex justify-center mb-6">
-            <div class="relative">
-                <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
-            </div>
-        </div>
-        
-        <h3 id="global-loading-title" class="text-3xl font-bold text-[#00A89D] mb-3 tracking-tight">
-            Working on it...
-        </h3>
-        
-        <div id="global-loading-message" class="text-lg text-gray-600 dark:text-gray-300 min-h-[60px] transition-opacity duration-300 leading-relaxed">
-            Personalized content incoming — this can take up to a minute.
-        </div>
-        
-        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-            Good things take time. We’re building something great for you.
-        </div>
-        <div id="plan-enrich-panel"></div>
-    </div>
-</div>
     <script>
 /* 
   Core UI logic (menu, quotes, theme, API key modal) has been moved to js/main.js 
@@ -13689,7 +13884,7 @@ window.toggleSupportingSection = function(sectionId) {
 <script src="js/features/prospecting-time-blocks.js?v=20260623-realtor-v245"></script>
 <script src="js/features/blog-creator.js?v=20260623-realtor-v245"></script>
 <script src="js/features/legacy-helpers.js?v=20260623-realtor-v245"></script>
-<script src="js/features/saved-items-library.js?v=20260702-realtor-v262"></script>
+<script src="js/features/saved-items-library.js?v=20260702-realtor-v264"></script>
 <script src="js/data/newsletter-dad-jokes.js?v=20260702-realtor-v253"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260702-realtor-v253"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260702-realtor-v253"></script>
@@ -14970,6 +15165,10 @@ if (document.readyState === 'loading') {
                         <input type="tel" id="profile-phone" placeholder="555-123-4567" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium mb-1">Real Estate License # <span class="text-gray-400 font-normal text-xs">(optional)</span></label>
+                        <input type="text" id="profile-license" placeholder="e.g. RB00012345" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium mb-1">Primary Market / Location <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
                         <input type="text" id="profile-location" placeholder="e.g. Indianapolis, IN" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
                     </div>
@@ -15272,7 +15471,7 @@ if (document.readyState === 'loading') {
 
     </div>
 </div>
-<script src="js/features/user-profile.js?v=20260702-realtor-v262"></script>
+<script src="js/features/user-profile.js?v=20260702-realtor-v264"></script>
 <script src="js/features/onboarding-coach.js?v=20260623-realtor-v245"></script>
 
 <!-- ===================================================== -->
@@ -15423,7 +15622,7 @@ if (document.readyState === 'loading') {
   Agent Sales Coach • v… • … • Render
 </div>
 <script src="js/features/section-bottom-banners.js?v=20260623-realtor-v245"></script>
-<script src="js/app-version.js?v=20260702-realtor-v246"></script>
+<script src="js/app-version.js?v=20260702-realtor-v264"></script>
 
 </body>
 </html>

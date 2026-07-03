@@ -33,6 +33,7 @@
   const COMPLETENESS_CHECKS = [
     { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach' },
     { key: 'email', weight: 10, hint: 'Add your email', tools: 'Newsletter signature' },
+    { key: 'phone', weight: 8, hint: 'Add your phone', tools: 'Scripts, Newsletter' },
     { key: 'location', weight: 12, hint: 'Add your market', tools: 'Social, Newsletter' },
     { key: 'blogPageUrl', weight: 8, hint: 'Add your blog page URL', tools: 'Newsletter, Blog' },
     { key: 'focus', weight: 10, hint: 'Pick your business focus', tools: 'Weekly Plan' },
@@ -113,6 +114,8 @@
         return !!(p.contentNotes && String(p.contentNotes).trim());
       case 'email':
         return !!(p.email && String(p.email).trim());
+      case 'phone':
+        return !!(p.phone && String(p.phone).trim());
       case 'blogPageUrl':
         return !!(p.blogPageUrl && String(p.blogPageUrl).trim());
       default:
@@ -135,7 +138,7 @@
     const location = (p.location || p.localArea || p.market || '').trim();
 
     const goals = [
-      p.monthlyUnits ? `${p.monthlyUnits} loans/mo` : '',
+      p.monthlyUnits ? `${p.monthlyUnits} transactions/mo` : '',
       p.monthlyGoal ? `Volume: ${p.monthlyGoal}` : ''
     ].filter(Boolean).join('; ');
 
@@ -144,7 +147,7 @@
       name: (p.name || '').trim(),
       email: (p.email || '').trim(),
       phone: (p.phone || '').trim(),
-      nmls: (p.nmls || '').trim(),
+      licenseNumber: (p.licenseNumber || p.nmls || '').trim(),
       intro: (p.intro || '').trim(),
       location,
       localArea: location,
@@ -327,6 +330,7 @@
       name: getVal('profile-name'),
       email: getVal('profile-email'),
       phone: getVal('profile-phone'),
+      licenseNumber: getVal('profile-license'),
       intro: getVal('profile-intro'),
       location: getVal('profile-location'),
       years: getRaw('profile-years'),
@@ -402,7 +406,7 @@
     const profile = normalizeProfile(readRawProfile());
 
     const fields = [
-      'name', 'email', 'phone', 'intro', 'location', 'years', 'team',
+      'name', 'email', 'phone', 'license', 'intro', 'location', 'years', 'team',
       'company-name', 'tagline', 'logo-url', 'headshot-url',
       'monthly-units', 'monthly-goal', 'income', 'focus', 'hours',
       'database-size', 'partner-focus', 'family', 'personality', 'tone',
@@ -411,6 +415,7 @@
     ];
 
     const fieldKeyMap = {
+      license: 'licenseNumber',
       'company-name': 'companyName',
       'logo-url': 'logoUrl',
       'headshot-url': 'headshotUrl',

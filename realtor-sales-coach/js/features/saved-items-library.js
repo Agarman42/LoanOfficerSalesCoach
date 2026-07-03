@@ -61,13 +61,7 @@
   function filterItems(items, filter, searchTerm) {
     let filtered = items;
     if (filter && filter !== 'all') {
-      if (filter === 'equity-opportunity') {
-        filtered = filtered.filter((item) => item.type === 'equity-opportunity' || item.type === 'equity-scan');
-      } else if (filter === 'listings') {
-        filtered = filtered.filter((item) => ['listings', 'open-house', 'consultation'].includes(item.type));
-      } else {
-        filtered = filtered.filter((item) => item.type === filter);
-      }
+      filtered = filtered.filter((item) => item.type === filter);
     }
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
@@ -82,7 +76,7 @@
 
   function plainTextContent(item) {
     let text = item.content || '';
-    if (['newsletter', 'equity-opportunity', 'equity-scan', 'plan', 'script', 'social', 'underwriting', 'coach', 'translation', 'postclosing', 'blog'].includes(item.type)) {
+    if (['newsletter', 'plan', 'script', 'social', 'underwriting', 'coach', 'translation', 'postclosing', 'blog', 'listings', 'open-house', 'consultation', 'book'].includes(item.type)) {
       text = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     }
     return text;
@@ -189,6 +183,9 @@
     }
     if (t === 'consultation') {
       links.push({ label: 'Buyer/Seller Consultation Kit', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('consultation');", style: 'primary' });
+    }
+    if (t === 'book') {
+      links.push({ label: 'Book Vault', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('books');", style: 'accent' });
     }
     if (t === 'underwriting') {
       links.push({ label: 'Buyer Financing Reference', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('underwriting-search');", style: 'primary' });
@@ -509,6 +506,9 @@
       ['event', 'fa-calendar-alt', 'Events'],
       ['plan', 'fa-chart-line', 'Plans'],
       ['listings', 'fa-home', 'Listings'],
+      ['open-house', 'fa-door-open', 'Open House'],
+      ['consultation', 'fa-handshake', 'Consult'],
+      ['book', 'fa-book', 'Books'],
       ['underwriting', 'fa-file-alt', 'UW'],
       ['coach', 'fa-robot', 'Coach'],
       ['translation', 'fa-language', 'Translate'],
