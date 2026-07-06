@@ -952,6 +952,10 @@
       }
     });
 
+    document.getElementById('profile-wizard-save-exit')?.addEventListener('click', () => {
+      performSave(true, true);
+    });
+
     document.getElementById('profile-open-wizard')?.addEventListener('click', () => {
       startProfileWizard(1);
     });
