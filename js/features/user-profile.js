@@ -46,6 +46,22 @@
 
   const PROFILE_TABS = ['identity', 'business', 'content', 'prospecting', 'personal'];
 
+  const WIZARD_STEP_LABELS = {
+    identity: 'Identity & Branding',
+    business: 'Business Goals',
+    content: 'Voice & Links',
+    prospecting: 'Prospecting',
+    personal: 'Personal'
+  };
+
+  const WIZARD_STEP_HINTS = {
+    identity: 'Name, contact, market, and NMLS — used in Newsletter, Scripts, and AI Coach.',
+    business: 'Focus, goals, and challenges — powers Weekly Win Plan and business planning.',
+    content: 'Tone, guardrails, and links — shapes how every AI post and email sounds.',
+    prospecting: 'Activities and partner types — tailors referral plays and outreach.',
+    personal: 'Hobbies and personality — makes social content authentically you.'
+  };
+
   function asArray(val) {
     if (Array.isArray(val)) return val.filter(Boolean);
     if (typeof val === 'string' && val.trim()) return val.split(',').map((s) => s.trim()).filter(Boolean);
@@ -296,6 +312,7 @@
   let modal;
   let autoSaveTimer = null;
   let wizardStep = 1;
+  let wizardActive = false;
 
   function collectProfileFromForm() {
     const get = (id) => document.getElementById(id);
@@ -639,9 +656,7 @@
   }
 
   function applyRuoffBlogPreset() {
-    const name = document.getElementById('profile-name')?.value.trim()
-      || document.getElementById('wizard-name')?.value.trim()
-      || '';
+    const name = document.getElementById('profile-name')?.value.trim() || '';
     const slug = slugifyBlogName(name);
     const el = document.getElementById('profile-blog-url');
     if (!el) return;
@@ -654,90 +669,76 @@
     if (typeof window.showToast === 'function') window.showToast('Ruoff Mortgage Column URL applied — adjust if your slug differs.', 'success');
   }
 
+  function flushWizardSave() {
+    clearTimeout(autoSaveTimer);
+    if (isProfileModalOpen()) performSave(false, false);
+  }
+
   function showView(view) {
-    const wizard = document.getElementById('profile-wizard-view');
+    const wizardHeader = document.getElementById('profile-wizard-view');
+    const wizardFooter = document.getElementById('profile-wizard-footer');
+    const fullChrome = document.getElementById('profile-full-chrome');
+    const fullFooter = document.getElementById('profile-full-footer');
     const full = document.getElementById('profile-full-view');
-    if (wizard) wizard.classList.toggle('hidden', view !== 'wizard');
-    if (full) full.classList.toggle('hidden', view !== 'full');
+    const modalEl = modal || document.getElementById('user-profile-modal');
+
+    wizardActive = view === 'wizard';
+    if (modalEl) modalEl.classList.toggle('profile-modal--wizard', wizardActive);
+
+    if (wizardHeader) wizardHeader.classList.toggle('hidden', !wizardActive);
+    if (wizardFooter) wizardFooter.classList.toggle('hidden', !wizardActive);
+    if (fullChrome) fullChrome.classList.toggle('hidden', wizardActive);
+    if (fullFooter) fullFooter.classList.toggle('hidden', wizardActive);
+    if (full) full.classList.remove('hidden');
+
     const scroll = document.getElementById('profile-form-scroll');
     if (scroll) scroll.scrollTop = 0;
   }
 
   function shouldShowWizard() {
     if (localStorage.getItem(WIZARD_DONE_KEY) === '1') return false;
-    return getProfileCompleteness().score < 55;
-  }
-
-  function needsFullProfile() {
     return getProfileCompleteness().score < 70;
   }
 
   function renderWizardStep() {
-    const steps = document.querySelectorAll('.profile-wizard-step');
-    steps.forEach((el) => el.classList.add('hidden'));
-    const active = document.getElementById(`profile-wizard-step-${wizardStep}`);
-    if (active) active.classList.remove('hidden');
+    const total = PROFILE_TABS.length;
+    const tabId = PROFILE_TABS[wizardStep - 1] || 'identity';
+    switchProfileTab(tabId);
 
     const progress = document.getElementById('profile-wizard-progress');
-    if (progress) progress.textContent = `Step ${wizardStep} of 3`;
+    if (progress) progress.textContent = `Step ${wizardStep} of ${total}`;
+
+    const title = document.getElementById('profile-wizard-step-title');
+    if (title) title.textContent = WIZARD_STEP_LABELS[tabId] || tabId;
+
+    const hint = document.getElementById('profile-wizard-step-hint');
+    if (hint) hint.textContent = WIZARD_STEP_HINTS[tabId] || '';
+
+    const dots = document.getElementById('profile-wizard-dots');
+    if (dots) {
+      dots.innerHTML = PROFILE_TABS.map((tab, idx) => {
+        const stepNum = idx + 1;
+        const cls = stepNum === wizardStep
+          ? 'bg-[#00A89D]'
+          : stepNum < wizardStep
+            ? 'bg-[#00A89D]/40'
+            : 'bg-gray-300 dark:bg-gray-600';
+        return `<span class="w-2 h-2 rounded-full ${cls}"></span>`;
+      }).join('');
+    }
 
     const back = document.getElementById('profile-wizard-back');
     const next = document.getElementById('profile-wizard-next');
     if (back) back.classList.toggle('hidden', wizardStep === 1);
-    if (next) next.textContent = wizardStep === 3 ? 'Save & finish' : 'Continue';
-  }
+    if (next) next.textContent = wizardStep === total ? 'Save & finish' : 'Continue';
 
-  function mergeWizardIntoProfile() {
-    const existing = readRawProfile();
-    const step1 = {
-      name: document.getElementById('wizard-name')?.value.trim() || existing.name || '',
-      location: document.getElementById('wizard-location')?.value.trim() || existing.location || '',
-      focus: document.getElementById('wizard-focus')?.value || existing.focus || ''
-    };
-    const hobbies = Array.from(document.querySelectorAll('.wizard-hobby:checked')).map((c) => c.value);
-    const step2 = {
-      tone: document.getElementById('wizard-tone')?.value || existing.tone || '',
-      hobbies: hobbies.length ? hobbies : (existing.hobbies || [])
-    };
-    const challenge = document.getElementById('wizard-challenge')?.value;
-    const step3 = {
-      monthlyUnits: document.getElementById('wizard-monthly-units')?.value || existing.monthlyUnits || '',
-      hours: document.getElementById('wizard-hours')?.value || existing.hours || '',
-      challenges: challenge ? [challenge] : (existing.challenges || []),
-      intro: document.getElementById('wizard-intro')?.value.trim() || existing.intro || '',
-      blogPageUrl: document.getElementById('wizard-blog-url')?.value.trim() || existing.blogPageUrl || existing.blogUrl || ''
-    };
-
-    return normalizeProfile({
-      ...existing,
-      ...step1,
-      ...step2,
-      ...step3,
-      lastUpdated: new Date().toISOString()
-    });
-  }
-
-  function prefillWizardFromProfile() {
-    const p = normalizeProfile(readRawProfile());
-    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
-    set('wizard-name', p.name);
-    set('wizard-location', p.location);
-    set('wizard-focus', p.focus);
-    set('wizard-tone', p.tone);
-    set('wizard-monthly-units', p.monthlyUnits);
-    set('wizard-hours', p.hours);
-    set('wizard-intro', p.intro);
-    set('wizard-blog-url', p.blogPageUrl);
-    if (p.challenges[0]) set('wizard-challenge', p.challenges[0]);
-    document.querySelectorAll('.wizard-hobby').forEach((cb) => {
-      cb.checked = p.hobbies.includes(cb.value);
-    });
+    refreshProfileUI();
   }
 
   function finishWizard() {
-    const merged = mergeWizardIntoProfile();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    flushWizardSave();
     localStorage.setItem(WIZARD_DONE_KEY, '1');
+    const merged = normalizeProfile(collectProfileFromForm());
     const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
     localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
     loadProfileIntoForm();
@@ -748,8 +749,15 @@
       try { window.syncNewsletterFromProfile(); } catch (e) {}
     }
     if (typeof window.showToast === 'function') {
-      window.showToast('Quick profile saved — add more anytime for even sharper content.');
+      window.showToast('Profile setup complete — edit anytime from My Profile.', 'success');
     }
+  }
+
+  function startProfileWizard(step) {
+    loadProfileIntoForm();
+    wizardStep = step || 1;
+    renderWizardStep();
+    showView('wizard');
   }
 
   function openModal(forceFull) {
@@ -765,13 +773,8 @@
       if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
     }
 
-    const openFull = forceFull || needsFullProfile();
-
-    if (!openFull && shouldShowWizard()) {
-      wizardStep = 1;
-      prefillWizardFromProfile();
-      renderWizardStep();
-      showView('wizard');
+    if (!forceFull && shouldShowWizard()) {
+      startProfileWizard(1);
     } else {
       loadProfileIntoForm();
       showView('full');
@@ -852,6 +855,7 @@
 
   function setupWizardHandlers() {
     document.getElementById('profile-wizard-skip')?.addEventListener('click', () => {
+      flushWizardSave();
       localStorage.setItem(WIZARD_DONE_KEY, '1');
       loadProfileIntoForm();
       showView('full');
@@ -859,11 +863,16 @@
     });
 
     document.getElementById('profile-wizard-back')?.addEventListener('click', () => {
-      if (wizardStep > 1) { wizardStep -= 1; renderWizardStep(); }
+      flushWizardSave();
+      if (wizardStep > 1) {
+        wizardStep -= 1;
+        renderWizardStep();
+      }
     });
 
     document.getElementById('profile-wizard-next')?.addEventListener('click', () => {
-      if (wizardStep < 3) {
+      flushWizardSave();
+      if (wizardStep < PROFILE_TABS.length) {
         wizardStep += 1;
         renderWizardStep();
       } else {
@@ -872,10 +881,7 @@
     });
 
     document.getElementById('profile-open-wizard')?.addEventListener('click', () => {
-      wizardStep = 1;
-      prefillWizardFromProfile();
-      renderWizardStep();
-      showView('wizard');
+      startProfileWizard(1);
     });
   }
 
@@ -941,6 +947,7 @@
   window.applyRuoffBlogPreset = applyRuoffBlogPreset;
   window.switchProfileTab = switchProfileTab;
   window.refreshProfileUI = refreshProfileUI;
+  window.startProfileWizard = startProfileWizard;
 
   // Paint header badge immediately from localStorage (no modal DOM required)
   paintHeaderProfileBadge();

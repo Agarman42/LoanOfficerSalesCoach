@@ -7661,122 +7661,30 @@
         </div>
 
         <!-- Quick Profile Wizard (~90 sec) -->
-        <div id="profile-wizard-view" class="hidden overflow-y-auto p-6 md:p-8 flex-1 min-h-0">
-            <div class="max-w-lg mx-auto">
-                <div class="text-center mb-6">
-                    <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase">Quick setup</div>
-                    <h3 class="text-xl font-bold text-[#002B5C] dark:text-white mt-1">Make the coach sound like you</h3>
-                    <p id="profile-wizard-progress" class="text-xs text-gray-500 mt-1">Step 1 of 3</p>
-                </div>
-
-                <div id="profile-wizard-step-1" class="profile-wizard-step space-y-4">
+        <!-- Profile setup wizard (header — one full tab per step) -->
+        <div id="profile-wizard-view" class="hidden flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 to-transparent">
+            <div class="px-4 sm:px-6 md:px-8 py-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <label class="block text-sm font-medium mb-1">Full Name</label>
-                        <input type="text" id="wizard-name" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="Your name">
+                        <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase">Profile setup</div>
+                        <h3 id="profile-wizard-step-title" class="text-lg font-bold text-[#002B5C] dark:text-white mt-0.5">Identity &amp; Branding</h3>
+                        <p id="profile-wizard-progress" class="text-xs text-gray-500 mt-1">Step 1 of 5</p>
+                        <p id="profile-wizard-step-hint" class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-2xl"></p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Primary Market</label>
-                        <input type="text" id="wizard-location" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="e.g. Indianapolis, IN">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Primary Focus</label>
-                        <select id="wizard-focus" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option value="balanced-growth">Balanced Growth</option>
-                            <option value="referral-partners">Heavy Realtor Partnerships</option>
-                            <option value="database">Past Client / Database Focus</option>
-                            <option value="equity-refi">Equity & Refinance Opportunities</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="profile-wizard-step-2" class="profile-wizard-step hidden space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Content Tone</label>
-                        <select id="wizard-tone" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option value="Warm and casual (like a trusted friend)">Warm and casual</option>
-                            <option value="Professional but approachable">Professional but approachable</option>
-                            <option value="Witty and fun">Witty and fun</option>
-                            <option value="Straightforward and helpful">Straightforward and helpful</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Pick 1–2 hobbies (for authentic content)</label>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]"><input type="checkbox" value="Golf" class="wizard-hobby accent-[#00A89D]"> Golf</label>
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]"><input type="checkbox" value="Sports" class="wizard-hobby accent-[#00A89D]"> Sports</label>
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]"><input type="checkbox" value="Fitness" class="wizard-hobby accent-[#00A89D]"> Fitness</label>
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]"><input type="checkbox" value="Family Time" class="wizard-hobby accent-[#00A89D]"> Family</label>
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]"><input type="checkbox" value="Outdoors" class="wizard-hobby accent-[#00A89D]"> Outdoors</label>
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]"><input type="checkbox" value="Cooking" class="wizard-hobby accent-[#00A89D]"> Cooking</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="profile-wizard-step-3" class="profile-wizard-step hidden space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Monthly Unit Goal</label>
-                        <select id="wizard-monthly-units" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option value="2-3 loans">2–3 loans / mo</option>
-                            <option value="4-5 loans">4–5 loans / mo</option>
-                            <option value="6-8 loans">6–8 loans / mo</option>
-                            <option value="8-10 loans">8–10 loans / mo</option>
-                            <option value="10-12 loans">10–12 loans / mo</option>
-                            <option value="12+ loans">12+ loans / mo</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Weekly Prospecting Hours</label>
-                        <select id="wizard-hours" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option>Less than 10</option>
-                            <option>10–15</option>
-                            <option>15–20</option>
-                            <option>20+</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">#1 Challenge Right Now</label>
-                        <select id="wizard-challenge" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option>Generating consistent leads</option>
-                            <option>Building realtor relationships</option>
-                            <option>Staying consistent with prospecting</option>
-                            <option>Creating social media content</option>
-                            <option>Engaging my past client database</option>
-                            <option>Time management</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">One-line intro <span class="text-gray-400 font-normal">(optional)</span></label>
-                        <input type="text" id="wizard-intro" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="I'm the LO who makes pre-approvals feel fast and human...">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Blog page URL <span class="text-gray-400 font-normal">(optional)</span></label>
-                        <input type="url" id="wizard-blog-url" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="https://mortgage-column.ruoff.com/yourname">
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between gap-3 mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button type="button" id="profile-wizard-skip" class="text-xs text-gray-500 hover:text-[#00A89D]">Skip to full profile</button>
-                    <div class="flex gap-2">
-                        <button type="button" id="profile-wizard-back" class="hidden px-4 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Back</button>
-                        <button type="button" id="profile-wizard-next" class="px-6 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-semibold hover:bg-[#008f85]">Continue</button>
-                    </div>
+                    <div id="profile-wizard-dots" class="flex gap-1.5 justify-center sm:justify-end flex-shrink-0" aria-hidden="true"></div>
                 </div>
             </div>
         </div>
 
 <!-- Full Profile Form -->
         <div id="profile-full-view" class="flex flex-col flex-1 min-h-0">
+        <div id="profile-full-chrome">
         <!-- Strength meter + live preview -->
         <div class="flex-shrink-0 px-4 sm:px-6 md:px-8 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-[#00A89D]/5 to-transparent">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between mb-3">
                 <div class="flex items-center flex-wrap gap-2 sm:gap-3">
                     <div class="text-sm font-semibold text-[#002B5C] dark:text-white">Profile strength: <span id="profile-strength-score" class="text-[#00A89D]">0%</span></div>
-                    <button type="button" id="profile-open-wizard" class="text-[10px] px-2 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Quick setup</button>
+                    <button type="button" id="profile-open-wizard" class="text-[10px] px-2 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Guided setup</button>
                     <span id="profile-last-updated" class="text-[10px] text-gray-400 hidden"></span>
                 </div>
                 <div class="flex-1 max-w-xs h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -7799,6 +7707,7 @@
             <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="prospecting">Prospecting <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
             <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="personal">Personal <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
         </div>
+        </div><!-- /profile-full-chrome -->
 
         <div id="profile-form-scroll" class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 md:p-8">
 
@@ -8154,8 +8063,19 @@
         </div>
         </div><!-- /profile-full-view -->
 
+
+        <div id="profile-wizard-footer" class="hidden flex-shrink-0 px-4 sm:px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+            <div class="flex items-center justify-between gap-3">
+                <button type="button" id="profile-wizard-skip" class="text-xs text-gray-500 hover:text-[#00A89D]">Skip to full profile</button>
+                <div class="flex gap-2">
+                    <button type="button" id="profile-wizard-back" class="hidden px-4 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Back</button>
+                    <button type="button" id="profile-wizard-next" class="px-6 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-semibold hover:bg-[#008f85]">Continue</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Footer -->
-        <div class="flex-shrink-0 px-4 sm:px-8 py-4 sm:py-6 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-gray-50 dark:bg-gray-800">
+        <div id="profile-full-footer" class="flex-shrink-0 px-4 sm:px-8 py-4 sm:py-6 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-gray-50 dark:bg-gray-800">
             <div id="profile-save-status" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 transition-opacity">
                 <i class="fas fa-check text-[#00A89D]"></i>
                 <span>All changes saved automatically</span>
@@ -8169,7 +8089,7 @@
     </div>
 </div>
 
-<script src="js/features/user-profile.js?v=20260701-profile-v256"></script>
+<script src="js/features/user-profile.js?v=20260706-lo-v283"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
