@@ -16,7 +16,6 @@ const FILES = [
   'js/api.js',
   'js/features/ai-chat.js',
   'js/features/save-ribbon.js',
-  'js/features/underwriting.js',
   'js/features/weekly-win-plan.js',
   'js/features/newsletter-entertainment.js',
   'js/features/value-vault.js',

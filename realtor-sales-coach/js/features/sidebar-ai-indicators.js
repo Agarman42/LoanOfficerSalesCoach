@@ -14,7 +14,6 @@
     'weekly-win-plan': { level: 'full', tip: 'AI-powered — generates your weekly plan' },
     'sales-script': { level: 'full', tip: 'AI-powered — writes custom scripts' },
     'ai-chat': { level: 'full', tip: 'AI-powered — profile-aware coach' },
-    'underwriting-search': { level: 'full', tip: 'AI-powered — buyer financing reference' },
     'client-translation': { level: 'full', tip: 'AI-powered — translates client communication' }
   };
 

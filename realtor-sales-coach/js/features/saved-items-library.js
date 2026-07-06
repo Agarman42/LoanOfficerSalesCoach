@@ -325,9 +325,7 @@
     if (t === 'book') {
       links.push({ label: 'Book Vault', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('books');", style: 'accent' });
     }
-    if (t === 'underwriting') {
-      links.push({ label: 'Buyer Financing Reference', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('underwriting-search');", style: 'primary' });
-    }
+
     if (t === 'translation') {
       links.push({ label: 'Client Translation', onclick: closeViewer + "if(typeof window.showSection==='function')window.showSection('client-translation');", style: 'primary' });
     }
@@ -713,7 +711,6 @@
         { label: 'Reference', filters: [
           ['value-vault', 'fa-gem', 'Vault'],
           ['book', 'fa-book', 'Books'],
-          ['underwriting', 'fa-file-alt', 'Financing'],
           ['coach', 'fa-robot', 'Coach'],
           ['custom', 'fa-edit', 'Custom']
         ]}

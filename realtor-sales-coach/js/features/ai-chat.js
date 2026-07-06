@@ -24,7 +24,6 @@ When asked what the tool does or about its features, ALWAYS highlight the AI TOO
 • Listing Description Generator – Instant professional, emotional, and social-ready descriptions in multiple lengths
 • Open House Script & Strategy – Full kit: setup checklist, opening scripts, talking points, objections, lead capture, and social angles
 • Buyer/Seller Consultation Prep Kit – Personalized market snapshots, comps, pricing/affordability, objections, and follow-up plans
-• Buyer Financing & Qualification Reference – Layered scenario analysis with lender-partner guidance and follow-up threads
 • Sales Script Generator – Instant objection handlers and conversation scripts
 • Social Media Post & Calendar Creator – Ready-to-post content + full monthly plans (6 pillars, 14 Reels, 120+ Evergreen)
 • Blog Creator – Full SEO + GEO optimized blog posts with matching social + Google + Reel assets in seconds
@@ -158,53 +157,6 @@ function smartRouteChat(message) {
     ];
     if (blockPhrases.some(phrase => lower.includes(phrase))) {
         return false; // Stay in chat
-    }
-
-    // === PRIMARY: Must have at least one strict qualification / guideline keyword ===
-    const primaryKeywords = [
-        'guideline', 'guidelines', 'underwriting', 'financing', 'pre-approval', 'qualification', 'scenario',
-        'dti', 'credit', 'self-employed', 'conventional', 'fha', 'va', 'jumbo', 'buydown', 'cash out',
-        'overlay', 'compensating factor', 'aus finding'
-    ];
-    const hasPrimary = primaryKeywords.some(kw => lower.includes(kw));
-
-    if (!hasPrimary) return false;
-
-    // === SECONDARY: Loan/qualification context terms (optional but boosts accuracy) ===
-    const secondaryKeywords = [
-        'dti', 'debt to income', 'credit score', 'fico', 'ltv', 'cltv', 'self-employed',
-        'bankruptcy', 'foreclosure', 'fha', 'va', 'usda', 'conventional', 'jumbo',
-        'non-qm', 'buydown', 'cash out', 'gift funds', 'manufactured home'
-    ];
-    const hasSecondary = secondaryKeywords.some(kw => lower.includes(kw));
-
-    // === QUESTION STRUCTURE: Boost if it's phrased as a question ===
-    const isQuestion = lower.includes('?') ||
-                       lower.includes('what is') ||
-                       lower.includes('can i') ||
-                       lower.includes('can they') ||
-                       lower.includes('qualify') ||
-                       lower.includes('eligible');
-
-    // === ROUTE ONLY IF STRONG SIGNAL ===
-    if (hasPrimary && (hasSecondary || isQuestion)) {
-        if (typeof window.showSection === 'function') {
-            window.showSection('underwriting-search');
-        } else {
-            document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-            const uwSection = document.getElementById('underwriting-search');
-            if (uwSection) uwSection.classList.remove('hidden');
-        }
-
-        const uwInput = document.getElementById('uw-question');
-        if (uwInput) {
-            uwInput.value = message;
-            uwInput.focus();
-            uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        console.log('[ai-chat] Buyer financing question routed to Financing Reference tool.');
-        return true;
     }
 
     // Default: Stay in general chat
