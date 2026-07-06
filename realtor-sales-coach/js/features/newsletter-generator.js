@@ -1776,8 +1776,8 @@ function buildSocialLinksHtml(social) {
 }
 
 function wrapBrandingForEmail(innerTableHtml) {
-    return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;max-width:600px;width:100%;">
-  <tr><td align="center" style="padding:0;">
+    return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;max-width:600px;width:600px;">
+  <tr><td align="center" style="padding:0;width:600px;">
 ${innerTableHtml}
   </td></tr>
 </table>`;
@@ -1787,28 +1787,32 @@ ${innerTableHtml}
 const NL_HEADER_LOGO_MAX_W = 360;
 const NL_HEADER_LOGO_MAX_H = 96;
 
-function buildAgentBrandHeader(ctx) {
+function buildAgentBrandHeaderTable(ctx) {
     if (!ctx.includeSignature) return '';
     if (!ctx.logoUrl && !ctx.company && !ctx.tagline) return '';
 
     const logoAlt = escBrandingAttr(ctx.company ? `${ctx.company} logo` : 'Company logo');
     const logoHtml = ctx.logoUrl
-        ? `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="${logoAlt}" width="${NL_HEADER_LOGO_MAX_W}" style="display:block;width:100%;max-width:${NL_HEADER_LOGO_MAX_W}px;height:auto;max-height:${NL_HEADER_LOGO_MAX_H}px;margin:0 auto 18px;border:0;object-fit:contain;object-position:center center;">`
+        ? `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="${logoAlt}" width="${NL_HEADER_LOGO_MAX_W}" style="display:block;max-width:${NL_HEADER_LOGO_MAX_W}px;width:${NL_HEADER_LOGO_MAX_W}px;height:auto;max-height:${NL_HEADER_LOGO_MAX_H}px;margin:0 auto 18px;border:0;object-fit:contain;object-position:center center;">`
         : '';
 
-    const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;max-width:600px;width:100%;">
+    return `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;width:600px;max-width:600px;border-collapse:collapse;">
   <tr>
-    <td style="padding:${ctx.logoUrl ? '26px' : '20px'} 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+    <td style="padding:${ctx.logoUrl ? '26px' : '20px'} 30px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;width:600px;">
       ${logoHtml}
       ${ctx.company ? `<div style="font-size:${ctx.logoUrl ? '18px' : '20px'};font-weight:700;letter-spacing:0.3px;color:#002B5C;line-height:1.3;margin-top:${ctx.logoUrl ? '4px' : '0'};">${escBrandingText(ctx.company)}</div>` : ''}
       ${ctx.tagline ? `<div style="font-size:13px;margin-top:6px;color:#555;line-height:1.4;">${escBrandingText(ctx.tagline)}</div>` : ''}
     </td>
   </tr>
   <tr>
-    <td height="4" bgcolor="#00A89D" style="background:#00A89D;font-size:0;line-height:0;">&nbsp;</td>
+    <td height="4" bgcolor="#00A89D" style="background:#00A89D;font-size:0;line-height:0;width:600px;">&nbsp;</td>
   </tr>
 </table>`;
-    return wrapBrandingForEmail(inner);
+}
+
+function buildAgentBrandHeader(ctx) {
+    const inner = buildAgentBrandHeaderTable(ctx);
+    return inner ? wrapBrandingForEmail(inner) : '';
 }
 
 /** Portrait crop — keeps faces centered in the circle (avoids chopping foreheads). */
@@ -1887,9 +1891,9 @@ function buildAgentSignatureFooter(ctx) {
 
     inner += socialHtml;
 
-    const innerTable = `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-top:3px solid #00A89D;margin-top:8px;max-width:600px;width:100%;">
+    const innerTable = `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-top:3px solid #00A89D;margin-top:8px;width:600px;max-width:600px;">
   <tr>
-    <td style="padding:24px 28px;font-family:Arial,sans-serif;">
+    <td style="padding:24px 30px;font-family:Arial,sans-serif;width:600px;">
       ${inner}
     </td>
   </tr>
@@ -1902,7 +1906,7 @@ const NL_DISCLAIMER_ROW_RE = /<tr>\s*<td[^>]*(?:background|bgcolor)[^>]*#002B5C[
 function buildDefaultNewsletterDisclaimerHtml() {
     const ctx = getNewsletterProfileContext();
     const byline = ctx.company || ctx.name || 'Your real estate professional';
-    const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#002B5C;max-width:600px;width:100%;">
+    const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#002B5C;width:600px;max-width:600px;">
   <tr>
     <td style="padding:16px 24px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.55;color:#ffffff;">
       <p style="margin:0;">This newsletter is for general informational purposes only and is not legal, financial, or tax advice. Market conditions vary by area and change over time. ${escBrandingText(byline)}. Equal Housing Opportunity.</p>
@@ -1941,8 +1945,15 @@ function injectAgentBranding(html) {
         ? buildCompactReferralHtml(firstName, ctx.email)
         : '';
 
-    if (header) {
-        if (/<body[^>]*>/i.test(html)) {
+    const headerTable = buildAgentBrandHeaderTable(ctx);
+    if (headerTable) {
+        const nestedPlaceholderRe = /<table[^>]*\balign=["']?center["']?[^>]*>[\s\S]*?<!--\s*\[YOUR LOGO\s*\/\s*BRAND HEADER HERE\][\s\S]*?<\/table>/i;
+        const placeholderCommentRe = /<!--\s*\[YOUR LOGO\s*\/\s*BRAND HEADER HERE\][^>]*-->/i;
+        if (nestedPlaceholderRe.test(html)) {
+            html = html.replace(nestedPlaceholderRe, headerTable);
+        } else if (placeholderCommentRe.test(html)) {
+            html = html.replace(placeholderCommentRe, headerTable);
+        } else if (/<body[^>]*>/i.test(html)) {
             html = html.replace(/<body[^>]*>/i, '$&' + header);
         } else {
             html = header + html;
@@ -2009,6 +2020,9 @@ function updateBrandPreview() {
 
 // === GLOBAL EMAIL / CRM SETTINGS ===
 const EMAIL_WIDTH = 600;
+/** Usable width inside a teal card (600px table − 30px side padding). */
+const NL_CARD_SIDE_PADDING = 30;
+const NL_CARD_CONTENT_WIDTH = EMAIL_WIDTH - (NL_CARD_SIDE_PADDING * 2);
 const BODY_PADDING = 90;        // left + right padding for centering
 const MODULE_PADDING = 20;      // consistent spacing between modules
 const HEADER_HEIGHT = 60;       // recommended for headers (used if needed)
@@ -2078,7 +2092,7 @@ function getPersonalPhotoWidthPercent() {
 }
 
 function getPersonalPhotoWidthPx() {
-    return Math.round(EMAIL_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
 }
 
 function formatPersonalPhotoSizeLabel() {
@@ -2091,7 +2105,11 @@ function formatPersonalPhotoSizeLabel() {
 function buildPersonalPhotoInsert(photoUrl) {
     const px = getPersonalPhotoWidthPx();
     const safeUrl = String(photoUrl || '').trim();
-    return `<p style="margin:16px 0 0; text-align:center;"><img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block; margin:0 auto; max-width:100%; width:${px}px; height:auto; border:0; border-radius:8px;" /></p>`;
+    return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:16px 0 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
+  <tr><td align="center" style="padding:0;">
+    <img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">
+  </td></tr>
+</table>`;
 }
 
 function updatePersonalPhotoSizeUI() {
@@ -3654,16 +3672,7 @@ function getCleanOutlookHTML() {
     // The frame around the personal photo (the "picture" that can appear above the video section) uses a teal bg + padding
     // to create a thin border. Raw keeps generation's 4px. Cleaned was using 3px; tighten to 2px to address the
     // "slightly thicker border" in Outlook/vault copies.
-    cleanHTML = cleanHTML.replace(
-        /<table[^>]*?style="[^"]*margin:\s*15px\s*0[^"]*max-width:\s*100%[^"]*"[^>]*>[\s\S]*?<img[^>]*?src="([^"]+)"[^>]*?alt="Personal photo"[\s\S]*?<\/table>/gi,
-        `<table width="100%" cellpadding="0" cellspacing="0" style="margin:15px 0; max-width:100%;">
-            <tr>
-                <td style="padding:2px; background:#00A89D; border-radius:12px;">
-                    <img src="$1" alt="Personal photo" width="100%" style="width:100%; max-width:540px; height:auto; display:block; border-radius:8px;">
-                </td>
-            </tr>
-        </table>`
-    );
+    cleanHTML = normalizePersonalPhotoBlocks(cleanHTML);
 
     return cleanHTML;
 }
@@ -3783,11 +3792,51 @@ function copyForOutlook() {
   // Fixes the occasional left teal line misalignment
   // =====================================================
 
+  function normalizePersonalPhotoBlocks(htmlString) {
+      if (!htmlString) return htmlString;
+      const photoFrameRe = /<table[^>]*style="[^"]*margin:\s*15px\s*0[^"]*max-width:\s*100%[^"]*"[^>]*>[\s\S]*?<img([^>]*alt=["']Personal photo["'][^>]*)[\s\S]*?<\/table>/gi;
+      let out = htmlString.replace(photoFrameRe, (match, imgAttrs) => {
+          const srcMatch = String(imgAttrs).match(/\bsrc=["']([^"']+)["']/i);
+          if (!srcMatch) return match;
+          const px = NL_CARD_CONTENT_WIDTH;
+          return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:16px 0 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
+  <tr><td align="center" style="padding:0;">
+    <img src="${srcMatch[1]}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">
+  </td></tr>
+</table>`;
+      });
+      out = out.replace(
+          /<img([^>]*alt=["']Personal photo["'][^>]*)>/gi,
+          (match, attrs) => {
+              if (/max-width:\s*100%/.test(attrs) && /width:\s*\d+px/.test(attrs)) return match;
+              const srcMatch = String(attrs).match(/\bsrc=["']([^"']+)["']/i);
+              if (!srcMatch) return match;
+              const px = NL_CARD_CONTENT_WIDTH;
+              return `<img src="${srcMatch[1]}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">`;
+          }
+      );
+      return out;
+  }
+
+  function normalizeNewsletterHeaderRowPadding(htmlString) {
+      if (!htmlString) return htmlString;
+      return htmlString.replace(
+          /(<tr>\s*<td[^>]*style=")([^"]*padding:\s*40px\s+20px[^"]*)(")/gi,
+          (m, pre, styleVal, post) => {
+              const next = styleVal.replace(/padding:\s*40px\s+20px/i, 'padding:40px 0');
+              return pre + next + post;
+          }
+      );
+  }
+
   function normalizeRawNewsletterHTML(htmlString) {
       if (!htmlString) return htmlString;
 
+      let out = normalizeNewsletterHeaderRowPadding(htmlString);
+      out = normalizePersonalPhotoBlocks(out);
+
       // Force every section table with the teal left border to have identical inner padding
-      return htmlString.replace(
+      return out.replace(
           /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*>)([\s\S]*?<td[^>]*?style=")([^"]*)(")/gi,
           (match, tableOpen, tdStyleStart, existingStyle, quote) => {
               let newStyle = existingStyle.replace(/padding\s*:\s*[^;"]*/i, 'padding:30px 30px 30px 30px');
