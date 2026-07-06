@@ -100,8 +100,14 @@
 
   function isRichHtmlItem(item) {
     if (!item) return false;
+    if (item.format === 'kit') return true;
     if (item.format === 'html') return true;
     return RICH_HTML_TYPES.includes(item.type) && /<[a-z][\s\S]*>/i.test(item.content || '');
+  }
+
+  function openHouseKitSectionCount(kitData) {
+    if (!kitData || !kitData.sections) return 0;
+    return Object.values(kitData.sections).filter((v) => v && String(v).trim().length > 20).length;
   }
 
   function getSavedViewerContent(item) {
@@ -111,6 +117,20 @@
         wrapperClass: 'p-4 overflow-hidden flex-1 bg-gray-100 dark:bg-gray-800',
         html: `<iframe style="width:100%;height:100%;min-height:500px;border:1px solid #ccc;border-radius:8px;background:white;" srcdoc="${safeSrcdoc}"></iframe>`,
         copyText: plainTextContent(item)
+      };
+    }
+
+    if (item.format === 'kit' && item.kit === 'open-house' && item.kitData) {
+      const html = typeof window.renderSavedOpenHouseKit === 'function'
+        ? window.renderSavedOpenHouseKit(item.kitData, { forVault: true })
+        : `<pre class="whitespace-pre-wrap text-sm">${(item.content || '').replace(/</g, '&lt;')}</pre>`;
+      const copyText = typeof window.openHouseKitToPlainText === 'function'
+        ? window.openHouseKitToPlainText(item.kitData)
+        : plainTextContent(item);
+      return {
+        wrapperClass: 'p-5 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 saved-rich-viewer custom-modal-scroll',
+        html: `<div class="saved-kit-open-house max-w-none">${html}</div>`,
+        copyText
       };
     }
 
@@ -219,6 +239,11 @@
   }
 
   function previewText(item) {
+    if (item.format === 'kit' && item.kit === 'open-house' && item.kitData) {
+      const count = openHouseKitSectionCount(item.kitData);
+      const property = item.kitData.propertyType || 'Open house';
+      return `Full playbook · ${count} section${count === 1 ? '' : 's'} · ${property}`;
+    }
     const text = plainTextContent(item);
     const preview = text.substring(0, 180);
     return preview + (text.length > 180 ? '...' : '');
@@ -307,7 +332,7 @@
     opts = opts || {};
     const saved = getSavedIdeas();
     const index = saved.findIndex(item => item.title === title);
-    const format = opts.format || (typeof content === 'string' && /<[a-z][\s\S]*>/i.test(content) ? 'html' : 'text');
+    const format = opts.kit ? 'kit' : (opts.format || (typeof content === 'string' && /<[a-z][\s\S]*>/i.test(content) ? 'html' : 'text'));
 
     if (index !== -1) {
       saved.splice(index, 1);
@@ -315,13 +340,16 @@
       window.updateSavedCount();
       if (element) element.innerHTML = '<i class="far fa-bookmark"></i>';
     } else {
-      saved.push({
+      const entry = {
         title,
-        content: content || title,
+        content: opts.summary || content || title,
         savedAt: new Date().toISOString(),
         type: customType || 'social',
         format
-      });
+      };
+      if (opts.kit) entry.kit = opts.kit;
+      if (opts.kitData) entry.kitData = opts.kitData;
+      saved.push(entry);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
       window.updateSavedCount();
       if (element) element.innerHTML = '<i class="fas fa-bookmark"></i>';
