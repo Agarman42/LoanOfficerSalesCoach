@@ -1793,13 +1793,7 @@ function buildAgentBrandHeader(ctx) {
 
     const logoAlt = escBrandingAttr(ctx.company ? `${ctx.company} logo` : 'Company logo');
     const logoHtml = ctx.logoUrl
-        ? `<table align="center" cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 18px;width:100%;">
-  <tr>
-    <td align="center" style="padding:20px 36px 22px;background:#ffffff;border:1px solid #dde3ea;border-radius:12px;">
-      <img src="${escBrandingAttr(ctx.logoUrl)}" alt="${logoAlt}" width="${NL_HEADER_LOGO_MAX_W}" style="display:block;width:100%;max-width:${NL_HEADER_LOGO_MAX_W}px;height:auto;max-height:${NL_HEADER_LOGO_MAX_H}px;margin:0 auto;border:0;object-fit:contain;object-position:center center;">
-    </td>
-  </tr>
-</table>`
+        ? `<img src="${escBrandingAttr(ctx.logoUrl)}" alt="${logoAlt}" width="${NL_HEADER_LOGO_MAX_W}" style="display:block;width:100%;max-width:${NL_HEADER_LOGO_MAX_W}px;height:auto;max-height:${NL_HEADER_LOGO_MAX_H}px;margin:0 auto 18px;border:0;object-fit:contain;object-position:center center;">`
         : '';
 
     const inner = `<table width="600" cellpadding="0" cellspacing="0" style="background:#f9f9f9;max-width:600px;width:100%;">
@@ -1836,7 +1830,7 @@ function buildSignatureLogoCell(logoUrl) {
     return `<td width="112" align="center" valign="middle" style="width:112px;padding-left:10px;vertical-align:middle;">
       <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
         <tr>
-          <td align="center" valign="middle" style="padding:10px 12px;background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;line-height:0;">
+          <td align="center" valign="middle" style="padding:0;line-height:0;">
             <img src="${escBrandingAttr(logoUrl)}" alt="Company logo" width="100" style="display:block;width:100%;max-width:100px;height:auto;max-height:68px;margin:0 auto;border:0;object-fit:contain;object-position:center center;">
           </td>
         </tr>
