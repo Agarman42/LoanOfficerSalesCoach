@@ -88,13 +88,37 @@
   function readRawProfile() {
     try {
       const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      if (raw && Object.keys(raw).length) return raw;
       const legacy = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+      if (raw && Object.keys(raw).length) {
+        return { ...legacy, ...raw };
+      }
       if (legacy && (legacy.name || legacy.location || legacy.focus)) return legacy;
       return raw;
     } catch (e) {
       return {};
     }
+  }
+
+  function setSelectValue(el, storedValue, labelFallback) {
+    if (!el || el.tagName !== 'SELECT') return;
+    const val = storedValue || '';
+    if (!val) {
+      el.value = '';
+      return;
+    }
+    const options = Array.from(el.options);
+    if (options.some((o) => o.value === val)) {
+      el.value = val;
+      return;
+    }
+    const byLabel = options.find(
+      (o) => o.textContent.trim() === val || (labelFallback && o.textContent.trim() === labelFallback)
+    );
+    if (byLabel) {
+      el.value = byLabel.value;
+      return;
+    }
+    el.value = val;
   }
 
   function checkComplete(p, key) {
@@ -360,10 +384,11 @@
   }
 
   function persistProfile(profile, showFeedback, closeAfter) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    const normalized = normalizeProfile(profile);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
 
     const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
-    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...profile }));
+    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...normalized }));
 
     refreshProfileUI();
     if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
@@ -412,7 +437,11 @@
       if (!el) return;
       const key = fieldKeyMap[field] || field.replace(/-([a-z])/g, (_, l) => l.toUpperCase());
       const val = profile[key] || profile[field] || '';
-      el.value = val;
+      if (field === 'focus') {
+        setSelectValue(el, val, profile.focusLabel);
+      } else {
+        el.value = val;
+      }
     });
 
     const yearsEl = document.getElementById('profile-years');
@@ -786,6 +815,7 @@
   function closeModal() {
     if (!modal) modal = document.getElementById('user-profile-modal');
     if (!modal) return;
+    flushWizardSave();
     if (typeof window.closeAppModal === 'function') {
       window.closeAppModal(modal);
     } else {

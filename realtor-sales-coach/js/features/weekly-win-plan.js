@@ -63,7 +63,7 @@
       monthlyUnits: central.monthlyUnits || local.monthlyGoal || local.monthlyUnits || 8,
       // Dollar volume goal (for future use)
       monthlyVolume: central.monthlyGoal || '',
-      focus: central.focus || local.focus || '',
+      focus: central.focusLabel || central.focus || local.focus || '',
       hours: central.hours || local.hours || '',
       hobbies: central.hobbies || local.hobbies || [],
       hobbiesOther: central.hobbiesOther || local.hobbiesOther || '',
@@ -110,7 +110,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 min-w-0 col-span-2">
           <div class="flex items-center gap-2 text-[#00A89D] mb-1"><i class="fas fa-bullseye text-sm"></i> <span class="text-xs font-bold tracking-wider">PRIMARY FOCUS</span></div>
-          <div class="font-semibold text-gray-900 dark:text-white text-[15px] break-words leading-tight">${p.focus || eff.focus || '—'}</div>
+          <div class="font-semibold text-gray-900 dark:text-white text-[15px] break-words leading-tight">${p.focusLabel || p.focus || eff.focus || '—'}</div>
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 min-w-0 col-span-2">
           <div class="flex items-center gap-2 text-[#00A89D] mb-1"><i class="fas fa-microphone text-sm"></i> <span class="text-xs font-bold tracking-wider">PERSONALITY / VOICE</span></div>
@@ -982,7 +982,7 @@ function updateWeeklyCustomizeDisplays() {
   const focusEl = document.getElementById('wwp-focus-display');
   if (goalEl) goalEl.textContent = p.monthlyUnits || p.monthlyGoal || 8;
   if (hoursEl) hoursEl.textContent = p.hours || '15–20';
-  if (focusEl) focusEl.textContent = p.focus || 'Balanced';
+  if (focusEl) focusEl.textContent = p.focusLabel || p.focus || 'Balanced';
   updateWeeklyLiveSummary();
 }
 
@@ -1035,7 +1035,7 @@ User Profile:
 - Name: ${p.name || eff.name || ''}
 - Email: ${p.email || ''}
 - Monthly transaction goal: ${p.monthlyUnits || p.monthlyGoal || eff.monthlyUnits || 8}
-- Business focus: ${p.focus || eff.focus || ''}
+- Business focus: ${p.focusLabel || p.focus || eff.focus || ''}
 - Weekly prospecting hours available: ${p.hours || eff.hours || ''}
 - Hobbies/Passions: ${[...(p.hobbies || []), p.hobbiesOther].filter(Boolean).join(', ') || [...(eff.hobbies || []), eff.hobbiesOther].filter(Boolean).join(', ') || 'none specified'}
 - Preferred prospecting activities: ${(p.activities || p.preferredActivities || eff.preferredActivities || []).join(', ') || 'balanced mix'}
