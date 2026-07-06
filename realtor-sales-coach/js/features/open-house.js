@@ -97,7 +97,7 @@
           </div>
           <div class="flex gap-1.5 flex-shrink-0">
             <button type="button" onclick="navigator.clipboard.writeText(this.closest('.rounded-3xl').querySelector('[data-copy-body]')?.innerText?.trim()||''); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1200)" class="text-xs px-3 py-1 border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white rounded-full">Copy</button>
-            <button type="button" onclick="if(typeof window.toggleSaveIdea==='function'){const b=this.closest('.rounded-3xl');window.toggleSaveIdea('${safeSaveLabel}', b.querySelector('[data-copy-body]')?.innerText?.trim()||'', this, 'open-house');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i></button>
+            <button type="button" onclick="if(typeof window.toggleSaveIdea==='function'){const b=this.closest('.rounded-3xl');window.toggleSaveIdea('${safeSaveLabel}', typeof window.buildSaveableSectionHtml==='function'?window.buildSaveableSectionHtml(b):(b.querySelector('[data-copy-body]')?.innerText?.trim()||''), this, 'open-house', {format:'html'});}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i></button>
           </div>
         </div>
         <div data-copy-body class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-[15px] flex-1">${body}</div>
@@ -116,7 +116,7 @@
           </div>
           <div class="flex gap-2">
             <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('oh-output')?.innerText?.replace(/Copy All|Save All Kit/g,'')?.trim()||''); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy All',1400)" class="text-xs px-4 py-2 border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white rounded-full font-medium">Copy All</button>
-            <button type="button" onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('${saveRoot}', document.getElementById('oh-output')?.innerText?.replace(/Copy All|Save All Kit/g,'')?.trim()||'', this, 'open-house');}" class="text-xs px-4 py-2 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full font-medium"><i class="far fa-bookmark"></i> Save All Kit</button>
+            <button type="button" onclick="if(typeof window.toggleSaveIdea==='function'){const o=document.getElementById('oh-output');window.toggleSaveIdea('${saveRoot}', typeof window.extractSaveableHtml==='function'?window.extractSaveableHtml(o):(o?.innerText?.replace(/Copy All|Save All Kit/g,'')?.trim()||''), this, 'open-house', {format:'html'});}" class="text-xs px-4 py-2 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full font-medium"><i class="far fa-bookmark"></i> Save All Kit</button>
           </div>
         </div>
       </div>`;

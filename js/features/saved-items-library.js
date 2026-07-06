@@ -90,13 +90,73 @@
     return filtered;
   }
 
+  const RICH_HTML_TYPES = ['listings', 'open-house', 'consultation', 'blog', 'plan', 'newsletter', 'translation'];
+
   function plainTextContent(item) {
-    let text = item.content || '';
-    if (['newsletter', 'equity-opportunity', 'equity-scan', 'plan', 'script', 'social', 'underwriting', 'coach', 'translation', 'postclosing', 'blog'].includes(item.type)) {
+    let text = (typeof item === 'string' ? item : item?.content) || '';
+    const type = typeof item === 'string' ? '' : (item?.type || '');
+    if (['newsletter', 'equity-opportunity', 'equity-scan', 'plan', 'script', 'social', 'underwriting', 'coach', 'translation', 'postclosing', 'blog', 'listings', 'open-house', 'consultation'].includes(type) || /<[a-z][\s\S]*>/i.test(text)) {
       text = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     }
     return text;
   }
+
+  function isRichHtmlItem(item) {
+    if (!item) return false;
+    if (item.format === 'html') return true;
+    return RICH_HTML_TYPES.includes(item.type) && /<[a-z][\s\S]*>/i.test(item.content || '');
+  }
+
+  function getSavedViewerContent(item) {
+    if (item.type === 'newsletter') {
+      const safeSrcdoc = (item.content || '').replace(/"/g, '&quot;');
+      return {
+        wrapperClass: 'p-4 overflow-hidden flex-1 bg-gray-100 dark:bg-gray-800',
+        html: `<iframe style="width:100%;height:100%;min-height:500px;border:1px solid #ccc;border-radius:8px;background:white;" srcdoc="${safeSrcdoc}"></iframe>`,
+        copyText: plainTextContent(item)
+      };
+    }
+
+    if (isRichHtmlItem(item)) {
+      return {
+        wrapperClass: 'p-5 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 saved-rich-viewer custom-modal-scroll',
+        html: `<div class="saved-rich-content space-y-4 max-w-none">${item.content}</div>`,
+        copyText: plainTextContent(item)
+      };
+    }
+
+    if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing', 'nurture', 'process', 'translation', 'listings', 'open-house', 'consultation'].includes(item.type)) {
+      const escaped = (item.content || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return {
+        wrapperClass: 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900 whitespace-pre-wrap leading-relaxed',
+        html: escaped,
+        copyText: item.content || ''
+      };
+    }
+
+    return {
+      wrapperClass: 'p-6 overflow-y-auto flex-1 prose prose-lg dark:prose-invert',
+      html: item.content || '',
+      copyText: plainTextContent(item)
+    };
+  }
+
+  window.extractSaveableHtml = function extractSaveableHtml(rootEl) {
+    if (!rootEl) return '';
+    const clone = rootEl.cloneNode(true);
+    clone.querySelectorAll('button').forEach((btn) => btn.remove());
+    return clone.innerHTML.trim();
+  };
+
+  window.buildSaveableSectionHtml = function buildSaveableSectionHtml(cardEl) {
+    if (!cardEl) return '';
+    const clone = cardEl.cloneNode(true);
+    clone.querySelectorAll('button').forEach((btn) => btn.remove());
+    return clone.outerHTML;
+  };
 
   function typeLabel(item) {
     const t = item.type || 'social';
@@ -235,9 +295,11 @@
     return '';
   }
 
-  window.toggleSaveIdea = function toggleSaveIdea(title, content, element, customType) {
+  window.toggleSaveIdea = function toggleSaveIdea(title, content, element, customType, opts) {
+    opts = opts || {};
     const saved = getSavedIdeas();
     const index = saved.findIndex(item => item.title === title);
+    const format = opts.format || (typeof content === 'string' && /<[a-z][\s\S]*>/i.test(content) ? 'html' : 'text');
 
     if (index !== -1) {
       saved.splice(index, 1);
@@ -249,7 +311,8 @@
         title,
         content: content || title,
         savedAt: new Date().toISOString(),
-        type: customType || 'social'
+        type: customType || 'social',
+        format
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
       window.updateSavedCount();
@@ -424,24 +487,19 @@
 
     document.querySelectorAll('.saved-viewer-modal').forEach(m => m.remove());
 
-    let contentHTML = item.content || '';
-    let contentWrapperClass = 'p-6 overflow-y-auto flex-1 prose prose-lg dark:prose-invert';
-
-    if (item.type === 'newsletter') {
-      contentWrapperClass = 'p-4 overflow-hidden flex-1 bg-gray-100 dark:bg-gray-800';
-      const safeSrcdoc = (item.content || '').replace(/"/g, '&quot;');
-      contentHTML = `<iframe style="width:100%;height:100%;min-height:500px;border:1px solid #ccc;border-radius:8px;background:white;" srcdoc="${safeSrcdoc}"></iframe>`;
-    } else if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing', 'nurture', 'process', 'translation'].includes(item.type)) {
-      contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900';
-    }
+    const viewerContent = getSavedViewerContent(item);
+    const contentHTML = viewerContent.html;
+    const contentWrapperClass = viewerContent.wrapperClass;
+    const copyText = (viewerContent.copyText || plainTextContent(item)).replace(/"/g, '&quot;').replace(/`/g, '\\`');
 
     const savedDate = formatSavedDate(item);
     const useNext = renderUseNextFooter(item);
+    const viewerWidth = isRichHtmlItem(item) ? 'max-w-5xl' : 'max-w-4xl';
 
     const modal = document.createElement('div');
     modal.className = 'app-modal-overlay fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center p-4 saved-viewer-modal';
     modal.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col" onclick="event.stopPropagation()">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl w-full ${viewerWidth} max-h-[85vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col" onclick="event.stopPropagation()">
         <div class="sticky top-0 z-10 flex justify-between items-center p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center gap-3 min-w-0">
             <span class="text-xs px-2.5 py-1 rounded-full flex-shrink-0 ${typeColor(item)}">${typeLabel(item)}</span>
@@ -455,7 +513,7 @@
         <div class="${contentWrapperClass} custom-modal-scroll">${contentHTML}</div>
         ${useNext ? `<div class="px-6 pb-2 flex-shrink-0">${useNext}</div>` : ''}
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0 bg-gray-50 dark:bg-gray-800/50">
-          <button data-saved-copy-text="${(item.content || '').replace(/"/g, '&quot;').replace(/`/g, '\\`')}"
+          <button data-saved-copy-text="${copyText}"
                   onclick="copySavedItemText(this)"
                   class="px-4 py-2 text-sm rounded-2xl border border-gray-300 hover:bg-white dark:hover:bg-gray-700 flex items-center gap-2">
             <i class="fas fa-copy"></i> Copy

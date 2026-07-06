@@ -73,7 +73,7 @@ Make everything warm, client-centered, and confidence-building. Use emotional la
             <div class="font-bold text-[#002B5C] text-xl">Consultation Prep Kit</div>
             <div class="flex gap-2">
               <button onclick="navigator.clipboard.writeText(this.closest('.rounded-3xl').innerText); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1200)" class="text-xs px-3 py-1 border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white rounded-full">Copy</button>
-              <button onclick="if(typeof window.toggleSaveIdea==='function'){window.toggleSaveIdea('Consultation Kit - ${preset}', this.closest('.rounded-3xl').innerText, this, 'consultation');}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
+              <button onclick="if(typeof window.toggleSaveIdea==='function'){const b=this.closest('.rounded-3xl');window.toggleSaveIdea('Consultation Kit - ${preset}', typeof window.buildSaveableSectionHtml==='function'?window.buildSaveableSectionHtml(b):(b?.innerText||''), this, 'consultation', {format:'html'});}" class="text-xs px-3 py-1 border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white rounded-full"><i class="far fa-bookmark"></i> Save</button>
             </div>
           </div>
           <div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">${text.replace(/</g,'&lt;')}</div>
