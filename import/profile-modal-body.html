@@ -1,0 +1,373 @@
+        <!-- Full Profile Form -->
+        <div id="profile-full-view" class="flex flex-col flex-1 min-h-0">
+        <!-- Strength meter + live preview -->
+        <div class="flex-shrink-0 px-4 sm:px-6 md:px-8 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-[#00A89D]/5 to-transparent">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between mb-3">
+                <div class="flex items-center flex-wrap gap-2 sm:gap-3">
+                    <div class="text-sm font-semibold text-[#002B5C] dark:text-white">Profile strength: <span id="profile-strength-score" class="text-[#00A89D]">0%</span></div>
+                    <button type="button" id="profile-open-wizard" class="text-[10px] px-2 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Quick setup</button>
+                    <span id="profile-last-updated" class="text-[10px] text-gray-400 hidden"></span>
+                </div>
+                <div class="flex-1 max-w-xs h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div id="profile-strength-bar" class="h-full rounded-full bg-gradient-to-r from-[#F15A29] to-[#00A89D] transition-all duration-500" style="width:0%"></div>
+                </div>
+            </div>
+            <div id="profile-strength-hints" class="flex flex-wrap gap-x-4 gap-y-1 mb-3"></div>
+            <div id="profile-live-preview" class="p-3 rounded-2xl border border-[#00A89D]/25 bg-white/70 dark:bg-gray-800/60 mb-2">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-1">How the coach sees you</p>
+                <p id="profile-live-preview-text" class="text-sm text-[#002B5C] dark:text-gray-200 m-0 leading-relaxed">Complete your profile so every tool sounds like you.</p>
+                <div id="profile-live-preview-tools" class="flex flex-wrap gap-1.5 mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Tab navigation -->
+        <div id="profile-tab-nav" class="flex-shrink-0 flex flex-wrap gap-1 px-4 sm:px-6 md:px-8 pt-3 pb-0 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+            <button type="button" class="profile-tab-btn active px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-[#00A89D] text-[#00A89D] bg-white dark:bg-gray-900" data-profile-tab="identity">Identity <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
+            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="business">Business <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
+            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="content">Voice &amp; Links <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
+            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="prospecting">Prospecting <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
+            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="personal">Personal <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
+        </div>
+
+        <div id="profile-form-scroll" class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 md:p-8">
+
+            <!-- TAB: Identity -->
+            <div id="profile-tab-panel-identity" class="profile-tab-panel space-y-4" data-profile-section="identity">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Identity &amp; Contact</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#F15A29]/10 text-[#F15A29] font-semibold">Essential</span>
+                </div>
+                <p class="text-xs text-gray-500 m-0">Used in <strong>Newsletter</strong>, <strong>Scripts</strong>, signatures, and AI Coach.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Full Name <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
+                        <input type="text" id="profile-name" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Email Address <span class="text-[10px] text-gray-400">Recommended</span></label>
+                        <input type="email" id="profile-email" placeholder="you@example.com" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Phone <span class="text-gray-400 font-normal text-xs">optional</span></label>
+                        <input type="tel" id="profile-phone" placeholder="(317) 555-0100" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">NMLS # <span class="text-gray-400 font-normal text-xs">optional</span></label>
+                        <input type="text" id="profile-nmls" placeholder="e.g. 123456" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">One-line intro <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
+                        <input type="text" id="profile-intro" placeholder="I'm the LO who makes pre-approvals feel fast, clear, and human..." class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <p class="text-[11px] text-gray-500 mt-1 m-0">How you describe yourself to partners — scripts and social pull from this.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Primary Market / Location <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
+                        <input type="text" id="profile-location" placeholder="e.g. Fort Wayne, IN" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Years in the Business</label>
+                        <input type="number" id="profile-years" min="0" step="1" placeholder="e.g. 7" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Team Situation</label>
+                    <select id="profile-team" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <option value="">Select...</option>
+                        <option>Solo Loan Officer</option>
+                        <option>Have an Assistant</option>
+                        <option>Small Team (2-4 people)</option>
+                        <option>Larger Team / Branch</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TAB: Business -->
+            <div id="profile-tab-panel-business" class="profile-tab-panel hidden space-y-4" data-profile-section="business">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Business &amp; Goals</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold">Weekly Plan</span>
+                </div>
+                <p class="text-xs text-gray-500 m-0">Shapes your <strong>Weekly Win Plan</strong>, coaching insights, and goal tracking.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Primary Focus Style <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
+                        <select id="profile-focus" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Select...</option>
+                            <option value="balanced-growth">Balanced Growth</option>
+                            <option value="referral-partners">Heavy Realtor Partnerships</option>
+                            <option value="database">Past Client / Database Focus</option>
+                            <option value="equity-refi">Equity & Refinance Opportunities</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Past Client Database Size</label>
+                        <select id="profile-database-size" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Select...</option>
+                            <option value="under-50">Under 50 past clients</option>
+                            <option value="50-200">50–200 past clients</option>
+                            <option value="200-plus">200+ past clients</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Monthly Unit Goal (loans)</label>
+                        <input type="text" id="profile-monthly-units" placeholder="e.g. 6 or 8–10" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <select onchange="if (this.value) { document.getElementById('profile-monthly-units').value = this.value; this.selectedIndex = 0; }" class="mt-1 w-full text-xs py-1.5 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Quick suggestions...</option>
+                            <option value="2-3 loans">2–3 loans / mo</option>
+                            <option value="4-5 loans">4–5 loans / mo</option>
+                            <option value="6-8 loans">6–8 loans / mo</option>
+                            <option value="8-10 loans">8–10 loans / mo</option>
+                            <option value="10-12 loans">10–12 loans / mo</option>
+                            <option value="12+ loans">12+ loans / mo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Monthly Volume Goal</label>
+                        <input type="text" id="profile-monthly-goal" placeholder="e.g. $3M – $4M" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <select onchange="if (this.value) { document.getElementById('profile-monthly-goal').value = this.value; this.selectedIndex = 0; }" class="mt-1 w-full text-xs py-1.5 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Quick suggestions...</option>
+                            <option value="Under $2M">Under $2M</option>
+                            <option value="$2M – $3M">$2M – $3M</option>
+                            <option value="$3M – $4M">$3M – $4M</option>
+                            <option value="$4M – $5M">$4M – $5M</option>
+                            <option value="$5M – $7M">$5M – $7M</option>
+                            <option value="$7M – $10M">$7M – $10M</option>
+                            <option value="$10M+">$10M+</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Weekly Prospecting Hours Available</label>
+                        <select id="profile-hours" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Select...</option>
+                            <option>Less than 10</option>
+                            <option>10–15</option>
+                            <option>15–20</option>
+                            <option>20+</option>
+                        </select>
+                    </div>
+                </div>
+                <details class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+                    <summary class="text-sm font-medium cursor-pointer text-gray-600 dark:text-gray-400">Optional planning &amp; niches</summary>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Target Annual Income <span class="text-gray-400 font-normal text-xs">private — optional</span></label>
+                            <input type="number" id="profile-income" placeholder="e.g. 300000" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-sm font-medium">Ideal Clients &amp; Niches</label>
+                                <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-niche"> Select all</label>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                <label class="flex items-center gap-2"><input type="checkbox" value="First-time homebuyers" class="profile-niche"> First-time homebuyers</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Move-up buyers" class="profile-niche"> Move-up buyers</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Real estate investors" class="profile-niche"> Real estate investors</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Self-employed / Business owners" class="profile-niche"> Self-employed / Business owners</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Military / Veterans" class="profile-niche"> Military / Veterans</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Luxury / High-end clients" class="profile-niche"> Luxury / High-end clients</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Refinance clients" class="profile-niche"> Refinance clients</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Young professionals" class="profile-niche"> Young professionals</label>
+                            </div>
+                            <input type="text" id="profile-niche-other" placeholder="Other niches (comma separated)" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-sm font-medium">Current Challenges</label>
+                                <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-challenge"> Select all</label>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Generating consistent leads" class="profile-challenge"> Generating consistent leads</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Building realtor relationships" class="profile-challenge"> Building realtor relationships</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Staying consistent with prospecting" class="profile-challenge"> Staying consistent with prospecting</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Creating social media content" class="profile-challenge"> Creating social media content</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Converting leads to clients" class="profile-challenge"> Converting leads to clients</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Standing out from other loan officers" class="profile-challenge"> Standing out from other loan officers</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Engaging my past client database" class="profile-challenge"> Engaging my past client database</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="Time management" class="profile-challenge"> Time management</label>
+                            </div>
+                            <input type="text" id="profile-challenge-other" placeholder="Other challenges" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- TAB: Voice & Links -->
+            <div id="profile-tab-panel-content" class="profile-tab-panel hidden space-y-4" data-profile-section="content">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Voice, Content &amp; Links</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#F15A29]/10 text-[#F15A29] font-semibold">Essential</span>
+                </div>
+                <p class="text-xs text-gray-500 m-0">Powers <strong>Newsletter</strong>, <strong>Blog Creator</strong>, <strong>Social</strong>, and all AI writing.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Preferred Content Tone <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
+                        <select id="profile-tone" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Select...</option>
+                            <option>Warm and casual (like a trusted friend)</option>
+                            <option>Professional but approachable</option>
+                            <option>Witty and fun</option>
+                            <option>Straightforward and helpful</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Never say / Always say <span class="text-gray-400 font-normal text-xs">guardrails</span></label>
+                        <textarea id="profile-content-notes" rows="3" placeholder="e.g. Always mention local market; never post rates publicly; avoid politics" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></textarea>
+                    </div>
+                </div>
+                <div class="p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium mb-1"><i class="fas fa-blog text-[#00A89D] mr-1"></i>Blog Page URL <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
+                        <p class="text-[11px] text-gray-500 m-0 mb-2">Your author column or blog home — e.g. <code class="text-xs">https://mortgage-column.ruoff.com/adamgarman</code>. Newsletter uses this as a default; paste a specific post URL per issue when you want to feature one article.</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="url" id="profile-blog-url" placeholder="https://mortgage-column.ruoff.com/yourname" class="flex-1 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                            <button type="button" id="profile-ruoff-blog-preset" class="text-xs px-4 py-2.5 rounded-2xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition whitespace-nowrap">Ruoff column preset</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">LinkedIn Profile <span class="text-gray-400 font-normal text-xs">optional</span></label>
+                            <input type="url" id="profile-linkedin-url" placeholder="https://linkedin.com/in/..." class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Company Website <span class="text-gray-400 font-normal text-xs">optional</span></label>
+                            <input type="url" id="profile-company-website" placeholder="https://ruoff.com" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium">Voice &amp; Tone Traits</label>
+                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-voice"> Select all</label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Uses humor / light-hearted" class="profile-voice"> Uses humor / light-hearted</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Very professional & polished" class="profile-voice"> Very professional & polished</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Conversational (like a trusted friend)" class="profile-voice"> Conversational (like a trusted friend)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Uses personal stories" class="profile-voice"> Uses personal stories</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Short & direct" class="profile-voice"> Short & direct</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Warm and encouraging" class="profile-voice"> Warm and encouraging</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Straightforward / no fluff" class="profile-voice"> Straightforward / no fluff</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Witty and clever" class="profile-voice"> Witty and clever</label>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium">Preferred Content Formats</label>
+                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-format"> Select all</label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Short text posts / Captions" class="profile-format"> Short text posts / Captions</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Carousel posts" class="profile-format"> Carousel posts</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Reels / Short videos" class="profile-format"> Reels / Short videos</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Stories" class="profile-format"> Stories</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Long-form posts" class="profile-format"> Long-form posts</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Email newsletters" class="profile-format"> Email newsletters</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Live videos" class="profile-format"> Live videos</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Prospecting -->
+            <div id="profile-tab-panel-prospecting" class="profile-tab-panel hidden space-y-4" data-profile-section="prospecting">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Prospecting Style</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold">Weekly Plan</span>
+                </div>
+                <p class="text-xs text-gray-500 m-0">How you hunt — shapes <strong>Weekly Win Plan</strong> and <strong>Value Vault</strong> recommendations.</p>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium">Preferred Prospecting Activities</label>
+                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-activity"> Select all</label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Coffee/Drink Appointments" class="profile-activity"> Coffee or Drink Appointments</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Lunch Appointments" class="profile-activity"> Lunch Appointments</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Personal Notes/Cards" class="profile-activity"> Personal Notes & Cards</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Deliveries" class="profile-activity"> Pop-By Gift Deliveries</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Phone Calls" class="profile-activity"> Phone Calls</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Networking Events" class="profile-activity"> Networking Events</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Social Media Videos" class="profile-activity"> Social Media Videos</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Video Messages" class="profile-activity"> Video Messages</label>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium">Target Partner Types <span class="text-gray-400 font-normal text-xs">categories</span></label>
+                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-partner"> Select all</label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Realtors / Real Estate Agents" class="profile-partner"> Realtors / Real Estate Agents</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Real Estate Attorneys" class="profile-partner"> Real Estate Attorneys</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Financial Advisors / Wealth Managers" class="profile-partner"> Financial Advisors / Wealth Managers</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="CPAs / Accountants" class="profile-partner"> CPAs / Accountants</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Insurance Agents" class="profile-partner"> Insurance Agents</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Small Business Owners" class="profile-partner"> Small Business Owners</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Home Inspectors" class="profile-partner"> Home Inspectors</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Title Company Representatives" class="profile-partner"> Title Company Representatives</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="Mortgage Brokers (cross-referrals)" class="profile-partner"> Mortgage Brokers (cross-referrals)</label>
+                    </div>
+                    <input type="text" id="profile-partner-other" placeholder="Other partner types" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Specific partners you're growing <span class="text-gray-400 font-normal text-xs">names &amp; teams</span></label>
+                    <textarea id="profile-partner-focus" rows="2" placeholder="e.g. Sarah &amp; Mike at ABC Realty; downtown investor agents..." class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></textarea>
+                    <p class="text-[11px] text-gray-500 mt-1 m-0">Partner <strong>types</strong> above = categories. This field = actual people or brokerages you're focused on right now.</p>
+                </div>
+            </div>
+
+            <!-- TAB: Personal -->
+            <div id="profile-tab-panel-personal" class="profile-tab-panel hidden space-y-4" data-profile-section="personal">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Personal Flavor</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold">Optional</span>
+                </div>
+                <p class="text-xs text-gray-500 m-0">Inspires <strong>Social</strong> and <strong>AI Coach</strong> ideas. Newsletter personal notes are <strong>not</strong> auto-filled from here — you write those fresh each issue.</p>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium">Hobbies &amp; Passions</label>
+                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-hobby"> Select all</label>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Golf" class="profile-hobby accent-[#00A89D]"> Golf</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Cards/Poker" class="profile-hobby accent-[#00A89D]"> Cards / Poker</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Sports" class="profile-hobby accent-[#00A89D]"> Sports (any)</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Fitness" class="profile-hobby accent-[#00A89D]"> Fitness / Gym</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Family Time" class="profile-hobby accent-[#00A89D]"> Family Time</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Outdoors" class="profile-hobby accent-[#00A89D]"> Outdoors / Hiking</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Cooking" class="profile-hobby accent-[#00A89D]"> Cooking / Foodie</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Crafts" class="profile-hobby accent-[#00A89D]"> Crafts / DIY</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Travel" class="profile-hobby accent-[#00A89D]"> Travel</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Pets" class="profile-hobby accent-[#00A89D]"> Pets / Animals</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Boating" class="profile-hobby accent-[#00A89D]"> Boating / Lake Life</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Hunting/Fishing" class="profile-hobby accent-[#00A89D]"> Hunting / Fishing</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Running/Cycling" class="profile-hobby accent-[#00A89D]"> Running / Cycling</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Yoga/Wellness" class="profile-hobby accent-[#00A89D]"> Yoga / Wellness</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Live Music" class="profile-hobby accent-[#00A89D]"> Live Music / Concerts</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Wine/Beer" class="profile-hobby accent-[#00A89D]"> Wine / Craft Beer</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Gardening" class="profile-hobby accent-[#00A89D]"> Gardening</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Volunteering" class="profile-hobby accent-[#00A89D]"> Volunteering / Community</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Youth Coaching" class="profile-hobby accent-[#00A89D]"> Youth Sports Coaching</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Home Projects" class="profile-hobby accent-[#00A89D]"> Home Projects / Renovating</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Photography" class="profile-hobby accent-[#00A89D]"> Photography</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Cars/Motorsports" class="profile-hobby accent-[#00A89D]"> Cars / Motorsports</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Beach/Water Sports" class="profile-hobby accent-[#00A89D]"> Beach / Water Sports</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Snow Sports" class="profile-hobby accent-[#00A89D]"> Snow Sports / Skiing</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Faith/Community" class="profile-hobby accent-[#00A89D]"> Faith / Church Community</label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Reading/Podcasts" class="profile-hobby accent-[#00A89D]"> Reading / Podcasts</label>
+                    </div>
+                    <input type="text" id="profile-hobbies-other" placeholder="Other hobbies or passions (e.g. pickleball, baking, fantasy football)" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Family Situation</label>
+                        <input type="text" id="profile-family" placeholder="e.g. Married with two young kids" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Personality / Lifestyle Keywords</label>
+                        <input type="text" id="profile-personality" placeholder="e.g. outdoorsy, foodie, competitive, family-first" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </div><!-- /profile-full-view -->
