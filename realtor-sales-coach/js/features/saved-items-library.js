@@ -148,6 +148,20 @@
       };
     }
 
+    if (item.format === 'kit' && item.kit === 'consultation-package' && item.kitData) {
+      const html = typeof window.renderSavedConsultationKit === 'function'
+        ? window.renderSavedConsultationKit(item.kitData, { forVault: true })
+        : `<pre class="whitespace-pre-wrap text-sm">${(item.content || '').replace(/</g, '&lt;')}</pre>`;
+      const copyText = typeof window.consultationKitToPlainText === 'function'
+        ? window.consultationKitToPlainText(item.kitData)
+        : plainTextContent(item);
+      return {
+        wrapperClass: 'p-5 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 saved-rich-viewer custom-modal-scroll',
+        html: `<div class="saved-kit-consultation max-w-none">${html}</div>`,
+        copyText
+      };
+    }
+
     if (isRichHtmlItem(item)) {
       return {
         wrapperClass: 'p-5 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 saved-rich-viewer custom-modal-scroll',
@@ -264,6 +278,11 @@
         ? item.kitData.address
         : (item.kitData.propertyType || 'Listing');
       return `Full package · ${count} section${count === 1 ? '' : 's'} · ${label}`;
+    }
+    if (item.format === 'kit' && item.kit === 'consultation-package' && item.kitData) {
+      const count = kitSectionCount(item.kitData);
+      const label = item.kitData.label || item.kitData.address || 'Consultation';
+      return `Full kit · ${count} section${count === 1 ? '' : 's'} · ${label}`;
     }
     const text = plainTextContent(item);
     const preview = text.substring(0, 180);
