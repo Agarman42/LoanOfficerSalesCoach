@@ -105,7 +105,7 @@
     return RICH_HTML_TYPES.includes(item.type) && /<[a-z][\s\S]*>/i.test(item.content || '');
   }
 
-  function openHouseKitSectionCount(kitData) {
+  function kitSectionCount(kitData) {
     if (!kitData || !kitData.sections) return 0;
     return Object.values(kitData.sections).filter((v) => v && String(v).trim().length > 20).length;
   }
@@ -130,6 +130,20 @@
       return {
         wrapperClass: 'p-5 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 saved-rich-viewer custom-modal-scroll',
         html: `<div class="saved-kit-open-house max-w-none">${html}</div>`,
+        copyText
+      };
+    }
+
+    if (item.format === 'kit' && item.kit === 'listing-package' && item.kitData) {
+      const html = typeof window.renderSavedListingKit === 'function'
+        ? window.renderSavedListingKit(item.kitData, { forVault: true })
+        : `<pre class="whitespace-pre-wrap text-sm">${(item.content || '').replace(/</g, '&lt;')}</pre>`;
+      const copyText = typeof window.listingKitToPlainText === 'function'
+        ? window.listingKitToPlainText(item.kitData)
+        : plainTextContent(item);
+      return {
+        wrapperClass: 'p-5 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 saved-rich-viewer custom-modal-scroll',
+        html: `<div class="saved-kit-listing max-w-none">${html}</div>`,
         copyText
       };
     }
@@ -240,9 +254,16 @@
 
   function previewText(item) {
     if (item.format === 'kit' && item.kit === 'open-house' && item.kitData) {
-      const count = openHouseKitSectionCount(item.kitData);
+      const count = kitSectionCount(item.kitData);
       const property = item.kitData.propertyType || 'Open house';
       return `Full playbook · ${count} section${count === 1 ? '' : 's'} · ${property}`;
+    }
+    if (item.format === 'kit' && item.kit === 'listing-package' && item.kitData) {
+      const count = kitSectionCount(item.kitData);
+      const label = item.kitData.address && item.kitData.address !== 'this property'
+        ? item.kitData.address
+        : (item.kitData.propertyType || 'Listing');
+      return `Full package · ${count} section${count === 1 ? '' : 's'} · ${label}`;
     }
     const text = plainTextContent(item);
     const preview = text.substring(0, 180);
