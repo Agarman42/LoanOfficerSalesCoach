@@ -174,6 +174,10 @@
       blogPageUrl: (p.blogPageUrl || p.blogUrl || '').trim(),
       linkedInUrl: (p.linkedInUrl || p.linkedin || '').trim(),
       companyWebsite: (p.companyWebsite || p.website || '').trim(),
+      translationDefaultTarget: p.translationDefaultTarget || 'es',
+      translationFavoriteLanguages: asArray(p.translationFavoriteLanguages).length
+        ? asArray(p.translationFavoriteLanguages)
+        : ['es', 'vi', 'zh'],
       lastUpdated: p.lastUpdated || ''
     };
   }
@@ -332,6 +336,8 @@
       blogPageUrl: getVal('profile-blog-url'),
       linkedInUrl: getVal('profile-linkedin-url'),
       companyWebsite: getVal('profile-company-website'),
+      translationDefaultTarget: getRaw('profile-translation-default') || 'es',
+      translationFavoriteLanguages: Array.from(document.querySelectorAll('.profile-translation-fav:checked')).map((c) => c.value),
       lastUpdated: new Date().toISOString()
     };
   }
@@ -412,6 +418,14 @@
       document.querySelectorAll(sel).forEach((cb) => {
         cb.checked = profile[key] && profile[key].includes(cb.value);
       });
+    });
+
+    const translationDefault = document.getElementById('profile-translation-default');
+    if (translationDefault) {
+      translationDefault.value = profile.translationDefaultTarget || 'es';
+    }
+    document.querySelectorAll('.profile-translation-fav').forEach((cb) => {
+      cb.checked = profile.translationFavoriteLanguages && profile.translationFavoriteLanguages.includes(cb.value);
     });
 
     syncSelectAllStates();

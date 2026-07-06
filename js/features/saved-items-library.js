@@ -80,7 +80,7 @@
 
   function plainTextContent(item) {
     let text = item.content || '';
-    if (['newsletter', 'equity-opportunity', 'equity-scan', 'plan', 'script', 'social', 'underwriting', 'coach', 'postclosing', 'blog'].includes(item.type)) {
+    if (['newsletter', 'equity-opportunity', 'equity-scan', 'plan', 'script', 'social', 'underwriting', 'coach', 'translation', 'postclosing', 'blog'].includes(item.type)) {
       text = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     }
     return text;
@@ -106,6 +106,7 @@
       newsletter: 'Newsletter (Outlook)',
       blog: 'Blog Bundle',
       coach: 'AI Coach Response',
+      translation: 'Client Translation',
       recruiting: 'Recruiting',
       social: 'Social',
       'value-vault': 'Value Vault Idea',
@@ -133,6 +134,7 @@
       newsletter: 'bg-[#00A89D]/10 text-[#00A89D]',
       blog: 'bg-[#F15A29]/10 text-[#F15A29]',
       coach: 'bg-[#00A89D]/10 text-[#00A89D]',
+      translation: 'bg-indigo-100 text-indigo-700',
       recruiting: 'bg-[#F15A29]/10 text-[#F15A29]',
       social: 'bg-teal-100 text-teal-700',
       'value-vault': 'bg-amber-100 text-amber-700',
@@ -493,6 +495,7 @@
       ['equity-opportunity', 'fa-home', 'Equity'],
       ['underwriting', 'fa-file-alt', 'UW'],
       ['coach', 'fa-robot', 'Coach'],
+      ['translation', 'fa-language', 'Translate'],
       ['custom', 'fa-edit', 'Custom']
     ];
 
