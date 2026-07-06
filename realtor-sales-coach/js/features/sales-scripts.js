@@ -1045,7 +1045,7 @@ window.showContextTipsModal = function() {
   window.generateSalesScript = generateSalesScript;
   window.copySingleScript = copySingleScript;
   window.saveSalesScript = saveSalesScript;
-  window.toggleAccordion = toggleAccordion;
+  // toggleAccordion is defined in js/main.js (loaded immediately before this file)
 
   // Initialize premium UI
   if (document.readyState === 'loading') {
