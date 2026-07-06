@@ -277,6 +277,13 @@ async function generateBlog(feedback = '') {
     const output = document.getElementById('blog-output');
     const loadingEl = document.getElementById('global-loading');
 
+    if (!output) {
+      console.error('[blog-creator] #blog-output container missing from DOM');
+      window.hideLoading?.();
+      window.notifyUser('Blog output area not found. Please refresh the page.', 'error', 4000);
+      return;
+    }
+
     // Use centralized force for consistent premium progress modal
     const loadingTitle = feedback ? 'Refining Your Blog Post...' : 'Building Your Authority Blog Post...';
     if (typeof window.forceShowGlobalLoading === 'function') {
