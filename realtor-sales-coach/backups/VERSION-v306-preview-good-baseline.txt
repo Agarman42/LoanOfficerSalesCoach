@@ -1,0 +1,29 @@
+Realtor Newsletter Generator — Preview-Good Baseline (v306)
+Saved: 2026-07-07
+
+Status: Preview looks very good. Outlook paste still broken (see newsletter-preview-issue.png / newsletter-preview-issue2.png in project root).
+
+Cache bust tag: js/features/newsletter-generator.js?v=20260707-realtor-v306
+
+Files in this backup:
+  backups/newsletter-generator.v306-preview-good-baseline.js
+  backups/newsletter-color-bundles.v306-preview-good-baseline.js
+
+To restore preview-good baseline:
+  cp backups/newsletter-generator.v306-preview-good-baseline.js js/features/newsletter-generator.js
+  cp backups/newsletter-color-bundles.v306-preview-good-baseline.js js/features/newsletter-color-bundles.js
+  # Set index.html script tag back to ?v=20260707-realtor-v306
+
+Known good in v306 preview:
+  - Logo/title spacing
+  - Oval headshot signature
+  - Clickable phone (tel:)
+  - Social links centered under contact info (preview)
+  - Larger header logo (420×112)
+  - "Insights from …" centered in title row
+  - Teal section cards left-aligned body text
+
+Known Outlook paste issues (v307 target):
+  - Title / Insights / hero shifted left (width:100% + max-width ignored by Outlook)
+  - Signature social links concatenated without spacing
+  - Overall column not locked to 600px on paste

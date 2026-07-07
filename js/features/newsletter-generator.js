@@ -1410,7 +1410,7 @@ function getPersonalPhotoWidthPercent() {
 }
 
 function getPersonalPhotoWidthPx() {
-    return Math.round(EMAIL_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
 }
 
 function formatPersonalPhotoSizeLabel() {
@@ -1423,7 +1423,11 @@ function formatPersonalPhotoSizeLabel() {
 function buildPersonalPhotoInsert(photoUrl) {
     const px = getPersonalPhotoWidthPx();
     const safeUrl = String(photoUrl || '').trim();
-    return `<p style="margin:16px 0 0; text-align:center;"><img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block; margin:0 auto; max-width:100%; width:${px}px; height:auto; border:0; border-radius:8px;" /></p>`;
+    return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" data-nl-personal-photo="1" style="margin:16px 0 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
+  <tr><td align="center" style="padding:0;">
+    <img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">
+  </td></tr>
+</table>`;
 }
 
 function updatePersonalPhotoSizeUI() {
@@ -1434,15 +1438,21 @@ function updatePersonalPhotoSizeUI() {
     if (labelEl) labelEl.textContent = formatPersonalPhotoSizeLabel();
 }
 
-/** Size preview image as % of the 600px email column so slider tracks 30–100% accurately. */
+/** Preview uses the same pixel width as the generated newsletter (slider % of card content area). */
 function applyPersonalPhotoPreviewSizing() {
     const photoImg = document.getElementById('nl-personal-photo-preview-img');
+    const stage = document.getElementById('nl-personal-photo-preview-stage');
     if (!photoImg) return;
-    const pct = getPersonalPhotoWidthPercent();
-    photoImg.style.width = `${pct}%`;
-    photoImg.style.maxWidth = 'none';
+    const px = getPersonalPhotoWidthPx();
+    if (stage) {
+        stage.style.maxWidth = `${NL_CARD_CONTENT_WIDTH}px`;
+        stage.style.width = '100%';
+        stage.style.boxSizing = 'border-box';
+        stage.style.padding = `${NL_CARD_SIDE_PADDING}px`;
+    }
+    photoImg.style.width = `${px}px`;
+    photoImg.style.maxWidth = '100%';
     photoImg.style.height = 'auto';
-    photoImg.style.maxHeight = 'none';
 }
 
 function getPersonalVideoWidthPercent() {
@@ -1453,7 +1463,7 @@ function getPersonalVideoWidthPercent() {
 }
 
 function getPersonalVideoWidthPx() {
-    return Math.round(EMAIL_WIDTH * getPersonalVideoWidthPercent() / 100);
+    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalVideoWidthPercent() / 100);
 }
 
 function formatPersonalVideoSizeLabel() {
@@ -1473,12 +1483,80 @@ function updatePersonalVideoSizeUI() {
 
 function applyPersonalVideoPreviewSizing() {
     const videoThumb = document.getElementById('nl-personal-video-preview-thumb');
+    const stage = document.getElementById('nl-personal-video-preview-stage');
     if (!videoThumb) return;
-    const pct = getPersonalVideoWidthPercent();
-    videoThumb.style.width = `${pct}%`;
-    videoThumb.style.maxWidth = 'none';
+    const px = getPersonalVideoWidthPx();
+    if (stage) {
+        stage.style.maxWidth = `${NL_CARD_CONTENT_WIDTH}px`;
+        stage.style.width = '100%';
+        stage.style.boxSizing = 'border-box';
+        stage.style.padding = `${NL_CARD_SIDE_PADDING}px`;
+    }
+    videoThumb.style.width = `${px}px`;
+    videoThumb.style.maxWidth = '100%';
     videoThumb.style.height = 'auto';
-    videoThumb.style.maxHeight = 'none';
+}
+
+/** Refresh preview iframe srcdoc without rebuilding the whole output panel. */
+function setNewsletterPreviewHTML(html) {
+    const previewEl = document.getElementById('nl-preview');
+    if (!previewEl || !html) return;
+    const iframe = previewEl.querySelector('iframe');
+    if (iframe) {
+        iframe.srcdoc = html;
+        return;
+    }
+    previewEl.innerHTML = '';
+    const next = document.createElement('iframe');
+    next.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
+    next.srcdoc = html;
+    previewEl.appendChild(next);
+}
+
+/** When sliders move after generation, patch photo/video widths in saved HTML + preview. */
+function patchPersonalMediaSizesInNewsletter() {
+    const rawEl = document.getElementById('nl-html-raw');
+    let html = (lastGeneratedHTML || '').trim() || (rawEl?.value || '').trim();
+    if (!html) return;
+
+    const photoEnabled = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
+    const videoEnabled = !!document.getElementById('nl-include-video')?.checked;
+    const photoUrl = (document.getElementById('nl-personal-photo')?.value || '').trim();
+    const videoUrl = (document.getElementById('nl-personal-video')?.value || '').trim();
+    const before = html;
+
+    if (photoEnabled && photoUrl) {
+        const photoBlock = buildPersonalPhotoInsert(photoUrl);
+        if (/data-nl-personal-photo=["']1["']/i.test(html)) {
+            html = html.replace(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<\/table>/gi, photoBlock);
+        } else if (/alt=["']Personal photo["']/i.test(html)) {
+            html = html
+                .replace(/<table[^>]*>[\s\S]*?<img[^>]*alt=["']Personal photo["'][^>]*>[\s\S]*?<\/table>/gi, photoBlock)
+                .replace(/<img[^>]*alt=["']Personal photo["'][^>]*>/gi, (match) => {
+                    const srcMatch = match.match(/\bsrc=["']([^"']+)["']/i);
+                    if (!srcMatch) return match;
+                    const px = getPersonalPhotoWidthPx();
+                    return `<img src="${srcMatch[1]}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">`;
+                });
+        }
+    }
+
+    if (videoEnabled && videoUrl) {
+        const videoTable = buildPersonalVideoTable(videoUrl);
+        if (/data-nl-personal-video=["']1["']/i.test(html)) {
+            html = html.replace(/<table[^>]*data-nl-personal-video=["']1["'][^>]*>[\s\S]*?<\/table>/gi, videoTable);
+        } else if (/Personal Video Update/i.test(html)) {
+            html = injectPersonalVideoSection(html, videoUrl);
+        }
+    }
+
+    html = applyPersonalMediaWidthsInHtml(html);
+    if (html === before) return;
+
+    lastGeneratedHTML = html;
+    if (rawEl) rawEl.value = html;
+    setNewsletterPreviewHTML(html);
+    try { localStorage.setItem('lastNewsletterHTML', html); } catch (e) {}
 }
 
 /** Hints for Specific Topics placeholder — core content sections only. */
@@ -1520,6 +1598,9 @@ function updateSpecificTopicsPlaceholder() {
 
 // === GLOBAL EMAIL / CRM SETTINGS ===
 const EMAIL_WIDTH = 600;
+/** Usable width inside a teal card (600px table − 30px side padding). Slider 100% = this width. */
+const NL_CARD_SIDE_PADDING = 30;
+const NL_CARD_CONTENT_WIDTH = EMAIL_WIDTH - (NL_CARD_SIDE_PADDING * 2);
 const BODY_PADDING = 90;        // left + right padding for centering
 const MODULE_PADDING = 20;      // consistent spacing between modules
 const HEADER_HEIGHT = 60;       // recommended for headers (used if needed)
@@ -1869,43 +1950,21 @@ function buildPersonalVideoTable(personalVideoUrl) {
         : 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
 
     return `
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-personal-video="1" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
   <tr>
-    <td style="padding:30px;">
-      <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:${videoWidthPx}px; margin:0 auto;">
+    <td style="padding:30px;box-sizing:border-box;">
+      <p style="margin:0 0 16px;font-size:19px;color:#002B5C;font-weight:700;text-align:center;">Personal Video Update</p>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
         <tr>
-          <td align="center" style="padding-bottom:16px;">
-            <p style="margin:0; font-size:19px; color:#002B5C; font-weight:700;">Personal Video Update</p>
-          </td>
-        </tr>
-        <tr>
-          <td align="center">
-            <a href="${href}" target="_blank" rel="noopener" style="text-decoration:none;">
-              <table align="center" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid #00A89D; border-radius:12px; overflow:hidden; max-width:${videoWidthPx}px;">
-                <tr>
-                  <td style="padding:0;">
-                    <img src="${thumbnailUrl}"
-                         alt="Watch Personal Video"
-                         width="${videoWidthPx}"
-                         style="width:100%; max-width:${videoWidthPx}px; height:auto; display:block; border:0;">
-                  </td>
-                </tr>
-              </table>
+          <td align="center" style="padding:0;">
+            <a href="${href}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;max-width:100%;">
+              <img src="${thumbnailUrl}" alt="Watch Personal Video" width="${videoWidthPx}" style="display:block;margin:0 auto;width:${videoWidthPx}px;max-width:100%;height:auto;border:3px solid #00A89D;border-radius:8px;">
             </a>
           </td>
         </tr>
         <tr>
           <td align="center" style="padding-top:18px;">
-            <table align="center" cellpadding="0" cellspacing="0" role="presentation">
-              <tr>
-                <td align="center" bgcolor="#F15A29" style="border-radius:30px;">
-                  <a href="${href}" target="_blank" rel="noopener"
-                     style="display:inline-block; padding:16px 40px; color:white; font-weight:bold; font-size:19px; text-decoration:none; border-radius:30px;">
-                      ▶ Watch Video
-                  </a>
-                </td>
-              </tr>
-            </table>
+            <a href="${href}" target="_blank" rel="noopener" style="display:inline-block;padding:16px 40px;background:#F15A29;color:#fff;font-weight:bold;font-size:19px;text-decoration:none;border-radius:30px;">▶ Watch Video</a>
           </td>
         </tr>
       </table>
@@ -1914,15 +1973,73 @@ function buildPersonalVideoTable(personalVideoUrl) {
 </table>`;
 }
 
+const NL_MODULE_WIDTH_STYLE = 'width:100%;max-width:600px;margin:0 auto;box-sizing:border-box;';
+const NL_MODULE_TABLE_TEST_RE = /data-nl-main-body|data-nl-personal-video|border-left:\s*8px solid|border-top:\s*\d+px solid|My Recent Blog/i;
+
+function applyModuleTableWidth(tableTag) {
+    let tag = String(tableTag || '');
+    tag = tag.replace(/\bwidth\s*=\s*["']600["']/i, 'width="100%"');
+    if (!/width\s*=\s*["']/i.test(tag)) {
+        tag = tag.replace(/<table\b/i, '<table width="100%"');
+    }
+    if (!/align\s*=\s*["']center["']/i.test(tag)) {
+        tag = tag.replace(/<table\b([^>]*)>/i, '<table$1 align="center">');
+    }
+    if (/style\s*=\s*"/i.test(tag)) {
+        tag = tag.replace(/style\s*=\s*"([^"]*)"/i, (m, styleVal) => {
+            let style = styleVal
+                .replace(/\bmin-width\s*:\s*[^;"]*/gi, '')
+                .replace(/\btable-layout\s*:\s*fixed/gi, '')
+                .replace(/\bwidth\s*:\s*600px/gi, '')
+                .replace(/\bmax-width\s*:\s*[^;"]*/gi, '')
+                .replace(/\bmargin\s*:\s*[^;"]*/gi, '')
+                .replace(/\bbox-sizing\s*:\s*[^;"]*/gi, '')
+                .replace(/;;+/g, ';')
+                .replace(/^;|;$/g, '')
+                .trim();
+            if (style && !style.endsWith(';')) style += ';';
+            return `style="${NL_MODULE_WIDTH_STYLE}${style}"`;
+        });
+    } else {
+        tag = tag.replace(/>$/, ` style="${NL_MODULE_WIDTH_STYLE}">`);
+    }
+    return tag;
+}
+
+function normalizeNewsletterModuleWidths(html) {
+    let out = String(html || '');
+
+    out = out.replace(/<table\b[^>]*>/gi, (tableTag) => {
+        if (!NL_MODULE_TABLE_TEST_RE.test(tableTag)) return tableTag;
+        if (/data-nl-personal-photo/i.test(tableTag)) return tableTag;
+        if (/role\s*=\s*["']presentation["']/i.test(tableTag) && !/data-nl-|border-left/i.test(tableTag)) return tableTag;
+        return applyModuleTableWidth(tableTag);
+    });
+
+    out = out.replace(
+        /(<tr>\s*<td)([^>]*)(>[\s\S]*?<h1\b)/gi,
+        (m, open, tdAttrs, rest) => {
+            let attrs = String(tdAttrs || '').replace(/\bwidth\s*=\s*["']600["']/gi, '');
+            attrs = attrs.replace(/\bmin-width\s*:\s*600px/gi, '');
+            if (!/max-width\s*:\s*600px/i.test(attrs)) {
+                attrs = /style\s*=/i.test(attrs)
+                    ? attrs.replace(/style\s*=\s*"/i, 'style="max-width:600px;margin:0 auto;box-sizing:border-box;')
+                    : `${attrs} style="max-width:600px;margin:0 auto;box-sizing:border-box;"`;
+            }
+            return `${open}${attrs}${rest}`;
+        }
+    );
+
+    return out;
+}
+
 function wrapNewsletterSectionRows(innerHtml) {
     if (!innerHtml) return '';
     return `
 <tr><td height="20"></td></tr>
-<tr>
-  <td align="center" style="padding:0;">
+<tr><td style="padding:0;">
 ${innerHtml}
-  </td>
-</tr>
+</td></tr>
 <tr><td height="20"></td></tr>`;
 }
 
@@ -2423,6 +2540,8 @@ function updatePersonalMediaPreviews() {
             applyPersonalVideoPreviewSizing();
         }
     }
+
+    patchPersonalMediaSizesInNewsletter();
 }
 
 function updateNewsletterPreflightSummary() {
@@ -3044,7 +3163,7 @@ if (includeBlog) {
     if (blogUrl && blogUrl.length > 3) {
         const fullBlogUrl = blogUrl.startsWith('http') ? blogUrl : 'https://' + blogUrl;
         const blogSection = wrapNewsletterSectionRows(`
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">
+    <table width="100%" cellpadding="0" cellspacing="0" align="center" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
         <tr>
             <td style="padding:30px;">
                 <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">My Recent Blog</h2>
@@ -3190,6 +3309,63 @@ function downloadNewsletterHTML() {
     alert('Newsletter downloaded! Double-click the file to preview.');
 }
 
+function ensureTdOutlookCentered(tdAttrs) {
+    let attrs = String(tdAttrs || '');
+    if (!/align\s*=\s*["']?center["']?/i.test(attrs)) attrs += ' align="center"';
+    if (!/text-align\s*:\s*center/i.test(attrs)) {
+        attrs = /style\s*=/i.test(attrs)
+            ? attrs.replace(/style\s*=\s*"/i, 'style="text-align:center;')
+            : `${attrs} style="text-align:center;"`;
+    }
+    return attrs;
+}
+
+function ensureTableOutlookCentered(tableAttrs) {
+    let attrs = String(tableAttrs || '');
+    if (!/align\s*=\s*["']?center["']?/i.test(attrs)) attrs += ' align="center"';
+    return attrs;
+}
+
+function ensureContentRowsCentered(html) {
+    let out = String(html || '');
+
+    out = out.replace(
+        /(<tr>\s*<td)([^>]*)(>[\s\S]*?<img[^>]*\balt=["']Hero[^>]*>)/gi,
+        (m, open, tdAttrs, rest) => `${open}${ensureTdOutlookCentered(tdAttrs)}${rest}`
+    );
+
+    out = out.replace(
+        /(<tr>\s*<td)([^>]*)(>\s*<table[^>]*\bborder-left:\s*8px solid #?[0-9a-fA-F]{6})/gi,
+        (m, open, tdAttrs, rest) => `${open}${ensureTdOutlookCentered(tdAttrs)}${rest}`
+    );
+
+    out = out.replace(
+        /(<tr>\s*<td)([^>]*)(>\s*<table[^>]*\bdata-nl-personal-(?:photo|video)=["']1["'])/gi,
+        (m, open, tdAttrs, rest) => `${open}${ensureTdOutlookCentered(tdAttrs)}${rest}`
+    );
+
+    out = out.replace(
+        /(<table\b)([^>]*\bborder-left:\s*8px solid #?[0-9a-fA-F]{6}[^>]*)(>)/gi,
+        (m, open, tableAttrs, close) => `${open}${ensureTableOutlookCentered(tableAttrs)}${close}`
+    );
+
+    out = out.replace(
+        /(<table\b)([^>]*\bdata-nl-personal-(?:photo|video)=["']1["'][^>]*)(>)/gi,
+        (m, open, tableAttrs, close) => `${open}${ensureTableOutlookCentered(tableAttrs)}${close}`
+    );
+
+    return out;
+}
+
+function wrapBodyForOutlookPaste(html) {
+    const bodyMatch = String(html || '').match(/^([\s\S]*?<body[^>]*>)([\s\S]*)(<\/body>[\s\S]*)$/i);
+    if (!bodyMatch) return html;
+    let inner = bodyMatch[2].trim();
+    if (/data-nl-outlook-body\s*=\s*["']1["']/i.test(inner)) return html;
+    inner = `<table role="presentation" data-nl-outlook-body="1" width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;background:#f4f4f4;"><tr><td align="center" style="padding:0;margin:0;">${inner}</td></tr></table>`;
+    return bodyMatch[1] + inner + bodyMatch[3];
+}
+
 function getCleanOutlookHTML() {
     const rawEl = document.getElementById('nl-html-raw');
     if (!rawEl || !rawEl.value) {
@@ -3214,38 +3390,12 @@ function getCleanOutlookHTML() {
     cleanHTML = cleanHTML.replace(
         /<tr>\s*<td[^>]*>\s*<img src="([^"]+)"[^>]*alt=["']Hero[^>]*>[\s\S]*?<\/td>\s*<\/tr>/gi,
         `<tr>
-            <td style="background:#f9f9f9; padding:0; text-align:center;">
+            <td align="center" style="background:#f9f9f9; padding:0; text-align:center;">
                 <img src="$1" alt="Hero Image" width="600" 
-                     style="width:600px; max-width:600px; height:auto; display:block; border:0;">
+                     style="width:600px; max-width:600px; height:auto; display:block; margin:0 auto; border:0;">
             </td>
         </tr>
-        <tr><td height="20"></td></tr>`
-    );
-
-    // === FORCE ALL TEAL CARDS (AI sections + injected blog + personal note + video + referral) TO IDENTICAL 600px WIDTH ===
-    // This is the key for Outlook copy + vault viewer: without an outer constraining table in some renderers,
-    // width="100%" cards can size differently. Forcing width="600" on the teal tables themselves
-    // makes every section render at exactly the same width regardless of container (iframe, paste target, etc).
-    // Raw/preview/download untouched (they keep the full skeleton + 100% inners which look correct inside the 600 wrapper).
-    cleanHTML = cleanHTML.replace(
-        /(<table\b[^>]*?border-left:\s*8px solid #00A89D[^>]*?)(width="100%"|width='100%')/gi,
-        '$1width="600"'
-    );
-    // Add width=600 to any teal card table that lacks an explicit width attribute
-    cleanHTML = cleanHTML.replace(
-        /(<table\b(?![^>]*\bwidth=)[^>]*?border-left:\s*8px solid #00A89D[^>]*?)>/gi,
-        '$1 width="600">'
-    );
-    // If the table has a style attribute, inject max-width + margin inside the style value (email clients vary on attr vs style)
-    cleanHTML = cleanHTML.replace(
-        /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*?style=")([^"]*)(")/gi,
-        (m, pre, styleVal, post) => {
-            let s = styleVal;
-            if (!/max-width\s*:/i.test(s)) {
-                s += (s.trim().endsWith(';') ? '' : ';') + ' max-width:600px; margin:0 auto';
-            }
-            return pre + s + post;
-        }
+        <tr><td height="20" align="center"></td></tr>`
     );
 
     // === UNIFORM PADDING ON EVERY TEAL CARD'S CONTENT TD (cleaned only) ===
@@ -3263,67 +3413,11 @@ function getCleanOutlookHTML() {
         }
     );
 
-    // === VIDEO: swap legacy sizes, then DE-CONSTRAIN the inner layout table IN PLACE (critical: do not unwrap) ===
-    // The video teal card is forced to 600px + uniform 30px padding (earlier).
-    // The inner layout table (the one wrapping title + green-bordered thumbnail + "Watch Video" button) originally had
-    // max-width + margin:0 auto (plus align=center). That made the video area narrower than other cards.
-    // PREVIOUS UNWRAP APPROACH (replacing the table with its raw <tr><td> contents) broke table nesting.
-    // Bare rows injected into the padded <td> caused parsers (Outlook, vault iframe) to mis-nest, making the green
-    // 3px border (on the thumbnail's own table) visually wrap around the button too, with lines coming down around it.
-    // Raw HTML is fine because full proper nesting is preserved.
-    //
-    // FIX (cleaned only): 
-    // - Keep the 560->100% swaps (lets the framed video breathe wider, consistent with card).
-    // - Leave the layout *table and its rows* completely intact for valid HTML structure.
-    // - Only strip the *constraining* max-width + margin:0 auto from *its style* so it fills the card's padded area.
-    // - Strip align="center" from the layout table itself (so it doesn't narrow itself).
-    // Result: the self-contained green-bordered thumbnail table only frames the picture. The button row follows it
-    // cleanly *under* the video (in the next <tr> of the layout table), and centers via its own child <td align="center">.
-    // This matches the raw HTML visual (button under the framed video, no border enclosing the button).
-    cleanHTML = cleanHTML.replace(/max-width:\s*560px/gi, 'max-width:100%');
-    cleanHTML = cleanHTML.replace(/width="560"/gi, 'width="100%"');
-    cleanHTML = cleanHTML.replace(/max-width:\s*600px/gi, 'max-width:100%');
-
-    // De-constrain only the video layout table's style (the one that contains "Personal Video Update" right after opening).
-    // Matches tables having both max-width:100% and margin:0 auto after the swaps above. Teal cards use 600px so they are skipped.
-    // Thumbnail's green border table has max-width:100% but no margin:0 auto, so it is left alone (good - we want its frame).
-    cleanHTML = cleanHTML.replace(
-      /(<table\b[^>]*?style=")([^"]*?max-width:\s*100%;?[^"]*?margin:\s*0\s*auto;?[^"]*)("[^>]*>)/gi,
-      (m, pre, styleVal, post) => {
-        let cleaned = styleVal
-          .replace(/max-width:\s*100%;?/gi, '')
-          .replace(/margin:\s*0\s*auto;?/gi, '')
-          .replace(/;\s*;/g, ';')
-          .trim();
-        if (!cleaned) cleaned = 'width:100%';
-        if (!/;$/.test(cleaned)) cleaned += ';';
-        return pre + cleaned + post;
-      }
-    );
-
-    // Remove align="center" from the video *layout wrapper table* only (targeted by proximity to the title text).
-    // This lets the layout stretch full width of the padded card. Its child <td align="center"> elements (title, video frame container, button)
-    // keep their align so the button centers nicely *under* the video.
-    // The thumbnail bordered table and button wrapper keep their own align attributes (deeper in source, safe from this limited match).
-    cleanHTML = cleanHTML.replace(
-      /(<table\b[^>]*?)(align="center")([^>]*>[\s\S]{0,80}?<p[^>]*>Personal Video Update)/gi,
-      '$1$3'
-    );
-
-    // === PERSONAL PHOTO FRAME (cleaned only) - tighten the teal border a bit ===
-    // The frame around the personal photo (the "picture" that can appear above the video section) uses a teal bg + padding
-    // to create a thin border. Raw keeps generation's 4px. Cleaned was using 3px; tighten to 2px to address the
-    // "slightly thicker border" in Outlook/vault copies.
-    cleanHTML = cleanHTML.replace(
-        /<table[^>]*?style="[^"]*margin:\s*15px\s*0[^"]*max-width:\s*100%[^"]*"[^>]*>[\s\S]*?<img[^>]*?src="([^"]+)"[^>]*?alt="Personal photo"[\s\S]*?<\/table>/gi,
-        `<table width="100%" cellpadding="0" cellspacing="0" style="margin:15px 0; max-width:100%;">
-            <tr>
-                <td style="padding:2px; background:#00A89D; border-radius:12px;">
-                    <img src="$1" alt="Personal photo" width="100%" style="width:100%; max-width:540px; height:auto; display:block; border-radius:8px;">
-                </td>
-            </tr>
-        </table>`
-    );
+    cleanHTML = normalizePersonalPhotoBlocks(cleanHTML);
+    cleanHTML = normalizePersonalVideoBlocks(cleanHTML);
+    cleanHTML = normalizeNewsletterModuleWidths(cleanHTML);
+    cleanHTML = ensureContentRowsCentered(cleanHTML);
+    cleanHTML = wrapBodyForOutlookPaste(cleanHTML);
 
     return cleanHTML;
 }
@@ -3370,7 +3464,7 @@ function copyForOutlook() {
     const baseTitle = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter';
     // Append timestamp so user can save multiple versions / batches without overwriting previous ones
     const title = baseTitle + ' — ' + new Date().toISOString().slice(0, 16).replace('T', ' ');
-    window.toggleSaveIdea(title, clean, null, 'newsletter');
+    window.toggleSaveIdea(title, clean, null, 'newsletter', { format: 'html' });
     if (window.showToast) {
       window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success');
     } else {
@@ -3465,11 +3559,87 @@ function copyForOutlook() {
   // Fixes the occasional left teal line misalignment
   // =====================================================
 
+  function parsePersonalMediaWidthPx(imgAttrs, fallbackPx) {
+      const s = String(imgAttrs || '');
+      const styleW = s.match(/width:\s*(\d+)px/i);
+      if (styleW) return Math.min(parseInt(styleW[1], 10), NL_CARD_CONTENT_WIDTH);
+      const attrW = s.match(/\bwidth=["'](\d+)["']/i);
+      if (attrW) return Math.min(parseInt(attrW[1], 10), NL_CARD_CONTENT_WIDTH);
+      return fallbackPx;
+  }
+
+  function resolvePersonalPhotoWidthPx(imgAttrs) {
+      const photoEnabled = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
+      if (photoEnabled && document.getElementById('nl-personal-photo-size')) {
+          return getPersonalPhotoWidthPx();
+      }
+      return parsePersonalMediaWidthPx(imgAttrs, getPersonalPhotoWidthPx());
+  }
+
+  function resolvePersonalVideoWidthPx(imgAttrs) {
+      const videoEnabled = !!document.getElementById('nl-include-video')?.checked;
+      if (videoEnabled && document.getElementById('nl-personal-video-size')) {
+          return getPersonalVideoWidthPx();
+      }
+      return parsePersonalMediaWidthPx(imgAttrs, getPersonalVideoWidthPx());
+  }
+
+  function buildPersonalPhotoImgTag(src, imgAttrs) {
+      const px = resolvePersonalPhotoWidthPx(imgAttrs);
+      return `<img src="${src}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">`;
+  }
+
+  function applyPersonalMediaWidthsInHtml(htmlString) {
+      if (!htmlString) return htmlString;
+      let out = htmlString.replace(
+          /<img([^>]*alt=["']Personal photo["'][^>]*)>/gi,
+          (match, attrs) => {
+              const srcMatch = String(attrs).match(/\bsrc=["']([^"']+)["']/i);
+              if (!srcMatch) return match;
+              return buildPersonalPhotoImgTag(srcMatch[1], attrs);
+          }
+      );
+      out = out.replace(
+          /<img([^>]*alt=["']Watch Personal Video["'][^>]*)>/gi,
+          (match, attrs) => {
+              const srcMatch = String(attrs).match(/\bsrc=["']([^"']+)["']/i);
+              if (!srcMatch) return match;
+              const px = resolvePersonalVideoWidthPx(attrs);
+              return `<img src="${srcMatch[1]}" alt="Watch Personal Video" width="${px}" style="display:block;margin:0 auto;width:${px}px;max-width:100%;height:auto;border:3px solid #00A89D;border-radius:8px;">`;
+          }
+      );
+      return out;
+  }
+
+  function normalizePersonalPhotoBlocks(htmlString) {
+      if (!htmlString) return htmlString;
+      const photoFrameRe = /<table(?![^>]*data-nl-personal-photo)[^>]*style="[^"]*margin:\s*15px\s*0[^"]*max-width:\s*100%[^"]*"[^>]*>[\s\S]*?<img([^>]*alt=["']Personal photo["'][^>]*)[\s\S]*?<\/table>/gi;
+      let out = htmlString.replace(photoFrameRe, (match, imgAttrs) => {
+          const srcMatch = String(imgAttrs).match(/\bsrc=["']([^"']+)["']/i);
+          if (!srcMatch) return match;
+          return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" data-nl-personal-photo="1" style="margin:16px 0 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
+  <tr><td align="center" style="padding:0;">
+    ${buildPersonalPhotoImgTag(srcMatch[1], imgAttrs)}
+  </td></tr>
+</table>`;
+      });
+      return applyPersonalMediaWidthsInHtml(out);
+  }
+
+  function normalizePersonalVideoBlocks(htmlString) {
+      if (!htmlString) return htmlString;
+      return applyPersonalMediaWidthsInHtml(htmlString);
+  }
+
   function normalizeRawNewsletterHTML(htmlString) {
       if (!htmlString) return htmlString;
 
+      let out = normalizePersonalPhotoBlocks(htmlString);
+      out = normalizePersonalVideoBlocks(out);
+      out = normalizeNewsletterModuleWidths(out);
+
       // Force every section table with the teal left border to have identical inner padding
-      return htmlString.replace(
+      return out.replace(
           /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*>)([\s\S]*?<td[^>]*?style=")([^"]*)(")/gi,
           (match, tableOpen, tdStyleStart, existingStyle, quote) => {
               let newStyle = existingStyle.replace(/padding\s*:\s*[^;"]*/i, 'padding:30px 30px 30px 30px');

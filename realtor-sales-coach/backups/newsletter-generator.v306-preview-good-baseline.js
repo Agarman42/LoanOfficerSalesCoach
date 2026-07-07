@@ -1769,26 +1769,17 @@ function getAgentBrandingContext() {
 }
 
 function buildSocialLinksHtml(social) {
-    const items = SOCIAL_LINK_CONFIG
+    const links = SOCIAL_LINK_CONFIG
         .filter((s) => social[s.key] && String(social[s.key]).trim())
-        .map((s) => ({
-            url: String(social[s.key]).trim(),
-            label: s.label
-        }));
-    if (!items.length) return '';
-    const cells = items.map((item, index) => {
-        const linkCell = `<td align="center" style="padding:0 6px;font-size:12px;line-height:1.5;white-space:nowrap;"><a href="${escBrandingAttr(item.url)}" style="color:#00A89D;text-decoration:underline;font-size:12px;font-weight:600;" target="_blank" rel="noopener">${escBrandingText(item.label)}</a></td>`;
-        const sepCell = index < items.length - 1
-            ? '<td align="center" style="padding:0 2px;font-size:12px;color:#bbb;line-height:1.5;">|</td>'
-            : '';
-        return linkCell + sepCell;
-    }).join('');
+        .map((s) => {
+            const url = String(social[s.key]).trim();
+            return `<a href="${escBrandingAttr(url)}" style="color:#00A89D;text-decoration:underline;margin:0 10px;font-size:12px;font-weight:600;" target="_blank" rel="noopener">${escBrandingText(s.label)}</a>`;
+        });
+    if (!links.length) return '';
     return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" data-nl-signature-social="1" style="margin-top:10px;">
   <tr>
     <td align="center" style="text-align:center;padding:10px 0 0;border-top:1px solid #e5e5e5;">
-      <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
-        <tr>${cells}</tr>
-      </table>
+      ${links.join('')}
     </td>
   </tr>
 </table>`;
@@ -1925,340 +1916,6 @@ function ensureContentRowsCentered(html) {
     return out;
 }
 
-const NL_OUTLOOK_MODULE_TABLE_RE = /data-nl-brand-header|data-nl-main-body|data-nl-signature-block|data-nl-referral-block|data-nl-disclaimer-block|data-nl-personal-video|border-left:\s*(?:4|8)px solid|border-top:\s*\d+px solid/i;
-const NL_OUTLOOK_WIDTH_STYLE = 'width:600px;';
-
-/** Outlook ignores max-width / margin:auto — restore fixed 600px module tables for paste. */
-function applyOutlookFixedModuleWidth(tableTag) {
-    let tag = String(tableTag || '');
-    tag = tag.replace(/\bwidth\s*=\s*["'][^"']*["']/gi, '');
-    tag = tag.replace(/<table\b/i, '<table width="600"');
-    if (!/align\s*=\s*["']center["']/i.test(tag)) {
-        tag = tag.replace(/<table\b([^>]*)>/i, '<table$1 align="center"');
-    }
-    if (/style\s*=\s*"/i.test(tag)) {
-        tag = tag.replace(/style\s*=\s*"([^"]*)"/i, (m, styleVal) => {
-            let style = styleVal
-                .replace(/\bwidth\s*:\s*100%/gi, '')
-                .replace(/\bmax-width\s*:\s*[^;"]*/gi, '')
-                .replace(/\bmargin\s*:\s*[^;"]*/gi, '')
-                .replace(/\bbox-sizing\s*:\s*[^;"]*/gi, '')
-                .replace(/;;+/g, ';')
-                .replace(/^;|;$/g, '')
-                .trim();
-            if (style && !style.endsWith(';')) style += ';';
-            return `style="${NL_OUTLOOK_WIDTH_STYLE}${style}"`;
-        });
-    } else {
-        tag = tag.replace(/>$/, ` style="${NL_OUTLOOK_WIDTH_STYLE}">`);
-    }
-    return tag;
-}
-
-function hardenNewsletterWidthsForOutlook(html) {
-    let out = String(html || '');
-
-    out = out.replace(/<table\b[^>]*>/gi, (tableTag) => {
-        if (!NL_OUTLOOK_MODULE_TABLE_RE.test(tableTag)) return tableTag;
-        if (/data-nl-brand-header/i.test(tableTag)) return tableTag;
-        if (/data-nl-personal-photo/i.test(tableTag)) return tableTag;
-        if (/data-nl-signature-social/i.test(tableTag)) return tableTag;
-        if (/role\s*=\s*["']presentation["']/i.test(tableTag) && !/data-nl-|border-left/i.test(tableTag)) return tableTag;
-        return applyOutlookFixedModuleWidth(tableTag);
-    });
-
-    out = out.replace(
-        /(<tr>\s*<td)([^>]*)(>[\s\S]*?<h1\b)/gi,
-        (m, open, tdAttrs, rest) => {
-            let attrs = String(tdAttrs || '')
-                .replace(/\bwidth\s*=\s*["'][^"']*["']/gi, '')
-                .replace(/\bmax-width\s*:\s*[^;"]*/gi, '')
-                .replace(/\bmargin\s*:\s*[^;"]*/gi, '');
-            if (!/align\s*=/i.test(attrs)) attrs += ' align="center"';
-            attrs += ' width="600"';
-            attrs = /style\s*=/i.test(attrs)
-                ? attrs.replace(/style\s*=\s*"/i, 'style="width:600px;text-align:center;')
-                : `${attrs} style="width:600px;text-align:center;"`;
-            return `${open}${attrs}${rest}`;
-        }
-    );
-
-    out = out.replace(
-        /(<tr>\s*<td)([^>]*)(>[\s\S]*?<img[^>]*\balt=["']Hero[^>]*>)/gi,
-        (m, open, tdAttrs, rest) => {
-            let attrs = ensureTdOutlookCentered(tdAttrs)
-                .replace(/\bwidth\s*=\s*["'][^"']*["']/gi, '')
-                .replace(/\bmax-width\s*:\s*[^;"]*/gi, '');
-            if (!/width\s*=\s*["']600["']/i.test(attrs)) attrs += ' width="600"';
-            attrs = /style\s*=/i.test(attrs)
-                ? attrs.replace(/style\s*=\s*"/i, 'style="width:600px;text-align:center;')
-                : `${attrs} style="width:600px;text-align:center;"`;
-            return `${open}${attrs}${rest}`;
-        }
-    );
-
-    return out;
-}
-
-/** Replace h1 / subtitle <p> with nested tables — Outlook mangles bare block tags in title rows. */
-function hardenTitleHeaderForOutlook(html) {
-    let out = String(html || '');
-
-    out = out.replace(
-        /<h1\b([^>]*)>([\s\S]*?)<\/h1>/gi,
-        (m, h1Attrs, text) => {
-            const styleMatch = h1Attrs.match(/style="([^"]*)"/i);
-            let style = styleMatch ? styleMatch[1] : 'color:#002B5C;font-size:36px;margin:8px 0 6px;text-align:center;';
-            style = style.replace(/text-align\s*:\s*left/gi, 'text-align:center');
-            if (!/text-align/i.test(style)) style += ';text-align:center';
-            return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" width="600" style="width:600px;text-align:center;padding:4px 20px 2px;"><span style="${style}font-weight:bold;">${text}</span></td></tr></table>`;
-        }
-    );
-
-    out = out.replace(
-        /(<table[^>]*role="presentation"[^>]*>[\s\S]*?<\/table>\s*)(<p\b([^>]*)>([\s\S]*?)<\/p>)(\s*<\/td>\s*<\/tr>\s*<tr[^>]*>[\s\S]*?\balt=["']Hero)/gi,
-        (m, h1Table, pTag, pAttrs, pText, heroPart) => {
-            const styleMatch = pAttrs.match(/style="([^"]*)"/i);
-            let style = styleMatch ? styleMatch[1] : 'color:#666;margin:0 0 12px;text-align:center;';
-            style = style.replace(/text-align\s*:\s*left/gi, 'text-align:center');
-            if (!/text-align/i.test(style)) style += ';text-align:center';
-            const pTable = `<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" width="600" style="width:600px;text-align:center;padding:0 20px 10px;"><span style="${style}">${pText}</span></td></tr></table>`;
-            return `${h1Table}${pTable}${heroPart}`;
-        }
-    );
-
-    return out;
-}
-
-/** Remove every full <table> block with a given data-* marker (depth-safe for nested tables). */
-function removeAllMarkerTables(html, attr, value) {
-    let out = String(html || '');
-    const openRe = new RegExp(`<table[^>]*\\b${attr}=["']${String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>`, 'gi');
-    let guard = 0;
-    while (guard++ < 64) {
-        openRe.lastIndex = 0;
-        const m = openRe.exec(out);
-        if (!m) break;
-        const start = m.index;
-        const chunk = extractOneTopLevelTable(out.slice(start));
-        if (!chunk) break;
-        out = out.slice(0, start) + out.slice(start + chunk.table.length);
-    }
-    return out;
-}
-
-function stripRogueSignatureBlocksFromBody(html) {
-    let out = removeAllMarkerTables(html, 'data-nl-signature-social', '1');
-    const rogueRe = /<table(?![^>]*\bdata-nl-(?:signature-block|referral-block|disclaimer-block)=["']1["'])[^>]*border-top:\s*6px solid[^>]*>/gi;
-    let guard = 0;
-    while (guard++ < 32) {
-        rogueRe.lastIndex = 0;
-        const m = rogueRe.exec(out);
-        if (!m) break;
-        const chunk = extractOneTopLevelTable(out.slice(m.index));
-        if (!chunk) break;
-        out = out.slice(0, m.index) + out.slice(m.index + chunk.table.length);
-    }
-    return out;
-}
-
-/** True when a regex chunk is real newsletter content — never strip these as signature ghosts. */
-function isProtectedNewsletterFragment(fragment) {
-    return /data-nl-brand-header|data-nl-personal-video|data-nl-personal-photo|border-left:\s*8px solid|\balt=["']Hero|\balt=["']Watch Personal Video|<h1\b/i.test(String(fragment || ''));
-}
-
-/** Remove partial signature fragments left by shallow regex deletes (ghost headshot/logo column). */
-function stripOrphanSignatureFragments(html) {
-    let out = String(html || '');
-    const footerStart = Math.max(
-        out.search(/data-nl-referral-block/i),
-        out.search(/data-nl-disclaimer-block/i)
-    );
-    const bodyPart = footerStart > 0 ? out.slice(0, footerStart) : out;
-
-    let cleanedBody = bodyPart.replace(
-        /<table[^>]*\bwidth=["']540["'][^>]*\brole=["']presentation["'][^>]*>[\s\S]*?<\/table>/gi,
-        (match) => (isProtectedNewsletterFragment(match) ? match : '')
-    );
-    cleanedBody = cleanedBody.replace(
-        /<table[^>]*\brole=["']presentation["'][^>]*>[\s\S]*?\bwidth:\s*86px;\s*height:\s*112px[\s\S]*?<\/table>/gi,
-        (match) => (isProtectedNewsletterFragment(match) ? match : '')
-    );
-    cleanedBody = cleanedBody.replace(
-        /<td[^>]*\bwidth=["']110["'][^>]*>[\s\S]*?alt=["']Company logo["'][\s\S]*?<\/td>/gi,
-        (match) => (isProtectedNewsletterFragment(match) ? match : '')
-    );
-
-    return footerStart > 0 ? cleanedBody + out.slice(footerStart) : cleanedBody;
-}
-
-/** Strip all footer modules from the letter body, remove ghosts, append one clean Outlook footer. */
-function peelAndRebuildOutlookFooter(html) {
-    let out = String(html || '');
-    out = removeAllMarkerTables(out, 'data-nl-signature-block', '1');
-    out = removeAllMarkerTables(out, 'data-nl-referral-block', '1');
-    out = removeAllMarkerTables(out, 'data-nl-disclaimer-block', '1');
-    out = stripOrphanSignatureFragments(out);
-    out = stripRogueSignatureBlocksFromBody(out);
-
-    const tail = [];
-    try {
-        const ctx = getAgentBrandingContext();
-        const selections = getNewsletterSelections();
-        const firstName = (ctx.name || '').split(' ')[0].trim() || 'Your Agent';
-        const sig = buildAgentSignatureFooterForOutlook(ctx);
-        if (sig) tail.push(sig);
-        if (selections.includeReferral && ctx.email) {
-            tail.push(buildCompactReferralHtmlForOutlook(firstName, ctx.email));
-        }
-        tail.push(buildDisclaimerForOutlook());
-    } catch (e) {}
-
-    if (/<\/body>/i.test(out)) {
-        return out.replace(/<\/body>/i, `${tail.join('')}</body>`);
-    }
-    return out + tail.join('');
-}
-
-function buildCompactReferralHtmlForOutlook(firstName, email) {
-    const mailSubject = encodeURIComponent('Referral from a Friend — Real Estate Help!');
-    const mailBody = encodeURIComponent(`Hi ${firstName},\n\nI'd like to refer someone who may need real estate help.\n\nName: \nPhone: \nEmail: \nThey're looking for: (buying / selling / both / not sure)\n\nThanks!\n`);
-    return `<table width="600" cellpadding="0" cellspacing="0" align="center" border="0" data-nl-referral-block="1" style="width:600px;background:#fafafa;border-top:2px solid #e0e0e0;border-collapse:collapse;">
-  <tr>
-    <td width="600" align="center" style="width:600px;padding:14px 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
-      <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
-      <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#666;">Know someone buying or selling? Forward this email — or tap below.</p>
-      <a href="mailto:${escBrandingAttr(email)}?subject=${mailSubject}&body=${mailBody}" style="display:inline-block;padding:9px 20px;background:#00A89D;color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;border-radius:20px;">Send a Referral</a>
-    </td>
-  </tr>
-</table>`;
-}
-
-function buildDisclaimerForOutlook() {
-    const ctx = getNewsletterProfileContext();
-    const byline = ctx.company || ctx.name || 'Your real estate professional';
-    return `<table width="600" cellpadding="0" cellspacing="0" align="center" border="0" data-nl-disclaimer-block="1" style="width:600px;background:#002B5C;border-collapse:collapse;">
-  <tr>
-    <td width="600" align="center" style="width:600px;padding:16px 24px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.55;color:#ffffff;">
-      <p style="margin:0;">This newsletter is for general informational purposes only and is not legal, financial, or tax advice. Market conditions vary by area and change over time. ${escBrandingText(byline)}. Equal Housing Opportunity.</p>
-    </td>
-  </tr>
-</table>`;
-}
-
-
-
-const NL_OUTLOOK_SPACER_ROW_RE = /<tr>\s*<td[^>]*height=["']\d+["'][^>]*>\s*(?:&nbsp;)?\s*<\/td>\s*<\/tr>/gi;
-
-function dedupeConsecutiveSpacerRows(html) {
-    let out = String(html || '');
-    let prev;
-    do {
-        prev = out;
-        out = out.replace(
-            /(<tr>\s*<td[^>]*height=["']\d+["'][^>]*>\s*(?:&nbsp;)?\s*<\/td>\s*<\/tr>)(\s*<tr>\s*<td[^>]*height=["']\d+["'][^>]*>\s*(?:&nbsp;)?\s*<\/td>\s*<\/tr>)+/gi,
-            NL_OUTLOOK_SECTION_SPACER_ROW
-        );
-    } while (out !== prev);
-    return out;
-}
-
-function hardenSectionSpacersForOutlook(html) {
-    let out = String(html || '');
-    out = out.replace(NL_OUTLOOK_SPACER_ROW_RE, NL_OUTLOOK_SECTION_SPACER_ROW);
-    out = dedupeConsecutiveSpacerRows(out);
-    return out;
-}
-
-function hardenNewsletterForOutlookPaste(html) {
-    let out = String(html || '');
-    out = hardenNewsletterWidthsForOutlook(out);
-    out = hardenTitleHeaderForOutlook(out);
-    out = ensureTitleHeaderRowCentered(out);
-    out = ensureContentRowsCentered(out);
-    out = hardenSectionSpacersForOutlook(out);
-    out = peelAndRebuildOutlookFooter(out);
-    return out;
-}
-
-/** Extract one outermost <table>…</table> block (depth-counted — nested section cards stay inside). */
-function extractOneTopLevelTable(html) {
-    const src = String(html || '');
-    if (!/^<table\b/i.test(src)) return null;
-
-    const tagRe = /<(\/?)table\b[^>]*>/gi;
-    let depth = 0;
-    let match;
-    while ((match = tagRe.exec(src)) !== null) {
-        depth += match[1] ? -1 : 1;
-        if (depth === 0) {
-            const end = tagRe.lastIndex;
-            return { table: src.slice(0, end), rest: src.slice(end) };
-        }
-    }
-    return null;
-}
-
-function extractTopLevelOutlookModules(inner) {
-    const modules = [];
-    let remaining = String(inner || '').trim();
-
-    while (remaining.length) {
-        const commentMatch = remaining.match(/^<!--[\s\S]*?-->/);
-        if (commentMatch) {
-            remaining = remaining.slice(commentMatch[0].length).trim();
-            continue;
-        }
-
-        if (/^\s+/.test(remaining)) {
-            remaining = remaining.replace(/^\s+/, '');
-            continue;
-        }
-
-        const tableChunk = extractOneTopLevelTable(remaining);
-        if (tableChunk) {
-            modules.push(tableChunk.table);
-            remaining = tableChunk.rest.trim();
-            continue;
-        }
-
-        const trBlockMatch = remaining.match(/^(?:<tr\b[\s\S]*?<\/tr>\s*)+/i);
-        if (trBlockMatch) {
-            modules.push(`<table width="600" align="center" cellpadding="0" cellspacing="0" border="0" style="width:600px;border-collapse:collapse;">${trBlockMatch[0]}</table>`);
-            remaining = remaining.slice(trBlockMatch[0].length).trim();
-            continue;
-        }
-
-        break;
-    }
-
-    if (remaining.trim().length > 0) {
-        modules.push(`<table width="600" align="center" cellpadding="0" cellspacing="0" border="0" style="width:600px;border-collapse:collapse;"><tr><td align="center" style="width:600px;padding:0;">${remaining}</td></tr></table>`);
-    }
-
-    return modules;
-}
-
-function stackOutlookBodyModules(inner) {
-    const modules = extractTopLevelOutlookModules(inner);
-    if (!modules.length) return inner;
-
-    const moduleRows = modules.map((mod) => {
-        const isFooter = /data-nl-(?:signature|referral|disclaimer)-block/i.test(mod);
-        return `<tr><td align="center" width="600" style="width:600px;padding:0;margin:0;text-align:center;${isFooter ? '' : 'display:block;'}">${mod}</td></tr>`;
-    }).join('');
-
-    return `<!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td width="600"><![endif]-->
-<table role="presentation" data-nl-outlook-body="1" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f4" align="center" style="background:#f4f4f4;mso-table-lspace:0pt;mso-table-rspace:0pt;">
-<tr><td align="center" style="padding:0;margin:0;">
-<table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0" style="width:600px;border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
-${moduleRows}
-</table>
-</td></tr>
-</table>
-<!--[if mso]></td></tr></table><![endif]-->`;
-}
-
 /** Display caps for branding images in generated newsletters (see profile upload tips). */
 const NL_HEADER_LOGO_MAX_W = 420;
 const NL_HEADER_LOGO_MAX_H = 112;
@@ -2293,9 +1950,6 @@ function buildAgentBrandHeader(ctx) {
 const NL_SIGNATURE_HEADSHOT_W = 86;
 const NL_SIGNATURE_HEADSHOT_H = 112;
 const NL_SIGNATURE_HEADSHOT_POS = 'center 18%';
-const NL_SIGNATURE_LOGO_W = 100;
-const NL_SIGNATURE_LOGO_MAX_H = 72;
-const NL_OUTLOOK_SECTION_SPACER_ROW = '<tr><td height="20" style="height:20px;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>';
 
 function buildSignatureHeadshotCell(headshotUrl, name) {
     return `<td width="100" align="center" valign="middle" style="width:100px;padding-right:10px;vertical-align:middle;">
@@ -2314,95 +1968,11 @@ function buildSignatureLogoCell(logoUrl) {
       <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
         <tr>
           <td align="center" valign="middle" style="padding:0;line-height:0;">
-            <img src="${escBrandingAttr(logoUrl)}" alt="Company logo" width="${NL_SIGNATURE_LOGO_W}" style="display:block;width:${NL_SIGNATURE_LOGO_W}px;max-width:${NL_SIGNATURE_LOGO_W}px;height:auto;max-height:${NL_SIGNATURE_LOGO_MAX_H}px;margin:0 auto;border:0;object-fit:contain;object-position:center center;">
+            <img src="${escBrandingAttr(logoUrl)}" alt="Company logo" width="100" style="display:block;width:100%;max-width:100px;height:auto;max-height:68px;margin:0 auto;border:0;object-fit:contain;object-position:center center;">
           </td>
         </tr>
       </table>
     </td>`;
-}
-
-/** Outlook ignores border-radius — use a teal bgcolor frame instead of CSS oval. */
-function buildSignatureHeadshotCellOutlook(headshotUrl, name) {
-    return `<td width="100" align="center" valign="middle" style="width:100px;padding-right:12px;vertical-align:middle;">
-      <table cellpadding="0" cellspacing="0" role="presentation" align="center" border="0">
-        <tr>
-          <td align="center" bgcolor="#00A89D" style="background:#00A89D;padding:3px;line-height:0;font-size:0;mso-line-height-rule:exactly;">
-            <table cellpadding="0" cellspacing="0" border="0" role="presentation">
-              <tr>
-                <td width="${NL_SIGNATURE_HEADSHOT_W}" height="${NL_SIGNATURE_HEADSHOT_H}" align="center" valign="top" bgcolor="#eef7f6" style="width:${NL_SIGNATURE_HEADSHOT_W}px;height:${NL_SIGNATURE_HEADSHOT_H}px;background:#eef7f6;line-height:0;font-size:0;">
-                  <img src="${escBrandingAttr(headshotUrl)}" alt="${escBrandingAttr(name || 'Agent')}" width="${NL_SIGNATURE_HEADSHOT_W}" height="${NL_SIGNATURE_HEADSHOT_H}" style="width:${NL_SIGNATURE_HEADSHOT_W}px;height:${NL_SIGNATURE_HEADSHOT_H}px;display:block;border:0;">
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>`;
-}
-
-function buildSignatureLogoCellOutlook(logoUrl) {
-    return `<td width="110" align="center" valign="middle" style="width:110px;padding-left:12px;vertical-align:middle;">
-      <img src="${escBrandingAttr(logoUrl)}" alt="Company logo" width="${NL_SIGNATURE_LOGO_W}" height="${NL_SIGNATURE_LOGO_MAX_H}" style="display:block;width:${NL_SIGNATURE_LOGO_W}px;height:auto;max-height:${NL_SIGNATURE_LOGO_MAX_H}px;border:0;">
-    </td>`;
-}
-
-function buildSignatureContactCellOutlook(ctx, socialHtml) {
-    let block = '<td align="center" valign="middle" style="vertical-align:middle;text-align:center;font-family:Arial,Helvetica,sans-serif;padding:0 10px;">';
-    if (ctx.name) block += `<div style="font-size:17px;font-weight:bold;color:#002B5C;margin-bottom:4px;line-height:1.3;">${escBrandingText(ctx.name)}</div>`;
-    if (ctx.company) block += `<div style="font-size:13px;color:#444;margin-bottom:2px;line-height:1.35;">${escBrandingText(ctx.company)}</div>`;
-    if (ctx.tagline) block += `<div style="font-size:12px;color:#666;font-style:italic;margin-bottom:8px;line-height:1.4;">${escBrandingText(ctx.tagline)}</div>`;
-    const contact = [];
-    if (ctx.phone) contact.push(buildSignaturePhoneLink(ctx.phone));
-    if (ctx.email) {
-        contact.push(`<a href="mailto:${escBrandingAttr(ctx.email)}" style="color:#00A89D;text-decoration:underline;">${escBrandingText(ctx.email)}</a>`);
-    }
-    if (contact.length) {
-        block += `<div style="font-size:12px;color:#555;margin-top:6px;line-height:1.5;">${contact.join(' &nbsp;|&nbsp; ')}</div>`;
-    }
-    if (socialHtml) block += socialHtml;
-    block += '</td>';
-    return block;
-}
-
-function buildAgentSignatureFooterForOutlook(ctx) {
-    if (!ctx.includeSignature && !ctx.includeSocial) return '';
-
-    const hasSignatureContent = ctx.includeSignature && (
-        ctx.headshotUrl || ctx.name || ctx.company || ctx.phone || ctx.email || ctx.logoUrl
-    );
-    const socialHtml = ctx.includeSocial ? buildSocialLinksHtml(ctx.social) : '';
-
-    if (!hasSignatureContent && !socialHtml) return '';
-
-    let inner = '';
-
-    if (hasSignatureContent) {
-        const hasHeadshot = !!ctx.headshotUrl;
-        const hasLogo = !!ctx.logoUrl;
-        inner += '<table width="540" cellpadding="0" cellspacing="0" role="presentation" align="center" border="0" style="width:540px;margin:0 auto;"><tr>';
-        if (hasHeadshot) {
-            inner += buildSignatureHeadshotCellOutlook(ctx.headshotUrl, ctx.name);
-        } else if (hasLogo) {
-            inner += '<td width="20" style="width:20px;font-size:0;line-height:0;">&nbsp;</td>';
-        }
-        inner += buildSignatureContactCellOutlook(ctx, socialHtml);
-        if (hasLogo) {
-            inner += buildSignatureLogoCellOutlook(ctx.logoUrl);
-        } else if (hasHeadshot) {
-            inner += '<td width="20" style="width:20px;font-size:0;line-height:0;">&nbsp;</td>';
-        }
-        inner += '</tr></table>';
-    } else if (socialHtml) {
-        inner += `<table width="540" cellpadding="0" cellspacing="0" role="presentation" align="center" border="0" style="width:540px;margin:0 auto;"><tr><td align="center" style="text-align:center;">${socialHtml}</td></tr></table>`;
-    }
-
-    return `<table width="600" cellpadding="0" cellspacing="0" align="center" border="0" data-nl-signature-block="1" style="width:600px;background:#f9f9f9;border-top:6px solid #00A89D;border-collapse:collapse;">
-  <tr>
-    <td width="600" align="center" style="width:600px;padding:24px 30px 22px;font-family:Arial,Helvetica,sans-serif;text-align:center;">
-      ${inner}
-    </td>
-  </tr>
-</table>`;
 }
 
 function buildSignaturePhoneLink(phone) {
@@ -4388,7 +3958,7 @@ function wrapBodyForOutlookPaste(html) {
     if (!bodyMatch) return html;
     let inner = bodyMatch[2].trim();
     if (/data-nl-outlook-body\s*=\s*["']1["']/i.test(inner)) return html;
-    inner = stackOutlookBodyModules(inner);
+    inner = `<table role="presentation" data-nl-outlook-body="1" width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;background:#f4f4f4;"><tr><td align="center" style="padding:0;margin:0;">${inner}</td></tr></table>`;
     return bodyMatch[1] + inner + bodyMatch[3];
 }
 
@@ -4415,7 +3985,7 @@ function getCleanOutlookHTML() {
                      style="width:600px; max-width:600px; height:auto; display:block; margin:0 auto; border:0;">
             </td>
         </tr>
-        ${NL_OUTLOOK_SECTION_SPACER_ROW}`
+        <tr><td height="${NL_SECTION_GAP_PX}" align="center"></td></tr>`
     );
 
     cleanHTML = cleanHTML.replace(
@@ -4434,7 +4004,8 @@ function getCleanOutlookHTML() {
 
     cleanHTML = normalizePersonalPhotoBlocks(cleanHTML);
     cleanHTML = normalizePersonalVideoBlocks(cleanHTML);
-    cleanHTML = hardenNewsletterForOutlookPaste(cleanHTML);
+    cleanHTML = normalizeNewsletterModuleWidths(cleanHTML);
+    cleanHTML = ensureContentRowsCentered(cleanHTML);
     cleanHTML = wrapBodyForOutlookPaste(cleanHTML);
 
     return cleanHTML;

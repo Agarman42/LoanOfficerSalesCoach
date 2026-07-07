@@ -48,6 +48,7 @@
 
     <!-- Shared UI (toast + search) - Phase 0 -->
     <script src="js/ui.js?v=20260706-realtor-v273"></script>
+    <script src="js/features/app-feedback.js?v=20260707-realtor-v308"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260706-realtor-v281"></script>
     <script src="js/early-boot.js?v=20260706-realtor-v273"></script>
 </head>
@@ -122,6 +123,15 @@
                         title="My Profile & Preferences">
                     <i class="fas fa-user-cog"></i>
                     <span class="hidden md:inline">My Profile</span>
+                </button>
+
+                <!-- App feedback -->
+                <button id="app-feedback-btn" type="button"
+                        onclick="if(typeof window.openAppFeedbackEmail==='function'){window.openAppFeedbackEmail();}"
+                        class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full text-sm font-medium transition-all border border-white/20"
+                        title="Send feedback — opens a pre-filled email">
+                    <i class="fas fa-comment-dots"></i>
+                    <span class="hidden md:inline">Feedback</span>
                 </button>
             </div>
         </div>
@@ -7102,6 +7112,19 @@
             </div>
           </div>
 
+          <div class="flex flex-col sm:flex-row sm:items-end gap-3 mb-6 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+            <div class="flex-1 min-w-[200px]">
+              <label for="nl-color-bundle" class="block text-xs font-semibold text-[#002B5C] dark:text-gray-300 mb-1">
+                <i class="fas fa-palette text-[#00A89D] mr-1"></i> Color scheme
+              </label>
+              <select id="nl-color-bundle" class="w-full text-sm p-2.5 rounded-xl border-2 border-[#00A89D]/40 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00A89D]/50">
+                <option value="">Profile default</option>
+              </select>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 mb-0">Change colors after generation — preview updates instantly.</p>
+            </div>
+            <div id="nl-color-bundle-preview" class="flex-shrink-0 sm:pb-1"></div>
+          </div>
+
           <div class="flex gap-3 flex-wrap mb-6">
             <button onclick="downloadNewsletterHTML()" class="bg-[#00A89D] hover:bg-[#008F85] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               <i class="fas fa-download"></i> Download .html
@@ -13718,7 +13741,16 @@ window.toggleSupportingSection = function(sectionId) {
 <script src="js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260706-realtor-v273"></script>
-<script src="js/features/newsletter-generator.js?v=20260706-realtor-v283"></script>
+<script>
+// Run before newsletter scripts — clears saved HTML that can freeze the tab on load (?clearNewsletter=1)
+try {
+  if (new URLSearchParams(location.search).get('clearNewsletter') === '1') {
+    localStorage.removeItem('lastNewsletterHTML');
+  }
+} catch (e) {}
+</script>
+<script src="js/features/newsletter-color-bundles.js?v=20260707-realtor-v303"></script>
+<script src="js/features/newsletter-generator.js?v=20260707-realtor-v312"></script>
 <script src="js/features/ai-chat.js?v=20260706-realtor-v281"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'realtor';</script>
 <script src="js/features/translation-tool.js?v=20260706-realtor-v273"></script>
@@ -14931,9 +14963,16 @@ if (document.readyState === 'loading') {
                         <input type="text" id="profile-tagline" placeholder="Your Trusted Local Real Estate Experts" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium mb-1" for="profile-newsletter-color-bundle">Newsletter color bundle</label>
+                        <select id="profile-newsletter-color-bundle" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        </select>
+                        <div id="profile-newsletter-color-preview"></div>
+                        <p id="profile-newsletter-color-desc" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0"></p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium mb-1">Company Logo URL</label>
                         <input type="url" id="profile-logo-url" placeholder="https://yourteam.com/logo.png" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">PNG with transparent background · 400–600px wide (horizontal) · displays up to 360×96px in the newsletter header</p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">PNG with transparent background · 400–600px wide (horizontal) · displays up to 420×112px in the newsletter header</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Professional Headshot URL</label>

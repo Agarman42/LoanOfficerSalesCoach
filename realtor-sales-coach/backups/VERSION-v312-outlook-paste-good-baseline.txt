@@ -1,0 +1,31 @@
+Realtor Newsletter Generator — Outlook Paste Good Baseline (v312)
+Saved: 2026-07-07
+
+Status: User confirmed Outlook copy is "much better" — full newsletter content pastes (header, hero, sections, personal video, signature, referral, disclaimer), not footer-only.
+
+Cache bust tag: js/features/newsletter-generator.js?v=20260707-realtor-v312
+
+Files in this backup:
+  backups/newsletter-generator.v312-outlook-paste-good-baseline.js
+  backups/newsletter-color-bundles.v312-outlook-paste-good-baseline.js
+
+To restore this baseline:
+  cp backups/newsletter-generator.v312-outlook-paste-good-baseline.js js/features/newsletter-generator.js
+  cp backups/newsletter-color-bundles.v312-outlook-paste-good-baseline.js js/features/newsletter-color-bundles.js
+  # Set index.html script tag to ?v=20260707-realtor-v312
+
+Key fix in v312:
+  - stripOrphanSignatureFragments no longer uses the destructive Company-logo table regex that wiped the main newsletter table (brand header → personal video row).
+  - Added isProtectedNewsletterFragment() guards so orphan-cleanup skips real content (brand header, hero, teal sections, personal video).
+
+Inherited from v306+ preview work (still good):
+  - Logo/title spacing
+  - Oval headshot signature (preview)
+  - Clickable phone (tel:)
+  - Social links in contact column
+  - Larger header logo (420×112)
+  - "Insights from …" centered in title row
+  - Teal section cards with left-aligned body text
+
+Related baselines:
+  - v306 (preview-good): backups/VERSION-v306-preview-good-baseline.txt — preview looked great; Outlook paste was broken.

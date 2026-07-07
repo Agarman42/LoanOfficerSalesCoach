@@ -107,13 +107,52 @@
     return RICH_HTML_TYPES.includes(item.type) && /<[a-z][\s\S]*>/i.test(item.content || '');
   }
 
+  function copyHtmlToClipboard(html, done) {
+    const clean = String(html || '');
+    if (!clean) return Promise.reject(new Error('empty'));
+    if (navigator.clipboard && window.ClipboardItem) {
+      const blob = new Blob([clean], { type: 'text/html' });
+      return navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]).then(() => {
+        if (typeof done === 'function') done();
+      });
+    }
+    return navigator.clipboard.writeText(clean).then(() => {
+      if (typeof done === 'function') done();
+    });
+  }
+
+  window.copySavedNewsletterHtml = function copySavedNewsletterHtml(vaultIndex, btn) {
+    const item = prepareItems().find((i) => i._vaultIndex === vaultIndex);
+    if (!item || item.type !== 'newsletter') return;
+    const html = item.content || '';
+    const done = () => {
+      if (!btn) return;
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      setTimeout(() => { if (btn.isConnected) btn.innerHTML = original; }, 1600);
+      if (typeof window.showToast === 'function') {
+        window.showToast('Outlook HTML copied — paste into a new email', 'success');
+      }
+    };
+    copyHtmlToClipboard(html, done).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = html;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      done();
+    });
+  };
+
   function getSavedViewerContent(item) {
     if (item.type === 'newsletter') {
       const safeSrcdoc = (item.content || '').replace(/"/g, '&quot;');
       return {
         wrapperClass: 'p-4 overflow-hidden flex-1 bg-gray-100 dark:bg-gray-800',
         html: `<iframe style="width:100%;height:100%;min-height:500px;border:1px solid #ccc;border-radius:8px;background:white;" srcdoc="${safeSrcdoc}"></iframe>`,
-        copyText: plainTextContent(item)
+        copyMode: 'newsletter-html',
+        vaultIndex: item._vaultIndex
       };
     }
 
@@ -441,6 +480,10 @@
   window.copySavedItemFromList = function copySavedItemFromList(vaultIndex, btn) {
     const item = prepareItems().find((i) => i._vaultIndex === vaultIndex);
     if (!item) return;
+    if (item.type === 'newsletter' && item.content && /<[a-z][\s\S]*>/i.test(item.content)) {
+      window.copySavedNewsletterHtml(vaultIndex, btn);
+      return;
+    }
     const text = `${item.title}\n\n${plainTextContent(item)}`;
     const done = () => {
       if (!btn) return;
@@ -491,6 +534,15 @@
     const contentHTML = viewerContent.html;
     const contentWrapperClass = viewerContent.wrapperClass;
     const copyText = (viewerContent.copyText || plainTextContent(item)).replace(/"/g, '&quot;').replace(/`/g, '\\`');
+    const copyButtonHtml = viewerContent.copyMode === 'newsletter-html'
+      ? `<button type="button" onclick="copySavedNewsletterHtml(${viewerContent.vaultIndex}, this)" class="px-4 py-2 text-sm rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white flex items-center gap-2">
+            <i class="fas fa-copy"></i> Copy for Outlook
+         </button>`
+      : `<button data-saved-copy-text="${copyText}"
+                  onclick="copySavedItemText(this)"
+                  class="px-4 py-2 text-sm rounded-2xl border border-gray-300 hover:bg-white dark:hover:bg-gray-700 flex items-center gap-2">
+            <i class="fas fa-copy"></i> Copy
+         </button>`;
 
     const savedDate = formatSavedDate(item);
     const useNext = renderUseNextFooter(item);
@@ -513,11 +565,7 @@
         <div class="${contentWrapperClass} custom-modal-scroll">${contentHTML}</div>
         ${useNext ? `<div class="px-6 pb-2 flex-shrink-0">${useNext}</div>` : ''}
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0 bg-gray-50 dark:bg-gray-800/50">
-          <button data-saved-copy-text="${copyText}"
-                  onclick="copySavedItemText(this)"
-                  class="px-4 py-2 text-sm rounded-2xl border border-gray-300 hover:bg-white dark:hover:bg-gray-700 flex items-center gap-2">
-            <i class="fas fa-copy"></i> Copy
-          </button>
+          ${copyButtonHtml}
           <button type="button" class="saved-viewer-close px-5 py-2 text-sm rounded-2xl bg-[#002B5C] text-white hover:bg-[#001f3f]">Close</button>
         </div>
       </div>`;
@@ -589,7 +637,7 @@
             </div>
             <div class="flex flex-col gap-1.5 flex-shrink-0">
               <button type="button" onclick="viewSavedItem(${item._vaultIndex})" class="text-xs px-3 py-1.5 rounded-2xl bg-[#002B5C] text-white hover:bg-black transition font-medium">View</button>
-              <button type="button" onclick="copySavedItemFromList(${item._vaultIndex}, this)" class="text-xs px-3 py-1.5 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition" title="Copy text"><i class="fas fa-copy"></i></button>
+              <button type="button" onclick="copySavedItemFromList(${item._vaultIndex}, this)" class="text-xs px-3 py-1.5 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition" title="${item.type === 'newsletter' ? 'Copy for Outlook' : 'Copy text'}"><i class="fas fa-copy"></i></button>
               <button type="button" onclick="deleteSavedItemFromLibrary(${item._vaultIndex}, this)" class="text-xs px-3 py-1.5 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition" title="Delete"><i class="fas fa-trash-alt"></i></button>
             </div>
           </div>

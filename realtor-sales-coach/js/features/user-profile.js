@@ -224,6 +224,7 @@
       tagline: (p.tagline || '').trim(),
       logoUrl: (p.logoUrl || p['logo-url'] || '').trim(),
       headshotUrl: (p.headshotUrl || p['headshot-url'] || '').trim(),
+      newsletterColorBundle: (p.newsletterColorBundle || 'coastal-teal').trim(),
       socialLinks: p.socialLinks || {},
       blogPageUrl: (p.blogPageUrl || p.blogUrl || '').trim(),
       linkedInUrl: (p.linkedInUrl || p.linkedin || p.socialLinks?.linkedin || '').trim(),
@@ -380,6 +381,7 @@
       tagline: getVal('profile-tagline'),
       logoUrl: getVal('profile-logo-url'),
       headshotUrl: getVal('profile-headshot-url'),
+      newsletterColorBundle: getRaw('profile-newsletter-color-bundle') || 'coastal-teal',
       socialLinks,
       monthlyUnits: getRaw('profile-monthly-units'),
       monthlyGoal: getRaw('profile-monthly-goal'),
@@ -449,7 +451,7 @@
 
     const fields = [
       'name', 'email', 'phone', 'license', 'intro', 'location', 'years', 'team',
-      'company-name', 'tagline', 'logo-url', 'headshot-url',
+      'company-name', 'tagline', 'newsletter-color-bundle', 'logo-url', 'headshot-url',
       'monthly-units', 'monthly-goal', 'income', 'focus', 'hours',
       'database-size', 'partner-focus', 'family', 'personality', 'tone',
       'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other',
@@ -459,6 +461,7 @@
     const fieldKeyMap = {
       license: 'licenseNumber',
       'company-name': 'companyName',
+      'newsletter-color-bundle': 'newsletterColorBundle',
       'logo-url': 'logoUrl',
       'headshot-url': 'headshotUrl',
       'company-website': 'companyWebsite',
@@ -512,6 +515,24 @@
       const el = document.getElementById('profile-social-' + s);
       if (el) el.value = social[s] || '';
     });
+
+    if (window.NlColorBundles?.wireProfileBundlePicker) {
+      window.NlColorBundles.wireProfileBundlePicker();
+      const bundleSel = document.getElementById('profile-newsletter-color-bundle');
+      if (bundleSel) {
+        bundleSel.value = profile.newsletterColorBundle || 'coastal-teal';
+        if (window.NlColorBundles.renderBundlePreview) {
+          window.NlColorBundles.renderBundlePreview(
+            document.getElementById('profile-newsletter-color-preview'),
+            bundleSel.value
+          );
+        }
+        const desc = document.getElementById('profile-newsletter-color-desc');
+        if (desc && window.NlColorBundles.getBundle) {
+          desc.textContent = window.NlColorBundles.getBundle(bundleSel.value).description || '';
+        }
+      }
+    }
 
     syncSelectAllStates();
     refreshProfileUI();
