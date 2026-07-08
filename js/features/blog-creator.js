@@ -51,6 +51,15 @@
         `$1${getRuoffPublishButtonHtml()}`
       );
     }
+    if (!patched.includes('id="blog-publish-kit-btn"')) {
+      patched = patched.replace(
+        /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
+        `$1
+        <button type="button" id="blog-publish-kit-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#00A89D]/10 transition-all flex items-center justify-center gap-2 flex-1">
+            <i class="fas fa-rocket"></i> Publish Kit
+        </button>`
+      );
+    }
     if (!patched.includes('id="blog-feedback"')) {
       patched += getBlogFeedbackHtml();
     }
@@ -201,6 +210,269 @@
 
     return result;
   }
+
+  function slugify(text) {
+    return String(text || '')
+      .toLowerCase()
+      .replace(/['']/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 80) || 'blog-post';
+  }
+
+  function stripMarkdownInline(text) {
+    return String(text || '')
+      .replace(/^#+\s+/gm, '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function extractBlogTitle(blogMarkdown) {
+    const m = String(blogMarkdown || '').match(/^#\s+(.+)$/m);
+    return m ? stripMarkdownInline(m[1]) : 'Blog Post';
+  }
+
+  function extractBlogIntro(blogMarkdown) {
+    const lines = String(blogMarkdown || '').split('\n');
+    const parts = [];
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t || t.startsWith('#') || t.startsWith('---')) continue;
+      parts.push(stripMarkdownInline(t));
+      if (parts.join(' ').length > 80) break;
+    }
+    return parts.join(' ').trim();
+  }
+
+  function extractFaqsFromBlog(blogMarkdown) {
+    const md = String(blogMarkdown || '');
+    const faqMatch = md.match(/##\s*Frequently Asked Questions\s*([\s\S]*?)(?=\n##\s|\n---\s*\n|$)/i);
+    if (!faqMatch) return [];
+
+    const block = faqMatch[1];
+    const faqs = [];
+    const bulletRe = /^[-*•]\s+\*{0,2}([^:*?\n]+)\*{0,2}[:\?]?\s*(.+)$/gm;
+    let m;
+    while ((m = bulletRe.exec(block)) !== null) {
+      const q = stripMarkdownInline(m[1]).replace(/\?$/, '') + '?';
+      const a = stripMarkdownInline(m[2]);
+      if (q.length > 8 && a.length > 10) faqs.push({ question: q, answer: a });
+    }
+    return faqs.slice(0, 8);
+  }
+
+  function buildBlogSeoData(blogMarkdown, topicInput, keyword, localArea, profile) {
+    const title = extractBlogTitle(blogMarkdown) || topicInput || 'Blog Post';
+    const intro = extractBlogIntro(blogMarkdown);
+    const metaBase = intro || `Expert mortgage guidance on ${topicInput || title} from a local loan officer.`;
+    const metaDescription = metaBase.length > 155 ? `${metaBase.slice(0, 152).trim()}…` : metaBase;
+    const slug = slugify(keyword || title);
+    const faqs = extractFaqsFromBlog(blogMarkdown);
+    const name = profile?.name || '';
+    const email = profile?.email || '';
+    const market = localArea || profile?.localArea || profile?.market || '';
+    const blogUrl = profile?.blogUrl || profile?.website || '';
+
+    const faqSchema = faqs.length ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: { '@type': 'Answer', text: f.answer },
+      })),
+    } : null;
+
+    const entityBlock = [
+      name ? `Author: ${name}` : '',
+      'Company: Ruoff Mortgage',
+      market ? `Market: ${market}` : '',
+      email ? `Email: ${email}` : '',
+      blogUrl ? `Website: ${blogUrl}` : '',
+      keyword ? `Primary keyword: ${keyword}` : '',
+    ].filter(Boolean).join('\n');
+
+    return { title, metaDescription, slug, faqs, faqSchema, entityBlock, blogUrl };
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function getBlogSeoPanelHtml(seo) {
+    const faqSchemaJson = seo.faqSchema ? JSON.stringify(seo.faqSchema, null, 2) : '';
+    const faqList = (seo.faqs || []).map((f) =>
+      `<li class="text-sm"><strong class="text-[#002B5C] dark:text-white">${escapeHtml(f.question)}</strong><br><span class="text-gray-600 dark:text-gray-400">${escapeHtml(f.answer)}</span></li>`
+    ).join('');
+
+    return `
+    <div id="blog-seo-panel" class="bg-white dark:bg-gray-900 border-2 border-[#002B5C]/20 rounded-3xl p-8 mb-8 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#002B5C] bg-[#002B5C]/10 px-2.5 py-1 rounded-full mb-2">SEO + AI VISIBILITY</span>
+                <h3 class="text-xl font-bold text-[#002B5C] dark:text-white m-0">Publish-ready SEO kit</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 m-0">Meta tags, slug, FAQ schema, and entity block — paste into your CMS or Ruoff publisher.</p>
+            </div>
+            <button type="button" id="blog-seo-copy-all-btn" class="text-sm px-5 py-2.5 rounded-2xl bg-[#002B5C] text-white font-semibold hover:bg-[#001429] transition flex items-center gap-2 self-start">
+                <i class="fas fa-copy"></i> Copy SEO bundle
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Meta title</span>
+                    <button type="button" class="blog-seo-copy-btn text-[11px] font-semibold text-[#00A89D] hover:underline" data-seo-copy="title">Copy</button>
+                </div>
+                <p id="blog-seo-title" class="text-sm font-medium text-[#002B5C] dark:text-white m-0">${escapeHtml(seo.title)}</p>
+            </div>
+            <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-500">URL slug</span>
+                    <button type="button" class="blog-seo-copy-btn text-[11px] font-semibold text-[#00A89D] hover:underline" data-seo-copy="slug">Copy</button>
+                </div>
+                <p id="blog-seo-slug" class="text-sm font-mono text-[#00A89D] m-0">/${escapeHtml(seo.slug)}</p>
+            </div>
+        </div>
+        <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 mb-4">
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Meta description <span class="font-normal">(${seo.metaDescription.length} chars)</span></span>
+                <button type="button" class="blog-seo-copy-btn text-[11px] font-semibold text-[#00A89D] hover:underline" data-seo-copy="description">Copy</button>
+            </div>
+            <p id="blog-seo-description" class="text-sm text-gray-700 dark:text-gray-300 m-0 leading-relaxed">${escapeHtml(seo.metaDescription)}</p>
+        </div>
+        <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 mb-4">
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Entity block (author + market)</span>
+                <button type="button" class="blog-seo-copy-btn text-[11px] font-semibold text-[#00A89D] hover:underline" data-seo-copy="entity">Copy</button>
+            </div>
+            <pre id="blog-seo-entity" class="text-xs text-gray-600 dark:text-gray-400 m-0 whitespace-pre-wrap font-sans">${escapeHtml(seo.entityBlock)}</pre>
+        </div>
+        ${faqSchemaJson ? `
+        <div class="p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5">
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-[#00A89D]">FAQ schema (JSON-LD)</span>
+                <button type="button" class="blog-seo-copy-btn text-[11px] font-semibold text-[#00A89D] hover:underline" data-seo-copy="schema">Copy JSON-LD</button>
+            </div>
+            <pre id="blog-seo-schema" class="text-[11px] text-gray-600 dark:text-gray-400 m-0 overflow-x-auto max-h-48 custom-modal-scroll">${escapeHtml(faqSchemaJson)}</pre>
+            ${faqList ? `<ul class="mt-3 space-y-2 m-0 pl-0 list-none border-t border-[#00A89D]/20 pt-3">${faqList}</ul>` : ''}
+        </div>` : '<p class="text-xs text-gray-400 m-0">No FAQ section detected — add an FAQ in your blog for rich results schema.</p>'}
+    </div>`;
+  }
+
+  let lastBlogSeo = null;
+  let lastBlogPublishKitId = null;
+
+  function wireBlogSeoPanel(seo) {
+    lastBlogSeo = seo;
+    const panel = document.getElementById('blog-seo-panel');
+    if (!panel) return;
+
+    const copyField = (key) => {
+      if (!lastBlogSeo) return '';
+      if (key === 'title') return lastBlogSeo.title;
+      if (key === 'slug') return lastBlogSeo.slug;
+      if (key === 'description') return lastBlogSeo.metaDescription;
+      if (key === 'entity') return lastBlogSeo.entityBlock;
+      if (key === 'schema' && lastBlogSeo.faqSchema) return JSON.stringify(lastBlogSeo.faqSchema, null, 2);
+      return '';
+    };
+
+    panel.querySelectorAll('.blog-seo-copy-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-seo-copy');
+        const text = copyField(key);
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+          if (window.showToast) window.showToast('Copied to clipboard', 'success');
+        }).catch(() => alert('Copy failed'));
+      });
+    });
+
+    const copyAllBtn = document.getElementById('blog-seo-copy-all-btn');
+    if (copyAllBtn) {
+      copyAllBtn.onclick = () => {
+        if (!lastBlogSeo) return;
+        const bundle = [
+          `Meta title: ${lastBlogSeo.title}`,
+          `Meta description: ${lastBlogSeo.metaDescription}`,
+          `Slug: /${lastBlogSeo.slug}`,
+          '',
+          '--- Entity block ---',
+          lastBlogSeo.entityBlock,
+          lastBlogSeo.faqSchema ? `\n--- FAQ JSON-LD ---\n${JSON.stringify(lastBlogSeo.faqSchema, null, 2)}` : '',
+        ].join('\n');
+        navigator.clipboard.writeText(bundle.trim()).then(() => {
+          if (window.showToast) window.showToast('Full SEO bundle copied', 'success');
+        }).catch(() => alert('Copy failed'));
+      };
+    }
+  }
+
+  window.getBlogPublishKitConfig = function getBlogPublishKitConfig() {
+    const bundle = lastBlogBundle || {};
+    const title = extractBlogTitle(bundle.blogMarkdown) || bundle.topicInput || 'Your Blog';
+    lastBlogPublishKitId = lastBlogPublishKitId || `blog_${Date.now().toString(36)}`;
+
+    return {
+      contentType: 'blog',
+      title,
+      subtitle: 'Blog + caption + Google post — one bundle, every channel.',
+      contentId: lastBlogPublishKitId,
+      tip: '<strong>Workflow:</strong> Publish the blog first, then post the matching caption and Google update the same day for maximum reach.',
+      assets: [
+        {
+          id: 'blog',
+          label: 'Blog post (plain text)',
+          hint: 'Paste into CMS or publisher',
+          icon: 'fa-file-alt',
+          text: stripMarkdownInline(bundle.blogMarkdown || ''),
+          format: 'text',
+        },
+        {
+          id: 'caption',
+          label: 'Social caption',
+          hint: 'Instagram / LinkedIn / Facebook',
+          icon: 'fa-share-alt',
+          text: bundle.captionText || '',
+          format: 'text',
+        },
+        {
+          id: 'google',
+          label: 'Google Business post',
+          hint: 'Under 1,400 characters',
+          icon: 'fab fa-google',
+          text: stripMarkdownInline(bundle.googlePostText || ''),
+          format: 'text',
+        },
+        {
+          id: 'reel',
+          label: 'Reel script',
+          hint: 'Film-ready 30–45s script',
+          icon: 'fa-video',
+          text: stripMarkdownInline(bundle.reelScriptText || ''),
+          format: 'text',
+        },
+      ].filter((a) => a.text),
+      platforms: ['ruoffpublish', 'linkedin', 'facebook', 'googlebusiness'],
+      checklist: [
+        { id: 'site', label: 'Published blog on my site / Ruoff publisher' },
+        { id: 'seo', label: 'Pasted meta title, description, and FAQ schema' },
+        { id: 'social', label: 'Posted matching social caption' },
+        { id: 'google', label: 'Posted Google Business update' },
+        { id: 'reel', label: 'Filmed or scheduled Reel from script' },
+      ],
+    };
+  };
 
   // =====================================================
   // ORIGINAL BLOG CREATOR CODE (moved verbatim)
@@ -452,6 +724,10 @@ let finalPrompt = systemPrompt;
 
     finalPrompt += `\n\nTopic: ${topicInput}`;
 
+    if (typeof window.buildGenerationRulesPromptBlock === 'function') {
+      finalPrompt += '\n' + window.buildGenerationRulesPromptBlock('blog').join('\n');
+    }
+
     if (feedback) {
         if (!lastBlogBundle) {
             alert('Generate a blog first, then use feedback to refine it.');
@@ -492,6 +768,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         const { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
 
         lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
+        lastBlogPublishKitId = `blog_${Date.now().toString(36)}`;
+
+        const seoData = buildBlogSeoData(blogMarkdown, topicInput, keywordInput, localArea, profile);
 
         // === Render output - Premium Card Style matching Social section ===
         output.innerHTML = `
@@ -522,6 +801,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             <i class="fas fa-download"></i> Download .doc
         </button>
         ${getRuoffPublishButtonHtml()}
+        <button type="button" id="blog-publish-kit-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#00A89D]/10 transition-all flex items-center justify-center gap-2 flex-1">
+            <i class="fas fa-rocket"></i> Publish Kit
+        </button>
         <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-bookmark"></i> Save Bundle to Vault
         </button>
@@ -529,6 +811,8 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             <i class="fas fa-trash"></i> Clear
         </button>
     </div>
+
+    ${getBlogSeoPanelHtml(seoData)}
 
     <!-- Social Caption Card - consistent premium card style (matching 2026 Plan supporting cards) -->
     <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 mb-8 shadow-xl">
@@ -597,6 +881,15 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 
         output.classList.remove('hidden');
 
+        wireBlogSeoPanel(seoData);
+
+        const publishKitBtn = document.getElementById('blog-publish-kit-btn');
+        if (publishKitBtn) {
+          publishKitBtn.onclick = () => {
+            if (typeof window.openBlogPublishKit === 'function') window.openBlogPublishKit();
+          };
+        }
+
         document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
         document.getElementById('download-blog-btn').onclick = downloadBlogWord;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
@@ -653,6 +946,10 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             event_label: 'Blog Generated',
             value: 1
         });
+
+        if (!feedback && typeof window.openBlogPublishKit === 'function') {
+          setTimeout(() => window.openBlogPublishKit(), 700);
+        }
 
 } catch (error) {
         console.error('[blog-creator] Generation failed:', error);
@@ -877,6 +1174,13 @@ function attachBlogOutputListeners() {
   if (googBtn) googBtn.onclick = copyGooglePostWithFormatting;
   const jumpBtn = document.getElementById('jump-publish-btn');
   if (jumpBtn) jumpBtn.onclick = copyBlogAndJumpToPublisher;
+
+  const publishKitBtn = document.getElementById('blog-publish-kit-btn');
+  if (publishKitBtn) {
+    publishKitBtn.onclick = () => {
+      if (typeof window.openBlogPublishKit === 'function') window.openBlogPublishKit();
+    };
+  }
 
   const refineBtn = document.getElementById('blog-refine-btn');
   if (refineBtn) {

@@ -2813,6 +2813,13 @@ function updateNewsletterPreflightSummary() {
         chips.push({ text: 'Referral CTA off', style: 'off' });
     }
 
+    if (typeof window.GenerationRules !== 'undefined' && typeof window.GenerationRules.getActiveLabels === 'function') {
+        const ruleLabels = window.GenerationRules.getActiveLabels();
+        if (ruleLabels.length) {
+            chips.push({ text: `Rules: ${ruleLabels.join(' · ')}`, style: 'meta' });
+        }
+    }
+
     const anyContent = Object.values(sel.contentSections).some(Boolean) || sel.personal;
     if (!anyContent) warnings.push('No content sections or Personal Update selected — your newsletter may be very thin.');
 
@@ -2873,6 +2880,8 @@ function wireNewsletterLiveFeedback() {
             refresh();
         });
     }
+
+    document.addEventListener('generation-rules-change', refresh);
 
     refresh();
 }
@@ -3087,6 +3096,9 @@ async function generateNewsletter(feedback = '') {
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
                 '- Section direction & extra instructions:\n' + getCombinedSpecificTopicsForPrompt(selections),
+                ...(typeof window.buildGenerationRulesPromptBlock === 'function'
+                    ? window.buildGenerationRulesPromptBlock('newsletter')
+                    : []),
                 '',
                 '**SECTION DIRECTION & ARTICLE URL RULE:**',
                 '- Per-section direction fields map directly to Market Updates, Industry News, Local Update, and Recipes — use each only in its named section.',
@@ -3458,6 +3470,10 @@ if (postSelections?.includeReferral) {
 
             if (typeof confetti === 'function') {
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            }
+
+            if (!feedback && typeof window.openNewsletterPublishKit === 'function') {
+                setTimeout(() => window.openNewsletterPublishKit(), 600);
             }
         }
 
