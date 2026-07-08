@@ -62,26 +62,33 @@
 
   function ensureModal() {
     let modal = document.getElementById(MODAL_ID);
-    if (modal) return modal;
+    if (modal) {
+      const content = modal.querySelector('.modal-content');
+      if (content) {
+        content.classList.remove('max-w-lg', 'max-w-md', 'max-w-xl');
+        content.classList.add('max-w-3xl');
+      }
+      return modal;
+    }
 
     modal = document.createElement('div');
     modal.id = MODAL_ID;
     modal.setAttribute('aria-hidden', 'true');
     modal.className = 'modal app-modal-overlay hidden fixed inset-0 bg-black/60 z-[100000] items-center justify-center p-4';
     modal.innerHTML = `
-      <div class="modal-content bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[92vh] flex flex-col" role="dialog" aria-labelledby="ns-modal-title">
-        <div class="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+      <div class="modal-content bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[92vh] flex flex-col" role="dialog" aria-labelledby="ns-modal-title">
+        <div class="px-6 md:px-8 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
               <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-2.5 py-1 rounded-full mb-2">WHEN YOU\'RE READY</span>
-              <h3 id="ns-modal-title" class="text-xl md:text-2xl font-bold text-[#002B5C] dark:text-white m-0 leading-tight">Next Steps</h3>
+              <h3 id="ns-modal-title" class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white m-0 leading-tight">Next Steps</h3>
               <p id="ns-modal-subtitle" class="text-sm text-gray-500 dark:text-gray-400 mt-1.5 m-0 leading-relaxed"></p>
             </div>
             <button type="button" data-ns-close class="text-3xl leading-none text-gray-400 hover:text-red-500 transition flex-shrink-0" aria-label="Close">&times;</button>
           </div>
         </div>
-        <div id="ns-modal-body" class="p-6 overflow-y-auto flex-1 space-y-5 custom-modal-scroll"></div>
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 flex-shrink-0">
+        <div id="ns-modal-body" class="p-6 md:p-8 overflow-y-auto flex-1 space-y-5 custom-modal-scroll"></div>
+        <div class="px-6 md:px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 flex-shrink-0">
           <button type="button" data-ns-close class="w-full px-5 py-3 rounded-2xl bg-[#002B5C] text-white font-semibold text-sm hover:bg-[#001429] transition">Close</button>
         </div>
       </div>`;
