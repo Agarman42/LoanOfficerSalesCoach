@@ -3010,40 +3010,213 @@ const NL_CUSTOM_CONTENT_BLOCKS = {
     puzzle: { checkboxId: 'nl-puzzle', blockId: 'brain-teaser-panel', shortLabel: 'Brain Teaser' }
 };
 
-const NL_SPECIFIC_SECTION_HINTS = [
-    { id: 'nl-market', label: 'Market Updates', example: 'Q1 inventory up 12% in Fort Wayne — or Market Updates: https://…' },
-    { id: 'nl-industry', label: 'Industry News', example: 'NAR membership trends — or Industry: https://…' },
-    { id: 'nl-local', label: 'Local Update', example: 'Komets playoff Sat 3/15 — or Local: https://…' },
-    { id: 'nl-recipes', label: 'Recipes', example: 'mulled wine recipe — or Recipes: https://…' }
+const NL_CORE_DIRECTION_SECTIONS = [
+    { key: 'market', checkboxId: 'nl-market', inputId: 'nl-direction-market', label: 'Market Updates' },
+    { key: 'industry', checkboxId: 'nl-industry', inputId: 'nl-direction-industry', label: 'Industry News' },
+    { key: 'local', checkboxId: 'nl-local', inputId: 'nl-direction-local', label: 'Local Update' },
+    { key: 'recipes', checkboxId: 'nl-recipes', inputId: 'nl-direction-recipes', label: 'Recipes' }
 ];
 
+function looksLikeUrl(text) {
+    const t = String(text || '').trim();
+    return /^https?:\/\//i.test(t) || /^www\./i.test(t);
+}
+
+function getCoreSectionDirections() {
+    const out = {};
+    NL_CORE_DIRECTION_SECTIONS.forEach((cfg) => {
+        out[cfg.key] = (document.getElementById(cfg.inputId)?.value || '').trim();
+    });
+    return out;
+}
+
+function truncateDirectionPreview(text, max = 42) {
+    const t = String(text || '').trim();
+    if (!t) return '';
+    if (t.length <= max) return t;
+    return `${t.slice(0, max - 1)}…`;
+}
+
+function buildCoreSectionDirectionsPromptLines(selections) {
+    const lines = [];
+    const directions = getCoreSectionDirections();
+    const directed = NL_CORE_DIRECTION_SECTIONS.filter((cfg) => {
+        return selections?.contentSections?.[cfg.key] && directions[cfg.key];
+    });
+
+    if (!directed.length) {
+        lines.push('- Per-section direction: none provided for core sections — use credible research and the agent\'s location for Market, Industry, Local, and Recipes.');
+        return lines;
+    }
+
+    lines.push('**PER-SECTION DIRECTION (user-provided — prioritize over generic research):**');
+    directed.forEach((cfg) => {
+        const val = directions[cfg.key];
+        const urlNote = looksLikeUrl(val)
+            ? ' Treat as a source URL: summarize the key takeaway, cite the source by name, and include a clickable hyperlink in that section\'s Sources line.'
+            : ' Use as the topic/angle for this section — be specific, timely, and local where applicable.';
+        lines.push(`- ${cfg.label}: "${val}"${urlNote}`);
+    });
+
+    const undirectedIncluded = NL_CORE_DIRECTION_SECTIONS.filter((cfg) => {
+        return selections?.contentSections?.[cfg.key] && !directions[cfg.key];
+    });
+    if (undirectedIncluded.length) {
+        lines.push(`- No direction provided for: ${undirectedIncluded.map((c) => c.label).join(', ')} — research and write these sections using location + credible sources.`);
+    }
+
+    return lines;
+}
+
+function getCombinedSpecificTopicsForPrompt(selections) {
+    const globalExtra = (document.getElementById('nl-specific')?.value || '').trim();
+    const coreLines = buildCoreSectionDirectionsPromptLines(selections);
+    const parts = [];
+    if (coreLines.length) parts.push(coreLines.join('\n'));
+    if (globalExtra) parts.push(`Global extra instructions: "${globalExtra}"`);
+    return parts.length ? parts.join('\n\n') : 'None';
+}
+
+function setCoreDirectionPanelOpen(card, open) {
+    if (!card) return;
+    const panel = card.querySelector('.nl-core-direction-panel');
+    const toggle = card.querySelector('.nl-core-direction-toggle');
+    const chevron = card.querySelector('.nl-core-direction-chevron');
+    if (!panel || !toggle) return;
+    panel.classList.toggle('hidden', !open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (chevron) chevron.classList.toggle('rotate-180', open);
+    card.dataset.nlDirectionOpen = open ? '1' : '0';
+}
+
+function updateCoreSectionDirectionUI() {
+    const directions = getCoreSectionDirections();
+    let checkedCount = 0;
+    let directedCount = 0;
+
+    NL_CORE_DIRECTION_SECTIONS.forEach((cfg) => {
+        const cb = document.getElementById(cfg.checkboxId);
+        const card = document.querySelector(`.nl-core-section-card[data-nl-core-key="${cfg.key}"]`);
+        if (!card) return;
+
+        const checked = !!cb?.checked;
+        const directed = checked && !!directions[cfg.key];
+        const wrap = card.querySelector('.nl-core-direction-wrap');
+        const badge = card.querySelector('.nl-core-directed-badge');
+        const toggleLabel = card.querySelector('.nl-core-direction-toggle-label');
+        const input = document.getElementById(cfg.inputId);
+
+        if (checked) checkedCount += 1;
+        if (directed) directedCount += 1;
+
+        card.classList.toggle('opacity-50', !checked);
+        card.classList.toggle('border-[#00A89D]/50', checked && directed);
+        card.classList.toggle('ring-1', checked && directed);
+        card.classList.toggle('ring-[#00A89D]/25', checked && directed);
+        card.classList.toggle('shadow-sm', checked && directed);
+
+        if (wrap) wrap.classList.toggle('hidden', !checked);
+        if (badge) badge.classList.toggle('hidden', !directed);
+
+        if (toggleLabel) {
+            if (!checked) toggleLabel.textContent = 'Add direction (optional)';
+            else if (directed) toggleLabel.textContent = card.dataset.nlDirectionOpen === '1' ? 'Hide direction' : 'Edit direction ✓';
+            else toggleLabel.textContent = card.dataset.nlDirectionOpen === '1' ? 'Hide direction' : 'Add direction (optional)';
+        }
+
+        if (input) {
+            input.classList.toggle('border-[#00A89D]/60', directed);
+            input.classList.toggle('bg-[#00A89D]/5', directed);
+        }
+
+        if (!checked) setCoreDirectionPanelOpen(card, false);
+    });
+
+    const progressEl = document.getElementById('nl-core-direction-progress');
+    if (progressEl) {
+        if (!checkedCount) {
+            progressEl.classList.add('hidden');
+            progressEl.textContent = '';
+        } else if (!directedCount) {
+            progressEl.classList.remove('hidden');
+            progressEl.innerHTML = '<span class="text-gray-500">Tip: add a link or topic under any section for a sharper edition</span>';
+        } else if (directedCount === checkedCount) {
+            progressEl.classList.remove('hidden');
+            progressEl.innerHTML = `<span class="text-[#00A89D] font-semibold">✨ All ${checkedCount} core section${checkedCount === 1 ? '' : 's'} directed — excellent!</span>`;
+        } else {
+            progressEl.classList.remove('hidden');
+            progressEl.innerHTML = `<span class="text-[#00A89D] font-semibold">${directedCount} of ${checkedCount}</span> <span class="text-gray-500">sections directed — more direction = more you</span>`;
+        }
+    }
+}
+
+async function pasteUrlIntoDirectionField(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    try {
+        const text = (await navigator.clipboard.readText() || '').trim();
+        if (!text) {
+            window.notifyUser('Clipboard is empty — copy an article link first.', 'warning', 2800);
+            return;
+        }
+        const isUrl = looksLikeUrl(text) || /^[^\s]+\.[^\s]{2,}/.test(text);
+        if (!isUrl) {
+            window.notifyUser('That doesn\'t look like a link — paste a URL or type a topic in the field instead.', 'warning', 3200);
+            return;
+        }
+        const normalized = /^https?:\/\//i.test(text) ? text : `https://${text}`;
+        input.value = normalized;
+        const card = input.closest('.nl-core-section-card');
+        if (card) setCoreDirectionPanelOpen(card, true);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        window.notifyUser('Link pasted — we\'ll summarize and cite it in that section.', 'success', 2600);
+    } catch (e) {
+        input.focus();
+        window.notifyUser('Tap the field and paste your link (Ctrl+V / ⌘V).', 'info', 3000);
+    }
+}
+
+function wireCoreSectionDirectionControls() {
+    const grid = document.getElementById('nl-core-sections-grid');
+    if (!grid || grid.dataset.nlCoreDirectionWired === '1') return;
+    grid.dataset.nlCoreDirectionWired = '1';
+
+    grid.addEventListener('click', (e) => {
+        const pasteBtn = e.target.closest('.nl-core-paste-url-btn');
+        if (pasteBtn) {
+            e.preventDefault();
+            pasteUrlIntoDirectionField(pasteBtn.getAttribute('data-nl-paste-for'));
+            return;
+        }
+
+        const toggle = e.target.closest('.nl-core-direction-toggle');
+        if (toggle) {
+            e.preventDefault();
+            const card = toggle.closest('.nl-core-section-card');
+            const open = card?.dataset.nlDirectionOpen !== '1';
+            setCoreDirectionPanelOpen(card, open);
+            updateCoreSectionDirectionUI();
+            if (open) {
+                const input = card.querySelector('.nl-core-direction-input');
+                window.setTimeout(() => input?.focus(), 80);
+            }
+        }
+    });
+
+    NL_CORE_DIRECTION_SECTIONS.forEach((cfg) => {
+        const cb = document.getElementById(cfg.checkboxId);
+        cb?.addEventListener('change', () => {
+            updateCoreSectionDirectionUI();
+        });
+    });
+}
+
 function updateSpecificTopicsPlaceholder() {
-    const ta = document.getElementById('nl-specific');
     const hintEl = document.getElementById('nl-specific-hint');
-    if (!ta) return;
-
-    const active = NL_SPECIFIC_SECTION_HINTS.filter((h) => document.getElementById(h.id)?.checked);
-    const langNote = 'Language requests work too (e.g. "Prepare the full newsletter in Spanish").';
-
-    let placeholder;
-    if (!active.length) {
-        placeholder = `Give specific direction for any sections you check — stats, headlines, or article URLs (e.g. Market Updates: https://…). ${langNote}`;
-    } else if (active.length === 1) {
-        placeholder = `e.g., ${active[0].label}: ${active[0].example}. ${langNote}`;
-    } else {
-        const parts = active.slice(0, 3).map((h) => `${h.label}: ${h.example}`);
-        const suffix = active.length > 3 ? '; …' : '';
-        placeholder = `e.g., ${parts.join('; ')}${suffix}. ${langNote}`;
-    }
-
-    ta.placeholder = placeholder;
-
     if (hintEl) {
-        const urlNote = 'Article URLs you paste here will be cited and linked in the matching section.';
-        hintEl.textContent = !active.length
-            ? `Give very specific direction for the sections you checked — exact names, dates, stats, headlines, or article URLs. ${urlNote}`
-            : `Tailored to your ${active.length} checked section${active.length === 1 ? '' : 's'}: ${active.map((h) => h.label).join(', ')}. ${urlNote}`;
+        hintEl.textContent = 'Whole-newsletter tweaks only — language, tone emphasis, or cross-section notes. Per-section topics live in the cards above.';
     }
+    updateCoreSectionDirectionUI();
 }
 
 function scrollToNewsletterCustomContent(sectionKey) {
@@ -3237,6 +3410,9 @@ function buildNewsletterSectionsPrompt(selections) {
     } else {
         lines.push('- Referral CTA (EXCLUDE): do NOT include any referral ask, "Know Someone" heading, referral button, or [REFERRAL CTA PLACEHOLDER]. End with personal note / video / blog then go straight to the footer disclaimer.');
     }
+
+    lines.push('');
+    lines.push(...buildCoreSectionDirectionsPromptLines(selections));
 
     return lines.join('\n');
 }
@@ -3530,9 +3706,17 @@ function updateNewsletterPreflightSummary() {
         const colorBundle = window.NlColorBundles.getActiveBundle();
         chips.push({ text: `Colors · ${colorBundle.label}`, style: 'meta' });
     }
+    const coreDirections = getCoreSectionDirections();
     Object.entries(NL_CONTENT_SECTIONS).forEach(([key, cfg]) => {
         if (!sel.contentSections[key]) return;
-        chips.push({ text: cfg.label, style: 'included', removeId: cfg.id });
+        const isCore = NL_CORE_DIRECTION_SECTIONS.some((c) => c.key === key);
+        const directed = isCore && !!coreDirections[key];
+        let chipText = cfg.label;
+        if (directed) {
+            const preview = truncateDirectionPreview(coreDirections[key], 36);
+            chipText = `✨ ${cfg.label}${preview ? ` · ${preview}` : ''}`;
+        }
+        chips.push({ text: chipText, style: directed ? 'personal' : 'included', removeId: cfg.id });
     });
     if (sel.personal) {
         const len = document.getElementById('nl-personal-text')?.value.trim().length || 0;
@@ -3936,7 +4120,7 @@ async function generateNewsletter(feedback = '') {
                 '- Good style examples: "The Local Edge", "Keys & Community", "Your Market Advantage", "Neighborhood Notes", "Home & Happenings", "The Listing Life", "Move With Confidence", "Local Market Pulse".',
                 '',
                 '**LANGUAGE RULE (important):**',
-                '- Check the "Specific Topics" field (and any other instructions). If the user requests a different language there (e.g. "Prepare the full newsletter in Spanish", "Generate in French", "in German", "en español", "tout en français"), output the **entire newsletter HTML** (all sections, personal note, headlines, body text, etc.) fully in that requested language.',
+                '- Check per-section direction fields and "Extra Instructions". If the user requests a different language (e.g. "Prepare the full newsletter in Spanish", "Generate in French", "in German", "en español", "tout en français"), output the **entire newsletter HTML** (all sections, personal note, headlines, body text, etc.) fully in that requested language.',
                 '- Translate naturally while keeping the exact required structure, teal accents, tables, placeholders, and compliance disclaimers.',
                 '- If no language is requested, default to English.',
                 '',
@@ -3964,7 +4148,7 @@ async function generateNewsletter(feedback = '') {
                 '- Personal update: "' + personalUpdateText + '"',
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
-                '- Specific topics / special requests (including any language requests such as "in Spanish" or "prepare the newsletter in French"): "' + (document.getElementById('nl-specific').value || 'None') + '"',
+                '- Section direction & extra instructions:\n' + getCombinedSpecificTopicsForPrompt(selections),
                 '',
                 ...buildNewsletterLengthPromptBlock(),
                 '',
@@ -4819,6 +5003,7 @@ function copyForOutlook() {
     // in the code above. They will run when this module executes.
 
     try { wireNewsletterLiveFeedback(); } catch (e) {}
+    try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
     try {
       if (window.NlColorBundles?.wireNewsletterBundlePicker) {

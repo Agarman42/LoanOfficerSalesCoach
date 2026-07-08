@@ -41,7 +41,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260706-realtor-v273">
+    <link rel="stylesheet" href="css/main.css?v=20260708-realtor-v275">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260706-realtor-v273"></script>
@@ -6624,7 +6624,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Complete your profile once</strong> (name, email, market, branding, voice). Everything else on this page is edition-specific — no need to re-enter contact info.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, hobby, family moment, or Sunday reset — it humanizes everything else.</span></div>
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use Specific Topics / Local Headlines.</strong> Give the AI exact events, stats, or recipes. Generic = lower engagement; hyper-local and timely = shares and replies.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Add direction to core sections.</strong> Tap <em>Add direction</em> under Market, Local, etc. — a link or one-line topic makes each issue feel written for <em>your</em> market, not generic AI filler.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pick a sustainable cadence</strong> (monthly is fine). Use the generator every time so the voice and mix stay consistent. Block the send date in your Weekly Win Plan.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Repurpose winners.</strong> A great issue becomes 3–4 social posts, a Reel script, or a blog angle. The output is designed for this — copy the sections and save ideas to your vault.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>End with the soft CTA every time.</strong> “Know anyone thinking about buying or selling? Happy to help — no pressure.” Track what gets forwarded or replied to and double down.</span></div>
@@ -6712,14 +6712,111 @@
         </h3>
 
         <div class="mb-6">
-          <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 mb-3 flex items-center gap-2">
-            <i class="fas fa-newspaper text-[#00A89D] text-[10px]"></i> Core Content
-          </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-market" checked class="w-6 h-6 text-[#00A89D] flex-shrink-0"> Market Updates 📈</label>
-            <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-industry" checked class="w-6 h-6 text-[#00A89D] flex-shrink-0"> Industry News 📰</label>
-            <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-local" checked class="w-6 h-6 text-[#00A89D] flex-shrink-0"> Local Update 🎉</label>
-            <label class="flex items-center gap-3 text-lg cursor-pointer p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]"><input type="checkbox" id="nl-recipes" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> Recipes 🍳</label>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 m-0 flex items-center gap-2">
+              <i class="fas fa-newspaper text-[#00A89D] text-[10px]"></i> Core Content
+            </p>
+            <p id="nl-core-direction-progress" class="text-xs text-gray-500 dark:text-gray-400 m-0 hidden"></p>
+          </div>
+          <div class="mb-4 p-4 rounded-2xl bg-gradient-to-r from-[#00A89D]/8 via-[#00A89D]/4 to-transparent border border-[#00A89D]/20">
+            <p class="text-sm text-gray-700 dark:text-gray-300 m-0 leading-relaxed">
+              <span class="font-semibold text-[#002B5C] dark:text-white">Optional but powerful ✨</span>
+              — We can write every section for you. Add a link or quick topic when you have one; that's when your newsletter feels unmistakably <em>yours</em>.
+            </p>
+          </div>
+          <div id="nl-core-sections-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="nl-core-section-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all duration-200" data-nl-core-key="market">
+              <div class="flex items-start gap-2 p-3">
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0">
+                  <input type="checkbox" id="nl-market" checked class="w-6 h-6 text-[#00A89D] flex-shrink-0 mt-0.5">
+                  <span class="min-w-0"><span class="font-medium">Market Updates</span> <span aria-hidden="true">📈</span></span>
+                </label>
+                <span class="nl-core-directed-badge hidden flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-[#00A89D]/15 text-[#00A89D]">✓ Directed</span>
+              </div>
+              <div class="nl-core-direction-wrap hidden px-3 pb-3">
+                <button type="button" class="nl-core-direction-toggle w-full flex items-center justify-between gap-2 text-left text-sm font-semibold text-[#00A89D] hover:text-[#008F85] py-2 px-3 rounded-xl border border-dashed border-[#00A89D]/40 hover:border-[#00A89D] hover:bg-[#00A89D]/5 transition" aria-expanded="false">
+                  <span class="nl-core-direction-toggle-label">Add direction (optional)</span>
+                  <i class="fas fa-chevron-down text-[10px] nl-core-direction-chevron transition-transform duration-200"></i>
+                </button>
+                <div class="nl-core-direction-panel hidden mt-2 space-y-2">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 m-0">Topic, stat, or article URL — we'll cite and link sources in this section.</p>
+                  <textarea id="nl-direction-market" rows="2" maxlength="500" placeholder="e.g., Q1 inventory up 12% — or paste a HousingWire / NAR article link" class="nl-core-direction-input w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30 resize-y min-h-[4.5rem]"></textarea>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="nl-core-paste-url-btn text-xs px-3 py-1.5 rounded-full border border-[#002B5C]/20 text-[#002B5C] dark:text-gray-200 font-semibold hover:bg-[#002B5C]/5 transition" data-nl-paste-for="nl-direction-market"><i class="fas fa-paste mr-1"></i>Paste link</button>
+                    <span class="text-[11px] text-gray-400">Skip it — we'll research credible sources</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="nl-core-section-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all duration-200" data-nl-core-key="industry">
+              <div class="flex items-start gap-2 p-3">
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0">
+                  <input type="checkbox" id="nl-industry" checked class="w-6 h-6 text-[#00A89D] flex-shrink-0 mt-0.5">
+                  <span class="min-w-0"><span class="font-medium">Industry News</span> <span aria-hidden="true">📰</span></span>
+                </label>
+                <span class="nl-core-directed-badge hidden flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-[#00A89D]/15 text-[#00A89D]">✓ Directed</span>
+              </div>
+              <div class="nl-core-direction-wrap hidden px-3 pb-3">
+                <button type="button" class="nl-core-direction-toggle w-full flex items-center justify-between gap-2 text-left text-sm font-semibold text-[#00A89D] hover:text-[#008F85] py-2 px-3 rounded-xl border border-dashed border-[#00A89D]/40 hover:border-[#00A89D] hover:bg-[#00A89D]/5 transition" aria-expanded="false">
+                  <span class="nl-core-direction-toggle-label">Add direction (optional)</span>
+                  <i class="fas fa-chevron-down text-[10px] nl-core-direction-chevron transition-transform duration-200"></i>
+                </button>
+                <div class="nl-core-direction-panel hidden mt-2 space-y-2">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 m-0">Headline you care about or article to summarize.</p>
+                  <textarea id="nl-direction-industry" rows="2" maxlength="500" placeholder="e.g., NAR membership trends — or paste an industry article link" class="nl-core-direction-input w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30 resize-y min-h-[4.5rem]"></textarea>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="nl-core-paste-url-btn text-xs px-3 py-1.5 rounded-full border border-[#002B5C]/20 text-[#002B5C] dark:text-gray-200 font-semibold hover:bg-[#002B5C]/5 transition" data-nl-paste-for="nl-direction-industry"><i class="fas fa-paste mr-1"></i>Paste link</button>
+                    <span class="text-[11px] text-gray-400">Skip it — we'll pick timely industry news</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="nl-core-section-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all duration-200" data-nl-core-key="local">
+              <div class="flex items-start gap-2 p-3">
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0">
+                  <input type="checkbox" id="nl-local" checked class="w-6 h-6 text-[#00A89D] flex-shrink-0 mt-0.5">
+                  <span class="min-w-0"><span class="font-medium">Local Update</span> <span aria-hidden="true">🎉</span></span>
+                </label>
+                <span class="nl-core-directed-badge hidden flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-[#00A89D]/15 text-[#00A89D]">✓ Directed</span>
+              </div>
+              <div class="nl-core-direction-wrap hidden px-3 pb-3">
+                <button type="button" class="nl-core-direction-toggle w-full flex items-center justify-between gap-2 text-left text-sm font-semibold text-[#00A89D] hover:text-[#008F85] py-2 px-3 rounded-xl border border-dashed border-[#00A89D]/40 hover:border-[#00A89D] hover:bg-[#00A89D]/5 transition" aria-expanded="false">
+                  <span class="nl-core-direction-toggle-label">Add direction (optional)</span>
+                  <i class="fas fa-chevron-down text-[10px] nl-core-direction-chevron transition-transform duration-200"></i>
+                </button>
+                <div class="nl-core-direction-panel hidden mt-2 space-y-2">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 m-0">Event, opening, or neighborhood highlight — hyper-local wins.</p>
+                  <textarea id="nl-direction-local" rows="2" maxlength="500" placeholder="e.g., Komets playoff Sat 3/15 — or paste a local event link" class="nl-core-direction-input w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30 resize-y min-h-[4.5rem]"></textarea>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="nl-core-paste-url-btn text-xs px-3 py-1.5 rounded-full border border-[#002B5C]/20 text-[#002B5C] dark:text-gray-200 font-semibold hover:bg-[#002B5C]/5 transition" data-nl-paste-for="nl-direction-local"><i class="fas fa-paste mr-1"></i>Paste link</button>
+                    <span class="text-[11px] text-gray-400">Skip it — we'll spotlight your market area</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="nl-core-section-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all duration-200" data-nl-core-key="recipes">
+              <div class="flex items-start gap-2 p-3">
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0">
+                  <input type="checkbox" id="nl-recipes" class="w-6 h-6 text-[#00A89D] flex-shrink-0 mt-0.5">
+                  <span class="min-w-0"><span class="font-medium">Recipes</span> <span aria-hidden="true">🍳</span></span>
+                </label>
+                <span class="nl-core-directed-badge hidden flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-[#00A89D]/15 text-[#00A89D]">✓ Directed</span>
+              </div>
+              <div class="nl-core-direction-wrap hidden px-3 pb-3">
+                <button type="button" class="nl-core-direction-toggle w-full flex items-center justify-between gap-2 text-left text-sm font-semibold text-[#00A89D] hover:text-[#008F85] py-2 px-3 rounded-xl border border-dashed border-[#00A89D]/40 hover:border-[#00A89D] hover:bg-[#00A89D]/5 transition" aria-expanded="false">
+                  <span class="nl-core-direction-toggle-label">Add direction (optional)</span>
+                  <i class="fas fa-chevron-down text-[10px] nl-core-direction-chevron transition-transform duration-200"></i>
+                </button>
+                <div class="nl-core-direction-panel hidden mt-2 space-y-2">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 m-0">Dish name, vibe, or recipe link for this edition.</p>
+                  <textarea id="nl-direction-recipes" rows="2" maxlength="500" placeholder="e.g., cozy slow-cooker chili — or paste a recipe URL" class="nl-core-direction-input w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30 resize-y min-h-[4.5rem]"></textarea>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="nl-core-paste-url-btn text-xs px-3 py-1.5 rounded-full border border-[#002B5C]/20 text-[#002B5C] dark:text-gray-200 font-semibold hover:bg-[#002B5C]/5 transition" data-nl-paste-for="nl-direction-recipes"><i class="fas fa-paste mr-1"></i>Paste link</button>
+                    <span class="text-[11px] text-gray-400">Skip it — we'll pick a seasonal favorite</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -6760,18 +6857,11 @@
         </div>
 
         <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
-          <label class="block text-lg font-semibold text-[#00A89D] mb-1">Specific Topics / Headlines / Recipes (Optional)</label>
-          <p id="nl-specific-hint" class="text-xs text-gray-500 mb-3">Give very specific direction for the sections you checked — exact names, dates, stats, or headlines. Prevents generic AI filler.</p>
-          <div class="mb-3 p-3 rounded-xl bg-[#00A89D]/5 border border-[#00A89D]/25">
-            <p class="text-xs text-gray-600 dark:text-gray-400 m-0 leading-relaxed">
-              <strong class="text-[#002B5C] dark:text-white"><i class="fas fa-link text-[#00A89D] mr-1"></i>Share article URLs here.</strong>
-              Paste a link and label which section it belongs in — e.g. <em>Market Updates: https://…</em> or <em>Industry: HousingWire article on inventory</em>.
-              We will summarize the key takeaway, <strong>cite the source by name</strong>, and add a <strong>clickable link</strong> in that section of your newsletter.
-            </p>
-          </div>
-          <textarea id="nl-specific" rows="3" placeholder="Give specific direction for any sections you check above — exact names, dates, stats, or headlines." 
-                    class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50"></textarea>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Language requests in this box (Spanish, French, etc.) will make the AI generate the entire newsletter in that language.</p>
+          <label class="block text-lg font-semibold text-[#00A89D] mb-1">Extra Instructions <span class="text-sm font-normal text-gray-500">(optional)</span></label>
+          <p id="nl-specific-hint" class="text-xs text-gray-500 mb-3">Whole-newsletter tweaks only — language, tone emphasis, or anything that applies to multiple sections. Per-section topics live above.</p>
+          <textarea id="nl-specific" rows="2" placeholder="e.g., Emphasize first-time buyers · Prepare the full newsletter in Spanish" 
+                    class="w-full p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:border-[#00A89D] focus:ring-4 focus:ring-[#00A89D]/50"></textarea>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Language requests here apply to the entire newsletter (all sections).</p>
         </div>
 
       </div>
@@ -7081,7 +7171,7 @@
           <div class="mb-4">
             <span id="nl-preflight-ready-badge" class="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[2px] text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 rounded-full mb-2">REVIEW SETUP</span>
             <h4 class="text-base sm:text-lg font-bold text-[#002B5C] dark:text-white m-0">Your edition at a glance</h4>
-            <p class="text-xs text-gray-500 mt-1 m-0">Click × on a chip to uncheck that section. Order at the bottom: signature → referral → disclaimer.</p>
+            <p class="text-xs text-gray-500 mt-1 m-0">Click × on a chip to uncheck that section. <span class="text-[#00A89D] font-medium">✨ directed</span> = you steered that core section. Order: signature → referral → disclaimer.</p>
           </div>
           <div id="nl-preflight-chips" class="flex flex-wrap gap-2 min-h-[28px]"></div>
           <ul id="nl-preflight-warnings" class="hidden mt-4 space-y-1.5 text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl px-4 py-3 list-disc pl-8 m-0"></ul>
@@ -13750,7 +13840,7 @@ try {
 } catch (e) {}
 </script>
 <script src="js/features/newsletter-color-bundles.js?v=20260707-realtor-v303"></script>
-<script src="js/features/newsletter-generator.js?v=20260707-realtor-v312"></script>
+<script src="js/features/newsletter-generator.js?v=20260707-realtor-v313"></script>
 <script src="js/features/ai-chat.js?v=20260706-realtor-v281"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'realtor';</script>
 <script src="js/features/translation-tool.js?v=20260706-realtor-v273"></script>
@@ -15433,7 +15523,7 @@ if (document.readyState === 'loading') {
   Agent Sales Coach • v… • … • Render
 </div>
 <script src="js/features/section-bottom-banners.js?v=20260706-realtor-v273"></script>
-<script src="js/app-version.js?v=20260706-realtor-v273"></script>
+<script src="js/app-version.js?v=20260708-realtor-v275"></script>
 
 </body>
 </html>
