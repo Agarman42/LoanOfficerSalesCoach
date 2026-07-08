@@ -202,8 +202,8 @@ Option 3:
                     <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white m-0">Pick your favorite — then publish</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 m-0">Each option has a different hook and energy.</p>
                 </div>
-                <button type="button" id="social-publish-kit-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 hover:bg-[#00A89D]/10 transition self-start">
-                    <i class="fas fa-rocket"></i> Publish Kit
+                <button type="button" id="social-next-steps-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 hover:bg-[#00A89D]/10 transition self-start">
+                    <i class="fas fa-list-check"></i> Next Steps
                 </button>
             </div>
         ` + posts.map((post, index) => `
@@ -234,20 +234,16 @@ Option 3:
         output.dataset.post1 = posts[1];
         output.dataset.post2 = posts[2];
 
-        const publishKitBtn = document.getElementById('social-publish-kit-btn');
-        if (publishKitBtn) {
-          publishKitBtn.onclick = () => {
-            if (typeof window.openSocialPublishKit === 'function') {
-              window.openSocialPublishKit(posts, 0);
-            }
+        window._socialNextStepsId = `social_${Date.now().toString(36)}`;
+
+        const nextStepsBtn = document.getElementById('social-next-steps-btn');
+        if (nextStepsBtn) {
+          nextStepsBtn.onclick = () => {
+            if (typeof window.openSocialNextSteps === 'function') window.openSocialNextSteps();
           };
         }
 
         output.classList.remove('hidden');
-
-        if (typeof window.openSocialPublishKit === 'function') {
-          setTimeout(() => window.openSocialPublishKit(posts, 0), 600);
-        }
 
         gtag('event', 'generate_social_post', {
             event_category: 'Tool Usage',

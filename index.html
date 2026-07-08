@@ -3353,9 +3353,6 @@
 
     </div>
 
-    <!-- Generation Rules -->
-    <div id="social-generation-rules-mount" class="mb-8 max-w-3xl mx-auto"></div>
-
     <!-- Generate Button -->
     <div class="text-center mb-12">
         <button onclick="generateSocialPost()" 
@@ -4971,9 +4968,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Generation Rules -->
-    <div id="blog-generation-rules-mount" class="mb-8 max-w-3xl mx-auto"></div>
 
     <!-- Generate Button Area -->
     <div class="text-center mb-12">
@@ -7142,9 +7136,6 @@
             <p id="nl-custom-content-footer" class="text-xs text-gray-500 mt-4">Curated lists avoid repeats until you hit <strong>Start fresh</strong>. Only checked sections appear here and in your newsletter.</p>
         </details>
 
-      <!-- Generation Rules (shared module) -->
-      <div id="nl-generation-rules-mount" class="mb-8 max-w-3xl mx-auto"></div>
-
       <!-- Pre-flight summary -->
       <div id="nl-preflight-summary" class="mb-6 max-w-3xl mx-auto">
         <div class="rounded-3xl border-2 border-[#00A89D]/30 bg-gradient-to-br from-[#00A89D]/5 to-white dark:from-[#00A89D]/10 dark:to-gray-900 p-5 sm:p-6 shadow-sm">
@@ -7181,6 +7172,10 @@
               </div>
               <h3 class="text-3xl md:text-4xl font-bold text-[#F15A29]">Your Custom Newsletter</h3>
               <p class="text-gray-600 dark:text-gray-400 mt-1">Ready to send — beautiful, compliant, and personal.</p>
+              <p id="nl-quality-note" class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-2 flex items-start gap-2 leading-relaxed max-w-xl">
+                <i class="fas fa-shield-alt text-[#00A89D] mt-0.5 flex-shrink-0"></i>
+                <span>Built for compliance (no specific rate quotes), credible sources, local relevance, and clear structure for search &amp; AI visibility.</span>
+              </p>
             </div>
           </div>
 
@@ -7191,8 +7186,8 @@
             <button onclick="copyForOutlook()" class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               📋 Copy for Outlook / Email
             </button>
-            <button type="button" onclick="if(typeof window.openNewsletterPublishKit==='function')window.openNewsletterPublishKit();" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition hover:bg-[#00A89D]/10">
-              <i class="fas fa-rocket"></i> Publish Kit
+            <button type="button" onclick="if(typeof window.openNewsletterNextSteps==='function')window.openNewsletterNextSteps();" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition hover:bg-[#00A89D]/10">
+              <i class="fas fa-list-check"></i> Next Steps
             </button>
             <button onclick="if (typeof window.saveNewsletterToVault === 'function') { window.saveNewsletterToVault(); } else if (typeof window.toggleSaveIdea === 'function' && typeof window.getCleanOutlookHTML === 'function') { const clean = window.getCleanOutlookHTML(); const title = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter'; window.toggleSaveIdea(title, clean || 'Newsletter', null, 'newsletter'); if (window.showToast) window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success'); }" class="bg-[#00A89D] hover:bg-[#008F85] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               <i class="far fa-bookmark"></i> Save to Vault (Outlook version)
@@ -7723,21 +7718,21 @@
 <script src="js/features/equity-scanner.js?v=20260623-lo-v222"></script>
 <script src="js/features/calculator.js"></script>
 <script src="js/features/sales-scripts.js?v=20260706-lo-v223"></script>
-<script src="js/features/social-post.js?v=20260708-lo-v268"></script>
+<script src="js/features/social-post.js?v=20260708-lo-v269"></script>
 <script src="js/features/mindset-lab.js"></script>
 <script src="js/data/weekend-plan-policy.js"></script>
 <script src="js/features/weekly-win-plan.js?v=20260623-lo-v222"></script>
 <script src="js/features/tool-bridges.js"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
-<script src="js/features/generation-rules.js?v=20260708-lo-v268"></script>
-<script src="js/features/publish-kit.js?v=20260708-lo-v268"></script>
-<script src="js/features/blog-creator.js?v=20260708-lo-v268"></script>
+<script src="js/features/generation-rules.js?v=20260708-lo-v269"></script>
+<script src="js/features/publish-kit.js?v=20260708-lo-v269"></script>
+<script src="js/features/blog-creator.js?v=20260708-lo-v269"></script>
 <script src="js/features/referral-rich-modals.js?v=20260623-lo-v222"></script>
 <script src="js/features/legacy-helpers.js?v=20260623-lo-v222"></script>
 <script src="js/data/newsletter-dad-jokes.js?v=20260625-lo-v231"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260625-lo-v233"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260625-lo-v234"></script>
-<script src="js/features/newsletter-generator.js?v=20260708-lo-v291"></script>
+<script src="js/features/newsletter-generator.js?v=20260708-lo-v292"></script>
 <script src="js/features/ai-chat.js?v=20260623-lo-v222"></script>
 <script src="js/features/underwriting.js"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'lo';</script>
@@ -8910,7 +8905,7 @@
   Ultimate Loan Officer Sales Coach • v… • … • Render
 </div>
 <script src="js/features/section-bottom-banners.js?v=20260623-lo-v222"></script>
-<script src="js/app-version.js?v=20260708-lo-v268"></script>
+<script src="js/app-version.js?v=20260708-lo-v269"></script>
 
 </body>
 </html>

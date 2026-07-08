@@ -2813,13 +2813,6 @@ function updateNewsletterPreflightSummary() {
         chips.push({ text: 'Referral CTA off', style: 'off' });
     }
 
-    if (typeof window.GenerationRules !== 'undefined' && typeof window.GenerationRules.getActiveLabels === 'function') {
-        const ruleLabels = window.GenerationRules.getActiveLabels();
-        if (ruleLabels.length) {
-            chips.push({ text: `Rules: ${ruleLabels.join(' · ')}`, style: 'meta' });
-        }
-    }
-
     const anyContent = Object.values(sel.contentSections).some(Boolean) || sel.personal;
     if (!anyContent) warnings.push('No content sections or Personal Update selected — your newsletter may be very thin.');
 
@@ -2880,8 +2873,6 @@ function wireNewsletterLiveFeedback() {
             refresh();
         });
     }
-
-    document.addEventListener('generation-rules-change', refresh);
 
     refresh();
 }
@@ -3472,8 +3463,8 @@ if (postSelections?.includeReferral) {
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             }
 
-            if (!feedback && typeof window.openNewsletterPublishKit === 'function') {
-                setTimeout(() => window.openNewsletterPublishKit(), 600);
+            if (!feedback) {
+                window._nlNextStepsId = `nl_${Date.now().toString(36)}`;
             }
         }
 
