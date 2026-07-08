@@ -12,9 +12,9 @@
 
   const LEVERAGE_TIPS = {
     newsletter: [
-      'Pull your <strong>Personal Update</strong> or a market blurb into a quick social post.',
-      'Save a strong section to <strong>My Saved Items</strong> for next month\'s remix.',
-      'Feature a recent blog in your next issue using the <strong>Blog Link</strong> checkbox.',
+      'Pull your <strong>Personal Update</strong> or a market blurb into <strong>Social Post Creator</strong> — copy the text from the preview above.',
+      'Tap <strong>Save to Vault</strong> above to store the <em>full newsletter</em> in <strong>My Saved Items</strong> (handy for archives or resending a past edition).',
+      'Feature a recent blog in your next issue using the <strong>Blog Link</strong> checkbox when you generate again.',
     ],
     blog: [
       'Drop the <strong>social caption</strong> and <strong>Google post</strong> from this bundle the same day you publish.',
@@ -34,7 +34,7 @@
       { id: 'edits', label: 'Made any tweaks using Feedback / Regenerate (if needed)' },
       { id: 'test', label: 'Sent a test email to myself' },
       { id: 'send', label: 'Pasted into Outlook or my email platform and sent/scheduled to my database' },
-      { id: 'repurpose', label: 'Repurposed at least one section for social or saved to My Saved Items' },
+      { id: 'repurpose', label: 'Repurposed content for social (copied from preview) or saved the full edition with Save to Vault' },
     ],
     blog: [
       { id: 'proofread', label: 'Read the blog aloud — adjusted anything that doesn\'t sound like me' },
