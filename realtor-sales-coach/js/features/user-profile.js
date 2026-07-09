@@ -27,6 +27,9 @@
   const DATABASE_LABELS = {
     'under-50': 'Under 50 past clients',
     '50-200': '50–200 past clients',
+    '200-500': '200–500 past clients',
+    '500-1000': '500–1,000 past clients',
+    '1000-plus': '1,000+ past clients',
     '200-plus': '200+ past clients'
   };
 
@@ -71,7 +74,9 @@
   }
 
   function normalizeFocus(raw) {
-    if (!raw) return { value: '', label: '' };
+    if (!raw || !String(raw).trim()) {
+      return { value: 'balanced-growth', label: FOCUS_OPTIONS['balanced-growth'] };
+    }
     if (FOCUS_OPTIONS[raw]) return { value: raw, label: FOCUS_OPTIONS[raw] };
     if (FOCUS_LEGACY[raw]) return { value: FOCUS_LEGACY[raw], label: raw };
     const lower = String(raw).toLowerCase();
@@ -386,7 +391,7 @@
       monthlyUnits: getRaw('profile-monthly-units'),
       monthlyGoal: getRaw('profile-monthly-goal'),
       income: getRaw('profile-income'),
-      focus: getRaw('profile-focus'),
+      focus: getRaw('profile-focus') || 'balanced-growth',
       hours: getRaw('profile-hours'),
       databaseSize: getRaw('profile-database-size'),
       partnerFocus: getVal('profile-partner-focus'),
@@ -536,6 +541,18 @@
 
     syncSelectAllStates();
     refreshProfileUI();
+  }
+
+  function backfillBlankProfileFields() {
+    try {
+      const raw = readRawProfile();
+      const needsFocus = !raw.focus || !String(raw.focus).trim();
+      if (!needsFocus) return;
+      const normalized = normalizeProfile({ ...raw, focus: 'balanced-growth' });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+      localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...normalized }));
+    } catch (e) { /* ignore */ }
   }
 
   function isProfileModalOpen() {
@@ -745,20 +762,6 @@
       .map((part) => part.replace(/[^a-z0-9]/g, ''))
       .filter(Boolean)
       .join('');
-  }
-
-  function applyBlogFromWebsite() {
-    const website = document.getElementById('profile-company-website')?.value.trim() || '';
-    const el = document.getElementById('profile-blog-url');
-    if (!el) return;
-    if (!website) {
-      if (typeof window.showToast === 'function') window.showToast('Add your company website first — we will append /blog.', 'info');
-      return;
-    }
-    const base = website.replace(/\/+$/, '');
-    el.value = `${base}/blog`;
-    autoSaveProfile();
-    if (typeof window.showToast === 'function') window.showToast('Blog URL set from your website — adjust if your blog lives elsewhere.', 'success');
   }
 
   function flushWizardSave() {
@@ -1012,7 +1015,6 @@
       window.ensureModalBackdropClose(modal);
     }
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
-    document.getElementById('profile-blog-from-website')?.addEventListener('click', applyBlogFromWebsite);
 
     modal.addEventListener('input', autoSaveProfile);
     modal.addEventListener('change', autoSaveProfile);
@@ -1056,6 +1058,7 @@
   paintHeaderProfileBadge();
 
   function bootProfileModal() {
+    backfillBlankProfileFields();
     initProfileModal();
     if (!document.getElementById('user-profile-modal')) {
       paintHeaderProfileBadge();

@@ -5034,6 +5034,10 @@ function copyForOutlook() {
               if (el.style.textAlign === 'center') el.style.textAlign = 'left';
           });
       });
+
+      doc.querySelectorAll('img[alt="Watch Personal Video"]').forEach((img) => {
+          img.style.border = `3px solid ${primary}`;
+      });
   }
 
   // =====================================================

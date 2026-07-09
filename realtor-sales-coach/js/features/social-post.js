@@ -111,10 +111,14 @@ async function generateSocialPost() {
     const details = document.getElementById('post-details').value.trim();
     const output = document.getElementById('social-output');
 
-    // Collect premium checkbox focus angles (new world-class UX control surface)
-    const focusContainer = document.getElementById('social-focuses') || document;
-    const focusChecks = focusContainer.querySelectorAll('input[type="checkbox"]:checked');
-    const focusAngles = Array.from(focusChecks).map(cb => (cb.value || '').trim()).filter(Boolean);
+    // Collect quick-focus chips (optional angles blended into the post)
+    const activeChips = document.querySelectorAll('.social-focus-chip.active');
+    let focusAngles = Array.from(activeChips).map((chip) => (chip.dataset.focus || chip.textContent || '').trim()).filter(Boolean);
+    if (!focusAngles.length) {
+      const focusContainer = document.getElementById('social-focuses') || document;
+      const focusChecks = focusContainer.querySelectorAll('input[type="checkbox"]:checked');
+      focusAngles = Array.from(focusChecks).map((cb) => (cb.value || '').trim()).filter(Boolean);
+    }
 
     // Pull central profile and build personalization
     const personalization = buildSocialPersonalization();
@@ -1289,11 +1293,28 @@ themeIds.forEach(id => {
     }
   }
 
-  // Call the helper init
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSocialPostHelpers);
-  } else {
+  function wireSocialFocusChips() {
+    const chipContainer = document.getElementById('social-focus-chips');
+    if (!chipContainer || chipContainer.dataset.wired === '1') return;
+    chipContainer.dataset.wired = '1';
+    const activeClasses = ['active', 'border-[#00A89D]', 'bg-[#00A89D]/10', 'text-[#002B5C]', 'dark:text-white'];
+    chipContainer.addEventListener('click', (e) => {
+      const chip = e.target.closest('.social-focus-chip');
+      if (!chip) return;
+      const isActive = chip.classList.toggle('active');
+      activeClasses.slice(1).forEach((cls) => chip.classList.toggle(cls, isActive));
+    });
+  }
+
+  function initSocialPostUi() {
     initSocialPostHelpers();
+    wireSocialFocusChips();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSocialPostUi);
+  } else {
+    initSocialPostUi();
   }
 
   // =====================================================

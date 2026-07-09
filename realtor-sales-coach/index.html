@@ -48,7 +48,7 @@
 
     <!-- Shared UI (toast + search) - Phase 0 -->
     <script src="js/ui.js?v=20260706-realtor-v273"></script>
-    <script src="js/features/app-feedback.js?v=20260707-realtor-v308"></script>
+    <script src="js/features/app-feedback.js?v=20260709-realtor-v309"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260706-realtor-v281"></script>
     <script src="js/early-boot.js?v=20260706-realtor-v273"></script>
 </head>
@@ -1451,28 +1451,7 @@
         </button>
     </div>
 
-    <!-- Toolbar: Search + Saved Ideas -->
-    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-8 p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl border border-gray-200 dark:border-gray-600">
-      <div class="flex-1 relative">
-        <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
-        <input 
-          type="text" 
-          id="social-strategy-search" 
-          placeholder="Search tips, theme days, calendars, platforms..." 
-          class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#00A89D]">
-      </div>
-      <div>
-        <button id="social-saved-btn"
-                onclick="showSavedItemsLibrary()"
-                class="px-4 py-2.5 text-sm font-semibold rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition flex items-center gap-2">
-          <i class="fas fa-bookmark"></i>
-          <span>My Saved Items</span>
-          <span id="social-saved-count" class="ml-1 text-xs px-2 py-0.5 bg-[#00A89D]/10 rounded-full font-medium">0</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Content Wrapper for Search + Favorites -->
+    <!-- Main Content Wrapper -->
     <div id="social-content">
 
     <!-- Explanatory Note: The 6 Pillars + Recommended Balance -->
@@ -3008,6 +2987,41 @@
         </div>
     </div>
 
+    <!-- Start Here — 5-step daily workflow -->
+    <div id="coach-start-here" class="mb-8">
+      <div class="text-center mb-3">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#F15A29] bg-[#F15A29]/10 px-3 py-1 rounded-full">START HERE</span>
+      </div>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-4">Your daily production loop — tap any step to jump straight in.</p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <button type="button" data-start-step="plan" onclick="window.showSection('weekly-win-plan')" class="group text-left bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-2xl p-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+          <div class="text-[10px] font-bold text-[#00A89D] mb-1">1 · PLAN</div>
+          <div class="font-semibold text-sm leading-tight group-hover:text-[#00A89D]">Weekly Win Plan</div>
+          <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Block your power hours</div>
+        </button>
+        <button type="button" data-start-step="gift" onclick="window.showSection('value-vault')" class="group text-left bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-2xl p-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+          <div class="text-[10px] font-bold text-[#00A89D] mb-1">2 · GIFT</div>
+          <div class="font-semibold text-sm leading-tight group-hover:text-[#00A89D]">Value Vault</div>
+          <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Pop-bys, scripts, gifts</div>
+        </button>
+        <button type="button" data-start-step="nurture" onclick="window.showSection('database')" class="group text-left bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-2xl p-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+          <div class="text-[10px] font-bold text-[#00A89D] mb-1">3 · NURTURE</div>
+          <div class="font-semibold text-sm leading-tight group-hover:text-[#00A89D]">Database</div>
+          <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Past clients &amp; sphere</div>
+        </button>
+        <button type="button" data-start-step="content" onclick="window.showSection('social')" class="group text-left bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-2xl p-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+          <div class="text-[10px] font-bold text-[#00A89D] mb-1">4 · CONTENT</div>
+          <div class="font-semibold text-sm leading-tight group-hover:text-[#00A89D]">Social Strategy</div>
+          <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Posts &amp; visibility</div>
+        </button>
+        <button type="button" data-start-step="opportunity" onclick="window.showSection('listing-description')" class="group text-left bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 hover:border-[#00A89D] rounded-2xl p-4 transition-all hover:shadow-md hover:-translate-y-0.5 col-span-2 sm:col-span-1">
+          <div class="text-[10px] font-bold text-[#00A89D] mb-1">5 · OPPORTUNITY</div>
+          <div class="font-semibold text-sm leading-tight group-hover:text-[#00A89D]">Listing Descriptions</div>
+          <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Listings &amp; seller plays</div>
+        </button>
+      </div>
+    </div>
+
     <!-- Pre-Generate Explanatory Header -->
     <div id="ai-chat-pregen-guidance" class="mb-8">
       <div class="text-center mb-3">
@@ -3789,33 +3803,18 @@
             </div>
         </div>
 
-        <!-- Quick Focus Angles - Premium checkbox grid for more control (consistent with Listing / Open House UX) -->
+        <!-- Quick focus chips — tap to blend angles into your post -->
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm mb-6">
-          <div class="flex items-center justify-between mb-2">
-            <div>
-              <span class="font-semibold text-[#002B5C] dark:text-white">Quick Content Focuses</span>
-              <span class="text-xs text-gray-500 ml-2">(check any that apply – blended into your post)</span>
-            </div>
-            <div class="flex gap-2 text-xs">
-              <button type="button" onclick="selectAllFeatures('social-focuses')" class="px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Select All</button>
-              <button type="button" onclick="clearAllFeatures('social-focuses')" class="px-3 py-1 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition">Clear</button>
-            </div>
+          <div class="mb-3">
+            <span class="font-semibold text-[#002B5C] dark:text-white">Quick Content Focus</span>
+            <span class="text-xs text-gray-500 ml-2">(optional — tap any chips to blend into your post)</span>
           </div>
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-sm" id="social-focuses">
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Personal story or family / hobby moment" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Personal / Family Story</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Local market insight or recent stats" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Local Market Insight</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Recent client win or just closed story" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Client Win / Just Closed</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Educational tip or how-to for buyers/sellers" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Educational Tip</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Just listed or just sold showcase" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Just Listed / Just Sold</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Sphere or past client nurturing / appreciation" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Sphere Nurture / Thanks</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Co-broke partner or fellow agent collaboration shoutout" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Agent / Co-Broke Collab</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Open house invite or recap with photos" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Open House Invite / Recap</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Lender partner value or joint resource (buyer checklist, etc.)" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Lender Partner Value</span></label>
-            <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Referral or 'who do you know' soft ask" class="form-checkbox h-4 w-4 text-[#00A89D]"><span class="text-xs">Referral Ask</span></label>
-          </div>
-          <div class="mt-3 flex gap-2">
-            <input type="text" id="social-custom-focus-input" placeholder="Add custom angle (e.g. 'New team member announcement')" class="flex-1 p-2 rounded-xl border border-[#00A89D] bg-white dark:bg-gray-800 text-sm">
-            <button type="button" onclick="addCustomFeature('social-focuses', 'social-custom-focus-input')" class="px-4 py-2 bg-[#00A89D] text-white rounded-xl text-sm font-semibold hover:bg-[#008a7f] transition flex items-center gap-1"><i class="fas fa-plus"></i> <span>Add</span></button>
+          <div class="flex flex-wrap gap-2" id="social-focus-chips">
+            <button type="button" class="social-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Personal story or family / hobby moment">Personal</button>
+            <button type="button" class="social-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Local market insight or recent stats">Local</button>
+            <button type="button" class="social-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Just listed or just sold showcase">Listing / Sold</button>
+            <button type="button" class="social-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Sphere or past client nurturing / appreciation">Sphere</button>
+            <button type="button" class="social-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Referral or 'who do you know' soft ask">Referral</button>
           </div>
         </div>
 
@@ -4982,28 +4981,18 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Select or type a topic → choose tone → click Generate.</p>
             </div>
 
-            <!-- Blog Quick Angles checkboxes for premium thorough UX (more options to check, consistent with other smart tools) -->
+            <!-- Optional focus chips — tap to weave angles into the post -->
             <div class="mb-4">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-sm font-semibold text-[#002B5C] dark:text-white">Quick Angles &amp; Emphases (check to weave in)</span>
-                <div class="flex gap-1.5 text-[10px]">
-                  <button type="button" onclick="selectAllFeatures('blog-angles')" class="px-2 py-0.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">All</button>
-                  <button type="button" onclick="clearAllFeatures('blog-angles')" class="px-2 py-0.5 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition">Clear</button>
-                </div>
+              <div class="mb-2">
+                <span class="text-sm font-semibold text-[#002B5C] dark:text-white">Quick Angles</span>
+                <span class="text-xs text-gray-500 ml-2">(optional — tap any to blend into your blog)</span>
               </div>
-              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs" id="blog-angles">
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Buyer journey / first-time or move-up education" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Buyer Education</span></label>
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Seller strategy / pre-listing checklist and pricing power" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Seller Strategy</span></label>
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Local market stats, inventory, days on market, trends" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Local Market Data</span></label>
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Client success story or case study with real (anonymized) outcome" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Client Story / Win</span></label>
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Open house recap, behind the scenes, or what buyers loved" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Open House Angle</span></label>
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Co-broke / agent partnership value or joint win story" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Agent Collab</span></label>
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Lifestyle / neighborhood / schools / commute living" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Neighborhood Lifestyle</span></label>
-                <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Investment angle, equity building, or homeownership benefits" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Investment / Equity</span></label>
-              </div>
-              <div class="mt-2 flex gap-2">
-                <input type="text" id="blog-custom-angle-input" placeholder="Custom angle e.g. 'New construction incentives this month'" class="flex-1 p-2 text-sm rounded-xl border border-[#00A89D] bg-white dark:bg-gray-800">
-                <button type="button" onclick="addCustomFeature('blog-angles', 'blog-custom-angle-input')" class="px-3 py-1.5 bg-[#00A89D] text-white text-xs font-semibold rounded-xl hover:bg-[#00887A] transition"><i class="fas fa-plus"></i> Add</button>
+              <div class="flex flex-wrap gap-2" id="blog-focus-chips">
+                <button type="button" class="blog-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Buyer journey / first-time or move-up education">Buyer</button>
+                <button type="button" class="blog-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Seller strategy / pre-listing checklist and pricing power">Seller</button>
+                <button type="button" class="blog-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Local market stats, inventory, days on market, trends">Local Market</button>
+                <button type="button" class="blog-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Client success story or case study with real (anonymized) outcome">Client Story</button>
+                <button type="button" class="blog-focus-chip px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#00A89D] transition" data-focus="Lifestyle / neighborhood / schools / commute living">Neighborhood</button>
               </div>
             </div>
 
@@ -7614,34 +7603,10 @@ window.toggleSupportingSection = function(sectionId) {
   }
 };
 
-// Social Strategy Search + Favorites (lightweight, self-contained)
+// Social Strategy helpers (pillar delegation + bookmark sync)
 (function() {
-  const searchInput = document.getElementById('social-strategy-search');
-  const savedBtn = document.getElementById('social-saved-btn');
   const contentWrapper = document.getElementById('social-content');
-
-  if (!searchInput || !contentWrapper) return;
-
-  // Robust search across the section (modern cards + supporting boxes only)
-  searchInput.addEventListener('input', function() {
-    const query = this.value.toLowerCase().trim();
-    const cards = contentWrapper.querySelectorAll('.social-pillar-card, #social-supporting-grid > div');
-    const expanded = contentWrapper.querySelectorAll('.social-pillar-expanded, [id^="supporting-"]');
-
-    cards.forEach(card => {
-      const text = card.textContent.toLowerCase();
-      card.style.display = (query === '' || text.includes(query)) ? '' : 'none';
-    });
-    expanded.forEach(el => {
-      if (!el.classList.contains('hidden')) {
-        const text = el.textContent.toLowerCase();
-        // keep expanded content visible if it matches, otherwise leave to toggle
-        if (query && !text.includes(query)) {
-          // optional: could collapse, but for now just leave
-        }
-      }
-    });
-  });
+  if (!contentWrapper) return;
 
   // Defensive data-pillar delegation for the main strategy cards (modern toggle)
   const pillarGrid = document.getElementById('social-pillar-grid');
@@ -13828,13 +13793,13 @@ window.toggleSupportingSection = function(sectionId) {
 <script src="js/features/consultation-kit.js?v=20260706-realtor-v280"></script>
 <script src="js/features/generation-rules.js?v=20260708-realtor-v276"></script>
 <script src="js/features/publish-kit.js?v=20260708-realtor-v276"></script>
-<script src="js/features/social-post.js?v=20260708-realtor-v277"></script>
+<script src="js/features/social-post.js?v=20260709-realtor-v278"></script>
 <script src="js/features/mindset-lab.js?v=20260706-realtor-v273"></script>
 <script src="js/data/weekend-plan-policy.js?v=20260706-realtor-v273"></script>
 <script src="js/features/weekly-win-plan.js?v=20260706-realtor-v273"></script>
 <script src="js/features/tool-bridges.js?v=20260706-realtor-v273"></script>
 <script src="js/features/prospecting-time-blocks.js?v=20260706-realtor-v273"></script>
-<script src="js/features/blog-creator.js?v=20260708-realtor-v277"></script>
+<script src="js/features/blog-creator.js?v=20260709-realtor-v284"></script>
 <script src="js/features/legacy-helpers.js?v=20260706-realtor-v273"></script>
 <script src="js/features/saved-items-library.js?v=20260706-realtor-v281"></script>
 <script src="js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273"></script>
@@ -15119,16 +15084,37 @@ if (document.readyState === 'loading') {
                             <option value="">Select...</option>
                             <option value="under-50">Under 50 past clients</option>
                             <option value="50-200">50–200 past clients</option>
-                            <option value="200-plus">200+ past clients</option>
+                            <option value="200-500">200–500 past clients</option>
+                            <option value="500-1000">500–1,000 past clients</option>
+                            <option value="1000-plus">1,000+ past clients</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Monthly Transaction Goal</label>
                         <input type="text" id="profile-monthly-units" placeholder="e.g. 4 or 6–8" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <select onchange="if (this.value) { document.getElementById('profile-monthly-units').value = this.value; this.selectedIndex = 0; }" class="mt-1 w-full text-xs py-1.5 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Quick suggestions...</option>
+                            <option value="1-2 transactions">1–2 transactions / mo</option>
+                            <option value="3-4 transactions">3–4 transactions / mo</option>
+                            <option value="5-6 transactions">5–6 transactions / mo</option>
+                            <option value="7-8 transactions">7–8 transactions / mo</option>
+                            <option value="9-10 transactions">9–10 transactions / mo</option>
+                            <option value="10+ transactions">10+ transactions / mo</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Monthly Volume Goal</label>
                         <input type="text" id="profile-monthly-goal" placeholder="e.g. $3M – $4M" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <select onchange="if (this.value) { document.getElementById('profile-monthly-goal').value = this.value; this.selectedIndex = 0; }" class="mt-1 w-full text-xs py-1.5 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Quick suggestions...</option>
+                            <option value="Under $2M">Under $2M</option>
+                            <option value="$2M – $3M">$2M – $3M</option>
+                            <option value="$3M – $4M">$3M – $4M</option>
+                            <option value="$4M – $5M">$4M – $5M</option>
+                            <option value="$5M – $7M">$5M – $7M</option>
+                            <option value="$7M – $10M">$7M – $10M</option>
+                            <option value="$10M+">$10M+</option>
+                        </select>
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-1">Weekly Prospecting Hours</label>
@@ -15209,10 +15195,7 @@ if (document.readyState === 'loading') {
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Blog Page URL <span class="text-gray-400 font-normal text-xs">Newsletter + Blog</span></label>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input type="url" id="profile-blog-url" placeholder="https://yourteam.com/blog" class="flex-1 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-                            <button type="button" id="profile-blog-from-website" class="text-xs px-4 py-2.5 rounded-2xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition whitespace-nowrap">Use website + /blog</button>
-                        </div>
+                        <input type="url" id="profile-blog-url" placeholder="https://yourteam.com/blog" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                         <p class="text-[11px] text-gray-500 m-0 mt-1">Your blog home page — Newsletter uses this as a default; paste a specific post URL per issue when you want to feature one article.</p>
                     </div>
                     <div>
@@ -15382,7 +15365,7 @@ if (document.readyState === 'loading') {
     </div>
 </div>
 <script src="js/features/user-profile.js?v=20260706-realtor-v285"></script>
-<script src="js/features/onboarding-coach.js?v=20260706-realtor-v273"></script>
+<script src="js/features/onboarding-coach.js?v=20260709-realtor-v274"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
