@@ -111,15 +111,6 @@ async function generateSocialPost() {
     const details = document.getElementById('post-details').value.trim();
     const output = document.getElementById('social-output');
 
-    // Collect quick-focus chips (optional angles blended into the post)
-    const activeChips = document.querySelectorAll('.social-focus-chip.active');
-    let focusAngles = Array.from(activeChips).map((chip) => (chip.dataset.focus || chip.textContent || '').trim()).filter(Boolean);
-    if (!focusAngles.length) {
-      const focusContainer = document.getElementById('social-focuses') || document;
-      const focusChecks = focusContainer.querySelectorAll('input[type="checkbox"]:checked');
-      focusAngles = Array.from(focusChecks).map((cb) => (cb.value || '').trim()).filter(Boolean);
-    }
-
     // Pull central profile and build personalization
     const personalization = buildSocialPersonalization();
     const eff = getEffectiveSetup();
@@ -190,7 +181,6 @@ ${localContext}
 
 Post type / goal: ${type && type.trim() !== '' && type !== ' ' ? type : 'Custom idea from user'}
 ${details ? `Specific details or angle the user wants: ${details}` : ''}
-${focusAngles.length ? `Key content focus angles to blend (use naturally where they fit the voice): ${focusAngles.map(f => '- ' + f).join('\n')}` : ''}
 
 Create THREE distinct, ready-to-post social media captions (Instagram/Facebook/LinkedIn friendly).
 
@@ -1293,22 +1283,8 @@ themeIds.forEach(id => {
     }
   }
 
-  function wireSocialFocusChips() {
-    const chipContainer = document.getElementById('social-focus-chips');
-    if (!chipContainer || chipContainer.dataset.wired === '1') return;
-    chipContainer.dataset.wired = '1';
-    const activeClasses = ['active', 'border-[#00A89D]', 'bg-[#00A89D]/10', 'text-[#002B5C]', 'dark:text-white'];
-    chipContainer.addEventListener('click', (e) => {
-      const chip = e.target.closest('.social-focus-chip');
-      if (!chip) return;
-      const isActive = chip.classList.toggle('active');
-      activeClasses.slice(1).forEach((cls) => chip.classList.toggle(cls, isActive));
-    });
-  }
-
   function initSocialPostUi() {
     initSocialPostHelpers();
-    wireSocialFocusChips();
   }
 
   if (document.readyState === 'loading') {
