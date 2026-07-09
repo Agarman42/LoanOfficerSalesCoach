@@ -833,21 +833,35 @@
         return;
       }
 
-      titleEl.textContent = data.title;
-      contentEl.innerHTML = `
-        <div class="prose dark:prose-invert max-w-none text-[15px]">
-          ${data.content}
-        </div>
-        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button onclick="savePartnerStrategy('Tier-${tier}', 0, this)" 
-                  class="text-sm px-4 py-2 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">
-            <i class="far fa-bookmark"></i> Save This Tier Playbook
-          </button>
-        </div>
-      `;
+      const richTitle = typeof window.getPartnerTierModalTitle === 'function'
+        ? window.getPartnerTierModalTitle(tier)
+        : null;
+      titleEl.textContent = richTitle || data.title;
 
-      modal.classList.remove('hidden');
-      modal.style.display = 'flex';
+      if (typeof window.renderRichPartnerTierModal === 'function' && window.renderRichPartnerTierModal(tier, contentEl)) {
+        // rich renderer handled content
+      } else {
+        contentEl.innerHTML = `
+          <div class="prose dark:prose-invert max-w-none text-[15px]">
+            ${data.content}
+          </div>
+          <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button onclick="savePartnerStrategy('Tier-${tier}', 0, this)" 
+                    class="text-sm px-4 py-2 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">
+              <i class="far fa-bookmark"></i> Save This Tier Playbook
+            </button>
+          </div>
+        `;
+      }
+
+      if (typeof window.openAppModal === 'function') {
+        window.openAppModal(modal);
+      } else if (typeof window.openNamedModal === 'function') {
+        window.openNamedModal(modal);
+      } else {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+      }
     } catch (e) {
       console.error('Error opening tier modal:', e);
       alert('Error opening modal. Check console for details.');
@@ -1558,6 +1572,16 @@
 
     console.log('%c[Book Vault] Initialized with ' + BOOKS_DATA.length + ' books', 'color:#00A89D');
   }
+
+  window.getBookSearchEntries = function getBookSearchEntries() {
+    return BOOKS_DATA.map((book) => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      category: book.category,
+      keywords: [book.author, book.category, book.whyUseful, book.keyTakeaway, book.level],
+    }));
+  };
 
   window.renderBookVault = function() {
     renderFeaturedBooks();

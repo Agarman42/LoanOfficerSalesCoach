@@ -1,5 +1,5 @@
 /**
- * Mindset Lab – Interactive toolkit for agent mindset
+ * Mindset Lab – Interactive toolkit for loan officer mindset
  * Premium card-based experience with unified "My Saved Items" integration.
  */
 
@@ -18,16 +18,16 @@
     "Value-First Mindset"
   ];
 
-  // Expanded high-value, agent-specific content (Big expansion v2 — includes best of classic sales quotes + many new agent-specific items)
+  // Expanded high-value, loan-officer-specific content (Big expansion v2 — includes best of classic sales quotes + many new LO-specific items)
   let mindsetItems = [
     // === RESILIENCE & REJECTION (16) ===
     { id: "res-1", category: "Resilience & Rejection", content: "Every “no” gets you closer to a “yes.” The top producers simply hear more nos than everyone else.", source: "Classic Sales Truth", action: "Track your 'No' count this week. Celebrate the number — it means you're in the game." },
     { id: "res-2", category: "Resilience & Rejection", content: "Rejection is not a reflection of your worth. It is feedback about timing, fit, or communication.", source: "Mindset Lab Original", action: "After every 'no' this week, write one sentence about what you learned instead of how it felt." },
-    { id: "res-3", category: "Resilience & Rejection", content: "The agent who wins is usually the one who simply refuses to quit after the 7th follow-up.", source: "Industry Pattern", action: "Pick your toughest current listing or buyer and commit to one more high-value touch today." },
+    { id: "res-3", category: "Resilience & Rejection", content: "The loan officer who wins is usually the one who simply refuses to quit after the 7th follow-up.", source: "Industry Pattern", action: "Pick your toughest current file and commit to one more high-value touch today." },
     { id: "res-4", category: "Resilience & Rejection", content: "Your job is not to avoid hearing no. Your job is to make 'no' meaningless by having so many conversations that the nos become background noise.", source: "Mindset Lab Original", action: "Set a daily conversation target (calls + texts + in-person) and hit it regardless of outcomes." },
     { id: "res-5", category: "Resilience & Rejection", content: "Slow markets don’t create slow producers. Slow producers create slow markets in their own mind.", source: "Mindset Lab Original", action: "Write down the three market complaints you hear yourself saying most. Reframe each as an opportunity." },
     { id: "res-6", category: "Resilience & Rejection", content: "The difference between a bad day and a good story is usually 48 hours and one more call.", source: "Mindset Lab Original", action: "End every difficult day by scheduling tomorrow’s first three prospecting activities before you leave." },
-    { id: "res-7", category: "Resilience & Rejection", content: "You don’t lose deals because of rates. You lose them because you stopped adding value after the first objection.", source: "Referral Partner Truth", action: "On your next rate objection, lead with a specific value move (strong offer strategy, quick lender coordination, or client win story) instead of defending the rate." },
+    { id: "res-7", category: "Resilience & Rejection", content: "You don’t lose deals because of rates. You lose them because you stopped adding value after the first objection.", source: "Referral Partner Truth", action: "On your next rate objection, lead with a specific value move (equity scan, pre-approval speed, partner intro) instead of defending the rate." },
     { id: "res-8", category: "Resilience & Rejection", content: "Top producers get rejected at the same rate as everyone else. They just interpret it as data, not drama.", source: "Mindset Lab Original", action: "After your next three rejections, ask yourself: 'What did this teach me about my process or positioning?'" },
     { id: "res-9", category: "Resilience & Rejection", content: "Every “no” closer to “yes.”", source: "Classic Sales Truth", action: "Say this out loud after your next rejection and immediately schedule the next conversation." },
     { id: "res-10", category: "Resilience & Rejection", content: "Failure is success in progress.", source: "Antoine de Saint-Exupéry", action: "At the end of a tough day, write down one thing that went wrong and one thing it taught you." },
@@ -43,7 +43,7 @@
     { id: "dis-2", category: "Daily Discipline", content: "The difference between where you are and where you want to be is the discipline you lack.", source: "Mindset Lab Original", action: "Choose one 15-minute activity that moves the needle and do it at the same time every day for the next 7 days." },
     { id: "dis-3", category: "Daily Discipline", content: "You will never 'find' time for the important things. You have to make time for them.", source: "Mindset Lab Original", action: "Block your first 60 minutes of every workday for revenue-generating activity before opening email or Slack." },
     { id: "dis-4", category: "Daily Discipline", content: "Consistency compounds. Inconsistency cancels.", source: "Mindset Lab Original", action: "Audit your last 10 business days. How many days had a protected prospecting block? Make it 9 out of 10 this month." },
-    { id: "dis-5", category: "Daily Discipline", content: "The best agents don’t work harder than everyone else on the days they feel like it. They work steadily on the days they don’t.", source: "Mindset Lab Original", action: "When you don’t feel like prospecting or follow-up, do the first 10 minutes anyway. Momentum usually shows up by minute 4." },
+    { id: "dis-5", category: "Daily Discipline", content: "The best loan officers don’t work harder than everyone else on the days they feel like it. They work steadily on the days they don’t.", source: "Mindset Lab Original", action: "When you don’t feel like prospecting, do the first 10 minutes anyway. Momentum usually shows up by minute 4." },
     { id: "dis-6", category: "Daily Discipline", content: "Database neglect is the most expensive habit in this business.", source: "Mindset Lab Original", action: "Today: send 5 handwritten notes or personal videos to people who have not heard from you in 90+ days." },
     { id: "dis-7", category: "Daily Discipline", content: "If it isn’t scheduled, it isn’t real. Hope is not a calendar entry.", source: "Mindset Lab Original", action: "Put every important non-urgent activity (database touches, partner lunches, content creation) on your calendar this week with a hard time block." },
     { id: "dis-8", category: "Daily Discipline", content: "Prospect daily or become obsolete.", source: "Tom Ferry", action: "Block 45 minutes on your calendar right now for prospecting tomorrow morning." },
@@ -60,12 +60,12 @@
 
     // === RELATIONSHIP PHILOSOPHY (16) ===
     { id: "rel-1", category: "Relationship Philosophy", content: "People do business with those they know, like, and trust. Everything else is secondary.", source: "Buffini Philosophy", action: "Send one genuine, non-business text or note today to someone in your database." },
-    { id: "rel-2", category: "Relationship Philosophy", content: "Your professional partners and past clients don’t need another lunch. They need to know you will make them look good in front of their clients.", source: "Mindset Lab Original", action: "On your next partner or client touch, lead with something that makes them the hero (smooth transaction, strong negotiation, or a big client win)." },
+    { id: "rel-2", category: "Relationship Philosophy", content: "Your referral partners don’t need another lunch. They need to know you will make them look good in front of their clients.", source: "Mindset Lab Original", action: "On your next partner touch, lead with something that makes them the hero (fast pre-approval, smooth closing story, client win)." },
     { id: "rel-3", category: "Relationship Philosophy", content: "The strongest relationships are built in the spaces between transactions.", source: "Mindset Lab Original", action: "This week, reach out to three past clients with zero ask — just a market update or personal note." },
     { id: "rel-4", category: "Relationship Philosophy", content: "You don’t earn trust by being the smartest person in the room. You earn it by being the most reliable.", source: "Mindset Lab Original", action: "Pick one partner or client and over-communicate on their file this week. Make the experience feel unusually safe." },
     { id: "rel-5", category: "Relationship Philosophy", content: "The best time to plant a tree was 20 years ago. The second best time is today — for your database.", source: "Mindset Lab Original", action: "Add 5 new people to your database this week with a personal note within 24 hours of meeting them." },
-    { id: "rel-6", category: "Relationship Philosophy", content: "Your sphere doesn’t care how good you are at real estate. They care how often you show up when you don’t need anything.", source: "Mindset Lab Original", action: "Schedule three 'value only' touches this week (article, local event, family photo, market insight)." },
-    { id: "rel-7", category: "Relationship Philosophy", content: "Referral partners and past clients stay loyal to the agent who makes their life easier, not the one who buys the most lunches.", source: "Mindset Lab Original", action: "Ask one of your top past clients or partners: 'What would make working with me easier for you?' Then do it." },
+    { id: "rel-6", category: "Relationship Philosophy", content: "Your sphere doesn’t care how good you are at mortgages. They care how often you show up when you don’t need anything.", source: "Mindset Lab Original", action: "Schedule three 'value only' touches this week (article, local event, family photo, market insight)." },
+    { id: "rel-7", category: "Relationship Philosophy", content: "Referral partners stay loyal to the loan officer who makes their life easier, not the one who buys the most lunches.", source: "Mindset Lab Original", action: "Ask one of your top referral partners: 'What would make working with me easier for you and your clients?' Then do it." },
     { id: "rel-8", category: "Relationship Philosophy", content: "Relationships over transactions.", source: "Ricky Carruth", action: "On your next three conversations, focus entirely on the other person for the first 5 minutes." },
     { id: "rel-9", category: "Relationship Philosophy", content: "Give value freely.", source: "Ricky Carruth", action: "Give one person something useful today with zero expectation of anything in return." },
     { id: "rel-10", category: "Relationship Philosophy", content: "Build your sphere.", source: "Ricky Carruth", action: "Add one person from a different profession to your sphere this week and find a way to help them." },
@@ -80,9 +80,9 @@
     { id: "conf-1", category: "Self-Belief & Confidence", content: "Your attitude, not your aptitude, will determine your altitude.", source: "Zig Ziglar", action: "Before your next call or appointment, write down three reasons the other person is lucky to work with you." },
     { id: "conf-2", category: "Self-Belief & Confidence", content: "You don’t rise to the level of your goals. You fall to the level of your systems and self-talk.", source: "Mindset Lab Original", action: "Write down the three most common negative thoughts you have about your production. Rewrite them as facts or questions." },
     { id: "conf-3", category: "Self-Belief & Confidence", content: "The market doesn’t decide your income. Your willingness to have uncomfortable conversations does.", source: "Mindset Lab Original", action: "Today, have the conversation you’ve been avoiding (rate objection, partner ask, past client follow-up)." },
-    { id: "conf-4", category: "Self-Belief & Confidence", content: "You are not 'just an agent.' You are the person who helps families achieve one of the biggest life decisions of their lives.", source: "Mindset Lab Original", action: "On your next consultation or showing, say out loud (to yourself or the client): 'My job is to make this feel safe and successful for you.'" },
+    { id: "conf-4", category: "Self-Belief & Confidence", content: "You are not 'just a loan officer.' You are the person who helps families achieve one of the biggest financial decisions of their lives.", source: "Mindset Lab Original", action: "On your next application, say out loud (to yourself or the client): 'My job is to make this feel safe and successful for you.'" },
     { id: "conf-5", category: "Self-Belief & Confidence", content: "Confidence is a byproduct of preparation and repetition. You cannot fake it long-term.", source: "Mindset Lab Original", action: "This week, role-play your three most common objections with a colleague or spouse for 15 minutes." },
-    { id: "conf-6", category: "Self-Belief & Confidence", content: "The agent who believes they are 'lucky' when deals close is usually the one who quietly did the work others skipped.", source: "Mindset Lab Original", action: "At the end of this week, list three wins that 'just happened' and trace the disciplined actions that made them possible." },
+    { id: "conf-6", category: "Self-Belief & Confidence", content: "The loan officer who believes they are 'lucky' when deals close is usually the one who quietly did the work others skipped.", source: "Mindset Lab Original", action: "At the end of this week, list three wins that 'just happened' and trace the disciplined actions that made them possible." },
     { id: "conf-7", category: "Self-Belief & Confidence", content: "Believe and act as if impossible to fail.", source: "Antoine de Saint-Exupéry", action: "Before your next big appointment, write 'This is going to go well' and list three reasons why." },
     { id: "conf-8", category: "Self-Belief & Confidence", content: "Success is getting what you want, happiness is wanting what you get.", source: "Brian Tracy", action: "Write down three things you already have in your business that you’re grateful for." },
     { id: "conf-9", category: "Self-Belief & Confidence", content: "Leaders think and talk about solutions.", source: "Brian Tracy", action: "Catch yourself complaining this week and immediately reframe it as a question about solutions." },
@@ -94,10 +94,10 @@
 
     // === PROSPECTING PSYCHOLOGY (20) ===
     { id: "pros-1", category: "Prospecting Psychology", content: "Prospecting is the lifeblood of your business. Do the work others won’t do to have what others don’t.", source: "Mike Ferry", action: "Commit to one prospecting block today that you will not cancel, no matter what." },
-    { id: "pros-2", category: "Prospecting Psychology", content: "Most agents hate prospecting because they made it about them instead of about the other person.", source: "Mindset Lab Original", action: "For the next 10 conversations, lead with a question about them (their business, their clients, their goals) before any real estate talk." },
+    { id: "pros-2", category: "Prospecting Psychology", content: "Most loan officers hate prospecting because they made it about them instead of about the other person.", source: "Mindset Lab Original", action: "For the next 10 conversations, lead with a question about them (their business, their clients, their goals) before any mortgage talk." },
     { id: "pros-3", category: "Prospecting Psychology", content: "Your database is not a list. It is a group of people who once trusted you enough to let you into their biggest financial decision.", source: "Mindset Lab Original", action: "Call or text five people from your database this week with zero agenda except 'I was thinking about you.'" },
-    { id: "pros-4", category: "Prospecting Psychology", content: "The fortune is in the follow-up. The follow-up is where most agents quietly quit.", source: "Mindset Lab Original", action: "Open your CRM or spreadsheet right now and schedule the next follow-up for every open opportunity or past client." },
-    { id: "pros-5", category: "Prospecting Psychology", content: "People don’t refer the smartest agent. They refer the one they think about when the topic of real estate comes up.", source: "Mindset Lab Original", action: "Create one simple, memorable way you show up (weekly video, specific niche tip, local market update) that makes you top of mind." },
+    { id: "pros-4", category: "Prospecting Psychology", content: "The fortune is in the follow-up. The follow-up is where most loan officers quietly quit.", source: "Mindset Lab Original", action: "Open your CRM or spreadsheet right now and schedule the next follow-up for every open opportunity or past client." },
+    { id: "pros-5", category: "Prospecting Psychology", content: "People don’t refer the smartest loan officer. They refer the one they think about when the topic of mortgages comes up.", source: "Mindset Lab Original", action: "Create one simple, memorable way you show up (weekly video, specific niche tip, local market update) that makes you top of mind." },
     { id: "pros-6", category: "Prospecting Psychology", content: "The best prospecting feels like catching up with a friend, not pitching a stranger.", source: "Mindset Lab Original", action: "This week, turn three prospecting calls into genuine conversations by asking about their family, business, or recent wins first." },
     { id: "pros-7", category: "Prospecting Psychology", content: "If you only prospect when you need deals, your tone will betray you every single time.", source: "Mindset Lab Original", action: "Schedule two 'just because' prospecting blocks this month with zero production pressure attached." },
     { id: "pros-8", category: "Prospecting Psychology", content: "Your next referral is currently talking to someone who is not you. Go be in that conversation.", source: "Mindset Lab Original", action: "Send one proactive, valuable message to a partner or past client before the end of today." },
@@ -116,11 +116,11 @@
 
     // === GROWTH & LONG-TERM THINKING (16) ===
     { id: "growth-1", category: "Growth & Long-term Thinking", content: "Success is 80% mindset and 20% strategy.", source: "Tom Ferry", action: "Identify one limiting belief you have about your market or ability, and write the opposite empowering belief." },
-    { id: "growth-2", category: "Growth & Long-term Thinking", content: "The agent who is still doing everything the same way in three years is choosing to be replaced.", source: "Mindset Lab Original", action: "Pick one skill or tool (AI, video, niche content, new partner channel) and spend 3 focused hours on it this week." },
+    { id: "growth-2", category: "Growth & Long-term Thinking", content: "The loan officer who is still doing everything the same way in three years is choosing to be replaced.", source: "Mindset Lab Original", action: "Pick one skill or tool (AI, video, niche content, new partner channel) and spend 3 focused hours on it this week." },
     { id: "growth-3", category: "Growth & Long-term Thinking", content: "Your business will only grow to the level you are willing to let other people help you.", source: "Mindset Lab Original", action: "This month, delegate or systemize one task that currently lives only in your head." },
     { id: "growth-4", category: "Growth & Long-term Thinking", content: "The producers who survive rate cycles and market shifts are the ones who built a personal brand, not just a pipeline.", source: "Mindset Lab Original", action: "Publish one piece of content (social, newsletter, video) this week that positions you as the local expert, not just a rate shopper." },
     { id: "growth-5", category: "Growth & Long-term Thinking", content: "Short-term thinking creates long-term pain. Long-term thinking creates short-term discomfort that pays off for years.", source: "Mindset Lab Original", action: "Choose one activity that feels slow today (nurturing, content, partner development) but compounds in 12 months. Do it weekly." },
-    { id: "growth-6", category: "Growth & Long-term Thinking", content: "The goal is not to close more deals. The goal is to become the kind of professional people fight to send their best clients to.", source: "Mindset Lab Original", action: "Write one sentence describing the agent you want to be known as in your market. Read it every morning this month." },
+    { id: "growth-6", category: "Growth & Long-term Thinking", content: "The goal is not to close more loans. The goal is to become the kind of professional people fight to send their best clients to.", source: "Mindset Lab Original", action: "Write one sentence describing the loan officer you want to be known as in your market. Read it every morning this month." },
     { id: "growth-7", category: "Growth & Long-term Thinking", content: "Build a business, not just a job.", source: "Tom Ferry", action: "Write down one thing you do today that only you can do — then start documenting how someone else could do it." },
     { id: "growth-8", category: "Growth & Long-term Thinking", content: "Scale your business with systems.", source: "Tom Ferry", action: "Document one process this week that you currently do from memory." },
     { id: "growth-9", category: "Growth & Long-term Thinking", content: "Be the knowledge broker.", source: "Tom Ferry", action: "Share one valuable piece of market or lending knowledge with your database or a partner this week." },
@@ -134,9 +134,9 @@
 
     // === VALUE-FIRST MINDSET (15) ===
     { id: "value-1", category: "Value-First Mindset", content: "Stop selling. Start helping. Givers gain.", source: "Bob Burg / Jeffrey Gitomer", action: "Find one piece of value (article, connection, idea) you can give someone today with zero expectation." },
-    { id: "value-2", category: "Value-First Mindset", content: "The fastest way to become referable is to make other people more successful because they know you.", source: "Mindset Lab Original", action: "Introduce two people in your network who should know each other this week (no real estate ask attached)." },
+    { id: "value-2", category: "Value-First Mindset", content: "The fastest way to become referable is to make other people more successful because they know you.", source: "Mindset Lab Original", action: "Introduce two people in your network who should know each other this week (no mortgage ask attached)." },
     { id: "value-3", category: "Value-First Mindset", content: "When you lead with value, the ask becomes a natural next step instead of an awkward request.", source: "Mindset Lab Original", action: "On your next three partner touches, give something specific and useful before you ask for anything." },
-    { id: "value-4", category: "Value-First Mindset", content: "Your clients and partners remember how you made them feel long after they forget the details of the transaction.", source: "Mindset Lab Original", action: "After your next closing, send a handwritten note + a small, thoughtful gift or local recommendation that has nothing to do with the deal." },
+    { id: "value-4", category: "Value-First Mindset", content: "Your clients and partners remember how you made them feel long after they forget the rate you gave them.", source: "Mindset Lab Original", action: "After your next closing, send a handwritten note + a small, thoughtful gift or local recommendation that has nothing to do with mortgages." },
     { id: "value-5", category: "Value-First Mindset", content: "The most powerful marketing is the story your referral partner tells about you when you are not in the room.", source: "Mindset Lab Original", action: "Do one thing this week that gives your best partner a story worth repeating to their clients and colleagues." },
     { id: "value-6", category: "Value-First Mindset", content: "You don’t have to be the cheapest. You have to be the one they trust to protect their reputation.", source: "Mindset Lab Original", action: "On your next file, over-communicate one thing that protects your partner’s relationship with their client." },
     { id: "value-7", category: "Value-First Mindset", content: "Generosity scales. Transactional behavior caps.", source: "Mindset Lab Original", action: "Find one way this week to make a past client or partner look good publicly (tag, shoutout, referral back) with zero direct benefit to you." },
@@ -164,7 +164,7 @@
     { id: "extra-12", category: "Daily Discipline", content: "Show up on purpose daily.", source: "Motivational", action: "Write down your 'why' and read it before you start work for the next 5 days." },
     { id: "extra-13", category: "Value-First Mindset", content: "Lead with value, close with ease.", source: "Motivational", action: "Give significant value in your next three conversations before you ever ask for anything." },
     { id: "extra-14", category: "Growth & Long-term Thinking", content: "Be relentless about paying activities.", source: "Motivational", action: "List your top 3 paying activities and protect time for them every single day this week." },
-    { id: "extra-15", category: "Prospecting Psychology", content: "Your next deal is one call away.", source: "Classic", action: "Make that call right now." }
+    { id: "extra-15", category: "Prospecting Psychology", content: "Your next loan is one call away.", source: "Classic", action: "Make that call right now." }
   ];
 
   // --- Filter persistence ---
@@ -180,7 +180,7 @@
   let currentFilter = getPersistedFilter();
   let currentSearch = '';
 
-  // 3 Core truths for the premium "Start Here" featured row (hand-picked for immediate agent impact)
+  // 3 Core truths for the premium "Start Here" featured row (hand-picked for immediate LO impact)
   const FEATURED_MINDSET_IDS = ['res-4', 'dis-1', 'rel-1'];
 
   function renderFeaturedMindset() {
@@ -377,7 +377,7 @@
             <i class="fas fa-quote-left text-[#00A89D] mt-1 text-xs opacity-70"></i>
             <p class="text-base leading-relaxed">"${item.content}"</p>
           </div>
-          ${item.action ? `<div class="text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl mb-4 border-l-2 border-[#00A89D]"><strong class="text-[#00A89D]">Apply this:</strong> ${item.action}</div>` : ''}
+          ${item.action ? `<div class="text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl mb-4 border-l-2 border-[#F15A29]"><strong class="text-[#F15A29]">Apply this:</strong> ${item.action}</div>` : ''}
         </div>
         <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
           <span class="text-xs text-gray-500">${item.source}</span>
@@ -561,6 +561,16 @@
     persistFilter(cat);
     renderItems();
     renderFilters();
+  };
+
+  window.getMindsetSearchEntries = function getMindsetSearchEntries() {
+    return mindsetItems.map((item) => ({
+      id: item.id,
+      content: item.content,
+      category: item.category,
+      source: item.source,
+      action: item.action,
+    }));
   };
 
   // Auto-init

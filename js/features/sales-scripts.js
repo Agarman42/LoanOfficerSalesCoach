@@ -1139,6 +1139,24 @@ window.showContextTipsModal = function() {
     }, 350);
   }
 
+  window.getSalesScriptSearchEntries = function getSalesScriptSearchEntries() {
+    const entries = [];
+    Object.keys(scenarioData).forEach((categoryKey) => {
+      const cat = scenarioData[categoryKey];
+      if (!cat?.scenarios?.length) return;
+      cat.scenarios.forEach((sc) => {
+        entries.push({
+          categoryKey,
+          categoryLabel: cat.label,
+          scenarioValue: sc.value,
+          label: sc.label,
+          contextTip: sc.contextTip,
+        });
+      });
+    });
+    return entries;
+  };
+
   // =====================================================
   // PUBLIC API EXPOSURE
   // =====================================================

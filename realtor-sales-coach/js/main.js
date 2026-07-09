@@ -340,40 +340,32 @@
   function initThemeToggle() {
     const toggleBtn = document.getElementById('theme-toggle');
     const icon = document.getElementById('theme-icon');
-    const label = toggleBtn?.querySelector('span');
+
+    function applyTheme(mode) {
+      const isDark = mode === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      if (icon) {
+        icon.className = isDark ? 'fas fa-sun text-sm' : 'fas fa-circle-half-stroke text-sm';
+      }
+      if (toggleBtn) {
+        toggleBtn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        toggleBtn.setAttribute('aria-label', toggleBtn.title);
+      }
+    }
 
     const savedTheme = localStorage.getItem('theme');
-
-    if (savedTheme === 'light') {
-      document.documentElement.classList.remove('dark');
-      if (icon) {
-        icon.classList.replace('fa-moon', 'fa-sun');
-        icon.classList.replace('text-yellow-400', 'text-yellow-500');
-      }
-      if (label) label.textContent = 'Light Mode';
+    if (savedTheme === 'dark') {
+      applyTheme('dark');
     } else {
-      document.documentElement.classList.add('dark');
+      applyTheme('light');
+      if (!savedTheme) localStorage.setItem('theme', 'light');
     }
 
     if (toggleBtn) {
       toggleBtn.addEventListener('click', () => {
-        if (document.documentElement.classList.contains('dark')) {
-          document.documentElement.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-          if (icon) {
-            icon.classList.replace('fa-moon', 'fa-sun');
-            icon.classList.replace('text-yellow-400', 'text-yellow-500');
-          }
-          if (label) label.textContent = 'Light Mode';
-        } else {
-          document.documentElement.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-          if (icon) {
-            icon.classList.replace('fa-sun', 'fa-moon');
-            icon.classList.replace('text-yellow-500', 'text-yellow-400');
-          }
-          if (label) label.textContent = 'Dark Mode';
-        }
+        const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+        localStorage.setItem('theme', next);
+        applyTheme(next);
       });
     }
 

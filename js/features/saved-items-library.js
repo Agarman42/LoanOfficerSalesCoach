@@ -368,7 +368,11 @@
     const socialCount = document.getElementById('social-saved-count');
     if (socialCount) socialCount.textContent = savedLength;
     const globalCount = document.getElementById('global-saved-count');
-    if (globalCount) globalCount.textContent = savedLength;
+    if (globalCount) {
+      globalCount.textContent = savedLength;
+      globalCount.classList.toggle('hidden', savedLength === 0);
+      globalCount.classList.toggle('flex', savedLength > 0);
+    }
   };
 
   window.showSavedFeedback = function showSavedFeedback(message) {

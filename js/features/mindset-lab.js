@@ -563,6 +563,16 @@
     renderFilters();
   };
 
+  window.getMindsetSearchEntries = function getMindsetSearchEntries() {
+    return mindsetItems.map((item) => ({
+      id: item.id,
+      content: item.content,
+      category: item.category,
+      source: item.source,
+      action: item.action,
+    }));
+  };
+
   // Auto-init
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initMindsetLab);

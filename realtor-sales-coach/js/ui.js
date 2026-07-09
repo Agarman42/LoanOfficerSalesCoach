@@ -584,7 +584,7 @@
 
   // Boot the UI helpers when DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
-    initHeaderSearch();
+    // Legacy header search superseded by js/features/global-search.js (command palette)
     portalNestedFixedModals();
     wireModalBackdropCloses();
   });
