@@ -22,6 +22,7 @@
   // =====================================================
 
 let lastGeneratedHTML = '';
+let _nlGenerating = false;
 
   window.openNewsletterTips = function openNewsletterTips() {
     const modal = document.getElementById('newsletter-tips-modal');
@@ -2505,6 +2506,20 @@ function detachNewsletterDisclaimer(html) {
     return { html: out, disclaimer };
 }
 
+function dedupeRealtorBrandHeaders(html) {
+    let out = String(html || '');
+    let found = false;
+    out = out.replace(
+        /<table\b[^>]*\bdata-nl-brand-header=["']1["'][^>]*>[\s\S]*?<\/table>/gi,
+        (block) => {
+            if (found) return '';
+            found = true;
+            return block;
+        }
+    );
+    return out;
+}
+
 function injectAgentBranding(html) {
     const ctx = getAgentBrandingContext();
     const selections = getNewsletterSelections();
@@ -2518,7 +2533,7 @@ function injectAgentBranding(html) {
         ? buildCompactReferralHtml(firstName, ctx.email)
         : '';
 
-    if (header) {
+    if (header && !/data-nl-brand-header/i.test(html)) {
         const nestedPlaceholderRe = /<table[^>]*\balign=["']?center["']?[^>]*>[\s\S]*?<!--\s*\[YOUR LOGO\s*\/\s*BRAND HEADER HERE\][\s\S]*?<\/table>/i;
         const placeholderCommentRe = /<!--\s*\[YOUR LOGO\s*\/\s*BRAND HEADER HERE\][^>]*-->/i;
         if (nestedPlaceholderRe.test(html)) {
@@ -2532,7 +2547,11 @@ function injectAgentBranding(html) {
         }
     }
 
-    const tail = footer + referral + disclaimer;
+    const tailParts = [];
+    if (!/data-nl-signature-block/i.test(html) && footer) tailParts.push(footer);
+    if (!/data-nl-referral-block/i.test(html) && referral) tailParts.push(referral);
+    if (!/data-nl-disclaimer-block/i.test(html) && disclaimer) tailParts.push(disclaimer);
+    const tail = tailParts.join('');
     if (tail) {
         if (/<\/body>\s*<\/html>/i.test(html)) {
             html = html.replace(/<\/body>\s*<\/html>/i, tail + '</body></html>');
@@ -2926,19 +2945,134 @@ function applyPersonalVideoPreviewSizing() {
     videoThumb.style.height = 'auto';
 }
 
+function stripFooterModulesForReEdit(html) {
+    let out = String(html || '');
+    out = removeAllMarkerTables(out, 'data-nl-signature-block', '1');
+    out = removeAllMarkerTables(out, 'data-nl-referral-block', '1');
+    out = removeAllMarkerTables(out, 'data-nl-disclaimer-block', '1');
+    out = stripReferralFromBody(out);
+    return out;
+}
+
+function getNewsletterHtmlForFeedbackEdit() {
+    let base = (lastGeneratedHTML || document.getElementById('nl-html-raw')?.value || '').trim();
+    if (!base) return base;
+    return stripFooterModulesForReEdit(base);
+}
+
+function hardenNewsletterPreviewHtml(html) {
+    let out = String(html || '');
+    if (!out.trim()) return out;
+    if (/<html\b/i.test(out)) {
+        out = out.replace(/<html\b([^>]*)>/i, (tag, attrs) => {
+            let a = String(attrs);
+            if (/style=["']/i.test(a)) {
+                a = a.replace(/style=(["'])([^"']*)\1/i, (m, q, styleVal) => {
+                    if (/overflow/i.test(styleVal)) return m;
+                    return `style=${q}${styleVal};height:100%;overflow-y:auto;${q}`;
+                });
+            } else {
+                a += ' style="height:100%;overflow-y:auto;"';
+            }
+            return `<html${a}>`;
+        });
+    }
+    if (!/<body\b/i.test(out)) return out;
+    return out.replace(/<body\b([^>]*)>/i, (tag, attrs) => {
+        let a = String(attrs).replace(/\s*contenteditable=["'][^"']*["']/gi, '');
+        if (/style=["']/i.test(a)) {
+            a = a.replace(/style=(["'])([^"']*)\1/i, (m, q, styleVal) => {
+                if (/overflow/i.test(styleVal)) return m;
+                return `style=${q}${styleVal};margin:0;overflow-y:auto;${q}`;
+            });
+        } else {
+            a += ' style="margin:0;overflow-y:auto;"';
+        }
+        return `<body${a} contenteditable="false">`;
+    });
+}
+
+function configureNewsletterPreviewIframeOnLoad(iframe) {
+    if (!iframe) return;
+    try {
+        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!doc) return;
+        if (doc.documentElement) {
+            doc.documentElement.style.height = '100%';
+            doc.documentElement.style.overflowY = 'auto';
+        }
+        if (doc.body) {
+            doc.body.setAttribute('contenteditable', 'false');
+            doc.body.style.margin = '0';
+            doc.body.style.overflowY = 'auto';
+            if (!doc.body.dataset.nlPreviewKeysWired) {
+                doc.body.dataset.nlPreviewKeysWired = '1';
+                doc.body.addEventListener('keydown', (e) => {
+                    if (e.key.length === 1 || e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete') {
+                        e.preventDefault();
+                    }
+                });
+            }
+        }
+    } catch (e) {}
+}
+
+function wireNewsletterPreviewIframeScroll(iframe) {
+    if (!iframe || iframe.dataset.nlScrollWired === '1') return;
+    iframe.dataset.nlScrollWired = '1';
+    iframe.addEventListener('load', () => configureNewsletterPreviewIframeOnLoad(iframe));
+}
+
+function applyNewsletterPreviewIframeIsolation(iframe) {
+    if (!iframe) return;
+    iframe.setAttribute('tabindex', '0');
+    iframe.setAttribute('sandbox', 'allow-same-origin');
+    iframe.setAttribute('scrolling', 'yes');
+    iframe.title = 'Newsletter preview — scroll inside to review';
+    iframe.style.pointerEvents = 'auto';
+    iframe.style.display = 'block';
+    wireNewsletterPreviewIframeScroll(iframe);
+}
+
+function mountNewsletterPreviewIframe(previewEl, html) {
+    if (!previewEl) return null;
+    previewEl.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.className = 'w-full border-0 rounded-2xl shadow-2xl bg-white';
+    iframe.style.height = 'min(85vh, 900px)';
+    iframe.style.minHeight = '500px';
+    applyNewsletterPreviewIframeIsolation(iframe);
+    iframe.srcdoc = hardenNewsletterPreviewHtml(html);
+    previewEl.appendChild(iframe);
+    if (iframe.contentDocument?.readyState === 'complete') {
+        configureNewsletterPreviewIframeOnLoad(iframe);
+    }
+    return iframe;
+}
+
 function setNewsletterPreviewHTML(html) {
     const previewEl = document.getElementById('nl-preview');
     if (!previewEl || !html) return;
     const iframe = previewEl.querySelector('iframe');
     if (iframe) {
-        iframe.srcdoc = html;
+        applyNewsletterPreviewIframeIsolation(iframe);
+        iframe.srcdoc = hardenNewsletterPreviewHtml(html);
         return;
     }
-    previewEl.innerHTML = '';
-    const next = document.createElement('iframe');
-    next.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-    next.srcdoc = html;
-    previewEl.appendChild(next);
+    mountNewsletterPreviewIframe(previewEl, html);
+}
+
+function wireNewsletterFeedbackFocusGuard() {
+    const feedbackEl = document.getElementById('nl-feedback');
+    if (!feedbackEl || feedbackEl.dataset.nlFocusGuardWired === '1') return;
+    feedbackEl.dataset.nlFocusGuardWired = '1';
+    const blurPreview = () => {
+        const iframe = document.querySelector('#nl-preview iframe');
+        try { iframe?.contentWindow?.blur(); } catch (e) {}
+        try { window.focus(); } catch (e) {}
+    };
+    feedbackEl.addEventListener('focus', blurPreview);
+    feedbackEl.addEventListener('mousedown', blurPreview);
 }
 
 function patchPersonalMediaSizesInNewsletter() {
@@ -3762,6 +3896,7 @@ function wireNewsletterLiveFeedback() {
         updateSpecificTopicsPlaceholder();
     };
     root.querySelectorAll('input, select, textarea').forEach((el) => {
+        if (el.id === 'nl-feedback' || el.id === 'nl-html-raw') return;
         el.addEventListener('input', refresh);
         el.addEventListener('change', refresh);
     });
@@ -3944,6 +4079,10 @@ document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', 
         return;
     }
     if (!lastGeneratedHTML) {
+        const raw = document.getElementById('nl-html-raw')?.value?.trim();
+        if (raw) lastGeneratedHTML = raw;
+    }
+    if (!lastGeneratedHTML) {
         window.notifyUser('No previous newsletter to edit — generate one first!', 'warning', 3200);
         return;
     }
@@ -3951,9 +4090,11 @@ document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', 
 });
 
 async function generateNewsletter(feedback = '') {
+    if (_nlGenerating) return;
     if (!feedback && !validatePersonalUpdateForGeneration()) {
         return;
     }
+    _nlGenerating = true;
 
     const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
     const displayTitle = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
@@ -4101,7 +4242,7 @@ async function generateNewsletter(feedback = '') {
                 '6. COMPLIANCE (NON-NEGOTIABLE): NEVER add, change, or include ANY mention of specific home loan rates, interest rates, APRs, or "current rates" anywhere in the document.',
                 '',
                 'PREVIOUS FULL NEWSLETTER HTML (use this as your base):',
-                lastGeneratedHTML,
+                getNewsletterHtmlForFeedbackEdit(),
                 '',
                 'USER EDIT REQUEST (apply this intelligently):',
                 feedback,
@@ -4149,6 +4290,9 @@ async function generateNewsletter(feedback = '') {
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
                 '- Section direction & extra instructions:\n' + getCombinedSpecificTopicsForPrompt(selections),
+                ...(typeof window.buildGenerationRulesPromptBlock === 'function'
+                    ? window.buildGenerationRulesPromptBlock('newsletter')
+                    : []),
                 '',
                 ...buildNewsletterLengthPromptBlock(),
                 '',
@@ -4264,7 +4408,8 @@ async function generateNewsletter(feedback = '') {
         // Centralized API call (Phase 0)
         let fullContent = await window.callGrokAPI(prompt, {
             temperature: feedback ? 0.7 : 0.8,
-            max_tokens: 12000
+            max_tokens: 12000,
+            timeoutMs: feedback ? 180000 : 120000
         });
 
         if (!fullContent) throw new Error('Empty response from API');
@@ -4322,6 +4467,8 @@ async function generateNewsletter(feedback = '') {
         });
 
     } finally {
+        _nlGenerating = false;
+
         // Restore the original #global-loading markup (standard spinner + title + message) then hide via the shared helper.
         // Matches the finally pattern used by weekly-win-plan.js and other feature modules.
         const loadingElFinal = document.getElementById('global-loading');
@@ -4336,6 +4483,7 @@ async function generateNewsletter(feedback = '') {
             loadingElFinal.style.setProperty('display', 'none', 'important');
         }
 
+        try {
         if (html && html.trim() !== '') {
             // Core replacements (always safe)
             html = html.replace(/<p[^>]*id=["']?fun-fact-placeholder["']?[^>]*>[\s\S]*?<\/p>/gi, `<p>${selectedFunFact}</p>`);
@@ -4468,6 +4616,12 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
                 if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
                     html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
                 }
+            } else {
+                // Feedback edits: strip post-processed footer modules, then rebuild branding once.
+                try {
+                    html = stripFooterModulesForReEdit(html);
+                    html = injectAgentBranding(html);
+                } catch (e) { /* non-fatal */ }
             }
 
     // Normalize before saving the raw HTML (for downloads/copying)
@@ -4490,14 +4644,10 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
 
             // Preview & raw output
             const previewEl = document.getElementById('nl-preview');
-            if (previewEl) {
-                previewEl.innerHTML = '';
-                const iframe = document.createElement('iframe');
-                iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-                iframe.srcdoc = html;
-                previewEl.appendChild(iframe);
-
+            const iframe = previewEl ? mountNewsletterPreviewIframe(previewEl, html) : null;
+            if (iframe) {
                 iframe.onload = () => {
+                    configureNewsletterPreviewIframeOnLoad(iframe);
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
                     const funFactP = iframeDoc.querySelector('#fun-fact-placeholder');
@@ -4533,6 +4683,10 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
             if (typeof confetti === 'function') {
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             }
+
+            if (!feedback) {
+                window._nlNextStepsId = `nl_${Date.now().toString(36)}`;
+            }
         }
 
         const output = document.getElementById('newsletter-output');
@@ -4551,6 +4705,10 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
 
         if (feedback && document.getElementById('nl-feedback')) {
             document.getElementById('nl-feedback').value = '';
+        }
+        } catch (postErr) {
+            console.error('[newsletter] post-process failed', postErr);
+            window.notifyUser('Newsletter finished but preview formatting had an issue. Try Copy for Outlook or regenerate.', 'warning', 5000);
         }
     }
     }  // additional close for if (html && ...) to fix brace count after personal media insertion refactor (old block had extra closes)
@@ -4655,7 +4813,7 @@ function copyForOutlook() {
   // has the orange headers that the raw/preview might.
   window.saveNewsletterToVault = function() {
     if (typeof window.toggleSaveIdea !== 'function') {
-      window.notifyUser('Saved Items system not ready yet. Please try again in a moment.', 'success', 3200);
+      window.notifyUser('Saved Items system not ready yet. Please try again in a moment.', 'warning', 3200);
       return;
     }
     const clean = getCleanOutlookHTML();
@@ -4692,22 +4850,19 @@ function copyForOutlook() {
       if (!last) return;
       // Skip heavy normalize on load — it can freeze the tab (ReDoS on large saved HTML).
       // Lightweight header fix only: re-center title + "Insights from …" on restored previews.
-      const html = typeof ensureTitleHeaderRowCentered === 'function'
-        ? ensureTitleHeaderRowCentered(last)
-        : last;
+      // Trust saved HTML — dedupe stray duplicate headers only, never re-inject branding on refresh.
+      let html = dedupeRealtorBrandHeaders(last);
+      html = typeof ensureTitleHeaderRowCentered === 'function'
+        ? ensureTitleHeaderRowCentered(html)
+        : html;
       lastGeneratedHTML = html;
       const rawEl = document.getElementById('nl-html-raw');
       const previewEl = document.getElementById('nl-preview');
       const outEl = document.getElementById('newsletter-output');
       if (rawEl) rawEl.value = html;
       if (previewEl) {
-        previewEl.innerHTML = '';
-        const iframe = document.createElement('iframe');
-        iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-        iframe.srcdoc = html;
-        previewEl.appendChild(iframe);
+        mountNewsletterPreviewIframe(previewEl, html);
       }
-      try { localStorage.setItem('lastNewsletterHTML', html); } catch (e) {}
       if (outEl) outEl.classList.remove('hidden');
       // Ensure a Clear button is present after restore (same as generate path)
       if (outEl && !outEl.querySelector('.nl-clear-btn')) {
@@ -5003,6 +5158,7 @@ function copyForOutlook() {
     // in the code above. They will run when this module executes.
 
     try { wireNewsletterLiveFeedback(); } catch (e) {}
+    try { wireNewsletterFeedbackFocusGuard(); } catch (e) {}
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
     try {

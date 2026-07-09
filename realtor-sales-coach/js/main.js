@@ -547,18 +547,8 @@
     if (window.__sidebarToggleInitialized) return;
   }
 
-  // Small cleanup: the old social post button hack (was a scattered inline script)
-  function initSocialPostButtonFix() {
-    // The generateSocialPost function lives in its own feature or inline.
-    // This just ensures the button also works via addEventListener in addition to onclick.
-    setTimeout(() => {
-      const generateBtn = document.querySelector('button[onclick*="generateSocialPost"]');
-      if (generateBtn && window.generateSocialPost) {
-        generateBtn.addEventListener('click', window.generateSocialPost, { once: true });
-        console.log('[main.js] Social Post generate button listener attached (cleanup)');
-      }
-    }, 800);
-  }
+  // Social post generate uses onclick on the button — no duplicate listener needed.
+  function initSocialPostButtonFix() {}
 
   // =====================================================
   // 5. NAVIGATION / SECTION SWITCHING (consolidated)

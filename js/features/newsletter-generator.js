@@ -22,6 +22,18 @@
   // =====================================================
 
 let lastGeneratedHTML = '';
+let _nlGenerating = false;
+
+function safeParseJSONArray(storageKey, fallback = []) {
+    try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
 
   window.openNewsletterTips = function openNewsletterTips() {
     const modal = document.getElementById('newsletter-tips-modal');
@@ -826,9 +838,9 @@ const motivationalQuotes = [
 ];
 
 // Track used items (no repeats) — separate for each category
-let usedFunFacts = JSON.parse(localStorage.getItem('usedFunFacts') || '[]');
-let usedProTips = JSON.parse(localStorage.getItem('usedProTips') || '[]');
-let usedQuotes = JSON.parse(localStorage.getItem('usedQuotes') || '[]');
+let usedFunFacts = safeParseJSONArray('usedFunFacts');
+let usedProTips = safeParseJSONArray('usedProTips');
+let usedQuotes = safeParseJSONArray('usedQuotes');
 
 // Reset functions
 function resetUsed(category) {
@@ -1503,14 +1515,11 @@ function setNewsletterPreviewHTML(html) {
     if (!previewEl || !html) return;
     const iframe = previewEl.querySelector('iframe');
     if (iframe) {
-        iframe.srcdoc = html;
+        applyNewsletterPreviewIframeIsolation(iframe);
+        iframe.srcdoc = hardenNewsletterPreviewHtml(html);
         return;
     }
-    previewEl.innerHTML = '';
-    const next = document.createElement('iframe');
-    next.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-    next.srcdoc = html;
-    previewEl.appendChild(next);
+    mountNewsletterPreviewIframe(previewEl, html);
 }
 
 /** When sliders move after generation, patch photo/video widths in saved HTML + preview. */
@@ -1797,7 +1806,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const savedSections = JSON.parse(localStorage.getItem('nl-sections') || '[]');
+    const savedSections = safeParseJSONArray('nl-sections');
     document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
         if (savedSections.includes(cb.id)) {
             cb.checked = true;
@@ -1809,9 +1818,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Load used items and selections
-    usedFunFacts = JSON.parse(localStorage.getItem('usedFunFacts') || '[]');
-    usedProTips = JSON.parse(localStorage.getItem('usedProTips') || '[]');
-    usedQuotes = JSON.parse(localStorage.getItem('usedQuotes') || '[]');
+    usedFunFacts = safeParseJSONArray('usedFunFacts');
+    usedProTips = safeParseJSONArray('usedProTips');
+    usedQuotes = safeParseJSONArray('usedQuotes');
 
     selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
     selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
@@ -1911,6 +1920,10 @@ document.getElementById('regenerate-with-edits-btn')?.addEventListener('click', 
     if (!feedback) {
         alert('Please enter feedback or specific edits first!');
         return;
+    }
+    if (!lastGeneratedHTML) {
+        const raw = document.getElementById('nl-html-raw')?.value?.trim();
+        if (raw) lastGeneratedHTML = raw;
     }
     if (!lastGeneratedHTML) {
         alert('No previous newsletter to edit — generate one first!');
@@ -2207,27 +2220,80 @@ function normalizeNewsletterModuleWidths(html) {
     return out;
 }
 
-function wrapNewsletterSectionRows(innerHtml) {
+function wrapNewsletterSectionRows(innerHtml, options) {
     if (!innerHtml) return '';
-    return `
-<tr><td height="20"></td></tr>
-<tr><td style="padding:0;">
+    const leading = options?.skipLeadingSpacer
+        ? ''
+        : '<tr><td height="20"></td></tr>\n';
+    return `${leading}<tr><td style="padding:0;">
 ${innerHtml}
 </td></tr>
 <tr><td height="20"></td></tr>`;
 }
 
-function wrapPersonalVideoRows(videoTable) {
-    return wrapNewsletterSectionRows(videoTable);
+function wrapPersonalVideoRows(videoTable, options) {
+    return wrapNewsletterSectionRows(videoTable, options);
+}
+
+const NL_SECTION_SPACER_ROW_END_RE = /<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*$/i;
+const NL_SECTION_SPACER_ROW_START_RE = /^<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*/i;
+
+function endsWithSectionSpacerRow(html) {
+    return NL_SECTION_SPACER_ROW_END_RE.test(String(html || '').trimEnd());
+}
+
+function matchSectionSpacerRowLengthAt(html, index) {
+    const slice = String(html || '').slice(index).trimStart();
+    const match = NL_SECTION_SPACER_ROW_START_RE.exec(slice);
+    return match ? match[0].length : 0;
+}
+
+function findMatchingTableCloseIndex(htmlFromOpen) {
+    const re = /<table\b[^>]*>|<\/table>/gi;
+    let depth = 0;
+    let match;
+    while ((match = re.exec(htmlFromOpen)) !== null) {
+        if (/^<table\b/i.test(match[0])) depth++;
+        else {
+            depth--;
+            if (depth === 0) return match.index + match[0].length;
+        }
+    }
+    return -1;
+}
+
+/** Prefer the outer 600px shell so footer rows stay inside the centered column. */
+function findLoMainTableCloseIndex(html) {
+    const src = String(html || '');
+    const bodyIdx = src.search(/<\/body>/i);
+    if (bodyIdx < 0) return src.lastIndexOf('</table>');
+    const beforeBody = src.slice(0, bodyIdx);
+    const mainTableOpenRe = /<table\b[^>]*(?:\bwidth=["']?600\b|style=["'][^"']*width:\s*600px)[^>]*>/gi;
+    let bestClose = -1;
+    let openMatch;
+    while ((openMatch = mainTableOpenRe.exec(beforeBody)) !== null) {
+        const closeRel = findMatchingTableCloseIndex(beforeBody.slice(openMatch.index));
+        if (closeRel >= 0) {
+            const absClose = openMatch.index + closeRel;
+            if (absClose > bestClose) bestClose = absClose;
+        }
+    }
+    if (bestClose >= 0) return bestClose;
+    return beforeBody.lastIndexOf('</table>');
 }
 
 function insertRowsInsideMainTable(html, rows) {
     if (!rows) return html;
-    const beforeMainClose = /<\/table>\s*<\/body>/i;
-    if (beforeMainClose.test(html)) {
-        return html.replace(beforeMainClose, rows + '\n</table></body>');
+    const src = String(html || '');
+    const bodyIdx = src.search(/<\/body>/i);
+    if (bodyIdx < 0) {
+        return src + rows;
     }
-    return html.replace(/<\/body>/i, '<table width="600" align="center" cellpadding="0" cellspacing="0">' + rows + '</table></body>');
+    const insertAt = findLoMainTableCloseIndex(src);
+    if (insertAt >= 0) {
+        return src.slice(0, insertAt) + rows + '\n' + src.slice(insertAt);
+    }
+    return src.replace(/<\/body>/i, '<table width="600" align="center" cellpadding="0" cellspacing="0">' + rows + '</table></body>');
 }
 
 const NL_BLOG_HEADING_RE = '(?:My Recent Blog|From the Blog|Blog Highlight|Recent Blog|Latest Blog Post)';
@@ -2237,8 +2303,13 @@ function escNewsletterAttr(str) {
     return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function escNewsletterHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function stripReferralSections(html) {
     let out = String(html || '');
+    out = out.replace(/<table\b[^>]*data-nl-referral-block=["']1["'][^>]*>[\s\S]*?<\/table>\s*/gi, '');
     const headlines = [REFERRAL_CTA_HEADLINE, 'Know Someone Thinking About Buying or Selling?'];
     headlines.forEach((h) => {
         const re = new RegExp('<tr>\\s*<td[^>]*>[\\s\\S]*?' + h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?<\\/table>\\s*<\\/td>\\s*<\\/tr>\\s*(?:<tr>\\s*<td[^>]*height=["\']?20["\']?[^>]*>\\s*<\\/td>\\s*<\\/tr>\\s*)?', 'gi');
@@ -2253,33 +2324,390 @@ function buildCompactReferralRowHtml(firstName, email) {
     const safeEmail = escNewsletterAttr(email);
     const mailSubject = encodeURIComponent('Referral from a Friend — Ready for Mortgage Help!');
     const mailBody = encodeURIComponent(`Hi ${firstName},\n\nI'd like to refer someone who's interested in mortgage options.\n\nName: \nPhone: \nEmail: \nThey're looking for: (buying / refinancing / other)\n\nThanks!\n`);
-    return `<tr>
-  <td align="center" style="padding:0;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;border-top:1px solid #e5e5e5;border-collapse:separate;max-width:600px;">
-      <tr>
-        <td style="padding:14px 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
-          <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
-          <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#666;">Know someone buying or refinancing? Forward this email — or tap below.</p>
-          <a href="mailto:${safeEmail}?subject=${mailSubject}&body=${mailBody}" style="display:inline-block;padding:9px 20px;background:#00A89D;color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;border-radius:20px;">Send a Referral</a>
-        </td>
-      </tr>
-    </table>
-  </td>
-</tr>
-<tr><td height="12"></td></tr>`;
+    return `<table width="600" cellpadding="0" cellspacing="0" align="center" border="0" data-nl-referral-block="1" style="width:600px;background:#fafafa;border-top:2px solid #e0e0e0;border-collapse:collapse;">
+  <tr>
+    <td width="600" align="center" style="width:600px;padding:14px 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+      <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
+      <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#666;">Know someone buying or refinancing? Forward this email — or tap below.</p>
+      <a href="mailto:${safeEmail}?subject=${mailSubject}&body=${mailBody}" style="display:inline-block;padding:9px 20px;background:#00A89D;color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;border-radius:20px;">Send a Referral</a>
+    </td>
+  </tr>
+</table>`;
 }
 
-function injectCompactReferralBeforeDisclaimer(html, referralRow) {
-    if (!referralRow) return html;
+const NL_DISCLAIMER_MARKERS_RE = /(?:Equal Housing(?:\s+Lender)?|informational purposes only|does not constitute an offer|commitment to lend|subject to credit approval|NMLS\s*#)/i;
+
+const NL_STYLED_DISCLAIMER_TABLE_RE = /<table\b[^>]*data-nl-disclaimer-block=["']1["'][^>]*>[\s\S]*?<\/table>\s*/gi;
+
+const NL_STYLED_DISCLAIMER_ROW_RE = /<tr>\s*<td[^>]*(?:data-nl-disclaimer-block|(?:background|bgcolor)[^>]*#?002[bB]5[cC])[^>]*>[\s\S]*?<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?\d+["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi;
+
+const NL_UNSTYLED_DISCLAIMER_ROW_RE = /<tr>\s*<td(?![^>]*(?:data-nl-disclaimer-block|(?:background|bgcolor)[^>]*#?002[bB]5[cC]))[^>]*>[\s\S]*?(?:Equal Housing|informational purposes|commitment to lend|NMLS\s*#)[\s\S]*?<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?\d+["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi;
+
+const LO_DISCLAIMER_BODY_TEXT =
+    'This newsletter is for informational purposes only and does not constitute an offer or commitment to lend. ' +
+    'All loans are subject to credit approval and property appraisal. Terms and conditions apply. ' +
+    'Consult your tax or legal advisor for specific advice. Equal Housing Lender.';
+
+function getLoFooterBrandingContext() {
+    const profile = getCentralProfile();
+    return {
+        name: (document.getElementById('nl-name')?.value || profile.name || 'Your Loan Officer').trim(),
+        email: (document.getElementById('nl-email')?.value || profile.email || profile.workEmail || '').trim(),
+        nmls: String(profile.nmls || '').trim(),
+        phone: String(profile.phone || '').trim(),
+        company: 'Ruoff Mortgage',
+    };
+}
+
+function buildLoContactLine(ctx) {
+    const parts = [ctx.name];
+    if (ctx.nmls) parts.push(`NMLS #${ctx.nmls}`);
+    parts.push(ctx.company);
+    if (ctx.email) parts.push(ctx.email);
+    if (ctx.phone) parts.push(ctx.phone);
+    return parts.join(' | ');
+}
+
+function buildLoDisclaimerFooterModule(ctx) {
+    const c = ctx || getLoFooterBrandingContext();
+    const contactLine = buildLoContactLine(c);
+    return `<table width="600" cellpadding="0" cellspacing="0" align="center" border="0" data-nl-disclaimer-block="1" style="width:600px;background:#002B5C;border-collapse:collapse;">
+  <tr>
+    <td width="600" align="center" bgcolor="#002B5C" style="width:600px;padding:16px 24px 20px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:8px;line-height:1.55;color:#ffffff;background-color:#002B5C;">
+      <p style="margin:0 0 8px;font-size:9px;color:#ffffff;line-height:1.5;">${escNewsletterHtml(contactLine)}</p>
+      <p style="margin:0;font-size:8px;color:#ffffff;">${escNewsletterHtml(LO_DISCLAIMER_BODY_TEXT)}</p>
+    </td>
+  </tr>
+</table>`;
+}
+
+function findDisclaimerFooterInsertPoint(html) {
+    const src = String(html || '');
+    const brainPlaceholder = src.search(/<!--\s*BRAIN_TEASER_ANSWER_PLACEHOLDER\s*-->/i);
+    if (brainPlaceholder >= 0) return brainPlaceholder;
+    const mainClose = findLoMainTableCloseIndex(src);
+    if (mainClose >= 0) return mainClose;
+    const bodyIdx = src.search(/<\/body>/i);
+    return bodyIdx >= 0 ? bodyIdx : src.length;
+}
+
+function hasLoReferralBlock(html) {
+    const src = String(html || '');
+    return /data-nl-referral-block=["']1["']/i.test(src)
+        || /Know Someone Ready to Buy or Refinance\?/i.test(src);
+}
+
+function dedupeLoReferralBlocks(html) {
+    let out = String(html || '');
+    let foundTable = false;
+    out = out.replace(
+        /<table\b[^>]*data-nl-referral-block=["']1["'][^>]*>[\s\S]*?<\/table>\s*/gi,
+        (block) => {
+            if (foundTable) return '';
+            foundTable = true;
+            return block;
+        }
+    );
+    let foundRow = false;
+    out = out.replace(
+        /<tr[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/tr>\s*/gi,
+        (block) => {
+            if (foundRow) return '';
+            foundRow = true;
+            return block;
+        }
+    );
+    return out;
+}
+
+/** Move footer <tr> rows that drifted outside the 600px shell back inside it. */
+function reparentLoOrphanFooterRows(html) {
+    const src = String(html || '');
+    const bodyMatch = src.match(/^([\s\S]*<body[^>]*>)([\s\S]*)(<\/body>[\s\S]*)$/i);
+    if (!bodyMatch) return src;
+
+    const mainClose = findLoMainTableCloseIndex(src);
+    if (mainClose < 0) return src;
+
+    const bodyEnd = src.search(/<\/body>/i);
+    if (bodyEnd < 0 || mainClose >= bodyEnd) return src;
+
+    const between = src.slice(mainClose, bodyEnd);
+    if (!/<tr\b/i.test(between)) return src;
+    if (!/(?:data-nl-disclaimer-block|Know Someone Ready to Buy or Refinance\?|Send a Referral|background:\s*#002B5C)/i.test(between)) {
+        return src;
+    }
+
+    const rowsToMove = [];
+    const cleanedBetween = between.replace(/<tr>[\s\S]*?<\/tr>\s*/gi, (row) => {
+        if (/(?:data-nl-disclaimer-block|Know Someone Ready to Buy or Refinance\?|Send a Referral|background:\s*#002B5C)/i.test(row)) {
+            rowsToMove.push(row);
+            return '';
+        }
+        return row;
+    });
+
+    if (!rowsToMove.length) return src;
+    return src.slice(0, mainClose) + '\n' + rowsToMove.join('\n') + cleanedBetween + src.slice(bodyEnd);
+}
+
+/** Refresh disclaimer from profile on restore — never touch referral blocks. */
+function prepareLoNewsletterForRestore(html) {
+    let out = dedupeLoReferralBlocks(String(html || ''));
+    if (!out.trim()) return out;
+    try {
+        out = ensureLoNewsletterFooter(out);
+    } catch (e) {
+        console.warn('[newsletter] prepareLoNewsletterForRestore failed', e);
+    }
+    return out;
+}
+
+/** Rebuild referral + disclaimer as body-level modules (fixes refresh/preview tail drift). */
+function repairLoNewsletterForPreview(html) {
+    let out = String(html || '');
+    if (!out.trim()) return out;
+    try {
+        const selections = getNewsletterSelections();
+        const fullName = document.getElementById('nl-name')?.value || 'Your Loan Officer';
+        const firstName = fullName.split(' ')[0].trim();
+        out = stripReferralSections(out);
+        out = ensureLoNewsletterFooter(out);
+        if (selections.includeReferral) {
+            const email = document.getElementById('nl-email')?.value || '';
+            out = injectCompactReferralBeforeDisclaimer(out, buildCompactReferralRowHtml(firstName, email));
+        }
+        out = dedupeLoReferralBlocks(out);
+    } catch (e) {
+        console.warn('[newsletter] repairLoNewsletterForPreview failed', e);
+    }
+    return out;
+}
+
+/** Strip post-processed tail blocks before sending HTML back to the model for edits. */
+function getNewsletterHtmlForFeedbackEdit() {
+    let base = (lastGeneratedHTML || document.getElementById('nl-html-raw')?.value || '').trim();
+    if (!base) return base;
+    base = stripLoSignatureBlocks(base);
+    base = stripReferralSections(base);
+    base = stripAllDisclaimerBlocks(base);
+    if (window.NlEntertainment && typeof window.NlEntertainment.stripBrainTeaserAnswerBlocks === 'function') {
+        base = window.NlEntertainment.stripBrainTeaserAnswerBlocks(base);
+    }
+    return base;
+}
+
+function hardenNewsletterPreviewHtml(html) {
+    let out = String(html || '');
+    if (!out.trim()) return out;
+    if (/<html\b/i.test(out)) {
+        out = out.replace(/<html\b([^>]*)>/i, (tag, attrs) => {
+            let a = String(attrs);
+            if (/style=["']/i.test(a)) {
+                a = a.replace(/style=(["'])([^"']*)\1/i, (m, q, styleVal) => {
+                    if (/overflow/i.test(styleVal)) return m;
+                    return `style=${q}${styleVal};height:100%;overflow-y:auto;${q}`;
+                });
+            } else {
+                a += ' style="height:100%;overflow-y:auto;"';
+            }
+            return `<html${a}>`;
+        });
+    }
+    if (!/<body\b/i.test(out)) return out;
+    return out.replace(/<body\b([^>]*)>/i, (tag, attrs) => {
+        let a = String(attrs).replace(/\s*contenteditable=["'][^"']*["']/gi, '');
+        if (/style=["']/i.test(a)) {
+            a = a.replace(/style=(["'])([^"']*)\1/i, (m, q, styleVal) => {
+                if (/overflow/i.test(styleVal)) return m;
+                return `style=${q}${styleVal};margin:0;overflow-y:auto;${q}`;
+            });
+        } else {
+            a += ' style="margin:0;overflow-y:auto;"';
+        }
+        return `<body${a} contenteditable="false">`;
+    });
+}
+
+function configureNewsletterPreviewIframeOnLoad(iframe) {
+    if (!iframe) return;
+    try {
+        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!doc) return;
+        if (doc.documentElement) {
+            doc.documentElement.style.height = '100%';
+            doc.documentElement.style.overflowY = 'auto';
+        }
+        if (doc.body) {
+            doc.body.setAttribute('contenteditable', 'false');
+            doc.body.style.margin = '0';
+            doc.body.style.overflowY = 'auto';
+            if (!doc.body.dataset.nlPreviewKeysWired) {
+                doc.body.dataset.nlPreviewKeysWired = '1';
+                doc.body.addEventListener('keydown', (e) => {
+                    if (e.key.length === 1 || e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete') {
+                        e.preventDefault();
+                    }
+                });
+            }
+        }
+    } catch (e) {}
+}
+
+function wireNewsletterPreviewIframeScroll(iframe) {
+    if (!iframe || iframe.dataset.nlScrollWired === '1') return;
+    iframe.dataset.nlScrollWired = '1';
+    iframe.addEventListener('load', () => configureNewsletterPreviewIframeOnLoad(iframe));
+}
+
+function applyNewsletterPreviewIframeIsolation(iframe) {
+    if (!iframe) return;
+    iframe.setAttribute('tabindex', '0');
+    iframe.setAttribute('sandbox', 'allow-same-origin');
+    iframe.setAttribute('scrolling', 'yes');
+    iframe.title = 'Newsletter preview — scroll inside to review';
+    iframe.style.pointerEvents = 'auto';
+    iframe.style.display = 'block';
+    wireNewsletterPreviewIframeScroll(iframe);
+}
+
+function mountNewsletterPreviewIframe(previewEl, html) {
+    if (!previewEl) return null;
+    previewEl.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.className = 'w-full border-0 rounded-2xl shadow-2xl bg-white';
+    iframe.style.height = 'min(85vh, 900px)';
+    iframe.style.minHeight = '500px';
+    applyNewsletterPreviewIframeIsolation(iframe);
+    iframe.srcdoc = hardenNewsletterPreviewHtml(html);
+    previewEl.appendChild(iframe);
+    if (iframe.contentDocument?.readyState === 'complete') {
+        configureNewsletterPreviewIframeOnLoad(iframe);
+    }
+    return iframe;
+}
+
+function wireNewsletterFeedbackFocusGuard() {
+    const feedbackEl = document.getElementById('nl-feedback');
+    if (!feedbackEl || feedbackEl.dataset.nlFocusGuardWired === '1') return;
+    feedbackEl.dataset.nlFocusGuardWired = '1';
+    const blurPreview = () => {
+        const iframe = document.querySelector('#nl-preview iframe');
+        try { iframe?.contentWindow?.blur(); } catch (e) {}
+        try { window.focus(); } catch (e) {}
+    };
+    feedbackEl.addEventListener('focus', blurPreview);
+    feedbackEl.addEventListener('mousedown', blurPreview);
+}
+
+function injectBeforeBodyClose(html, fragment) {
+    if (!fragment) return html;
+    const src = String(html || '');
+    const bodyIdx = src.search(/<\/body>/i);
+    if (bodyIdx >= 0) {
+        return src.slice(0, bodyIdx) + fragment + '\n' + src.slice(bodyIdx);
+    }
+    return src + fragment;
+}
+
+function stripOrphanDisclaimerTail(html) {
+    const bodyMatch = String(html || '').match(/^([\s\S]*<body[^>]*>)([\s\S]*)(<\/body>[\s\S]*)$/i);
+    if (!bodyMatch) return html;
+
+    let inner = bodyMatch[2];
+    const lastTableClose = inner.lastIndexOf('</table>');
+    if (lastTableClose < 0) return html;
+
+    const before = inner.slice(0, lastTableClose + 8);
+    let tail = inner.slice(lastTableClose + 8);
+    if (!NL_DISCLAIMER_MARKERS_RE.test(tail)) {
+        return html;
+    }
+
+    const preserved = [];
+    const brainPlaceholder = tail.match(/<!--\s*BRAIN_TEASER_ANSWER_PLACEHOLDER\s*-->/i);
+    if (brainPlaceholder) preserved.push(brainPlaceholder[0]);
+
+    tail = tail.replace(/<tr>[\s\S]*?<\/tr>/gi, (row) => {
+        if (/BRAIN_TEASER|font-size:\s*10px;\s*color:\s*#999/i.test(row) && !NL_DISCLAIMER_MARKERS_RE.test(row)) {
+            return row;
+        }
+        return NL_DISCLAIMER_MARKERS_RE.test(row) ? '' : row;
+    });
+    tail = tail.replace(/<p[^>]*>[\s\S]*?<\/p>/gi, (p) => (NL_DISCLAIMER_MARKERS_RE.test(p) ? '' : p));
+    tail = tail.replace(/<div[^>]*>[\s\S]*?<\/div>/gi, (d) => (NL_DISCLAIMER_MARKERS_RE.test(d) ? '' : d));
+    tail = tail.replace(/[^<\n]+/g, (text) => (NL_DISCLAIMER_MARKERS_RE.test(text) ? '' : text));
+
+    return bodyMatch[1] + before + preserved.join('\n') + tail + bodyMatch[3];
+}
+
+function stripLoSignatureBlocks(html) {
+    let out = String(html || '');
+    out = out.replace(/<tr[^>]*data-nl-signature-block=["']1["'][^>]*>[\s\S]*?<\/tr>\s*/gi, '');
+    out = out.replace(/<table[^>]*data-nl-signature-block=["']1["'][^>]*>[\s\S]*?<\/table>\s*/gi, '');
+    return out;
+}
+
+function stripStrayAiDisclaimerText(html) {
+    let out = String(html || '');
+    const isFooterDisclaimer = (chunk) => {
+        if (/data-nl-disclaimer-block/i.test(chunk)) return false;
+        const text = chunk.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!text || text.length > 420) return false;
+        const markerHits = [
+            /Equal Housing/i.test(text),
+            /informational purposes/i.test(text),
+            /commitment to lend|does not constitute an offer/i.test(text),
+            /subject to credit approval/i.test(text),
+        ].filter(Boolean).length;
+        return markerHits >= 2;
+    };
+    out = out.replace(/<p[^>]*>[\s\S]*?<\/p>/gi, (p) => (isFooterDisclaimer(p) ? '' : p));
+    out = out.replace(/<div[^>]*>[\s\S]*?<\/div>/gi, (d) => (isFooterDisclaimer(d) ? '' : d));
+    return out;
+}
+
+function stripAllDisclaimerBlocks(html) {
+    let out = String(html || '');
+    out = out.replace(NL_STYLED_DISCLAIMER_TABLE_RE, '');
+    out = out.replace(NL_STYLED_DISCLAIMER_ROW_RE, '');
+    out = out.replace(NL_UNSTYLED_DISCLAIMER_ROW_RE, '');
+    out = stripStrayAiDisclaimerText(out);
+    out = stripOrphanDisclaimerTail(out);
+    return out;
+}
+
+/** Always rebuild styled disclaimer as a body-level 600px table (referral → disclaimer; no signature). */
+function ensureLoNewsletterFooter(html) {
+    let out = String(html || '');
+    if (!out.trim()) return out;
+    out = stripLoSignatureBlocks(out);
+    out = stripAllDisclaimerBlocks(out);
+    out = stripStrayAiDisclaimerText(out);
+    const disclaimer = buildLoDisclaimerFooterModule(getLoFooterBrandingContext());
+    return injectBeforeBodyClose(out, disclaimer);
+}
+
+/** @deprecated Use ensureLoNewsletterFooter */
+function ensureLoDisclaimerFooter(html) {
+    return ensureLoNewsletterFooter(html);
+}
+
+function injectCompactReferralBeforeDisclaimer(html, referralModule) {
+    if (!referralModule) return html;
     let out = String(html || '');
     if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
-        return out.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, referralRow);
+        return out.replace(/\[REFERRAL CTA PLACEHOLDER\]/gi, referralModule);
     }
-    const footerRow = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i;
-    if (footerRow.test(out)) {
-        return out.replace(footerRow, referralRow + '\n$1');
+    const disclaimerTable = /(<table\b[^>]*data-nl-disclaimer-block=["']1["'][^>]*>)/i;
+    if (disclaimerTable.test(out)) {
+        return out.replace(disclaimerTable, referralModule + '\n$1');
     }
-    return insertRowsInsideMainTable(out, referralRow);
+    const legacyFooterRow = /(<tr>\s*<td[^>]*(?:data-nl-disclaimer-block|background:\s*#002B5C)[^>]*>)/i;
+    if (legacyFooterRow.test(out)) {
+        return out.replace(legacyFooterRow, referralModule + '\n$1');
+    }
+    return injectBeforeBodyClose(out, referralModule);
 }
 
 function stripBlogSections(html) {
@@ -2327,8 +2755,8 @@ function findBlogInsertBeforePersonalIndex(html) {
     return -1;
 }
 
-function injectBlogBeforePersonal(html, blogSection, options) {
-    if (!blogSection) return html;
+function injectBlogBeforePersonal(html, blogInnerTableHtml, options) {
+    if (!blogInnerTableHtml) return html;
     const personalIncluded = !!(options && options.personalIncluded);
 
     // Never trust placeholder position — AI often leaves it right after the hero.
@@ -2336,8 +2764,20 @@ function injectBlogBeforePersonal(html, blogSection, options) {
 
     const personalIdx = findBlogInsertBeforePersonalIndex(out);
     if (personalIdx >= 0) {
+        const before = out.slice(0, personalIdx);
+        const spacerLen = matchSectionSpacerRowLengthAt(out, personalIdx);
+        const blogSection = wrapNewsletterSectionRows(blogInnerTableHtml, {
+            skipLeadingSpacer: endsWithSectionSpacerRow(before),
+        });
+        if (spacerLen > 0) {
+            return out.slice(0, personalIdx) + blogSection + out.slice(personalIdx + spacerLen);
+        }
         return out.slice(0, personalIdx) + blogSection + out.slice(personalIdx);
     }
+
+    const wrapBlogForTail = (tailHtml) => wrapNewsletterSectionRows(blogInnerTableHtml, {
+        skipLeadingSpacer: endsWithSectionSpacerRow(out),
+    });
 
     if (personalIncluded) {
         const personalComment = /<!--\s*Personal Note Section\s*-->/i;
@@ -2345,32 +2785,39 @@ function injectBlogBeforePersonal(html, blogSection, options) {
         if (commentMatch) {
             const heroIdx = out.search(/<img[^>]*alt=["'][^"']*hero[^"']*["']/i);
             if (heroIdx === -1 || commentMatch.index > heroIdx + 400) {
+                const blogSection = wrapNewsletterSectionRows(blogInnerTableHtml, {
+                    skipLeadingSpacer: endsWithSectionSpacerRow(out.slice(0, commentMatch.index)),
+                });
                 return out.slice(0, commentMatch.index) + blogSection + out.slice(commentMatch.index);
             }
         }
-        return insertRowsInsideMainTable(out, blogSection);
+        return insertRowsInsideMainTable(out, wrapBlogForTail(out));
     }
 
     // Personal block not included — tuck blog before video / referral / footer.
     if (out.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
+        const spacerBeforePlaceholder = /<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*<!--\s*PERSONAL VIDEO PLACEHOLDER\s*-->/i;
+        const blogSection = wrapNewsletterSectionRows(blogInnerTableHtml, {
+            skipLeadingSpacer: spacerBeforePlaceholder.test(out) || endsWithSectionSpacerRow(out),
+        });
         return out.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', blogSection + '\n<!-- PERSONAL VIDEO PLACEHOLDER -->');
     }
 
     if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
-        return out.replace('[REFERRAL CTA PLACEHOLDER]', blogSection + '\n[REFERRAL CTA PLACEHOLDER]');
+        return out.replace('[REFERRAL CTA PLACEHOLDER]', wrapBlogForTail(out) + '\n[REFERRAL CTA PLACEHOLDER]');
     }
 
     const referralBlock = /<tr>\s*<td[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/tr>/i;
     if (referralBlock.test(out)) {
-        return out.replace(referralBlock, blogSection + '$&');
+        return out.replace(referralBlock, wrapBlogForTail(out) + '$&');
     }
 
     const footerRow = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i;
     if (footerRow.test(out)) {
-        return out.replace(footerRow, blogSection + '$1');
+        return out.replace(footerRow, wrapBlogForTail(out) + '$1');
     }
 
-    return insertRowsInsideMainTable(out, blogSection);
+    return insertRowsInsideMainTable(out, wrapBlogForTail(out));
 }
 
 function stripPersonalVideoBlocks(html) {
@@ -2385,17 +2832,24 @@ function injectPersonalVideoSection(html, personalVideoUrl) {
     if (!url) return html;
 
     const videoTable = buildPersonalVideoTable(url);
-    const videoSection = wrapPersonalVideoRows(videoTable);
     let out = stripPersonalVideoBlocks(html);
 
     if (out.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
+        const spacerBeforePlaceholder = /<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*<!--\s*PERSONAL VIDEO PLACEHOLDER\s*-->/i;
+        const videoSection = wrapPersonalVideoRows(
+            videoTable,
+            { skipLeadingSpacer: spacerBeforePlaceholder.test(out) }
+        );
         return out.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', videoSection);
     }
 
     const afterPersonalNote = /(<tr>\s*<td[^>]*>\s*<table[^>]*border-left:\s*8px[^>]*>[\s\S]*?A Note From[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>\s*<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>)/i;
     if (afterPersonalNote.test(out)) {
+        const videoSection = wrapPersonalVideoRows(videoTable, { skipLeadingSpacer: true });
         return out.replace(afterPersonalNote, '$1' + videoSection);
     }
+
+    const videoSection = wrapPersonalVideoRows(videoTable);
 
     if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
         return out.replace('[REFERRAL CTA PLACEHOLDER]', videoSection + '\n[REFERRAL CTA PLACEHOLDER]');
@@ -2857,6 +3311,7 @@ function wireNewsletterLiveFeedback() {
     };
 
     root.querySelectorAll('input, select, textarea').forEach((el) => {
+        if (el.id === 'nl-feedback' || el.id === 'nl-html-raw') return;
         el.addEventListener('input', refresh);
         el.addEventListener('change', refresh);
     });
@@ -2900,9 +3355,11 @@ function validatePersonalUpdateForGeneration() {
 }
 
 async function generateNewsletter(feedback = '') {
+    if (_nlGenerating) return;
     if (!feedback && !validatePersonalUpdateForGeneration()) {
         return;
     }
+    _nlGenerating = true;
 
     const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
     const displayTitle = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
@@ -3044,7 +3501,7 @@ async function generateNewsletter(feedback = '') {
                 '6. COMPLIANCE (NON-NEGOTIABLE): NEVER add, change, or include ANY mention of specific mortgage rates, interest rates, APRs, or "current rates" anywhere in the document.',
                 '',
                 'PREVIOUS FULL NEWSLETTER HTML (use this as your base):',
-                lastGeneratedHTML,
+                getNewsletterHtmlForFeedbackEdit(),
                 '',
                 'USER EDIT REQUEST (apply this intelligently):',
                 feedback,
@@ -3139,7 +3596,7 @@ async function generateNewsletter(feedback = '') {
                     : '- REFERRAL CTA: User excluded the referral section — do NOT include [REFERRAL CTA PLACEHOLDER], referral headings, referral buttons, or any "know someone" ask.'),
                 '- ALL EXTERNAL LINKS: target="_blank" rel="noopener".',
                 '- If a personal photo URL is provided, place the image BELOW the personal note text. Use a simple table wrapper with max-width around 590px and max-height around 480px so the photo scales down automatically while staying fully visible. Keep it clean and Outlook-friendly.',
-                '- Compliance: Use the exact footer disclaimer provided below. NEVER quote specific rates anywhere.',
+                '- Compliance: Do NOT write the footer disclaimer yourself — we inject the exact compliance footer in post-processing. NEVER quote specific rates anywhere.',
                 '- COMPLIANCE (CRITICAL - NEVER BREAK): NEVER quote, mention, suggest, or imply ANY specific mortgage interest rates, APRs, current rates, or loan rates in ANY section (Market Update, Industry News, Current News, or elsewhere). Use only general language like "rates have fluctuated recently" WITHOUT any numbers or quotes. Violation = compliance risk.',
                 '- EMAIL COMPATIBILITY (MANDATORY): Use ONLY inline styles. DO NOT include any <style> tags or class attributes. Use TABLE-BASED LAYOUTS for all structural elements. Avoid flexbox, gap, and box-shadow.',
                 '- Main container: <table width="600" align="center"...> with background white.',
@@ -3197,7 +3654,7 @@ async function generateNewsletter(feedback = '') {
             }
             promptLines.push(
                 '    <!-- REFERRAL CTA: compact block added in post-processing immediately before disclaimer when enabled -->',
-                '    <tr><td align="center" style="padding:20px; background:#002B5C; color:white; text-align:center; font-size:8px;"> ... disclaimer ... </td></tr>',
+                '    <!-- DISCLAIMER: added in post-processing — do NOT include disclaimer text or footer rows in the body -->',
                 (selections.contentSections.puzzle ? '    <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->' : ''),
                 '  </table>',
                 '</bo' + 'dy>',
@@ -3210,7 +3667,8 @@ async function generateNewsletter(feedback = '') {
         // Centralized API call (Phase 0)
         let fullContent = await window.callGrokAPI(prompt, {
             temperature: feedback ? 0.7 : 0.8,
-            max_tokens: 12000
+            max_tokens: 12000,
+            timeoutMs: feedback ? 180000 : 120000
         });
 
         if (!fullContent) throw new Error('Empty response from API');
@@ -3267,6 +3725,8 @@ async function generateNewsletter(feedback = '') {
         });
 
     } finally {
+        _nlGenerating = false;
+
         // Restore the original #global-loading markup (standard spinner + title + message) then hide via the shared helper.
         // Matches the finally pattern used by weekly-win-plan.js and other feature modules.
         const loadingElFinal = document.getElementById('global-loading');
@@ -3349,8 +3809,7 @@ if (includeBlog) {
     const blogTitle = (document.getElementById('nl-blog-title')?.value || '').trim() || 'Latest Blog Post';
     if (blogUrl && blogUrl.length > 3) {
         const fullBlogUrl = blogUrl.startsWith('http') ? blogUrl : 'https://' + blogUrl;
-        const blogSection = wrapNewsletterSectionRows(`
-    <table width="100%" cellpadding="0" cellspacing="0" align="center" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
+        const blogInnerTable = `<table width="100%" cellpadding="0" cellspacing="0" align="center" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
         <tr>
             <td style="padding:30px;">
                 <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">My Recent Blog</h2>
@@ -3359,8 +3818,8 @@ if (includeBlog) {
                 <a href="${fullBlogUrl}" target="_blank" rel="noopener" style="color:#00A89D; font-weight:bold; text-decoration:underline; display:inline-block;">Read full article →</a>
             </td>
         </tr>
-    </table>`);
-        html = injectBlogBeforePersonal(html, blogSection, { personalIncluded: !!postSelections?.personal });
+    </table>`;
+        html = injectBlogBeforePersonal(html, blogInnerTable, { personalIncluded: !!postSelections?.personal });
     } else {
         html = html.replace(/<!--\s*BLOG SECTION PLACEHOLDER\s*-->/gi, '');
     }
@@ -3391,12 +3850,15 @@ if (postSelections?.includeReferral) {
                 if (postSelections) {
                     html = applyUncheckedNewsletterSectionFilters(html, postSelections);
                 }
-
-                // Brain teaser answer — very last, below footer/disclaimer/referral
-                if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
-                    html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, postSelections || getNewsletterSelections());
-                }
             } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
+
+            // Always inject styled compliance footer — prevents orphan plain-text disclaimers.
+            html = ensureLoNewsletterFooter(html);
+            html = repairLoNewsletterForPreview(html);
+
+            if (!feedback && window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
+                html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
+            }
 
     // Normalize before saving the raw HTML (for downloads/copying)
     lastGeneratedHTML = normalizeRawNewsletterHTML(html);
@@ -3418,14 +3880,10 @@ if (postSelections?.includeReferral) {
 
             // Preview & raw output
             const previewEl = document.getElementById('nl-preview');
-            if (previewEl) {
-                previewEl.innerHTML = '';
-                const iframe = document.createElement('iframe');
-                iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-                iframe.srcdoc = html;
-                previewEl.appendChild(iframe);
-
+            const iframe = previewEl ? mountNewsletterPreviewIframe(previewEl, html) : null;
+            if (iframe) {
                 iframe.onload = () => {
+                    configureNewsletterPreviewIframeOnLoad(iframe);
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
                     const previewSel = getNewsletterSelections();
@@ -3613,6 +4071,24 @@ function getCleanOutlookHTML() {
     return cleanHTML;
 }
 
+function copyHtmlToOutlookClipboard(html, onSuccess, onError) {
+    const clean = String(html || '');
+    if (!clean) return Promise.reject(new Error('empty'));
+
+    const done = () => {
+        if (typeof onSuccess === 'function') onSuccess();
+    };
+
+    if (navigator.clipboard && window.ClipboardItem) {
+        const blob = new Blob([clean], { type: 'text/html' });
+        return navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]).then(done);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(clean).then(done);
+    }
+    return Promise.reject(new Error('clipboard unavailable'));
+}
+
 function copyForOutlook() {
     const cleanHTML = getCleanOutlookHTML();
     if (!cleanHTML) {
@@ -3620,14 +4096,23 @@ function copyForOutlook() {
         return;
     }
 
-    const blob = new Blob([cleanHTML], { type: 'text/html' });
-    const data = [new ClipboardItem({ 'text/html': blob })];
-
-    navigator.clipboard.write(data).then(() => {
+    const onSuccess = () => {
         alert('✅ Outlook-optimized HTML copied!\n\nPaste into a NEW email in Outlook.');
-    }).catch(err => {
-        console.error(err);
-        alert('Clipboard issue — try the regular Copy HTML button instead.');
+    };
+
+    copyHtmlToOutlookClipboard(cleanHTML, onSuccess).catch(() => {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = cleanHTML;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            onSuccess();
+        } catch (err) {
+            console.error(err);
+            alert('Clipboard issue — try the regular Copy HTML button instead.');
+        }
     });
 }
 
@@ -3679,16 +4164,18 @@ function copyForOutlook() {
     try {
       const last = localStorage.getItem('lastNewsletterHTML');
       if (!last) return;
+      // Rebuild disclaimer from profile; dedupe referral only (never duplicate referral).
+      let html = prepareLoNewsletterForRestore(last);
+      if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
+        html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
+      }
+      lastGeneratedHTML = html;
       const rawEl = document.getElementById('nl-html-raw');
       const previewEl = document.getElementById('nl-preview');
       const outEl = document.getElementById('newsletter-output');
-      if (rawEl) rawEl.value = last;
+      if (rawEl) rawEl.value = html;
       if (previewEl) {
-        previewEl.innerHTML = '';
-        const iframe = document.createElement('iframe');
-        iframe.className = 'w-full h-screen min-h-[800px] border-0 rounded-2xl shadow-2xl bg-white';
-        iframe.srcdoc = last;
-        previewEl.appendChild(iframe);
+        mountNewsletterPreviewIframe(previewEl, html);
       }
       if (outEl) outEl.classList.remove('hidden');
       // Ensure a Clear button is present after restore (same as generate path)
@@ -3931,6 +4418,7 @@ function copyForOutlook() {
       try { wireNewsletterChoiceButtons(); } catch (e) {}
     }
     try { wireNewsletterLiveFeedback(); } catch (e) {}
+    try { wireNewsletterFeedbackFocusGuard(); } catch (e) {}
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
 
@@ -3957,11 +4445,12 @@ function copyForOutlook() {
       }
     }, 80);
 
-    // Restore last generated newsletter (raw + visual preview) so the previous version is present after refresh
-    // until the user Clears or generates a replacement.
-    if (typeof restoreLastNewsletter === 'function') {
-      try { restoreLastNewsletter(); } catch (e) {}
-    }
+    // Defer restore until profile + checkbox state are settled (avoids footer/referral drift on refresh).
+    setTimeout(() => {
+      if (typeof restoreLastNewsletter === 'function') {
+        try { restoreLastNewsletter(); } catch (e) {}
+      }
+    }, 300);
 
     console.log('%c[newsletter-generator.js] Newsletter Generator initialized', 'color:#00A89D');
   }

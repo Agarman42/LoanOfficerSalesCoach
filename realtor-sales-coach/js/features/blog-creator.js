@@ -33,6 +33,15 @@
 
   function patchRestoredBlogOutput(html) {
     let patched = html || '';
+    if (!patched.includes('id="blog-next-steps-btn"')) {
+      patched = patched.replace(
+        /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
+        `$1
+        <button type="button" id="blog-next-steps-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#00A89D]/10 transition-all flex items-center justify-center gap-2 flex-1">
+            <i class="fas fa-list-check"></i> Next Steps
+        </button>`
+      );
+    }
     if (!patched.includes('id="blog-feedback"')) {
       patched += getBlogFeedbackHtml();
     }
@@ -154,6 +163,17 @@
     return result;
   }
 
+  function extractBlogTitle(blogMarkdown) {
+    const m = String(blogMarkdown || '').match(/^#\s+(.+)$/m);
+    if (!m) return 'Blog Post';
+    return m[1].replace(/\*\*/g, '').replace(/\*/g, '').trim();
+  }
+
+  window.getBlogNextStepsTitle = function getBlogNextStepsTitle() {
+    const bundle = lastBlogBundle || {};
+    return extractBlogTitle(bundle.blogMarkdown) || bundle.topicInput || 'Blog Post';
+  };
+
   // =====================================================
   // ORIGINAL BLOG CREATOR CODE (moved verbatim)
   // =====================================================
@@ -222,7 +242,11 @@ window.removeBlogUploadedFile = function() {
     document.getElementById('blog-remove-file-btn').classList.add('hidden');
 };
 
+let _blogGenerating = false;
+
 async function generateBlog(feedback = '') {
+    if (_blogGenerating) return;
+    _blogGenerating = true;
     console.log('%c[blog-creator] generateBlog() called', feedback ? 'with feedback' : 'fresh', 'color:#00A89D');
 
     // Ensure latest local area is persisted before generation
@@ -270,6 +294,7 @@ async function generateBlog(feedback = '') {
     const fileContext = blogUploadedFileText || '';
 
     if (!topicInput) {
+        _blogGenerating = false;
         window.notifyUser('Please select or type a blog topic', 'warning', 3200);
         return;
     }
@@ -278,6 +303,7 @@ async function generateBlog(feedback = '') {
     const loadingEl = document.getElementById('global-loading');
 
     if (!output) {
+      _blogGenerating = false;
       console.error('[blog-creator] #blog-output container missing from DOM');
       window.hideLoading?.();
       window.notifyUser('Blog output area not found. Please refresh the page.', 'error', 4000);
@@ -410,8 +436,13 @@ let finalPrompt = systemPrompt;
 
     finalPrompt += `\n\nTopic: ${topicInput}`;
 
+    if (typeof window.buildGenerationRulesPromptBlock === 'function') {
+      finalPrompt += '\n' + window.buildGenerationRulesPromptBlock('blog').join('\n');
+    }
+
     if (feedback) {
         if (!lastBlogBundle) {
+            _blogGenerating = false;
             window.notifyUser('Generate a blog first, then use feedback to refine it.', 'warning', 3200);
             window.hideLoading?.();
             return;
@@ -450,6 +481,11 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         const { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
 
         lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
+        window._blogNextStepsId = `blog_${Date.now().toString(36)}`;
+
+        const qualityNote = (typeof window.GenerationRules !== 'undefined' && window.GenerationRules.getQualityNoteText)
+          ? window.GenerationRules.getQualityNoteText()
+          : 'Built for fair-housing compliance, credible sources, local relevance, and clear structure.';
 
         // === Render output - Premium Card Style matching Social section ===
         output.innerHTML = `
@@ -462,7 +498,11 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
                     <i class="fas fa-check-circle"></i> YOUR AUTHORITY BLOG POST IS READY
                 </div>
                 <h3 class="text-3xl md:text-4xl font-bold text-[#F15A29]">Your Custom Blog Post</h3>
-                <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm">SEO + GEO optimized, in your exact voice, with matching social assets.</p>
+                <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm">In your exact voice, with matching social caption, Google post, and Reel script.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-2 flex items-start gap-2 leading-relaxed max-w-xl">
+                  <i class="fas fa-shield-alt text-[#00A89D] mt-0.5 flex-shrink-0"></i>
+                  <span>${qualityNote}</span>
+                </p>
             </div>
             <span class="text-xs px-3 py-1 bg-[#00A89D]/10 text-[#00A89D] rounded-full font-medium hidden md:block">Ready to publish</span>
         </div>
@@ -478,6 +518,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         </button>
         <button id="download-blog-btn" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-download"></i> Download .doc
+        </button>
+        <button type="button" id="blog-next-steps-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#00A89D]/10 transition-all flex items-center justify-center gap-2 flex-1">
+            <i class="fas fa-list-check"></i> Next Steps
         </button>
         <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else window.saveNotReady();" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
             <i class="fas fa-bookmark"></i> Save Bundle to Vault
@@ -553,6 +596,13 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 `;
 
         output.classList.remove('hidden');
+
+        const nextStepsBtn = document.getElementById('blog-next-steps-btn');
+        if (nextStepsBtn) {
+          nextStepsBtn.onclick = () => {
+            if (typeof window.openBlogNextSteps === 'function') window.openBlogNextSteps();
+          };
+        }
 
         document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
         document.getElementById('download-blog-btn').onclick = downloadBlogWord;
@@ -635,6 +685,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         `;
         output.classList.remove('hidden');
     } finally {
+        _blogGenerating = false;
         if (loadingEl) {
             if (loadingEl.dataset.originalContent) {
                 loadingEl.innerHTML = loadingEl.dataset.originalContent;
@@ -820,6 +871,14 @@ function attachBlogOutputListeners() {
   if (capBtn) capBtn.onclick = copySocialCaption;
   const googBtn = document.getElementById('copy-google-btn');
   if (googBtn) googBtn.onclick = copyGooglePostWithFormatting;
+
+  const nextStepsBtn = document.getElementById('blog-next-steps-btn');
+  if (nextStepsBtn) {
+    nextStepsBtn.onclick = () => {
+      if (typeof window.openBlogNextSteps === 'function') window.openBlogNextSteps();
+    };
+  }
+
   const refineBtn = document.getElementById('blog-refine-btn');
   if (refineBtn) {
     refineBtn.onclick = () => {

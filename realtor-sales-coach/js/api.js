@@ -142,7 +142,8 @@
       temperature = 0.8,
       max_tokens = 1400,
       model = DEFAULT_MODEL,
-      messages: messagesOverride
+      messages: messagesOverride,
+      timeoutMs = 180000
     } = options;
 
     let messages;
@@ -174,11 +175,20 @@
         headers['Authorization'] = `Bearer ${apiKey}`;
       }
 
-      const response = await fetch(getProxyUrl(), {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload)
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+      let response;
+      try {
+        response = await fetch(getProxyUrl(), {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => '(no response body)');
@@ -207,6 +217,9 @@
       return content;
     } catch (err) {
       console.error('[Grok API] callGrokAPI failed to ' + getProxyUrl() + ':', err);
+      if (err && err.name === 'AbortError') {
+        throw new Error('The AI request timed out. Please try again — for newsletter edits, try a shorter, more specific change.');
+      }
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
         const hosted = isProductionHosted();
         if (hosted) {

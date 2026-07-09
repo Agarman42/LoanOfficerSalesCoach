@@ -837,10 +837,25 @@
     return `Answer: ${item.riddle ? item.answer : ''}`;
   }
 
-  function stripBrainTeaserAnswerRows(html) {
+  function stripBrainTeaserAnswerBlocks(html) {
     return String(html || '')
-      .replace(/<tr>\s*<td[^>]*>\s*<p[^>]*font-size:\s*10px[^>]*>\s*Answer:[\s\S]*?<\/td>\s*<\/tr>/gi, '')
-      .replace(/<!--\s*BRAIN_TEASER_ANSWER_PLACEHOLDER\s*-->/gi, '');
+      .replace(/<table\b[^>]*data-nl-brain-teaser-answer=["']1["'][^>]*>[\s\S]*?<\/table>\s*/gi, '')
+      .replace(/<tr>\s*<td[^>]*>\s*<p[^>]*font-size:\s*10px[^>]*>\s*Answer:[\s\S]*?<\/td>\s*<\/tr>/gi, '');
+  }
+
+  /** @deprecated Use stripBrainTeaserAnswerBlocks — kept for callers that expect the old name. */
+  function stripBrainTeaserAnswerRows(html) {
+    return stripBrainTeaserAnswerBlocks(html);
+  }
+
+  function buildBrainTeaserAnswerModule(answerText) {
+    return `<table width="600" cellpadding="0" cellspacing="0" align="center" border="0" data-nl-brain-teaser-answer="1" style="width:600px;border-collapse:collapse;">
+  <tr>
+    <td width="600" align="center" bgcolor="#ffffff" style="width:600px;padding:6px 24px 14px;text-align:center;font-family:Arial,Helvetica,sans-serif;background-color:#ffffff;">
+      <p style="margin:0;font-size:10px;color:#666666;line-height:1.4;">${escapeHtml(answerText)}</p>
+    </td>
+  </tr>
+</table>`;
   }
 
   function injectIntoHtml(html, selections) {
@@ -858,35 +873,32 @@
       out = out.replace(/<div[^>]*id=["']?brain-teaser-placeholder["']?[^>]*>[\s\S]*?<\/div>/gi, `<div id="brain-teaser-placeholder">${body}</div>`);
     }
 
-    return stripBrainTeaserAnswerRows(out);
+    return out;
   }
 
   function injectTeaserAnswerAtEnd(html, selections) {
-    if (!html || !selections?.contentSections?.puzzle) return stripBrainTeaserAnswerRows(html);
+    if (!html || !selections?.contentSections?.puzzle) return stripBrainTeaserAnswerBlocks(html);
 
     const type = selections.puzzleType || getActivePuzzleType();
     const item = getSelectedPuzzle(type);
     const answerText = buildAnswerLine(type, item);
-    if (!answerText) return stripBrainTeaserAnswerRows(html);
+    if (!answerText) return stripBrainTeaserAnswerBlocks(html);
 
-    let out = stripBrainTeaserAnswerRows(html);
-    const answerRow = `<tr><td align="center" style="padding:10px 20px 20px;text-align:center;"><p style="margin:0;font-size:10px;color:#999;line-height:1.4;">${escapeHtml(answerText)}</p></td></tr>`;
+    let out = stripBrainTeaserAnswerBlocks(html);
+    out = out.replace(/<!--\s*BRAIN_TEASER_ANSWER_PLACEHOLDER\s*-->/gi, '');
+    const answerModule = buildBrainTeaserAnswerModule(answerText);
 
-    if (out.includes('<!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->')) {
-      return out.replace('<!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->', answerRow);
+    const afterDisclaimerTable = /(<table\b[^>]*data-nl-disclaimer-block=["']1["'][^>]*>[\s\S]*?<\/table>)/i;
+    if (afterDisclaimerTable.test(out)) {
+      return out.replace(afterDisclaimerTable, '$1\n' + answerModule);
     }
 
-    const afterFooter = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>[\s\S]*?<\/td>\s*<\/tr>)/i;
-    if (afterFooter.test(out)) {
-      return out.replace(afterFooter, '$1\n' + answerRow);
+    const afterFooterRow = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>[\s\S]*?<\/td>\s*<\/tr>)/i;
+    if (afterFooterRow.test(out)) {
+      return out.replace(afterFooterRow, '$1\n' + answerModule);
     }
 
-    const beforeMainClose = /<\/table>\s*<\/body>/i;
-    if (beforeMainClose.test(out)) {
-      return out.replace(beforeMainClose, answerRow + '\n</table></body>');
-    }
-
-    return out.replace(/<\/body>/i, answerRow + '\n</body>');
+    return out.replace(/<\/body>/i, answerModule + '\n</body>');
   }
 
   function stripSections(html) {
@@ -995,6 +1007,7 @@
     buildPromptLines,
     injectIntoHtml,
     injectTeaserAnswerAtEnd,
+    stripBrainTeaserAnswerBlocks,
     stripSections,
     wireUI,
     getSelectionsExtra() {

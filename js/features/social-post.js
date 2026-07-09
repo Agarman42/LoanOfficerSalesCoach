@@ -65,7 +65,49 @@
   // =====================================================
   // SOCIAL POST GENERATOR (3 options)
   // =====================================================
+
+  let _socialGenerating = false;
+
+  /** Parse three caption options — prefer Option N: markers; fall back to --- separators. */
+  function parseSocialPostOptions(fullResponse) {
+    const content = String(fullResponse || '').trim();
+    if (!content) throw new Error('Empty response from API');
+
+    const optionRe = /(?:^|\n)\s*Option\s+([123])\s*:\s*/gi;
+    const markers = [];
+    let match;
+    while ((match = optionRe.exec(content)) !== null) {
+      markers.push({ num: parseInt(match[1], 10), start: match.index, end: match.index + match[0].length });
+    }
+
+    if (markers.length >= 3) {
+      const byNum = {};
+      markers.forEach((mk) => { if (!byNum[mk.num]) byNum[mk.num] = mk; });
+      const ordered = [1, 2, 3].map((n) => byNum[n]).filter(Boolean);
+      if (ordered.length === 3) {
+        return ordered.map((mk, i) => {
+          const nextStart = i + 1 < ordered.length ? ordered[i + 1].start : content.length;
+          return content.slice(mk.end, nextStart).trim();
+        });
+      }
+    }
+
+    const lineSplit = content.split(/\n---\n/).map((p) => p.trim()).filter((p) => p);
+    if (lineSplit.length === 3) {
+      return lineSplit.map((part) => part.replace(/^Option \d+:\s*/i, '').trim());
+    }
+
+    const looseSplit = content.split('---').map((p) => p.trim()).filter((p) => p.length > 20);
+    if (looseSplit.length === 3) {
+      return looseSplit.map((part) => part.replace(/^Option \d+:\s*/i, '').trim());
+    }
+
+    throw new Error('Unexpected response format');
+  }
+
 async function generateSocialPost() {
+    if (_socialGenerating) return;
+    _socialGenerating = true;
     const type = document.getElementById('post-type').value;
     const details = document.getElementById('post-details').value.trim();
     const output = document.getElementById('social-output');
@@ -180,17 +222,7 @@ Option 3:
 
         if (!fullResponse) throw new Error('Empty response from API');
 
-        // Split into three options
-        const parts = fullResponse.split('---').map(p => p.trim()).filter(p => p);
-        if (parts.length !== 3) {
-            throw new Error('Unexpected response format');
-        }
-
-        // Clean option labels and extract raw text
-        const posts = parts.map(part => {
-            // Remove "Option X:" header if present
-            return part.replace(/^Option \d+:\s*/i, '').trim();
-        });
+        const posts = parseSocialPostOptions(fullResponse);
 
         // Render header + three premium separate cards with individual copy + save buttons
         output.innerHTML = `
@@ -256,6 +288,7 @@ Option 3:
         output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating posts. Check console or try again.</p>';
         output.classList.remove('hidden');
     } finally {
+        _socialGenerating = false;
         if (loadingEl && originalLoadingHTML) {
             loadingEl.innerHTML = originalLoadingHTML;
             delete loadingEl.dataset.originalContent; // if any
