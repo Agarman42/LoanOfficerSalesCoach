@@ -244,26 +244,6 @@ window.removeBlogUploadedFile = function() {
 
 let _blogGenerating = false;
 
-function getBlogFocusAngles() {
-  const chips = document.querySelectorAll('.blog-focus-chip.active');
-  return Array.from(chips)
-    .map((chip) => (chip.dataset.focus || chip.textContent || '').trim())
-    .filter(Boolean);
-}
-
-function wireBlogFocusChips() {
-  const container = document.getElementById('blog-focus-chips');
-  if (!container || container.dataset.wired === '1') return;
-  container.dataset.wired = '1';
-  const activeClasses = ['active', 'border-[#00A89D]', 'bg-[#00A89D]/10', 'text-[#002B5C]', 'dark:text-white'];
-  container.addEventListener('click', (e) => {
-    const chip = e.target.closest('.blog-focus-chip');
-    if (!chip) return;
-    const isActive = chip.classList.toggle('active');
-    activeClasses.slice(1).forEach((cls) => chip.classList.toggle(cls, isActive));
-  });
-}
-
 async function generateBlog(feedback = '') {
     if (_blogGenerating) return;
     _blogGenerating = true;
@@ -311,7 +291,6 @@ async function generateBlog(feedback = '') {
     const localArea = document.getElementById('blog-local-area')?.value.trim() || '';
 
     const additionalContext = document.getElementById('blog-additional-context')?.value.trim() || '';
-    const focusAngles = getBlogFocusAngles();
     const fileContext = blogUploadedFileText || '';
 
     if (!topicInput) {
@@ -453,10 +432,6 @@ let finalPrompt = systemPrompt;
             safeAdditional = additionalContext.substring(0, MAX_ADDITIONAL) + ' [...] (truncated for size)';
         }
         finalPrompt += `\n\nAdditional instructions / special requests (including any language requests such as "in Spanish" or "prepare in French"): ${safeAdditional}`;
-    }
-
-    if (focusAngles.length) {
-        finalPrompt += `\n\nOptional content angles to weave in naturally (do not force all — blend what fits the topic): ${focusAngles.join('; ')}`;
     }
 
     finalPrompt += `\n\nTopic: ${topicInput}`;
@@ -1038,8 +1013,6 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   // INITIALIZATION
   // =====================================================
   function initBlogCreator() {
-    wireBlogFocusChips();
-
     // === TOPIC DROPDOWN → CUSTOM TOPIC INPUT SYNC ===
     const topicSelect = document.getElementById('blog-topic-select');
     const topicInput = document.getElementById('blog-topic');
