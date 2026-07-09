@@ -375,13 +375,13 @@
     'uw-question-tips-modal',
     'blog-tips-modal',
     'newsletter-tips-modal',
-    'blog-tips-modal',
-    'newsletter-tips-modal',
     'api-key-modal',
     'content-modal',
     'newsletter-choice-modal',
     'idea-modal',
     'user-profile-modal',
+    'next-steps-modal',
+    'modal-drive-attendance',
     'modal-client-appreciation',
     'modal-partner-mastermind',
     'modal-social-networking',
@@ -392,7 +392,7 @@
     'modal-frequency-goal',
     'modal-post-event-followup',
     'context-tips-modal',
-    'my-saved-items-library'
+    'my-saved-items-library',
   ];
 
   function isModalVisible(el) {
@@ -694,23 +694,88 @@
     repairMisportaledModalParts();
   }
 
+  function closeModalFromBackdrop(modal, id) {
+    if (!modal) return;
+
+    if (id === 'content-modal' && typeof window.closeSocialContentModal === 'function') {
+      window.closeSocialContentModal();
+    } else if ((id === 'detail-modal' || id === 'equity-detail-modal') && typeof window.closeDetailModal === 'function') {
+      window.closeDetailModal();
+    } else if (id === 'task-help-modal' && typeof window.closeTaskHelp === 'function') {
+      window.closeTaskHelp();
+    } else if (id === 'user-profile-modal' && typeof window.closeUserProfile === 'function') {
+      window.closeUserProfile();
+    } else if (id === 'referral-modal' && typeof window.closeReferralModal === 'function') {
+      window.closeReferralModal();
+    } else if (id === 'uw-question-tips-modal' && typeof window.closeUwQuestionTips === 'function') {
+      window.closeUwQuestionTips();
+    } else if (id === 'blog-tips-modal' && typeof window.closeBlogTips === 'function') {
+      window.closeBlogTips();
+    } else if (id === 'newsletter-tips-modal' && typeof window.closeNewsletterTips === 'function') {
+      window.closeNewsletterTips();
+    } else if (id === 'idea-modal' && typeof window.closeIdeaModal === 'function') {
+      window.closeIdeaModal();
+    } else if (id === 'newsletter-choice-modal' && typeof window.closeNewsletterChoiceModal === 'function') {
+      window.closeNewsletterChoiceModal();
+    } else if (id === 'next-steps-modal' && typeof window.closeNextSteps === 'function') {
+      window.closeNextSteps();
+    } else if (id === 'context-tips-modal' && typeof window.closeContextTipsModal === 'function') {
+      window.closeContextTipsModal();
+    } else if (id === 'api-key-modal' && typeof window.closeApiKeyModal === 'function') {
+      window.closeApiKeyModal();
+    } else if (id === 'my-saved-items-library' && typeof window.closeSavedItemsLibrary === 'function') {
+      window.closeSavedItemsLibrary();
+    } else if (id.startsWith('modal-') && typeof window.closeEventModal === 'function') {
+      window.closeEventModal(id.replace('modal-', ''));
+    } else if (modal.classList?.contains('saved-viewer-modal') || modal.classList?.contains('saved-library-panel')) {
+      if (typeof window.closeSavedOverlay === 'function') window.closeSavedOverlay(modal);
+      else window.closeNamedModal(modal);
+    } else {
+      window.closeNamedModal(modal);
+    }
+  }
+
+  /**
+   * Close on intentional backdrop click only — not when the user drags a text
+   * selection from inside the panel and releases outside (mousedown ≠ mouseup target).
+   */
+  window.ensureModalBackdropClose = function ensureModalBackdropClose(modal) {
+    if (!modal || modal._backdropHandlerAttached) return;
+    const id = modal.id || '';
+    let pressedOnBackdrop = false;
+
+    modal.addEventListener('mousedown', (e) => {
+      pressedOnBackdrop = (e.target === modal);
+    });
+
+    modal.addEventListener('mouseup', (e) => {
+      if (!pressedOnBackdrop || e.target !== modal) {
+        pressedOnBackdrop = false;
+        return;
+      }
+      pressedOnBackdrop = false;
+
+      const sel = window.getSelection && window.getSelection();
+      if (sel && sel.toString().trim().length > 0) return;
+
+      closeModalFromBackdrop(modal, id);
+    });
+
+    modal._backdropHandlerAttached = true;
+  };
+
   function wireModalBackdropCloses() {
-    MODAL_ROOT_IDS.forEach(id => {
+    const seen = new Set();
+    MODAL_ROOT_IDS.forEach((id) => {
       const el = document.getElementById(id);
-      if (!el || el._backdropHandlerAttached) return;
-      el.addEventListener('click', (e) => {
-        if (e.target !== el) return;
-        if (id === 'detail-modal' && typeof window.closeDetailModal === 'function') {
-          window.closeDetailModal();
-        } else if (id === 'task-help-modal' && typeof window.closeTaskHelp === 'function') {
-          window.closeTaskHelp();
-        } else if (id.startsWith('modal-') && typeof window.closeEventModal === 'function') {
-          window.closeEventModal(id.replace('modal-', ''));
-        } else {
-          window.closeNamedModal(el);
-        }
-      });
-      el._backdropHandlerAttached = true;
+      if (!el || seen.has(id)) return;
+      seen.add(id);
+      window.ensureModalBackdropClose(el);
+    });
+    document.querySelectorAll('.app-modal-overlay').forEach((el) => {
+      if (!el.id || seen.has(el.id) || EQUITY_MODAL_INNER_IDS.has(el.id)) return;
+      seen.add(el.id);
+      window.ensureModalBackdropClose(el);
     });
   }
 

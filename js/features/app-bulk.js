@@ -166,13 +166,12 @@ window.openExpandedSocialExamplesModal = function(pillar) {
 // Social Strategy Search + Favorites (lightweight, self-contained)
 (function() {
   const searchInput = document.getElementById('social-strategy-search');
-  const savedBtn = document.getElementById('social-saved-btn');
   const contentWrapper = document.getElementById('social-content');
 
-  if (!searchInput || !contentWrapper) return;
+  if (!contentWrapper) return;
 
-  // Robust search across the section (modern cards + supporting boxes only)
-  searchInput.addEventListener('input', function() {
+  // Optional in-section search (toolbar removed from header UI; wire when present)
+  if (searchInput) searchInput.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
     const cards = contentWrapper.querySelectorAll('.social-pillar-card, #social-supporting-grid > div');
     const expanded = contentWrapper.querySelectorAll('.social-pillar-expanded, [id^="supporting-"]');

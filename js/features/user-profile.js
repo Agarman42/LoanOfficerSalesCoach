@@ -25,6 +25,9 @@
   const DATABASE_LABELS = {
     'under-50': 'Under 50 past clients',
     '50-200': '50–200 past clients',
+    '200-500': '200–500 past clients',
+    '500-1000': '500–1,000 past clients',
+    '1000-plus': '1,000+ past clients',
     '200-plus': '200+ past clients'
   };
 
@@ -69,7 +72,9 @@
   }
 
   function normalizeFocus(raw) {
-    if (!raw) return { value: '', label: '' };
+    if (!raw || !String(raw).trim()) {
+      return { value: 'balanced-growth', label: FOCUS_OPTIONS['balanced-growth'] };
+    }
     if (FOCUS_OPTIONS[raw]) return { value: raw, label: FOCUS_OPTIONS[raw] };
     if (FOCUS_LEGACY[raw]) return { value: FOCUS_LEGACY[raw], label: raw };
     const lower = String(raw).toLowerCase();
@@ -211,6 +216,7 @@
       formats,
       voiceTraits,
       goals,
+      newsletterColorBundle: (p.newsletterColorBundle || 'coastal-teal').trim(),
       blogPageUrl: (p.blogPageUrl || p.blogUrl || '').trim(),
       linkedInUrl: (p.linkedInUrl || p.linkedin || '').trim(),
       companyWebsite: (p.companyWebsite || p.website || '').trim(),
@@ -355,7 +361,8 @@
       monthlyUnits: getRaw('profile-monthly-units'),
       monthlyGoal: getRaw('profile-monthly-goal'),
       income: getRaw('profile-income'),
-      focus: getRaw('profile-focus'),
+      focus: getRaw('profile-focus') || 'balanced-growth',
+      newsletterColorBundle: getRaw('profile-newsletter-color-bundle') || 'coastal-teal',
       hours: getRaw('profile-hours'),
       databaseSize: getRaw('profile-database-size'),
       partnerFocus: getVal('profile-partner-focus'),
@@ -423,10 +430,11 @@
       'monthly-units', 'monthly-goal', 'income', 'focus', 'hours',
       'database-size', 'partner-focus', 'family', 'personality', 'tone',
       'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other',
-      'blog-url', 'linkedin-url', 'company-website'
+      'newsletter-color-bundle', 'blog-url', 'linkedin-url', 'company-website'
     ];
 
     const fieldKeyMap = {
+      'newsletter-color-bundle': 'newsletterColorBundle',
       'blog-url': 'blogPageUrl',
       'linkedin-url': 'linkedInUrl',
       'company-website': 'companyWebsite'
@@ -474,8 +482,28 @@
       cb.checked = profile.translationFavoriteLanguages && profile.translationFavoriteLanguages.includes(cb.value);
     });
 
+    const bundleSel = document.getElementById('profile-newsletter-color-bundle');
+    if (bundleSel) {
+      bundleSel.value = profile.newsletterColorBundle || 'coastal-teal';
+      if (window.NlColorBundles?.wireProfileBundlePicker) {
+        window.NlColorBundles.wireProfileBundlePicker();
+      }
+    }
+
     syncSelectAllStates();
     refreshProfileUI();
+  }
+
+  function backfillBlankProfileFields() {
+    try {
+      const raw = readRawProfile();
+      const needsFocus = !raw.focus || !String(raw.focus).trim();
+      if (!needsFocus) return;
+      const normalized = normalizeProfile({ ...raw, focus: 'balanced-growth' });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+      localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...normalized }));
+    } catch (e) { /* ignore */ }
   }
 
   function isProfileModalOpen() {
@@ -944,6 +972,11 @@
     }
     document.getElementById('close-profile-modal')?.addEventListener('click', closeModal);
     document.getElementById('cancel-profile')?.addEventListener('click', closeModal);
+
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
+
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
 
     modal.addEventListener('input', autoSaveProfile);
@@ -978,6 +1011,10 @@
     openModal(!!forceFull);
   };
 
+  window.closeUserProfile = function closeUserProfile() {
+    closeModal();
+  };
+
   window.applyRuoffBlogPreset = applyRuoffBlogPreset;
   window.switchProfileTab = switchProfileTab;
   window.refreshProfileUI = refreshProfileUI;
@@ -987,6 +1024,7 @@
   paintHeaderProfileBadge();
 
   function bootProfileModal() {
+    backfillBlankProfileFields();
     initProfileModal();
     if (!document.getElementById('user-profile-modal')) {
       paintHeaderProfileBadge();

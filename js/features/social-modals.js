@@ -512,15 +512,6 @@
     }
   };
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('content-modal');
-    if (!modal || modal._socialBackdropWired) return;
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal) closeShell();
-    });
-    modal._socialBackdropWired = true;
-  });
-
   window.__SOCIAL_MODALS_EXPORTS = {
     openSocialPillarModal: window.openSocialPillarModal,
     openExpandedSocialExamplesModal: window.openExpandedSocialExamplesModal,

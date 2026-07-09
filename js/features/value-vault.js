@@ -1017,9 +1017,9 @@
         if (typeof window.showRandomIdea === 'function') window.showRandomIdea();
       });
 
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeIdeaModal();
-      });
+      if (typeof window.ensureModalBackdropClose === 'function') {
+        window.ensureModalBackdropClose(modal);
+      }
     }
 
     const executionTips = {
@@ -1099,21 +1099,11 @@
   // Expose globally for the "Get Another Idea" button and toolbar robustness
   window.closeIdeaModal = closeIdeaModal;
 
-  // Robust delegated close for Idea modal (handles dynamic recreation)
+  // Delegated close button for Idea modal (handles dynamic recreation)
   document.addEventListener('click', function(e) {
-    const modal = document.getElementById('idea-modal');
-    if (!modal) return;
-
-    // Close button
-    if (e.target.closest('.close-idea-btn')) {
-      e.preventDefault();
-      closeIdeaModal();
-    }
-
-    // Backdrop click
-    if (e.target === modal) {
-      closeIdeaModal();
-    }
+    if (!e.target.closest('.close-idea-btn')) return;
+    e.preventDefault();
+    closeIdeaModal();
   });
 
   // =====================================================
@@ -1724,7 +1714,9 @@ DAY OF
         if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
       };
       fb.querySelectorAll('.event-fallback-close').forEach((btn) => btn.addEventListener('click', closeFb));
-      fb.addEventListener('click', (e) => { if (e.target === fb) closeFb(); });
+      if (typeof window.ensureModalBackdropClose === 'function') {
+        window.ensureModalBackdropClose(fb);
+      }
       if (typeof window.openAppModal === 'function') window.openAppModal(fb);
     } catch (e) { console.error('[Event] openEventModal (value-vault.js) error', e); }
   }

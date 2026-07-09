@@ -947,17 +947,15 @@ function ensureNewsletterChoiceModal() {
             </div>
         </div>`;
 
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal && typeof window.closeNewsletterChoiceModal === 'function') {
-            window.closeNewsletterChoiceModal();
-        }
-    });
     modal.querySelector('[data-nl-choice-close]')?.addEventListener('click', () => {
         if (typeof window.closeNewsletterChoiceModal === 'function') window.closeNewsletterChoiceModal();
     });
 
     const root = document.body || document.documentElement;
     root.appendChild(modal);
+    if (typeof window.ensureModalBackdropClose === 'function') {
+        window.ensureModalBackdropClose(modal);
+    }
     return modal;
 }
 
@@ -1112,10 +1110,6 @@ function openModal(category) {
         search.focus();
     }
 
-    // === PREMIUM OPEN + CLICK ANYWHERE OUTSIDE TO CLOSE ===
-    modal.onclick = function(e) {
-        if (e.target === modal) closeModal();   // clicks on dark backdrop close it
-    };
 }
 
 // Close newsletter choice modal (separate from social pillar #content-modal)
@@ -1354,7 +1348,8 @@ const persistentFields = [
     'nl-personal-photo',
     'nl-personal-photo-size',
     'nl-personal-video',
-    'nl-personal-video-size'
+    'nl-personal-video-size',
+    'nl-color-bundle'
 ];
 
 const NL_MEDIA_SIZE_DEFAULT = 100;
@@ -1560,6 +1555,7 @@ function patchPersonalMediaSizesInNewsletter() {
     }
 
     html = applyPersonalMediaWidthsInHtml(html);
+    html = applyNewsletterColorBundle(html);
     if (html === before) return;
 
     lastGeneratedHTML = html;
@@ -2126,6 +2122,12 @@ function extractYouTubeVideoId(url) {
     return id.length === 11 ? id : '';
 }
 
+function getNewsletterAccentColor() {
+    return window.NlColorBundles?.getActiveBundle()?.primary || '#00A89D';
+}
+
+const NL_SECTION_LEFT_BORDER_IN_TABLE_RE = /border-left:\s*(?:4|8)px\s+solid\s+#?[0-9a-fA-F]{3,6}/i;
+
 function buildPersonalVideoTable(personalVideoUrl) {
     const url = String(personalVideoUrl || '').trim();
     if (!url) return '';
@@ -2542,6 +2544,7 @@ function configureNewsletterPreviewIframeOnLoad(iframe) {
             doc.body.setAttribute('contenteditable', 'false');
             doc.body.style.margin = '0';
             doc.body.style.overflowY = 'auto';
+            normalizeSectionBorders(doc);
             if (!doc.body.dataset.nlPreviewKeysWired) {
                 doc.body.dataset.nlPreviewKeysWired = '1';
                 doc.body.addEventListener('keydown', (e) => {
@@ -2585,6 +2588,31 @@ function mountNewsletterPreviewIframe(previewEl, html) {
         configureNewsletterPreviewIframeOnLoad(iframe);
     }
     return iframe;
+}
+
+function applyNewsletterColorBundle(html) {
+    if (!html || !window.NlColorBundles) return html;
+    const bundle = window.NlColorBundles.getActiveBundle();
+    const applyFn = window.NlColorBundles.applyColorSchemeTokensOnly || window.NlColorBundles.applyColorScheme;
+    return applyFn(html, bundle);
+}
+
+function refreshNewsletterColorScheme() {
+    const rawEl = document.getElementById('nl-html-raw');
+    let html = (rawEl?.value || '').trim() || (lastGeneratedHTML || '').trim();
+    if (!html || !window.NlColorBundles) return;
+    html = applyNewsletterColorBundle(html);
+    lastGeneratedHTML = html;
+    if (rawEl) rawEl.value = html;
+    const previewEl = document.getElementById('nl-preview');
+    if (previewEl) mountNewsletterPreviewIframe(previewEl, html);
+    try { localStorage.setItem('lastNewsletterHTML', html); } catch (e) {}
+    if (window.NlColorBundles.renderBundlePreview) {
+        window.NlColorBundles.renderBundlePreview(
+            document.getElementById('nl-color-bundle-preview'),
+            window.NlColorBundles.getActiveBundleId()
+        );
+    }
 }
 
 function wireNewsletterFeedbackFocusGuard() {
@@ -3862,6 +3890,7 @@ if (postSelections?.includeReferral) {
 
     // Normalize before saving the raw HTML (for downloads/copying)
     lastGeneratedHTML = normalizeRawNewsletterHTML(html);
+    lastGeneratedHTML = applyNewsletterColorBundle(lastGeneratedHTML);
 
             // === NORMALIZE ALL SECTION TABLES FOR PERFECT LEFT BORDER ALIGNMENT ===
             // Fixes the occasional "broken teal line" visual bug on the left side
@@ -4120,6 +4149,7 @@ function copyForOutlook() {
   // PUBLIC API EXPOSURE (for onclick handlers and cross-feature calls)
   // =====================================================
   window.generateNewsletter = generateNewsletter;
+  window.refreshNewsletterColorScheme = refreshNewsletterColorScheme;
   window.downloadNewsletterHTML = downloadNewsletterHTML;
   window.copyForOutlook = copyForOutlook;
   window.getCleanOutlookHTML = getCleanOutlookHTML;
@@ -4169,6 +4199,7 @@ function copyForOutlook() {
       if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
         html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
       }
+      html = applyNewsletterColorBundle(html);
       lastGeneratedHTML = html;
       const rawEl = document.getElementById('nl-html-raw');
       const previewEl = document.getElementById('nl-preview');
@@ -4283,7 +4314,8 @@ function copyForOutlook() {
               const srcMatch = String(attrs).match(/\bsrc=["']([^"']+)["']/i);
               if (!srcMatch) return match;
               const px = resolvePersonalVideoWidthPx(attrs);
-              return `<img src="${srcMatch[1]}" alt="Watch Personal Video" width="${px}" style="display:block;margin:0 auto;width:${px}px;max-width:100%;height:auto;border:3px solid #00A89D;border-radius:8px;">`;
+              const accent = getNewsletterAccentColor();
+              return `<img src="${srcMatch[1]}" alt="Watch Personal Video" width="${px}" style="display:block;margin:0 auto;width:${px}px;max-width:100%;height:auto;border:3px solid ${accent};border-radius:8px;">`;
           }
       );
       return out;
@@ -4336,19 +4368,25 @@ function copyForOutlook() {
   function normalizeSectionBorders(doc) {
       if (!doc) return;
 
-      const tables = doc.querySelectorAll('table[style*="border-left:8px solid #00A89D"], table[style*="border-left: 8px solid #00A89D"]');
+      const primary = getNewsletterAccentColor();
+      const tables = doc.querySelectorAll('table[style*="border-left"]');
 
-      tables.forEach(table => {
-          // Force consistent border and collapse
-          table.style.borderLeft = '8px solid #00A89D';
+      tables.forEach((table) => {
+          const style = table.getAttribute('style') || '';
+          if (!NL_SECTION_LEFT_BORDER_IN_TABLE_RE.test(style)) return;
+
+          table.style.borderLeft = `8px solid ${primary}`;
           table.style.borderCollapse = 'separate';
 
-          // Find the first content cell and force identical padding
           const firstTd = table.querySelector('td');
           if (firstTd) {
               firstTd.style.padding = '30px 30px 30px 30px';
               firstTd.style.boxSizing = 'border-box';
           }
+      });
+
+      doc.querySelectorAll('img[alt="Watch Personal Video"]').forEach((img) => {
+          img.style.border = `3px solid ${primary}`;
       });
   }
 

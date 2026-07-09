@@ -47,10 +47,11 @@
     <script src="js/api.js"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260623-lo-v222"></script>
+    <script src="js/ui.js?v=20260709-lo-v288"></script>
+    <script src="js/features/app-feedback.js?v=20260709-lo-v309"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-    <script defer src="js/main.js?v=20260708-lo-v274"></script>
+    <script defer src="js/main.js?v=20260709-lo-v288"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260701-lo-v257"></script>
     <script src="js/early-boot.js?v=20260623-lo-v222"></script>
 </head>
@@ -80,16 +81,7 @@
             <h1 class="flex-1 text-center text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Ultimate Loan Officer Sales Coach</h1>
         </div>
 
-        <!-- Search bar - centered under the title -->
-        <div class="mt-3 flex justify-center">
-            <div class="relative w-full max-w-2xl">
-                <input type="text" id="search" placeholder="Search sections, vault ideas, scripts, tools..."
-                       class="w-full p-3 pr-12 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 text-base">
-                <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-white/80"></i>
-            </div>
-        </div>
-
-        <!-- Buttons row: Light Mode, API Key, Saved, My Profile - below search bar but before the scrolling quotes -->
+        <!-- Buttons row: Light Mode, API Key, My Profile, Feedback -->
         <div class="mt-3 flex justify-center">
             <div class="flex items-center gap-2 flex-wrap justify-center">
                 <button id="theme-toggle"
@@ -106,24 +98,21 @@
                     <span class="hidden md:inline">API Key</span>
                 </button>
 
-                <!-- My Saved Items (Global) -->
-                <button onclick="showSavedItemsLibrary()" 
-                        class="relative flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full text-sm font-medium transition-all border border-white/20"
-                        title="My Saved Items">
-                    <i class="fas fa-bookmark"></i>
-                    <span class="hidden md:inline">Saved</span>
-                    <span id="global-saved-count" 
-                          class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#F15A29] text-white rounded-full flex items-center justify-center">
-                        0
-                    </span>
-                </button>
-
                 <!-- My Profile / Preferences -->
                 <button id="open-profile-btn"
                         class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full text-sm font-medium transition-all border border-white/20"
                         title="My Profile & Preferences">
                     <i class="fas fa-user-cog"></i>
                     <span class="hidden md:inline">My Profile</span>
+                </button>
+
+                <!-- App feedback -->
+                <button id="app-feedback-btn" type="button"
+                        onclick="if(typeof window.openAppFeedbackEmail==='function'){window.openAppFeedbackEmail();}"
+                        class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full text-sm font-medium transition-all border border-white/20"
+                        title="Send feedback — opens a pre-filled email">
+                    <i class="fas fa-comment-dots"></i>
+                    <span class="hidden md:inline">Feedback</span>
                 </button>
             </div>
         </div>
@@ -858,28 +847,7 @@
         </button>
     </div>
 
-    <!-- Toolbar: Search + Saved Ideas -->
-    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-8 p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl border border-gray-200 dark:border-gray-600">
-      <div class="flex-1 relative">
-        <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
-        <input 
-          type="text" 
-          id="social-strategy-search" 
-          placeholder="Search tips, theme days, calendars, platforms..." 
-          class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#00A89D]">
-      </div>
-      <div>
-        <button id="social-saved-btn"
-                onclick="showSavedItemsLibrary()"
-                class="px-4 py-2.5 text-sm font-semibold rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition flex items-center gap-2">
-          <i class="fas fa-bookmark"></i>
-          <span>My Saved Items</span>
-          <span id="social-saved-count" class="ml-1 text-xs px-2 py-0.5 bg-[#00A89D]/10 rounded-full font-medium">0</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Content Wrapper for Search + Favorites -->
+    <!-- Main Content Wrapper -->
     <div id="social-content">
 
     <!-- Explanatory Note: The 6 Pillars + Recommended Balance -->
@@ -2987,7 +2955,7 @@
 </section>
 
 <!-- Process Stage Modal -->
-<div id="process-stage-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'process-stage-modal') closeNamedModal('process-stage-modal')">
+<div id="process-stage-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -3004,7 +2972,7 @@
 </div>
 
 <!-- Process Template Modal (premium rich playbooks — matches journey + database polish) -->
-<div id="process-template-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'process-template-modal') closeNamedModal('process-template-modal')">
+<div id="process-template-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -3021,7 +2989,7 @@
 </div>
 
 <!-- Nurture Template Modal -->
-<div id="nurture-template-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'nurture-template-modal') closeNamedModal('nurture-template-modal')">
+<div id="nurture-template-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -3038,8 +3006,8 @@
 </div>
 
 <!-- Life Event & Scaling Detail Modal (also used by Database Nurturing pillars) -->
-<div id="detail-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden" onclick="if (event.target.id === 'detail-modal') closeDetailModal()">
-    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-full sm:max-w-4xl max-h-[90vh] mx-2 sm:mx-4 overflow-y-auto" onclick="event.stopPropagation()">
+<div id="detail-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-full sm:max-w-4xl max-h-[90vh] mx-2 sm:mx-4 overflow-y-auto">
         <!-- Premium Close (sticky, matching equity modal polish) -->
         <div class="sticky top-0 z-10 flex justify-end p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl">
             <button onclick="closeDetailModal()" class="text-3xl leading-none text-gray-400 hover:text-red-500 transition w-10 h-10 flex items-center justify-center">&times;</button>
@@ -3055,7 +3023,7 @@
 </div>
 
 <!-- Client Appreciation & Events Modal -->
-<div id="client-appreciation-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[110]" onclick="if (event.target.id === 'client-appreciation-modal') closeNamedModal('client-appreciation-modal')">
+<div id="client-appreciation-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[110]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -3072,7 +3040,7 @@
 </div>
 
 <!-- Scaling Level Modal -->
-<div id="scaling-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'scaling-modal') closeNamedModal('scaling-modal')">
+<div id="scaling-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -3089,7 +3057,7 @@
 </div>
 
 <!-- Communication Deep-Dive Modal -->
-<div id="communication-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]" onclick="if (event.target.id === 'communication-modal') closeNamedModal('communication-modal')">
+<div id="communication-modal" class="app-modal-overlay fixed inset-0 bg-black/60 flex items-center justify-center hidden z-[100]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700" onclick="event.stopImmediatePropagation()">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -3106,7 +3074,7 @@
 </div>
 
 <!-- Weekly Win Plan Task Help Modal (body-level so fixed positioning stays viewport-centered) -->
-<div id="task-help-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[9999] hidden p-4" onclick="if (event.target.id === 'task-help-modal') closeTaskHelp()">
+<div id="task-help-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[9999] hidden p-4">
     <div class="bg-white dark:bg-gray-800 w-full max-w-2xl mx-auto rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
         <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-8 py-5 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-3">
@@ -4489,7 +4457,7 @@
 </section>
 
 <!-- Underwriting Question Structuring Tips Modal (replaces examples grid — educational and more valuable for unique real-world scenarios) -->
-<div id="uw-question-tips-modal" class="fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center" onclick="if (event.target.id === 'uw-question-tips-modal') closeUwQuestionTips()">
+<div id="uw-question-tips-modal" class="fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center">
   <div class="bg-white dark:bg-gray-800 w-full max-w-3xl mx-4 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
     <!-- Header matching other premium modals (newsletter tips, etc.) -->
     <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-8 py-6 flex items-center justify-between flex-shrink-0">
@@ -4555,7 +4523,7 @@
 </div>
 
 <!-- Blog Creator Tips Modal -->
-<div id="blog-tips-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center" onclick="if (event.target.id === 'blog-tips-modal') window.closeBlogTips()">
+<div id="blog-tips-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center">
   <div class="bg-white dark:bg-gray-800 w-full max-w-3xl mx-4 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
     <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#F15A29] px-8 py-6 flex items-center justify-between flex-shrink-0">
       <div class="flex items-center gap-3">
@@ -4597,7 +4565,7 @@
 </div>
 
 <!-- Newsletter Tips Modal -->
-<div id="newsletter-tips-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center" onclick="if (event.target.id === 'newsletter-tips-modal') window.closeNewsletterTips()">
+<div id="newsletter-tips-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center">
   <div class="bg-white dark:bg-gray-800 w-full max-w-3xl mx-4 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
     <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-8 py-6 flex items-center justify-between flex-shrink-0">
       <div class="flex items-center gap-3">
@@ -4986,7 +4954,7 @@
 
 
     <!-- ==================== SOCIAL MEDIA PILLAR MODAL ==================== -->
-<div id="content-modal" onclick="if(event.target.id==='content-modal'&&typeof window.closeSocialContentModal==='function')window.closeSocialContentModal()" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+<div id="content-modal" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
     <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col max-h-[92vh]">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-start gap-4 flex-shrink-0">
             <div class="min-w-0">
@@ -5006,7 +4974,7 @@
 </div>
 
 <!-- ==================== REFERRAL PARTNER MODAL ==================== -->
-<div id="referral-modal" onclick="if (event.target.id === 'referral-modal') closeReferralModal()" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+<div id="referral-modal" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
     <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
             <div>
@@ -6480,9 +6448,8 @@
 <!-- Idea of the Day Modal (Global - outside Value Vault for reliable centering) -->
 <div id="idea-modal"
      class="app-modal-overlay hidden fixed inset-0 bg-black/70 z-[200] items-center justify-center p-4"
-     onclick="if (event.target.id === 'idea-modal' && typeof window.closeIdeaModal === 'function') window.closeIdeaModal();">
-  <div onclick="event.stopPropagation()"
-       class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+    >
+  <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
     <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#F15A29] px-6 py-5 flex items-center justify-between flex-shrink-0">
       <div class="flex items-center gap-3">
         <i class="fas fa-lightbulb text-white text-xl"></i>
@@ -7179,6 +7146,19 @@
             </div>
           </div>
 
+          <div class="flex flex-col sm:flex-row sm:items-end gap-3 mb-6 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+            <div class="flex-1 min-w-[200px]">
+              <label for="nl-color-bundle" class="block text-xs font-semibold text-[#002B5C] dark:text-gray-300 mb-1">
+                <i class="fas fa-palette text-[#00A89D] mr-1"></i> Color scheme
+              </label>
+              <select id="nl-color-bundle" class="w-full text-sm p-2.5 rounded-xl border-2 border-[#00A89D]/40 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00A89D]/50">
+                <option value="">Profile default</option>
+              </select>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 mb-0">Change colors after generation — preview updates instantly. Default is Ruoff teal &amp; navy.</p>
+            </div>
+            <div id="nl-color-bundle-preview" class="flex-shrink-0 sm:pb-1"></div>
+          </div>
+
           <div class="flex gap-3 flex-wrap mb-6">
             <button onclick="downloadNewsletterHTML()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               <i class="fas fa-download"></i> Download .html
@@ -7530,7 +7510,7 @@
 </main>
 
 <!-- Newsletter fun-fact / pro-tip / quote picker (also auto-created by newsletter-generator.js if missing) -->
-<div id="newsletter-choice-modal" onclick="if(event.target.id==='newsletter-choice-modal'&&typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal()" class="modal app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4" aria-hidden="true">
+<div id="newsletter-choice-modal" class="modal app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4" aria-hidden="true">
     <div onclick="event.stopImmediatePropagation()" class="modal-content bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-6 md:px-8 py-5 flex items-center justify-between">
             <div class="flex items-center gap-3 min-w-0">
@@ -7553,12 +7533,12 @@
 <script src="js/features/nurture-rich-modals.js?v=20260623-lo-v222"></script>
 <script src="js/features/database-rich-modals.js?v=20260623-lo-v222"></script>
 <script src="js/features/event-rich-modals.js?v=20260623-lo-v222"></script>
-<script defer src="js/features/app-bulk.js?v=20260623-lo-v222"></script>
+<script defer src="js/features/app-bulk.js?v=20260709-lo-v290"></script>
 <script defer src="js/features/popby-seasonal.js?v=20260623-lo-v222"></script>
 
 
 <!-- Equity Scanner Detail Modal -->
-<div id="equity-detail-modal" class="app-modal-overlay hidden fixed inset-0 bg-black/70 z-50 items-center justify-center p-4" onclick="if (event.target.id === 'equity-detail-modal') closeDetailModal()">
+<div id="equity-detail-modal" class="app-modal-overlay hidden fixed inset-0 bg-black/70 z-50 items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-full sm:max-w-4xl max-h-[90vh] mx-2 sm:mx-4 overflow-y-auto" onclick="event.stopPropagation()">
         <!-- Premium Close -->
         <div class="sticky top-0 z-10 flex justify-end p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-t-3xl">
@@ -7713,7 +7693,7 @@
 </div>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/saved-items-library.js?v=20260707-lo-v276"></script>
+<script src="js/features/saved-items-library.js?v=20260709-lo-v289"></script>
 <script src="js/features/save-ribbon.js"></script>
 <script src="js/features/equity-scanner.js?v=20260623-lo-v222"></script>
 <script src="js/features/calculator.js"></script>
@@ -7725,14 +7705,15 @@
 <script src="js/features/tool-bridges.js"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
 <script src="js/features/generation-rules.js?v=20260708-lo-v269"></script>
-<script src="js/features/publish-kit.js?v=20260708-lo-v271"></script>
+<script src="js/features/publish-kit.js?v=20260709-lo-v272"></script>
 <script src="js/features/blog-creator.js?v=20260708-lo-v274"></script>
 <script src="js/features/referral-rich-modals.js?v=20260623-lo-v222"></script>
 <script src="js/features/legacy-helpers.js?v=20260623-lo-v222"></script>
 <script src="js/data/newsletter-dad-jokes.js?v=20260625-lo-v231"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260625-lo-v233"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260625-lo-v234"></script>
-<script src="js/features/newsletter-generator.js?v=20260708-lo-v294"></script>
+<script src="js/features/newsletter-color-bundles.js?v=20260709-lo-v282"></script>
+<script src="js/features/newsletter-generator.js?v=20260709-lo-v296"></script>
 <script src="js/features/ai-chat.js?v=20260623-lo-v222"></script>
 <script src="js/features/underwriting.js"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'lo';</script>
@@ -7884,7 +7865,9 @@
                             <option value="">Select...</option>
                             <option value="under-50">Under 50 past clients</option>
                             <option value="50-200">50–200 past clients</option>
-                            <option value="200-plus">200+ past clients</option>
+                            <option value="200-500">200–500 past clients</option>
+                            <option value="500-1000">500–1,000 past clients</option>
+                            <option value="1000-plus">1,000+ past clients</option>
                         </select>
                     </div>
                     <div>
@@ -7991,6 +7974,13 @@
                     <div>
                         <label class="block text-sm font-medium mb-1">Never say / Always say <span class="text-gray-400 font-normal text-xs">guardrails</span></label>
                         <textarea id="profile-content-notes" rows="3" placeholder="e.g. Always mention local market; never post rates publicly; avoid politics" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" for="profile-newsletter-color-bundle">Newsletter color bundle</label>
+                        <select id="profile-newsletter-color-bundle" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        </select>
+                        <div id="profile-newsletter-color-preview"></div>
+                        <p id="profile-newsletter-color-desc" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0"></p>
                     </div>
                 </div>
                 <div class="p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 space-y-3">
@@ -8207,12 +8197,12 @@
     </div>
 </div>
 
-<script src="js/features/user-profile.js?v=20260706-lo-v285"></script>
+<script src="js/features/user-profile.js?v=20260709-lo-v287"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
 <!-- ===================================================== -->
-<div id="modal-drive-attendance" onclick="if (event.target.id === 'modal-drive-attendance') closeEventModal('drive-attendance')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
+<div id="modal-drive-attendance" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F15A29]/10 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
       <div>
@@ -8226,7 +8216,7 @@
   </div>
 </div>
 
-<div id="modal-client-appreciation" onclick="if (event.target.id === 'modal-client-appreciation') closeEventModal('client-appreciation')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
+<div id="modal-client-appreciation" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
       <div>
@@ -8356,7 +8346,7 @@
   </div>
 </div>
 
-<div id="modal-partner-mastermind" onclick="if (event.target.id === 'modal-partner-mastermind') closeEventModal('partner-mastermind')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
+<div id="modal-partner-mastermind" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
       <div>
@@ -8443,7 +8433,7 @@
   </div>
 </div>
 
-<div id="modal-social-networking" onclick="if (event.target.id === 'modal-social-networking') closeEventModal('social-networking')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
+<div id="modal-social-networking" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
       <div>
@@ -8520,7 +8510,7 @@
   </div>
 </div>
 
-<div id="modal-community-charity" onclick="if (event.target.id === 'modal-community-charity') closeEventModal('community-charity')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
+<div id="modal-community-charity" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
       <div>
@@ -8592,7 +8582,7 @@
 </div>
 
 <!-- Event Philosophy Modals (premium — matches "View Full Playbook" card promise) -->
-<div id="modal-value-first" onclick="if (event.target.id === 'modal-value-first') closeEventModal('value-first')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+<div id="modal-value-first" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
       <div><div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Philosophy</div><h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Value First — The Non-Negotiable Foundation</h3></div>
@@ -8643,7 +8633,7 @@
   </div>
 </div>
 
-<div id="modal-invite-plus-one" onclick="if (event.target.id === 'modal-invite-plus-one') closeEventModal('invite-plus-one')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+<div id="modal-invite-plus-one" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
       <div><div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Philosophy</div><h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Invite +1 — Your Built-in Lead Machine</h3></div>
@@ -8685,7 +8675,7 @@
   </div>
 </div>
 
-<div id="modal-co-host-leverage" onclick="if (event.target.id === 'modal-co-host-leverage') closeEventModal('co-host-leverage')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+<div id="modal-co-host-leverage" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
       <div><div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Philosophy</div><h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Co-Host for Leverage — Double Reach, Half the Cost</h3></div>
@@ -8723,7 +8713,7 @@
   </div>
 </div>
 
-<div id="modal-frequency-goal" onclick="if (event.target.id === 'modal-frequency-goal') closeEventModal('frequency-goal')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+<div id="modal-frequency-goal" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
       <div><div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase mb-0.5">Event Philosophy</div><h3 class="text-2xl md:text-3xl font-bold text-[#002B5C] dark:text-white">Frequency Goal — 4–6 Events Per Year Without Burnout</h3></div>
@@ -8778,7 +8768,7 @@
 </div>
 
 <!-- Post-Event Follow-Up Static Modal (premium) -->
-<div id="modal-post-event-followup" onclick="if (event.target.id === 'modal-post-event-followup') closeEventModal('post-event-followup')" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
+<div id="modal-post-event-followup" class="app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
   <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-gray-900 rounded-3xl max-w-4xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-6 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 via-white to-white dark:via-gray-800 dark:to-gray-800 flex justify-between items-center">
       <div>
@@ -8905,7 +8895,7 @@
   Ultimate Loan Officer Sales Coach • v… • … • Render
 </div>
 <script src="js/features/section-bottom-banners.js?v=20260623-lo-v222"></script>
-<script src="js/app-version.js?v=20260708-lo-v274"></script>
+<script src="js/app-version.js?v=20260709-lo-v287"></script>
 
 </body>
 </html>

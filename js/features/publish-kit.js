@@ -2,7 +2,7 @@
  * js/features/publish-kit.js
  *
  * Next Steps checklist — optional, user-opened guide after reviewing content.
- * No auto-popup, no duplicate copy buttons, no external platform links.
+ * No auto-popup, no duplicate copy buttons. Newsletter Next Steps may link to Ruoff Marketing Portal.
  */
 (function () {
   'use strict';
@@ -10,11 +10,14 @@
   const MODAL_ID = 'next-steps-modal';
   const CHECKLIST_PREFIX = 'nextStepsChecklist_';
 
+  const MARKETING_PORTAL_URL = 'https://marketing.ruoff.com/product/800';
+
   const LEVERAGE_TIPS = {
     newsletter: [
       'Pull your <strong>Personal Update</strong> or a market blurb into <strong>Social Post Creator</strong> — copy the text from the preview above.',
       'Tap <strong>Save to Vault</strong> above to store the <em>full newsletter</em> in <strong>My Saved Items</strong> (handy for archives or resending a past edition).',
       'Feature a recent blog in your next issue using the <strong>Blog Link</strong> checkbox when you generate again.',
+      'Need branded flyers or social graphics? Use the <strong>Ruoff Marketing Portal</strong> link below to upload or order materials.',
     ],
     blog: [
       'Drop the <strong>social caption</strong> and <strong>Google post</strong> from this bundle the same day you publish.',
@@ -35,6 +38,7 @@
       { id: 'test', label: 'Sent a test email to myself' },
       { id: 'send', label: 'Pasted into Outlook or my email platform and sent/scheduled to my database' },
       { id: 'repurpose', label: 'Repurposed content for social (copied from preview) or saved the full edition with Save to Vault' },
+      { id: 'marketing', label: 'Uploaded or ordered branded materials via Ruoff Marketing Portal (optional)' },
     ],
     blog: [
       { id: 'proofread', label: 'Read the blog aloud — adjusted anything that doesn\'t sound like me' },
@@ -68,6 +72,9 @@
         content.classList.remove('max-w-lg', 'max-w-md', 'max-w-xl');
         content.classList.add('max-w-3xl');
       }
+      if (typeof window.ensureModalBackdropClose === 'function') {
+        window.ensureModalBackdropClose(modal);
+      }
       return modal;
     }
 
@@ -93,13 +100,13 @@
         </div>
       </div>`;
 
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeNextSteps();
-    });
     modal.querySelectorAll('[data-ns-close]').forEach((btn) => {
       btn.addEventListener('click', closeNextSteps);
     });
     document.body.appendChild(modal);
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
     return modal;
   }
 
@@ -159,6 +166,23 @@
       </div>`;
   }
 
+  function renderMarketingPortalCard(toolKey) {
+    if (toolKey !== 'newsletter') return '';
+    return `
+      <div class="rounded-2xl border border-[#002B5C]/20 bg-[#002B5C]/5 dark:bg-[#002B5C]/15 p-5">
+        <h4 class="text-sm font-bold text-[#002B5C] dark:text-white mb-2 flex items-center gap-2 m-0">
+          <i class="fas fa-cloud-upload-alt text-[#00A89D]"></i> Ruoff Marketing Portal
+        </h4>
+        <p class="text-sm text-gray-600 dark:text-gray-400 m-0 mb-3 leading-relaxed">
+          Upload files or order ready-made flyers, social graphics, and videos for your database and partners.
+        </p>
+        <a href="${MARKETING_PORTAL_URL}" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#00A89D] text-white text-sm font-semibold hover:bg-[#008F85] transition">
+          <i class="fas fa-external-link-alt"></i> Open Marketing Upload
+        </a>
+      </div>`;
+  }
+
   function renderLeverageTips(toolKey) {
     const tips = LEVERAGE_TIPS[toolKey];
     if (!tips?.length) return '';
@@ -212,6 +236,7 @@
           No rush — review your content above first. Open this checklist whenever you're ready to publish or repurpose.
         </p>
         ${renderChecklist(id, checklist)}
+        ${renderMarketingPortalCard(key)}
         ${renderLeverageTips(key)}
       `;
       wireChecklist(modal, id, checklist);

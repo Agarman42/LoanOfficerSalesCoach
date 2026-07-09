@@ -410,34 +410,6 @@
     window.updateSavedCount();
   };
 
-  window.exportSavedItemsJSON = function exportSavedItemsJSON(filter, searchTerm, sortBy) {
-    const items = sortItems(
-      filterItems(prepareItems(), filter || 'all', searchTerm || ''),
-      sortBy || 'newest'
-    ).map(({ title, content, savedAt, type }) => ({ title, content, savedAt, type }));
-
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      app: 'Ultimate Loan Officer Sales Coach',
-      count: items.length,
-      items
-    };
-
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `saved-items-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Exported ${items.length} item${items.length === 1 ? '' : 's'} as JSON`);
-    }
-  };
-
   window.copyFilteredSavedItems = function copyFilteredSavedItems(filter, searchTerm, sortBy, btn) {
     const items = sortItems(
       filterItems(prepareItems(), filter || 'all', searchTerm || ''),
@@ -573,9 +545,9 @@
     modal.querySelectorAll('.saved-viewer-close').forEach((btn) => {
       btn.addEventListener('click', () => closeSavedOverlay(modal));
     });
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeSavedOverlay(modal);
-    });
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
     openSavedOverlay(modal);
   };
 
@@ -739,9 +711,6 @@
         </div>
         <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex flex-wrap justify-between items-center gap-2 bg-white dark:bg-gray-800">
           <div class="flex flex-wrap gap-2">
-            <button type="button" id="saved-items-export-json" class="text-xs px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium flex items-center gap-1.5">
-              <i class="fas fa-download"></i> Export JSON
-            </button>
             <button type="button" id="saved-items-bulk-copy" class="text-xs px-4 py-2 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition font-medium flex items-center gap-1.5">
               <i class="fas fa-copy"></i> Copy filtered
             </button>
@@ -754,9 +723,9 @@
     panel.querySelectorAll('.saved-library-close').forEach((btn) => {
       btn.addEventListener('click', () => closeSavedOverlay(panel));
     });
-    panel.addEventListener('click', (e) => {
-      if (e.target === panel) closeSavedOverlay(panel);
-    });
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(panel);
+    }
     openSavedOverlay(panel);
 
     function updateSummary(filter, searchTerm) {
@@ -815,16 +784,17 @@
       refreshList();
     };
 
-    panel.querySelector('#saved-items-export-json')?.addEventListener('click', () => {
-      window.exportSavedItemsJSON(activeFilter, searchInput.value, activeSort);
-    });
-
     panel.querySelector('#saved-items-bulk-copy')?.addEventListener('click', (e) => {
       window.copyFilteredSavedItems(activeFilter, searchInput.value, activeSort, e.currentTarget);
     });
   };
 
   window.getSavedIdeas = getSavedIdeas;
+  window.closeSavedOverlay = closeSavedOverlay;
+  window.closeSavedItemsLibrary = function closeSavedItemsLibrary() {
+    const panel = document.getElementById('my-saved-items-library');
+    if (panel) closeSavedOverlay(panel);
+  };
 
   function init() {
     window.updateSavedCount();

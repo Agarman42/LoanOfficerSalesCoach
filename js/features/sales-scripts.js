@@ -732,9 +732,10 @@ window.showContextTipsModal = function() {
     };
 
     modal.querySelector('.context-tips-close')?.addEventListener('click', closeContextTips);
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeContextTips();
-    });
+    window.closeContextTipsModal = closeContextTips;
+    if (typeof window.ensureModalBackdropClose === 'function') {
+        window.ensureModalBackdropClose(modal);
+    }
 
     if (typeof window.openAppModal === 'function') {
         window.openAppModal(modal);

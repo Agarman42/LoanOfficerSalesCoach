@@ -478,10 +478,10 @@
     if (closeBtn) closeBtn.addEventListener('click', hideModal);
     if (closeBottom) closeBottom.addEventListener('click', hideModal);
 
-    // Click outside to close
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) hideModal();
-    });
+    window.closeApiKeyModal = hideModal;
+    if (typeof window.ensureModalBackdropClose === 'function') {
+      window.ensureModalBackdropClose(modal);
+    }
 
     // Save / Update
     if (saveBtn) {
