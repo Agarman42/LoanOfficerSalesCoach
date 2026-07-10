@@ -575,6 +575,9 @@
 
     if (target) {
       target.classList.remove('hidden');
+      if (typeof window.trackCoachSectionOpen === 'function') {
+        try { window.trackCoachSectionOpen(id); } catch (e) { console.warn('[analytics]', e); }
+      }
       if (typeof window.onCoachSectionShown === 'function') {
         try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
       }

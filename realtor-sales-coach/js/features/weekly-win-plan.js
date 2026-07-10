@@ -1607,6 +1607,21 @@ async function generateWeeklyPlan(options = {}) {
         renderWeeklyTiles(data.days, container);
         updateWeeklyResultsHeader();
 
+        if (typeof window.trackCoachEvent === 'function') {
+            window.trackCoachEvent({
+                tool: 'weekly-win-plan',
+                action: 'generate',
+                eventName: 'generate_weekly_plan',
+                label: 'Weekly Win Plan Generated'
+            });
+        } else if (typeof gtag === 'function') {
+            gtag('event', 'generate_weekly_plan', {
+                event_category: 'Tool Usage',
+                event_label: 'Weekly Win Plan Generated',
+                value: 1
+            });
+        }
+
     } catch (error) {
         console.error('[weekly-win-plan] generateWeeklyPlan failed:', error);
         container.innerHTML = `

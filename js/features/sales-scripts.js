@@ -790,19 +790,19 @@ window.showContextTipsModal = function() {
     Object.keys(scenarioData).forEach(key => {
       const cat = scenarioData[key];
       const card = document.createElement('div');
-      card.className = 'cursor-pointer border border-gray-200 dark:border-gray-700 rounded-2xl p-5 hover:border-[#00A89D] hover:shadow-md transition-all flex items-start gap-3';
+      card.className = 'cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl p-3 hover:border-[#00A89D] hover:shadow-sm transition-all flex items-center gap-2.5';
 
       // Special handling for "Write Your Own Situation" so we don't show "0 situations"
       const countHTML = (key === 'custom')
-        ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Free-form</div>`
-        : `<div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${cat.scenarios.length} situations</div>`;
+        ? `<div class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Free-form</div>`
+        : `<div class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">${cat.scenarios.length} situations</div>`;
 
       card.innerHTML = `
-        <div class="text-2xl mt-0.5" style="color: ${cat.color}">
+        <div class="text-base shrink-0" style="color: ${cat.color}">
           <i class="fas ${cat.icon}"></i>
         </div>
-        <div>
-          <div class="font-semibold text-[#002B5C] dark:text-white">${cat.label}</div>
+        <div class="min-w-0">
+          <div class="font-medium text-sm text-[#002B5C] dark:text-white leading-tight">${cat.label}</div>
           ${countHTML}
         </div>
       `;

@@ -12,9 +12,10 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-MDYP4C0BJ1');
-  // Optional: you can remove the page_title/page_path object unless you need custom values
+  window.COACH_APP_ID = 'loan_officer';
+  gtag('config', 'G-MDYP4C0BJ1', { app_id: 'loan_officer' });
 </script>
+    <script src="js/analytics.js?v=20260709-lo-v312"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -3633,7 +3634,7 @@
             <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
                 <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-folder-open text-[#00A89D]"></i></span> Choose a Category
             </h3>
-            <div id="sales-category-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div id="sales-category-cards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 <!-- Dynamically populated by sales-scripts.js -->
             </div>
         </div>

@@ -12,9 +12,10 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-MDYP4C0BJ1');
-  // Optional: you can remove the page_title/page_path object unless you need custom values
+  window.COACH_APP_ID = 'realtor';
+  gtag('config', 'G-MDYP4C0BJ1', { app_id: 'realtor' });
 </script>
+    <script src="js/analytics.js?v=20260709-realtor-v312"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -4110,7 +4111,7 @@
             <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
                 <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-folder-open text-[#00A89D]"></i></span> Choose a Category
             </h3>
-            <div id="sales-category-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div id="sales-category-cards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 <!-- Dynamically populated by sales-scripts.js -->
             </div>
         </div>
@@ -4126,25 +4127,6 @@
                     Select a category above to see relevant situations
                 </div>
             </div>
-        </div>
-
-        <!-- Script Elements checkboxes for premium control (more options to check, consistent UX) -->
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 shadow-sm mb-6">
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="font-semibold text-sm">Key Elements to Include in Scripts</span>
-            <div class="flex gap-1.5 text-[10px]">
-              <button type="button" onclick="selectAllFeatures('sales-elements')" class="px-2 py-0.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">All</button>
-              <button type="button" onclick="clearAllFeatures('sales-elements')" class="px-2 py-0.5 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition">Clear</button>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 text-xs" id="sales-elements">
-            <label class="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Strong empathy opener acknowledging the client's feeling" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Empathy Opener</span></label>
-            <label class="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Specific proof / recent client story or stat" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Proof / Story</span></label>
-            <label class="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Clear next step or soft call to action" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Clear Next Step</span></label>
-            <label class="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Handling of timeline or urgency pressure" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Timeline / Urgency</span></label>
-            <label class="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Co-broke or preferred partner mention when natural" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Partner Mention</span></label>
-            <label class="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#00A89D]/50 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Emotional / lifestyle benefit tie-in" class="form-checkbox h-3.5 w-3.5 text-[#00A89D]"><span>Lifestyle Benefit</span></label>
-          </div>
         </div>
 
         <!-- Additional Context -->

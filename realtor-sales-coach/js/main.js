@@ -568,6 +568,9 @@
     const target = document.getElementById(id);
     if (target) {
       target.classList.remove('hidden');
+      if (typeof window.trackCoachSectionOpen === 'function') {
+        try { window.trackCoachSectionOpen(id); } catch (e) { console.warn('[analytics]', e); }
+      }
       // Smooth scroll into view
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
