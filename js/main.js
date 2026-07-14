@@ -723,6 +723,15 @@
         }, 80);
       }
 
+      // Bio Builder — sync profile + restore saved bio
+      if (id === 'bio-creator') {
+        setTimeout(() => {
+          if (typeof window.syncBioFromProfile === 'function') {
+            try { window.syncBioFromProfile(); } catch (e) {}
+          }
+        }, 80);
+      }
+
       // Newsletter Generator — sync profile fields + ensure listeners + initial previews for custom curated
       if (id === 'newsletter-generator') {
         setTimeout(() => {

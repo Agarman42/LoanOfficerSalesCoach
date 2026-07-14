@@ -10,7 +10,7 @@
   const MODAL_ID = 'next-steps-modal';
   const CHECKLIST_PREFIX = 'nextStepsChecklist_';
 
-  const MARKETING_PORTAL_URL = 'https://marketing.ruoff.com/product/800';
+  const MARKETING_PORTAL_URL = 'https://ruoffplus.ruoff.com/marketing/library/461?productId=1256';
 
   const LEVERAGE_TIPS = {
     newsletter: [

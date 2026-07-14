@@ -16,6 +16,7 @@
     'social-post': 'Social Post Creator',
     social: 'Social Media Strategy',
     blog: 'Blog Creator',
+    'bio-creator': 'Bio Builder',
     'newsletter-generator': 'Newsletter Generator',
     eventplanning: 'Event Planning',
     referrals: 'Referral Partners',

@@ -29,6 +29,9 @@
   let nlPuzzleTopicFilter = 'all';
   let nlPuzzleCategoryFilter = 'all';
   let dadJokeIsCustom = false;
+  const explicitPuzzlePicks = { trivia: false, scramble: false, riddle: false };
+
+  const MODAL_RANDOM_ROW_CLASS = 'px-3 py-2 mb-2 text-sm bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-xl cursor-pointer hover:bg-[#F15A29]/20 transition-all text-[#F15A29] font-medium flex items-center gap-2';
 
   const CUSTOM_PUZZLE_IDS = {
     trivia: 'custom-trivia',
@@ -211,31 +214,274 @@
     persistCustomDrafts();
   }
 
-  function applyCustomDadJoke() {
-    const input = document.getElementById('nl-custom-dadjoke-input');
-    const text = (input?.value || '').trim();
+  const MODAL_CUSTOM_INPUT_CLASS = 'w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30';
+
+  function readPuzzleCustomValues(type, root) {
+    const scope = root || document;
+    const get = (id) => (scope.getElementById(id)?.value || '').trim();
+    if (type === 'trivia') {
+      return { question: get('nl-custom-trivia-question'), answer: get('nl-custom-trivia-answer') };
+    }
+    if (type === 'scramble') {
+      return {
+        prompt: get('nl-custom-scramble-prompt'),
+        answer: get('nl-custom-scramble-answer'),
+        scrambled: get('nl-custom-scramble-letters').toUpperCase(),
+        hint: get('nl-custom-scramble-hint')
+      };
+    }
+    return { riddle: get('nl-custom-riddle-text'), answer: get('nl-custom-riddle-answer') };
+  }
+
+  function readModalPuzzleCustomValues(type, modal) {
+    const scope = modal || document;
+    const get = (id) => (scope.querySelector(`#${id}`)?.value || '').trim();
+    if (type === 'trivia') {
+      return { question: get('modal-custom-trivia-question'), answer: get('modal-custom-trivia-answer') };
+    }
+    if (type === 'scramble') {
+      return {
+        prompt: get('modal-custom-scramble-prompt'),
+        answer: get('modal-custom-scramble-answer'),
+        scrambled: get('modal-custom-scramble-letters').toUpperCase(),
+        hint: get('modal-custom-scramble-hint')
+      };
+    }
+    return { riddle: get('modal-custom-riddle-text'), answer: get('modal-custom-riddle-answer') };
+  }
+
+  function syncFormCustomFields(values) {
+    const set = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && val != null) el.value = val;
+    };
+    if (values.dadJoke != null) set('nl-custom-dadjoke-input', values.dadJoke);
+    if (values.trivia) {
+      set('nl-custom-trivia-question', values.trivia.question);
+      set('nl-custom-trivia-answer', values.trivia.answer);
+    }
+    if (values.scramble) {
+      set('nl-custom-scramble-prompt', values.scramble.prompt);
+      set('nl-custom-scramble-answer', values.scramble.answer);
+      set('nl-custom-scramble-letters', values.scramble.scrambled);
+      set('nl-custom-scramble-hint', values.scramble.hint);
+    }
+    if (values.riddle) {
+      set('nl-custom-riddle-text', values.riddle.riddle);
+      set('nl-custom-riddle-answer', values.riddle.answer);
+    }
+  }
+
+  function getCustomDraftSnapshot() {
+    return {
+      dadJoke: localStorage.getItem('nl-custom-dadjoke-draft') || '',
+      trivia: {
+        question: localStorage.getItem('nl-custom-trivia-question-draft') || '',
+        answer: localStorage.getItem('nl-custom-trivia-answer-draft') || ''
+      },
+      scramble: {
+        prompt: localStorage.getItem('nl-custom-scramble-prompt-draft') || '',
+        answer: localStorage.getItem('nl-custom-scramble-answer-draft') || '',
+        scrambled: localStorage.getItem('nl-custom-scramble-letters-draft') || '',
+        hint: localStorage.getItem('nl-custom-scramble-hint-draft') || ''
+      },
+      riddle: {
+        riddle: localStorage.getItem('nl-custom-riddle-text-draft') || '',
+        answer: localStorage.getItem('nl-custom-riddle-answer-draft') || ''
+      }
+    };
+  }
+
+  function shouldOpenModalCustomDetails(category, meta) {
+    if (category === 'dadJoke') return isCustomDadJokeActive();
+    if (category === 'puzzle') {
+      const type = meta?.puzzleType || getActivePuzzleType();
+      return isCustomPuzzleItem(getSelectedPuzzle(type));
+    }
+    return false;
+  }
+
+  function buildModalCustomPanelHTML(category, puzzleType) {
+    const wrap = (inner) => `
+      <details id="modal-custom-details" class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 overflow-hidden">
+        <summary class="px-4 py-3 text-sm font-semibold text-[#002B5C] dark:text-white cursor-pointer select-none list-none flex items-center gap-2">
+          <span>✏️ Write your own instead</span>
+        </summary>
+        <div class="px-4 pb-4 pt-1 border-t border-gray-200 dark:border-gray-700 space-y-3">${inner}</div>
+      </details>`;
+
+    if (category === 'dadJoke') {
+      return wrap(`
+        <textarea id="modal-custom-dadjoke-input" rows="3" placeholder="Type your dad joke here…" class="${MODAL_CUSTOM_INPUT_CLASS}"></textarea>
+        <button type="button" id="modal-custom-dadjoke-apply" class="text-xs px-4 py-2 bg-[#F15A29] text-white rounded-full font-semibold hover:opacity-90">Use my joke</button>`);
+    }
+    if (category === 'puzzle') {
+      const label = (PUZZLE_TYPES[puzzleType]?.label || puzzleType).toLowerCase();
+      const triviaFields = `
+        <div data-modal-custom-fields="trivia" class="${puzzleType === 'trivia' ? '' : 'hidden'} space-y-3">
+          <div>
+            <label for="modal-custom-trivia-question" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Question</label>
+            <textarea id="modal-custom-trivia-question" rows="2" placeholder="e.g., What does PMI stand for?" class="${MODAL_CUSTOM_INPUT_CLASS}"></textarea>
+          </div>
+          <div>
+            <label for="modal-custom-trivia-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer</label>
+            <input type="text" id="modal-custom-trivia-answer" placeholder="e.g., Private Mortgage Insurance" class="${MODAL_CUSTOM_INPUT_CLASS}">
+          </div>
+        </div>`;
+      const scrambleFields = `
+        <div data-modal-custom-fields="scramble" class="${puzzleType === 'scramble' ? '' : 'hidden'} space-y-3">
+          <div>
+            <label for="modal-custom-scramble-prompt" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Prompt</label>
+            <textarea id="modal-custom-scramble-prompt" rows="2" placeholder="e.g., Unscramble this word every homeowner hopes to build:" class="${MODAL_CUSTOM_INPUT_CLASS}"></textarea>
+          </div>
+          <div>
+            <label for="modal-custom-scramble-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer (unscrambled word)</label>
+            <div class="flex flex-wrap gap-2">
+              <input type="text" id="modal-custom-scramble-answer" placeholder="e.g., Equity" class="flex-1 min-w-[140px] ${MODAL_CUSTOM_INPUT_CLASS}">
+              <button type="button" id="modal-custom-scramble-shuffle" class="text-xs px-3 py-2 border-2 border-[#00A89D] text-[#00A89D] rounded-full font-semibold hover:bg-[#00A89D]/10 whitespace-nowrap">Scramble letters</button>
+            </div>
+          </div>
+          <div>
+            <label for="modal-custom-scramble-letters" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Scrambled letters</label>
+            <input type="text" id="modal-custom-scramble-letters" placeholder="e.g., YTUIQE" class="${MODAL_CUSTOM_INPUT_CLASS} uppercase tracking-widest">
+          </div>
+          <div>
+            <label for="modal-custom-scramble-hint" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Hint (optional)</label>
+            <input type="text" id="modal-custom-scramble-hint" placeholder="e.g., Grows as you pay down the loan" class="${MODAL_CUSTOM_INPUT_CLASS}">
+          </div>
+        </div>`;
+      const riddleFields = `
+        <div data-modal-custom-fields="riddle" class="${puzzleType === 'riddle' ? '' : 'hidden'} space-y-3">
+          <div>
+            <label for="modal-custom-riddle-text" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Riddle</label>
+            <textarea id="modal-custom-riddle-text" rows="3" placeholder="e.g., What has hands but cannot clap?" class="${MODAL_CUSTOM_INPUT_CLASS}"></textarea>
+          </div>
+          <div>
+            <label for="modal-custom-riddle-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer</label>
+            <input type="text" id="modal-custom-riddle-answer" placeholder="e.g., A clock" class="${MODAL_CUSTOM_INPUT_CLASS}">
+          </div>
+        </div>`;
+      return wrap(`
+        <p class="text-[11px] text-gray-500 dark:text-gray-400 m-0">Custom ${escapeHtml(label)} — only if you don't want a library pick.</p>
+        ${triviaFields}
+        ${scrambleFields}
+        ${riddleFields}
+        <button type="button" id="modal-custom-puzzle-apply" class="text-xs px-4 py-2 bg-[#F15A29] text-white rounded-full font-semibold hover:opacity-90">Use my brain teaser</button>`);
+    }
+    return '';
+  }
+
+  function prefillModalCustomPanel(modal, category, meta) {
+    const drafts = getCustomDraftSnapshot();
+    if (category === 'dadJoke') {
+      let text = drafts.dadJoke;
+      if (isCustomDadJokeActive() && selectedDadJoke) text = selectedDadJoke;
+      const input = modal.querySelector('#modal-custom-dadjoke-input');
+      if (input) input.value = text;
+      return;
+    }
+    if (category === 'puzzle') {
+      const type = meta.puzzleType || getActivePuzzleType();
+      const current = meta.current;
+      const useCurrent = isCustomPuzzleItem(current);
+      const values = useCurrent ? current : null;
+      const set = (id, val) => {
+        const el = modal.querySelector(`#${id}`);
+        if (el && val != null) el.value = val;
+      };
+      if (type === 'trivia') {
+        set('modal-custom-trivia-question', useCurrent ? values.question : drafts.trivia.question);
+        set('modal-custom-trivia-answer', useCurrent ? values.answer : drafts.trivia.answer);
+      } else if (type === 'scramble') {
+        set('modal-custom-scramble-prompt', useCurrent ? values.prompt : drafts.scramble.prompt);
+        set('modal-custom-scramble-answer', useCurrent ? values.answer : drafts.scramble.answer);
+        set('modal-custom-scramble-letters', useCurrent ? values.scrambled : drafts.scramble.scrambled);
+        set('modal-custom-scramble-hint', useCurrent ? values.hint : drafts.scramble.hint);
+      } else {
+        set('modal-custom-riddle-text', useCurrent ? values.riddle : drafts.riddle.riddle);
+        set('modal-custom-riddle-answer', useCurrent ? values.answer : drafts.riddle.answer);
+      }
+    }
+  }
+
+  function wireModalCustomPanel(modal, category, modalApi) {
+    const { hideModal, shouldKeepOpen, refreshModal } = modalApi;
+    const onSuccess = () => {
+      if (typeof shouldKeepOpen === 'function' && shouldKeepOpen() && typeof refreshModal === 'function') {
+        refreshModal(category);
+        return;
+      }
+      hideModal(modal);
+      const search = modal.querySelector('#modal-search');
+      if (search) search.value = '';
+    };
+
+    if (category === 'dadJoke') {
+      const applyBtn = modal.querySelector('#modal-custom-dadjoke-apply');
+      const input = modal.querySelector('#modal-custom-dadjoke-input');
+      if (applyBtn) {
+        applyBtn.onclick = () => {
+          applyCustomDadJoke({
+            text: input?.value,
+            onSuccess
+          });
+        };
+      }
+      return;
+    }
+
+    if (category === 'puzzle') {
+      const applyBtn = modal.querySelector('#modal-custom-puzzle-apply');
+      const shuffleBtn = modal.querySelector('#modal-custom-scramble-shuffle');
+      if (shuffleBtn) {
+        shuffleBtn.onclick = () => {
+          const answer = (modal.querySelector('#modal-custom-scramble-answer')?.value || '').trim();
+          if (!answer) {
+            alert('Enter the unscrambled answer first, then scramble.');
+            return;
+          }
+          const lettersEl = modal.querySelector('#modal-custom-scramble-letters');
+          if (lettersEl) lettersEl.value = scrambleLetters(answer);
+        };
+      }
+      if (applyBtn) {
+        applyBtn.onclick = () => {
+          const type = getActivePuzzleType();
+          applyCustomPuzzle({
+            puzzleType: type,
+            values: readModalPuzzleCustomValues(type, modal),
+            onSuccess
+          });
+        };
+      }
+    }
+  }
+
+  function applyCustomDadJoke(options = {}) {
+    const text = (options.text ?? document.getElementById('nl-custom-dadjoke-input')?.value ?? '').trim();
     if (!text) {
       alert('Please type a joke first.');
-      return;
+      return false;
     }
     selectedDadJoke = text;
     dadJokeIsCustom = true;
+    syncFormCustomFields({ dadJoke: text });
     persistCustomDrafts();
     persistUsed();
     updatePreviews();
+    if (typeof options.onSuccess === 'function') options.onSuccess();
+    return true;
   }
 
-  function applyCustomPuzzle() {
-    const type = getActivePuzzleType();
-    let item = null;
+  function buildCustomPuzzleItem(type, values) {
     if (type === 'trivia') {
-      const question = (document.getElementById('nl-custom-trivia-question')?.value || '').trim();
-      const answer = (document.getElementById('nl-custom-trivia-answer')?.value || '').trim();
+      const question = (values.question || '').trim();
+      const answer = (values.answer || '').trim();
       if (!question || !answer) {
         alert('Please enter both a trivia question and answer.');
-        return;
+        return null;
       }
-      item = {
+      return {
         id: CUSTOM_PUZZLE_IDS.trivia,
         custom: true,
         question,
@@ -243,19 +489,18 @@
         category: 'Custom',
         tags: ['custom']
       };
-    } else if (type === 'scramble') {
-      const prompt = (document.getElementById('nl-custom-scramble-prompt')?.value || '').trim();
-      const answer = (document.getElementById('nl-custom-scramble-answer')?.value || '').trim();
-      let scrambled = (document.getElementById('nl-custom-scramble-letters')?.value || '').trim().toUpperCase();
-      const hint = (document.getElementById('nl-custom-scramble-hint')?.value || '').trim();
+    }
+    if (type === 'scramble') {
+      const prompt = (values.prompt || '').trim();
+      const answer = (values.answer || '').trim();
+      let scrambled = (values.scrambled || '').trim().toUpperCase();
+      const hint = (values.hint || '').trim();
       if (!prompt || !answer) {
         alert('Please enter a prompt and the unscrambled answer.');
-        return;
+        return null;
       }
       if (!scrambled) scrambled = scrambleLetters(answer);
-      const lettersEl = document.getElementById('nl-custom-scramble-letters');
-      if (lettersEl) lettersEl.value = scrambled;
-      item = {
+      return {
         id: CUSTOM_PUZZLE_IDS.scramble,
         custom: true,
         prompt,
@@ -265,26 +510,48 @@
         category: 'Custom',
         tags: ['custom']
       };
-    } else {
-      const riddle = (document.getElementById('nl-custom-riddle-text')?.value || '').trim();
-      const answer = (document.getElementById('nl-custom-riddle-answer')?.value || '').trim();
-      if (!riddle || !answer) {
-        alert('Please enter both the riddle and its answer.');
-        return;
-      }
-      item = {
-        id: CUSTOM_PUZZLE_IDS.riddle,
-        custom: true,
-        riddle,
-        answer,
-        category: 'Custom',
-        tags: ['custom']
-      };
     }
-    setSelectedPuzzle(type, item);
+    const riddle = (values.riddle || '').trim();
+    const answer = (values.answer || '').trim();
+    if (!riddle || !answer) {
+      alert('Please enter both the riddle and its answer.');
+      return null;
+    }
+    return {
+      id: CUSTOM_PUZZLE_IDS.riddle,
+      custom: true,
+      riddle,
+      answer,
+      category: 'Custom',
+      tags: ['custom']
+    };
+  }
+
+  function applyCustomPuzzle(options = {}) {
+    const type = options.puzzleType || getActivePuzzleType();
+    const values = options.values || readPuzzleCustomValues(type);
+    const item = buildCustomPuzzleItem(type, values);
+    if (!item) return false;
+    setSelectedPuzzle(type, item, { explicit: true });
+    if (type === 'trivia') {
+      syncFormCustomFields({ trivia: { question: item.question, answer: item.answer } });
+    } else if (type === 'scramble') {
+      syncFormCustomFields({
+        scramble: {
+          prompt: item.prompt,
+          answer: item.answer,
+          scrambled: item.scrambled,
+          hint: item.hint || ''
+        }
+      });
+    } else {
+      syncFormCustomFields({ riddle: { riddle: item.riddle, answer: item.answer } });
+    }
     persistCustomDrafts();
     persistUsed();
     updatePreviews();
+    if (typeof options.onSuccess === 'function') options.onSuccess();
+    return true;
   }
 
   function restoreSelectedPuzzle(type, saved) {
@@ -317,10 +584,48 @@
     return null;
   }
 
-  function setSelectedPuzzle(type, item) {
+  function setSelectedPuzzle(type, item, options = {}) {
     if (type === 'trivia') selectedTrivia = item;
     else if (type === 'scramble') selectedScramble = item;
     else if (type === 'riddle') selectedRiddle = item;
+    if (options.explicit) explicitPuzzlePicks[type] = true;
+    else if (options.clearExplicit) explicitPuzzlePicks[type] = false;
+  }
+
+  function syncPreviewConsumers() {
+    if (typeof window.__nlRefreshWizardCuratedPreviews === 'function') {
+      window.__nlRefreshWizardCuratedPreviews();
+    }
+  }
+
+  function getSetupPreviewPlainText() {
+    const type = getActivePuzzleType();
+    const item = getSelectedPuzzle(type);
+    if (!item) return 'Shuffle or browse the library to pick one.';
+
+    const lines = [];
+    if (isCustomPuzzleItem(item)) lines.push('Your custom');
+    else if (item.category && item.category !== 'General') lines.push(item.category);
+
+    if (type === 'trivia') {
+      lines.push('Type: Trivia');
+      lines.push(`Q: ${item.question}`);
+    } else if (type === 'scramble') {
+      lines.push('Type: Word Scramble');
+      lines.push(item.prompt);
+      lines.push(`Letters: ${item.scrambled}`);
+      if (item.hint) lines.push(`Hint: ${item.hint}`);
+    } else {
+      lines.push('Type: Riddle');
+      lines.push(item.riddle);
+    }
+
+    const answerText = buildAnswerLine(type, item);
+    if (answerText) {
+      lines.push(answerText);
+      lines.push('Shown here so you can review before generating. Subscribers only see it in fine print at the bottom of the newsletter.');
+    }
+    return lines.join('\n');
   }
 
   function getRandomString(list, used) {
@@ -405,6 +710,19 @@
   function syncPuzzleTypeFromUI() {
     nlPuzzleType = getActivePuzzleType();
     localStorage.setItem('nl-puzzle-type', nlPuzzleType);
+  }
+
+  function setPuzzleType(type) {
+    if (!PUZZLE_TYPES[type]) return;
+    nlPuzzleType = type;
+    localStorage.setItem('nl-puzzle-type', type);
+    document.querySelectorAll('input[name="nl-puzzle-type"]').forEach((radio) => {
+      radio.checked = radio.value === type;
+    });
+    syncPuzzleTypeRadiosUI();
+    ensureSelectionMatchesFilters();
+    updateFilterCountUI();
+    updatePreviews();
   }
 
   function formatSetupAnswerBlock(type, item) {
@@ -508,9 +826,9 @@
       setSelectedPuzzle(type, null);
       return;
     }
-    if (current && isCustomPuzzleItem(current)) return;
+    if (current && (isCustomPuzzleItem(current) || explicitPuzzlePicks[type])) return;
     if (!current || !filtered.some((item) => item.id === current.id)) {
-      setSelectedPuzzle(type, getRandomObject(filtered, getUsedIds(type)));
+      setSelectedPuzzle(type, getRandomObject(filtered, getUsedIds(type)), { clearExplicit: true });
       persistUsed();
     }
   }
@@ -531,6 +849,61 @@
     updatePreviews();
   }
 
+  function entertainmentEmptyPreviewHTML(label) {
+    return `<span class="nl-curated-empty-preview text-gray-400"><i class="fas fa-hand-pointer text-[#00A89D]/70"></i> Click to pick a ${label} — or hit Shuffle</span>`;
+  }
+
+  function getSelectionText(category) {
+    if (category === 'dadJoke') return selectedDadJoke || '';
+    if (category === 'puzzle') return getSetupPreviewPlainText();
+    return '';
+  }
+
+  function getPoolStats(category) {
+    if (category === 'dadJoke') {
+      return { total: dadJokes.length, used: usedDadJokes.length, label: 'dad jokes' };
+    }
+    if (category === 'puzzle') {
+      const type = getActivePuzzleType();
+      const pool = getFilteredPuzzleList(type);
+      const used = getUsedIds(type).length;
+      return {
+        total: pool.length,
+        used,
+        label: `${(PUZZLE_TYPES[type]?.label || 'brain teaser').toLowerCase()} items`
+      };
+    }
+    return { total: 0, used: 0, label: 'items' };
+  }
+
+  function getPickStatus(sectionKey) {
+    if (sectionKey === 'dadjoke') {
+      if (!selectedDadJoke) return 'empty';
+      if (isCustomDadJokeActive()) return 'custom';
+      return 'library';
+    }
+    if (sectionKey === 'puzzle') {
+      const type = getActivePuzzleType();
+      const item = getSelectedPuzzle(type);
+      if (!item) return 'empty';
+      if (isCustomPuzzleItem(item)) return 'custom';
+      return 'library';
+    }
+    return null;
+  }
+
+  function afterEngagementModalPick(modalApi, category, modal, search) {
+    persistUsed();
+    updatePreviews();
+    const stayOpen = typeof modalApi.shouldKeepOpen === 'function' && modalApi.shouldKeepOpen();
+    if (stayOpen && typeof modalApi.refreshModal === 'function') {
+      modalApi.refreshModal(category);
+      return;
+    }
+    if (typeof modalApi.hideModal === 'function') modalApi.hideModal(modal);
+    if (search) search.value = '';
+  }
+
   function updatePreviews() {
     const dadEl = document.getElementById('dad-joke-preview');
     const puzzleEl = document.getElementById('brain-teaser-preview');
@@ -538,7 +911,7 @@
       const badge = isCustomDadJokeActive() ? customPreviewBadge() : '';
       dadEl.innerHTML = selectedDadJoke
         ? `${badge}${escapeHtml(selectedDadJoke)}`
-        : '<span class="text-gray-500">No dad joke selected</span>';
+        : entertainmentEmptyPreviewHTML('dad joke');
     }
     if (puzzleEl) {
       const type = getActivePuzzleType();
@@ -546,11 +919,24 @@
       puzzleEl.innerHTML = formatPuzzlePreview(type, item);
     }
     syncPuzzleTypeRadiosUI();
+    if (typeof window.__nlSyncSetupPuzzleTypeCards === 'function') {
+      window.__nlSyncSetupPuzzleTypeCards();
+    }
     syncCustomPuzzleFieldsUI();
     updateFilterCountUI();
+    syncPreviewConsumers();
   }
 
   function syncPuzzleTypeRadiosUI() {
+    document.querySelectorAll('[data-nl-puzzle-open]').forEach((btn) => {
+      const active = btn.getAttribute('data-nl-puzzle-open') === getActivePuzzleType();
+      btn.classList.toggle('border-[#00A89D]', active);
+      btn.classList.toggle('bg-[#00A89D]/10', active);
+      btn.classList.toggle('ring-2', active);
+      btn.classList.toggle('ring-[#00A89D]/30', active);
+      btn.classList.toggle('border-gray-200', !active);
+      btn.classList.toggle('dark:border-gray-700', !active);
+    });
     document.querySelectorAll('input[name="nl-puzzle-type"]').forEach((radio) => {
       const label = radio.closest('.nl-puzzle-type-card');
       if (!label) return;
@@ -575,17 +961,21 @@
         alert('No items match your current filters. Try All topics or a different category.');
         return;
       }
-      setSelectedPuzzle(type, getRandomObject(pool, getUsedIds(type)));
+      explicitPuzzlePicks[type] = false;
+      setSelectedPuzzle(type, getRandomObject(pool, getUsedIds(type)), { clearExplicit: true });
     } else if (PUZZLE_TYPES[category]) {
       const pool = getFilteredPuzzleList(category);
       if (!pool.length) {
         alert('No items match your current filters. Try All topics or a different category.');
         return;
       }
-      setSelectedPuzzle(category, getRandomObject(pool, getUsedIds(category)));
+      explicitPuzzlePicks[category] = false;
+      setSelectedPuzzle(category, getRandomObject(pool, getUsedIds(category)), { clearExplicit: true });
     }
     persistUsed();
     updatePreviews();
+    const previewMap = { dadJoke: 'dad-joke-preview', puzzle: 'brain-teaser-preview' };
+    if (typeof window.flashCuratedPreview === 'function') window.flashCuratedPreview(previewMap[category]);
   }
 
   function resetUsed(category) {
@@ -648,7 +1038,10 @@
     const meta = getChoiceModalMeta(category);
     if (!meta || !modalApi) return;
 
-    const { ensureModal, getTitleEl, getListEl, showModal, hideModal } = modalApi;
+    const {
+      ensureModal, getTitleEl, getListEl, showModal, hideModal,
+      renderHubTabs, renderToolbar, hubMode, shouldKeepOpen, refreshModal
+    } = modalApi;
     const modal = ensureModal();
     if (!modal) return;
 
@@ -657,13 +1050,56 @@
     const data = meta.data || [];
 
     showModal(modal);
+    if (typeof renderHubTabs === 'function' && hubMode) {
+      renderHubTabs(category, modal);
+    }
+    if (typeof renderToolbar === 'function' && hubMode) {
+      renderToolbar(category, modal, hubMode);
+    }
     if (title) {
-      title.textContent = meta.title;
+      const hubTab = typeof window.getEngagementHubTabByCategory === 'function'
+        ? window.getEngagementHubTabByCategory(category)
+        : null;
+      title.textContent = hubMode && hubTab
+        ? `Engagement Picker · ${hubTab.label}`
+        : meta.title;
       title.style.color = '#fff';
     }
 
-    let search = modal.querySelector('#modal-search');
     const contentBody = list ? list.parentElement : null;
+
+    let typeBar = modal.querySelector('#modal-puzzle-type-bar');
+    if (category === 'puzzle' && contentBody) {
+      if (!typeBar) {
+        typeBar = document.createElement('div');
+        typeBar.id = 'modal-puzzle-type-bar';
+        typeBar.className = 'mb-4';
+        contentBody.insertBefore(typeBar, list);
+      }
+      const activeType = getActivePuzzleType();
+      typeBar.innerHTML = `
+        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Format</p>
+        <div class="grid grid-cols-3 gap-2">
+          ${Object.entries(PUZZLE_TYPES).map(([key, cfg]) => `
+            <button type="button" data-modal-puzzle-type="${key}" class="text-xs sm:text-sm px-2 py-2.5 rounded-xl border-2 font-semibold transition ${activeType === key ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C] dark:text-white' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#00A89D]/50'}">
+              ${key === 'trivia' ? '🧠 ' : key === 'scramble' ? '🔤 ' : '❓ '}${cfg.label}
+            </button>
+          `).join('')}
+        </div>`;
+      typeBar.classList.remove('hidden');
+      typeBar.querySelectorAll('[data-modal-puzzle-type]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          setPuzzleType(btn.getAttribute('data-modal-puzzle-type'));
+          openChoiceModal(category, modalApi);
+        });
+      });
+    } else if (typeBar) {
+      typeBar.classList.add('hidden');
+    }
+
+    const showCustomPanel = category === 'dadJoke' || category === 'puzzle';
+
+    let search = modal.querySelector('#modal-search');
     if (!search && contentBody) {
       search = document.createElement('input');
       search.id = 'modal-search';
@@ -732,14 +1168,30 @@
       }
 
       const randomLi = document.createElement('li');
-      randomLi.className = 'p-4 mb-2 bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-2xl cursor-pointer hover:bg-[#F15A29]/20 transition-all text-[#F15A29] font-semibold flex items-center gap-3';
-      randomLi.innerHTML = `<i class="fas fa-dice"></i> <span>Pick a random one for me</span>`;
+      randomLi.className = MODAL_RANDOM_ROW_CLASS;
+      randomLi.innerHTML = `<i class="fas fa-dice text-xs"></i> <span>Pick a random one for me</span>`;
       randomLi.addEventListener('click', () => {
         regenerateRandom(category);
-        hideModal(modal);
-        if (search) search.value = '';
+        if (shouldKeepOpen && shouldKeepOpen() && typeof refreshModal === 'function') {
+          refreshModal(category);
+        } else {
+          hideModal(modal);
+          if (search) search.value = '';
+        }
       });
       list.appendChild(randomLi);
+
+      if (showCustomPanel) {
+        const customLi = document.createElement('li');
+        customLi.id = 'modal-custom-panel';
+        customLi.className = 'nl-modal-custom-row mb-2 list-none';
+        customLi.innerHTML = buildModalCustomPanelHTML(category, meta.puzzleType || getActivePuzzleType());
+        list.appendChild(customLi);
+        prefillModalCustomPanel(modal, category, meta);
+        wireModalCustomPanel(modal, category, modalApi);
+        const details = modal.querySelector('#modal-custom-details');
+        if (details && shouldOpenModalCustomDetails(category, meta)) details.open = true;
+      }
 
       if (meta.mode === 'string') {
         data.forEach((item) => {
@@ -750,10 +1202,7 @@
           li.addEventListener('click', () => {
             selectedDadJoke = item;
             dadJokeIsCustom = false;
-            persistUsed();
-            updatePreviews();
-            hideModal(modal);
-            if (search) search.value = '';
+            afterEngagementModalPick(modalApi, category, modal, search);
           });
           list.appendChild(li);
         });
@@ -775,11 +1224,11 @@
           li.innerHTML = `<i class="fas fa-puzzle-piece text-[#00A89D] mt-0.5 flex-shrink-0"></i> <span class="flex-1"><span class="block">${escapeHtml(display)}</span>${answerLine}${badges.length ? `<span class="flex flex-wrap gap-1.5 mt-2">${badges.join('')}</span>` : ''}</span> ${isCurrent ? '<span class="text-[10px] px-2 py-0.5 bg-[#00A89D]/10 text-[#00A89D] rounded-full self-start">current</span>' : ''}`;
           li.dataset.searchText = `${display} ${item.answer || ''} ${item.category || ''} ${(item.tags || []).join(' ')}`.toLowerCase();
           li.addEventListener('click', () => {
-            setSelectedPuzzle(meta.puzzleType, item);
-            persistUsed();
-            updatePreviews();
-            hideModal(modal);
-            if (search) search.value = '';
+            if (meta.puzzleType && meta.puzzleType !== getActivePuzzleType()) {
+              setPuzzleType(meta.puzzleType);
+            }
+            setSelectedPuzzle(meta.puzzleType, item, { explicit: true });
+            afterEngagementModalPick(modalApi, category, modal, search);
           });
           list.appendChild(li);
         });
@@ -791,7 +1240,7 @@
       search.oninput = () => {
         const filter = search.value.toLowerCase().trim();
         Array.from(list.children).forEach((li, idx) => {
-          if (idx === 0 || li.classList.contains('nl-modal-empty-state')) return;
+          if (idx === 0 || li.classList.contains('nl-modal-empty-state') || li.classList.contains('nl-modal-custom-row')) return;
           const haystack = li.dataset.searchText || li.innerText.toLowerCase();
           li.style.display = !filter || haystack.includes(filter) ? '' : 'none';
         });
@@ -1001,9 +1450,15 @@
     PUZZLE_TYPES,
     getActivePuzzleType,
     updatePreviews,
+    getSetupPreviewPlainText,
+    getSelectionText,
+    getPoolStats,
+    getPickStatus,
     regenerateRandom,
     resetUsed,
     openChoiceModal,
+    setPuzzleType,
+    getActivePuzzleType,
     buildPromptLines,
     injectIntoHtml,
     injectTeaserAnswerAtEnd,

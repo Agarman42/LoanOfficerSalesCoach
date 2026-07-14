@@ -11,6 +11,7 @@
     'newsletter-generator': { level: 'full', tip: 'AI-powered — builds newsletter editions' },
     'weekly-win-plan': { level: 'full', tip: 'AI-powered — generates your weekly plan' },
     'sales-script': { level: 'full', tip: 'AI-powered — writes custom scripts' },
+    'bio-creator': { level: 'full', tip: 'AI-powered — builds platform-ready professional bios' },
     'ai-chat': { level: 'full', tip: 'AI-powered — profile-aware coach' },
     'underwriting-search': { level: 'full', tip: 'AI-powered — searches guidelines' },
     'client-translation': { level: 'full', tip: 'AI-powered — translates client communication' }

@@ -28,6 +28,7 @@
     'eventplanning': function () { goSection('eventplanning'); },
     'equity-scanner': function () { goSection('equity-scanner'); },
     'sales-script': function () { goSection('sales-script'); },
+    'bio-creator': function () { goSection('bio-creator'); },
     'ai-chat': function () { goSection('ai-chat'); },
     'newsletter-generator': function () { goSection('newsletter-generator'); },
     'mindset-motivation': function () { goSection('mindset-motivation'); },
@@ -147,6 +148,15 @@
       gradient: 'orange',
       links: [
         { label: 'Social Post Creator', action: 'social-post' },
+        { label: 'Newsletter Generator', action: 'newsletter-generator' }
+      ]
+    },
+    'bio-creator': {
+      headline: 'Your bio is how strangers decide to trust you',
+      detail: 'A strong Google, Experience.com, or Zillow bio improves SEO and AI visibility — and gives every other tool a consistent story to build on. Save your primary bio once, use it everywhere.',
+      gradient: 'teal',
+      links: [
+        { label: 'Blog Creator', action: 'blog' },
         { label: 'Newsletter Generator', action: 'newsletter-generator' }
       ]
     },

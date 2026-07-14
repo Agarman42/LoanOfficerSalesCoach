@@ -24,6 +24,7 @@ When asked what the tool does or about its features, ALWAYS highlight the AI TOO
 • Sales Script Generator – Instant objection handlers and conversation scripts
 • Social Media Post & Calendar Creator – Ready-to-post content + full monthly plans (6 pillars, 14 Reels, 120+ Evergreen)
 • Blog Creator – Full SEO + GEO optimized blog posts with matching social + Google + Reel assets in seconds
+• Bio Builder – Platform-ready professional bios (Google, Experience.com, Zillow, company pages) saved to your profile
 • Value Vault – Save and organize your best ideas
 • 2026 Business Plan + Weekly Win Plan Creators – Anxiety-reducing, profile-powered planning
 • Mindset Lab – 100+ principles for resilience

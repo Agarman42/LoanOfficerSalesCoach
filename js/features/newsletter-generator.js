@@ -847,12 +847,15 @@ function resetUsed(category) {
     if (category === 'funFacts') {
         usedFunFacts = [];
         selectedFunFact = getRandomItem(funFacts, usedFunFacts);
+        funFactIsCustom = false;
     } else if (category === 'proTips') {
         usedProTips = [];
         selectedProTip = getRandomItem(proTips, usedProTips);
+        proTipIsCustom = false;
     } else if (category === 'quotes') {
         usedQuotes = [];
         selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+        quoteIsCustom = false;
     } else if (window.NlEntertainment && typeof window.NlEntertainment.resetUsed === 'function') {
         window.NlEntertainment.resetUsed(category);
         return;
@@ -882,6 +885,120 @@ function getRandomItem(list, used) {
 let selectedFunFact = getRandomItem(funFacts, usedFunFacts);
 let selectedProTip = getRandomItem(proTips, usedProTips);
 let selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+let funFactIsCustom = localStorage.getItem('nl-funfact-custom') === '1';
+let proTipIsCustom = localStorage.getItem('nl-protip-custom') === '1';
+let quoteIsCustom = localStorage.getItem('nl-quote-custom') === '1';
+
+const NL_MODAL_RANDOM_ROW_CLASS = 'px-3 py-2 mb-2 text-sm bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-xl cursor-pointer hover:bg-[#F15A29]/20 transition-all text-[#F15A29] font-medium flex items-center gap-2';
+const NL_MODAL_CUSTOM_INPUT_CLASS = 'w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30';
+
+function nlCustomPreviewBadge() {
+    return '<span class="inline-block text-[10px] px-2 py-0.5 mb-1 rounded-full bg-[#F15A29]/10 text-[#F15A29] font-semibold">Your custom</span>';
+}
+
+function nlCuratedEmptyPreviewHTML(label) {
+    return `<span class="nl-curated-empty-preview text-gray-400 not-italic"><i class="fas fa-hand-pointer text-[#00A89D]/70"></i> Click to pick a ${label} — or hit Shuffle</span>`;
+}
+
+function injectEngagementPolishStyles() {
+    if (document.getElementById('nl-engagement-polish-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'nl-engagement-polish-styles';
+    style.textContent = `
+      @keyframes nlPreviewFlash { 0%,100%{opacity:1;transform:scale(1)} 45%{opacity:.4;transform:scale(.985)} }
+      .nl-preview-flash { animation: nlPreviewFlash .45s ease; }
+    `;
+    document.head.appendChild(style);
+}
+
+function isCustomCuratedSelection(category, value) {
+    if (category === 'funFact') return funFactIsCustom || (value && !funFacts.includes(value));
+    if (category === 'proTip') return proTipIsCustom || (value && !proTips.includes(value));
+    if (category === 'quote') return quoteIsCustom || (value && !motivationalQuotes.includes(value));
+    return false;
+}
+
+function persistCuratedSelections() {
+    if (selectedFunFact) localStorage.setItem('selectedFunFact', selectedFunFact);
+    if (selectedProTip) localStorage.setItem('selectedProTip', selectedProTip);
+    if (selectedQuote) localStorage.setItem('selectedQuote', selectedQuote);
+    localStorage.setItem('nl-funfact-custom', funFactIsCustom ? '1' : '0');
+    localStorage.setItem('nl-protip-custom', proTipIsCustom ? '1' : '0');
+    localStorage.setItem('nl-quote-custom', quoteIsCustom ? '1' : '0');
+}
+
+function restoreCuratedSelections() {
+    try {
+        const savedFun = localStorage.getItem('selectedFunFact');
+        if (savedFun && (funFactIsCustom || funFacts.includes(savedFun))) selectedFunFact = savedFun;
+    } catch (e) { /* ignore */ }
+    try {
+        const savedTip = localStorage.getItem('selectedProTip');
+        if (savedTip && (proTipIsCustom || proTips.includes(savedTip))) selectedProTip = savedTip;
+    } catch (e) { /* ignore */ }
+    try {
+        const savedQuote = localStorage.getItem('selectedQuote');
+        if (savedQuote && (quoteIsCustom || motivationalQuotes.includes(savedQuote))) selectedQuote = savedQuote;
+    } catch (e) { /* ignore */ }
+}
+
+function getCuratedCustomDraftKey(category) {
+    if (category === 'funFact') return 'nl-custom-funfact-draft';
+    if (category === 'proTip') return 'nl-custom-protip-draft';
+    if (category === 'quote') return 'nl-custom-quote-draft';
+    return '';
+}
+
+function getCuratedCustomLabel(category) {
+    if (category === 'funFact') return 'fun fact';
+    if (category === 'proTip') return 'pro tip';
+    return 'quote';
+}
+
+function buildCuratedModalCustomHTML(category) {
+    const label = getCuratedCustomLabel(category);
+    const inputId = `modal-custom-${category}-input`;
+    const applyId = `modal-custom-${category}-apply`;
+    const placeholder = category === 'quote'
+        ? 'Type your motivational quote here…'
+        : `Type your ${label} here…`;
+    return `
+      <details id="modal-custom-details" class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 overflow-hidden">
+        <summary class="px-4 py-3 text-sm font-semibold text-[#002B5C] dark:text-white cursor-pointer select-none list-none flex items-center gap-2">
+          <span>✏️ Write your own instead</span>
+        </summary>
+        <div class="px-4 pb-4 pt-1 border-t border-gray-200 dark:border-gray-700 space-y-3">
+          <textarea id="${inputId}" rows="3" placeholder="${placeholder}" class="${NL_MODAL_CUSTOM_INPUT_CLASS}"></textarea>
+          <button type="button" id="${applyId}" class="text-xs px-4 py-2 bg-[#F15A29] text-white rounded-full font-semibold hover:opacity-90">Use my ${label}</button>
+        </div>
+      </details>`;
+}
+
+function applyCuratedCustomSelection(category, text, modalApi) {
+    const value = String(text || '').trim();
+    if (!value) {
+        alert(`Please type a ${getCuratedCustomLabel(category)} first.`);
+        return false;
+    }
+    if (category === 'funFact') {
+        selectedFunFact = value;
+        funFactIsCustom = true;
+    } else if (category === 'proTip') {
+        selectedProTip = value;
+        proTipIsCustom = true;
+    } else if (category === 'quote') {
+        selectedQuote = value;
+        quoteIsCustom = true;
+    }
+    const draftKey = getCuratedCustomDraftKey(category);
+    if (draftKey) localStorage.setItem(draftKey, value);
+    persistCuratedSelections();
+    updatePreviews();
+    if (modalApi?.hideModal) modalApi.hideModal();
+    return true;
+}
+
+restoreCuratedSelections();
 
 // Update localStorage used arrays
 localStorage.setItem('usedFunFacts', JSON.stringify(usedFunFacts));
@@ -894,23 +1011,61 @@ function updatePreviews() {
     const proTipEl = document.getElementById('pro-tip-preview');
     const quoteEl = document.getElementById('quote-preview');
 
-    if (funFactEl) funFactEl.innerText = selectedFunFact || 'No fun fact selected';
-    if (proTipEl) proTipEl.innerText = selectedProTip || 'No pro tip selected';
-    if (quoteEl) quoteEl.innerText = selectedQuote || 'No quote selected';
+    if (funFactEl) {
+        const badge = isCustomCuratedSelection('funFact', selectedFunFact) ? nlCustomPreviewBadge() : '';
+        funFactEl.innerHTML = selectedFunFact
+            ? `${badge}${selectedFunFact}`
+            : nlCuratedEmptyPreviewHTML('fun fact');
+    }
+    if (proTipEl) {
+        const badge = isCustomCuratedSelection('proTip', selectedProTip) ? nlCustomPreviewBadge() : '';
+        proTipEl.innerHTML = selectedProTip
+            ? `${badge}${selectedProTip}`
+            : nlCuratedEmptyPreviewHTML('pro tip');
+    }
+    if (quoteEl) {
+        const badge = isCustomCuratedSelection('quote', selectedQuote) ? nlCustomPreviewBadge() : '';
+        quoteEl.innerHTML = selectedQuote
+            ? `${badge}${selectedQuote}`
+            : nlCuratedEmptyPreviewHTML('quote');
+    }
+    persistCuratedSelections();
     if (window.NlEntertainment && typeof window.NlEntertainment.updatePreviews === 'function') {
         window.NlEntertainment.updatePreviews();
     }
+    updateCuratedRowStatuses();
     updatePersonalCharMeter();
     updatePersonalMediaPreviews();
     updateCustomContentChoicesVisibility();
+    updateEngagementSectionSummary();
     updateNewsletterPreflightSummary();
+    if (typeof window.__nlSyncSetupPuzzleTypeCards === 'function') {
+        window.__nlSyncSetupPuzzleTypeCards();
+    }
+}
+
+function flashCuratedPreview(previewId) {
+    if (!previewId) return;
+    const el = document.getElementById(previewId);
+    if (!el) return;
+    el.classList.remove('nl-preview-flash');
+    void el.offsetWidth;
+    el.classList.add('nl-preview-flash');
+    window.setTimeout(() => el.classList.remove('nl-preview-flash'), 500);
 }
 
 // Regenerate random for a category
 function regenerateRandom(category) {
-    if (category === 'funFact') selectedFunFact = getRandomItem(funFacts, usedFunFacts);
-    else if (category === 'proTip') selectedProTip = getRandomItem(proTips, usedProTips);
-    else if (category === 'quote') selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+    if (category === 'funFact') {
+        selectedFunFact = getRandomItem(funFacts, usedFunFacts);
+        funFactIsCustom = false;
+    } else if (category === 'proTip') {
+        selectedProTip = getRandomItem(proTips, usedProTips);
+        proTipIsCustom = false;
+    } else if (category === 'quote') {
+        selectedQuote = getRandomItem(motivationalQuotes, usedQuotes);
+        quoteIsCustom = false;
+    }
     else if (window.NlEntertainment && typeof window.NlEntertainment.regenerateRandom === 'function') {
         window.NlEntertainment.regenerateRandom(category);
         return;
@@ -920,10 +1075,256 @@ function regenerateRandom(category) {
     localStorage.setItem('usedProTips', JSON.stringify(usedProTips));
     localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
 
+    const previewMap = { funFact: 'fun-fact-preview', proTip: 'pro-tip-preview', quote: 'quote-preview' };
     updatePreviews();
+    flashCuratedPreview(previewMap[category]);
 }
 
 const NL_CHOICE_MODAL_ID = 'newsletter-choice-modal';
+
+const NL_ENGAGEMENT_HUB_TABS = [
+    { key: 'fun', category: 'funFact', label: 'Fun Fact', icon: '🤓' },
+    { key: 'tip', category: 'proTip', label: 'Pro Tip', icon: '🏡' },
+    { key: 'quote', category: 'quote', label: 'Quote', icon: '💪' },
+    { key: 'dadjoke', category: 'dadJoke', label: 'Dad Joke', icon: '😄' },
+    { key: 'puzzle', category: 'puzzle', label: 'Brain Teaser', icon: '🧩' }
+];
+
+const NL_ENGAGEMENT_HUB_CATEGORIES = new Set(NL_ENGAGEMENT_HUB_TABS.map((t) => t.category));
+
+function isEngagementHubCategory(category) {
+    return NL_ENGAGEMENT_HUB_CATEGORIES.has(category);
+}
+
+function getEngagementHubTabByCategory(category) {
+    return NL_ENGAGEMENT_HUB_TABS.find((t) => t.category === category) || null;
+}
+
+function getCheckedEngagementHubTabs() {
+    return NL_ENGAGEMENT_HUB_TABS.filter((tab) => {
+        const cfg = NL_CUSTOM_CONTENT_BLOCKS[tab.key];
+        if (!cfg) return false;
+        return !!document.getElementById(cfg.checkboxId)?.checked;
+    });
+}
+
+function shouldKeepEngagementHubOpen(hubMode) {
+    return !!hubMode && getCheckedEngagementHubTabs().length >= 2;
+}
+
+function getCuratedSelectionText(category) {
+    if (category === 'funFact') return selectedFunFact;
+    if (category === 'proTip') return selectedProTip;
+    if (category === 'quote') return selectedQuote;
+    if (window.NlEntertainment && typeof window.NlEntertainment.getSelectionText === 'function') {
+        return window.NlEntertainment.getSelectionText(category);
+    }
+    return '';
+}
+
+function getCuratedPoolStats(category) {
+    if (category === 'funFact') {
+        return { total: funFacts.length, used: usedFunFacts.length, label: 'fun facts' };
+    }
+    if (category === 'proTip') {
+        return { total: proTips.length, used: usedProTips.length, label: 'pro tips' };
+    }
+    if (category === 'quote') {
+        return { total: motivationalQuotes.length, used: usedQuotes.length, label: 'quotes' };
+    }
+    if (window.NlEntertainment && typeof window.NlEntertainment.getPoolStats === 'function') {
+        return window.NlEntertainment.getPoolStats(category);
+    }
+    return { total: 0, used: 0, label: 'items' };
+}
+
+function getCuratedPickStatus(sectionKey) {
+    const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
+    if (!cfg) return 'empty';
+    if (window.NlEntertainment && typeof window.NlEntertainment.getPickStatus === 'function') {
+        const entStatus = window.NlEntertainment.getPickStatus(sectionKey);
+        if (entStatus) return entStatus;
+    }
+    const category = cfg.category;
+    const value = getCuratedSelectionText(category);
+    if (!value || /not selected/i.test(String(value))) return 'empty';
+    if (isCustomCuratedSelection(category, value)) return 'custom';
+    return 'library';
+}
+
+function getCuratedStatusLabel(status) {
+    if (status === 'custom') return '✏️ Your custom';
+    if (status === 'library') return '📚 Library pick';
+    if (status === 'random') return '🎲 Shuffled';
+    return 'Pick one';
+}
+
+function updateCuratedRowStatuses() {
+    Object.keys(NL_CUSTOM_CONTENT_BLOCKS).forEach((key) => {
+        const statusEl = document.querySelector(`[data-nl-status-for="${key}"]`);
+        if (!statusEl) return;
+        const cb = document.getElementById(NL_CUSTOM_CONTENT_BLOCKS[key].checkboxId);
+        if (!cb?.checked) {
+            statusEl.textContent = '';
+            return;
+        }
+        statusEl.textContent = getCuratedStatusLabel(getCuratedPickStatus(key));
+    });
+}
+
+function updateEngagementSectionSummary() {
+    const textEl = document.getElementById('nl-engagement-summary-text');
+    const shuffleAllBtn = document.getElementById('nl-shuffle-all-engagement');
+    const hubBtn = document.getElementById('nl-open-engagement-hub');
+    if (!textEl) return;
+
+    const checked = Object.entries(NL_CUSTOM_CONTENT_BLOCKS).filter(([key, cfg]) => {
+        return !!document.getElementById(cfg.checkboxId)?.checked;
+    });
+    const ready = checked.filter(([key]) => getCuratedPickStatus(key) !== 'empty');
+
+    if (!checked.length) {
+        textEl.textContent = 'No curated sections checked — fun facts, tips, and jokes live here.';
+        if (shuffleAllBtn) shuffleAllBtn.classList.add('hidden');
+        if (hubBtn) hubBtn.classList.add('hidden');
+        return;
+    }
+
+    const allReady = ready.length === checked.length;
+    textEl.innerHTML = allReady
+        ? `<strong class="text-[#00A89D]">${ready.length} of ${checked.length} picks ready</strong> — you're set for engagement content.`
+        : `<strong>${ready.length} of ${checked.length}</strong> curated sections have picks · finish the rest or hit Shuffle all.`;
+    if (shuffleAllBtn) shuffleAllBtn.classList.toggle('hidden', !checked.length);
+    if (hubBtn) hubBtn.classList.toggle('hidden', checked.length < 2);
+}
+
+function shuffleAllCheckedEngagement() {
+    let count = 0;
+    Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([key, cfg]) => {
+        if (!document.getElementById(cfg.checkboxId)?.checked) return;
+        regenerateRandom(cfg.category);
+        count += 1;
+    });
+    if (count && window.showToast) window.showToast(`Shuffled ${count} curated section${count === 1 ? '' : 's'}.`, 'success');
+}
+
+function openFirstCheckedEngagementHub() {
+    const first = getCheckedEngagementHubTabs()[0];
+    if (first) openNewsletterEngagementHub(first.key);
+}
+
+function getCuratedResetKey(category) {
+    const map = {
+        funFact: 'funFacts',
+        proTip: 'proTips',
+        quote: 'quotes',
+        dadJoke: 'dadJokes',
+        puzzle: 'puzzleAll'
+    };
+    return map[category] || '';
+}
+
+function renderEngagementModalToolbar(category, modal, hubMode) {
+    const m = modal || getNewsletterChoiceModal();
+    if (!m) return;
+    const toolbar = m.querySelector('#nl-choice-modal-toolbar');
+    if (!toolbar) return;
+
+    if (!isEngagementHubCategory(category)) {
+        toolbar.classList.add('hidden');
+        toolbar.innerHTML = '';
+        return;
+    }
+
+    const current = getCuratedSelectionText(category);
+    const stats = getCuratedPoolStats(category);
+    const remaining = Math.max(0, stats.total - stats.used);
+    const currentPreview = current
+        ? truncateDirectionPreview(current.replace(/<[^>]+>/g, ''), 110)
+        : 'Nothing picked yet — shuffle or choose from the list.';
+
+    toolbar.classList.remove('hidden');
+    toolbar.innerHTML = `
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="flex-1 min-w-[200px]">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 m-0 mb-1">Current pick</p>
+          <p class="text-sm text-gray-700 dark:text-gray-200 italic m-0 leading-snug">${currentPreview}</p>
+          ${stats.total ? `<p class="text-[11px] text-gray-500 m-0 mt-1.5">${stats.total} ${stats.label || 'items'} · ${remaining} fresh before repeats</p>` : ''}
+        </div>
+        <div class="flex flex-wrap gap-1.5 flex-shrink-0">
+          <button type="button" data-nl-modal-shuffle="${category}" class="text-xs px-3 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition"><i class="fas fa-dice mr-1"></i>Shuffle</button>
+          <button type="button" data-nl-modal-reset="${getCuratedResetKey(category)}" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-semibold hover:border-[#00A89D] hover:text-[#00A89D] transition">Start fresh</button>
+        </div>
+      </div>
+      ${shouldKeepEngagementHubOpen(hubMode) ? '<p class="text-[11px] text-[#00A89D] m-0 mt-2 font-medium"><i class="fas fa-info-circle mr-1"></i>Picks apply instantly — use tabs above to jump between sections without closing.</p>' : ''}`;
+
+    toolbar.querySelector('[data-nl-modal-shuffle]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        regenerateRandom(category);
+        renderEngagementModalToolbar(category, m, hubMode);
+        if (shouldKeepEngagementHubOpen(hubMode)) {
+            openModal(category, { hub: true, keepOpen: true });
+        }
+    });
+    toolbar.querySelector('[data-nl-modal-reset]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const resetKey = e.currentTarget.getAttribute('data-nl-modal-reset');
+        if (resetKey && typeof resetUsed === 'function') resetUsed(resetKey);
+        renderEngagementModalToolbar(category, m, hubMode);
+        if (shouldKeepEngagementHubOpen(hubMode)) {
+            openModal(category, { hub: true, keepOpen: true });
+        }
+    });
+}
+
+function renderNewsletterEngagementHubTabs(activeCategory, modal) {
+    const m = modal || getNewsletterChoiceModal();
+    if (!m) return;
+    const tabsHost = m.querySelector('#nl-choice-modal-tabs');
+    if (!tabsHost) return;
+
+    const checkedTabs = getCheckedEngagementHubTabs();
+    if (!isEngagementHubCategory(activeCategory) || checkedTabs.length < 2) {
+        tabsHost.classList.add('hidden');
+        tabsHost.innerHTML = '';
+        return;
+    }
+
+    tabsHost.classList.remove('hidden');
+    tabsHost.innerHTML = `
+        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 m-0 mb-2">Engagement picker</p>
+        <div class="flex flex-wrap gap-1.5" role="tablist" aria-label="Engagement content types">
+            ${checkedTabs.map((tab) => {
+                const active = tab.category === activeCategory;
+                const hasPick = getCuratedPickStatus(tab.key) !== 'empty';
+                const dot = hasPick ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-[#00A89D] ml-0.5 align-middle"></span>' : '';
+                return `<button type="button" role="tab" aria-selected="${active ? 'true' : 'false'}" data-nl-hub-tab="${tab.category}" class="text-xs sm:text-sm px-3 py-1.5 rounded-full border-2 font-semibold transition whitespace-nowrap inline-flex items-center gap-1 ${active ? 'border-[#00A89D] bg-[#00A89D]/15 text-[#002B5C] dark:text-white' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#00A89D]/50'}">${tab.icon} ${tab.label}${dot}</button>`;
+            }).join('')}
+        </div>`;
+
+    tabsHost.querySelectorAll('[data-nl-hub-tab]').forEach((btn) => {
+        if (btn.dataset.nlHubTabWired === '1') return;
+        btn.dataset.nlHubTabWired = '1';
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const cat = btn.getAttribute('data-nl-hub-tab');
+            if (!cat || cat === activeCategory) return;
+            openModal(cat, { hub: true, keepOpen: true });
+        });
+    });
+}
+
+function openNewsletterEngagementHub(sectionKey) {
+    const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
+    if (!cfg) return;
+    const cb = document.getElementById(cfg.checkboxId);
+    if (!cb?.checked) {
+        if (window.showToast) window.showToast(`Check ${cfg.shortLabel} in Sections first.`, 'info');
+        else alert(`Check ${cfg.shortLabel} in Sections to Include first.`);
+        return;
+    }
+    openModal(cfg.category, { hub: true });
+}
 
 function ensureNewsletterChoiceModal() {
     let modal = document.getElementById(NL_CHOICE_MODAL_ID);
@@ -942,6 +1343,8 @@ function ensureNewsletterChoiceModal() {
                 </div>
                 <button type="button" data-nl-choice-close class="text-white/80 hover:text-white text-4xl leading-none transition flex-shrink-0" aria-label="Close">&times;</button>
             </div>
+            <div id="nl-choice-modal-tabs" class="hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50"></div>
+            <div id="nl-choice-modal-toolbar" class="hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"></div>
             <div class="p-6 md:p-8">
                 <ul id="nl-choice-modal-list" class="space-y-4 max-h-[62vh] overflow-y-auto pr-1 list-none m-0 p-0"></ul>
             </div>
@@ -973,12 +1376,15 @@ function getNewsletterChoiceListEl(modal) {
         || (modal && modal.querySelector('#modal-list'));
 }
 
-function openModal(category) {
+function openModal(category, options) {
+    const opts = options || {};
     const modal = ensureNewsletterChoiceModal();
     if (!modal) return;
 
     const title = getNewsletterChoiceTitleEl(modal);
     const list = getNewsletterChoiceListEl(modal);
+    const hubMode = opts.hub !== false && isEngagementHubCategory(category);
+    const modalAlreadyOpen = !modal.classList.contains('hidden') && modal.getAttribute('aria-hidden') !== 'true';
 
     let data = [];
     let modalTitleText = '';
@@ -989,22 +1395,36 @@ function openModal(category) {
                 ensureModal: ensureNewsletterChoiceModal,
                 getTitleEl: getNewsletterChoiceTitleEl,
                 getListEl: getNewsletterChoiceListEl,
+                renderHubTabs: renderNewsletterEngagementHubTabs,
+                renderToolbar: renderEngagementModalToolbar,
+                hubMode,
+                shouldKeepOpen: () => shouldKeepEngagementHubOpen(hubMode),
                 showModal: (m) => {
-                    if (typeof window.openNamedModal === 'function') window.openNamedModal(m);
-                    else if (typeof window.openAppModal === 'function') window.openAppModal(m);
-                    else {
-                        m.classList.remove('hidden');
-                        m.classList.add('flex');
-                        m.style.display = 'flex';
-                        document.body.classList.add('modal-open');
+                    if (!opts.keepOpen || !modalAlreadyOpen) {
+                        if (typeof window.openNamedModal === 'function') window.openNamedModal(m);
+                        else if (typeof window.openAppModal === 'function') window.openAppModal(m);
+                        else {
+                            m.classList.remove('hidden');
+                            m.classList.add('flex');
+                            m.style.display = 'flex';
+                            document.body.classList.add('modal-open');
+                        }
                     }
                     m.setAttribute('aria-hidden', 'false');
+                    if (hubMode) {
+                        renderNewsletterEngagementHubTabs(category, m);
+                        renderEngagementModalToolbar(category, m, hubMode);
+                    }
                 },
-                hideModal: () => closeModal()
+                hideModal: () => closeModal(),
+                refreshModal: (cat) => openModal(cat, { hub: true, keepOpen: true })
             });
         }
         return;
     }
+
+    modal.querySelector('#modal-puzzle-type-bar')?.classList.add('hidden');
+    modal.querySelector('#modal-puzzle-filter-bar')?.classList.add('hidden');
 
     if (category === 'funFact') {
         modalTitleText = 'Choose a Fun Fact';
@@ -1020,24 +1440,46 @@ function openModal(category) {
         data = [];
     }
 
-    if (typeof window.openNamedModal === 'function') {
-        window.openNamedModal(modal);
-    } else if (typeof window.openAppModal === 'function') {
-        window.openAppModal(modal);
-    } else {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        modal.style.display = 'flex';
-        modal.style.pointerEvents = 'auto';
-        document.body.classList.add('modal-open');
+    if (!opts.keepOpen || !modalAlreadyOpen) {
+        if (typeof window.openNamedModal === 'function') {
+            window.openNamedModal(modal);
+        } else if (typeof window.openAppModal === 'function') {
+            window.openAppModal(modal);
+        } else {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.style.display = 'flex';
+            modal.style.pointerEvents = 'auto';
+            document.body.classList.add('modal-open');
+        }
     }
     modal.setAttribute('aria-hidden', 'false');
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
 
-    // Force title into the header (gradient bar) — use textContent + color guard for reliability
+    if (hubMode) {
+        renderNewsletterEngagementHubTabs(category, modal);
+        renderEngagementModalToolbar(category, modal, hubMode);
+    } else {
+        const tabsHost = modal.querySelector('#nl-choice-modal-tabs');
+        if (tabsHost) {
+            tabsHost.classList.add('hidden');
+            tabsHost.innerHTML = '';
+        }
+        const toolbar = modal.querySelector('#nl-choice-modal-toolbar');
+        if (toolbar) {
+            toolbar.classList.add('hidden');
+            toolbar.innerHTML = '';
+        }
+    }
+
+    const stayOpen = shouldKeepEngagementHubOpen(hubMode);
+
+    const hubTab = getEngagementHubTabByCategory(category);
     if (title) {
-        title.textContent = modalTitleText;
+        title.textContent = hubMode && hubTab
+            ? `Engagement Picker · ${hubTab.label}`
+            : modalTitleText;
         title.style.color = '#fff';
         title.style.setProperty('color', '#fff', 'important');
     }
@@ -1056,41 +1498,91 @@ function openModal(category) {
     if (list) {
         list.innerHTML = '';
 
-        // Quick "Pick Random" at top for convenience
         const randomLi = document.createElement('li');
-        randomLi.className = 'p-4 mb-2 bg-[#F15A29]/10 border border-[#F15A29]/30 rounded-2xl cursor-pointer hover:bg-[#F15A29]/20 transition-all text-[#F15A29] font-semibold flex items-center gap-3';
-        randomLi.innerHTML = `<i class="fas fa-dice"></i> <span>Pick a Random ${modalTitleText.replace('Choose a ', '')} for me</span>`;
+        randomLi.className = NL_MODAL_RANDOM_ROW_CLASS;
+        randomLi.innerHTML = `<i class="fas fa-dice text-xs"></i> <span>Pick a Random ${modalTitleText.replace('Choose a ', '')} for me</span>`;
         randomLi.addEventListener('click', () => {
             if (!data.length) return;
             const randomItem = data[Math.floor(Math.random() * data.length)];
-            if (category === 'funFact') selectedFunFact = randomItem;
-            else if (category === 'proTip') selectedProTip = randomItem;
-            else if (category === 'quote') selectedQuote = randomItem;
+            if (category === 'funFact') {
+                selectedFunFact = randomItem;
+                funFactIsCustom = false;
+            } else if (category === 'proTip') {
+                selectedProTip = randomItem;
+                proTipIsCustom = false;
+            } else if (category === 'quote') {
+                selectedQuote = randomItem;
+                quoteIsCustom = false;
+            }
             updatePreviews();
-            closeModal();
-            if (search) search.value = '';
+            if (stayOpen) {
+                openModal(category, { hub: true, keepOpen: true });
+            } else {
+                closeModal();
+                if (search) search.value = '';
+            }
         });
         list.appendChild(randomLi);
 
-        // Current selected for context
+        const customLi = document.createElement('li');
+        customLi.className = 'nl-modal-custom-row mb-2 list-none';
+        customLi.innerHTML = buildCuratedModalCustomHTML(category);
+        list.appendChild(customLi);
+
+        const customInput = modal.querySelector(`#modal-custom-${category}-input`);
+        const customApply = modal.querySelector(`#modal-custom-${category}-apply`);
+        const draftKey = getCuratedCustomDraftKey(category);
         let currentSelected = '';
         if (category === 'funFact') currentSelected = selectedFunFact;
         else if (category === 'proTip') currentSelected = selectedProTip;
         else if (category === 'quote') currentSelected = selectedQuote;
+        if (customInput) {
+            const draft = draftKey ? (localStorage.getItem(draftKey) || '') : '';
+            customInput.value = isCustomCuratedSelection(category, currentSelected) ? currentSelected : draft;
+        }
+        if (customApply) {
+            customApply.onclick = () => {
+                applyCuratedCustomSelection(category, customInput?.value, {
+                    hideModal: () => {
+                        if (stayOpen) {
+                            openModal(category, { hub: true, keepOpen: true });
+                        } else {
+                            closeModal();
+                            if (search) search.value = '';
+                        }
+                    }
+                });
+            };
+        }
+        const customDetails = modal.querySelector('#modal-custom-details');
+        if (customDetails && isCustomCuratedSelection(category, currentSelected)) {
+            customDetails.open = true;
+        }
 
         data.forEach(item => {
             const li = document.createElement('li');
-            const isCurrent = item === currentSelected;
+            const isCurrent = item === currentSelected && !isCustomCuratedSelection(category, currentSelected);
             li.className = `p-4 bg-white dark:bg-gray-800 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-gray-900 dark:text-gray-100 text-base border ${isCurrent ? 'border-[#00A89D] ring-1 ring-[#00A89D]/30' : 'border-gray-200 dark:border-gray-700 hover:border-[#00A89D]'} flex items-start gap-3`;
             li.innerHTML = `<i class="fas fa-quote-left text-[#00A89D] mt-0.5 flex-shrink-0"></i> <span class="flex-1">${item}</span> ${isCurrent ? '<span class="text-[10px] px-2 py-0.5 bg-[#00A89D]/10 text-[#00A89D] rounded-full self-start">current</span>' : ''}`;
 
             li.addEventListener('click', () => {
-                if (category === 'funFact') selectedFunFact = item;
-                else if (category === 'proTip') selectedProTip = item;
-                else if (category === 'quote') selectedQuote = item;
+                if (category === 'funFact') {
+                    selectedFunFact = item;
+                    funFactIsCustom = false;
+                } else if (category === 'proTip') {
+                    selectedProTip = item;
+                    proTipIsCustom = false;
+                } else if (category === 'quote') {
+                    selectedQuote = item;
+                    quoteIsCustom = false;
+                }
                 updatePreviews();
-                closeModal();
-                if (search) search.value = '';
+                if (stayOpen) {
+                    openModal(category, { hub: true, keepOpen: true });
+                } else {
+                    closeModal();
+                    if (search) search.value = '';
+                }
             });
 
             list.appendChild(li);
@@ -1098,12 +1590,12 @@ function openModal(category) {
     }
 
     if (search) {
+        if (!opts.keepOpen) search.value = '';
         search.placeholder = `Search ${modalTitleText.toLowerCase().replace('choose a ', '')}...`;
         search.oninput = () => {
             const filter = search.value.toLowerCase();
             Array.from(list.children).forEach((li, idx) => {
-                // keep the random pick always visible at top
-                if (idx === 0) return;
+                if (idx === 0 || li.classList.contains('nl-modal-custom-row')) return;
                 li.style.display = li.innerText.toLowerCase().includes(filter) ? '' : 'none';
             });
         };
@@ -1349,7 +1841,9 @@ const persistentFields = [
     'nl-personal-photo-size',
     'nl-personal-video',
     'nl-personal-video-size',
-    'nl-color-bundle'
+    'nl-color-bundle',
+    'nl-specific',
+    'nl-direction-market', 'nl-direction-industry', 'nl-direction-local', 'nl-direction-recipes'
 ];
 
 const NL_MEDIA_SIZE_DEFAULT = 100;
@@ -1673,9 +2167,9 @@ function updateCoreSectionDirectionUI() {
         if (badge) badge.classList.toggle('hidden', !directed);
 
         if (toggleLabel) {
-            if (!checked) toggleLabel.textContent = 'Add direction (optional)';
+            if (!checked) toggleLabel.textContent = 'Add direction or URL (optional)';
             else if (directed) toggleLabel.textContent = card.dataset.nlDirectionOpen === '1' ? 'Hide direction' : 'Edit direction ✓';
-            else toggleLabel.textContent = card.dataset.nlDirectionOpen === '1' ? 'Hide direction' : 'Add direction (optional)';
+            else toggleLabel.textContent = card.dataset.nlDirectionOpen === '1' ? 'Hide direction' : 'Add direction or URL (optional)';
         }
 
         if (input) {
@@ -1818,9 +2312,15 @@ document.addEventListener('DOMContentLoaded', () => {
     usedProTips = safeParseJSONArray('usedProTips');
     usedQuotes = safeParseJSONArray('usedQuotes');
 
-    selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
-    selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
-    selectedQuote = motivationalQuotes.includes(selectedQuote) ? selectedQuote : getRandomItem(motivationalQuotes, usedQuotes);
+    if (!funFactIsCustom) {
+        selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
+    }
+    if (!proTipIsCustom) {
+        selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
+    }
+    if (!quoteIsCustom) {
+        selectedQuote = motivationalQuotes.includes(selectedQuote) ? selectedQuote : getRandomItem(motivationalQuotes, usedQuotes);
+    }
 
     updatePreviews();
 
@@ -1866,17 +2366,6 @@ document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEac
         }
         if (Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)) {
             updateCustomContentChoicesVisibility();
-            const details = document.getElementById('nl-custom-content-details');
-            if (details) {
-                if (cb.checked) {
-                    details.open = true;
-                } else {
-                    const anyCurated = Object.values(NL_CUSTOM_CONTENT_BLOCKS).some(
-                        (cfg) => document.getElementById(cfg.checkboxId)?.checked
-                    );
-                    if (!anyCurated) details.open = false;
-                }
-            }
         }
     });
 });
@@ -1982,100 +2471,43 @@ const NL_CONTENT_SECTIONS = {
     }
 };
 
-/** Curated library blocks inside Custom Content Choices (mirrors section checkboxes). */
+/** Inline curated section rows in Sections to Include (mirrors engagement checkboxes). */
 const NL_CUSTOM_CONTENT_BLOCKS = {
-    fun: { checkboxId: 'nl-fun', blockId: 'nl-custom-section-fun', shortLabel: 'Fun Facts' },
-    tip: { checkboxId: 'nl-tip', blockId: 'nl-custom-section-tip', shortLabel: 'Pro Tip' },
-    quote: { checkboxId: 'nl-quote', blockId: 'nl-custom-section-quote', shortLabel: 'Quote' },
-    dadjoke: { checkboxId: 'nl-dadjoke', blockId: 'nl-custom-section-dadjoke', shortLabel: 'Dad Joke' },
-    puzzle: { checkboxId: 'nl-puzzle', blockId: 'brain-teaser-panel', shortLabel: 'Brain Teaser' }
+    fun: { checkboxId: 'nl-fun', rowId: 'nl-engagement-row-fun', category: 'funFact', previewId: 'fun-fact-preview', shortLabel: 'Fun Facts' },
+    tip: { checkboxId: 'nl-tip', rowId: 'nl-engagement-row-tip', category: 'proTip', previewId: 'pro-tip-preview', shortLabel: 'Pro Tip' },
+    quote: { checkboxId: 'nl-quote', rowId: 'nl-engagement-row-quote', category: 'quote', previewId: 'quote-preview', shortLabel: 'Quote' },
+    dadjoke: { checkboxId: 'nl-dadjoke', rowId: 'nl-engagement-row-dadjoke', category: 'dadJoke', previewId: 'dad-joke-preview', shortLabel: 'Dad Joke' },
+    puzzle: { checkboxId: 'nl-puzzle', rowId: 'nl-engagement-row-puzzle', category: 'puzzle', previewId: 'brain-teaser-preview', shortLabel: 'Brain Teaser' }
 };
 
 function scrollToNewsletterCustomContent(sectionKey) {
-    const details = document.getElementById('nl-custom-content-details');
-    if (details) details.open = true;
-    updateCustomContentChoicesVisibility();
+    openNewsletterEngagementHub(sectionKey);
+}
 
-    let targetId = null;
-    if (sectionKey && NL_CUSTOM_CONTENT_BLOCKS[sectionKey]) {
-        const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
-        const cb = document.getElementById(cfg.checkboxId);
-        if (cb?.checked) targetId = cfg.blockId;
-    }
-    if (!targetId) {
-        for (const cfg of Object.values(NL_CUSTOM_CONTENT_BLOCKS)) {
-            const cb = document.getElementById(cfg.checkboxId);
-            if (cb?.checked) {
-                targetId = cfg.blockId;
-                break;
-            }
-        }
-    }
-
-    if (!targetId) {
-        if (window.showToast) window.showToast('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser first.', 'info');
-        else alert('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser in Sections to Include first.');
-        return;
-    }
-
-    const el = document.getElementById(targetId);
-    if (!el) return;
-
-    window.setTimeout(() => {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        el.classList.add('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
-        window.setTimeout(() => {
-            el.classList.remove('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
-        }, 2200);
-    }, 120);
+function getCuratedPreviewSnippet(previewId, maxLen = 72) {
+    const el = document.getElementById(previewId);
+    if (!el) return '';
+    let text = (el.textContent || '').trim();
+    text = text.replace(/^your pick\s*/i, '').replace(/\s+/g, ' ');
+    if (!text || /not selected/i.test(text) || /no\s+\w+\s+selected/i.test(text)) return '';
+    return truncateDirectionPreview(text, maxLen);
 }
 
 function updateCustomContentChoicesVisibility() {
-    const activeLabels = [];
     Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([key, cfg]) => {
         const cb = document.getElementById(cfg.checkboxId);
-        const block = document.getElementById(cfg.blockId);
+        const row = document.getElementById(cfg.rowId);
         const show = !!cb?.checked;
-        if (block) block.classList.toggle('hidden', !show);
-        const inlineBtn = document.querySelector(`.nl-inline-customize-btn[data-nl-jump-custom="${key}"]`);
-        if (inlineBtn) inlineBtn.classList.toggle('hidden', !show);
-        if (show) activeLabels.push(cfg.shortLabel);
+        if (!row) return;
+        row.classList.toggle('border-[#00A89D]/50', show);
+        row.classList.toggle('ring-1', show);
+        row.classList.toggle('ring-[#00A89D]/25', show);
+        row.querySelectorAll('.nl-curated-row-actions, .nl-curated-preview-wrap').forEach((el) => {
+            el.classList.toggle('hidden', !show);
+        });
     });
-
-    const anyVisible = activeLabels.length > 0;
-    const emptyEl = document.getElementById('nl-custom-content-empty');
-    const bodyEl = document.getElementById('nl-custom-content-body');
-    const footerEl = document.getElementById('nl-custom-content-footer');
-    const introEl = document.getElementById('nl-custom-content-intro');
-    const summaryEl = document.getElementById('nl-custom-content-summary');
-    const countEl = document.getElementById('nl-custom-content-count');
-    const detailsEl = document.getElementById('nl-custom-content-details');
-
-    if (emptyEl) emptyEl.classList.toggle('hidden', anyVisible);
-    if (bodyEl) bodyEl.classList.toggle('hidden', !anyVisible);
-    if (footerEl) footerEl.classList.toggle('hidden', !anyVisible);
-
-    if (introEl) {
-        introEl.innerHTML = anyVisible
-            ? `Customize <strong>${activeLabels.join(', ')}</strong> — pick from the library, regenerate random, or write your own.`
-            : '';
-    }
-
-    if (summaryEl) {
-        summaryEl.textContent = anyVisible
-            ? `Custom Content Choices (${activeLabels.join(', ')})`
-            : 'Custom Content Choices';
-    }
-
-    if (countEl) {
-        countEl.textContent = anyVisible ? `${activeLabels.length} active` : '';
-        countEl.classList.toggle('hidden', !anyVisible);
-    }
-
-    if (detailsEl) {
-        detailsEl.classList.toggle('hidden', !anyVisible);
-        if (!anyVisible) detailsEl.open = false;
-    }
+    updateCuratedRowStatuses();
+    updateEngagementSectionSummary();
 }
 
 function wireCustomContentJumpControls() {
@@ -2083,13 +2515,38 @@ function wireCustomContentJumpControls() {
     if (sectionsCard && !sectionsCard._nlInlineCustomizeWired) {
         sectionsCard._nlInlineCustomizeWired = true;
         sectionsCard.addEventListener('click', (e) => {
+            const resetBtn = e.target.closest('[data-nl-reset-used]');
+            if (resetBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const key = resetBtn.getAttribute('data-nl-reset-used');
+                if (key && typeof resetUsed === 'function') resetUsed(key);
+                return;
+            }
+            const shuffleBtn = e.target.closest('[data-nl-shuffle]');
+            if (shuffleBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const cat = shuffleBtn.getAttribute('data-nl-shuffle');
+                if (cat && typeof regenerateRandom === 'function') regenerateRandom(cat);
+                return;
+            }
             const btn = e.target.closest('.nl-inline-customize-btn');
             if (!btn) return;
             e.preventDefault();
             e.stopPropagation();
-            scrollToNewsletterCustomContent(btn.getAttribute('data-nl-jump-custom'));
+            openNewsletterEngagementHub(btn.getAttribute('data-nl-jump-custom'));
         });
     }
+
+    document.getElementById('nl-shuffle-all-engagement')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        shuffleAllCheckedEngagement();
+    });
+    document.getElementById('nl-open-engagement-hub')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFirstCheckedEngagementHub();
+    });
 }
 
 function extractYouTubeVideoId(url) {
@@ -2350,11 +2807,31 @@ const LO_DISCLAIMER_BODY_TEXT =
     'All loans are subject to credit approval and property appraisal. Terms and conditions apply. ' +
     'Consult your tax or legal advisor for specific advice. Equal Housing Lender.';
 
+function getNewsletterOfficerName() {
+    const profile = getCentralProfile();
+    return (profile.name || document.getElementById('nl-name')?.value || 'Your Loan Officer').trim();
+}
+
+function getNewsletterOfficerEmail() {
+    const profile = getCentralProfile();
+    return (profile.email || profile.workEmail || document.getElementById('nl-email')?.value || '').trim();
+}
+
+function syncNewsletterContactFromProfile() {
+    const p = getCentralProfile();
+    const nameEl = document.getElementById('nl-name');
+    const emailEl = document.getElementById('nl-email');
+    if (nameEl && p.name) nameEl.value = String(p.name).trim();
+    if (emailEl && (p.email || p.workEmail)) {
+        emailEl.value = String(p.email || p.workEmail || '').trim();
+    }
+}
+
 function getLoFooterBrandingContext() {
     const profile = getCentralProfile();
     return {
-        name: (document.getElementById('nl-name')?.value || profile.name || 'Your Loan Officer').trim(),
-        email: (document.getElementById('nl-email')?.value || profile.email || profile.workEmail || '').trim(),
+        name: getNewsletterOfficerName() || 'Your Loan Officer',
+        email: getNewsletterOfficerEmail(),
         nmls: String(profile.nmls || '').trim(),
         phone: String(profile.phone || '').trim(),
         company: 'Ruoff Mortgage',
@@ -3302,6 +3779,28 @@ function updateNewsletterPreflightSummary() {
         ? chips.map((chip) => buildPreflightChipHtml(chip)).join('')
         : '<span class="text-xs text-gray-500">Check sections above to build your edition.</span>';
 
+    const curatedWrap = document.getElementById('nl-preflight-curated');
+    const curatedListEl = document.getElementById('nl-preflight-curated-list');
+    if (curatedWrap && curatedListEl) {
+        const curatedLines = [];
+        Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([key, cfg]) => {
+            if (!sel.contentSections[key]) return;
+            const snippet = getCuratedPreviewSnippet(cfg.previewId);
+            if (snippet) curatedLines.push({ label: cfg.shortLabel, snippet, sectionKey: key });
+        });
+        if (curatedLines.length) {
+            curatedWrap.classList.remove('hidden');
+            curatedListEl.innerHTML = curatedLines.map((line) => `
+                <div class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-3 text-sm p-3 rounded-xl bg-white/70 dark:bg-gray-800/60 border border-[#00A89D]/15">
+                  <button type="button" class="text-xs font-bold text-[#00A89D] whitespace-nowrap hover:underline text-left" data-nl-preflight-curated-open="${line.sectionKey}">${line.label} →</button>
+                  <span class="text-gray-600 dark:text-gray-300 italic flex-1 min-w-0">"${line.snippet}"</span>
+                </div>`).join('');
+        } else {
+            curatedWrap.classList.add('hidden');
+            curatedListEl.innerHTML = '';
+        }
+    }
+
     if (warningsEl) {
         if (warnings.length) {
             warningsEl.classList.remove('hidden');
@@ -3335,6 +3834,8 @@ function wireNewsletterLiveFeedback() {
         updatePersonalMediaPreviews();
         updateSpecificTopicsPlaceholder();
         updateCustomContentChoicesVisibility();
+        updateCuratedRowStatuses();
+        updateEngagementSectionSummary();
         updateNewsletterPreflightSummary();
     };
 
@@ -3348,6 +3849,12 @@ function wireNewsletterLiveFeedback() {
     if (preflight && !preflight.dataset.nlRemoveWired) {
         preflight.dataset.nlRemoveWired = '1';
         preflight.addEventListener('click', (e) => {
+            const curatedBtn = e.target.closest('[data-nl-preflight-curated-open]');
+            if (curatedBtn) {
+                e.preventDefault();
+                openNewsletterEngagementHub(curatedBtn.getAttribute('data-nl-preflight-curated-open'));
+                return;
+            }
             const btn = e.target.closest('[data-nl-preflight-remove]');
             if (!btn) return;
             e.preventDefault();
@@ -3382,12 +3889,34 @@ function validatePersonalUpdateForGeneration() {
     return false;
 }
 
+function escapeNewsletterSkeletonText(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function showNewsletterReviewHandoff() {
+    const panel = document.getElementById('nl-review-handoff');
+    if (!panel) return;
+    panel.classList.remove('hidden');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 async function generateNewsletter(feedback = '') {
     if (_nlGenerating) return;
     if (!feedback && !validatePersonalUpdateForGeneration()) {
         return;
     }
     _nlGenerating = true;
+
+    if (!feedback) {
+        syncNewsletterContactFromProfile();
+        if (typeof window.saveNewsletterPersonalHistory === 'function') {
+            window.saveNewsletterPersonalHistory();
+        }
+    }
 
     const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
     const displayTitle = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
@@ -3419,8 +3948,14 @@ async function generateNewsletter(feedback = '') {
     let html = '';
 
     // === FIRST NAME EXTRACTION (moved to top for safety) ===
-    const fullName = document.getElementById('nl-name').value || 'Your Loan Officer';
+    const fullName = getNewsletterOfficerName();
     const firstName = fullName.split(' ')[0].trim();
+
+    const selections = getNewsletterSelections();
+    const includedLabels = Object.entries(NL_CONTENT_SECTIONS)
+        .filter(([key]) => selections.contentSections[key])
+        .map(([, cfg]) => cfg.label);
+    const sectionsSummary = includedLabels.length ? includedLabels.join(', ') : '(no optional content sections selected)';
 
     // === SAVE ORIGINAL LOADING CONTENT (after force so we capture the clean base card) ===
     const loadingEl = document.getElementById('global-loading');
@@ -3433,7 +3968,7 @@ async function generateNewsletter(feedback = '') {
         <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
             <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border border-gray-200 dark:border-gray-700">
                 
-                <div class="text-center mb-8">
+                <div class="text-center mb-6">
                     <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
                     <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">
                         ${displayTitle}
@@ -3445,6 +3980,12 @@ async function generateNewsletter(feedback = '') {
                         Crafting your personalized, compliant edition with your voice + curated gems.
                     </p>
                 </div>
+                ${!feedback ? `
+                <div class="mb-6 p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 text-left">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-2">Filling in your issue structure</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mb-2">Sections you selected:</p>
+                    <p class="text-sm font-medium text-[#002B5C] dark:text-white m-0 leading-snug">${escapeNewsletterSkeletonText(sectionsSummary)}</p>
+                </div>` : ''}
 
                 <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
                     <h4 class="text-xl font-bold text-[#F15A29] mb-5 text-center">
@@ -3497,12 +4038,6 @@ async function generateNewsletter(feedback = '') {
     }
 
     try {
-        const selections = getNewsletterSelections();
-        const includedLabels = Object.entries(NL_CONTENT_SECTIONS)
-            .filter(([key]) => selections.contentSections[key])
-            .map(([, cfg]) => cfg.label);
-        const sectionsSummary = includedLabels.length ? includedLabels.join(', ') : '(no optional content sections selected)';
-
         const personalPhotoUrl = selections.includePhoto
             ? (document.getElementById('nl-personal-photo')?.value.trim() || '')
             : '';
@@ -3952,13 +4487,16 @@ if (postSelections?.includeReferral) {
 
             if (!feedback) {
                 window._nlNextStepsId = `nl_${Date.now().toString(36)}`;
+                showNewsletterReviewHandoff();
             }
         }
 
         const output = document.getElementById('newsletter-output');
         if (output) {
             output.classList.remove('hidden');
-            output.scrollIntoView({ behavior: 'smooth' });
+            if (feedback) {
+                output.scrollIntoView({ behavior: 'smooth' });
+            }
             // Add a visible Clear button (premium pill style) so user can discard the persisted last version
             if (!output.querySelector('.nl-clear-btn')) {
               const clr = document.createElement('button');
@@ -4148,7 +4686,48 @@ function copyForOutlook() {
   // =====================================================
   // PUBLIC API EXPOSURE (for onclick handlers and cross-feature calls)
   // =====================================================
+  function reloadNewsletterPersistedValues() {
+    persistentFields.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const saved = localStorage.getItem(id);
+      if (saved === null) return;
+      if (el.type === 'checkbox') {
+        el.checked = saved === 'true' || saved === '1';
+      } else {
+        el.value = saved;
+      }
+    });
+
+    const savedSections = safeParseJSONArray('nl-sections');
+    if (savedSections.length) {
+      document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
+        if (!cb.id || !cb.id.startsWith('nl-')) return;
+        if (cb.id === 'nl-include-referral' && !savedSections.includes(cb.id)) {
+          cb.checked = true;
+          return;
+        }
+        cb.checked = savedSections.includes(cb.id);
+      });
+    }
+
+    const personalCb = document.getElementById('nl-personal');
+    const personalFields = document.getElementById('personal-fields');
+    if (personalCb && personalFields) personalFields.classList.toggle('hidden', !personalCb.checked);
+    const blogCb = document.getElementById('nl-include-blog');
+    const blogFields = document.getElementById('blog-fields');
+    if (blogCb && blogFields) blogFields.classList.toggle('hidden', !blogCb.checked);
+
+    if (typeof updateCustomContentChoicesVisibility === 'function') updateCustomContentChoicesVisibility();
+    if (typeof updateCoreSectionDirectionUI === 'function') updateCoreSectionDirectionUI();
+    if (typeof updateNewsletterPreflightSummary === 'function') updateNewsletterPreflightSummary();
+  }
+
   window.generateNewsletter = generateNewsletter;
+  window.updateNewsletterPreflightSummary = updateNewsletterPreflightSummary;
+  window.updatePersonalMediaPreviews = updatePersonalMediaPreviews;
+  window.reloadNewsletterPersistedValues = reloadNewsletterPersistedValues;
+  window.NL_PERSISTENT_FIELD_IDS = persistentFields.slice();
   window.refreshNewsletterColorScheme = refreshNewsletterColorScheme;
   window.downloadNewsletterHTML = downloadNewsletterHTML;
   window.copyForOutlook = copyForOutlook;
@@ -4424,30 +5003,81 @@ function copyForOutlook() {
     };
   }
 
+  function setNewsletterFieldIfEmpty(id, value, options) {
+    const opts = options || {};
+    const v = String(value || '').trim();
+    if (!v) return false;
+    const el = document.getElementById(id);
+    if (!el) return false;
+    const current = String(el.value || '').trim();
+    const emptyValues = Array.isArray(opts.treatAsEmpty) ? opts.treatAsEmpty.map((x) => String(x).trim()) : [];
+    const isEmpty = !current || emptyValues.includes(current);
+    if (!isEmpty && !opts.force) return false;
+    el.value = v;
+    if (opts.dispatch !== false) {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    return true;
+  }
+
+  function mapProfileToneToNewsletterTone(profileTone) {
+    const t = String(profileTone || '').toLowerCase();
+    if (!t) return '';
+    if (t.includes('witty') || t.includes('fun')) return 'fun-playful';
+    if (t.includes('casual') || t.includes('friend')) return 'casual-friendly';
+    if (t.includes('straightforward') || t.includes('helpful')) return 'conversational';
+    if (t.includes('local') || t.includes('community') || t.includes('neighbor')) return 'local-neighbor';
+    if (t.includes('professional') || t.includes('approachable') || t.includes('warm')) return 'warm-professional';
+    return '';
+  }
+
+  function mapProfileAudience(profile) {
+    const focus = String(profile.partnerFocus || '').toLowerCase();
+    const partners = Array.isArray(profile.partnerTypes) ? profile.partnerTypes.join(' ').toLowerCase() : '';
+    const haystack = `${focus} ${partners}`;
+    if (/realtor|agent|partner|referral/.test(haystack)) return 'partners';
+    if (/past client|former client|repeat/.test(haystack)) return 'past';
+    if (/sphere|soi|friends|family/.test(haystack)) return 'sphere';
+    return '';
+  }
+
   function syncNewsletterFromProfile() {
     try {
       const p = getCentralProfile();
-      const nameEl = document.getElementById('nl-name');
-      const emailEl = document.getElementById('nl-email');
-      const locEl = document.getElementById('nl-location');
-      if (nameEl && p.name && !nameEl.value) nameEl.value = p.name;
-      if (emailEl && (p.email || p.workEmail) && !emailEl.value) emailEl.value = p.email || p.workEmail || '';
-      if (locEl && (p.localArea || p.market) && (!locEl.value || locEl.value === 'Fort Wayne, Indiana')) {
-        locEl.value = p.localArea || p.market || locEl.value;
-      }
-      const blogUrlEl = document.getElementById('nl-blog-url');
-      const profileBlog = (p.blogPageUrl || p.blogUrl || '').trim();
-      if (blogUrlEl && profileBlog && !blogUrlEl.value.trim()) {
-        blogUrlEl.value = profileBlog;
-      }
-      // Silent profile sync — no toast to avoid corner popups on load
+      syncNewsletterContactFromProfile();
 
+      const market = (p.localArea || p.market || p.location || '').trim();
+      setNewsletterFieldIfEmpty('nl-location', market, { treatAsEmpty: ['Fort Wayne, Indiana'] });
+
+      const mappedTone = mapProfileToneToNewsletterTone(p.tone);
+      if (mappedTone) setNewsletterFieldIfEmpty('nl-tone', mappedTone);
+
+      const mappedAudience = mapProfileAudience(p);
+      if (mappedAudience) setNewsletterFieldIfEmpty('nl-audience', mappedAudience);
+
+      setNewsletterFieldIfEmpty('nl-blog-url', p.blogPageUrl || p.blogUrl);
+
+      const notes = (p.contentNotes || '').trim();
+      if (notes) setNewsletterFieldIfEmpty('nl-specific', notes);
+
+      const colorEl = document.getElementById('nl-color-bundle');
+      const savedColor = localStorage.getItem('nl-color-bundle');
+      if (colorEl && p.newsletterColorBundle && !savedColor) {
+        colorEl.value = p.newsletterColorBundle;
+        colorEl.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      if (typeof window.__nlRefreshWizardCuratedPreviews === 'function') {
+        try { window.__nlRefreshWizardCuratedPreviews(); } catch (e) {}
+      }
     } catch (e) {
       console.warn('[newsletter] profile sync failed', e);
     }
   }
 
   function initNewsletterGenerator() {
+    try { injectEngagementPolishStyles(); } catch (e) {}
     try { ensureNewsletterChoiceModal(); } catch (e) {}
     if (typeof window.restoreNewsletterModals === 'function') {
       try { window.restoreNewsletterModals(); } catch (e) {}
@@ -4459,10 +5089,19 @@ function copyForOutlook() {
     try { wireNewsletterFeedbackFocusGuard(); } catch (e) {}
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
+    setTimeout(() => {
+      if (typeof window.initNewsletterSetupForm === 'function') {
+        try { window.initNewsletterSetupForm(); } catch (e) {}
+      }
+    }, 120);
 
     // Initial profile sync (non-destructive)
     setTimeout(() => {
+      if (typeof syncNewsletterContactFromProfile === 'function') syncNewsletterContactFromProfile();
       if (typeof syncNewsletterFromProfile === 'function') syncNewsletterFromProfile();
+      if (typeof window.initNewsletterSetupForm === 'function') {
+        try { window.initNewsletterSetupForm(); } catch (e) {}
+      }
     }, 50);
 
     // Ensure conditional fields (personal / blog) show/hide work
@@ -4494,8 +5133,16 @@ function copyForOutlook() {
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
+  window.syncNewsletterContactFromProfile = syncNewsletterContactFromProfile;
+  window.showNewsletterReviewHandoff = showNewsletterReviewHandoff;
   window.updateCustomContentChoicesVisibility = updateCustomContentChoicesVisibility;
   window.scrollToNewsletterCustomContent = scrollToNewsletterCustomContent;
+  window.openNewsletterEngagementHub = openNewsletterEngagementHub;
+  window.renderNewsletterEngagementHubTabs = renderNewsletterEngagementHubTabs;
+  window.renderEngagementModalToolbar = renderEngagementModalToolbar;
+  window.getEngagementHubTabByCategory = getEngagementHubTabByCategory;
+  window.shuffleAllCheckedEngagement = shuffleAllCheckedEngagement;
+  window.flashCuratedPreview = flashCuratedPreview;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initNewsletterGenerator);

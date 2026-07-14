@@ -217,6 +217,36 @@
       </div>`;
   }
 
+  /** Mini newsletter card mockup — used on wizard step 2 for live color preview. */
+  function renderBundleMiniPreview(container, bundleId, options) {
+    if (!container) return;
+    const opts = options || {};
+    const bundle = getBundle(bundleId || getActiveBundleId());
+    const showLabel = opts.showLabel !== false;
+    const desc = bundle.description || '';
+    container.innerHTML = `
+      <div class="flex flex-col items-center w-full">
+      <div class="nl-color-mini-preview w-full max-w-[200px] mx-auto rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden shadow-sm bg-white dark:bg-gray-900" title="${bundle.label}">
+        <div class="h-2.5" style="background: linear-gradient(90deg, ${bundle.primary}, ${bundle.secondary})"></div>
+        <div class="p-2.5">
+          <div class="text-[9px] font-bold uppercase tracking-wide mb-1.5 truncate" style="color:${bundle.secondary}">Your Newsletter</div>
+          <div class="space-y-1 mb-2">
+            <div class="h-1 rounded-full bg-gray-200 dark:bg-gray-700" style="width:92%"></div>
+            <div class="h-1 rounded-full bg-gray-200 dark:bg-gray-700" style="width:76%"></div>
+            <div class="h-1 rounded-full" style="width:58%;background:${bundle.primary}33"></div>
+          </div>
+          <div class="pl-1.5 py-1 rounded-r" style="border-left:3px solid ${bundle.primary};background:${bundle.primary}12">
+            <div class="text-[8px] font-semibold truncate" style="color:${bundle.secondary}">Section accent</div>
+            <div class="h-0.5 rounded-full bg-gray-200 dark:bg-gray-700 mt-1" style="width:70%"></div>
+          </div>
+          <div class="mt-2 inline-block text-[8px] font-semibold px-2 py-0.5 rounded-full text-white" style="background:${bundle.primary}">CTA button</div>
+          ${showLabel ? `<p class="text-[9px] text-gray-500 dark:text-gray-400 mt-2 mb-0 truncate">${bundle.label}</p>` : ''}
+        </div>
+      </div>
+      ${desc && opts.showDescription ? `<p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 mb-0 max-w-[200px] text-center leading-snug">${String(desc).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')}</p>` : ''}
+      </div>`;
+  }
+
   function populateBundleSelect(selectEl, selectedId, options) {
     if (!selectEl) return;
     const opts = options || {};
@@ -256,17 +286,26 @@
   }
 
   function wireNewsletterBundlePicker() {
-    const select = document.getElementById('nl-color-bundle');
+    const select = document.getElementById('nl-color-bundle-output');
     const preview = document.getElementById('nl-color-bundle-preview');
     if (!select || select.dataset.nlBundleWired === '1') return;
     select.dataset.nlBundleWired = '1';
     const saved = localStorage.getItem('nl-color-bundle') || '';
     populateBundleSelect(select, saved, { includeProfileDefault: true });
     const refresh = () => {
-      renderBundlePreview(preview, getActiveBundleId());
+      if (preview && typeof renderBundleMiniPreview === 'function') {
+        renderBundleMiniPreview(preview, getActiveBundleId(), { showDescription: false, showLabel: true });
+      } else {
+        renderBundlePreview(preview, getActiveBundleId());
+      }
     };
     select.addEventListener('change', () => {
       try { localStorage.setItem('nl-color-bundle', select.value); } catch (e) {}
+      const setup = document.getElementById('nl-color-bundle');
+      if (setup && setup.value !== select.value) {
+        setup.value = select.value;
+        setup.dispatchEvent(new Event('change', { bubbles: true }));
+      }
       refresh();
       if (typeof window.refreshNewsletterColorScheme === 'function') {
         window.refreshNewsletterColorScheme();
@@ -308,6 +347,7 @@
     ensureCtaButtonTextWhite,
     ensureDisclaimerReadable,
     renderBundlePreview,
+    renderBundleMiniPreview,
     populateBundleSelect,
     wireProfileBundlePicker,
     wireNewsletterBundlePicker,

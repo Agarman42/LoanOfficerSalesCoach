@@ -224,6 +224,10 @@
       translationFavoriteLanguages: asArray(p.translationFavoriteLanguages).length
         ? asArray(p.translationFavoriteLanguages)
         : ['es', 'vi', 'zh'],
+      bioBuilderDraft: p.bioBuilderDraft && typeof p.bioBuilderDraft === 'object' ? p.bioBuilderDraft : {},
+      professionalBio: (p.professionalBio || '').trim(),
+      professionalBioMeta: p.professionalBioMeta && typeof p.professionalBioMeta === 'object' ? p.professionalBioMeta : null,
+      bioHistory: Array.isArray(p.bioHistory) ? p.bioHistory.slice(0, 8) : [],
       lastUpdated: p.lastUpdated || ''
     };
   }
@@ -333,6 +337,8 @@
     if (p.blogPageUrl) lines.push(`Blog page: ${p.blogPageUrl}`);
     if (p.linkedInUrl) lines.push(`LinkedIn: ${p.linkedInUrl}`);
     if (p.companyWebsite) lines.push(`Company website: ${p.companyWebsite}`);
+    if (p.years) lines.push(`Years in business: ${p.years}`);
+    if (p.professionalBio) lines.push(`Professional bio: ${p.professionalBio}`);
     return lines.length
       ? lines.join('. ') + '.'
       : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
@@ -388,6 +394,22 @@
       translationFavoriteLanguages: Array.from(document.querySelectorAll('.profile-translation-fav:checked')).map((c) => c.value),
       lastUpdated: new Date().toISOString()
     };
+  }
+
+  function patchUserProfile(partial, opts) {
+    const options = opts || {};
+    const merged = normalizeProfile({ ...readRawProfile(), ...partial, lastUpdated: new Date().toISOString() });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
+    if (!options.silent) refreshProfileUI();
+    if (options.showFeedback) {
+      const msg = options.feedbackMessage || 'Profile updated.';
+      if (typeof window.showToast === 'function') {
+        window.showToast(msg);
+      }
+    }
+    return merged;
   }
 
   function persistProfile(profile, showFeedback, closeAfter) {
@@ -1000,6 +1022,8 @@
   window.getUserProfile = function getUserProfile() {
     return normalizeProfile(readRawProfile());
   };
+
+  window.patchUserProfile = patchUserProfile;
 
   window.getProfileCompleteness = getProfileCompleteness;
   window.buildProfileAiContext = buildAiContext;

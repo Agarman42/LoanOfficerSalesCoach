@@ -36,13 +36,20 @@
    * In this mode we can rely on a server-side XAI_API_KEY in the proxy and
    * should NOT prompt the end user for their own key.
    */
+  function isLocalDevHost() {
+    if (typeof window === 'undefined') return false;
+    const host = (window.location && window.location.hostname) || '';
+    if (!host) return false;
+    return host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host.endsWith('.local');
+  }
+
   function isProductionHosted() {
     if (typeof window !== 'undefined' && window.FORCE_HOSTED_MODE === true) return true;
     if (typeof window === 'undefined') return false;
     const host = (window.location && window.location.hostname) || '';
     if (!host) return false;
     // Local dev / self-hosted dev cases
-    if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host.endsWith('.local')) return false;
+    if (isLocalDevHost()) return false;
     // Anything else (your Render URL, custom domain, Netlify, etc.) = hosted production
     return true;
   }
@@ -111,6 +118,15 @@
    * In production hosted mode (non-localhost proxy), we skip prompting
    * and let the server-side proxy use its own XAI_API_KEY env var.
    */
+  function isValidGrokApiKey(key) {
+    if (!key || typeof key !== 'string') return false;
+    const k = key.trim();
+    if (!k.startsWith('xai-')) return false;
+    if (/yourkey|placeholder|example|xxx/i.test(k)) return false;
+    if (k.length < 24) return false;
+    return true;
+  }
+
   function ensureApiKey() {
     let key = getGrokApiKey();
     if (!key) {
@@ -134,24 +150,43 @@
    * @param {string|object} promptOrMessages
    * @param {object} [options]
    */
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function parseRetryAfterMs(response) {
+    const header = response.headers.get('Retry-After');
+    if (!header) return null;
+    const seconds = parseInt(header, 10);
+    if (!Number.isNaN(seconds) && seconds > 0) return seconds * 1000;
+    const dateMs = Date.parse(header);
+    if (!Number.isNaN(dateMs)) return Math.max(0, dateMs - Date.now());
+    return null;
+  }
+
   async function callGrokAPI(promptOrMessages, options = {}) {
-    console.log('[Grok API] Using PROXY_URL:', getProxyUrl());
-    const apiKey = ensureApiKey();
-
-    // In hosted mode we intentionally allow apiKey to be null here.
-    // The proxy will use its own server-side key (XAI_API_KEY or GROK_API_KEY).
-    // We only error early for non-hosted cases.
-    if (!apiKey && !isProductionHosted()) {
-      throw new Error('No Grok API key available. AI features are disabled until a valid key is provided.');
-    }
-
     const {
       temperature = 0.8,
       max_tokens = 1400,
       model = DEFAULT_MODEL,
       messages: messagesOverride,
-      timeoutMs = 180000
+      timeoutMs = 180000,
+      skipKeyPrompt = false,
+      signal: externalSignal = null,
+      maxRetries = 3,
+      retryOn429 = true,
+      onRetry = null
     } = options;
+
+    console.log('[Grok API] Request →', getProxyUrl(), { model, max_tokens, timeoutMs });
+
+    const apiKey = skipKeyPrompt ? getGrokApiKey() : ensureApiKey();
+
+    // In hosted mode (or local proxy with .env key) we allow apiKey to be null.
+    // The proxy will use its own server-side key (XAI_API_KEY or GROK_API_KEY).
+    if (!apiKey && !isProductionHosted() && !isLocalDevHost()) {
+      throw new Error('No Grok API key available. AI features are disabled until a valid key is provided.');
+    }
 
     let messages;
     if (messagesOverride && Array.isArray(messagesOverride)) {
@@ -171,57 +206,91 @@
       max_tokens
     };
 
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    const maxAttempts = retryOn429 ? maxRetries + 1 : 1;
+
     try {
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-
-      // Only send the client key if we actually have one.
-      // In hosted production mode the proxy falls back to its own server env key.
-      if (apiKey) {
-        headers['Authorization'] = `Bearer ${apiKey}`;
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-      let response;
-      try {
-        response = await fetch(getProxyUrl(), {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        });
-      } finally {
-        clearTimeout(timeoutId);
-      }
-
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => '(no response body)');
-        console.error('[Grok API] HTTP error', response.status, errorText);
-
-        if (response.status === 401 || response.status === 403) {
-          if (isProductionHosted()) {
-            // Server-side key is missing or invalid on the hosted proxy
-            throw new Error('The hosted API service is not configured with a key. Please contact the site owner.');
-          }
-          // Bad client key in local/dev mode
-          localStorage.removeItem(STORAGE_KEY);
-          throw new Error('Invalid or expired Grok API key. Please refresh and re-enter your key.');
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (externalSignal?.aborted) {
+          throw new DOMException('Aborted', 'AbortError');
         }
 
-        throw new Error(`API request failed (${response.status}): ${errorText}`);
+        const controller = new AbortController();
+        const onExternalAbort = () => controller.abort();
+        if (externalSignal) {
+          if (externalSignal.aborted) controller.abort();
+          else externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+        }
+        const timeoutId = setTimeout(() => {
+          console.warn('[Grok API] Aborting — timeout', timeoutMs, 'ms');
+          controller.abort();
+        }, timeoutMs);
+
+        let response;
+        try {
+          response = await fetch(getProxyUrl(), {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+        } finally {
+          clearTimeout(timeoutId);
+          if (externalSignal) externalSignal.removeEventListener('abort', onExternalAbort);
+        }
+
+        if (response.status === 429 && attempt < maxAttempts) {
+          const errorText = await response.text().catch(() => '');
+          const retryAfterMs = parseRetryAfterMs(response);
+          const delayMs = Math.min(retryAfterMs || 2000 * Math.pow(2, attempt - 1), 30000);
+          console.warn('[Grok API] 429 rate limit — retry', attempt, 'of', maxRetries, 'in', delayMs, 'ms', errorText);
+          if (typeof onRetry === 'function') {
+            onRetry({ attempt, maxRetries, delayMs });
+          }
+          await sleep(delayMs);
+          continue;
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => '(no response body)');
+          console.error('[Grok API] HTTP error', response.status, errorText);
+
+          const isBadKey =
+            response.status === 401 ||
+            response.status === 403 ||
+            (response.status === 400 && /api key|incorrect api key|invalid.*key/i.test(errorText));
+
+          if (isBadKey) {
+            if (isProductionHosted()) {
+              throw new Error('The hosted API service is not configured with a valid key. Please contact the site owner.');
+            }
+            localStorage.removeItem(STORAGE_KEY);
+            throw new Error('Invalid Grok API key. Click API Key in the header and paste a valid xai- key from console.x.ai.');
+          }
+
+          if (response.status === 429) {
+            throw new Error('xAI is temporarily at capacity (rate limit). Wait 30–60 seconds, then try again.');
+          }
+
+          throw new Error(`API request failed (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content?.trim();
+
+        if (!content) {
+          throw new Error('Empty response from Grok API');
+        }
+
+        return content;
       }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content?.trim();
-
-      if (!content) {
-        throw new Error('Empty response from Grok API');
-      }
-
-      return content;
     } catch (err) {
       console.error('[Grok API] callGrokAPI failed to ' + getProxyUrl() + ':', err);
       if (err && err.name === 'AbortError') {
@@ -244,7 +313,9 @@
   window.setGrokApiKey = setGrokApiKey;
   window.callGrokAPI = callGrokAPI;
   window.ensureGrokApiKey = ensureApiKey;
+  window.isValidGrokApiKey = isValidGrokApiKey;
   window.isProductionHosted = isProductionHosted;
+  window.isLocalDevHost = isLocalDevHost;
 
   // Optional helper for debugging / settings UI later
   window.clearGrokApiKey = () => {
