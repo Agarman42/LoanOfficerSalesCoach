@@ -652,6 +652,7 @@
     updatePrimaryBioStrip();
     updateQualityChecklist();
     updateDestinationPanel();
+    updateBioYearsHint();
   }
 
   function hobbiesTextFromProfile(p) {
@@ -684,6 +685,7 @@
     }
 
     seedBioFieldsFromProfile(p);
+    updateBioYearsHint();
 
     restoreSavedBioOutput();
     renderDestinationCards();
@@ -736,9 +738,34 @@
     }
   }
 
+  function experienceYearsForPrompt(raw) {
+    const text = String(raw || '').trim();
+    if (!text) return 'not specified';
+    if (typeof window.resolveExperienceYears === 'function') {
+      const r = window.resolveExperienceYears(text);
+      return r.phrase || text;
+    }
+    return text;
+  }
+
+  function updateBioYearsHint() {
+    const input = document.getElementById('bio-years');
+    const hint = document.getElementById('bio-years-hint');
+    if (!input || !hint || typeof window.resolveExperienceYears !== 'function') return;
+    const r = window.resolveExperienceYears(input.value);
+    if (r.hint) {
+      hint.textContent = r.hint;
+      hint.classList.remove('hidden');
+    } else {
+      hint.textContent = '';
+      hint.classList.add('hidden');
+    }
+  }
+
   function buildPrompt(feedback, previousBio) {
     const p = getCentralProfile();
     const draft = collectDraftFromForm();
+    const yearsLine = experienceYearsForPrompt(draft.yearsConfirm || p.years);
     const dest = getSelectedDestination();
     const tone = draft.toneOverride || p.tone || 'Warm, professional, and authentic';
     const profileCtx =
@@ -768,7 +795,7 @@ LOAN OFFICER PROFILE:
 ${profileCtx}
 
 STORY INPUTS (use these specifics — this is what makes the bio authentic):
-- Years in business: ${draft.yearsConfirm || p.years || 'not specified'}
+- Years in business: ${yearsLine}
 - What they love most about helping homeowners: ${draft.lovesMost || 'not specified'}
 - Customer service approach: ${[...(draft.serviceApproach || []), draft.serviceApproachNotes].filter(Boolean).join('; ') || 'not specified'}
 - Who they help most: ${[...(draft.whoYouHelp || []), draft.whoYouHelpNotes].filter(Boolean).join('; ') || 'not specified'}
@@ -1403,7 +1430,8 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
     const root = document.getElementById('bio-creator');
     if (!root) return;
 
-    root.addEventListener('input', () => {
+    root.addEventListener('input', (e) => {
+      if (e.target?.id === 'bio-years') updateBioYearsHint();
       updateQualityChecklist();
       scheduleDraftSave();
     });

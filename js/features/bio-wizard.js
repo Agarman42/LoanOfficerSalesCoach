@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'bioWizardLastStep';
-  const WIZARD_DOM_VERSION = '2';
+  const WIZARD_DOM_VERSION = '3';
   const LOVES_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -149,7 +149,12 @@
     setText('bio-wizard-profile-phone', p.phone);
     setText('bio-wizard-profile-nmls', p.nmls);
     setText('bio-wizard-profile-market', p.location);
-    setText('bio-wizard-profile-years', p.years);
+    setText(
+      'bio-wizard-profile-years',
+      typeof window.formatExperienceYearsDisplay === 'function'
+        ? window.formatExperienceYearsDisplay(p.years)
+        : p.years
+    );
     setText('bio-wizard-profile-team', p.team);
     setText('bio-wizard-profile-tone', p.tone);
     setText('bio-wizard-profile-hobbies', hobbiesTextFromProfile(p));
@@ -161,6 +166,20 @@
 
     const warn = $('bio-wizard-profile-warn');
     if (warn) warn.classList.toggle('hidden', !!(p.name && p.location));
+  }
+
+  function updateWizardYearsHint() {
+    const input = $('bio-wizard-years');
+    const hint = $('bio-wizard-years-hint');
+    if (!input || !hint || typeof window.resolveExperienceYears !== 'function') return;
+    const r = window.resolveExperienceYears(input.value);
+    if (r.hint) {
+      hint.textContent = r.hint;
+      hint.classList.remove('hidden');
+    } else {
+      hint.textContent = '';
+      hint.classList.add('hidden');
+    }
   }
 
   function updatePersonalStepHints() {
@@ -266,6 +285,7 @@
 
     renderStepNav();
     if (currentStep === 1) updateProfileCard();
+    if (currentStep === 2) updateWizardYearsHint();
     if (currentStep === 4) updatePersonalStepHints();
     if (currentStep === 5) updateDestSummary();
 
@@ -395,7 +415,9 @@
           <div data-bio-wizard-step="2" class="hidden">
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">This is the #1 thing that separates you from generic LO bios — a real feeling or moment, not "I'm passionate about helping people."</p>
             <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-years">Years in the business</label>
-            <input type="number" id="bio-wizard-years" min="0" class="w-full max-w-[10rem] p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 mb-4" placeholder="e.g. 12">
+            <p class="text-xs text-gray-500 mb-2 m-0">Type <strong>12</strong>, <strong>since 2004</strong>, or <strong>licensed since 2010</strong> — start years auto-update each year.</p>
+            <input type="text" id="bio-wizard-years" inputmode="text" autocomplete="off" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 mb-1" placeholder="e.g. 12, since 2004">
+            <p id="bio-wizard-years-hint" class="hidden text-xs text-[#00A89D] mb-4 m-0"></p>
             <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-loves">What do you love most about helping homeowners? <span class="text-[#F15A29]">*</span></label>
             <textarea id="bio-wizard-loves" rows="4" class="w-full p-4 rounded-xl border-2 border-[#00A89D]/50 bg-white dark:bg-gray-800" placeholder="A client moment, a feeling, or feedback you hear often…"></textarea>
           </div>
@@ -463,6 +485,8 @@
     $('bio-wizard-edit-profile')?.addEventListener('click', () => {
       if (typeof window.openUserProfile === 'function') window.openUserProfile(true);
     });
+
+    $('bio-wizard-years')?.addEventListener('input', updateWizardYearsHint);
 
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeBioWizard();

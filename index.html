@@ -3660,8 +3660,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div class="bio-field-block" data-bio-field="years">
                     <div class="flex items-center gap-2 mb-2"><span data-bio-status="years"></span><label class="font-bold text-[#00A89D]">Years in the Business</label></div>
-                    <p class="text-xs text-gray-500 mb-2">Credibility without bragging — "12 years" or "since 2012" both work.</p>
-                    <input type="number" id="bio-years" min="0" step="1" placeholder="e.g. 12" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    <p class="text-xs text-gray-500 mb-2">Credibility without bragging — type <strong>12</strong>, <strong>12 years</strong>, or <strong>since 2004</strong>. Start years auto-calculate tenure each year.</p>
+                    <input type="text" id="bio-years" inputmode="text" autocomplete="off" placeholder="e.g. 12, since 2004, licensed since 2010" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    <p id="bio-years-hint" class="hidden text-xs text-[#00A89D] mt-1.5 m-0"></p>
                 </div>
                 <div class="bio-field-block" data-bio-field="tone">
                     <div class="flex items-center gap-2 mb-2"><span data-bio-status="tone"><i class="fas fa-circle text-gray-300 text-[10px]"></i></span><label class="font-bold text-[#00A89D]">Tone <span class="font-normal text-gray-500 text-sm">(optional)</span></label></div>
@@ -8059,7 +8060,8 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Years in the Business</label>
-                        <input type="number" id="profile-years" min="0" step="1" placeholder="e.g. 7" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <input type="text" id="profile-years" inputmode="text" autocomplete="off" placeholder="e.g. 12, since 2004, licensed since 2010" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <p id="profile-years-hint" class="hidden text-xs text-[#00A89D] mt-1.5 m-0"></p>
                     </div>
                 </div>
                 <div>
@@ -8430,9 +8432,9 @@
     </div>
 </div>
 
-<script src="js/features/user-profile.js?v=20260714-lo-v288"></script>
-<script src="js/features/bio-creator.js?v=20260714-lo-v9"></script>
-<script src="js/features/bio-wizard.js?v=20260714-lo-v2"></script>
+<script src="js/features/user-profile.js?v=20260714-lo-v289"></script>
+<script src="js/features/bio-creator.js?v=20260714-lo-v10"></script>
+<script src="js/features/bio-wizard.js?v=20260714-lo-v3"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->

@@ -275,6 +275,7 @@
       previewRow('Phone', p.phone),
       previewRow('NMLS', p.nmls),
       previewRow('Market', p.location),
+      previewRow('Years', p.years ? formatExperienceYearsDisplay(p.years) : ''),
       previewRow('Intro', p.intro),
       previewRow('Focus', p.focusLabel || p.focus),
       previewRow('Goals', [p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(' · ')),
@@ -301,6 +302,80 @@
       return '<p class="text-gray-500 italic">No fields filled yet — complete the form below and every tool will personalize from it.</p>';
     }
     return rows.join('');
+  }
+
+  /**
+   * Parse free-text experience: "12", "12 years", "since 2004", "licensed since 2010".
+   * When a start year is found, computed tenure updates automatically each calendar year.
+   */
+  function resolveExperienceYears(raw, options = {}) {
+    const nowYear = options.asOfYear || new Date().getFullYear();
+    const text = String(raw || '').trim();
+    if (!text) {
+      return { raw: '', startYear: null, computedYears: null, phrase: '', hint: '' };
+    }
+
+    let startYear = null;
+    let computedYears = null;
+
+    if (/^\d{1,2}$/.test(text)) {
+      computedYears = parseInt(text, 10);
+    }
+
+    const yearsWord = text.match(/^(\d{1,2})\s*\+?\s*years?\b/i);
+    if (yearsWord) computedYears = parseInt(yearsWord[1], 10);
+
+    if (computedYears == null) {
+      const sincePatterns = [
+        /\b(?:since|from|started(?:\s+in)?|licensed\s+since|in\s+(?:the\s+)?business\s+since)\s*['']?(\d{4})\b/i,
+        /^since\s+['']?(\d{4})\b/i,
+        /^(\d{4})$/
+      ];
+      for (const re of sincePatterns) {
+        const m = text.match(re);
+        if (m) {
+          startYear = parseInt(m[1], 10);
+          break;
+        }
+      }
+      if (startYear == null) {
+        const embedded = text.match(/\b(19[89]\d|20[0-3]\d)\b/);
+        if (embedded) startYear = parseInt(embedded[1], 10);
+      }
+      if (startYear != null && startYear >= 1950 && startYear <= nowYear) {
+        computedYears = Math.max(0, nowYear - startYear);
+      }
+    }
+
+    let hint = '';
+    let phrase = text;
+    if (startYear != null && computedYears != null) {
+      hint = `≈ ${computedYears} years in business (since ${startYear}, through ${nowYear})`;
+      phrase = `${text} — approximately ${computedYears} years in business as of ${nowYear} (career start ${startYear})`;
+    } else if (computedYears != null) {
+      hint = `${computedYears} year${computedYears === 1 ? '' : 's'} in business`;
+      phrase = /\byears?\b/i.test(text) ? text : `${computedYears} years in business`;
+    }
+
+    return { raw: text, startYear, computedYears, phrase, hint };
+  }
+
+  function formatExperienceYearsDisplay(raw) {
+    const r = resolveExperienceYears(raw);
+    if (!r.raw) return '—';
+    return r.hint ? r.hint.replace(/^≈\s*/, '') : r.raw;
+  }
+
+  function updateExperienceYearsHint(inputEl, hintEl) {
+    if (!inputEl || !hintEl) return;
+    const r = resolveExperienceYears(inputEl.value);
+    if (r.hint) {
+      hintEl.textContent = r.hint;
+      hintEl.classList.remove('hidden');
+    } else {
+      hintEl.textContent = '';
+      hintEl.classList.add('hidden');
+    }
   }
 
   function buildPreviewText(profile) {
@@ -337,7 +412,10 @@
     if (p.blogPageUrl) lines.push(`Blog page: ${p.blogPageUrl}`);
     if (p.linkedInUrl) lines.push(`LinkedIn: ${p.linkedInUrl}`);
     if (p.companyWebsite) lines.push(`Company website: ${p.companyWebsite}`);
-    if (p.years) lines.push(`Years in business: ${p.years}`);
+    if (p.years) {
+      const y = resolveExperienceYears(p.years);
+      lines.push(`Years in business: ${y.phrase || p.years}`);
+    }
     if (p.professionalBio) lines.push(`Professional bio: ${p.professionalBio}`);
     return lines.length
       ? lines.join('. ') + '.'
@@ -474,11 +552,10 @@
       }
     });
 
-    const yearsEl = document.getElementById('profile-years');
-    if (yearsEl?.type === 'number') {
-      const num = parseInt(yearsEl.value, 10);
-      yearsEl.value = isNaN(num) ? '' : String(num);
-    }
+    updateExperienceYearsHint(
+      document.getElementById('profile-years'),
+      document.getElementById('profile-years-hint')
+    );
 
     const sets = [
       ['.profile-hobby', 'hobbies'],
@@ -1001,7 +1078,12 @@
 
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
 
-    modal.addEventListener('input', autoSaveProfile);
+    modal.addEventListener('input', (e) => {
+      if (e.target?.id === 'profile-years') {
+        updateExperienceYearsHint(e.target, document.getElementById('profile-years-hint'));
+      }
+      autoSaveProfile();
+    });
     modal.addEventListener('change', autoSaveProfile);
     setupSelectAllToggles();
     setupWizardHandlers();
@@ -1030,6 +1112,8 @@
   window.buildProfilePreviewText = buildPreviewText;
   window.buildProfilePreviewHtml = buildPreviewHtml;
   window.normalizeUserProfile = normalizeProfile;
+  window.resolveExperienceYears = resolveExperienceYears;
+  window.formatExperienceYearsDisplay = formatExperienceYearsDisplay;
 
   window.openUserProfile = function openUserProfile(forceFull) {
     openModal(!!forceFull);
