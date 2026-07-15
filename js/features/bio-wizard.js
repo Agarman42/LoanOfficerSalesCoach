@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'bioWizardLastStep';
-  const WIZARD_DOM_VERSION = '3';
+  const WIZARD_DOM_VERSION = '4';
   const LOVES_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -31,12 +31,12 @@
   ];
 
   const DEST_OPTIONS = [
+    { value: 'website-about', label: 'Company Website', hint: '750 characters · team page standard' },
     { value: 'google-gbp', label: 'Google Business Profile', hint: '750 characters · local SEO' },
+    { value: 'company-page', label: 'Company / Team Page', hint: '250 words' },
     { value: 'experience-com', label: 'Experience.com', hint: '200 words · reviews ecosystem' },
     { value: 'zillow', label: 'Zillow', hint: '2,000 characters · consumer-facing' },
-    { value: 'linkedin', label: 'LinkedIn', hint: '2,600 characters · professional' },
-    { value: 'company-page', label: 'Company / Team Page', hint: '250 words' },
-    { value: 'website-about', label: 'Website About', hint: 'Flexible length' }
+    { value: 'linkedin', label: 'LinkedIn', hint: '2,600 characters · professional' }
   ];
 
   let currentStep = 1;
@@ -127,7 +127,7 @@
 
   function readFormIntoWizard() {
     FIELD_MAP.forEach(([wizId, formId]) => readField(formId, wizId));
-    const dest = $('bio-destination')?.value || 'google-gbp';
+    const dest = $('bio-destination')?.value || 'website-about';
     const radio = document.querySelector(`input[name="bio-wizard-dest"][value="${dest}"]`);
     if (radio) radio.checked = true;
     updateDestSummary();
@@ -200,7 +200,7 @@
   }
 
   function updateDestSummary() {
-    const dest = document.querySelector('input[name="bio-wizard-dest"]:checked')?.value || 'google-gbp';
+    const dest = document.querySelector('input[name="bio-wizard-dest"]:checked')?.value || 'website-about';
     const opt = DEST_OPTIONS.find((d) => d.value === dest);
     const el = $('bio-wizard-dest-summary');
     if (el && opt) {
@@ -247,14 +247,18 @@
     nav.innerHTML = STEP_META.map((meta, i) => {
       const step = i + 1;
       const active = step === currentStep;
-      const done = step < currentStep;
+      const visited = step < currentStep;
       const cls = [
-        'bio-wizard-nav-pill flex-1 min-w-0 text-center py-2 px-1 rounded-xl transition text-[10px] sm:text-xs font-semibold leading-tight',
-        active ? 'bg-[#00A89D] text-white shadow-sm' : '',
-        !active && done ? 'bg-[#00A89D]/15 text-[#00A89D] cursor-pointer' : '',
-        !active && !done ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 cursor-pointer' : ''
+        'bio-wizard-nav-pill flex-1 min-w-[4.25rem] text-center py-2 px-1 rounded-xl transition text-[10px] sm:text-xs font-semibold leading-tight',
+        active ? 'bg-[#00A89D] text-white shadow-sm ring-2 ring-[#00A89D]/35' : '',
+        !active && visited ? 'bg-[#00A89D]/15 text-[#00A89D] cursor-pointer hover:bg-[#00A89D]/25 hover:ring-2 hover:ring-[#00A89D]/30' : '',
+        !active && !visited ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 hover:ring-2 hover:ring-[#00A89D]/20' : '',
+        active ? 'cursor-default' : 'cursor-pointer'
       ].filter(Boolean).join(' ');
-      return `<button type="button" class="${cls}" data-bio-wizard-goto="${step}" ${active ? 'disabled' : ''}><span class="block truncate">${meta.title}</span></button>`;
+      return `<button type="button" class="${cls}" data-bio-wizard-goto="${step}" aria-label="Go to step ${step}: ${meta.title}" title="${meta.title} — ${meta.subtitle}" ${active ? 'aria-current="step"' : ''}>
+        <span class="block text-[9px] opacity-80 leading-none mb-0.5">${step}</span>
+        <span class="block truncate">${meta.title}</span>
+      </button>`;
     }).join('');
   }
 
@@ -309,6 +313,7 @@
     writeWizardIntoForm({ silent: true });
     currentStep = target;
     readFormIntoWizard();
+    showStepError('');
     renderStep();
   }
 
@@ -494,9 +499,10 @@
 
     $('bio-wizard-step-nav')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-bio-wizard-goto]');
-      if (!btn || btn.disabled) return;
+      if (!btn) return;
       const step = parseInt(btn.getAttribute('data-bio-wizard-goto'), 10);
-      if (step < currentStep) goToStep(step);
+      if (!Number.isFinite(step) || step === currentStep) return;
+      goToStep(step);
     });
 
     overlay.querySelectorAll('input[name="bio-wizard-dest"]').forEach((radio) => {

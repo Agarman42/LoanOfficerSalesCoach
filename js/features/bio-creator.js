@@ -54,7 +54,7 @@
   ];
 
   const REFINE_CHIPS = [
-    'Use more of the character/word limit — add substantive detail',
+    'Fill to the character limit — use nearly every allowed character',
     'Make it warmer and more personal',
     'Make it shorter — cut filler',
     'Sound more professional',
@@ -134,9 +134,9 @@
       icon: 'fa-google',
       limitType: 'chars',
       limit: 750,
-      targetMinPct: 85,
-      hint: 'High-impact local SEO. Use 85–95% of the full 750 characters — empty space wastes ranking opportunity. Lead with who you help + market, then depth on your approach, differentiator, and a soft CTA.',
-      structure: 'Two short paragraphs, 5–7 substantive sentences (~640–700 characters). First ~160 characters = hook with market + who you help (critical for Google snippets). Second paragraph: experience, service style, a concrete human detail from story inputs, local/community tie-in, soft CTA. No bullets. Do not stop at 3–4 short sentences.',
+      targetMinPct: 92,
+      hint: 'High-impact local SEO. Use 93–98% of the full 750 characters — empty space wastes ranking opportunity. Lead with who you help + market, then depth on your approach, differentiator, and a soft CTA.',
+      structure: 'First-person throughout. Two short paragraphs, 6–8 substantive sentences (~700–730 characters). First ~160 characters = hook with market + who you help (critical for Google snippets). Second paragraph: experience, service style, a concrete human detail from story inputs, local/community tie-in, soft CTA. No bullets. Do not stop until you are within ~15 characters of the limit.',
       pasteTip: 'Google Business Profile → Edit profile → Business description'
     },
     'experience-com': {
@@ -146,7 +146,7 @@
       limitType: 'words',
       limit: 200,
       hint: 'Credibility + reviews ecosystem. Professional, trustworthy, specific — built for search and AI discovery.',
-      structure: '2–3 short paragraphs. Open with expertise + market. Middle = client experience promise. Close with invitation to connect.',
+      structure: 'First-person throughout. 2–3 short paragraphs. Open with expertise + market. Middle = client experience promise. Close with invitation to connect.',
       pasteTip: 'Experience.com dashboard → Profile → About / Bio section'
     },
     'company-page': {
@@ -156,7 +156,7 @@
       limitType: 'words',
       limit: 250,
       hint: 'Polished but human. Visitors should feel they know you before the first call.',
-      structure: 'Professional third-person or warm first-person. Experience, specialty, service philosophy, local connection.',
+      structure: 'Warm first-person only. Experience, specialty, service philosophy, local connection.',
       pasteTip: 'Your company team page admin or marketing contact'
     },
     'zillow': {
@@ -180,14 +180,15 @@
       pasteTip: 'LinkedIn → Profile → About → Edit'
     },
     'website-about': {
-      label: 'Website About Page',
+      label: 'Company Website',
       short: 'Website',
       icon: 'fa-globe',
-      limitType: 'words',
-      limit: 300,
-      hint: 'Your flagship story. More room for personality, community, and your "why."',
-      structure: 'Story arc: why you do this → who you help → how you\'re different → local roots → invite conversation.',
-      pasteTip: 'Your website CMS About page or blog bio widget'
+      limitType: 'chars',
+      limit: 750,
+      targetMinPct: 92,
+      hint: 'Company team page standard — uniform 750-character bios across the site. Use 93–98% of the limit. Lead with who you help + market, then approach and differentiator.',
+      structure: 'First-person throughout. Two tight paragraphs (~700–730 characters). Hook with who you help + market → experience + service style → one human detail → soft CTA. Match company tone: professional, warm, consistent. Stop only when within ~15 characters of the 750 limit.',
+      pasteTip: 'Company website team page bio field'
     },
     'realtor-partner': {
       label: 'Realtor Partner Intro',
@@ -196,7 +197,7 @@
       limitType: 'words',
       limit: 150,
       hint: 'Written for agents. Emphasize communication, clean files, on-time closings, and protecting their reputation.',
-      structure: 'Partner-first tone. What agents experience working with you. Specific reliability promises.',
+      structure: 'First-person, partner-first tone. What agents experience working with you. Specific reliability promises.',
       pasteTip: 'Partner emails, referral one-pagers, or agent onboarding packets'
     },
     custom: {
@@ -211,8 +212,25 @@
     }
   };
 
+  const DESTINATION_ORDER = [
+    'website-about',
+    'google-gbp',
+    'company-page',
+    'experience-com',
+    'zillow',
+    'linkedin',
+    'realtor-partner',
+    'custom'
+  ];
+
+  const FIRST_PERSON_RULE = `FIRST-PERSON VOICE (mandatory — never violate):
+- Write ENTIRELY in first person as the loan officer speaking directly to the reader.
+- Use I, me, my, mine — NEVER he, she, him, her, his, hers, or "[Name] is/has/specializes..."
+- When rewriting an existing third-person bio, convert every sentence to first person.
+- Referring to clients as they/their/them is fine; only the loan officer must never be described in third person.`;
+
   const REGENERATE_PROMPT =
-    'Write a fresh alternative version of this bio. Use different wording and sentence structure while keeping the same facts, voice, destination, and character/word limits. Hit the TARGET length range — do not return a shorter stub. Do not reuse phrases from the previous version.';
+    'Write a fresh alternative version of this bio in first person (I/me/my — never he/she). Use different wording and sentence structure while keeping the same facts and destination. Hit the TARGET length range — use nearly the full character/word limit, not a short stub. Do not reuse phrases from the previous version.';
 
   let lastGeneratedText = '';
   let autoSaveTimer = null;
@@ -234,7 +252,7 @@
     { icon: 'fa-paste', color: '#002B5C', title: 'Paste once, use everywhere', text: 'After you save a Primary Bio, Newsletter, Blog, Social, and AI Coach all speak in the same authentic voice.' },
     { icon: 'fa-star', color: '#F15A29', title: 'Experience.com angle', text: 'Review ecosystems reward bios that sound credible and human — not like they were copied from a template.' },
     { icon: 'fa-handshake', color: '#00A89D', title: 'Realtor magnet', text: 'Agents skim for communication and reliability. If your bio answers "Will this LO go silent at the worst moment?" — you win.' },
-    { icon: 'fa-lightbulb', color: '#002B5C', title: 'Pro move', text: 'Generate for Google first (750 chars), save as Primary, then regenerate for Zillow or LinkedIn with the same story inputs.' }
+    { icon: 'fa-lightbulb', color: '#002B5C', title: 'Company standard', text: 'Paste your long bio at the top — we\'ll tighten it to 750 characters for the company website. Then adapt for Google, Zillow, or LinkedIn.' }
   ];
 
   const BIO_LOADING_STEPS = [
@@ -272,8 +290,8 @@
 
   function getSelectedDestination() {
     const sel = document.getElementById('bio-destination');
-    const key = sel?.value || 'google-gbp';
-    const base = DESTINATIONS[key] || DESTINATIONS['google-gbp'];
+    const key = sel?.value || 'website-about';
+    const base = DESTINATIONS[key] || DESTINATIONS['website-about'];
     if (key !== 'custom') return { key, ...base };
 
     const typeEl = document.getElementById('bio-custom-limit-type');
@@ -291,21 +309,36 @@
   function getLengthTargets(dest) {
     const max = dest.limit;
     const unit = dest.limitType === 'words' ? 'words' : 'characters';
-    const minPct = dest.targetMinPct ?? (dest.limitType === 'chars' ? 82 : 78);
+    const minPct = dest.targetMinPct ?? (dest.limitType === 'chars' ? 90 : 85);
     const targetMin = Math.round(max * (minPct / 100));
-    const targetIdeal = Math.round(max * 0.92);
-    const targetMax = dest.limitType === 'chars' ? Math.max(targetMin, max - 8) : Math.max(targetMin, max - 3);
+    const targetIdeal = Math.round(max * 0.96);
+    const targetMax = dest.limitType === 'chars' ? Math.max(targetMin, max - 5) : Math.max(targetMin, max - 2);
     return { unit, max, targetMin, targetIdeal, targetMax };
+  }
+
+  function bioNeedsLengthBoost(measure, targets, dest) {
+    if (measure.over) return false;
+    if (measure.current < targets.targetIdeal) return true;
+    if (dest.limitType === 'chars') {
+      return measure.current < targets.targetMax;
+    }
+    return measure.current < targets.targetMax;
+  }
+
+  function buildLengthBoostPrompt(dest, measure, goal) {
+    const targets = getLengthTargets(dest);
+    const gap = Math.max(0, goal - measure.current);
+    return `CRITICAL LENGTH: Bio is only ${measure.current} ${targets.unit} — ${gap} ${targets.unit} below goal. Expand to ${goal} ${targets.unit} (hard max ${targets.max}). Use nearly the FULL limit — unused space hurts SEO and looks incomplete. Add substantive detail from story inputs: who you help, service approach, differentiator, local market, community. Stay in first person (I/me/my). No filler or repetition.`;
   }
 
   function buildLengthInstruction(dest) {
     const { unit, max, targetMin, targetIdeal, targetMax } = getLengthTargets(dest);
     return `LENGTH (critical — follow exactly):
 - HARD MAXIMUM: ${max} ${unit} including spaces. Never exceed.
-- TARGET RANGE: ${targetMin}–${targetIdeal} ${unit}. Ideal landing spot: ~${targetIdeal} ${unit}.
-- MINIMUM ACCEPTABLE: ${targetMin} ${unit}. Bios shorter than this waste valuable platform space and hurt SEO/discoverability.
+- TARGET RANGE: ${targetIdeal}–${targetMax} ${unit}. Ideal landing spot: ~${targetMax} ${unit} (use nearly every allowed ${unit.slice(0, -1)}).
+- MINIMUM ACCEPTABLE: ${targetMin} ${unit}. Bios shorter than ${targetIdeal} ${unit} waste valuable platform space and hurt SEO/discoverability.
 - Expand with specific story-input details (who you help, service style, differentiator, local market) — not generic filler.
-- Before returning, mentally count ${unit}. If under ${targetMin}, add another concrete detail from the inputs.`;
+- Before returning, mentally count ${unit}. If under ${targetIdeal}, add another concrete detail until you are within ~5 ${unit} of the max.`;
   }
 
   function parseBioResponse(raw) {
@@ -313,6 +346,24 @@
     let text = raw.trim().replace(/^```[\w]*\n?/gm, '').replace(/```$/gm, '').trim();
     text = text.replace(/^(Bio:|Professional Bio:|About:)\s*/i, '').trim();
     return text.replace(/\n*[\[(]?\d+\s*\/\s*\d+\s*(words|characters)[\])]?\s*$/i, '').trim();
+  }
+
+  function bioUsesThirdPersonLoVoice(text, profileName) {
+    const t = text || '';
+    if (/\b(He|She)\s+(is|has|was|helps?|specializes?|brings?|offers?|provides?|works?|serves?|loves?|believes?|knows?|focuses?)\b/.test(t)) {
+      return true;
+    }
+    if (/\b(His|Her)\s+(approach|passion|focus|experience|background|commitment|goal|mission|dedication|expertise)\b/i.test(t)) {
+      return true;
+    }
+    const firstName = (profileName || '').trim().split(/\s+/)[0];
+    if (firstName && firstName.length > 2) {
+      const esc = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (new RegExp(`\\b${esc}\\s+(is|has|was|helps?|specializes?|brings?|offers?|provides?|works?|serves?|loves?)\\b`, 'i').test(t)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   function measureBio(text, dest) {
@@ -345,7 +396,8 @@
       additionalNotes: (document.getElementById('bio-additional')?.value || '').trim(),
       mentionCompany: !!document.getElementById('bio-mention-company')?.checked,
       toneOverride: document.getElementById('bio-tone')?.value || '',
-      destination: document.getElementById('bio-destination')?.value || 'google-gbp',
+      existingBioPaste: (document.getElementById('bio-existing-paste')?.value || '').trim(),
+      destination: document.getElementById('bio-destination')?.value || 'website-about',
       customLimitType: document.getElementById('bio-custom-limit-type')?.value || 'chars',
       customLimitValue: document.getElementById('bio-custom-limit-value')?.value || '750'
     };
@@ -366,6 +418,7 @@
 
     setChips('service', draft.serviceApproach);
     setVal('bio-service-notes', draft.serviceApproachNotes);
+    setVal('bio-existing-paste', draft.existingBioPaste);
     setVal('bio-years', draft.yearsConfirm);
     setVal('bio-loves-most', draft.lovesMost);
     setChips('who', draft.whoYouHelp);
@@ -431,11 +484,12 @@
   function renderDestinationCards() {
     const wrap = document.getElementById('bio-destination-cards');
     if (!wrap) return;
-    const current = document.getElementById('bio-destination')?.value || 'google-gbp';
+    const current = document.getElementById('bio-destination')?.value || 'website-about';
 
-    wrap.innerHTML = Object.entries(DESTINATIONS)
-      .filter(([k]) => k !== 'custom')
-      .map(([key, d]) => {
+    wrap.innerHTML = DESTINATION_ORDER
+      .filter((key) => key !== 'custom' && DESTINATIONS[key])
+      .map((key) => {
+        const d = DESTINATIONS[key];
         const limit = d.limitType === 'words' ? `~${d.limit} words` : `${d.limit} chars`;
         const active = key === current;
         const iconCls = d.icon === 'fa-google' || d.icon === 'fa-linkedin' ? `fab ${d.icon}` : `fas ${d.icon}`;
@@ -653,6 +707,7 @@
     updateQualityChecklist();
     updateDestinationPanel();
     updateBioYearsHint();
+    updateExistingPasteMeta();
   }
 
   function hobbiesTextFromProfile(p) {
@@ -686,10 +741,21 @@
 
     seedBioFieldsFromProfile(p);
     updateBioYearsHint();
+    if (!document.getElementById('bio-existing-paste')?.value?.trim()) {
+      const seedBio = p.professionalBio || p.bioBuilderDraft?.existingBioPaste;
+      if (seedBio) {
+        const pasteEl = document.getElementById('bio-existing-paste');
+        if (pasteEl) {
+          pasteEl.value = seedBio;
+          pasteEl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+    }
+    updateExistingPasteMeta();
 
     restoreSavedBioOutput();
     renderDestinationCards();
-    syncDestinationCards(document.getElementById('bio-destination')?.value || 'google-gbp');
+    syncDestinationCards(document.getElementById('bio-destination')?.value || 'website-about');
     toggleCustomLimitRow();
     refreshAllUI();
   }
@@ -762,6 +828,69 @@
     }
   }
 
+  function ensureWebsiteDestination() {
+    const sel = document.getElementById('bio-destination');
+    if (!sel) return;
+    sel.value = 'website-about';
+    syncDestinationCards('website-about');
+    toggleCustomLimitRow();
+    updateDestinationPanel();
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function updateExistingPasteMeta() {
+    const ta = document.getElementById('bio-existing-paste');
+    const meta = document.getElementById('bio-existing-paste-meta');
+    if (!ta || !meta) return;
+    const len = (ta.value || '').length;
+    if (!len) {
+      meta.textContent = 'Paste your current team-page or website bio above.';
+      return;
+    }
+    meta.textContent =
+      len > 750
+        ? `${len} characters — we'll rewrite down to the 750-character company standard.`
+        : `${len} characters — already under 750; we'll still polish for the company format.`;
+  }
+
+  function buildRewritePrompt(existingText) {
+    const p = getCentralProfile();
+    const draft = collectDraftFromForm();
+    const dest = getSelectedDestination();
+    const whoLine =
+      [...(draft.whoYouHelp || []), draft.whoYouHelpNotes].filter(Boolean).join('; ') || 'not specified';
+    const profileCtx =
+      typeof window.buildProfileAiContext === 'function'
+        ? window.buildProfileAiContext(p)
+        : `Name: ${p.name || 'Loan Officer'}. Market: ${p.location || 'local area'}.`;
+    const lengthInstruction = buildLengthInstruction(dest);
+
+    return `You are tightening a loan officer bio to the company website standard.
+
+DESTINATION: ${dest.label}
+${lengthInstruction}
+
+${FIRST_PERSON_RULE}
+
+TASK: Rewrite the EXISTING BIO below to fit the character limit. This is a shorten + polish job, not a from-scratch write.
+- Preserve real facts, credentials, NMLS, market, and voice from the original.
+- Convert any third-person phrasing (he/she/[Name]) to first person (I/me/my).
+- Remove filler, redundancy, and overly long phrasing.
+- Prioritize who you help, local market, and one differentiator.
+- If WHO YOU HELP is provided below and missing from the bio, weave it in naturally.
+- Do NOT invent awards, numbers, or personal details not in the original or profile.
+
+WHO YOU HELP (use if space allows): ${whoLine}
+
+PROFILE CONTEXT:
+${profileCtx}
+
+EXISTING BIO TO REWRITE (${countChars(existingText)} characters):
+${existingText}
+
+OUTPUT: Return ONLY the rewritten bio text. No title, labels, or markdown.`;
+  }
+
   function buildPrompt(feedback, previousBio) {
     const p = getCentralProfile();
     const draft = collectDraftFromForm();
@@ -812,13 +941,14 @@ VOICE: ${tone}
 ${companyNote}
 ${inferNote}
 
+${FIRST_PERSON_RULE}
+
 QUALITY RULES:
 - NEVER sound like generic corporate boilerplate ("passionate professional dedicated to excellence").
 - Use at least ONE concrete, human detail from the story inputs (feeling, client type, or agent feedback).
 - Weave in the local market naturally if provided — good for SEO/GEO.
 - No rate promises, guaranteed approval, or superlatives like "best" or "#1" unless user provided proof.
 - No NMLS/EHO boilerplate unless user included it in additional notes.
-- Write in the person appropriate for the platform (first-person for Google/LinkedIn/Zillow; partner-focused for realtor intro).
 - If life-outside-work details were provided, include at least one naturally — it separates memorable bios from generic ones. Never invent personal facts.
 
 ${feedback ? `REFINEMENT (keep destination + limit):\n${feedback}\n\nPREVIOUS BIO:\n${previousBio || lastGeneratedText}` : ''}
@@ -835,6 +965,43 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       clearTimeout(bioWatchdogTimer);
       bioWatchdogTimer = null;
     }
+  }
+
+  async function autoExpandBioLength(text, dest, controller) {
+    let measure = measureBio(text, dest);
+    const targets = getLengthTargets(dest);
+    if (!bioNeedsLengthBoost(measure, targets, dest)) return text;
+
+    const goals = [targets.targetIdeal, targets.targetMax];
+    for (const goal of goals) {
+      measure = measureBio(text, dest);
+      if (!bioNeedsLengthBoost(measure, targets, dest) || measure.current >= goal) break;
+
+      console.warn('[bio-creator] Expanding bio length…', { current: measure.current, goal });
+      const elapsedEl = document.getElementById('bio-loading-elapsed');
+      if (elapsedEl) {
+        elapsedEl.textContent = `Filling to target length (${goal} ${targets.unit})…`;
+      }
+
+      const expandPrompt = buildPrompt(buildLengthBoostPrompt(dest, measure, goal), text);
+      const expandedRaw = await window.callGrokAPI(expandPrompt, {
+        temperature: 0.62,
+        max_tokens: 900,
+        timeoutMs: BIO_API_TIMEOUT_MS,
+        skipKeyPrompt: true,
+        signal: controller?.signal,
+        maxRetries: 3,
+        onRetry: ({ attempt, maxRetries, delayMs }) => {
+          const el = document.getElementById('bio-loading-elapsed');
+          if (el) el.textContent = `xAI is busy — auto-retry ${attempt}/${maxRetries} in ${Math.ceil(delayMs / 1000)}s…`;
+        }
+      });
+      if (expandedRaw?.trim()) {
+        text = parseBioResponse(expandedRaw);
+      }
+    }
+
+    return text;
   }
 
   function failBioGeneration(message) {
@@ -866,7 +1033,9 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
     hideBioLoading();
     bioGenerating = false;
     const genBtn = document.getElementById('generate-bio-btn');
+    const rewriteBtn = document.getElementById('bio-rewrite-existing-btn');
     if (genBtn) genBtn.disabled = false;
+    if (rewriteBtn) rewriteBtn.disabled = false;
     updateQualityChecklist();
     if (typeof window.showToast === 'function') window.showToast('Bio generation cancelled.');
   }
@@ -1070,19 +1239,26 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
     const panel = document.getElementById('bio-output-panel');
     if (!output || !panel) return;
 
+    const savedFeedback = document.getElementById('bio-feedback')?.value || '';
     const measure = measureBio(text, dest);
+    const targets = getLengthTargets(dest);
+    const hasRoom = bioNeedsLengthBoost(measure, targets, dest);
+    const unused =
+      measure.type === 'chars' ? measure.max - measure.current : measure.max - measure.current;
     const countLabel =
       measure.type === 'words'
         ? `${measure.current} / ${measure.max} words`
         : `${measure.current} / ${measure.max} characters`;
-    const targets = getLengthTargets(dest);
-    const tooShort = !measure.over && measure.current < targets.targetMin;
+    const countLabelFull =
+      hasRoom && measure.type === 'chars' && unused > 0
+        ? `${countLabel} · ${unused} unused`
+        : countLabel;
     const countClass = measure.over
       ? 'bg-red-100 text-red-700'
-      : tooShort
+      : hasRoom
         ? 'bg-amber-100 text-amber-800'
         : 'bg-[#00A89D]/10 text-[#00A89D]';
-    const barClass = measure.over ? 'bg-red-500' : tooShort ? 'bg-amber-500' : 'bg-[#00A89D]';
+    const barClass = measure.over ? 'bg-red-500' : hasRoom ? 'bg-amber-500' : 'bg-[#00A89D]';
 
     output.innerHTML = `
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -1090,15 +1266,26 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
           <span class="text-xs font-bold tracking-wider text-[#F15A29] uppercase">${escapeHtml(dest.label)}</span>
           ${isPrimary ? '<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-[#002B5C] text-white font-semibold">Primary · Profile</span>' : ''}
         </div>
-        <span class="text-sm font-bold px-3 py-1 rounded-full ${countClass}">${countLabel}</span>
+        <span class="text-sm font-bold px-3 py-1 rounded-full ${countClass}">${countLabelFull}</span>
       </div>
-      ${tooShort ? `<div class="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-900 dark:text-amber-200"><i class="fas fa-ruler-horizontal mr-2"></i>This bio is shorter than the target for ${escapeHtml(dest.label)} (aim for ${targets.targetMin}–${targets.targetIdeal} ${targets.unit}). Click <strong>Expand to Target</strong> to use more of your limit.</div>` : ''}
+      ${hasRoom ? `<div class="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-900 dark:text-amber-200"><i class="fas fa-ruler-horizontal mr-2"></i>This bio has unused space for ${escapeHtml(dest.label)}. Aim for <strong>${targets.targetIdeal}–${targets.targetMax} ${targets.unit}</strong> (nearly the full ${measure.max}). Click <strong>Fill to Limit</strong> or describe edits below.</div>` : ''}
       <div class="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 mb-4 overflow-hidden">
         <div class="h-full rounded-full transition-all ${barClass}" style="width:${Math.min(100, measure.pct)}%"></div>
       </div>
       <div id="bio-output-text" class="text-base leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-5 border border-gray-100 dark:border-gray-700">${escapeHtml(text)}</div>
       <div class="mt-4 p-4 rounded-2xl bg-[#002B5C]/5 border border-[#002B5C]/10 text-sm text-gray-600 dark:text-gray-400">
         <i class="fas fa-paste text-[#00A89D] mr-2"></i><strong>Paste location:</strong> ${escapeHtml(dest.pasteTip || 'Your platform profile editor')}
+      </div>
+      <div class="mt-6 p-5 rounded-2xl border-2 border-[#00A89D]/25 bg-[#00A89D]/5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <label class="text-base font-semibold text-[#00A89D] m-0" for="bio-feedback"><i class="fas fa-edit mr-2"></i>Edit or refine this bio</label>
+          <span class="text-xs text-gray-500">Quick chips or your own notes</span>
+        </div>
+        <div id="bio-refine-chips" class="flex flex-wrap gap-2 mb-3"></div>
+        <textarea id="bio-feedback" rows="3" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" placeholder="e.g., Fill to 750 characters, mention VA loans, warmer tone…">${escapeHtml(savedFeedback)}</textarea>
+        <button type="button" id="bio-refine-btn" class="mt-3 bg-[#002B5C] text-white py-3 px-8 rounded-full font-bold inline-flex items-center gap-2 hover:bg-black transition">
+          <i class="fas fa-magic"></i> Apply Edit
+        </button>
       </div>
       <div class="flex flex-wrap gap-3 mt-6">
         <button type="button" id="bio-copy-btn" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:opacity-90">
@@ -1110,17 +1297,26 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
         <button type="button" id="bio-regenerate-btn" class="border-2 border-[#00A89D] text-[#00A89D] px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-[#00A89D]/10 transition">
           <i class="fas fa-sync-alt"></i> Another Version
         </button>
-        ${tooShort ? `<button type="button" id="bio-expand-btn" class="border-2 border-amber-500 text-amber-700 dark:text-amber-300 px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-amber-500 hover:text-white transition"><i class="fas fa-expand-alt"></i> Expand to Target</button>` : ''}
+        ${hasRoom ? `<button type="button" id="bio-fill-limit-btn" class="border-2 border-amber-500 text-amber-700 dark:text-amber-300 px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-amber-500 hover:text-white transition"><i class="fas fa-expand-alt"></i> Fill to Limit</button>` : ''}
         ${measure.over ? `<button type="button" id="bio-trim-btn" class="border-2 border-[#F15A29] text-[#F15A29] px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-[#F15A29] hover:text-white transition"><i class="fas fa-compress-alt"></i> Trim to Fit</button>` : ''}
       </div>`;
 
     panel.classList.remove('hidden');
     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    renderRefineChips();
     document.getElementById('bio-copy-btn')?.addEventListener('click', copyBio);
     document.getElementById('bio-save-primary-btn')?.addEventListener('click', saveAsPrimaryBio);
     document.getElementById('bio-regenerate-btn')?.addEventListener('click', () => regenerateBio());
-    document.getElementById('bio-expand-btn')?.addEventListener('click', () => expandBioToTarget(dest));
+    document.getElementById('bio-fill-limit-btn')?.addEventListener('click', () => fillBioToLimit(dest));
     document.getElementById('bio-trim-btn')?.addEventListener('click', () => trimBioToFit(dest));
+    document.getElementById('bio-refine-btn')?.addEventListener('click', () => {
+      const fb = (document.getElementById('bio-feedback')?.value || '').trim();
+      if (!fb) {
+        if (typeof window.showToast === 'function') window.showToast('Type a refinement or tap a quick edit chip.');
+        return;
+      }
+      generateBio(fb);
+    });
   }
 
   function copyBio() {
@@ -1174,6 +1370,18 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
     updatePrimaryBioStrip();
   }
 
+  async function rewriteExistingBio() {
+    const existing = (document.getElementById('bio-existing-paste')?.value || '').trim();
+    if (!existing) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Paste your current bio in the box at the top first.');
+      }
+      return;
+    }
+    ensureWebsiteDestination();
+    await generateBio(null, { rewriteExisting: true, existingBio: existing });
+  }
+
   async function regenerateBio() {
     const existing = (document.getElementById('bio-output-text')?.textContent || lastGeneratedText || '').trim();
     if (!existing) {
@@ -1187,7 +1395,7 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
   }
 
   async function generateBio(feedback, options = {}) {
-    const { regenerate = false } = options;
+    const { regenerate = false, rewriteExisting = false, existingBio = '' } = options;
 
     if (bioGenerating) {
       console.warn('[bio-creator] Generation already in progress');
@@ -1196,7 +1404,7 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
 
     const checks = evaluateChecks();
     const essentialDone = checks.filter((c) => c.essential && c.done).length;
-    const skipEssentials = regenerate || !!feedback || !!lastGeneratedText?.trim();
+    const skipEssentials = regenerate || rewriteExisting || !!feedback || !!lastGeneratedText?.trim();
     if (!skipEssentials && essentialDone < MIN_ESSENTIALS) {
       scrollToFirstMissing();
       if (typeof window.showToast === 'function') {
@@ -1208,13 +1416,16 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
     bioGenerating = true;
     bioUserCancelled = false;
     const genBtn = document.getElementById('generate-bio-btn');
+    const rewriteBtn = document.getElementById('bio-rewrite-existing-btn');
     if (genBtn) genBtn.disabled = true;
+    if (rewriteBtn) rewriteBtn.disabled = true;
 
     try {
       preflightBioApi({ forRegenerate: regenerate || !!lastGeneratedText?.trim() });
     } catch (preErr) {
       bioGenerating = false;
       if (genBtn) genBtn.disabled = false;
+      if (rewriteBtn) rewriteBtn.disabled = false;
       if (typeof window.showToast === 'function') window.showToast(preErr.message);
       else alert(preErr.message);
       return;
@@ -1227,12 +1438,15 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       bioAbortController?.abort();
     }, BIO_WATCHDOG_MS);
 
-    showBioLoading(!!feedback || regenerate);
+    showBioLoading(!!feedback || regenerate || rewriteExisting);
     const dest = getSelectedDestination();
-    const prompt = buildPrompt(feedback, lastGeneratedText);
+    const prompt = rewriteExisting
+      ? buildRewritePrompt(existingBio)
+      : buildPrompt(feedback, lastGeneratedText);
     console.warn('[bio-creator] Starting API call…', {
       refine: !!feedback,
       regenerate,
+      rewriteExisting,
       dest: dest.key,
       promptChars: prompt.length,
       timeoutMs: BIO_API_TIMEOUT_MS
@@ -1240,7 +1454,7 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
 
     try {
       const raw = await window.callGrokAPI(prompt, {
-        temperature: regenerate ? 0.85 : feedback ? 0.6 : 0.72,
+        temperature: rewriteExisting ? 0.55 : regenerate ? 0.85 : feedback ? 0.6 : 0.72,
         max_tokens: 950,
         timeoutMs: BIO_API_TIMEOUT_MS,
         skipKeyPrompt: true,
@@ -1257,19 +1471,23 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       if (!raw?.trim()) throw new Error('Empty response from AI');
 
       let text = parseBioResponse(raw);
-      const targets = getLengthTargets(dest);
-      let measure = measureBio(text, dest);
+      const skipLengthBoost = feedback && /shorter|shorten|trim|cut filler|compress/i.test(feedback);
 
-      if (!feedback && !regenerate && measure.current < targets.targetMin) {
-        console.warn('[bio-creator] Output shorter than target — auto-expanding…', measure);
+      if (!skipLengthBoost) {
+        text = await autoExpandBioLength(text, dest, bioAbortController);
+      }
+
+      const profileName = getCentralProfile().name || '';
+      if (bioUsesThirdPersonLoVoice(text, profileName)) {
+        console.warn('[bio-creator] Third-person LO voice detected — auto-correcting to first person…');
         const elapsedEl = document.getElementById('bio-loading-elapsed');
-        if (elapsedEl) elapsedEl.textContent = `Expanding to target length (${targets.targetMin}–${targets.targetIdeal} ${targets.unit})…`;
-        const expandPrompt = buildPrompt(
-          `CRITICAL: Bio is only ${measure.current} ${targets.unit} — too short. Expand to ${targets.targetMin}–${targets.targetIdeal} ${targets.unit} (hard max ${targets.max}). Add substantive detail from story inputs: who you help, service approach, differentiator, local market. No filler or repetition.`,
+        if (elapsedEl) elapsedEl.textContent = 'Converting to first person (I/me/my)…';
+        const fixPrompt = buildPrompt(
+          `CRITICAL: This bio describes the loan officer in third person (he/she/${profileName.split(/\s+/)[0] || 'name'}). Rewrite EVERY sentence in first person as the loan officer speaking (I, me, my). Keep the same facts, destination, and length targets. Do not change client references (they/their is fine).`,
           text
         );
-        const expandedRaw = await window.callGrokAPI(expandPrompt, {
-          temperature: 0.65,
+        const fixedRaw = await window.callGrokAPI(fixPrompt, {
+          temperature: 0.5,
           max_tokens: 900,
           timeoutMs: BIO_API_TIMEOUT_MS,
           skipKeyPrompt: true,
@@ -1280,10 +1498,13 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
             if (el) el.textContent = `xAI is busy — auto-retry ${attempt}/${maxRetries} in ${Math.ceil(delayMs / 1000)}s…`;
           }
         });
-        if (expandedRaw?.trim()) {
-          text = parseBioResponse(expandedRaw);
-          measure = measureBio(text, dest);
+        if (fixedRaw?.trim()) {
+          text = parseBioResponse(fixedRaw);
         }
+      }
+
+      if (!skipLengthBoost) {
+        text = await autoExpandBioLength(text, dest, bioAbortController);
       }
 
       lastGeneratedText = text;
@@ -1314,23 +1535,26 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       bioAbortController = null;
       bioGenerating = false;
       if (genBtn) genBtn.disabled = false;
+      if (rewriteBtn) rewriteBtn.disabled = false;
       updateQualityChecklist();
     }
   }
 
   async function trimBioToFit(dest) {
     await generateBio(
-      `Bio exceeds ${getLimitLabel(dest)}. Shorten aggressively while keeping the strongest human details and local market reference. Remove filler and redundancy.`
+      `Bio exceeds ${getLimitLabel(dest)}. Shorten aggressively while keeping the strongest human details and local market reference. Stay in first person (I/me/my — never he/she). Remove filler and redundancy.`
     );
   }
 
-  async function expandBioToTarget(dest) {
+  async function fillBioToLimit(dest) {
     const text = document.getElementById('bio-output-text')?.textContent || lastGeneratedText || '';
     const measure = measureBio(text, dest);
     const targets = getLengthTargets(dest);
-    await generateBio(
-      `Bio is only ${measure.current} ${targets.unit} — too short for ${dest.label}. Expand to ${targets.targetMin}–${targets.targetIdeal} ${targets.unit} (hard max ${targets.max}). Weave in more specifics from story inputs: who you help, service style, differentiator, local market, community touch. No generic filler.`
-    );
+    await generateBio(buildLengthBoostPrompt(dest, measure, targets.targetMax));
+  }
+
+  async function expandBioToTarget(dest) {
+    return fillBioToLimit(dest);
   }
 
   function restoreSavedBioOutput() {
@@ -1425,13 +1649,13 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
     renderChipGroup('bio-personal-chips', 'personal', PERSONAL_LIFE_CHIPS);
     renderStarterButtons();
     renderDestinationCards();
-    renderRefineChips();
 
     const root = document.getElementById('bio-creator');
     if (!root) return;
 
     root.addEventListener('input', (e) => {
       if (e.target?.id === 'bio-years') updateBioYearsHint();
+      if (e.target?.id === 'bio-existing-paste') updateExistingPasteMeta();
       updateQualityChecklist();
       scheduleDraftSave();
     });
@@ -1458,15 +1682,8 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       updateDestinationPanel();
     });
 
+    document.getElementById('bio-rewrite-existing-btn')?.addEventListener('click', () => rewriteExistingBio());
     document.getElementById('generate-bio-btn')?.addEventListener('click', () => generateBio());
-    document.getElementById('bio-refine-btn')?.addEventListener('click', () => {
-      const fb = (document.getElementById('bio-feedback')?.value || '').trim();
-      if (!fb) {
-        if (typeof window.showToast === 'function') window.showToast('Type a refinement or tap a quick edit chip.');
-        return;
-      }
-      generateBio(fb);
-    });
 
     syncBioFromProfile();
   }
@@ -1476,6 +1693,7 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
   window.syncBioDestinationCards = syncDestinationCards;
   window.generateBio = generateBio;
   window.regenerateBio = regenerateBio;
+  window.rewriteExistingBio = rewriteExistingBio;
   window.cancelBioGeneration = cancelBioGeneration;
   window.scrollToBioForm = function scrollToBioForm() {
     document.getElementById('bio-full-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
