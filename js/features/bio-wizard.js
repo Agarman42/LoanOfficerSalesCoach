@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'bioWizardLastStep';
-  const WIZARD_DOM_VERSION = '4';
+  const WIZARD_DOM_VERSION = '5';
   const LOVES_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -223,6 +223,11 @@
   function validateCurrentStep() {
     showStepError('');
     if (currentStep === 2) {
+      const who = ($('bio-wizard-who')?.value || '').trim();
+      if (who.length < 15) {
+        showStepError('Add who you help most — client type + situation (e.g. first-time buyers in your market).');
+        return false;
+      }
       const loves = ($('bio-wizard-loves')?.value || '').trim();
       if (loves.length < LOVES_MIN_CHARS) {
         showStepError(`Share a bit more about your "why" — at least ${LOVES_MIN_CHARS} characters helps the AI sound like you (not generic boilerplate).`);
@@ -231,10 +236,9 @@
     }
     if (currentStep === 3) {
       const service = ($('bio-wizard-service')?.value || '').trim();
-      const who = ($('bio-wizard-who')?.value || '').trim();
       const diff = ($('bio-wizard-diff')?.value || '').trim();
-      if (!service && !who && !diff) {
-        showStepError('Add at least one note about your service style, who you help, or what makes you different.');
+      if (!service && !diff) {
+        showStepError('Add at least one note about your service style or what makes you different.');
         return false;
       }
     }
@@ -418,11 +422,14 @@
           </div>
 
           <div data-bio-wizard-step="2" class="hidden">
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">This is the #1 thing that separates you from generic LO bios — a real feeling or moment, not "I'm passionate about helping people."</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Credibility, who you serve, then your emotional hook — the combo that separates you from generic LO bios.</p>
             <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-years">Years in the business</label>
             <p class="text-xs text-gray-500 mb-2 m-0">Type <strong>12</strong>, <strong>since 2004</strong>, or <strong>licensed since 2010</strong> — start years auto-update each year.</p>
             <input type="text" id="bio-wizard-years" inputmode="text" autocomplete="off" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 mb-1" placeholder="e.g. 12, since 2004">
             <p id="bio-wizard-years-hint" class="hidden text-xs text-[#00A89D] mb-4 m-0"></p>
+            <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-who">Who you help most <span class="text-[#F15A29]">*</span></label>
+            <p class="text-xs text-gray-500 mb-2 m-0">Client type + situation — first-time, move-up, refi, VA, etc.</p>
+            <textarea id="bio-wizard-who" rows="2" class="w-full p-3 rounded-xl border-2 border-[#F15A29]/35 bg-white dark:bg-gray-800 mb-4" placeholder="First-time buyers in [your market] who want a patient guide, not pressure…"></textarea>
             <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-loves">What do you love most about helping homeowners? <span class="text-[#F15A29]">*</span></label>
             <textarea id="bio-wizard-loves" rows="4" class="w-full p-4 rounded-xl border-2 border-[#00A89D]/50 bg-white dark:bg-gray-800" placeholder="A client moment, a feeling, or feedback you hear often…"></textarea>
           </div>
@@ -431,8 +438,6 @@
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">How clients and agents <em>experience</em> you. Fill at least one — more is better.</p>
             <label class="block text-sm font-semibold mb-1" for="bio-wizard-service">Customer service approach</label>
             <textarea id="bio-wizard-service" rows="2" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 mb-4" placeholder="How you communicate, educate, and show up under pressure…"></textarea>
-            <label class="block text-sm font-semibold mb-1" for="bio-wizard-who">Who you help most</label>
-            <textarea id="bio-wizard-who" rows="2" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 mb-4" placeholder="First-time buyers, move-up families, VA, self-employed…"></textarea>
             <label class="block text-sm font-semibold mb-1" for="bio-wizard-diff">What makes you different</label>
             <textarea id="bio-wizard-diff" rows="2" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="What would your best realtor partner say about you?"></textarea>
           </div>

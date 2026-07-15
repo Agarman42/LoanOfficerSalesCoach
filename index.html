@@ -3644,17 +3644,6 @@
             </button>
         </div>
 
-        <!-- Who you help — priority field -->
-        <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/30 rounded-3xl p-6 shadow-sm">
-            <div class="bio-field-block border-0 p-0 mb-0" data-bio-field="who">
-                <div class="flex items-center gap-2 mb-1"><span data-bio-status="who"></span><label class="font-bold text-[#00A89D] text-lg">Who You Help Most</label><span class="text-[10px] font-bold text-[#F15A29] uppercase">Essential</span></div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Top priority for company bios — helps the right clients self-select. Include <strong>client type</strong> + <strong>situation</strong> (first-time, move-up, refi, etc.).</p>
-                <div id="bio-who-chips" class="flex flex-wrap gap-2 mb-3"></div>
-                <div id="bio-starters-who" class="flex flex-wrap gap-2 mb-3"></div>
-                <textarea id="bio-who-notes" rows="2" class="w-full p-4 rounded-xl border-2 border-[#F15A29]/35 bg-white dark:bg-gray-800" placeholder="e.g., First-time buyers in [your market] who want a patient guide, not pressure."></textarea>
-            </div>
-        </div>
-
         <!-- Step 1: Profile -->
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -3704,6 +3693,14 @@
                         <option>Calm &amp; Reassuring</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="bio-field-block mb-6" data-bio-field="who">
+                <div class="flex items-center gap-2 mb-1"><span data-bio-status="who"></span><label class="font-bold text-[#00A89D] text-lg">Who You Help Most</label><span class="text-[10px] font-bold text-[#F15A29] uppercase">Essential</span></div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Top priority for company bios — helps the right clients self-select. Include <strong>client type</strong> + <strong>situation</strong> (first-time, move-up, refi, etc.).</p>
+                <div id="bio-who-chips" class="flex flex-wrap gap-2 mb-3"></div>
+                <div id="bio-starters-who" class="flex flex-wrap gap-2 mb-3"></div>
+                <textarea id="bio-who-notes" rows="2" class="w-full p-4 rounded-xl border-2 border-[#F15A29]/35 bg-white dark:bg-gray-800" placeholder="e.g., First-time buyers in [your market] who want a patient guide, not pressure."></textarea>
             </div>
 
             <div class="bio-field-block mb-6" data-bio-field="loves-most">
@@ -8447,7 +8444,7 @@
 
 <script src="js/features/user-profile.js?v=20260714-lo-v289"></script>
 <script src="js/features/bio-creator.js?v=20260715-lo-v13"></script>
-<script src="js/features/bio-wizard.js?v=20260715-lo-v5"></script>
+<script src="js/features/bio-wizard.js?v=20260715-lo-v6"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
