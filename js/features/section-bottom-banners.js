@@ -193,7 +193,8 @@
       gradient: 'orange',
       links: [
         { label: 'Social Post Creator', action: 'social-post' },
-        { label: 'Weekly Win Plan', action: 'weekly-win-plan' }
+        { label: 'Weekly Win Plan', action: 'weekly-win-plan' },
+        { label: 'Primary Bio', action: 'bio-creator' }
       ]
     },
     'weekly-win-plan': {
@@ -202,7 +203,8 @@
       gradient: 'orange',
       links: [
         { label: '2026 Business Plan', action: 'planning' },
-        { label: 'AI Coach', action: 'ai-chat' }
+        { label: 'Newsletter', action: 'newsletter-generator' },
+        { label: 'Social posts', action: 'social-post' }
       ]
     }
   };

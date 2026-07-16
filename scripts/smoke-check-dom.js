@@ -39,6 +39,14 @@ const REQUIRED_IDS = [
   'equity-scanner',
   'underwriting-search',
   'client-translation',
+  // Empty states + polish
+  'blog-empty-state',
+  'social-empty-state',
+  'script-empty-state',
+  'equity-empty-state',
+  'nl-empty-state',
+  'generate-script-btn',
+  'generate-social-btn',
   // Profile / backup
   'open-profile-btn'
 ];
