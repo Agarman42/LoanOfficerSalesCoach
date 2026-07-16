@@ -250,7 +250,14 @@
   // ORIGINAL SALES SCRIPT CODE (moved from leaked block in index.html)
   // =====================================================
 
+let _salesScriptGenerating = false;
+
 async function generateSalesScript() {
+    if (_salesScriptGenerating) {
+      if (typeof window.notifyUser === 'function') window.notifyUser('Scripts are already generating — hang tight.', 'info');
+      else if (typeof window.showToast === 'function') window.showToast('Scripts are already generating — hang tight.');
+      return;
+    }
     const output = document.getElementById('script-output');
 
     // Get scenario from the new premium card UI (validate early, before showing loading)
@@ -258,8 +265,16 @@ async function generateSalesScript() {
     let scenario = currentSelectedScenario || '';
 
     if (!scenario) {
-        alert('Please select or type a scenario');
+        if (typeof window.notifyUser === 'function') window.notifyUser('Please select or type a scenario', 'warning');
+        else alert('Please select or type a scenario');
         return;
+    }
+
+    _salesScriptGenerating = true;
+    const genBtn = document.getElementById('generate-script-btn') || document.querySelector('[onclick*="generateSalesScript"]');
+    if (genBtn) {
+      genBtn.disabled = true;
+      genBtn.setAttribute('aria-busy', 'true');
     }
 
     // Use centralized force show for consistent premium progress modal (fixes lost modal)
@@ -444,15 +459,26 @@ Focus on building connection and trust — not closing the deal.`;
 
     } catch (err) {
         console.error('[Sales Script] Generation failed:', err.message, err.stack);
-        renderedHTML = `<p class="text-red-600 text-center py-20 text-xl">
-            Error: ${err.message || 'Failed to generate scripts'}<br>
-            <small>(Check console for details)</small>
+        const friendly = typeof window.formatFriendlyApiError === 'function'
+          ? window.formatFriendlyApiError(err, 'Failed to generate scripts')
+          : (err.message || 'Failed to generate scripts');
+        const safe = String(friendly).replace(/</g, '&lt;');
+        renderedHTML = `<p class="text-red-600 text-center py-20 text-xl max-w-xl mx-auto">
+            ${safe}
         </p>`;
     } finally {
+        _salesScriptGenerating = false;
+        if (genBtn) {
+          genBtn.disabled = false;
+          genBtn.removeAttribute('aria-busy');
+        }
         if (loadingEl) {
             loadingEl.innerHTML = originalLoadingHTML;
             loadingEl.classList.add('hidden');
             loadingEl.style.display = 'none';
+        }
+        if (typeof window.hideLoading === 'function') {
+          try { window.hideLoading(); } catch (e) {}
         }
 
         if (output) {

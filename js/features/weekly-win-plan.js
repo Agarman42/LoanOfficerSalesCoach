@@ -1502,11 +1502,22 @@ function escapeWeeklyICSText(text) {
 // =====================================================
 // WEEKLY WIN PLAN - Unified execution (uses API)
 // =====================================================
+let _weeklyPlanGenerating = false;
+
 async function generateWeeklyPlan(options = {}) {
+    if (_weeklyPlanGenerating) {
+      if (typeof window.notifyUser === 'function') window.notifyUser('Your weekly plan is already building — hang tight.', 'info');
+      return;
+    }
+    _weeklyPlanGenerating = true;
     const feedback = (typeof options === 'string' ? options : options.feedback || '').trim();
     const isFeedbackRegen = !!feedback;
     const btn = document.getElementById('generate-win-plan-btn');
     const container = document.getElementById('weekly-tasks-container');
+    if (btn) {
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+    }
 
     // 2026 Business Plan and Weekly Win Plan are completely separate — this function is WEEKLY ONLY.
     // ABSOLUTE FIRST ACTION: force the custom progress "modal" (we replace #global-loading inner content for Weekly).
@@ -1712,10 +1723,14 @@ async function generateWeeklyPlan(options = {}) {
 
     } catch (error) {
         console.error('[weekly-win-plan] generateWeeklyPlan failed:', error);
+        const friendly = typeof window.formatFriendlyApiError === 'function'
+          ? window.formatFriendlyApiError(error, 'Could not generate your weekly plan right now.')
+          : 'Could not generate your weekly plan right now.';
+        const safe = String(friendly).replace(/</g, '&lt;');
         container.innerHTML = `
             <div class="bg-red-50 dark:bg-red-900/20 border border-red-300 p-6 rounded-2xl">
-                <p class="text-red-600 font-bold">Could not generate your weekly plan right now.</p>
-                <p class="text-sm mt-2">Please make sure the local Grok proxy is running (bash start-proxy.sh) and try again. API proxy on 3000 (HTML serve port like 8080 is fine; use CUSTOM_PROXY_URL if proxy port differs). You can also use the Business Planning section for a full 2026 plan.</p>
+                <p class="text-red-600 font-bold">${safe}</p>
+                <p class="text-sm mt-2">If you are on local dev, keep <code>bash start-proxy.sh</code> open (port 3000). You can also use 2026 Business Plan for the annual map.</p>
             </div>
         `;
         // On failure, restore the pre-gen UI so user can retry easily
@@ -1726,6 +1741,11 @@ async function generateWeeklyPlan(options = {}) {
         const rw = document.getElementById('weekly-plan-results');
         if (rw) rw.classList.add('hidden');
     } finally {
+        _weeklyPlanGenerating = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.removeAttribute('aria-busy');
+        }
         // Restore the original #global-loading markup (the standard spinner + title + message) then hide via the shared helper
         const loadingEl = document.getElementById('global-loading');
         if (loadingEl && loadingEl.dataset.originalContent) {

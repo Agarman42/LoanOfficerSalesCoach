@@ -4253,17 +4253,20 @@ async function generateNewsletter(feedback = '') {
         
         html = '';
         lastGeneratedHTML = '';
+
+        const friendly = typeof window.formatFriendlyApiError === 'function'
+          ? window.formatFriendlyApiError(err, 'Newsletter generation failed. No content was created — please try again.')
+          : 'Newsletter generation failed. No content was created — please try again.';
+        const safeFriendly = String(friendly).replace(/</g, '&lt;');
         
         const errorMessage = `
             <div style="padding: 40px 20px; background: #fff3f3; border: 2px solid #ff4d4d; border-radius: 12px; color: #c00; text-align: center; font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto;">
                 <h2 style="margin: 0 0 20px; font-size: 28px; color: #c00;">Generation Failed</h2>
                 <p style="font-size: 18px; margin: 0 0 15px; line-height: 1.5;">
-                    The AI could not generate the newsletter due to an error.<br>
-                    No content was created to avoid using inaccurate or outdated information.
+                    ${safeFriendly}
                 </p>
                 <p style="font-size: 14px; color: #555; margin: 0 0 25px;">
-                    Please try again in a moment. If this keeps happening, check your connection,<br>
-                    API status, or contact support.
+                    No content was created so you never paste half-finished or inaccurate copy.
                 </p>
                 <button onclick="location.reload()" style="padding: 12px 32px; background: #c00; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
                     Retry Generation
@@ -4279,7 +4282,8 @@ async function generateNewsletter(feedback = '') {
         const rawEl = document.getElementById('nl-html-raw');
         if (rawEl) rawEl.value = '';
         
-        alert('Newsletter generation failed. No content created — please try again.');
+        if (typeof window.notifyUser === 'function') window.notifyUser(friendly, 'error');
+        else alert(friendly);
         
         gtag('event', feedback ? 'edit_newsletter_failed' : 'generate_newsletter_failed', {
             event_category: 'Tool Usage',

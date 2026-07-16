@@ -56,11 +56,14 @@
     };
 
     const toast = document.createElement('div');
-    toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl pointer-events-auto ${colors[type] || colors.info} max-w-sm`;
-    toast.innerHTML = `
-      <i class="fas ${icons[type] || icons.info} text-xl opacity-90"></i>
-      <span class="text-sm font-medium leading-snug">${message}</span>
-    `;
+    toast.className = `flex items-start gap-3 px-5 py-3.5 rounded-2xl shadow-2xl pointer-events-auto ${colors[type] || colors.info} max-w-md`;
+    const icon = document.createElement('i');
+    icon.className = `fas ${icons[type] || icons.info} text-xl opacity-90 mt-0.5 shrink-0`;
+    const span = document.createElement('span');
+    span.className = 'text-sm font-medium leading-snug whitespace-pre-wrap';
+    span.textContent = String(message == null ? '' : message);
+    toast.appendChild(icon);
+    toast.appendChild(span);
 
     container.appendChild(toast);
 
@@ -90,6 +93,63 @@
 
     return toast;
   };
+
+  /**
+   * Preferred user notification helper. Prefer this over alert().
+   * Falls back to native alert if toasts are unavailable.
+   */
+  window.notifyUser = function notifyUser(message, type = 'info', duration) {
+    const msg = String(message == null ? '' : message);
+    const d = duration != null ? duration : Math.min(9000, Math.max(3200, 2200 + msg.length * 18));
+    if (typeof window.showToast === 'function') {
+      return window.showToast(msg, type, d);
+    }
+    window.__nativeAlert ? window.__nativeAlert(msg) : window.alert(msg);
+  };
+
+  /**
+   * Map common API/proxy failures into short, actionable copy.
+   */
+  window.formatFriendlyApiError = function formatFriendlyApiError(err, fallback) {
+    const msg = (err && err.message) || String(err || '') || '';
+    if (/Failed to fetch|proxy|NetworkError/i.test(msg)) {
+      return 'Could not reach the AI proxy. On local dev, run bash start-proxy.sh and open http://localhost:3000.';
+    }
+    if (/api key|Invalid Grok|401|400|Incorrect API/i.test(msg)) {
+      return 'Invalid or missing API key. Click API Key in the header and paste a real xai- key from console.x.ai.';
+    }
+    if (/429|rate limit|temporarily at capacity|Too Many Requests/i.test(msg)) {
+      return 'xAI is temporarily at capacity (rate limit). Wait 30–60 seconds, then try again.';
+    }
+    if (/timed out|AbortError/i.test(msg)) {
+      return 'Request timed out. Try again in a moment, or shorten the request.';
+    }
+    return msg || fallback || 'Something went wrong. Please try again.';
+  };
+
+  // Soft-route most alert() calls through toasts (confirm() stays native).
+  (function patchAlertToToast() {
+    if (window.__alertPatchedToToast) return;
+    window.__alertPatchedToToast = true;
+    const nativeAlert = window.alert.bind(window);
+    window.__nativeAlert = nativeAlert;
+    window.alert = function (message) {
+      const msg = String(message == null ? '' : message);
+      const lineBreaks = (msg.match(/\n/g) || []).length;
+      if (msg.length > 420 || lineBreaks >= 4) {
+        return nativeAlert(msg);
+      }
+      if (typeof window.showToast !== 'function') {
+        return nativeAlert(msg);
+      }
+      let type = 'info';
+      if (/error|fail|invalid|could not|unable/i.test(msg)) type = 'error';
+      else if (/please |select or type|enter |generate .*first|no .*to |clipboard is empty/i.test(msg)) type = 'warning';
+      else if (/saved|copied|downloaded|✅|✓|great choice|success/i.test(msg)) type = 'success';
+      const flat = msg.replace(/\n+/g, ' — ').replace(/\s+/g, ' ').trim();
+      return window.showToast(flat, type, Math.min(8500, 3000 + flat.length * 14));
+    };
+  })();
 
   // =====================================================
   // HEADER SEARCH BAR (fully functional)

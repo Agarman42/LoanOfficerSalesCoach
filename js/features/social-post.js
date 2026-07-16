@@ -285,7 +285,10 @@ Option 3:
 
     } catch (error) {
         console.error(error);
-        output.innerHTML = '<p class="text-red-600 text-center py-20">Error generating posts. Check console or try again.</p>';
+        const friendly = typeof window.formatFriendlyApiError === 'function'
+          ? window.formatFriendlyApiError(error, 'Error generating posts. Please try again.')
+          : 'Error generating posts. Please try again.';
+        output.innerHTML = `<p class="text-red-600 text-center py-20 max-w-xl mx-auto">${String(friendly).replace(/</g, '&lt;')}</p>`;
         output.classList.remove('hidden');
     } finally {
         _socialGenerating = false;
@@ -666,7 +669,14 @@ function loadSavedSocialPlan() {
 }
 
 // === UPDATED generateMonthlyPlan WITH PERSISTENCE ===
+let _monthlyPlanGenerating = false;
+
 async function generateMonthlyPlan() {
+    if (_monthlyPlanGenerating) {
+      if (typeof window.notifyUser === 'function') window.notifyUser('Calendar is already generating — hang tight.', 'info');
+      return;
+    }
+    _monthlyPlanGenerating = true;
     const month = document.getElementById('plan-month').value;
     const year = document.getElementById('plan-year').value;
     const localArea = document.getElementById('plan-areas')?.value.trim() || 'your area';
@@ -966,8 +976,12 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
 
     } catch (err) {
         console.error('Plan generation error:', err);
-        output.innerHTML = `<p class="text-red-600 text-center text-2xl">Error: ${err.message}</p>`;
+        const friendly = typeof window.formatFriendlyApiError === 'function'
+          ? window.formatFriendlyApiError(err, err.message || 'Calendar generation failed')
+          : (err.message || 'Calendar generation failed');
+        output.innerHTML = `<p class="text-red-600 text-center text-2xl max-w-xl mx-auto">${String(friendly).replace(/</g, '&lt;')}</p>`;
     } finally {
+        _monthlyPlanGenerating = false;
         window.hideLoading();
 
         // === RESTORE ORIGINAL GLOBAL LOADING CONTENT ===
