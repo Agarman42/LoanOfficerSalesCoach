@@ -9,6 +9,7 @@
   const DISMISS_PREFIX = 'coachGuideDismissed_';
   const PROFILE_NUDGE_KEY = 'coachProfileNudgeDismissed';
   const CHECKLIST_DISMISS_KEY = 'coachFirstRunChecklistDismissed';
+  const CHECKLIST_VERSION = '2'; // bump when step order/copy changes so hide resets
 
   function getProfile() {
     if (typeof window.getUserProfile === 'function') return window.getUserProfile();
@@ -291,6 +292,20 @@
     }
   }
 
+  function hasBusinessPlan() {
+    try {
+      const html = localStorage.getItem('savedBusinessPlan');
+      if (html && String(html).trim().length > 100) return true;
+      const md = localStorage.getItem('lo_savedBusinessPlanMarkdown');
+      if (md && String(md).trim().length > 80) return true;
+      const ctx = localStorage.getItem('lo_savedBusinessPlanContext');
+      if (ctx && String(ctx).trim().length > 40) return true;
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function getFirstRunItems() {
     const p = getProfile();
     return [
@@ -302,13 +317,19 @@
       },
       {
         id: 'bio',
-        label: 'Save a Primary Bio',
+        label: 'Save a Primary Bio (your voice for all tools)',
         done: !!p.professionalBio,
         run: () => { if (typeof window.showSection === 'function') window.showSection('bio-creator'); }
       },
       {
+        id: 'annual',
+        label: 'Build your 2026 Business Plan (annual map)',
+        done: hasBusinessPlan(),
+        run: () => { if (typeof window.showSection === 'function') window.showSection('planning'); }
+      },
+      {
         id: 'weekly',
-        label: 'Build a Weekly Win Plan',
+        label: 'Build a Weekly Win Plan (execute the map)',
         done: hasWeeklyPlan(),
         run: () => { if (typeof window.showSection === 'function') window.showSection('weekly-win-plan'); }
       },
@@ -373,9 +394,9 @@
       <div class="rounded-2xl border border-[#00A89D]/35 bg-white dark:bg-gray-900 p-4 md:p-5 shadow-sm" role="region" aria-label="Getting started checklist">
         <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
           <div>
-            <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">First-run coach checklist</div>
-            <div class="font-semibold text-[#002B5C] dark:text-white text-sm mt-0.5">Get the suite working for you (${doneCount}/${items.length})</div>
-            <p class="text-xs text-gray-500 m-0 mt-1">Complete these once — every AI tool gets smarter and you always know what to do next.</p>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">Getting started</div>
+            <div class="font-semibold text-[#002B5C] dark:text-white text-sm mt-0.5">Set up your coach (${doneCount}/${items.length})</div>
+            <p class="text-xs text-gray-500 m-0 mt-1">Profile &amp; bio first → <strong>2026 Business Plan</strong> (the map) → <strong>Weekly Win Plan</strong> (this week’s execution) → content you can reuse.</p>
           </div>
           <button type="button" id="coach-checklist-dismiss" class="text-xs px-3 py-1.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 shrink-0">Hide</button>
         </div>
@@ -549,6 +570,11 @@
     if (localStorage.getItem(PROFILE_NUDGE_KEY) === '1') {
       localStorage.removeItem(PROFILE_NUDGE_KEY);
     }
+    // Show checklist again when we change the recommended path (e.g. annual before weekly)
+    if (localStorage.getItem('coachFirstRunChecklistVersion') !== CHECKLIST_VERSION) {
+      localStorage.removeItem(CHECKLIST_DISMISS_KEY);
+      localStorage.setItem('coachFirstRunChecklistVersion', CHECKLIST_VERSION);
+    }
 
     // Stagger heavy UI chrome so first paint isn't blocked
     const paint = () => {
@@ -577,7 +603,14 @@
     }, 800);
 
     window.addEventListener('storage', (e) => {
-      if (e.key === 'userProfile' || e.key === 'socialSavedIdeas' || e.key === 'savedWeeklyPlan') {
+      if (
+        e.key === 'userProfile' ||
+        e.key === 'socialSavedIdeas' ||
+        e.key === 'savedWeeklyPlan' ||
+        e.key === 'savedBusinessPlan' ||
+        e.key === 'lo_savedBusinessPlanMarkdown' ||
+        e.key === 'lo_savedBusinessPlanContext'
+      ) {
         refreshOnProfileChange();
       }
     });
