@@ -1,0 +1,21 @@
+# Render Blueprint — Loan Officer Sales Coach
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: loan-officer-sales-coach
+    runtime: node
+    plan: free
+    # Repo root should contain proxy.js + index.html + package.json
+    buildCommand: npm install --omit=dev
+    startCommand: node proxy.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: XAI_API_KEY
+        sync: false
+      # Optional: lock CORS to your Render URL(s), e.g.
+      # https://loan-officer-sales-coach.onrender.com
+      # Leave unset to allow all origins (default).
+      - key: CORS_ORIGINS
+        sync: false

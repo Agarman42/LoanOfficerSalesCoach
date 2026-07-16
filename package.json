@@ -1,8 +1,11 @@
 {
-  "name": "full-code-with-working-equity-scanner-with-api-keys",
-  "version": "1.0.0",
-  "description": "",
+  "name": "loan-officer-sales-coach",
+  "version": "3.02.0",
+  "description": "Loan Officer Sales Coach — static app + Grok API proxy",
   "main": "proxy.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node proxy.js",
     "extract-perf": "node scripts/finish-extract.mjs",

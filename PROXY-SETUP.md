@@ -55,19 +55,25 @@ The goal for public v2: End users should **never** have to get or paste an xAI A
    - New → Web Service
    - Connect your GitHub repo (or use "Deploy from existing" if already connected)
    - Name it something like `loan-officer-coach-v2`
-   - **Root Directory**: leave as `/` (or the subfolder if you have one)
+   - **Root Directory**: leave blank / `/` (must be the folder that contains `proxy.js` + `index.html` + `package.json`)
    - **Environment**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `node proxy.js`
+   - **Build Command**: `npm install --omit=dev`  (or just `npm install`)
+   - **Start Command**: `node proxy.js`  (must use `process.env.PORT` — proxy.js already does)
+   - **Health Check Path**: `/api/health`
    - **Plan**: Free (or paid if you want no sleep)
+   - Optional: use the included `render.yaml` Blueprint
 
 3. In the Render service settings → **Environment** tab:
    - Add environment variable:
      - Key: `XAI_API_KEY`
      - Value: `xai-` + **your real production key** (create a dedicated one at https://x.ai if you want to keep dev keys separate)
+   - Optional: `NODE_VERSION` = `20`
+   - **Do not** set `CORS_ORIGINS` unless you know your exact public URL(s). A wrong allowlist used to cause Internal Server Error (now fixed to deny safely instead of 500).
    - Save.
 
 4. Deploy. Render will build and give you a public URL like `https://loan-officer-coach-v2.onrender.com`.
+   - First check: open `https://YOUR-SERVICE.onrender.com/api/health` — should return `{"ok":true,...}`.
+   - Then open the site root. If health works but the site does not, the static files / root directory setting is wrong.
 
 5. Users visit that single URL. 
    - The proxy serves the entire app.
