@@ -385,8 +385,18 @@ Do not add extra fluff or marketing language. Be the calm, experienced underwrit
 
     } catch (err) {
       console.error(err);
+      let msg = (err && err.message) || 'Error searching guidelines. Please try again.';
+      if (/Failed to fetch|proxy|NetworkError/i.test(msg)) {
+        msg = 'Could not reach the AI proxy. On local dev, run bash start-proxy.sh and open http://localhost:3000.';
+      } else if (/api key|Invalid Grok|401|400|Incorrect API/i.test(msg)) {
+        msg = 'Invalid or missing API key. Click API Key in the header and paste a real xai- key from console.x.ai.';
+      } else if (/429|rate limit|temporarily at capacity|Too Many Requests/i.test(msg)) {
+        msg = 'xAI is temporarily at capacity (rate limit). Wait 30–60 seconds, then try again.';
+      } else if (/timed out|AbortError/i.test(msg)) {
+        msg = 'Request timed out. Try a shorter question, or try again.';
+      }
       if (output) {
-        output.innerHTML = `<p class="text-red-600">Error searching guidelines. Please try again.</p>`;
+        output.innerHTML = `<p class="text-red-600">${msg.replace(/</g, '&lt;')}</p>`;
         output.classList.remove('hidden');
       }
     } finally {

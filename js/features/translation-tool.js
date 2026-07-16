@@ -102,9 +102,16 @@
 
   function persistTranslationPrefs(targetCode, favorites) {
     try {
+      const partial = {};
+      if (targetCode) partial.translationDefaultTarget = targetCode;
+      if (favorites) partial.translationFavoriteLanguages = favorites;
+      if (!Object.keys(partial).length) return;
+      if (typeof window.patchUserProfile === 'function') {
+        window.patchUserProfile(partial, { silent: true });
+        return;
+      }
       const raw = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      if (targetCode) raw.translationDefaultTarget = targetCode;
-      if (favorites) raw.translationFavoriteLanguages = favorites;
+      Object.assign(raw, partial);
       localStorage.setItem('userProfile', JSON.stringify(raw));
     } catch (e) {}
   }

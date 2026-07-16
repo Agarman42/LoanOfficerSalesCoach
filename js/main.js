@@ -827,6 +827,17 @@
       return;
     }
 
+    // Retire early-boot listeners so clicks/hash don't fire twice
+    if (typeof window.__earlyNavSidebarClick === 'function') {
+      sidebar.removeEventListener('click', window.__earlyNavSidebarClick);
+      window.__earlyNavSidebarClick = null;
+    }
+    if (typeof window.__earlyNavHashChange === 'function') {
+      window.removeEventListener('hashchange', window.__earlyNavHashChange);
+      window.__earlyNavHashChange = null;
+    }
+    window.__mainNavReady = true;
+
     // Delegate clicks on sidebar links that point to sections
     sidebar.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
@@ -1102,17 +1113,35 @@
     const loadingEl = document.getElementById('global-loading');
     if (loadingEl) {
       loadingEl.classList.add('hidden');
+      loadingEl.classList.remove('flex');
       loadingEl.style.setProperty('display', 'none', 'important');
       loadingEl.style.setProperty('visibility', 'hidden', 'important');
+      loadingEl.style.removeProperty('opacity');
+      loadingEl.style.removeProperty('pointer-events');
       // Clean up any plan-specific enrich panel (clear placeholder if present, don't remove the div from static)
       const enrich = loadingEl.querySelector('#plan-enrich-panel');
       if (enrich) {
         enrich.innerHTML = '';
       }
+      // If a tool rewrote the loading card HTML, restore a minimal shell for next use
+      if (loadingEl.dataset.restoreHtml) {
+        try {
+          loadingEl.innerHTML = loadingEl.dataset.restoreHtml;
+          delete loadingEl.dataset.restoreHtml;
+        } catch (e) {}
+      }
     }
     if (loadingInterval) {
       clearInterval(loadingInterval);
       loadingInterval = null;
+    }
+  };
+
+  /** Snapshot global-loading HTML before a tool mutates it (pair with hideLoading). */
+  window.snapshotGlobalLoadingHtml = function snapshotGlobalLoadingHtml() {
+    const loadingEl = document.getElementById('global-loading');
+    if (loadingEl && !loadingEl.dataset.restoreHtml) {
+      loadingEl.dataset.restoreHtml = loadingEl.innerHTML;
     }
   };
 

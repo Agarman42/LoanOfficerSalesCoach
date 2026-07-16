@@ -53,25 +53,33 @@
 
   window.showSection = showSectionEarly;
 
+  function onSidebarClick(e) {
+    // Skip once main.js owns navigation (avoids double showSection / analytics).
+    if (window.__mainNavReady) return;
+    var link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+
+    var href = link.getAttribute('href') || '';
+    if (link.target === '_blank' || !href.startsWith('#')) return;
+
+    e.preventDefault();
+    showSectionEarly(href.replace('#', ''));
+  }
+
+  function onHashChange() {
+    if (window.__mainNavReady) return;
+    var hashId = location.hash.replace('#', '');
+    if (hashId) showSectionEarly(hashId);
+  }
+
   function initEarlyNav() {
     var sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
 
-    sidebar.addEventListener('click', function (e) {
-      var link = e.target.closest('a[href^="#"]');
-      if (!link) return;
-
-      var href = link.getAttribute('href') || '';
-      if (link.target === '_blank' || !href.startsWith('#')) return;
-
-      e.preventDefault();
-      showSectionEarly(href.replace('#', ''));
-    });
-
-    window.addEventListener('hashchange', function () {
-      var hashId = location.hash.replace('#', '');
-      if (hashId) showSectionEarly(hashId);
-    });
+    sidebar.addEventListener('click', onSidebarClick);
+    window.addEventListener('hashchange', onHashChange);
+    window.__earlyNavSidebarClick = onSidebarClick;
+    window.__earlyNavHashChange = onHashChange;
 
     if (location.hash) {
       showSectionEarly(location.hash.replace('#', ''));

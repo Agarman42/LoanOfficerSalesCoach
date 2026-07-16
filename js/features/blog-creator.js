@@ -309,9 +309,14 @@ async function generateBlog(feedback = '') {
             try {
                 const current = getCentralProfile();
                 if (current.localArea !== val || current.market !== val) {
-                    current.localArea = val;
-                    current.market = val;
-                    localStorage.setItem('userProfile', JSON.stringify(current));
+                    if (typeof window.patchUserProfile === 'function') {
+                        window.patchUserProfile({ localArea: val, location: val, market: val }, { silent: true });
+                    } else {
+                        current.localArea = val;
+                        current.market = val;
+                        current.location = val;
+                        localStorage.setItem('userProfile', JSON.stringify(current));
+                    }
                 }
             } catch (e) {}
         }
@@ -1107,9 +1112,14 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
         try {
             const current = getCentralProfile();
             if (current.localArea !== trimmed || current.market !== trimmed) {
-                current.localArea = trimmed;
-                current.market = trimmed; // for compatibility with other tools
-                localStorage.setItem('userProfile', JSON.stringify(current));
+                if (typeof window.patchUserProfile === 'function') {
+                    window.patchUserProfile({ localArea: trimmed, location: trimmed, market: trimmed }, { silent: true });
+                } else {
+                    current.localArea = trimmed;
+                    current.market = trimmed;
+                    current.location = trimmed;
+                    localStorage.setItem('userProfile', JSON.stringify(current));
+                }
             }
         } catch (e) {
             console.warn('[blog-creator] Failed to persist local area', e);

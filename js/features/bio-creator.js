@@ -595,9 +595,14 @@
       el.className = 'mb-6 flex items-start gap-3 rounded-2xl border border-[#00A89D]/40 bg-[#00A89D]/8 px-5 py-4 text-sm';
       el.innerHTML = `
         <i class="fas fa-check-circle text-[#00A89D] mt-0.5"></i>
-        <div>
+        <div class="min-w-0">
           <strong class="text-[#002B5C] dark:text-white">Primary bio saved</strong>
-          <span class="text-gray-600 dark:text-gray-400"> — ${escapeHtml(meta.destinationLabel || 'profile')}. Other AI tools use this for personalization. Generate a new version for another platform anytime.</span>
+          <span class="text-gray-600 dark:text-gray-400"> — ${escapeHtml(meta.destinationLabel || 'profile')}. Newsletter, Blog, Social &amp; AI Coach will use this voice.</span>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <button type="button" class="text-[11px] px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition" onclick="if(typeof window.showSection==='function')window.showSection('newsletter-generator')">Newsletter →</button>
+            <button type="button" class="text-[11px] px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition" onclick="if(typeof window.showSection==='function')window.showSection('ai-chat')">AI Coach →</button>
+            <button type="button" class="text-[11px] px-3 py-1 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] transition" onclick="if(typeof window.showSection==='function')window.showSection('planning')">2026 Plan →</button>
+          </div>
         </div>`;
       el.classList.remove('hidden');
     } else {

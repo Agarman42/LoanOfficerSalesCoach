@@ -1044,6 +1044,21 @@
     document.getElementById('profile-open-wizard')?.addEventListener('click', () => {
       startProfileWizard(1);
     });
+
+    document.getElementById('profile-export-data')?.addEventListener('click', () => {
+      if (typeof window.exportCoachDataPack === 'function') window.exportCoachDataPack();
+    });
+    document.getElementById('profile-import-data')?.addEventListener('click', () => {
+      document.getElementById('profile-import-file')?.click();
+    });
+    document.getElementById('profile-import-file')?.addEventListener('change', (e) => {
+      const file = e.target?.files?.[0];
+      if (file && typeof window.importCoachDataPack === 'function') {
+        window.importCoachDataPack(file).finally(() => {
+          e.target.value = '';
+        });
+      }
+    });
   }
 
   function paintHeaderProfileBadge() {
@@ -1127,6 +1142,98 @@
   window.switchProfileTab = switchProfileTab;
   window.refreshProfileUI = refreshProfileUI;
   window.startProfileWizard = startProfileWizard;
+
+  // --- Export / import coach data pack (profile + plans + key content drafts) ---
+  const EXPORT_KEYS = [
+    'userProfile',
+    'winPlanSetup',
+    'savedBusinessPlan',
+    'lo_savedBusinessPlanContext',
+    'lo_savedBusinessPlanMarkdown',
+    'savedWeeklyPlan',
+    'weeklyCheckedTasks',
+    'winPlanStreak',
+    'aiChatHistory',
+    'lastNewsletterHTML',
+    'lastBlogOutput',
+    'lastSocialPlanHTML',
+    'lastSocialPlanMonth',
+    'lastSocialPlanYear',
+    'socialSavedIdeas'
+  ];
+
+  function exportCoachDataPack() {
+    const pack = {
+      app: 'LoanOfficerSalesCoach',
+      version: window.APP_VERSION || 'unknown',
+      exportedAt: new Date().toISOString(),
+      data: {}
+    };
+    EXPORT_KEYS.forEach((key) => {
+      try {
+        const val = localStorage.getItem(key);
+        if (val != null && val !== '') pack.data[key] = val;
+      } catch (e) {}
+    });
+    const blob = new Blob([JSON.stringify(pack, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lo-sales-coach-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    if (typeof window.showToast === 'function') {
+      window.showToast('Backup downloaded — profile, plans, and key drafts included.');
+    }
+  }
+
+  async function importCoachDataPack(file) {
+    if (!file) return;
+    const text = await file.text();
+    let pack;
+    try {
+      pack = JSON.parse(text);
+    } catch (e) {
+      if (typeof window.showToast === 'function') window.showToast('Invalid backup file (not JSON).');
+      else alert('Invalid backup file (not JSON).');
+      return;
+    }
+    const data = pack && pack.data && typeof pack.data === 'object' ? pack.data : pack;
+    if (!data || typeof data !== 'object') {
+      if (typeof window.showToast === 'function') window.showToast('Backup file has no data.');
+      return;
+    }
+    let count = 0;
+    EXPORT_KEYS.forEach((key) => {
+      if (data[key] != null && data[key] !== '') {
+        try {
+          localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+          count += 1;
+        } catch (e) {}
+      }
+    });
+    // Prefer normalized profile if present
+    try {
+      if (data.userProfile) {
+        const raw = typeof data.userProfile === 'string' ? JSON.parse(data.userProfile) : data.userProfile;
+        persistProfile(raw, false, false);
+      }
+    } catch (e) {}
+    refreshProfileUI();
+    if (typeof window.restoreSavedBusinessPlan === 'function') {
+      try { window.restoreSavedBusinessPlan(); } catch (e) {}
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Imported ${count} data key(s). Refresh if a tool looks stale.`);
+    } else {
+      alert(`Imported ${count} data key(s).`);
+    }
+  }
+
+  window.exportCoachDataPack = exportCoachDataPack;
+  window.importCoachDataPack = importCoachDataPack;
 
   // Paint header badge immediately from localStorage (no modal DOM required)
   paintHeaderProfileBadge();

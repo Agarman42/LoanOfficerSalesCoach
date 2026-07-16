@@ -457,6 +457,13 @@ Make the entire plan feel like an elite, professional business document that a l
     } finally {
         window.hideLoading();
 
+        const genBtnDone = document.getElementById('generate-plan-btn');
+        if (genBtnDone) {
+            genBtnDone.dataset.generating = '0';
+            genBtnDone.disabled = false;
+            genBtnDone.removeAttribute('aria-busy');
+        }
+
         const planContainer = document.getElementById(targetOutputId);
 
         if (planContainer) {
@@ -3719,6 +3726,17 @@ function wireGeneratePlanButton() {
     try {
       console.log('%c[weekly-win-plan] Business Planning "Build My 2026 Plan — Make It Real & Fun" button clicked', 'color:lime');
       if (ev && ev.preventDefault) ev.preventDefault();
+
+      const genBtn = document.getElementById('generate-plan-btn');
+      if (genBtn && genBtn.dataset.generating === '1') {
+        if (typeof window.showToast === 'function') window.showToast('Already building your plan — hang tight.');
+        return;
+      }
+      if (genBtn) {
+        genBtn.dataset.generating = '1';
+        genBtn.disabled = true;
+        genBtn.setAttribute('aria-busy', 'true');
+      }
 
       // Force the rich progress modal (enrich panel + tips) as the VERY FIRST thing. This guarantees the user sees the modal instead of any note in #plan-output.
       if (typeof window.forceShowGlobalLoading === 'function') {

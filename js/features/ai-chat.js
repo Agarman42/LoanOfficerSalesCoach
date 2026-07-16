@@ -116,7 +116,17 @@ async function sendChatMessage() {
         }
     } catch (error) {
         console.error(error);
-        addMessage('assistant', 'Error: Could not get response. Check console or try again.', false);
+        let msg = (error && error.message) || 'Could not get a response.';
+        if (/Failed to fetch|proxy|NetworkError/i.test(msg)) {
+            msg = 'Could not reach the AI proxy. On local dev, run `bash start-proxy.sh` and open http://localhost:3000.';
+        } else if (/api key|Invalid Grok|401|400|Incorrect API/i.test(msg)) {
+            msg = 'Invalid or missing API key. Click **API Key** in the header and paste a real `xai-` key from console.x.ai.';
+        } else if (/429|rate limit|temporarily at capacity|Too Many Requests/i.test(msg)) {
+            msg = 'xAI is temporarily at capacity (rate limit). Wait 30–60 seconds, then try again.';
+        } else if (/timed out|AbortError/i.test(msg)) {
+            msg = 'Request timed out. Try a shorter question, or try again in a moment.';
+        }
+        addMessage('assistant', msg, false);
     } finally {
         // Remove thinking indicator
         if (thinkingEl && thinkingEl.parentNode) {
