@@ -17,24 +17,23 @@
 </script>
     <script src="js/analytics.js?v=20260709-lo-v312"></script>
     
+    <!-- Tailwind CDN is heavy on this 1MB page; load first, then defer non-critical libs -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- === PDF.js — REQUIRED for Blog Document Upload === -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        // This tells pdf.js where to find its worker file (most common reason it fails)
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>      
-    <!-- SWITCH TO CLASS MODE -->
+    <!-- SWITCH TO CLASS MODE (must stay before body paint for dark mode) -->
     <script>
       tailwind.config = {
         darkMode: 'class'
       }
     </script>
+    <!-- Heavy libs deferred: not needed for first paint / navigation -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- === PDF.js — Blog Document Upload (defer; blog checks when used) === -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script defer src="js/pdf-worker-boot.js?v=20260715-lo-v1"></script>
     <script>
       (function () {
         try {
@@ -55,7 +54,7 @@
     <script src="js/api.js?v=20260714-lo-v4"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260715-lo-v290"></script>
+    <script src="js/ui.js?v=20260715-lo-v291"></script>
     <script src="js/features/app-feedback.js?v=20260709-lo-v309"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
@@ -7791,7 +7790,7 @@
 <script>window.TRANSLATION_COACH_VARIANT = 'lo';</script>
 <script src="js/features/translation-tool.js?v=20260715-tr-v265"></script>
 <script src="js/features/value-vault.js?v=20260623-lo-v222"></script>
-<script src="js/features/onboarding-coach.js?v=20260715-lo-v223"></script>
+<script defer src="js/features/onboarding-coach.js?v=20260715-lo-v224"></script>
 <script src="js/features/fact-vault-ui.js?v=20260623-lo-v222"></script>
 
 <script defer src="js/features/referral-event-modals.js?v=20260623-lo-v222"></script>
@@ -8980,9 +8979,9 @@
 <div id="app-version-line" data-app-name="Ultimate Loan Officer Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Ultimate Loan Officer Sales Coach • v… • … • Render
 </div>
-<script src="js/features/section-bottom-banners.js?v=20260715-lo-v223"></script>
-<script src="js/features/coach-polish.js?v=20260715-lo-v1"></script>
-<script src="js/app-version.js?v=20260715-lo-v300"></script>
+<script defer src="js/features/section-bottom-banners.js?v=20260715-lo-v223"></script>
+<script defer src="js/features/coach-polish.js?v=20260715-lo-v2"></script>
+<script src="js/app-version.js?v=20260715-lo-v301"></script>
 
 </body>
 </html>

@@ -911,12 +911,23 @@
     });
   }
 
-  // Boot the UI helpers when DOM is ready
+  // Boot the UI helpers when DOM is ready — keep this light; unstick is expensive
   document.addEventListener('DOMContentLoaded', () => {
     // Legacy header search superseded by js/features/global-search.js (command palette)
-    portalNestedFixedModals();
-    wireModalBackdropCloses();
-    if (typeof window.unstickPage === 'function') window.unstickPage();
+    const boot = () => {
+      try {
+        portalNestedFixedModals();
+        wireModalBackdropCloses();
+      } catch (e) {
+        console.warn('[ui] modal boot failed', e);
+      }
+    };
+    // Yield past first paint; avoid running unstickPage on every load (scans entire DOM)
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(boot, { timeout: 2000 });
+    } else {
+      setTimeout(boot, 0);
+    }
   });
 
   // Also expose a manual clear if needed

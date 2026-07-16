@@ -550,14 +550,31 @@
       localStorage.removeItem(PROFILE_NUDGE_KEY);
     }
 
-    renderProfileNudge();
-    renderFirstRunChecklist();
-    applyProfileAwareStartHere();
-    injectVaultWeeklyBridge();
-    injectWeeklyVaultBridge();
+    // Stagger heavy UI chrome so first paint isn't blocked
+    const paint = () => {
+      try {
+        renderProfileNudge();
+        renderFirstRunChecklist();
+        applyProfileAwareStartHere();
+        const visible = document.querySelector('main section:not(.hidden)');
+        if (visible?.id) window.onCoachSectionShown(visible.id);
+      } catch (e) {
+        console.warn('[onboarding-coach] paint failed', e);
+      }
+    };
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(paint, { timeout: 2500 });
+    } else {
+      setTimeout(paint, 50);
+    }
 
-    const visible = document.querySelector('main section:not(.hidden)');
-    if (visible?.id) window.onCoachSectionShown(visible.id);
+    // Bridges only when those sections matter
+    setTimeout(() => {
+      try {
+        injectVaultWeeklyBridge();
+        injectWeeklyVaultBridge();
+      } catch (e) {}
+    }, 800);
 
     window.addEventListener('storage', (e) => {
       if (e.key === 'userProfile' || e.key === 'socialSavedIdeas' || e.key === 'savedWeeklyPlan') {

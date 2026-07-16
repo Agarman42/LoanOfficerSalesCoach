@@ -1,6 +1,9 @@
 /**
  * Coach polish — empty states, generate-button a11y, and post-output coaching handoffs.
  * LO Sales Coach only. Safe no-ops if DOM pieces are missing.
+ *
+ * IMPORTANT: avoid MutationObserver feedback loops (setting attributes / rewriting
+ * handoff HTML must not re-enter the same observer).
  */
 (function () {
   'use strict';
@@ -218,12 +221,15 @@
   function mountHandoff(container, key) {
     if (!container || !HANDOFF_SPECS[key]) return;
     let bar = container.querySelector(`[data-coach-handoff="${key}"]`);
+    // Already mounted — do not rewrite (prevents MutationObserver loops)
+    if (bar && bar.dataset.coachHandoffReady === '1') return;
     if (!bar) {
       bar = document.createElement('div');
       bar.dataset.coachHandoff = key;
       container.appendChild(bar);
     }
     bar.innerHTML = handoffBar(HANDOFF_SPECS[key]);
+    bar.dataset.coachHandoffReady = '1';
     bindGoButtons(bar);
   }
 
@@ -232,10 +238,20 @@
     showEmpty,
     hideEmpty,
     mountHandoff,
-    go
+    go,
+    refreshOutput: refreshOneOutput
   };
 
-  // --- Generate button a11y (aria-busy while disabled) ---
+  // --- Generate button a11y (no MutationObserver — attribute writes re-enter observers) ---
+  function syncBusy(btn) {
+    if (!btn) return;
+    const busy = btn.disabled || btn.dataset.generating === '1';
+    const next = busy ? 'true' : 'false';
+    if (btn.getAttribute('aria-busy') !== next) {
+      btn.setAttribute('aria-busy', next);
+    }
+  }
+
   function wireGenerateA11y() {
     const selectors = [
       '#generate-bio-btn',
@@ -260,84 +276,121 @@
           (btn.textContent || '').replace(/\s+/g, ' ').trim() ||
           'Generate';
         if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', label);
-        const obs = new MutationObserver(() => {
-          const busy = btn.disabled || btn.getAttribute('aria-busy') === 'true' || btn.dataset.generating === '1';
-          btn.setAttribute('aria-busy', busy ? 'true' : 'false');
+        syncBusy(btn);
+        // Lightweight attribute watchers only — never set the same attr that re-fires forever
+        btn.addEventListener('click', () => {
+          // Generators set disabled shortly after click; sync next frames
+          requestAnimationFrame(() => syncBusy(btn));
+          setTimeout(() => syncBusy(btn), 50);
+          setTimeout(() => syncBusy(btn), 500);
         });
-        obs.observe(btn, { attributes: true, attributeFilter: ['disabled', 'aria-busy', 'data-generating', 'class'] });
       });
     });
   }
 
-  // --- Hook generators: hide empty + show handoff when outputs appear ---
-  function observeOutput(outputId, emptyId, handoffKey) {
-    const out = document.getElementById(outputId);
-    if (!out) return;
-    const apply = () => {
-      const hidden = out.classList.contains('hidden');
-      // Ignore coach handoff nodes when measuring "real" content
-      let textLen = 0;
-      let meaningfulChildren = 0;
-      Array.from(out.childNodes).forEach((node) => {
-        if (node.nodeType === 1 && node.dataset && node.dataset.coachHandoff) return;
-        if (node.nodeType === 1 && node.id === 'nl-empty-state') return;
-        if (node.nodeType === 3) textLen += (node.textContent || '').trim().length;
-        if (node.nodeType === 1) {
-          textLen += (node.textContent || '').trim().length;
+  function measureHasContent(out) {
+    let textLen = 0;
+    let meaningfulChildren = 0;
+    Array.from(out.childNodes).forEach((node) => {
+      if (node.nodeType === 1 && node.dataset && node.dataset.coachHandoff) return;
+      if (node.nodeType === 1 && node.id === 'nl-empty-state') return;
+      if (node.nodeType === 3) textLen += (node.textContent || '').trim().length;
+      if (node.nodeType === 1) {
+        const t = (node.textContent || '').trim().length;
+        // Ignore shell-only wrappers with almost no text
+        if (t > 20) {
+          textLen += t;
           meaningfulChildren += 1;
         }
-      });
-      const hasContent = textLen > 40 || meaningfulChildren > 0;
-      if (!hidden && hasContent) {
-        if (emptyId) hideEmpty(emptyId);
-        if (handoffKey) mountHandoff(out, handoffKey);
-      } else if (emptyId && (hidden || !hasContent)) {
-        showEmpty(emptyId);
+      }
+    });
+    return textLen > 60 || meaningfulChildren > 0;
+  }
+
+  const outputPairs = [
+    ['blog-output', 'blog-empty-state', 'blog'],
+    ['social-output', 'social-empty-state', 'social'],
+    ['script-output', 'script-empty-state', 'scripts'],
+    ['equity-output', 'equity-empty-state', 'equity'],
+    ['nl-preview', 'nl-empty-state', 'newsletter']
+  ];
+
+  function refreshOneOutput(outputId, emptyId, handoffKey) {
+    const out = document.getElementById(outputId);
+    if (!out) return;
+    const hidden = out.classList.contains('hidden');
+    const hasContent = measureHasContent(out);
+    if (!hidden && hasContent) {
+      if (emptyId) hideEmpty(emptyId);
+      if (handoffKey) mountHandoff(out, handoffKey);
+    } else if (emptyId && (hidden || !hasContent)) {
+      showEmpty(emptyId);
+    }
+  }
+
+  function refreshAllOutputs() {
+    outputPairs.forEach(([out, empty, handoff]) => refreshOneOutput(out, empty, handoff));
+  }
+
+  // --- Hook generators with debounced observers + re-entry guard ---
+  function observeOutput(outputId, emptyId, handoffKey) {
+    const out = document.getElementById(outputId);
+    if (!out || out._coachObs) return;
+    let scheduled = false;
+    let applying = false;
+    const apply = () => {
+      if (applying) return;
+      applying = true;
+      try {
+        refreshOneOutput(outputId, emptyId, handoffKey);
+      } finally {
+        applying = false;
+        scheduled = false;
       }
     };
+    const schedule = () => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(apply);
+    };
+    out._coachObs = true;
     apply();
-    const obs = new MutationObserver(apply);
-    obs.observe(out, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    const obs = new MutationObserver(schedule);
+    // childList only on direct children — not subtree (avoids handoff rewrites thrashing)
+    obs.observe(out, { childList: true, attributes: true, attributeFilter: ['class', 'style'] });
   }
 
   function ensureWeeklyHandoff() {
     const results = document.getElementById('weekly-plan-results');
     if (!results || results.classList.contains('hidden')) return;
     let host = document.getElementById('weekly-coach-handoff');
+    if (host && host.dataset.coachHandoffReady === '1') return;
     if (!host) {
       host = document.createElement('div');
       host.id = 'weekly-coach-handoff';
       results.appendChild(host);
     }
     host.innerHTML = handoffBar(HANDOFF_SPECS.weekly);
+    host.dataset.coachHandoffReady = '1';
     bindGoButtons(host);
   }
 
   function init() {
     Object.keys(EMPTY_SPECS).forEach(ensureEmptyState);
-    // Initial visibility: show empty when paired output is hidden
-    [
-      ['blog-output', 'blog-empty-state', 'blog'],
-      ['social-output', 'social-empty-state', 'social'],
-      ['script-output', 'script-empty-state', 'scripts'],
-      ['equity-output', 'equity-empty-state', 'equity'],
-      ['nl-preview', 'nl-empty-state', 'newsletter']
-    ].forEach(([out, empty, handoff]) => {
+    outputPairs.forEach(([out, empty, handoff]) => {
       const o = document.getElementById(out);
       if (o && o.classList.contains('hidden')) showEmpty(empty);
+      else if (o && !measureHasContent(o)) showEmpty(empty);
       else if (o) hideEmpty(empty);
       observeOutput(out, empty, handoff);
     });
 
-    // Newsletter preview is often empty but visible — treat empty content as empty state
-    const nl = document.getElementById('nl-preview');
-    if (nl && !(nl.textContent || '').trim()) showEmpty('nl-empty-state');
-
     wireGenerateA11y();
 
-    // Weekly results handoff when shown
     const weeklyResults = document.getElementById('weekly-plan-results');
-    if (weeklyResults) {
+    if (weeklyResults && !weeklyResults._coachObs) {
+      weeklyResults._coachObs = true;
+      // attributes only — do not watch childList (handoff injection would loop)
       const wObs = new MutationObserver(() => {
         if (!weeklyResults.classList.contains('hidden')) ensureWeeklyHandoff();
       });
@@ -345,21 +398,37 @@
       if (!weeklyResults.classList.contains('hidden')) ensureWeeklyHandoff();
     }
 
-    // Also re-check after section navigation (content injects later)
     document.addEventListener('click', (e) => {
       const link = e.target.closest('#sidebar a[href^="#"]');
       if (!link) return;
       setTimeout(() => {
         wireGenerateA11y();
         ensureWeeklyHandoff();
+        refreshAllOutputs();
       }, 400);
     });
   }
 
+  function scheduleInit() {
+    // Yield so the giant HTML + Tailwind can settle before we touch the DOM
+    const run = () => {
+      try {
+        init();
+      } catch (e) {
+        console.warn('[coach-polish] init failed', e);
+      }
+    };
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(run, { timeout: 2500 });
+    } else {
+      setTimeout(run, 0);
+    }
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', scheduleInit);
   } else {
-    init();
+    scheduleInit();
   }
 
   console.log('%c[coach-polish] Empty states, a11y, and handoffs ready', 'color:#00A89D');
