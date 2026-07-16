@@ -525,6 +525,55 @@
   }
   window.resetModalScroll = resetModalScroll;
 
+  const FOCUSABLE_SEL =
+    'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function getFocusable(modal) {
+    if (!modal) return [];
+    return Array.from(modal.querySelectorAll(FOCUSABLE_SEL)).filter((el) => {
+      if (el.closest('[aria-hidden="true"]') && el.closest('[aria-hidden="true"]') !== modal) return false;
+      const style = window.getComputedStyle(el);
+      return style.display !== 'none' && style.visibility !== 'hidden' && !el.hasAttribute('disabled');
+    });
+  }
+
+  function trapModalFocus(e, modal) {
+    if (e.key !== 'Tab' || !modal) return;
+    const focusables = getFocusable(modal);
+    if (!focusables.length) {
+      e.preventDefault();
+      if (modal.focus) modal.focus();
+      return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first || !modal.contains(document.activeElement)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else if (document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  function attachModalFocusTrap(modal) {
+    if (!modal || modal._focusTrapAttached) return;
+    modal._focusTrapAttached = true;
+    if (!modal.hasAttribute('tabindex')) modal.setAttribute('tabindex', '-1');
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        // Prefer dedicated close paths so tool-specific cleanup still runs
+        e.preventDefault();
+        e.stopPropagation();
+        closeModalFromBackdrop(modal, modal.id || '');
+        return;
+      }
+      trapModalFocus(e, modal);
+    });
+  }
+
   window.openAppModal = function openAppModal(modal) {
     if (!modal) return;
     window.ensureModalInViewport(modal);
@@ -538,8 +587,24 @@
     modal.style.inset = '0';
     modal.style.zIndex = modal.style.zIndex || '9999';
     modal.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('role', modal.getAttribute('role') || 'dialog');
+    if (!modal.hasAttribute('aria-modal')) modal.setAttribute('aria-modal', 'true');
     resetModalScroll(modal);
     document.body.classList.add('modal-open');
+
+    modal._prevFocus = document.activeElement;
+    attachModalFocusTrap(modal);
+    requestAnimationFrame(() => {
+      const focusables = getFocusable(modal);
+      const preferred =
+        modal.querySelector('[data-autofocus]') ||
+        focusables.find((el) => el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') ||
+        focusables[0] ||
+        modal;
+      try { preferred.focus({ preventScroll: true }); } catch (e) {
+        try { preferred.focus(); } catch (e2) {}
+      }
+    });
   };
 
   window.closeAppModal = function closeAppModal(modal) {
@@ -551,6 +616,13 @@
     modal.style.pointerEvents = 'none';
     modal.setAttribute('aria-hidden', 'true');
     window.releaseModalScrollLock();
+    const prev = modal._prevFocus;
+    modal._prevFocus = null;
+    if (prev && typeof prev.focus === 'function' && document.contains(prev)) {
+      try { prev.focus({ preventScroll: true }); } catch (e) {
+        try { prev.focus(); } catch (e2) {}
+      }
+    }
   };
 
   /** Emergency reset — clears stuck overlays / scroll lock (safe to call anytime) */

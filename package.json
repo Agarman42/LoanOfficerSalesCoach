@@ -8,7 +8,8 @@
     "extract-perf": "node scripts/finish-extract.mjs",
     "extract-perf:py": "python3 scripts/chunk-extract.py",
     "audit:vault": "node scripts/audit-vault-ids.mjs",
-    "smoke": "node scripts/smoke-check-dom.js",
+    "smoke": "node scripts/smoke-check-dom.js && node scripts/smoke-check-js.js",
+    "smoke:browser": "node scripts/smoke-browser.mjs",
     "test": "npm run smoke"
   },
   "keywords": [],

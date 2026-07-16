@@ -1,13 +1,14 @@
 /**
  * js/features/onboarding-coach.js
- * Sprint C/D: profile nudge, section micro-guides, profile-aware Start Here,
- * Weekly Win Plan ↔ Value Vault cross-links.
+ * Profile nudge, first-run checklist, section micro-guides, profile-aware Start Here,
+ * tool-specific profile tips, Weekly Win Plan ↔ Value Vault cross-links.
  */
 (function () {
   'use strict';
 
   const DISMISS_PREFIX = 'coachGuideDismissed_';
   const PROFILE_NUDGE_KEY = 'coachProfileNudgeDismissed';
+  const CHECKLIST_DISMISS_KEY = 'coachFirstRunChecklistDismissed';
 
   function getProfile() {
     if (typeof window.getUserProfile === 'function') return window.getUserProfile();
@@ -148,7 +149,8 @@
       icon: 'fa-fire',
       title: 'Start here this week',
       body: 'Generate your plan, block 2–3 power hours on your calendar, then execute one partner touch from Value Vault the same day.',
-      action: { label: 'Pick a Pop-By →', section: 'value-vault' }
+      action: { label: 'Pick a Pop-By →', section: 'value-vault' },
+      needsProfile: ['name', 'location']
     },
     'value-vault': {
       icon: 'fa-gift',
@@ -174,13 +176,236 @@
       body: 'Open one expanded pillar for copy-ready posts, save 2 winners to My Saved Items, and schedule them in Social Post Creator.',
       action: { label: 'Weekly Win Plan →', section: 'weekly-win-plan' }
     },
+    'social-post': {
+      icon: 'fa-magic',
+      title: 'Batch content in minutes',
+      body: 'Generate 3 post options or a full 30-day calendar. Save winners to My Saved Items, then protect posting time in Weekly Win Plan.',
+      action: { label: 'Weekly Win Plan →', section: 'weekly-win-plan' },
+      needsProfile: ['name', 'location', 'tone']
+    },
     'equity-scanner': {
       icon: 'fa-chart-line',
       title: 'Opportunity hunting',
       body: 'Upload or review your pipeline, prioritize PMI-drop and move-up candidates, and use the outreach scripts with your voice.',
-      action: { label: 'Objection help →', section: 'value-vault', pillar: 4 }
+      action: { label: 'Sales scripts →', section: 'sales-script' }
+    },
+    'bio-creator': {
+      icon: 'fa-id-card',
+      title: 'Your voice starts with one bio',
+      body: 'Save a Primary Bio so Newsletter, Blog, Social, and AI Coach speak like you. Company website = 750 characters is the default standard.',
+      action: { label: 'Open My Profile →', openProfile: true },
+      needsProfile: ['name', 'location']
+    },
+    'blog': {
+      icon: 'fa-newspaper',
+      title: 'Authority content, full package',
+      body: 'One generate = blog + social caption + Google post + Reel. Add your market in the form (auto-saves to profile) for stronger GEO.',
+      action: { label: 'Newsletter next →', section: 'newsletter-generator' },
+      needsProfile: ['location']
+    },
+    'newsletter-generator': {
+      icon: 'fa-envelope-open-text',
+      title: 'Stay top of mind monthly',
+      body: 'Write a real Personal Update first, then generate. Review the preview before copy/download — compliance-safe by design.',
+      action: { label: 'Primary bio →', section: 'bio-creator' },
+      needsProfile: ['name', 'location']
+    },
+    'sales-script': {
+      icon: 'fa-comments',
+      title: 'Sound human under pressure',
+      body: 'Pick a scenario, add context, generate 4 scripts. Save keepers to My Saved Items before your next call block.',
+      action: { label: 'Equity opportunities →', section: 'equity-scanner' },
+      needsProfile: ['name', 'tone']
+    },
+    'planning': {
+      icon: 'fa-chart-line',
+      title: 'Annual map → weekly execution',
+      body: 'Build your 2026 plan once, then open Weekly Win Plan to turn pillars into this week’s protected blocks.',
+      action: { label: 'Weekly Win Plan →', section: 'weekly-win-plan' },
+      needsProfile: ['name', 'location']
+    },
+    'ai-chat': {
+      icon: 'fa-robot',
+      title: 'Profile-aware coaching',
+      body: 'Ask anything — voice, market, and bio from My Profile shape the answers. Complete name + market if replies feel generic.',
+      action: { label: 'Complete Profile →', openProfile: true },
+      needsProfile: ['name', 'location']
     }
   };
+
+  function profileFieldMissing(field) {
+    const p = getProfile();
+    if (field === 'name') return !p.name;
+    if (field === 'location') return !(p.location || p.market || p.localArea);
+    if (field === 'tone') return !p.tone;
+    if (field === 'bio') return !p.professionalBio;
+    return false;
+  }
+
+  function renderToolProfileTip(sectionId) {
+    const guide = SECTION_GUIDES[sectionId];
+    const section = document.getElementById(sectionId);
+    if (!guide?.needsProfile || !section) return;
+    const missing = guide.needsProfile.filter(profileFieldMissing);
+    const existing = section.querySelector('.coach-tool-profile-tip');
+    if (!missing.length) {
+      existing?.remove();
+      return;
+    }
+    const labels = { name: 'name', location: 'market', tone: 'tone', bio: 'primary bio' };
+    const list = missing.map((m) => labels[m] || m).join(', ');
+    let el = existing;
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'coach-tool-profile-tip mb-4';
+      const anchor = section.querySelector('.coach-section-guide') || section.querySelector('h2')?.closest('.text-center') || section.firstElementChild;
+      if (anchor) anchor.insertAdjacentElement('afterend', el);
+      else section.insertBefore(el, section.firstChild);
+    }
+    el.innerHTML = `
+      <div class="rounded-xl border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+        <span class="text-amber-900 dark:text-amber-100"><i class="fas fa-user-edit mr-1.5 text-amber-600"></i>Add <strong>${list}</strong> in My Profile so this tool personalizes better.</span>
+        <button type="button" class="coach-tool-profile-open text-xs px-3 py-1.5 rounded-lg bg-[#002B5C] text-white font-semibold hover:bg-black shrink-0">Open Profile</button>
+      </div>`;
+    el.querySelector('.coach-tool-profile-open')?.addEventListener('click', () => {
+      if (typeof window.openUserProfile === 'function') window.openUserProfile(true);
+    });
+  }
+
+  function savedItemsCount() {
+    try {
+      return JSON.parse(localStorage.getItem('socialSavedIdeas') || '[]').length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function hasWeeklyPlan() {
+    try {
+      const raw = localStorage.getItem('savedWeeklyPlan');
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      return !!(parsed && (parsed.days || parsed.length));
+    } catch (e) {
+      return !!localStorage.getItem('savedWeeklyPlan');
+    }
+  }
+
+  function getFirstRunItems() {
+    const p = getProfile();
+    return [
+      {
+        id: 'profile',
+        label: 'Add name + market in My Profile',
+        done: !!(p.name && (p.location || p.market || p.localArea)),
+        run: () => { if (typeof window.openUserProfile === 'function') window.openUserProfile(true); }
+      },
+      {
+        id: 'bio',
+        label: 'Save a Primary Bio',
+        done: !!p.professionalBio,
+        run: () => { if (typeof window.showSection === 'function') window.showSection('bio-creator'); }
+      },
+      {
+        id: 'weekly',
+        label: 'Build a Weekly Win Plan',
+        done: hasWeeklyPlan(),
+        run: () => { if (typeof window.showSection === 'function') window.showSection('weekly-win-plan'); }
+      },
+      {
+        id: 'content',
+        label: 'Generate social, blog, or newsletter content',
+        done: (() => {
+          try {
+            const items = JSON.parse(localStorage.getItem('socialSavedIdeas') || '[]');
+            return items.some((i) => ['social', 'blog', 'newsletter'].includes(i.type));
+          } catch (e) {
+            return false;
+          }
+        })() || !!localStorage.getItem('lastBlogOutput') || !!localStorage.getItem('lastNewsletterHTML') || !!localStorage.getItem('lastSocialPlanHTML'),
+        run: () => { if (typeof window.showSection === 'function') window.showSection('social-post'); }
+      },
+      {
+        id: 'saved',
+        label: 'Save something to My Saved Items',
+        done: savedItemsCount() > 0,
+        run: () => {
+          if (typeof window.showSavedItemsLibrary === 'function') window.showSavedItemsLibrary();
+          else if (typeof window.showSection === 'function') window.showSection('social-post');
+        }
+      }
+    ];
+  }
+
+  function renderFirstRunChecklist() {
+    if (localStorage.getItem(CHECKLIST_DISMISS_KEY) === '1') {
+      document.getElementById('coach-first-run-checklist')?.remove();
+      return;
+    }
+    const items = getFirstRunItems();
+    const doneCount = items.filter((i) => i.done).length;
+    if (doneCount >= items.length) {
+      document.getElementById('coach-first-run-checklist')?.remove();
+      return;
+    }
+
+    const slot = document.getElementById('global-profile-nudge') || document.querySelector('main');
+    if (!slot) return;
+
+    let card = document.getElementById('coach-first-run-checklist');
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'coach-first-run-checklist';
+      card.className = 'mb-6';
+      // Place after profile nudge if present
+      const nudge = document.getElementById('coach-profile-nudge');
+      if (nudge && nudge.parentNode) {
+        nudge.insertAdjacentElement('afterend', card);
+      } else if (slot.id === 'global-profile-nudge') {
+        slot.appendChild(card);
+      } else {
+        slot.insertBefore(card, slot.firstChild);
+      }
+    }
+
+    const pct = Math.round((doneCount / items.length) * 100);
+    card.innerHTML = `
+      <div class="rounded-2xl border border-[#00A89D]/35 bg-white dark:bg-gray-900 p-4 md:p-5 shadow-sm" role="region" aria-label="Getting started checklist">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">First-run coach checklist</div>
+            <div class="font-semibold text-[#002B5C] dark:text-white text-sm mt-0.5">Get the suite working for you (${doneCount}/${items.length})</div>
+            <p class="text-xs text-gray-500 m-0 mt-1">Complete these once — every AI tool gets smarter and you always know what to do next.</p>
+          </div>
+          <button type="button" id="coach-checklist-dismiss" class="text-xs px-3 py-1.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 shrink-0">Hide</button>
+        </div>
+        <div class="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden mb-3">
+          <div class="h-full rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] transition-all" style="width:${pct}%"></div>
+        </div>
+        <ul class="m-0 p-0 space-y-2 list-none">
+          ${items.map((item) => `
+            <li class="flex items-center justify-between gap-3 text-sm">
+              <span class="flex items-center gap-2 min-w-0 ${item.done ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-gray-200'}">
+                <i class="fas ${item.done ? 'fa-check-circle text-[#00A89D]' : 'fa-circle text-gray-300'} shrink-0" aria-hidden="true"></i>
+                <span class="truncate">${item.label}</span>
+              </span>
+              ${item.done ? '' : `<button type="button" data-checklist-id="${item.id}" class="coach-checklist-go text-xs px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white shrink-0">Go</button>`}
+            </li>
+          `).join('')}
+        </ul>
+      </div>`;
+
+    document.getElementById('coach-checklist-dismiss')?.addEventListener('click', () => {
+      localStorage.setItem(CHECKLIST_DISMISS_KEY, '1');
+      card.remove();
+    });
+    card.querySelectorAll('.coach-checklist-go').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = items.find((i) => i.id === btn.getAttribute('data-checklist-id'));
+        if (item && typeof item.run === 'function') item.run();
+      });
+    });
+  }
 
   function renderSectionGuide(sectionId) {
     const guide = SECTION_GUIDES[sectionId];
@@ -218,6 +443,10 @@
     });
 
     el.querySelector('.coach-guide-action')?.addEventListener('click', () => {
+      if (guide.action.openProfile && typeof window.openUserProfile === 'function') {
+        window.openUserProfile(true);
+        return;
+      }
       if (guide.action.section && typeof window.showSection === 'function') {
         window.showSection(guide.action.section);
       }
@@ -299,12 +528,17 @@
 
   function refreshOnProfileChange() {
     renderProfileNudge();
+    renderFirstRunChecklist();
     applyProfileAwareStartHere();
+    const visible = document.querySelector('main section:not(.hidden)');
+    if (visible?.id) renderToolProfileTip(visible.id);
   }
 
   window.onCoachSectionShown = function onCoachSectionShown(sectionId) {
     renderProfileNudge();
+    renderFirstRunChecklist();
     renderSectionGuide(sectionId);
+    renderToolProfileTip(sectionId);
     if (sectionId === 'value-vault') injectVaultWeeklyBridge();
     if (sectionId === 'weekly-win-plan') injectWeeklyVaultBridge();
     if (sectionId === 'ai-chat') applyProfileAwareStartHere();
@@ -317,6 +551,7 @@
     }
 
     renderProfileNudge();
+    renderFirstRunChecklist();
     applyProfileAwareStartHere();
     injectVaultWeeklyBridge();
     injectWeeklyVaultBridge();
@@ -325,7 +560,9 @@
     if (visible?.id) window.onCoachSectionShown(visible.id);
 
     window.addEventListener('storage', (e) => {
-      if (e.key === 'userProfile') refreshOnProfileChange();
+      if (e.key === 'userProfile' || e.key === 'socialSavedIdeas' || e.key === 'savedWeeklyPlan') {
+        refreshOnProfileChange();
+      }
     });
 
     document.getElementById('save-profile')?.addEventListener('click', () => {
@@ -341,7 +578,13 @@
       });
     }
 
+    // Refresh checklist when saved items / plans likely changed
+    window.addEventListener('focus', () => {
+      setTimeout(renderFirstRunChecklist, 200);
+    });
+
     window.refreshCoachOnboarding = refreshOnProfileChange;
+    window.renderCoachFirstRunChecklist = renderFirstRunChecklist;
   }
 
   if (document.readyState === 'loading') {

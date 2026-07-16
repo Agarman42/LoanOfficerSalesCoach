@@ -576,19 +576,33 @@
         ? 'Try a different filter, clear your search, or switch the sort order.'
         : 'Save scripts, social posts, equity scans, newsletters, and coach replies — then reuse them all week.';
 
+      const checklist = hasAny ? '' : `
+        <div class="mt-6 text-left max-w-md mx-auto rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 p-4">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-2">How to fill this library</p>
+          <ol class="m-0 pl-4 space-y-1.5 text-xs text-gray-600 dark:text-gray-400 list-decimal">
+            <li>Generate a <strong>Sales Script</strong> or <strong>Social Post</strong></li>
+            <li>Tap <strong>Save</strong> / bookmark on the output card</li>
+            <li>Return here anytime from the header or sidebar</li>
+            <li>Copy, reuse, or delete items as you execute your week</li>
+          </ol>
+        </div>`;
+
       const ctas = hasAny ? '' : `
         <div class="mt-6 flex flex-wrap justify-center gap-2">
           <button type="button" class="saved-empty-cta text-xs px-4 py-2 rounded-2xl bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition" data-section="social-post">Social Post Creator</button>
           <button type="button" class="saved-empty-cta text-xs px-4 py-2 rounded-2xl border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D]/10 transition" data-section="sales-script">Sales Scripts</button>
           <button type="button" class="saved-empty-cta text-xs px-4 py-2 rounded-2xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition" data-section="blog">Blog Creator</button>
+          <button type="button" class="saved-empty-cta text-xs px-4 py-2 rounded-2xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition" data-section="newsletter-generator">Newsletter</button>
+          <button type="button" class="saved-empty-cta text-xs px-4 py-2 rounded-2xl border border-gray-300 dark:border-gray-600 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition" data-section="bio-creator">Bio Builder</button>
         </div>`;
 
-      return `<div class="flex flex-col items-center justify-center py-14 text-center col-span-full">
-          <div class="w-16 h-16 rounded-3xl bg-[#00A89D]/10 flex items-center justify-center mb-4">
+      return `<div class="flex flex-col items-center justify-center py-14 text-center col-span-full" role="status">
+          <div class="w-16 h-16 rounded-3xl bg-[#00A89D]/10 flex items-center justify-center mb-4" aria-hidden="true">
             <i class="fas fa-bookmark text-3xl text-[#00A89D]"></i>
           </div>
           <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">${title}</p>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-md">${subtitle}</p>
+          ${checklist}
           ${ctas}
         </div>`;
     }
