@@ -57,6 +57,12 @@
     if (eff.targetPartners && eff.targetPartners.length) parts.push(`Ideal audience & referral partners: ${eff.targetPartners.join(', ')}`);
     if (eff.goals) parts.push(`Current focus/goals: ${eff.goals}`);
     if (eff.challenges) parts.push(`Key client challenges you solve: ${eff.challenges}`);
+    const hobbies = [
+      ...(Array.isArray(eff.hobbies) ? eff.hobbies : []),
+      eff.hobbiesOther
+    ].filter(Boolean);
+    if (hobbies.length) parts.push(`Hobbies & passions to weave into personal posts: ${hobbies.join(', ')}`);
+    if (eff.family) parts.push(`Family/life context (use only if natural): ${eff.family}`);
 
     const base = 'Warm, authentic, relationship-first mortgage loan officer who posts like a real person — never salesy. Heavy on personal, local, and engagement content (70-80% non-mortgage).';
     return parts.length ? `${base} ${parts.join('. ')}.` : base;
@@ -1143,7 +1149,8 @@ function prefillCalendarFromProfile() {
         } else if (profile.hobbies) {
             hobbies = profile.hobbies;
         }
-        if (profile['hobbies-other']) hobbies += (hobbies ? ', ' : '') + profile['hobbies-other'];
+        const other = profile.hobbiesOther || profile['hobbies-other'] || '';
+        if (other) hobbies += (hobbies ? ', ' : '') + other;
         if (hobbies) hobbiesEl.value = hobbies;
     }
     if (familyEl && !familyEl.value.trim() && profile.family) {

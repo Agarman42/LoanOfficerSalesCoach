@@ -49,6 +49,109 @@
     }
   }
 
+  /** Normalize hobby/activity tokens for profile ↔ plan form matching */
+  function normToken(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/&amp;/g, '&')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * Map My Profile hobby values onto Business Plan chip values.
+   * Profile has a long list; plan form has a short set of chips.
+   */
+  const PROFILE_HOBBY_TO_PLAN_CHIPS = {
+    golf: ['Golf'],
+    'cards poker': ['Cards/Poker'],
+    poker: ['Cards/Poker'],
+    sports: ['Sports'],
+    'sports any': ['Sports'],
+    'youth coaching': ['Sports'],
+    'beach water sports': ['Sports'],
+    'snow sports': ['Sports'],
+    'cars motorsports': ['Sports'],
+    fitness: ['Fitness'],
+    'fitness gym': ['Fitness'],
+    'running cycling': ['Fitness'],
+    'yoga wellness': ['Fitness'],
+    outdoors: ['Outdoors'],
+    'outdoors nature': ['Outdoors'],
+    'outdoors hiking': ['Outdoors'],
+    'hunting fishing': ['Outdoors'],
+    boating: ['Outdoors'],
+    gardening: ['Outdoors'],
+    cooking: ['Cooking'],
+    'cooking foodie': ['Cooking'],
+    'wine beer': ['Cooking'],
+    crafts: ['Crafts'],
+    'crafts diy': ['Crafts'],
+    'home projects': ['Crafts'],
+    'family time': ['Family Time'],
+    pets: ['Family Time']
+  };
+
+  function expandHobbiesToPlanValues(hobbyList) {
+    const out = new Set();
+    (hobbyList || []).forEach((raw) => {
+      const key = normToken(raw);
+      if (!key) return;
+      // Exact chip values (current + legacy plan labels)
+      if (['golf', 'cards poker', 'sports', 'sports any', 'crafts', 'crafts diy', 'family time', 'outdoors', 'outdoors nature', 'fitness', 'fitness gym', 'cooking', 'cooking foodie'].includes(key)) {
+        const legacyMap = {
+          'sports any': 'Sports',
+          'crafts diy': 'Crafts',
+          'outdoors nature': 'Outdoors',
+          'fitness gym': 'Fitness',
+          'cooking foodie': 'Cooking',
+          'cards poker': 'Cards/Poker',
+          golf: 'Golf',
+          sports: 'Sports',
+          crafts: 'Crafts',
+          'family time': 'Family Time',
+          outdoors: 'Outdoors',
+          fitness: 'Fitness',
+          cooking: 'Cooking'
+        };
+        out.add(legacyMap[key] || raw);
+      }
+      const mapped = PROFILE_HOBBY_TO_PLAN_CHIPS[key];
+      if (mapped) mapped.forEach((v) => out.add(v));
+      // Partial: "snow sports" already mapped; "colts sports" free text may miss — OK
+    });
+    return out;
+  }
+
+  function hobbyListMatchesCheckbox(hobbyList, checkboxValue) {
+    const wanted = expandHobbiesToPlanValues(hobbyList);
+    if (wanted.has(checkboxValue)) return true;
+    const cb = normToken(checkboxValue);
+    return [...wanted].some((w) => {
+      const nw = normToken(w);
+      return nw === cb || nw.includes(cb) || cb.includes(nw);
+    });
+  }
+
+  function applyHobbyCheckboxesFromList(hobbyList, { scopeSelector = '' } = {}) {
+    const root = scopeSelector ? document.querySelector(scopeSelector) : document;
+    const boxes = root ? root.querySelectorAll('.hobby-checkbox') : document.querySelectorAll('.hobby-checkbox');
+    boxes.forEach((cb) => {
+      cb.checked = hobbyListMatchesCheckbox(hobbyList, cb.value);
+    });
+  }
+
+  function applyActivityCheckboxesFromList(activityList, { scopeSelector = '' } = {}) {
+    const list = (activityList || []).map(normToken);
+    const root = scopeSelector ? document.querySelector(scopeSelector) : document;
+    const boxes = root ? root.querySelectorAll('.activity-checkbox') : document.querySelectorAll('.activity-checkbox');
+    boxes.forEach((cb) => {
+      const cv = normToken(cb.value);
+      cb.checked = list.some((a) => a === cv || a.includes(cv) || cv.includes(a));
+    });
+  }
+
   // Merge central profile into the local userSetup for this tool
   // (central profile wins for rich fields; keeps backward compat)
   function getEffectiveSetup() {
@@ -1818,30 +1921,26 @@ function restoreBusinessPlanningForm() {
         if (radio) radio.checked = true;
     }
 
-    // Restore hobby checkboxes in the Business Planning form (local overrides win over profile)
+    // Restore hobby checkboxes (alias-aware so legacy "Sports (any)" still maps to Sports)
     const savedHobbies = localStorage.getItem('winPlan_hobbies');
     if (savedHobbies) {
         try {
             const hobbies = JSON.parse(savedHobbies);
-            document.querySelectorAll('.hobby-checkbox').forEach(cb => {
-                cb.checked = hobbies.includes(cb.value);
-            });
+            if (Array.isArray(hobbies) && hobbies.length) {
+                applyHobbyCheckboxesFromList(hobbies, { scopeSelector: '#planning' });
+            }
         } catch (e) {}
-    } else {
-        // No local override yet — will be populated by sync from central profile
     }
 
-    // Restore activity checkboxes in the Business Planning form (local overrides win)
+    // Restore activity checkboxes (alias-aware)
     const savedActivities = localStorage.getItem('winPlan_activities');
     if (savedActivities) {
         try {
             const activities = JSON.parse(savedActivities);
-            document.querySelectorAll('.activity-checkbox').forEach(cb => {
-                cb.checked = activities.includes(cb.value);
-            });
+            if (Array.isArray(activities) && activities.length) {
+                applyActivityCheckboxesFromList(activities, { scopeSelector: '#planning' });
+            }
         } catch (e) {}
-    } else {
-        // No local override — sync will pull from profile
     }
 }
 
@@ -3167,20 +3266,25 @@ window.applyPlanFeedbackAndRegenerate = function() {
   }, 300);
 };
 
-window.syncPlanningFormFromProfile = function() {
+window.syncPlanningFormFromProfile = function(options) {
+  const force = !!(options && options.force);
   const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
   const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : {};
 
   const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  const setValIfEmpty = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && val && (force || !String(el.value || '').trim())) el.value = val;
+  };
 
   // Only pull annual numbers from profile if the user hasn't set specific local values yet (persistence wins for 2026-specific targets)
   const hasLocalClosings = localStorage.getItem('winPlan_target-closings');
   const hasLocalIncome = localStorage.getItem('winPlan_target-income');
   const monthlyUnits = parseInt(p.monthlyUnits || eff.monthlyUnits || 8, 10);
-  if (monthlyUnits && !hasLocalClosings) {
+  if (monthlyUnits && (force || !hasLocalClosings)) {
     setVal('target-closings', String(monthlyUnits * 12));
   }
-  if ((p.monthlyGoal || eff.monthlyVolume) && !hasLocalIncome) {
+  if ((p.monthlyGoal || eff.monthlyVolume) && (force || !hasLocalIncome)) {
     setVal('target-income', p.monthlyGoal || eff.monthlyVolume);
   }
   if (p.hours) setVal('weekly-hours-hint', p.hours);
@@ -3193,31 +3297,55 @@ window.syncPlanningFormFromProfile = function() {
     if (bal) bal.checked = true;
   }
 
-  // === Pull hobbies & activities from central profile ONLY if no local overrides saved for this tool ===
-  // This way: profile provides smart defaults the first time (no clicking needed), but user's changes in the plan form persist.
+  // === Hobbies & activities from central profile ===
+  // Exact token match used to fail (profile "Sports" vs plan "Sports (any)").
+  // Now alias-map profile hobbies onto plan chips. force:true (Sync button) always re-pulls.
   const hasLocalHobbies = localStorage.getItem('winPlan_hobbies');
-  if (!hasLocalHobbies || hasLocalHobbies === '[]') {
-    const profileHobbies = p.hobbies || [];
-    document.querySelectorAll('.hobby-checkbox').forEach(cb => {
-      cb.checked = profileHobbies.includes(cb.value);
-    });
-    if (p.hobbiesOther) {
-      setVal('hobby-other', p.hobbiesOther);
+  const localHobbyEmpty = !hasLocalHobbies || hasLocalHobbies === '[]' || hasLocalHobbies === 'null';
+  // Stale local lists that don't light up any chip (old mismatched values) → re-pull from profile
+  let localHobbiesDead = false;
+  if (!force && !localHobbyEmpty) {
+    try {
+      const localList = JSON.parse(hasLocalHobbies);
+      applyHobbyCheckboxesFromList(localList, { scopeSelector: '#planning' });
+      localHobbiesDead = !document.querySelector('#planning .hobby-checkbox:checked') && (p.hobbies || []).length > 0;
+    } catch (e) {
+      localHobbiesDead = true;
     }
-    // Save the profile defaults as the initial local state so they persist
-    const defaultHobbies = Array.from(document.querySelectorAll('.hobby-checkbox')).filter(c => c.checked).map(c => c.value);
-    if (defaultHobbies.length) localStorage.setItem('winPlan_hobbies', JSON.stringify(defaultHobbies));
+  }
+  if (force || localHobbyEmpty || localHobbiesDead) {
+    const profileHobbies = [...(p.hobbies || [])];
+    if (p.hobbiesOther) profileHobbies.push(p.hobbiesOther);
+    applyHobbyCheckboxesFromList(profileHobbies, { scopeSelector: '#planning' });
+    if (p.hobbiesOther) {
+      setValIfEmpty('hobby-other', p.hobbiesOther);
+      if (force) setVal('hobby-other', p.hobbiesOther);
+    }
+    const defaultHobbies = Array.from(document.querySelectorAll('#planning .hobby-checkbox:checked')).map((c) => c.value);
+    localStorage.setItem('winPlan_hobbies', JSON.stringify(defaultHobbies));
   }
 
   const hasLocalActivities = localStorage.getItem('winPlan_activities');
-  if (!hasLocalActivities || hasLocalActivities === '[]') {
-    // Support both p.activities and p.preferredActivities for compatibility
+  const localActivityEmpty = !hasLocalActivities || hasLocalActivities === '[]' || hasLocalActivities === 'null';
+  let localActivitiesDead = false;
+  if (!force && !localActivityEmpty) {
+    try {
+      const localList = JSON.parse(hasLocalActivities);
+      applyActivityCheckboxesFromList(localList, { scopeSelector: '#planning' });
+      localActivitiesDead = !document.querySelector('#planning .activity-checkbox:checked') && (p.activities || []).length > 0;
+    } catch (e) {
+      localActivitiesDead = true;
+    }
+  }
+  if (force || localActivityEmpty || localActivitiesDead) {
     const profileActivities = [...(p.activities || []), ...(p.preferredActivities || [])];
-    document.querySelectorAll('.activity-checkbox').forEach(cb => {
-      cb.checked = profileActivities.includes(cb.value);
-    });
-    const defaultActivities = Array.from(document.querySelectorAll('.activity-checkbox')).filter(c => c.checked).map(c => c.value);
-    if (defaultActivities.length) localStorage.setItem('winPlan_activities', JSON.stringify(defaultActivities));
+    applyActivityCheckboxesFromList(profileActivities, { scopeSelector: '#planning' });
+    const defaultActivities = Array.from(document.querySelectorAll('#planning .activity-checkbox:checked')).map((c) => c.value);
+    localStorage.setItem('winPlan_activities', JSON.stringify(defaultActivities));
+  }
+
+  if (force && typeof window.showToast === 'function') {
+    window.showToast('Business Plan form synced from My Profile (hobbies, activities, goals).', 'success');
   }
 
   // Pre-fill notes with profile context ONLY if the notes field is still empty (don't overwrite user's 2026 vision/notes)

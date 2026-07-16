@@ -431,7 +431,7 @@
                       class="px-2.5 py-1 sm:px-4 sm:py-2 rounded-2xl border-2 border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition">
                 <i class="fas fa-cog text-xs"></i> <span>Edit Full Profile</span>
               </button>
-              <button onclick=" (typeof syncPlanningFormFromProfile === 'function' ? syncPlanningFormFromProfile() : (window.syncPlanningFormFromProfile && window.syncPlanningFormFromProfile())) " 
+              <button type="button" onclick="if(typeof window.syncPlanningFormFromProfile==='function')window.syncPlanningFormFromProfile({force:true});"
                       class="px-2.5 py-1 sm:px-4 sm:py-2 rounded-2xl bg-[#00A89D] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 hover:bg-[#008f85] transition">
                 <i class="fas fa-sync text-xs"></i> <span>Sync from Profile (goals, hobbies, etc.)</span>
               </button>
@@ -551,14 +551,15 @@
               <div>
                 <div class="text-xs font-semibold mb-2 text-[#00A89D]">What actually makes you happy outside work? (We weave this in — this is what makes the plan stick and your content/relationships feel human)</div>
                 <div class="flex flex-wrap gap-2 mb-3">
+                  <!-- Values match My Profile hobby tokens (see profile-hobby checkboxes) -->
                   <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-golf" value="Golf" class="hobby-checkbox hidden"><span>Golf</span></label>
                   <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-poker" value="Cards/Poker" class="hobby-checkbox hidden"><span>Cards / Poker</span></label>
-                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-sports" value="Sports (any)" class="hobby-checkbox hidden"><span>Sports</span></label>
-                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-crafts" value="Crafts / DIY" class="hobby-checkbox hidden"><span>Crafts</span></label>
+                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-sports" value="Sports" class="hobby-checkbox hidden"><span>Sports</span></label>
+                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-crafts" value="Crafts" class="hobby-checkbox hidden"><span>Crafts</span></label>
                   <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-family" value="Family Time" class="hobby-checkbox hidden"><span>Family Time</span></label>
-                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-outdoors" value="Outdoors / Nature" class="hobby-checkbox hidden"><span>Outdoors</span></label>
-                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-fitness" value="Fitness / Gym" class="hobby-checkbox hidden"><span>Fitness</span></label>
-                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-cooking" value="Cooking / Foodie" class="hobby-checkbox hidden"><span>Cooking</span></label>
+                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-outdoors" value="Outdoors" class="hobby-checkbox hidden"><span>Outdoors</span></label>
+                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-fitness" value="Fitness" class="hobby-checkbox hidden"><span>Fitness</span></label>
+                  <label class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D] has-[:checked]:bg-[#00A89D] has-[:checked]:text-white has-[:checked]:border-[#00A89D] transition"><input type="checkbox" id="hobby-cooking" value="Cooking" class="hobby-checkbox hidden"><span>Cooking</span></label>
                 </div>
                 <input type="text" id="hobby-other" placeholder="Other passions (wine, travel, music, whatever makes you you)" class="w-full p-3 text-sm rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-900">
               </div>
@@ -7762,11 +7763,11 @@
 <script src="js/features/save-ribbon.js"></script>
 <script src="js/features/equity-scanner.js?v=20260623-lo-v222"></script>
 <script src="js/features/calculator.js"></script>
-<script src="js/features/sales-scripts.js?v=20260715-lo-v224"></script>
-<script src="js/features/social-post.js?v=20260715-lo-v275"></script>
+<script src="js/features/sales-scripts.js?v=20260715-lo-v225"></script>
+<script src="js/features/social-post.js?v=20260715-lo-v276"></script>
 <script src="js/features/mindset-lab.js"></script>
 <script src="js/data/weekend-plan-policy.js"></script>
-<script src="js/features/weekly-win-plan.js?v=20260715-lo-v224"></script>
+<script src="js/features/weekly-win-plan.js?v=20260715-lo-v225"></script>
 <script src="js/features/tool-bridges.js"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
 <script src="js/features/generation-rules.js?v=20260708-lo-v269"></script>

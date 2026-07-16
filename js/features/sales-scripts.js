@@ -69,6 +69,12 @@
     if (eff.partnerFocus) parts.push(`Partner focus: ${eff.partnerFocus}`);
     if (eff.challenges && eff.challenges.length) parts.push(`Challenges: ${eff.challenges.join(', ')}`);
     if (eff.contentNotes) parts.push(`Content guardrails: ${eff.contentNotes}`);
+    const hobbies = [
+      ...(Array.isArray(eff.hobbies) ? eff.hobbies : []),
+      eff.hobbiesOther
+    ].filter(Boolean);
+    if (hobbies.length) parts.push(`Hobbies/passions (use lightly for rapport): ${hobbies.join(', ')}`);
+    if (eff.family) parts.push(`Family/life notes (use only if natural): ${eff.family}`);
 
     const base = 'Warm, authentic, relationship-first loan officer who speaks like a trusted advisor.';
     return parts.length ? `${base} ${parts.join('. ')}.` : base;
