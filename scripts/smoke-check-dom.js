@@ -20,7 +20,11 @@ const REQUIRED_IDS = [
   'user-profile-modal',
   'profile-export-data',
   'profile-import-data',
-  // AI tools / sections
+  // Home launchpad + AI tools / sections
+  'home',
+  'home-setup-slot',
+  'home-start-here',
+  'home-greeting',
   'ai-chat',
   'chat-input',
   'planning',
@@ -57,6 +61,7 @@ const REQUIRED_HREF_TARGETS = [
   'social-post',
   'blog',
   'newsletter-generator',
+  'home',
   'weekly-win-plan',
   'planning',
   'ai-chat',

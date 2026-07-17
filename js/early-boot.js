@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  var DEFAULT_SECTION = 'ai-chat';
+  var DEFAULT_SECTION = 'home';
   var ALIASES = {
     'social-media-strategy': 'social',
     'referral-partners': 'referrals',

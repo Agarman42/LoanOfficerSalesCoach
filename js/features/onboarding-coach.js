@@ -10,7 +10,7 @@
   const PROFILE_NUDGE_KEY = 'coachProfileNudgeDismissed';
   const CHECKLIST_DISMISS_KEY = 'coachFirstRunChecklistDismissed';
   const CHECKLIST_MINIMIZED_KEY = 'coachFirstRunChecklistMinimized';
-  const CHECKLIST_VERSION = '5'; // bump when design/copy changes so dismissed cards reappear
+  const CHECKLIST_VERSION = '6'; // home-only setup mount + launchpad
 
   function getProfile() {
     if (typeof window.getUserProfile === 'function') return window.getUserProfile();
@@ -29,68 +29,122 @@
     return { score: 0, missing: ['profile'], isComplete: false };
   }
 
+  /**
+   * Profile personalization lives on Home via Getting Started — never as a
+   * banner above every tool page.
+   */
   function renderProfileNudge() {
-    const slot = document.getElementById('global-profile-nudge')
-      || document.querySelector('main');
-    if (!slot) return;
-
-    if (sessionStorage.getItem(PROFILE_NUDGE_KEY) === '1') {
-      document.getElementById('coach-profile-nudge')?.remove();
-      if (slot.id === 'global-profile-nudge') slot.innerHTML = '';
-      return;
-    }
-
-    const { score, missing, isComplete } = getProfileCompleteness();
-    if (isComplete) {
-      document.getElementById('coach-profile-nudge')?.remove();
-      if (slot.id === 'global-profile-nudge') slot.innerHTML = '';
-      return;
-    }
-
     document.getElementById('coach-profile-nudge')?.remove();
+    const global = document.getElementById('global-profile-nudge');
+    if (global) {
+      global.innerHTML = '';
+      global.classList.add('hidden');
+      global.setAttribute('aria-hidden', 'true');
+    }
+  }
 
-    let banner = document.createElement('div');
-    banner.id = 'coach-profile-nudge';
-    if (slot.id === 'global-profile-nudge') {
-      slot.innerHTML = '';
-      slot.appendChild(banner);
-    } else {
-      slot.insertBefore(banner, slot.firstChild);
+  function firstNameFromProfile() {
+    const p = getProfile();
+    const raw = (p.name || p.fullName || '').trim();
+    if (!raw) return '';
+    return raw.split(/\s+/)[0];
+  }
+
+  function timeOfDayGreeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  function ensureHomeStyles() {
+    if (document.getElementById('coach-home-styles')) return;
+    const el = document.createElement('style');
+    el.id = 'coach-home-styles';
+    el.textContent = `
+      #home-start-here .home-day-card.is-recommended {
+        border-color: #F15A29 !important;
+        box-shadow: 0 12px 28px -14px rgba(241,90,41,0.45), 0 0 0 1px rgba(241,90,41,0.2);
+        background: linear-gradient(165deg, rgba(241,90,41,0.06), #fff 42%);
+      }
+      .dark #home-start-here .home-day-card.is-recommended {
+        background: linear-gradient(165deg, rgba(241,90,41,0.12), rgba(17,24,39,0.95) 45%);
+      }
+      #home-start-here .home-day-card .start-here-badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        color: #F15A29; margin-bottom: 0.35rem;
+      }
+      #home-start-here .home-day-card .start-here-badge::before {
+        content: ''; width: 5px; height: 5px; border-radius: 999px;
+        background: #F15A29; box-shadow: 0 0 8px rgba(241,90,41,0.7);
+      }
+      #home-hero-stats .home-stat-pill {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.35rem 0.75rem; border-radius: 999px;
+        font-size: 11px; font-weight: 600;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.78);
+      }
+      #home-hero-stats .home-stat-pill.is-ready {
+        border-color: rgba(0,168,157,0.45);
+        background: rgba(0,168,157,0.15);
+        color: #5eead4;
+      }
+      #home-hero-stats .home-stat-pill.is-warn {
+        border-color: rgba(241,90,41,0.4);
+        background: rgba(241,90,41,0.12);
+        color: #fdba74;
+      }
+      #home-setup-ready {
+        animation: gs-enter 0.45s cubic-bezier(0.22,1,0.36,1) both;
+      }
+    `;
+    document.head.appendChild(el);
+  }
+
+  function updateHomeHero() {
+    ensureHomeStyles();
+    const greeting = document.getElementById('home-greeting');
+    const subline = document.getElementById('home-subline');
+    const name = firstNameFromProfile();
+    const tod = timeOfDayGreeting();
+    if (greeting) {
+      greeting.textContent = name ? `${tod}, ${name}.` : `${tod}. Welcome back.`;
+    }
+    if (subline) {
+      const { score, isComplete } = getProfileCompleteness();
+      if (!isComplete && score < 40) {
+        subline.textContent = 'Start with setup below — then run your daily loop. AI Coach gets sharper once your profile and bio are in.';
+      } else if (!isComplete) {
+        subline.textContent = 'You’re underway. Finish setup, then run the daily loop. Open AI Coach when you need to think something through.';
+      } else {
+        subline.textContent = 'Your launchpad — run the day, jump into tools, or open AI Coach when you need to think.';
+      }
     }
 
-    const missingLabel = missing.slice(0, 3).map((m) => (typeof m === 'string' ? m : m.hint)).join(', ');
-    banner.className = 'mb-6';
-    banner.innerHTML = `
-      <div class="rounded-2xl border border-[#F15A29]/40 bg-gradient-to-r from-[#F15A29]/8 to-[#00A89D]/8 p-4 md:p-5">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-xl bg-[#F15A29]/15 flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-user-edit text-[#F15A29]"></i>
-            </div>
-            <div>
-              <div class="font-semibold text-[#002B5C] dark:text-white text-sm">Personalize your coach (${score}% complete)</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Add ${missingLabel} so AI answers, weekly plans, and scripts sound like <em>you</em> — not generic filler.</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 flex-shrink-0">
-            <button type="button" id="coach-profile-nudge-open" class="text-xs px-4 py-2 rounded-xl bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition">Complete Profile</button>
-            <button type="button" id="coach-profile-nudge-dismiss" class="text-xs px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Later</button>
-          </div>
-        </div>
-        <div class="mt-2 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-          <div class="h-full rounded-full bg-gradient-to-r from-[#F15A29] to-[#00A89D] transition-all" style="width:${score}%"></div>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('coach-profile-nudge-open')?.addEventListener('click', () => {
-      if (typeof window.openUserProfile === 'function') window.openUserProfile(true);
-    });
-    document.getElementById('coach-profile-nudge-dismiss')?.addEventListener('click', () => {
-      sessionStorage.setItem(PROFILE_NUDGE_KEY, '1');
-      banner.remove();
-      document.getElementById('global-profile-nudge')?.replaceChildren();
-    });
+    const stats = document.getElementById('home-hero-stats');
+    if (stats) {
+      const { score, isComplete } = getProfileCompleteness();
+      const planOk = hasBusinessPlan();
+      const weekOk = hasWeeklyPlan();
+      const bioOk = !!getProfile().professionalBio;
+      stats.innerHTML = `
+        <span class="home-stat-pill ${isComplete ? 'is-ready' : 'is-warn'}" title="Profile completeness">
+          <i class="fas fa-user text-[10px] opacity-80"></i> Profile ${score}%
+        </span>
+        <span class="home-stat-pill ${bioOk ? 'is-ready' : ''}" title="Primary bio">
+          <i class="fas fa-id-card text-[10px] opacity-80"></i> ${bioOk ? 'Bio ready' : 'Bio needed'}
+        </span>
+        <span class="home-stat-pill ${planOk ? 'is-ready' : ''}" title="2026 business plan">
+          <i class="fas fa-chart-line text-[10px] opacity-80"></i> ${planOk ? '2026 plan' : 'No annual plan'}
+        </span>
+        <span class="home-stat-pill ${weekOk ? 'is-ready' : ''}" title="Weekly win plan">
+          <i class="fas fa-fire text-[10px] opacity-80"></i> ${weekOk ? 'Week planned' : 'Plan this week'}
+        </span>
+      `;
+    }
   }
 
   function getRecommendedStartStep() {
@@ -115,35 +169,25 @@
   }
 
   function applyProfileAwareStartHere() {
-    const grid = document.querySelector('#coach-start-here .grid');
-    if (!grid) return;
-
-    const stepMap = {
-      plan: 'weekly-win-plan',
-      gift: 'value-vault',
-      nurture: 'database',
-      content: 'social',
-      opportunity: 'equity-scanner'
-    };
+    ensureHomeStyles();
+    const root = document.getElementById('home-start-here');
+    if (!root) return;
 
     const recommended = getRecommendedStartStep();
-    const recommendedSection = stepMap[recommended];
 
-    grid.querySelectorAll('button[data-start-step]').forEach((btn) => {
-      btn.classList.remove('ring-2', 'ring-[#F15A29]', 'border-[#F15A29]');
-      const badge = btn.querySelector('.start-here-badge');
-      if (badge) badge.remove();
+    root.querySelectorAll('button[data-start-step]').forEach((btn) => {
+      btn.classList.remove('is-recommended', 'ring-2', 'ring-[#F15A29]', 'border-[#F15A29]');
+      btn.querySelector('.start-here-badge')?.remove();
     });
 
-    grid.querySelectorAll('button[data-start-step]').forEach((btn) => {
-      const onclick = btn.getAttribute('onclick') || '';
-      if (!onclick.includes(`'${recommendedSection}'`)) return;
-      btn.classList.add('ring-2', 'ring-[#F15A29]', 'border-[#F15A29]');
-      const badge = document.createElement('div');
-      badge.className = 'start-here-badge text-[9px] font-bold uppercase tracking-wider text-[#F15A29] mb-1';
-      badge.textContent = 'Recommended for you';
-      btn.insertBefore(badge, btn.firstChild);
-    });
+    const target = root.querySelector(`button[data-start-step="${recommended}"]`);
+    if (!target) return;
+
+    target.classList.add('is-recommended');
+    const badge = document.createElement('div');
+    badge.className = 'start-here-badge';
+    badge.textContent = 'Recommended for you';
+    target.insertBefore(badge, target.firstChild);
   }
 
   const SECTION_GUIDES = {
@@ -228,10 +272,16 @@
     },
     'ai-chat': {
       icon: 'fa-robot',
-      title: 'Profile-aware coaching',
-      body: 'Ask anything — voice, market, and bio from My Profile shape the answers. Complete name + market if replies feel generic.',
-      action: { label: 'Complete Profile →', openProfile: true },
+      title: 'Conversation first',
+      body: 'Ask anything — voice, market, and bio from My Profile shape the answers. Setup and your daily loop live on Home.',
+      action: { label: '← Back to Home', section: 'home' },
       needsProfile: ['name', 'location']
+    },
+    home: {
+      icon: 'fa-home',
+      title: 'Your launchpad',
+      body: 'Finish setup once, run the daily loop every day, jump into tools when you need them, open AI Coach when you need to think.',
+      action: { label: 'Open AI Coach →', section: 'ai-chat' }
     }
   };
 
@@ -612,37 +662,81 @@
     return map[item.id] || 'Continue';
   }
 
-  function renderFirstRunChecklist() {
-    if (localStorage.getItem(CHECKLIST_DISMISS_KEY) === '1') {
-      document.getElementById('coach-first-run-checklist')?.remove();
+  function renderHomeReadyBanner(slot) {
+    if (!slot) return;
+    document.getElementById('coach-first-run-checklist')?.remove();
+    if (sessionStorage.getItem('coachHomeReadyDismissed') === '1') {
+      document.getElementById('home-setup-ready')?.remove();
       return;
     }
+    let banner = document.getElementById('home-setup-ready');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'home-setup-ready';
+      banner.className = 'w-full';
+      slot.appendChild(banner);
+    }
+    banner.innerHTML = `
+      <div class="rounded-2xl border border-[#00A89D]/30 bg-gradient-to-r from-[#00A89D]/10 to-[#002B5C]/5 dark:from-[#00A89D]/15 dark:to-transparent px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-start gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center shrink-0">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-sm font-bold text-[#002B5C] dark:text-white">You’re set up. Run the day.</div>
+            <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mt-0.5 leading-relaxed">Daily loop below · tools anytime · AI Coach when you need to think.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" id="home-ready-coach" class="text-xs px-4 py-2 rounded-full bg-[#002B5C] text-white font-semibold hover:bg-black transition">Open AI Coach</button>
+          <button type="button" id="home-ready-dismiss" class="text-xs px-3 py-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Got it</button>
+        </div>
+      </div>`;
+    document.getElementById('home-ready-coach')?.addEventListener('click', () => {
+      if (typeof window.showSection === 'function') window.showSection('ai-chat');
+    });
+    document.getElementById('home-ready-dismiss')?.addEventListener('click', () => {
+      sessionStorage.setItem('coachHomeReadyDismissed', '1');
+      banner.remove();
+    });
+  }
+
+  function renderFirstRunChecklist() {
+    // Getting Started lives only on Home — never stacked above Blog/Social/etc.
+    const slot = document.getElementById('home-setup-slot');
+    if (!slot) return;
+
+    // Clean up any legacy mount under global nudge / main
+    const legacy = document.getElementById('coach-first-run-checklist');
+    if (legacy && legacy.parentElement !== slot) {
+      legacy.remove();
+    }
+
+    if (localStorage.getItem(CHECKLIST_DISMISS_KEY) === '1') {
+      document.getElementById('coach-first-run-checklist')?.remove();
+      document.getElementById('home-setup-ready')?.remove();
+      return;
+    }
+
     const items = getFirstRunItems();
     const doneCount = items.filter((i) => i.done).length;
     if (doneCount >= items.length) {
-      document.getElementById('coach-first-run-checklist')?.remove();
+      renderHomeReadyBanner(slot);
       return;
     }
 
-    const slot = document.getElementById('global-profile-nudge') || document.querySelector('main');
-    if (!slot) return;
-
+    document.getElementById('home-setup-ready')?.remove();
     ensureGettingStartedStyles();
+    ensureHomeStyles();
 
     let card = document.getElementById('coach-first-run-checklist');
     if (!card) {
       card = document.createElement('div');
       card.id = 'coach-first-run-checklist';
-      // Full width of main content (matches tool cards) — no max-w-5xl squeeze
-      card.className = 'mb-6 mt-1 w-full';
-      const nudge = document.getElementById('coach-profile-nudge');
-      if (nudge && nudge.parentNode) {
-        nudge.insertAdjacentElement('afterend', card);
-      } else if (slot.id === 'global-profile-nudge') {
-        slot.appendChild(card);
-      } else {
-        slot.insertBefore(card, slot.firstChild);
-      }
+      card.className = 'mb-1 w-full';
+      slot.appendChild(card);
+    } else if (card.parentElement !== slot) {
+      slot.appendChild(card);
     }
 
     const pct = Math.round((doneCount / items.length) * 100);
@@ -875,20 +969,31 @@
 
   function refreshOnProfileChange() {
     renderProfileNudge();
+    updateHomeHero();
     renderFirstRunChecklist();
     applyProfileAwareStartHere();
     const visible = document.querySelector('main section:not(.hidden)');
-    if (visible?.id) renderToolProfileTip(visible.id);
+    if (visible?.id && visible.id !== 'home') renderToolProfileTip(visible.id);
   }
 
   window.onCoachSectionShown = function onCoachSectionShown(sectionId) {
+    // Keep setup card in #home-setup-slot only (never re-inject at top of every tool)
     renderProfileNudge();
     renderFirstRunChecklist();
-    renderSectionGuide(sectionId);
+
+    if (sectionId === 'home') {
+      updateHomeHero();
+      applyProfileAwareStartHere();
+      return;
+    }
+
+    // Chat stays chat-first — no heavy section guide chrome
+    if (sectionId !== 'ai-chat') {
+      renderSectionGuide(sectionId);
+    }
     renderToolProfileTip(sectionId);
     if (sectionId === 'value-vault') injectVaultWeeklyBridge();
     if (sectionId === 'weekly-win-plan') injectWeeklyVaultBridge();
-    if (sectionId === 'ai-chat') applyProfileAwareStartHere();
   };
 
   function init() {
@@ -906,6 +1011,7 @@
     const paint = () => {
       try {
         renderProfileNudge();
+        updateHomeHero();
         renderFirstRunChecklist();
         applyProfileAwareStartHere();
         const visible = document.querySelector('main section:not(.hidden)');
@@ -969,5 +1075,5 @@
     init();
   }
 
-  console.log('%c[onboarding-coach.js] Profile nudge, section guides & vault bridges ready', 'color:#00A89D');
+  console.log('%c[onboarding-coach.js] Home launchpad, setup path & section guides ready', 'color:#00A89D');
 })();

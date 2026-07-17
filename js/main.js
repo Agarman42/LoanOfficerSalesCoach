@@ -564,11 +564,11 @@
       sec.classList.add('hidden');
     });
 
-    // Show the target (fallback to AI Chat if hash/alias is stale)
+    // Show the target (fallback to Home if hash/alias is stale)
     const target = document.getElementById(id);
     if (!target) {
-      if (id !== 'ai-chat') {
-        showSection('ai-chat');
+      if (id !== 'home') {
+        showSection('home');
       }
       return;
     }
@@ -861,17 +861,19 @@
       if (id) showSection(id);
     });
 
-    // On initial page load, respect a hash if present, otherwise show AI Chat as default
+    // On initial page load, respect a hash if present, otherwise land on Home
     if (location.hash) {
       const id = location.hash.replace('#', '');
       setTimeout(() => showSection(id), 150);
     } else {
-      // Default view: Show AI Chat Assistant (original intended behavior)
       setTimeout(() => {
-        const aiChat = document.getElementById('ai-chat');
-        if (aiChat) {
+        const home = document.getElementById('home');
+        if (home) {
           document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-          aiChat.classList.remove('hidden');
+          home.classList.remove('hidden');
+          if (typeof window.onCoachSectionShown === 'function') {
+            try { window.onCoachSectionShown('home'); } catch (e) {}
+          }
         }
       }, 200);
     }
