@@ -399,6 +399,7 @@
       #coach-first-run-checklist {
         width: 100%;
         max-width: none;
+        margin-top: 0.35rem; /* hair of white between quote bar and setup card */
       }
       #coach-first-run-checklist .gs-shell {
         position: relative;
@@ -633,7 +634,7 @@
       card = document.createElement('div');
       card.id = 'coach-first-run-checklist';
       // Full width of main content (matches tool cards) — no max-w-5xl squeeze
-      card.className = 'mb-6 w-full';
+      card.className = 'mb-6 mt-1 w-full';
       const nudge = document.getElementById('coach-profile-nudge');
       if (nudge && nudge.parentNode) {
         nudge.insertAdjacentElement('afterend', card);
