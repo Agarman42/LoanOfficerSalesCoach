@@ -9,7 +9,8 @@
   const DISMISS_PREFIX = 'coachGuideDismissed_';
   const PROFILE_NUDGE_KEY = 'coachProfileNudgeDismissed';
   const CHECKLIST_DISMISS_KEY = 'coachFirstRunChecklistDismissed';
-  const CHECKLIST_VERSION = '3'; // bump when design/copy changes so dismissed cards reappear
+  const CHECKLIST_MINIMIZED_KEY = 'coachFirstRunChecklistMinimized';
+  const CHECKLIST_VERSION = '4'; // bump when design/copy changes so dismissed cards reappear
 
   function getProfile() {
     if (typeof window.getUserProfile === 'function') return window.getUserProfile();
@@ -377,130 +378,219 @@
   }
 
   function ensureGettingStartedStyles() {
-    if (document.getElementById('coach-getting-started-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'coach-getting-started-styles';
-    style.textContent = `
+    const style = document.getElementById('coach-getting-started-styles');
+    if (style) style.remove(); // always refresh so design iterations apply
+    const el = document.createElement('style');
+    el.id = 'coach-getting-started-styles';
+    el.textContent = `
+      @keyframes gs-enter {
+        from { opacity: 0; transform: translateY(10px) scale(0.985); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @keyframes gs-shimmer {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+      }
+      @keyframes gs-pulse-ring {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(0,168,157,0.35); }
+        50% { box-shadow: 0 0 0 6px rgba(0,168,157,0); }
+      }
+      #coach-first-run-checklist { animation: gs-enter 0.45s cubic-bezier(0.22,1,0.36,1) both; }
       #coach-first-run-checklist .gs-shell {
         position: relative;
         overflow: hidden;
-        border-radius: 1.5rem;
-        border: 1px solid rgba(0,168,157,0.22);
+        border-radius: 1.65rem;
+        border: 1px solid rgba(255,255,255,0.08);
         background:
-          radial-gradient(1200px 280px at 0% 0%, rgba(0,168,157,0.16), transparent 55%),
-          radial-gradient(900px 240px at 100% 0%, rgba(241,90,41,0.12), transparent 50%),
-          linear-gradient(145deg, #001a38 0%, #002B5C 48%, #0a3d4a 100%);
-        box-shadow: 0 20px 50px -24px rgba(0,43,92,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset;
+          radial-gradient(900px 220px at 8% -20%, rgba(0,168,157,0.28), transparent 55%),
+          radial-gradient(700px 200px at 92% 0%, rgba(241,90,41,0.18), transparent 50%),
+          linear-gradient(155deg, #001429 0%, #002B5C 42%, #063a42 100%);
+        box-shadow:
+          0 28px 60px -28px rgba(0,20,40,0.75),
+          0 0 0 1px rgba(0,168,157,0.12) inset,
+          0 1px 0 rgba(255,255,255,0.06) inset;
         color: #fff;
       }
       .dark #coach-first-run-checklist .gs-shell {
-        border-color: rgba(0,168,157,0.28);
         background:
-          radial-gradient(1000px 260px at 10% -10%, rgba(0,168,157,0.2), transparent 50%),
-          radial-gradient(800px 220px at 100% 0%, rgba(241,90,41,0.14), transparent 45%),
-          linear-gradient(145deg, #061018 0%, #0b1c2e 55%, #0a2428 100%);
+          radial-gradient(900px 220px at 8% -20%, rgba(0,168,157,0.22), transparent 55%),
+          radial-gradient(700px 200px at 92% 0%, rgba(241,90,41,0.14), transparent 50%),
+          linear-gradient(155deg, #050b12 0%, #0a1624 50%, #0a1f24 100%);
       }
-      #coach-first-run-checklist .gs-shell::before {
+      #coach-first-run-checklist .gs-shell::after {
         content: '';
         position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent 40%);
+        inset: -40% auto auto 40%;
+        width: 50%;
+        height: 120%;
+        background: linear-gradient(115deg, transparent, rgba(255,255,255,0.04), transparent);
+        transform: rotate(12deg);
         pointer-events: none;
       }
       #coach-first-run-checklist .gs-inner { position: relative; z-index: 1; }
       #coach-first-run-checklist .gs-kicker {
-        font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
-        color: rgba(0,168,157,0.95);
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+        color: #5eead4;
+      }
+      #coach-first-run-checklist .gs-kicker-dot {
+        width: 6px; height: 6px; border-radius: 999px;
+        background: #00A89D;
+        box-shadow: 0 0 10px rgba(0,168,157,0.8);
       }
       #coach-first-run-checklist .gs-progress-track {
-        height: 4px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden;
+        height: 3px; border-radius: 999px; background: rgba(255,255,255,0.1); overflow: hidden;
       }
       #coach-first-run-checklist .gs-progress-fill {
         height: 100%; border-radius: 999px;
-        background: linear-gradient(90deg, #00A89D, #F15A29);
-        box-shadow: 0 0 16px rgba(0,168,157,0.45);
-        transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        background: linear-gradient(90deg, #00A89D, #2dd4bf, #F15A29, #00A89D);
+        background-size: 200% 100%;
+        animation: gs-shimmer 3.2s linear infinite;
+        transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
       }
       #coach-first-run-checklist .gs-next {
-        border-radius: 1.15rem;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.12);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        border-radius: 1.25rem;
+        background: linear-gradient(160deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 12px 32px -18px rgba(0,0,0,0.5);
+        transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
       }
       #coach-first-run-checklist .gs-next:hover {
-        border-color: rgba(0,168,157,0.45);
-        background: rgba(255,255,255,0.11);
+        border-color: rgba(0,168,157,0.5);
+        background: linear-gradient(160deg, rgba(255,255,255,0.13), rgba(0,168,157,0.08));
+      }
+      #coach-first-run-checklist .gs-icon-tile {
+        width: 3rem; height: 3rem; border-radius: 1rem; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(145deg, #00A89D, #F15A29);
+        box-shadow: 0 10px 22px -8px rgba(241,90,41,0.55);
+        animation: gs-pulse-ring 2.8s ease-in-out infinite;
       }
       #coach-first-run-checklist .gs-cta {
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        padding: 0.7rem 1.15rem; border-radius: 999px; font-weight: 700; font-size: 0.8125rem;
-        color: #fff; border: 0; cursor: pointer;
-        background: linear-gradient(105deg, #00A89D 0%, #00A89D 40%, #F15A29 100%);
-        box-shadow: 0 10px 24px -10px rgba(0,168,157,0.7);
-        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem;
+        padding: 0.8rem 1.35rem; border-radius: 999px; font-weight: 700; font-size: 0.8125rem;
+        color: #fff; border: 0; cursor: pointer; white-space: nowrap;
+        background: linear-gradient(105deg, #00A89D 0%, #14b8a6 35%, #F15A29 100%);
+        background-size: 140% 100%;
+        box-shadow: 0 12px 28px -12px rgba(0,168,157,0.75);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background-position 0.25s ease;
       }
       #coach-first-run-checklist .gs-cta:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.05);
-        box-shadow: 0 14px 28px -10px rgba(241,90,41,0.45);
+        transform: translateY(-2px);
+        background-position: 100% 0;
+        box-shadow: 0 16px 32px -12px rgba(241,90,41,0.5);
       }
       #coach-first-run-checklist .gs-cta:active { transform: translateY(0); }
-      #coach-first-run-checklist .gs-rail {
-        display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.15rem;
-        scrollbar-width: none; -ms-overflow-style: none;
+      #coach-first-run-checklist .gs-cta i { transition: transform 0.18s ease; }
+      #coach-first-run-checklist .gs-cta:hover i { transform: translateX(3px); }
+      #coach-first-run-checklist .gs-path {
+        display: flex; align-items: flex-start; width: 100%;
       }
-      #coach-first-run-checklist .gs-rail::-webkit-scrollbar { display: none; }
+      #coach-first-run-checklist .gs-path-item {
+        flex: 1; display: flex; flex-direction: column; align-items: center; min-width: 0;
+        position: relative;
+      }
+      #coach-first-run-checklist .gs-path-line {
+        position: absolute; top: 0.95rem; left: calc(-50% + 1rem); right: calc(50% + 1rem);
+        height: 2px; border-radius: 999px;
+        background: rgba(255,255,255,0.1);
+        z-index: 0;
+      }
+      #coach-first-run-checklist .gs-path-item.is-done .gs-path-line,
+      #coach-first-run-checklist .gs-path-item.is-current .gs-path-line {
+        background: linear-gradient(90deg, rgba(0,168,157,0.75), rgba(0,168,157,0.35));
+      }
+      #coach-first-run-checklist .gs-path-item:first-child .gs-path-line { display: none; }
       #coach-first-run-checklist .gs-step {
-        flex: 1 1 0; min-width: 4.5rem; max-width: 7.5rem;
-        display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
-        padding: 0.55rem 0.4rem; border-radius: 0.9rem; border: 1px solid transparent;
-        background: transparent; color: rgba(255,255,255,0.55); cursor: pointer;
-        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+        position: relative; z-index: 1;
+        display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+        width: 100%; padding: 0.25rem 0.15rem; border: 0; background: transparent;
+        color: rgba(255,255,255,0.42); cursor: pointer;
+        transition: color 0.15s ease, transform 0.15s ease;
       }
       #coach-first-run-checklist .gs-step:hover:not(:disabled) {
-        background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9);
+        color: rgba(255,255,255,0.92); transform: translateY(-1px);
       }
-      #coach-first-run-checklist .gs-step.is-done { color: rgba(0,168,157,0.95); cursor: default; }
-      #coach-first-run-checklist .gs-step.is-current {
-        color: #fff;
-        border-color: rgba(0,168,157,0.45);
-        background: rgba(0,168,157,0.12);
-        box-shadow: 0 0 0 1px rgba(0,168,157,0.15);
-      }
+      #coach-first-run-checklist .gs-step.is-done { color: #5eead4; cursor: default; }
+      #coach-first-run-checklist .gs-step.is-current { color: #fff; }
       #coach-first-run-checklist .gs-dot {
-        width: 1.65rem; height: 1.65rem; border-radius: 999px;
+        width: 1.9rem; height: 1.9rem; border-radius: 999px;
         display: inline-flex; align-items: center; justify-content: center;
-        font-size: 0.65rem; font-weight: 700;
-        border: 1px solid rgba(255,255,255,0.18);
-        background: rgba(255,255,255,0.06);
+        font-size: 0.7rem; font-weight: 700;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(0,0,0,0.2);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
       }
       #coach-first-run-checklist .gs-step.is-done .gs-dot {
-        border-color: rgba(0,168,157,0.5);
-        background: rgba(0,168,157,0.2);
+        border-color: rgba(0,168,157,0.55);
+        background: rgba(0,168,157,0.22);
         color: #5eead4;
       }
       #coach-first-run-checklist .gs-step.is-current .gs-dot {
         border-color: transparent;
-        background: linear-gradient(135deg, #00A89D, #F15A29);
+        background: linear-gradient(145deg, #00A89D, #F15A29);
         color: #fff;
-        box-shadow: 0 4px 12px -2px rgba(241,90,41,0.45);
+        box-shadow: 0 6px 16px -4px rgba(241,90,41,0.55);
+        transform: scale(1.08);
       }
       #coach-first-run-checklist .gs-step-label {
-        font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em;
+        font-size: 0.62rem; font-weight: 600; letter-spacing: 0.03em;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+        text-align: center;
       }
-      #coach-first-run-checklist .gs-dismiss {
-        color: rgba(255,255,255,0.45); background: transparent; border: 0;
-        font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-        padding: 0.35rem 0.55rem; border-radius: 0.5rem; cursor: pointer;
+      #coach-first-run-checklist .gs-ghost {
+        color: rgba(255,255,255,0.4); background: transparent;
+        border: 1px solid rgba(255,255,255,0.12);
+        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.03em;
+        padding: 0.35rem 0.65rem; border-radius: 999px; cursor: pointer;
+        transition: color 0.15s, border-color 0.15s, background 0.15s;
       }
-      #coach-first-run-checklist .gs-dismiss:hover {
-        color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08);
+      #coach-first-run-checklist .gs-ghost:hover {
+        color: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.28);
+        background: rgba(255,255,255,0.06);
+      }
+      #coach-first-run-checklist .gs-mini {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.7rem 0.85rem 0.7rem 0.95rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0,168,157,0.28);
+        background: linear-gradient(105deg, #002B5C 0%, #0a3d4a 100%);
+        box-shadow: 0 12px 28px -16px rgba(0,43,92,0.65);
+        color: #fff; cursor: pointer; width: 100%;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        text-align: left;
+      }
+      #coach-first-run-checklist .gs-mini:hover {
+        transform: translateY(-1px);
+        border-color: rgba(0,168,157,0.5);
+        box-shadow: 0 16px 32px -14px rgba(0,168,157,0.35);
+      }
+      #coach-first-run-checklist .gs-mini-bar {
+        width: 2.5rem; height: 3px; border-radius: 999px;
+        background: rgba(255,255,255,0.12); overflow: hidden; flex-shrink: 0;
+      }
+      #coach-first-run-checklist .gs-mini-bar > span {
+        display: block; height: 100%; border-radius: 999px;
+        background: linear-gradient(90deg, #00A89D, #F15A29);
+      }
+      @media (max-width: 640px) {
+        #coach-first-run-checklist .gs-step-label { font-size: 0.58rem; }
+        #coach-first-run-checklist .gs-dot { width: 1.65rem; height: 1.65rem; font-size: 0.62rem; }
       }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(el);
+  }
+
+  function ctaLabelFor(item) {
+    const map = {
+      profile: 'Open profile',
+      bio: 'Build my bio',
+      annual: 'Build 2026 plan',
+      weekly: 'Plan this week',
+      content: 'Create content',
+      saved: 'Open library'
+    };
+    return map[item.id] || 'Continue';
   }
 
   function renderFirstRunChecklist() {
@@ -538,58 +628,84 @@
     const pct = Math.round((doneCount / items.length) * 100);
     const next = items.find((i) => !i.done) || items[0];
     const nextIndex = items.findIndex((i) => i.id === next.id) + 1;
+    const minimized = localStorage.getItem(CHECKLIST_MINIMIZED_KEY) === '1';
+
+    if (minimized) {
+      card.innerHTML = `
+        <button type="button" class="gs-mini" id="coach-checklist-expand" aria-expanded="false" aria-label="Expand coach setup, ${doneCount} of ${items.length} complete">
+          <span class="gs-mini-bar" aria-hidden="true"><span style="width:${pct}%"></span></span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#5eead4]">Setup · ${doneCount}/${items.length}</span>
+            <span class="block text-sm font-semibold text-white truncate">Next: ${next.label}</span>
+          </span>
+          <span class="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-white/90">
+            Open
+            <i class="fas fa-chevron-down text-[10px] opacity-70" aria-hidden="true"></i>
+          </span>
+        </button>`;
+      document.getElementById('coach-checklist-expand')?.addEventListener('click', () => {
+        localStorage.setItem(CHECKLIST_MINIMIZED_KEY, '0');
+        renderFirstRunChecklist();
+      });
+      return;
+    }
 
     card.innerHTML = `
       <div class="gs-shell" role="region" aria-label="Coach setup progress">
         <div class="gs-inner p-5 sm:p-6 md:p-7">
-          <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex items-start justify-between gap-3 mb-3.5">
             <div class="min-w-0">
-              <div class="gs-kicker mb-1.5">Your coach setup</div>
-              <h3 class="text-lg sm:text-xl font-bold tracking-tight m-0 text-white">One focused path. Zero guesswork.</h3>
-              <p class="text-xs sm:text-sm text-white/55 m-0 mt-1.5 max-w-xl leading-relaxed">
-                Profile &amp; bio → <span class="text-white/85 font-medium">2026 map</span> → weekly execution → content you can reuse.
+              <div class="gs-kicker mb-2"><span class="gs-kicker-dot" aria-hidden="true"></span> Coach setup</div>
+              <h3 class="text-lg sm:text-[1.35rem] font-bold tracking-tight m-0 text-white leading-snug">One focused path. Zero guesswork.</h3>
+              <p class="text-xs sm:text-[13px] text-white/50 m-0 mt-1.5 max-w-lg leading-relaxed">
+                Identity → <span class="text-white/80 font-medium">annual map</span> → weekly execution → content that compounds.
               </p>
             </div>
-            <div class="flex flex-col items-end gap-1 shrink-0">
-              <span class="text-[11px] font-semibold tabular-nums text-white/70">${doneCount}<span class="text-white/35"> / ${items.length}</span></span>
-              <button type="button" id="coach-checklist-dismiss" class="gs-dismiss" aria-label="Dismiss setup card">Dismiss</button>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="hidden sm:inline text-[11px] font-semibold tabular-nums text-white/55 px-2 py-1 rounded-full border border-white/10 bg-white/5">${doneCount}/${items.length}</span>
+              <button type="button" id="coach-checklist-minimize" class="gs-ghost" title="Minimize to a slim bar">Minimize</button>
+              <button type="button" id="coach-checklist-dismiss" class="gs-ghost" aria-label="Dismiss setup card">Dismiss</button>
             </div>
           </div>
 
-          <div class="gs-progress-track mb-5" aria-hidden="true">
+          <div class="gs-progress-track mb-5" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Setup progress">
             <div class="gs-progress-fill" style="width:${pct}%"></div>
           </div>
 
-          <div class="gs-next p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="gs-next p-4 sm:p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
             <div class="flex items-start gap-3.5 min-w-0 flex-1">
-              <div class="w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-[#00A89D] to-[#F15A29] shadow-lg shadow-[#00A89D]/25">
-                <i class="fas ${next.icon} text-white text-base" aria-hidden="true"></i>
+              <div class="gs-icon-tile" aria-hidden="true">
+                <i class="fas ${next.icon} text-white text-[1.05rem]"></i>
               </div>
               <div class="min-w-0">
-                <div class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5eead4]/90 mb-1">Next up · Step ${nextIndex}</div>
-                <div class="text-base sm:text-lg font-bold text-white leading-snug">${next.label}</div>
-                <p class="text-xs sm:text-sm text-white/55 m-0 mt-1 leading-relaxed">${next.blurb}</p>
+                <div class="text-[10px] font-bold uppercase tracking-[0.16em] text-[#5eead4] mb-1">Next · Step ${nextIndex} of ${items.length}</div>
+                <div class="text-base sm:text-lg font-bold text-white leading-snug tracking-tight">${next.label}</div>
+                <p class="text-xs sm:text-[13px] text-white/50 m-0 mt-1 leading-relaxed">${next.blurb}</p>
               </div>
             </div>
-            <button type="button" id="coach-checklist-primary" class="gs-cta shrink-0 self-stretch sm:self-center justify-center">
-              Continue
+            <button type="button" id="coach-checklist-primary" class="gs-cta shrink-0 self-stretch sm:self-center">
+              ${ctaLabelFor(next)}
               <i class="fas fa-arrow-right text-[11px] opacity-90" aria-hidden="true"></i>
             </button>
           </div>
 
-          <div class="gs-rail" role="list" aria-label="Setup steps">
+          <div class="gs-path" role="list" aria-label="Setup steps">
             ${items.map((item, idx) => {
               const state = item.done ? 'is-done' : (item.id === next.id ? 'is-current' : '');
               const num = item.done
                 ? '<i class="fas fa-check text-[10px]" aria-hidden="true"></i>'
                 : String(idx + 1);
               return `
-              <button type="button" role="listitem" class="gs-step ${state}" data-checklist-id="${item.id}"
-                ${item.done ? 'disabled aria-disabled="true"' : ''}
-                title="${item.done ? 'Completed: ' : ''}${item.label}">
-                <span class="gs-dot">${num}</span>
-                <span class="gs-step-label">${item.short}</span>
-              </button>`;
+              <div class="gs-path-item ${state}" role="listitem">
+                <div class="gs-path-line" aria-hidden="true"></div>
+                <button type="button" class="gs-step ${state}" data-checklist-id="${item.id}"
+                  ${item.done ? 'disabled aria-disabled="true"' : ''}
+                  aria-current="${item.id === next.id ? 'step' : 'false'}"
+                  title="${item.done ? 'Completed: ' : ''}${item.label}">
+                  <span class="gs-dot">${num}</span>
+                  <span class="gs-step-label">${item.short}</span>
+                </button>
+              </div>`;
             }).join('')}
           </div>
         </div>
@@ -598,6 +714,10 @@
     document.getElementById('coach-checklist-dismiss')?.addEventListener('click', () => {
       localStorage.setItem(CHECKLIST_DISMISS_KEY, '1');
       card.remove();
+    });
+    document.getElementById('coach-checklist-minimize')?.addEventListener('click', () => {
+      localStorage.setItem(CHECKLIST_MINIMIZED_KEY, '1');
+      renderFirstRunChecklist();
     });
 
     const runItem = (id) => {
