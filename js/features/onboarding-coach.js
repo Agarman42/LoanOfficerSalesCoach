@@ -9,7 +9,7 @@
   const DISMISS_PREFIX = 'coachGuideDismissed_';
   const PROFILE_NUDGE_KEY = 'coachProfileNudgeDismissed';
   const CHECKLIST_DISMISS_KEY = 'coachFirstRunChecklistDismissed';
-  const CHECKLIST_VERSION = '2'; // bump when step order/copy changes so hide resets
+  const CHECKLIST_VERSION = '3'; // bump when design/copy changes so dismissed cards reappear
 
   function getProfile() {
     if (typeof window.getUserProfile === 'function') return window.getUserProfile();
@@ -311,31 +311,46 @@
     return [
       {
         id: 'profile',
-        label: 'Add name + market in My Profile',
+        short: 'Profile',
+        label: 'Lock in your identity',
+        blurb: 'Name + market so every tool sounds like you — not a generic LO.',
+        icon: 'fa-user',
         done: !!(p.name && (p.location || p.market || p.localArea)),
         run: () => { if (typeof window.openUserProfile === 'function') window.openUserProfile(true); }
       },
       {
         id: 'bio',
-        label: 'Save a Primary Bio (your voice for all tools)',
+        short: 'Bio',
+        label: 'Save a Primary Bio',
+        blurb: 'One authentic voice for Newsletter, Blog, Social, and AI Coach.',
+        icon: 'fa-id-card',
         done: !!p.professionalBio,
         run: () => { if (typeof window.showSection === 'function') window.showSection('bio-creator'); }
       },
       {
         id: 'annual',
-        label: 'Build your 2026 Business Plan (annual map)',
+        short: '2026 Plan',
+        label: 'Build your 2026 Business Plan',
+        blurb: 'Your annual map — vision, numbers, and strategy before the weekly grind.',
+        icon: 'fa-chart-line',
         done: hasBusinessPlan(),
         run: () => { if (typeof window.showSection === 'function') window.showSection('planning'); }
       },
       {
         id: 'weekly',
-        label: 'Build a Weekly Win Plan (execute the map)',
+        short: 'Weekly',
+        label: 'Build this week’s Win Plan',
+        blurb: 'Turn the map into protected blocks and tasks you actually run.',
+        icon: 'fa-fire',
         done: hasWeeklyPlan(),
         run: () => { if (typeof window.showSection === 'function') window.showSection('weekly-win-plan'); }
       },
       {
         id: 'content',
-        label: 'Generate social, blog, or newsletter content',
+        short: 'Content',
+        label: 'Ship one piece of content',
+        blurb: 'Social, blog, or newsletter — show up in the market with your voice.',
+        icon: 'fa-sparkles',
         done: (() => {
           try {
             const items = JSON.parse(localStorage.getItem('socialSavedIdeas') || '[]');
@@ -348,7 +363,10 @@
       },
       {
         id: 'saved',
-        label: 'Save something to My Saved Items',
+        short: 'Library',
+        label: 'Save a keeper',
+        blurb: 'Bookmark one script or post so your best work is one click away.',
+        icon: 'fa-bookmark',
         done: savedItemsCount() > 0,
         run: () => {
           if (typeof window.showSavedItemsLibrary === 'function') window.showSavedItemsLibrary();
@@ -356,6 +374,133 @@
         }
       }
     ];
+  }
+
+  function ensureGettingStartedStyles() {
+    if (document.getElementById('coach-getting-started-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'coach-getting-started-styles';
+    style.textContent = `
+      #coach-first-run-checklist .gs-shell {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.5rem;
+        border: 1px solid rgba(0,168,157,0.22);
+        background:
+          radial-gradient(1200px 280px at 0% 0%, rgba(0,168,157,0.16), transparent 55%),
+          radial-gradient(900px 240px at 100% 0%, rgba(241,90,41,0.12), transparent 50%),
+          linear-gradient(145deg, #001a38 0%, #002B5C 48%, #0a3d4a 100%);
+        box-shadow: 0 20px 50px -24px rgba(0,43,92,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset;
+        color: #fff;
+      }
+      .dark #coach-first-run-checklist .gs-shell {
+        border-color: rgba(0,168,157,0.28);
+        background:
+          radial-gradient(1000px 260px at 10% -10%, rgba(0,168,157,0.2), transparent 50%),
+          radial-gradient(800px 220px at 100% 0%, rgba(241,90,41,0.14), transparent 45%),
+          linear-gradient(145deg, #061018 0%, #0b1c2e 55%, #0a2428 100%);
+      }
+      #coach-first-run-checklist .gs-shell::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent 40%);
+        pointer-events: none;
+      }
+      #coach-first-run-checklist .gs-inner { position: relative; z-index: 1; }
+      #coach-first-run-checklist .gs-kicker {
+        font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+        color: rgba(0,168,157,0.95);
+      }
+      #coach-first-run-checklist .gs-progress-track {
+        height: 4px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden;
+      }
+      #coach-first-run-checklist .gs-progress-fill {
+        height: 100%; border-radius: 999px;
+        background: linear-gradient(90deg, #00A89D, #F15A29);
+        box-shadow: 0 0 16px rgba(0,168,157,0.45);
+        transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      #coach-first-run-checklist .gs-next {
+        border-radius: 1.15rem;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      }
+      #coach-first-run-checklist .gs-next:hover {
+        border-color: rgba(0,168,157,0.45);
+        background: rgba(255,255,255,0.11);
+      }
+      #coach-first-run-checklist .gs-cta {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        padding: 0.7rem 1.15rem; border-radius: 999px; font-weight: 700; font-size: 0.8125rem;
+        color: #fff; border: 0; cursor: pointer;
+        background: linear-gradient(105deg, #00A89D 0%, #00A89D 40%, #F15A29 100%);
+        box-shadow: 0 10px 24px -10px rgba(0,168,157,0.7);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+      }
+      #coach-first-run-checklist .gs-cta:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+        box-shadow: 0 14px 28px -10px rgba(241,90,41,0.45);
+      }
+      #coach-first-run-checklist .gs-cta:active { transform: translateY(0); }
+      #coach-first-run-checklist .gs-rail {
+        display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.15rem;
+        scrollbar-width: none; -ms-overflow-style: none;
+      }
+      #coach-first-run-checklist .gs-rail::-webkit-scrollbar { display: none; }
+      #coach-first-run-checklist .gs-step {
+        flex: 1 1 0; min-width: 4.5rem; max-width: 7.5rem;
+        display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+        padding: 0.55rem 0.4rem; border-radius: 0.9rem; border: 1px solid transparent;
+        background: transparent; color: rgba(255,255,255,0.55); cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      }
+      #coach-first-run-checklist .gs-step:hover:not(:disabled) {
+        background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9);
+      }
+      #coach-first-run-checklist .gs-step.is-done { color: rgba(0,168,157,0.95); cursor: default; }
+      #coach-first-run-checklist .gs-step.is-current {
+        color: #fff;
+        border-color: rgba(0,168,157,0.45);
+        background: rgba(0,168,157,0.12);
+        box-shadow: 0 0 0 1px rgba(0,168,157,0.15);
+      }
+      #coach-first-run-checklist .gs-dot {
+        width: 1.65rem; height: 1.65rem; border-radius: 999px;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 0.65rem; font-weight: 700;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.06);
+      }
+      #coach-first-run-checklist .gs-step.is-done .gs-dot {
+        border-color: rgba(0,168,157,0.5);
+        background: rgba(0,168,157,0.2);
+        color: #5eead4;
+      }
+      #coach-first-run-checklist .gs-step.is-current .gs-dot {
+        border-color: transparent;
+        background: linear-gradient(135deg, #00A89D, #F15A29);
+        color: #fff;
+        box-shadow: 0 4px 12px -2px rgba(241,90,41,0.45);
+      }
+      #coach-first-run-checklist .gs-step-label {
+        font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+      }
+      #coach-first-run-checklist .gs-dismiss {
+        color: rgba(255,255,255,0.45); background: transparent; border: 0;
+        font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+        padding: 0.35rem 0.55rem; border-radius: 0.5rem; cursor: pointer;
+      }
+      #coach-first-run-checklist .gs-dismiss:hover {
+        color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08);
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   function renderFirstRunChecklist() {
@@ -373,12 +518,13 @@
     const slot = document.getElementById('global-profile-nudge') || document.querySelector('main');
     if (!slot) return;
 
+    ensureGettingStartedStyles();
+
     let card = document.getElementById('coach-first-run-checklist');
     if (!card) {
       card = document.createElement('div');
       card.id = 'coach-first-run-checklist';
-      card.className = 'mb-6';
-      // Place after profile nudge if present
+      card.className = 'mb-6 max-w-5xl mx-auto w-full';
       const nudge = document.getElementById('coach-profile-nudge');
       if (nudge && nudge.parentNode) {
         nudge.insertAdjacentElement('afterend', card);
@@ -390,41 +536,78 @@
     }
 
     const pct = Math.round((doneCount / items.length) * 100);
+    const next = items.find((i) => !i.done) || items[0];
+    const nextIndex = items.findIndex((i) => i.id === next.id) + 1;
+
     card.innerHTML = `
-      <div class="rounded-2xl border border-[#00A89D]/35 bg-white dark:bg-gray-900 p-4 md:p-5 shadow-sm" role="region" aria-label="Getting started checklist">
-        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
-          <div>
-            <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">Getting started</div>
-            <div class="font-semibold text-[#002B5C] dark:text-white text-sm mt-0.5">Set up your coach (${doneCount}/${items.length})</div>
-            <p class="text-xs text-gray-500 m-0 mt-1">Profile &amp; bio first → <strong>2026 Business Plan</strong> (the map) → <strong>Weekly Win Plan</strong> (this week’s execution) → content you can reuse.</p>
+      <div class="gs-shell" role="region" aria-label="Coach setup progress">
+        <div class="gs-inner p-5 sm:p-6 md:p-7">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="min-w-0">
+              <div class="gs-kicker mb-1.5">Your coach setup</div>
+              <h3 class="text-lg sm:text-xl font-bold tracking-tight m-0 text-white">One focused path. Zero guesswork.</h3>
+              <p class="text-xs sm:text-sm text-white/55 m-0 mt-1.5 max-w-xl leading-relaxed">
+                Profile &amp; bio → <span class="text-white/85 font-medium">2026 map</span> → weekly execution → content you can reuse.
+              </p>
+            </div>
+            <div class="flex flex-col items-end gap-1 shrink-0">
+              <span class="text-[11px] font-semibold tabular-nums text-white/70">${doneCount}<span class="text-white/35"> / ${items.length}</span></span>
+              <button type="button" id="coach-checklist-dismiss" class="gs-dismiss" aria-label="Dismiss setup card">Dismiss</button>
+            </div>
           </div>
-          <button type="button" id="coach-checklist-dismiss" class="text-xs px-3 py-1.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 shrink-0">Hide</button>
+
+          <div class="gs-progress-track mb-5" aria-hidden="true">
+            <div class="gs-progress-fill" style="width:${pct}%"></div>
+          </div>
+
+          <div class="gs-next p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex items-start gap-3.5 min-w-0 flex-1">
+              <div class="w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-[#00A89D] to-[#F15A29] shadow-lg shadow-[#00A89D]/25">
+                <i class="fas ${next.icon} text-white text-base" aria-hidden="true"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5eead4]/90 mb-1">Next up · Step ${nextIndex}</div>
+                <div class="text-base sm:text-lg font-bold text-white leading-snug">${next.label}</div>
+                <p class="text-xs sm:text-sm text-white/55 m-0 mt-1 leading-relaxed">${next.blurb}</p>
+              </div>
+            </div>
+            <button type="button" id="coach-checklist-primary" class="gs-cta shrink-0 self-stretch sm:self-center justify-center">
+              Continue
+              <i class="fas fa-arrow-right text-[11px] opacity-90" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="gs-rail" role="list" aria-label="Setup steps">
+            ${items.map((item, idx) => {
+              const state = item.done ? 'is-done' : (item.id === next.id ? 'is-current' : '');
+              const num = item.done
+                ? '<i class="fas fa-check text-[10px]" aria-hidden="true"></i>'
+                : String(idx + 1);
+              return `
+              <button type="button" role="listitem" class="gs-step ${state}" data-checklist-id="${item.id}"
+                ${item.done ? 'disabled aria-disabled="true"' : ''}
+                title="${item.done ? 'Completed: ' : ''}${item.label}">
+                <span class="gs-dot">${num}</span>
+                <span class="gs-step-label">${item.short}</span>
+              </button>`;
+            }).join('')}
+          </div>
         </div>
-        <div class="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden mb-3">
-          <div class="h-full rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] transition-all" style="width:${pct}%"></div>
-        </div>
-        <ul class="m-0 p-0 space-y-2 list-none">
-          ${items.map((item) => `
-            <li class="flex items-center justify-between gap-3 text-sm">
-              <span class="flex items-center gap-2 min-w-0 ${item.done ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-gray-200'}">
-                <i class="fas ${item.done ? 'fa-check-circle text-[#00A89D]' : 'fa-circle text-gray-300'} shrink-0" aria-hidden="true"></i>
-                <span class="truncate">${item.label}</span>
-              </span>
-              ${item.done ? '' : `<button type="button" data-checklist-id="${item.id}" class="coach-checklist-go text-xs px-3 py-1 rounded-full border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white shrink-0">Go</button>`}
-            </li>
-          `).join('')}
-        </ul>
       </div>`;
 
     document.getElementById('coach-checklist-dismiss')?.addEventListener('click', () => {
       localStorage.setItem(CHECKLIST_DISMISS_KEY, '1');
       card.remove();
     });
-    card.querySelectorAll('.coach-checklist-go').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const item = items.find((i) => i.id === btn.getAttribute('data-checklist-id'));
-        if (item && typeof item.run === 'function') item.run();
-      });
+
+    const runItem = (id) => {
+      const item = items.find((i) => i.id === id);
+      if (item && !item.done && typeof item.run === 'function') item.run();
+    };
+
+    document.getElementById('coach-checklist-primary')?.addEventListener('click', () => runItem(next.id));
+    card.querySelectorAll('.gs-step:not(.is-done)').forEach((btn) => {
+      btn.addEventListener('click', () => runItem(btn.getAttribute('data-checklist-id')));
     });
   }
 
