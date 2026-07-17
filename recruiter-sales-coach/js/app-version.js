@@ -5,8 +5,8 @@
 (function () {
   'use strict';
 
-  window.APP_VERSION = '2.14';
-  window.APP_BUILD_DATE = '2026-06-18';
+  window.APP_VERSION = '2.34';
+  window.APP_BUILD_DATE = '2026-07-17';
 
   function applyAppVersionFooter() {
     const el = document.getElementById('app-version-line');

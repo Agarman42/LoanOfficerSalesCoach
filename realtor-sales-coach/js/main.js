@@ -564,8 +564,15 @@
       sec.classList.add('hidden');
     });
 
-    // Show the target
+    // Show the target (fallback to Home if hash/alias is stale)
     const target = document.getElementById(id);
+    if (!target) {
+      if (id !== 'home') {
+        showSection('home');
+      }
+      return;
+    }
+
     if (target) {
       target.classList.remove('hidden');
       if (typeof window.trackCoachSectionOpen === 'function') {
@@ -700,6 +707,15 @@
         }, 80);
       }
 
+      // Bio Builder — sync profile + restore saved draft
+      if (id === 'bio-creator') {
+        setTimeout(() => {
+          if (typeof window.syncBioFromProfile === 'function') {
+            try { window.syncBioFromProfile(); } catch (e) {}
+          }
+        }, 80);
+      }
+
       // Newsletter Generator — sync profile fields + ensure listeners + initial previews for custom curated
       if (id === 'newsletter-generator') {
         setTimeout(() => {
@@ -819,20 +835,23 @@
       if (id) showSection(id);
     });
 
-    // On initial page load, respect a hash if present, otherwise show AI Chat as default
+    // On initial page load, respect a hash if present, otherwise land on Home
     if (location.hash) {
       const id = location.hash.replace('#', '');
       setTimeout(() => {
         const target = document.getElementById(id);
         if (target) showSection(id);
+        else showSection('home');
       }, 150);
     } else {
-      // Default view: Show AI Chat Assistant (original intended behavior)
       setTimeout(() => {
-        const aiChat = document.getElementById('ai-chat');
-        if (aiChat) {
+        const home = document.getElementById('home');
+        if (home) {
           document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-          aiChat.classList.remove('hidden');
+          home.classList.remove('hidden');
+          if (typeof window.onCoachSectionShown === 'function') {
+            try { window.onCoachSectionShown('home'); } catch (e) {}
+          }
         }
       }, 200);
     }

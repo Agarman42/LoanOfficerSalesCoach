@@ -38,10 +38,32 @@
     return `<ul class="${className || 'text-sm space-y-2 list-disc pl-5 text-gray-700 dark:text-gray-300'}">${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
   }
 
+  function renderVisionBanner() {
+    const v = PLAN().vision || {};
+    if (!v.statement) return '';
+    return `
+      <div class="mb-6 rounded-3xl overflow-hidden border border-[#00A89D]/25 shadow-lg">
+        <div class="bg-gradient-to-br from-[#001429] via-[#002B5C] to-[#0a3d4a] px-6 py-6 sm:px-8 sm:py-7 text-white">
+          <div class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#5eead4] mb-2">Ruoff Recruiting Vision · 2026</div>
+          <p class="text-lg sm:text-xl font-bold leading-snug m-0 tracking-tight">${escapeHtml(v.statement)}</p>
+          ${v.how ? `<p class="text-sm text-white/65 m-0 mt-3 leading-relaxed max-w-4xl">${escapeHtml(v.how)}</p>` : ''}
+          <div class="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold">
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/15">Goal: ${escapeHtml(String(PLAN().annualGoal || 60))} net hires</span>
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/15">Capacity: ~${escapeHtml(String(PLAN().grossHireCapacity || 85))} gross</span>
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/15">Shape = system of record</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
   function renderPillarsOverview() {
     const pillars = PLAN().pillars || [];
     const keys = PLAN().keysToSuccess || [];
+    const overview = PLAN().planOverview || '';
+    const aiTools = PLAN().aiToolsInPlan || [];
     return `
+      ${renderVisionBanner()}
+      ${overview ? `<p class="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">${escapeHtml(overview)}</p>` : ''}
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Click any pillar for the full playbook — rhythm, checklist, examples, pitfalls, and one-click links into tools.</p>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="recruiting-pillar-grid">
         ${pillars.map(p => `
@@ -53,11 +75,18 @@
             <div class="mt-3 text-xs text-[#00A89D] font-semibold flex items-center gap-1">Explore pillar <i class="fas fa-arrow-right text-[10px] group-hover:translate-x-0.5 transition-transform"></i></div>
           </button>`).join('')}
       </div>
-      <div class="p-5 rounded-2xl border border-dashed border-[#002B5C]/30 bg-[#002B5C]/5">
+      <div class="p-5 rounded-2xl border border-dashed border-[#002B5C]/30 bg-[#002B5C]/5 mb-4">
         <h4 class="font-bold text-[#002B5C] dark:text-white mb-3">Keys to Success (2026 Plan)</h4>
         ${renderList(keys)}
         <p class="text-xs text-gray-500 mt-3 italic">New recruiters: the first 30 days go sideways when outreach volume drops and rejection isn&apos;t reframed. Protect Tue–Thu phones — everything else supports that.</p>
-      </div>`;
+      </div>
+      ${aiTools.length ? `
+      <div class="p-5 rounded-2xl border border-[#00A89D]/25 bg-[#00A89D]/5">
+        <h4 class="font-bold text-[#002B5C] dark:text-white mb-2">AI tools named in the plan</h4>
+        <ul class="text-sm space-y-2 text-gray-700 dark:text-gray-300 m-0 pl-0 list-none">
+          ${aiTools.map(t => `<li><strong class="text-[#00A89D]">${escapeHtml(t.name)}</strong> — ${escapeHtml(t.purpose)}</li>`).join('')}
+        </ul>
+      </div>` : ''}`;
   }
 
   function renderPillarModalBody(num) {

@@ -238,6 +238,10 @@
       translationFavoriteLanguages: asArray(p.translationFavoriteLanguages).length
         ? asArray(p.translationFavoriteLanguages)
         : ['es', 'vi', 'zh'],
+      bioBuilderDraft: p.bioBuilderDraft && typeof p.bioBuilderDraft === 'object' ? p.bioBuilderDraft : {},
+      professionalBio: (p.professionalBio || '').trim(),
+      professionalBioMeta: p.professionalBioMeta && typeof p.professionalBioMeta === 'object' ? p.professionalBioMeta : null,
+      bioHistory: Array.isArray(p.bioHistory) ? p.bioHistory.slice(0, 8) : [],
       lastUpdated: p.lastUpdated || ''
     };
   }
@@ -348,6 +352,7 @@
     if (p.blogPageUrl) lines.push(`Blog page: ${p.blogPageUrl}`);
     if (p.companyWebsite) lines.push(`Company website: ${p.companyWebsite}`);
     if (p.headshotUrl) lines.push(`Headshot on file for newsletters`);
+    if (p.professionalBio) lines.push(`Professional bio: ${p.professionalBio}`);
     return lines.length
       ? lines.join('. ') + '.'
       : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
@@ -363,6 +368,8 @@
     const get = (id) => document.getElementById(id);
     const getVal = (id) => (get(id)?.value || '').trim();
     const getRaw = (id) => get(id)?.value || '';
+    // Preserve Bio Builder fields not shown on the profile form
+    const existing = readRawProfile();
 
     const socialLinks = {
       linkedin: getVal('profile-social-linkedin'),
@@ -415,8 +422,28 @@
       linkedInUrl: socialLinks.linkedin,
       translationDefaultTarget: getRaw('profile-translation-default') || 'es',
       translationFavoriteLanguages: Array.from(document.querySelectorAll('.profile-translation-fav:checked')).map((c) => c.value),
+      bioBuilderDraft: existing.bioBuilderDraft && typeof existing.bioBuilderDraft === 'object' ? existing.bioBuilderDraft : {},
+      professionalBio: (existing.professionalBio || '').trim(),
+      professionalBioMeta: existing.professionalBioMeta && typeof existing.professionalBioMeta === 'object' ? existing.professionalBioMeta : null,
+      bioHistory: Array.isArray(existing.bioHistory) ? existing.bioHistory.slice(0, 8) : [],
       lastUpdated: new Date().toISOString()
     };
+  }
+
+  function patchUserProfile(partial, opts) {
+    const options = opts || {};
+    const merged = normalizeProfile({ ...readRawProfile(), ...partial, lastUpdated: new Date().toISOString() });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
+    localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
+    if (!options.silent) refreshProfileUI();
+    if (options.showFeedback) {
+      const msg = options.feedbackMessage || 'Profile updated.';
+      if (typeof window.showToast === 'function') {
+        window.showToast(msg);
+      }
+    }
+    return merged;
   }
 
   function persistProfile(profile, showFeedback, closeAfter) {
@@ -983,6 +1010,21 @@
     document.getElementById('profile-open-wizard')?.addEventListener('click', () => {
       startProfileWizard(1);
     });
+
+    document.getElementById('profile-export-data')?.addEventListener('click', () => {
+      if (typeof window.exportCoachDataPack === 'function') window.exportCoachDataPack();
+    });
+    document.getElementById('profile-import-data')?.addEventListener('click', () => {
+      document.getElementById('profile-import-file')?.click();
+    });
+    document.getElementById('profile-import-file')?.addEventListener('change', (e) => {
+      const file = e.target?.files?.[0];
+      if (file && typeof window.importCoachDataPack === 'function') {
+        window.importCoachDataPack(file).finally(() => {
+          e.target.value = '';
+        });
+      }
+    });
   }
 
   function paintHeaderProfileBadge() {
@@ -1053,6 +1095,98 @@
   window.switchProfileTab = switchProfileTab;
   window.refreshProfileUI = refreshProfileUI;
   window.startProfileWizard = startProfileWizard;
+  window.patchUserProfile = patchUserProfile;
+
+  // --- Export / import coach data pack (profile + plans + key content drafts) ---
+  const EXPORT_KEYS = [
+    'userProfile',
+    'winPlanSetup',
+    'savedBusinessPlan',
+    'lo_savedBusinessPlanContext',
+    'lo_savedBusinessPlanMarkdown',
+    'savedWeeklyPlan',
+    'weeklyCheckedTasks',
+    'winPlanStreak',
+    'aiChatHistory',
+    'lastNewsletterHTML',
+    'lastBlogOutput',
+    'lastSocialPlanHTML',
+    'lastSocialPlanMonth',
+    'lastSocialPlanYear',
+    'socialSavedIdeas'
+  ];
+
+  function exportCoachDataPack() {
+    const pack = {
+      app: 'AgentSalesCoach',
+      version: window.APP_VERSION || 'unknown',
+      exportedAt: new Date().toISOString(),
+      data: {}
+    };
+    EXPORT_KEYS.forEach((key) => {
+      try {
+        const val = localStorage.getItem(key);
+        if (val != null && val !== '') pack.data[key] = val;
+      } catch (e) {}
+    });
+    const blob = new Blob([JSON.stringify(pack, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `agent-sales-coach-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    if (typeof window.showToast === 'function') {
+      window.showToast('Backup downloaded — profile, plans, and key drafts included.');
+    }
+  }
+
+  async function importCoachDataPack(file) {
+    if (!file) return;
+    const text = await file.text();
+    let pack;
+    try {
+      pack = JSON.parse(text);
+    } catch (e) {
+      if (typeof window.showToast === 'function') window.showToast('Invalid backup file (not JSON).');
+      else alert('Invalid backup file (not JSON).');
+      return;
+    }
+    const data = pack && pack.data && typeof pack.data === 'object' ? pack.data : pack;
+    if (!data || typeof data !== 'object') {
+      if (typeof window.showToast === 'function') window.showToast('Backup file has no data.');
+      return;
+    }
+    let count = 0;
+    EXPORT_KEYS.forEach((key) => {
+      if (data[key] != null && data[key] !== '') {
+        try {
+          localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+          count += 1;
+        } catch (e) {}
+      }
+    });
+    try {
+      if (data.userProfile) {
+        const raw = typeof data.userProfile === 'string' ? JSON.parse(data.userProfile) : data.userProfile;
+        persistProfile(raw, false, false);
+      }
+    } catch (e) {}
+    refreshProfileUI();
+    if (typeof window.restoreSavedBusinessPlan === 'function') {
+      try { window.restoreSavedBusinessPlan(); } catch (e) {}
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Imported ${count} data key(s). Refresh if a tool looks stale.`);
+    } else {
+      alert(`Imported ${count} data key(s).`);
+    }
+  }
+
+  window.exportCoachDataPack = exportCoachDataPack;
+  window.importCoachDataPack = importCoachDataPack;
 
   // Paint header badge immediately from localStorage (no modal DOM required)
   paintHeaderProfileBadge();

@@ -394,7 +394,7 @@
 
     if (hosted) {
       // Change button to be informative instead of "enter your key"
-      apiBtn.innerHTML = `<i class="fas fa-shield-alt"></i> <span class="hidden md:inline">API Managed</span>`;
+      apiBtn.innerHTML = `<i class="fas fa-shield-alt w-5"></i> API Managed`;
       apiBtn.title = 'API key is managed server-side for this hosted version. No user key required.';
       // Still allow opening the modal for transparency / status
     }
@@ -582,10 +582,18 @@
       sec.classList.add('hidden');
     });
 
-    // Show the target
+    // Show the target (fallback to Home if hash/alias is stale)
     const target = document.getElementById(id);
+    if (!target) {
+      if (id !== 'home') showSection('home');
+      return;
+    }
+
     if (target) {
       target.classList.remove('hidden');
+      if (typeof window.onCoachSectionShown === 'function') {
+        try { window.onCoachSectionShown(id); } catch (e) {}
+      }
       // Smooth scroll into view
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -814,6 +822,17 @@
       return;
     }
 
+    // Retire early-boot listeners so clicks/hash don't fire twice
+    if (typeof window.__earlyNavSidebarClick === 'function') {
+      sidebar.removeEventListener('click', window.__earlyNavSidebarClick);
+      window.__earlyNavSidebarClick = null;
+    }
+    if (typeof window.__earlyNavHashChange === 'function') {
+      window.removeEventListener('hashchange', window.__earlyNavHashChange);
+      window.__earlyNavHashChange = null;
+    }
+    window.__mainNavReady = true;
+
     // Delegate clicks on sidebar links that point to sections
     sidebar.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
@@ -837,25 +856,28 @@
       if (id) showSection(id);
     });
 
-    // On initial page load, respect a hash if present, otherwise show AI Chat as default
+    // On initial page load, respect a hash if present, otherwise land on Home
     if (location.hash) {
       const id = resolveSectionId(location.hash.replace('#', ''));
       setTimeout(() => {
         const target = document.getElementById(id);
         if (target) showSection(id);
+        else showSection('home');
       }, 150);
     } else {
-      // Default view: Show AI Chat Assistant (original intended behavior)
       setTimeout(() => {
-        const aiChat = document.getElementById('ai-chat');
-        if (aiChat) {
+        const home = document.getElementById('home');
+        if (home) {
           document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-          aiChat.classList.remove('hidden');
+          home.classList.remove('hidden');
+          if (typeof window.onCoachSectionShown === 'function') {
+            try { window.onCoachSectionShown('home'); } catch (e) {}
+          }
         }
       }, 200);
     }
 
-    console.log('[main.js] Navigation initialized (sidebar links + hash support)');
+    console.log('[main.js] Navigation initialized (default Home)');
   }
 
   // Helper for Weekly Win Plan buttons (retry until the script loads)

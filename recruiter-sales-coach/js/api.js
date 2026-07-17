@@ -229,12 +229,111 @@
     }
   }
 
+  /** Base URL for proxy routes (chat, voice, stt) — no trailing path */
+  function getProxyBaseUrl() {
+    if (typeof window !== 'undefined' && window.CUSTOM_PROXY_URL) {
+      try {
+        const u = new URL(window.CUSTOM_PROXY_URL, window.location.origin);
+        return u.origin;
+      } catch (e) {
+        return '';
+      }
+    }
+    if (isProductionHosted()) return '';
+    const hn = (typeof window !== 'undefined' ? (window.location.hostname || 'localhost') : 'localhost');
+    const port =
+      typeof window !== 'undefined' && window.location && window.location.port
+        ? window.location.port
+        : '3002';
+    return `http://${hn}:${port}`;
+  }
+
+  function authHeaders() {
+    const headers = {};
+    const apiKey = ensureApiKey();
+    if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+    return headers;
+  }
+
+  /**
+   * Mint a short-lived client secret for browser Voice Agent WebSocket.
+   * @returns {Promise<{value:string, agent_id:string, expires_in:number}>}
+   */
+  async function fetchVoiceClientSecret(options = {}) {
+    const seconds = options.expiresSeconds || 300;
+    const base = getProxyBaseUrl();
+    const url = `${base}/api/voice/client-secret`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders()
+      },
+      body: JSON.stringify({ expires_after: { seconds } })
+    });
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`Voice token failed (${response.status}): ${errText.slice(0, 200)}`);
+    }
+    const data = await response.json();
+    const value =
+      data.value ||
+      data.client_secret ||
+      data.secret ||
+      (data.client_secret && data.client_secret.value) ||
+      data.token;
+    if (!value) throw new Error('Voice token response missing secret value');
+    return {
+      value,
+      agent_id: data.agent_id || window.RECRUITING_VOICE_AGENT_ID || 'agent_dPytnYBuJKo5KrKQ',
+      expires_in: data.expires_in || seconds
+    };
+  }
+
+  /**
+   * Transcribe an audio File/Blob via proxy → xAI STT.
+   * @param {File|Blob} file
+   * @returns {Promise<{text:string, raw:object}>}
+   */
+  async function transcribeAudioFile(file) {
+    if (!file) throw new Error('No audio file provided');
+    const base = getProxyBaseUrl();
+    const url = `${base}/api/v1/stt`;
+    const form = new FormData();
+    form.append('file', file, file.name || 'recording.mp3');
+
+    const headers = authHeaders();
+    // Do not set Content-Type — browser sets multipart boundary
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: form
+    });
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`Transcription failed (${response.status}): ${errText.slice(0, 240)}`);
+    }
+    const data = await response.json();
+    const text =
+      data.text ||
+      data.transcript ||
+      data.transcription ||
+      (Array.isArray(data.segments) ? data.segments.map((s) => s.text).join(' ') : '') ||
+      '';
+    return { text: String(text).trim(), raw: data };
+  }
+
   // Expose to global scope (classic script style used by the rest of the app)
   window.getGrokApiKey = getGrokApiKey;
   window.setGrokApiKey = setGrokApiKey;
   window.callGrokAPI = callGrokAPI;
   window.ensureGrokApiKey = ensureApiKey;
   window.isProductionHosted = isProductionHosted;
+  window.getProxyBaseUrl = getProxyBaseUrl;
+  window.fetchVoiceClientSecret = fetchVoiceClientSecret;
+  window.transcribeAudioFile = transcribeAudioFile;
+  window.RECRUITING_VOICE_AGENT_ID =
+    window.RECRUITING_VOICE_AGENT_ID || 'agent_dPytnYBuJKo5KrKQ';
 
   // Optional helper for debugging / settings UI later
   window.clearGrokApiKey = () => {

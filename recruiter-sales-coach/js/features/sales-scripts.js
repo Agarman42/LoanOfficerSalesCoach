@@ -49,6 +49,11 @@
     if (eff.targetPartners && eff.targetPartners.length) parts.push(`Ideal LO candidates: ${eff.targetPartners.join(', ')}`);
 
     const base = 'Warm, curious Ruoff recruiter who leads with respect — never pushy, always relationship-first.';
+    const vision = window.RECRUITING_PLAN_2026?.vision?.shortLine
+      || window.RECRUITING_PLAN_2026?.vision?.statement
+      || '';
+    if (vision) parts.push(`Company vision to reinforce naturally when relevant: ${vision}`);
+    parts.push('2026 team goal: 60 net hires; outreach discipline Tue–Thu phones; value before pitch.');
     return parts.length ? `${base} ${parts.join('. ')}.` : base;
   }
 

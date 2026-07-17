@@ -8,6 +8,8 @@
   const GA_ID = 'G-MDYP4C0BJ1';
 
   const TOOL_LABELS = {
+    home: 'Home',
+    'bio-creator': 'Bio Builder',
     'ai-chat': 'AI Coach',
     'sales-script': 'Sales Script Generator',
     'client-translation': 'Client Translation',

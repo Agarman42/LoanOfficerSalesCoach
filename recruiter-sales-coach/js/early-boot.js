@@ -1,6 +1,5 @@
 /**
  * Minimal sidebar navigation — runs before heavy feature scripts load.
- * Full showSection() from main.js replaces this when ready.
  */
 (function () {
   'use strict';
@@ -9,7 +8,8 @@
   var ALIASES = {
     'social-media-strategy': 'social',
     'referral-partners': 'referrals',
-    'prospecting': 'weekly-win-plan'
+    'prospecting': 'weekly-win-plan',
+    'sales-script': 'recruiting-script'
   };
 
   function resolveId(id) {
@@ -53,25 +53,29 @@
 
   window.showSection = showSectionEarly;
 
+  function onSidebarClick(e) {
+    if (window.__mainNavReady) return;
+    var link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    var href = link.getAttribute('href') || '';
+    if (link.target === '_blank' || !href.startsWith('#')) return;
+    e.preventDefault();
+    showSectionEarly(href.replace('#', ''));
+  }
+
+  function onHashChange() {
+    if (window.__mainNavReady) return;
+    var hashId = location.hash.replace('#', '');
+    if (hashId) showSectionEarly(hashId);
+  }
+
   function initEarlyNav() {
     var sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
-
-    sidebar.addEventListener('click', function (e) {
-      var link = e.target.closest('a[href^="#"]');
-      if (!link) return;
-
-      var href = link.getAttribute('href') || '';
-      if (link.target === '_blank' || !href.startsWith('#')) return;
-
-      e.preventDefault();
-      showSectionEarly(href.replace('#', ''));
-    });
-
-    window.addEventListener('hashchange', function () {
-      var hashId = location.hash.replace('#', '');
-      if (hashId) showSectionEarly(hashId);
-    });
+    sidebar.addEventListener('click', onSidebarClick);
+    window.addEventListener('hashchange', onHashChange);
+    window.__earlyNavSidebarClick = onSidebarClick;
+    window.__earlyNavHashChange = onHashChange;
 
     if (location.hash) {
       showSectionEarly(location.hash.replace('#', ''));
@@ -87,8 +91,6 @@
       gl.classList.add('hidden');
       gl.classList.remove('flex');
       gl.style.display = 'none';
-      gl.style.pointerEvents = 'none';
-      gl.style.visibility = 'hidden';
     }
   }
 

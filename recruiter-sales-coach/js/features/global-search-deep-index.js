@@ -4,7 +4,12 @@
 (function () {
   'use strict';
 
-  const appId = /Agent Sales Coach/i.test(document.title || '') ? 'realtor' : 'lo';
+  const title = document.title || '';
+  const appId = /Agent Sales Coach/i.test(title)
+    ? 'realtor'
+    : /Recruit/i.test(title)
+      ? 'recruiter'
+      : 'lo';
 
   function g(id, title, subtitle, sectionId, handler, keywords, icon) {
     return {
@@ -321,9 +326,10 @@
       ...DATABASE_GUIDES,
       ...REFERRAL_GUIDES,
       ...SHARED_TOOLS,
-      ...LO_ONLY,
-      ...REALTOR_ONLY,
     ];
+    if (appId === 'lo') guides.push(...LO_ONLY);
+    if (appId === 'realtor') guides.push(...REALTOR_ONLY);
+    // recruiter: sidebar tools + quick actions cover primary surfaces; skip LO/agent-only guides
 
     const scripts = [];
     if (typeof window.getSalesScriptSearchEntries === 'function') {
@@ -333,7 +339,7 @@
           id: `script-${sc.categoryKey}-${sc.scenarioValue}`.replace(/[^a-z0-9-]/gi, '-').slice(0, 80),
           title: sc.label,
           subtitle: `${sc.categoryLabel || 'Sales Script'} · opens with scenario selected`,
-          sectionId: 'sales-script',
+          sectionId: appId === 'recruiter' ? 'recruiting-script' : 'sales-script',
           handler: {
             kind: 'script',
             categoryKey: sc.categoryKey,

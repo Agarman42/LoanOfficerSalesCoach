@@ -1,33 +1,53 @@
 /**
  * Ruoff Recruiting Plan 2026 — structured ops data for the recruiting coach.
- * Source: Ruoff Recruiting Plan 2026.txt + Recruiting_Sales_Tool_Summary.txt
+ * Source: Ruoff Recruiting Plan 2026_Final EXTENDED (+ prior plan text / tool summary).
  */
 window.RECRUITING_PLAN_2026 = {
   annualGoal: 60,
+  /** Working-capacity funnel (gross) so ~60 net survives attrition */
+  grossHireCapacity: 85,
+  planTitle: 'Ruoff Mortgage Loan Officer Recruiting Plan 2026',
+  planOverview:
+    'A structured, multi-channel approach to attracting top-performing Loan Officers to Ruoff Mortgage. Built on a relationship-first philosophy, it combines strategic candidate sourcing and outreach, authentic social media presence, and ongoing collaboration with Area Managers.',
+  vision: {
+    headline: 'Dominant in every market we enter. Clear #1 in Midwest purchase share.',
+    statement:
+      'Our vision is simple but ambitious: We want to be the dominant mortgage company in every market we enter and become the clear #1 in purchase market share across the Midwest.',
+    how:
+      'We’ll achieve this by giving elite loan officers the autonomy they want, the technology and support they need, and a true family culture that actually backs them. At Ruoff, you don’t have to choose between high production and a great life — you get both. We’re building something special, and we’re looking for high-performing professionals who want to be part of it.',
+    shortLine:
+      'Autonomy + technology + family culture — high production and a great life. No false choice.'
+  },
   pillars: [
     { num: 1, title: 'Candidate Sourcing', frequency: 'Weekly', goal: 'Identify qualified prospects at 30–70 units, 50%+ purchase' },
-    { num: 2, title: 'Outreach & Messaging', frequency: 'Weekly + bi-monthly content', goal: 'Relationship-first engagement across phone, text, LinkedIn, Facebook' },
+    { num: 2, title: 'Outreach & Messaging', frequency: 'Weekly + bi-monthly value content', goal: 'Relationship-first engagement across phone, text, LinkedIn, Facebook' },
     { num: 3, title: 'Social Media Strategy', frequency: '3–4×/week', goal: '80% personal / 20% Ruoff — attract LO prospects authentically' },
-    { num: 4, title: 'Area Manager Collaboration', frequency: 'Monthly', goal: 'Pipeline alignment, market intel, coordinated recruiting' },
+    { num: 4, title: 'Area Manager Collaboration', frequency: 'Monthly', goal: 'Pipeline alignment, market intel, coordinated recruiting (Clint + Adam participate)' },
     { num: 5, title: 'Weekly Meetings with Adam', frequency: 'Mon + Wed', goal: 'Accountability, call review, role-play, prospect planning' },
-    { num: 6, title: '2026 Goal & Trackable Metrics', frequency: 'Daily / weekly / monthly', goal: '60 net hires via funnel discipline in Shape' }
+    { num: 6, title: '2026 Goal & Trackable Metrics', frequency: 'Daily / weekly / monthly', goal: '60 net hires via funnel discipline in Shape (~85 gross capacity)' }
   ],
   keysToSuccess: [
     'Consistency: Momentum is built through repetition and reliability.',
-    'Human First: Every interaction starts with real care before any pitch.',
-    'Authenticity: Be genuine.',
+    'Human First: Every interaction starts with real human care, empathy, and connection — before any pitch or process.',
+    'Authenticity: Be genuine!',
     'Relationships First: Every touchpoint leads with value, not a pitch.',
-    'Input: Every meeting, prospect, and conversation gets logged in Shape.',
+    'Input: Every meeting, prospect, and conversation gets input into Shape so nothing drops.',
     'Speed: Timely follow-up after events or active conversations is non-negotiable.',
-    'Market Awareness: Area Manager meeting intel shapes timing and messaging.',
-    'AI as an Enhancer: AI refines and coaches — relationships remain the core.',
-    'The Long Game: Brand recognition and genuine relationships until the right window opens.'
+    'Market Awareness: Intel gathered in Area Manager meetings directly shapes your timing and messaging.',
+    'AI as an Enhancer: AI tools refine, analyze, and coach. Relationships remain the core.',
+    'The Long Game: Convert as quickly as possible when the window is open — and keep building brand recognition and genuine relationships until that window appears. Not every conversation is an immediate move; every meaningful touchpoint gets us closer.'
+  ],
+  aiToolsInPlan: [
+    { name: 'Recruiter Sales Coach', purpose: 'Content, scripts, blog generation, coaching, voice roleplay, call review' },
+    { name: 'AI (messaging)', purpose: 'Draft polish, tone clarity, engagement rating, pitch-free filter' },
+    { name: '“What’s It Really Like at Ruoff” Survey', purpose: 'Peer social proof for outreach, social, and live recruiting calls' }
   ],
   sourcingTools: [
     { name: 'Cotality / Marketrac', note: 'Primary weekly sourcing tool' },
-    { name: 'Model Match', note: 'Identify producers matching criteria' },
-    { name: 'MMI (Mortgage Market Intelligence)', note: 'Market-level producer research' },
-    { name: 'Hunter', note: 'Clint-built LO sourcing tool' },
+    { name: 'Model Match', note: 'LO production data and analytics' },
+    { name: 'MMI (Mortgage Market Intelligence)', note: 'Market-level LO performance data' },
+    { name: 'Hunter', note: 'Clint-built LO sourcing / research dossiers' },
+    { name: 'Executive / AM / Branch collab', note: 'Warm intros and market intel' },
     { name: 'Shape CRM', note: 'Log every prospect — system of record' }
   ],
   mondaySourcingChecklist: [
@@ -61,6 +81,7 @@ window.RECRUITING_PLAN_2026 = {
       promptHint: 'Write a value-add outreach message — market insight, ops tip, or career growth thought. Genuinely helpful, zero pitch pressure.'
     }
   ],
+  amMeetingParticipants: 'Clint Morgan and Adam Garman join the monthly Area Manager group sessions.',
   amMeetingAgenda: [
     {
       topic: 1,

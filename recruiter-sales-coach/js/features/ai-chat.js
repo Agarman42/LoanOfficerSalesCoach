@@ -236,13 +236,42 @@ function getFactVaultContext() {
   }
 }
 
+function getRecruitingPlanContext() {
+  try {
+    const plan = window.RECRUITING_PLAN_2026;
+    if (!plan) return '';
+    const parts = [];
+    if (plan.vision?.statement) {
+      parts.push(`VISION: ${plan.vision.statement}`);
+      if (plan.vision.how) parts.push(`HOW: ${plan.vision.how}`);
+    }
+    if (plan.annualGoal) parts.push(`2026 GOAL: ${plan.annualGoal} net hires (gross capacity ~${plan.grossHireCapacity || 85}).`);
+    if (plan.keysToSuccess?.length) {
+      parts.push('KEYS TO SUCCESS: ' + plan.keysToSuccess.slice(0, 6).join(' | '));
+    }
+    if (plan.pillars?.length) {
+      parts.push(
+        'PILLARS: ' +
+          plan.pillars.map((p) => `${p.num}. ${p.title} (${p.frequency})`).join('; ')
+      );
+    }
+    return parts.join('\n');
+  } catch (e) {
+    return '';
+  }
+}
+
 function injectProfileContext() {
   if (!chatHistory || chatHistory.length === 0) return;
   const ctx = getProfileContext();
   const facts = getFactVaultContext();
+  const planCtx = getRecruitingPlanContext();
   const systemMsg = chatHistory[0];
   if (systemMsg && systemMsg.role === 'system') {
     let content = getBaseSystemWithCoachRules() + `\n\nCURRENT USER PROFILE CONTEXT — use this to make every answer specific and personal: ${ctx}`;
+    if (planCtx) {
+      content += `\n\nRUOFF 2026 RECRUITING PLAN (align coaching with this vision, pillars, and keys — relationship-first, pitch-free value, Shape logging):\n${planCtx}`;
+    }
     if (facts) {
       content += `\n\nRUOFF FACT VAULT (ground recruiting advice in these facts — never invent comp, ops, or tech claims):\n${facts}`;
     }
