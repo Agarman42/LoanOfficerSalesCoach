@@ -12,6 +12,8 @@
     'blog': { level: 'full', tip: 'AI-powered — writes blog drafts' },
     'newsletter-generator': { level: 'full', tip: 'AI-powered — builds newsletter editions' },
     'weekly-win-plan': { level: 'full', tip: 'AI-powered — generates your weekly plan' },
+    'planning': { level: 'full', tip: 'AI-powered — builds your 2026 business plan' },
+    'bio-creator': { level: 'full', tip: 'AI-powered — builds platform-ready professional bios' },
     'sales-script': { level: 'full', tip: 'AI-powered — writes custom scripts' },
     'ai-chat': { level: 'full', tip: 'AI-powered — profile-aware coach' },
     'client-translation': { level: 'full', tip: 'AI-powered — translates client communication' }

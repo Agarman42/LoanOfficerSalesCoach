@@ -2,12 +2,27 @@
  * js/ui.js
  * Shared UI utilities for the Loan Officer Sales Coach.
  *
- * Phase 0:
- * - Toast notification system (replaces alert() calls over time)
- * - Working header search bar
+ * - Toast / notifyUser helpers (prefer over alert())
+ * - Modal open/close, focus trap, backdrop, viewport portal
+ * - Optional legacy header search (global-search.js is primary)
  */
 
 (function () {
+  'use strict';
+
+  // =====================================================
+  // SHARED ESCAPE (also used by search banner + feature modules)
+  // =====================================================
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  window.escapeHtml = escapeHtml;
+
   // =====================================================
   // TOAST NOTIFICATION SYSTEM
   // =====================================================
@@ -157,7 +172,7 @@
   function initHeaderSearch() {
     const searchInput = document.getElementById('search');
     if (!searchInput) {
-      console.warn('[ui] #search input not found');
+      // Header uses data-global-search-trigger + global-search.js; legacy #search is optional.
       return;
     }
 
@@ -174,9 +189,10 @@
     }
 
     function clearHighlights() {
-      document.querySelectorAll('mark.search-hit').forEach(mark => {
+      document.querySelectorAll('mark.search-hit').forEach((mark) => {
         const parent = mark.parentNode;
-        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        if (!parent) return;
+        parent.replaceChild(document.createTextNode(mark.textContent || ''), mark);
         parent.normalize();
       });
     }
@@ -301,33 +317,46 @@
       banner.id = 'search-banner';
       banner.className = 'max-w-5xl mx-auto mb-4 px-6';
 
-      const vaultHtml = vaultHits.length ? `
+      const safeQuery = escapeHtml(query);
+      const vaultHtml = vaultHits.length
+        ? `
         <div class="mt-3 pt-3 border-t border-white/20">
           <div class="text-xs uppercase tracking-wider opacity-80 mb-2">
             <i class="fas fa-gem mr-1"></i> Value Vault library (${vaultHits.length})
           </div>
           <div class="flex flex-wrap gap-2">
-            ${vaultHits.map((item) => `
+            ${vaultHits
+              .map(
+                (item) => `
               <button type="button"
                 class="header-vault-hit px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-xs font-medium transition"
-                data-vault-id="${item.id}">
-                ${item.title}
+                data-vault-id="${escapeHtml(item.id)}">
+                ${escapeHtml(item.title)}
               </button>
-            `).join('')}
+            `
+              )
+              .join('')}
             <button type="button" id="search-open-vault-btn"
               class="px-3 py-1.5 rounded-full bg-[#00A89D] hover:bg-[#00A89D]/90 text-xs font-semibold transition">
               Open Value Vault
             </button>
           </div>
         </div>
-      ` : '';
+      `
+        : '';
 
       banner.innerHTML = `
         <div class="bg-[#002B5C] text-white px-5 py-3 rounded-2xl text-sm shadow">
           <div class="flex items-center justify-between gap-3">
             <div>
-              Found <strong>${count}</strong> result(s) for <strong>"${query}"</strong>
-              ${vaultHits.length ? ` <span class="opacity-80">· includes ${vaultHits.length} vault item${vaultHits.length === 1 ? '' : 's'}</span>` : ''}
+              Found <strong>${count}</strong> result(s) for <strong>"${safeQuery}"</strong>
+              ${
+                vaultHits.length
+                  ? ` <span class="opacity-80">· includes ${vaultHits.length} vault item${
+                      vaultHits.length === 1 ? '' : 's'
+                    }</span>`
+                  : ''
+              }
             </div>
             <button id="search-clear-btn" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold transition flex-shrink-0">Clear</button>
           </div>
@@ -404,16 +433,16 @@
       }
     });
 
-    // Optional: focus search with "/"
+    // Optional: focus search with "/" when nothing else is focused
     document.addEventListener('keydown', (e) => {
-      if (e.key === '/' && document.activeElement.tagName === 'BODY') {
+      const active = document.activeElement;
+      const tag = active && active.tagName;
+      if (e.key === '/' && (!active || tag === 'BODY')) {
         e.preventDefault();
         searchInput.focus();
         searchInput.select();
       }
     });
-
-    console.log('%c[ui.js] Header search initialized (sections + Value Vault library)', 'color:#00A89D');
   }
 
   // =====================================================
@@ -645,8 +674,8 @@
       'uw-question-tips-modal',
       'context-tips-modal',
       'my-saved-items-library',
-    'blog-tips-modal',
-    'newsletter-tips-modal',
+      'blog-tips-modal',
+      'newsletter-tips-modal',
       'nurture-template-modal',
       'process-template-modal',
       'process-stage-modal',
@@ -911,24 +940,30 @@
     });
   }
 
-  // Boot the UI helpers when DOM is ready — keep this light; unstick is expensive
-  document.addEventListener('DOMContentLoaded', () => {
-    // Legacy header search superseded by js/features/global-search.js (command palette)
+  // Boot modal helpers when DOM is ready — keep light; unstickPage is expensive
+  function bootUiHelpers() {
     const boot = () => {
       try {
         portalNestedFixedModals();
         wireModalBackdropCloses();
+        // Legacy #search bar only if present; command palette lives in global-search.js
+        initHeaderSearch();
       } catch (e) {
         console.warn('[ui] modal boot failed', e);
       }
     };
-    // Yield past first paint; avoid running unstickPage on every load (scans entire DOM)
     if (typeof requestIdleCallback === 'function') {
       requestIdleCallback(boot, { timeout: 2000 });
     } else {
       setTimeout(boot, 0);
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootUiHelpers);
+  } else {
+    bootUiHelpers();
+  }
 
   // Also expose a manual clear if needed
   window.clearSearch = () => {

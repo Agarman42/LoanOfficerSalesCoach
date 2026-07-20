@@ -33,7 +33,12 @@
     'newsletter-generator': function () { goSection('newsletter-generator'); },
     'mindset-motivation': function () { goSection('mindset-motivation'); },
     'blog': function () { goSection('blog'); },
-    'process': function () { goSection('process'); }
+    'process': function () { goSection('process'); },
+    'smart-savings': function () { goSection('smart-savings'); },
+    'client-translation': function () { goSection('client-translation'); },
+    'content-hub': function () { goSection('content-hub'); },
+    content: function () { goSection('content-hub'); },
+    'content-studio': function () { goSection('content-hub'); }
   };
 
   var FOOTERS = {
@@ -44,12 +49,12 @@
       links: [{ label: 'Weekly Win Plan', action: 'weekly-win-plan' }]
     },
     'planning': {
-      headline: 'Your plan is the map — execution is the journey',
-      detail: 'A strong 2026 plan powers your Weekly Win Plan, prospecting blocks, social content, and partner outreach. Fill this once — then execute everywhere else with clarity.',
+      headline: 'When this plan feels right, run the week',
+      detail: 'A strong annual plan is the direction. Your next step is protected hours and daily tasks — then content and partner outreach that match the same focus.',
       gradient: 'orange',
       links: [
         { label: 'Weekly Win Plan', action: 'weekly-win-plan' },
-        { label: 'Database Nurturing', action: 'database' }
+        { label: 'Content Studio', action: 'content-hub' }
       ]
     },
     'social': {
@@ -205,6 +210,24 @@
         { label: '2026 Business Plan', action: 'planning' },
         { label: 'Newsletter', action: 'newsletter-generator' },
         { label: 'Social posts', action: 'social-post' }
+      ]
+    },
+    'smart-savings': {
+      headline: 'Turn the numbers into a conversation',
+      detail: 'Guided setup walks a client meeting. Full form is for power users. Save a strong plan story, then pair it with a sales script or equity follow-up.',
+      gradient: 'teal',
+      links: [
+        { label: 'Sales Script Generator', action: 'sales-script' },
+        { label: 'Equity Scanner', action: 'equity-scanner' }
+      ]
+    },
+    'client-translation': {
+      headline: 'Clear words build trust across every language',
+      detail: 'Mortgage language is hard enough in English. Translate carefully, check meaning, then send — and save strong versions for next time.',
+      gradient: 'teal',
+      links: [
+        { label: 'AI Coach', action: 'ai-chat' },
+        { label: 'Sales Script Generator', action: 'sales-script' }
       ]
     }
   };

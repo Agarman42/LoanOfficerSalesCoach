@@ -42,10 +42,68 @@
     max-height: 3000px; 
 }
 
-/* === HEADER - BOLDER & DARKER === */
-header {
+/* === HEADER - BOLDER & DARKER ===
+   ONLY the coach page chrome (body > header).
+   Never target nested <header> inside Smart Savings / guided modal. */
+body > header {
     background: linear-gradient(to right, #001429, #002b5c) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* Navy band wraps title + search (excludes teal quote bar) so logo centers on navy only */
+.header-navy-band {
+    position: relative;
+    width: 100%;
+}
+
+/* Ruoff logo — far right of navy bar, vertically centered in dark blue block
+   (logo asset is dark-on-light; white plate for contrast on navy) */
+.header-ruoff-logo {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    pointer-events: none;
+}
+@media (min-width: 640px) {
+    .header-ruoff-logo { right: 1.25rem; }
+}
+@media (min-width: 1024px) {
+    .header-ruoff-logo { right: 1.5rem; }
+}
+.header-ruoff-logo-plate {
+    background: #ffffff;
+    border-radius: 0.9rem;
+    padding: 0.45rem 0.75rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    line-height: 0;
+}
+@media (min-width: 640px) {
+    .header-ruoff-logo-plate {
+        border-radius: 1rem;
+        padding: 0.55rem 0.95rem;
+    }
+}
+.header-ruoff-logo-img {
+    display: block;
+    height: 2.875rem; /* ~15% larger than 2.5rem */
+    width: auto;
+    max-width: 11.5rem;
+    object-fit: contain;
+    object-position: right center;
+}
+@media (min-width: 640px) {
+    .header-ruoff-logo-img {
+        height: 3.45rem;
+        max-width: 13.8rem;
+    }
+}
+@media (min-width: 768px) {
+    .header-ruoff-logo-img {
+        height: 3.85rem;
+        max-width: 15.5rem;
+    }
 }
 
 /* === SIDEBAR - BOLDER & DARKER === */
@@ -253,46 +311,48 @@ header {
     opacity: 1;
 }
 
-/* Eliminate top gap */
-main {
+/* Eliminate top gap on coach shell only — NOT nested Smart Savings <main>/<section> */
+body > main {
     padding-top: 0 !important;
     margin-top: 0 !important;
 }
-main > section {
+/* Direct tool sections under coach main (home, newsletter, …). Exclude #smart-savings
+   children so the calculator keeps its glass-card separation. */
+body > main > section {
     margin-top: 0 !important;
     padding-top: 1.5rem !important;
 }
-main section > *:first-child {
+body > main > section:not(#smart-savings) > *:first-child {
     margin-top: 0 !important;
 }
 
-/* Input readability */
-input[type="text"],
-input[type="number"],
-input[type="search"],
-textarea,
-select {
+/* Input readability — coach tools only (Smart Savings has its own form system) */
+body > main > section:not(#smart-savings) input[type="text"],
+body > main > section:not(#smart-savings) input[type="number"],
+body > main > section:not(#smart-savings) input[type="search"],
+body > main > section:not(#smart-savings) textarea,
+body > main > section:not(#smart-savings) select {
     background-color: #ffffff !important;
     color: #1f2937 !important;
 }
 
-.dark input[type="text"],
-.dark input[type="number"],
-.dark input[type="search"],
-.dark textarea,
-.dark select {
+.dark body > main > section:not(#smart-savings) input[type="text"],
+.dark body > main > section:not(#smart-savings) input[type="number"],
+.dark body > main > section:not(#smart-savings) input[type="search"],
+.dark body > main > section:not(#smart-savings) textarea,
+.dark body > main > section:not(#smart-savings) select {
     background-color: #1f2937 !important;
     color: #f3f4f6 !important;
     border-color: #4b5563 !important;
 }
 
-input::placeholder,
-textarea::placeholder {
+body > main > section:not(#smart-savings) input::placeholder,
+body > main > section:not(#smart-savings) textarea::placeholder {
     color: #9ca3af !important;
     opacity: 1;
 }
-.dark input::placeholder,
-.dark textarea::placeholder {
+.dark body > main > section:not(#smart-savings) input::placeholder,
+.dark body > main > section:not(#smart-savings) textarea::placeholder {
     color: #9ca3af !important;
 }
 
@@ -338,9 +398,9 @@ textarea::placeholder {
     }
 }
 
-header, 
-#sidebar, 
-main {
+body > header,
+#sidebar,
+body > main {
     padding-top: env(safe-area-inset-top);
 }
 
@@ -541,37 +601,380 @@ input[type="range"]:active::-moz-range-thumb {
     display:block;
 }
 
-/* Enhanced Blog Headings */
+/*
+ * AI / markdown tool output — clean editorial style.
+ * (Previously: huge orange headers + thick teal underlines.)
+ */
+.prose {
+    color: #1f2937;
+    line-height: 1.65;
+}
+
 .prose h1,
 .prose h2,
 .prose h3,
 .prose h4 {
-    color: #F15A29 !important;
-    border-bottom: 4px solid #00A89D;
-    padding-bottom: 0.5rem;
-    margin-bottom: 2rem !important;
+    color: #002B5C !important;
+    border-bottom: none;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
 }
 
 .prose h1 {
-    font-size: 3.5rem !important;
-    font-weight: 900 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.85rem !important;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid rgba(0, 43, 92, 0.12);
 }
 
 .prose h2 {
-    font-size: 2.5rem !important;
-    font-weight: 800 !important;
+    font-size: 1.125rem !important;
+    font-weight: 700 !important;
+    margin-top: 1.65rem !important;
+    margin-bottom: 0.55rem !important;
+    padding: 0.15rem 0 0.15rem 0.7rem;
+    border-left: 3px solid #00A89D;
+    border-bottom: none;
 }
 
 .prose h3 {
-    font-size: 2rem !important;
+    font-size: 1rem !important;
+    font-weight: 650 !important;
+    margin-top: 1.25rem !important;
+    margin-bottom: 0.4rem !important;
+    color: #334155 !important;
 }
 
-/* Dark mode headings */
+.prose h4 {
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.35rem !important;
+    color: #475569 !important;
+}
+
+.prose p {
+    margin-top: 0.4rem !important;
+    margin-bottom: 0.7rem !important;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.prose ul,
+.prose ol {
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.85rem !important;
+    padding-left: 1.25rem;
+}
+
+.prose li {
+    margin-bottom: 0.35rem;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.prose strong {
+    color: #002B5C;
+    font-weight: 650;
+}
+
+.prose blockquote {
+    margin: 0.85rem 0;
+    padding: 0.65rem 0.9rem;
+    border-left: 3px solid #00A89D;
+    background: rgba(0, 168, 157, 0.06);
+    border-radius: 0 0.75rem 0.75rem 0;
+    color: #334155;
+    font-style: normal;
+}
+
+.prose hr {
+    border: none;
+    border-top: 1px solid rgba(0, 43, 92, 0.1);
+    margin: 1.25rem 0;
+}
+
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    margin: 0.75rem 0 1rem;
+}
+
+.prose th,
+.prose td {
+    border: 1px solid rgba(0, 43, 92, 0.1);
+    padding: 0.5rem 0.65rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.prose th {
+    background: rgba(0, 43, 92, 0.04);
+    color: #002B5C;
+    font-weight: 650;
+}
+
+.ai-output {
+    background: #fff;
+    border: 1px solid rgba(0, 43, 92, 0.1);
+    border-radius: 1.25rem;
+    padding: 1.35rem 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 43, 92, 0.04);
+}
+
+.ai-output-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(0, 43, 92, 0.08);
+}
+
+.ai-output-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #00A89D;
+    margin-bottom: 0.25rem;
+}
+
+.ai-output-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #002B5C;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.dark .ai-output-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .ai-output-title {
+    color: #f3f4f6;
+}
+
+/* Blog companion cards (caption / Google / Reel) — high-contrast, structured */
+.blog-companion-panel {
+    border-radius: 1rem;
+    padding: 1.1rem 1.2rem;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid rgba(0, 43, 92, 0.1);
+    color: #0f172a;
+}
+.dark .blog-companion-panel {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.95) 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+}
+.blog-companion-empty {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    font-style: italic;
+}
+.blog-companion-body {
+    color: #0f172a;
+}
+.dark .blog-companion-body {
+    color: #f1f5f9;
+}
+.blog-caption-text {
+    margin: 0 0 0.85rem;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    font-weight: 600;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+.dark .blog-caption-text {
+    color: #f8fafc;
+}
+.blog-hashtag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.blog-hashtag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0f766e;
+    background: rgba(0, 168, 157, 0.12);
+    border: 1px solid rgba(0, 168, 157, 0.28);
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+}
+.dark .blog-hashtag {
+    color: #5eead4;
+    background: rgba(0, 168, 157, 0.18);
+    border-color: rgba(94, 234, 212, 0.3);
+}
+.blog-google-p {
+    margin: 0 0 0.65rem;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    font-weight: 500;
+    color: #1e293b;
+}
+.blog-google-p:last-child {
+    margin-bottom: 0;
+}
+.blog-google-p strong {
+    color: #002B5C;
+    font-weight: 700;
+}
+.dark .blog-google-p {
+    color: #e2e8f0;
+}
+.dark .blog-google-p strong {
+    color: #f8fafc;
+}
+.blog-reel-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+.blog-reel-row {
+    padding: 0.85rem 0.95rem;
+    border-radius: 0.85rem;
+    background: #fff;
+    border: 1px solid rgba(0, 43, 92, 0.08);
+    box-shadow: 0 1px 2px rgba(0, 43, 92, 0.03);
+}
+.dark .blog-reel-row {
+    background: rgba(15, 23, 42, 0.65);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+.blog-reel-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #00A89D;
+    margin-bottom: 0.35rem;
+}
+.blog-reel-timing {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+.dark .blog-reel-timing {
+    color: #94a3b8;
+}
+.blog-reel-body {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    font-weight: 500;
+    color: #0f172a;
+}
+.blog-reel-body strong {
+    color: #002B5C;
+    font-weight: 700;
+}
+.dark .blog-reel-body {
+    color: #f1f5f9;
+}
+.dark .blog-reel-body strong {
+    color: #fff;
+}
+.blog-companion-panel-reel {
+    padding: 0.85rem;
+    background: linear-gradient(180deg, #f0fdfa 0%, #f8fafc 55%);
+}
+.dark .blog-companion-panel-reel {
+    background: linear-gradient(180deg, rgba(0, 168, 157, 0.08) 0%, rgba(15, 23, 42, 0.9) 55%);
+}
+
+.dark .prose {
+    color: #e5e7eb;
+}
+
 .dark .prose h1,
-.dark .prose h2,
+.dark .prose h2 {
+    color: #f3f4f6 !important;
+}
+
+.dark .prose h1 {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.dark .prose h2 {
+    border-left-color: #00A89D;
+}
+
 .dark .prose h3,
 .dark .prose h4 {
-    color: #F15A29 !important;
+    color: #d1d5db !important;
+}
+
+.dark .prose p,
+.dark .prose li {
+    color: #d1d5db;
+}
+
+.dark .prose strong {
+    color: #f9fafb;
+}
+
+/* AI Coach chat bubbles — white text on brand fills (must beat any inherited prose colors) */
+#chat-messages .chat-bubble {
+    color: #ffffff;
+}
+#chat-messages .chat-bubble p,
+#chat-messages .chat-bubble li,
+#chat-messages .chat-bubble span,
+#chat-messages .chat-bubble strong,
+#chat-messages .chat-bubble em,
+#chat-messages .chat-bubble h1,
+#chat-messages .chat-bubble h2,
+#chat-messages .chat-bubble h3,
+#chat-messages .chat-bubble h4,
+#chat-messages .chat-bubble blockquote {
+    color: #ffffff !important;
+}
+#chat-messages .chat-bubble a {
+    color: #5eead4 !important;
+    text-decoration: underline;
+}
+#chat-messages .chat-bubble p {
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.55rem !important;
+}
+#chat-messages .chat-bubble p:first-child {
+    margin-top: 0 !important;
+}
+#chat-messages .chat-bubble p:last-child {
+    margin-bottom: 0 !important;
+}
+#chat-messages .chat-bubble ul,
+#chat-messages .chat-bubble ol {
+    margin: 0.4rem 0 0.55rem;
+    padding-left: 1.2rem;
+}
+#chat-messages .chat-bubble-user {
+    background: #F15A29;
+}
+#chat-messages .chat-bubble-assistant {
+    background: #002B5C;
+}
+
+.dark .ai-output {
+    background: #111827;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Prevent sidebar underlines */
@@ -659,8 +1062,8 @@ input[type="range"]:active::-moz-range-thumb {
    CLEAN v2.3 HEADER + SIDEBAR STYLING
    ============================================ */
 
-/* Header */
-header {
+/* Header — coach page only */
+body > header {
     background: linear-gradient(to right, #001429, #002b5c);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
@@ -711,35 +1114,54 @@ header {
     transform: translateX(3px);
 }
 
-/* Sidebar AI indicators */
+/* Sidebar AI indicators — quiet asterisk so favorite stars stay primary */
 .sidebar-link--has-ai {
-    padding-right: 0.65rem;
+    /* room for * + star on the right */
+    padding-right: 0.35rem;
 }
 
 .sidebar-ai-pip {
-    margin-left: auto;
+    /* no ml-auto — that competes with .home-fav-star */
+    margin-left: 0.2rem;
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 15px;
-    height: 15px;
-    border-radius: 4px;
-    background: rgba(0, 168, 157, 0.18);
-    color: #5eead4;
-    font-size: 8px;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 13px;
+    font-weight: 700;
     line-height: 1;
-    opacity: 0.9;
+    opacity: 0.75;
     pointer-events: none;
+    letter-spacing: 0;
 }
 
 .sidebar-ai-pip--assist {
-    background: rgba(241, 90, 41, 0.16);
-    color: #fdba74;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.32);
 }
 
 .sidebar-link:hover .sidebar-ai-pip {
+    opacity: 0.95;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* Favorite star owns the right edge of the row */
+#sidebar .home-fav-star {
+    margin-left: auto;
+    opacity: 0.55;
+}
+#sidebar .home-fav-star:hover {
     opacity: 1;
+}
+#sidebar .home-fav-star .fas.fa-star {
+    opacity: 1;
+    color: #F15A29;
 }
 
 .sidebar-ai-legend {
@@ -790,21 +1212,23 @@ header {
     opacity: 1;
 }
 
-/* Main content spacing to prevent sidebar overlap */
-header,
-main {
+/* Main content spacing to prevent sidebar overlap — coach shell only.
+   Nested header/main inside #smart-savings-root must NOT inherit this
+   (was collapsing the SS header to a half-width strip + wrong gradient). */
+body > header,
+body > main {
     padding-left: 1.5rem;
 }
 
 @media (min-width: 768px) {
-    header,
-    main {
+    body > header,
+    body > main {
         margin-left: 16rem; /* 64 * 0.25rem = 16rem */
     }
 }
 
 @media (min-width: 1024px) {
-    main {
+    body > main {
         margin-left: 18rem;
     }
 }
@@ -822,8 +1246,8 @@ body.sidebar-collapsed #sidebar {
   pointer-events: none;
 }
 
-body.sidebar-collapsed header,
-body.sidebar-collapsed main {
+body.sidebar-collapsed > header,
+body.sidebar-collapsed > main {
   margin-left: 0 !important;
 }
 
@@ -1086,4 +1510,153 @@ details summary::marker {
     font-size: 10px;
     padding: 2px 6px;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Shared Guided setup | Full form switch (Bio, Newsletter, Plan)
+   Mirrors Smart Savings mode-bar so every wizard feels familiar
+   ═══════════════════════════════════════════════════════════ */
+.coach-mode-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto 1.75rem;
+  max-width: 36rem;
+}
+.coach-mode-toggle {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: rgba(0, 43, 92, 0.06);
+  border: 1px solid rgba(0, 43, 92, 0.1);
+  gap: 0.15rem;
+}
+.dark .coach-mode-toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.coach-mode-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+.coach-mode-btn:hover {
+  color: #002B5C;
+}
+.dark .coach-mode-btn:hover {
+  color: #f1f5f9;
+}
+.coach-mode-btn.is-active {
+  background: #fff;
+  color: #00A89D;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 168, 157, 0.2);
+}
+.dark .coach-mode-btn.is-active {
+  background: #0f172a;
+  color: #5eead4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 168, 157, 0.35);
+}
+.coach-mode-hint {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.35;
+  max-width: 28rem;
+}
+.dark .coach-mode-hint {
+  color: #94a3b8;
+}
+.coach-mode-target-flash {
+  outline: 2px solid rgba(0, 168, 157, 0.55);
+  outline-offset: 4px;
+  transition: outline-color 0.3s;
+}
+
+/* Dark mode: pure navy FA icons are hard to read on dark cards.
+   Prefer dark:text-white / dark:text-[#7dd3fc] in markup; this is a safety net. */
+html.dark i[class*="fa-"][class*="text-[#002B5C]"],
+html.dark .dark-navy-icon {
+  color: #f1f5f9;
+}
+
+/* Shared wizard modal chrome (Newsletter / Bio / Business Plan) */
+.coach-wizard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+.coach-wizard-btn-back {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+  background: transparent;
+  transition: background 0.15s;
+}
+.coach-wizard-btn-back:hover {
+  background: #f9fafb;
+}
+.coach-wizard-btn-next {
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  background: #00A89D;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.coach-wizard-btn-next:hover {
+  background: #008F85;
+}
+.coach-wizard-btn-generate {
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  background: linear-gradient(to right, #00A89D, #F15A29);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.coach-wizard-btn-generate:hover {
+  opacity: 0.95;
+}
+
+/* Shared primary page CTAs (generators) */
+.coach-primary-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 3rem;
+  border-radius: 999px;
+  background: linear-gradient(to right, #00A89D, #F15A29);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.125rem;
+  box-shadow: 0 10px 25px rgba(0, 43, 92, 0.15);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.coach-primary-cta:hover {
+  opacity: 0.95;
 }

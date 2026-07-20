@@ -323,7 +323,7 @@ async function generateSalesScript() {
                             <div><strong>Relationship-first</strong> — Built to create trust and connection, not pressure.</div>
                         </div>
                         <div class="flex gap-3">
-                            <i class="fas fa-bullseye text-[#002B5C] mt-0.5"></i>
+                            <i class="fas fa-bullseye text-[#002B5C] dark:text-white mt-0.5"></i>
                             <div><strong>Context-aware</strong> — The more details you gave, the more targeted and effective they are.</div>
                         </div>
                     </div>

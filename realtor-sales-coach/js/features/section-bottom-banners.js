@@ -34,7 +34,11 @@
     'process': function () { goSection('process'); },
     'listing-description': function () { goSection('listing-description'); },
     'open-house': function () { goSection('open-house'); },
-    'consultation': function () { goSection('consultation'); }
+    'consultation': function () { goSection('consultation'); },
+    'bio-creator': function () { goSection('bio-creator'); },
+    'content-hub': function () { goSection('content-hub'); },
+    content: function () { goSection('content-hub'); },
+    'content-studio': function () { goSection('content-hub'); }
   };
 
   var FOOTERS = {
@@ -45,12 +49,12 @@
       links: [{ label: 'Weekly Win Plan', action: 'weekly-win-plan' }]
     },
     'planning': {
-      headline: 'Your plan is the map — execution is the journey',
-      detail: 'A strong 2026 plan powers your Weekly Win Plan, prospecting blocks, social content, and partner outreach. Fill this once — then execute everywhere else with clarity.',
+      headline: 'When this plan feels right, run the week',
+      detail: 'A strong annual plan is the direction. Your next step is protected hours and daily tasks — then content and partner outreach that match the same focus.',
       gradient: 'orange',
       links: [
         { label: 'Weekly Win Plan', action: 'weekly-win-plan' },
-        { label: 'Database Nurturing', action: 'database' }
+        { label: 'Content Studio', action: 'content-hub' }
       ]
     },
     'social': {

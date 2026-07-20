@@ -106,65 +106,138 @@
   }
 
   function loadPersonalStoryHistory() {
-    try { return localStorage.getItem(PERSONAL_HISTORY_KEY) || ''; } catch (e) { return ''; }
+    try { return (localStorage.getItem(PERSONAL_HISTORY_KEY) || '').trim(); } catch (e) { return ''; }
+  }
+
+  /** Best-effort recover previous personal note from last generated HTML (legacy users). */
+  function extractPersonalFromLastNewsletter() {
+    let html = '';
+    try { html = localStorage.getItem('lastNewsletterHTML') || ''; } catch (e) { return ''; }
+    if (!html || html.length < 40) return '';
+    try {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      // Prefer labeled personal modules, then common card patterns
+      const candidates = [
+        doc.querySelector('[data-nl-personal-update]'),
+        doc.querySelector('[data-nl-personal-note]'),
+        ...Array.from(doc.querySelectorAll('td, div, p')).filter((el) => {
+          const t = (el.textContent || '').trim();
+          const label = (el.previousElementSibling?.textContent || el.parentElement?.textContent || '').toLowerCase();
+          return t.length >= 40 && t.length < 1200 && /personal|from my desk|a note from/i.test(label + ' ' + (el.getAttribute('class') || ''));
+        })
+      ].filter(Boolean);
+      for (const el of candidates) {
+        const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (text.length >= 40) return text.slice(0, 1500);
+      }
+    } catch (e) { /* ignore */ }
+    return '';
+  }
+
+  /** Seed history key so returning users see Load last even if they never hit the new blur hook. */
+  function seedPersonalStoryHistory() {
+    if (loadPersonalStoryHistory()) return loadPersonalStoryHistory();
+    const fromField = ($('nl-personal-text')?.value || '').trim();
+    if (fromField.length >= 20) {
+      try { localStorage.setItem(PERSONAL_HISTORY_KEY, fromField); } catch (e) {}
+      return fromField;
+    }
+    const fromHtml = extractPersonalFromLastNewsletter();
+    if (fromHtml) {
+      try { localStorage.setItem(PERSONAL_HISTORY_KEY, fromHtml); } catch (e) {}
+      return fromHtml;
+    }
+    return '';
   }
 
   function updatePersonalHistoryUI() {
-    const last = loadPersonalStoryHistory();
+    const last = seedPersonalStoryHistory() || loadPersonalStoryHistory();
     const trigger = $('nl-personal-history-trigger');
     const snippet = $('nl-personal-history-snippet');
-    if (!trigger) return;
-    if (!last) {
-      trigger.classList.add('hidden');
-      return;
-    }
-    trigger.classList.remove('hidden');
-    if (snippet) snippet.textContent = last;
+    if (snippet) snippet.textContent = last || '';
+    // Compact "Last issue" chip only appears when we have prior text
+    if (trigger) trigger.classList.toggle('hidden', !last);
+    if (!last) $('nl-personal-history-popover')?.classList.add('hidden');
   }
 
   function applyPersonalStoryHistory() {
     const last = loadPersonalStoryHistory();
     const ta = $('nl-personal-text');
-    if (!ta || !last) return;
+    if (!last || !ta) return;
+    // Ensure personal section is open so the user sees the load
+    const personalCb = $('nl-personal');
+    if (personalCb && !personalCb.checked) {
+      personalCb.checked = true;
+      personalCb.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    const fields = $('personal-fields');
+    if (fields) fields.classList.remove('hidden');
     ta.value = last;
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     $('nl-personal-history-popover')?.classList.add('hidden');
+    if (window.showToast) window.showToast('Loaded your last personal update.', 'success');
+    try { ta.focus({ preventScroll: false }); } catch (e) { ta.focus(); }
   }
 
   function wirePersonalHistory() {
     const trigger = $('nl-personal-history-trigger');
+    const loadBtn = $('nl-personal-history-load-btn');
     const popover = $('nl-personal-history-popover');
-    if (!trigger || trigger.dataset.wired === '1') return;
-    trigger.dataset.wired = '1';
+    if (!loadBtn || loadBtn.dataset.wired === '1') return;
+    loadBtn.dataset.wired = '1';
 
-    let hideTimer = null;
-    const show = () => {
-      if (hideTimer) clearTimeout(hideTimer);
-      popover?.classList.remove('hidden');
-    };
-    const hide = () => {
-      hideTimer = setTimeout(() => popover?.classList.add('hidden'), 180);
-    };
-
-    [trigger, popover].forEach((el) => {
-      if (!el) return;
-      el.addEventListener('mouseenter', show);
-      el.addEventListener('mouseleave', hide);
-      el.addEventListener('focusin', show);
-      el.addEventListener('focusout', hide);
+    // Compact chip: click → preview; second click or "Use this text" applies
+    loadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!loadPersonalStoryHistory()) return;
+      if (popover) {
+        const open = !popover.classList.contains('hidden');
+        if (open) applyPersonalStoryHistory();
+        else {
+          updatePersonalHistoryUI();
+          popover.classList.remove('hidden');
+        }
+      } else {
+        applyPersonalStoryHistory();
+      }
     });
 
     $('nl-personal-history-use')?.addEventListener('click', (e) => {
       e.preventDefault();
       applyPersonalStoryHistory();
     });
+    $('nl-personal-history-dismiss')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      popover?.classList.add('hidden');
+    });
+
+    // Click outside closes preview
+    if (trigger && !trigger.dataset.nlOutsideWired) {
+      trigger.dataset.nlOutsideWired = '1';
+      document.addEventListener('click', (e) => {
+        if (!popover || popover.classList.contains('hidden')) return;
+        if (trigger.contains(e.target)) return;
+        popover.classList.add('hidden');
+      });
+    }
+
+    // Save on blur so history exists even before Generate
+    const ta = $('nl-personal-text');
+    if (ta && !ta.dataset.nlHistoryBlurWired) {
+      ta.dataset.nlHistoryBlurWired = '1';
+      ta.addEventListener('blur', () => {
+        const text = (ta.value || '').trim();
+        if (text.length >= 20) saveNewsletterPersonalHistory();
+      });
+    }
 
     updatePersonalHistoryUI();
   }
 
   function saveNewsletterPersonalHistory() {
     const text = ($('nl-personal-text')?.value || '').trim();
-    if (!text) return;
+    if (!text || text.length < 20) return;
     try { localStorage.setItem(PERSONAL_HISTORY_KEY, text); } catch (e) {}
     updatePersonalHistoryUI();
   }
@@ -288,9 +361,27 @@
     wirePuzzleTypeCards();
     wireCustomPreviewClicks();
     wireEngagementShuffleButtons();
+    // Refresh Load last when Personal is toggled
+    const personalCb = $('nl-personal');
+    if (personalCb && !personalCb.dataset.nlHistoryToggleWired) {
+      personalCb.dataset.nlHistoryToggleWired = '1';
+      personalCb.addEventListener('change', () => updatePersonalHistoryUI());
+    }
+    // When user opens Newsletter section later, refresh the control
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest?.('[href="#newsletter-generator"], [onclick*="newsletter-generator"]');
+      if (link) setTimeout(updatePersonalHistoryUI, 200);
+    });
+    // Hash / showSection navigation
+    window.addEventListener('hashchange', () => {
+      if ((location.hash || '').replace(/^#/, '') === 'newsletter-generator') {
+        setTimeout(updatePersonalHistoryUI, 150);
+      }
+    });
   }
 
   window.saveNewsletterPersonalHistory = saveNewsletterPersonalHistory;
+  window.updateNewsletterPersonalHistoryUI = updatePersonalHistoryUI;
   window.initNewsletterSetupForm = initNewsletterSetupForm;
   window.__nlSyncSetupPuzzleTypeCards = syncPuzzleTypeCardStyles;
 

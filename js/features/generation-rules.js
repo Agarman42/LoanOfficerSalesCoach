@@ -2,11 +2,20 @@
  * js/features/generation-rules.js
  *
  * Background quality rules — always on, no UI.
- * Injects compliance, source citation, local-first, and AI-search-friendly
- * instructions into newsletter, blog, and social prompts.
+ * Injects compliance, source citation, local-first, AI-search-friendly,
+ * and hobby/passion restraint into newsletter, blog, social, and plan prompts.
  */
 (function () {
   'use strict';
+
+  /** Shared restraint — hobbies are seasoning, not the main course. */
+  const HOBBY_RESTRAINT_LINES = [
+    'HOBBIES / PASSIONS RESTRAINT (always on): Profile hobbies and lifestyle details are optional seasoning for authenticity — NOT the theme of the whole output.',
+    'Never force hobby puns, sports metaphors, or hobby-themed tactics into every section. Loving golf does not mean every post, plan, or script is about golf.',
+    'At most 1–2 light hobby-tied ideas or examples unless the user explicitly asked for heavy hobby integration or selected a hobbies-only content theme.',
+    'Market, rates (general language only), process, compliance, partner business, and pipeline work stay professional — do not shoehorn hobbies into those.',
+    'When hobbies are used: keep them natural, specific, and sparse. Prefer one genuine touch over a laundry list of passion-branded plays.',
+  ];
 
   const RULE_DEFS = [
     {
@@ -41,6 +50,10 @@
         'Naturally mention the loan officer name, company (Ruoff Mortgage), and local market — never keyword-stuff.',
       ],
     },
+    {
+      id: 'hobbyRestraint',
+      promptLines: HOBBY_RESTRAINT_LINES,
+    },
   ];
 
   const QUALITY_NOTE_TEXT =
@@ -57,6 +70,18 @@
     return lines;
   }
 
+  /** Compact block for business plans / weekly plans that build their own prompts. */
+  function buildHobbyRestraintBlock() {
+    return [
+      '',
+      'HOBBIES / PASSIONS RESTRAINT (critical — do not overdo personalization):',
+      ...HOBBY_RESTRAINT_LINES.map((line) => '- ' + line),
+      '- Power themes and tactics may be *inspired* by life/values; they must not turn the entire plan into a hobby brand.',
+      '- Rough guide for plans: at most ~2–3 of 10 tactics may lean on hobbies; the rest = partners, pipeline, process, numbers, and discipline.',
+      '',
+    ].join('\n');
+  }
+
   function getQualityNoteHtml() {
     return `<p class="nl-quality-note text-xs text-gray-500 dark:text-gray-400 m-0 mt-2 flex items-start gap-2 leading-relaxed">
       <i class="fas fa-shield-alt text-[#00A89D] mt-0.5 flex-shrink-0"></i>
@@ -66,9 +91,11 @@
 
   window.GenerationRules = {
     buildPromptBlock,
+    buildHobbyRestraintBlock,
     getQualityNoteHtml,
     getQualityNoteText: () => QUALITY_NOTE_TEXT,
   };
 
   window.buildGenerationRulesPromptBlock = buildPromptBlock;
+  window.buildHobbyRestraintPromptBlock = buildHobbyRestraintBlock;
 })();

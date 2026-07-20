@@ -683,7 +683,7 @@ function getTierPlaybooks() {
     title: "A+ Partners — White-Glove Playbook",
     content: `
       <div class="bg-[#002B5C]/10 border border-[#002B5C]/30 rounded-3xl p-5 mb-6">
-        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#002B5C]"></i><span class="font-bold text-[#002B5C] uppercase tracking-wider text-sm">These 10–20 People Pay Your Mortgage</span></div>
+        <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#002B5C] dark:text-white"></i><span class="font-bold text-[#002B5C] uppercase tracking-wider text-sm">These 10–20 People Pay Your Mortgage</span></div>
         <p class="text-[15px]">Your true A+ partners send 5+ referrals per year or represent outsized strategic value. They deserve concierge treatment — not because you are desperate, but because protecting this tier is how top producers stay at the top.</p>
       </div>
 

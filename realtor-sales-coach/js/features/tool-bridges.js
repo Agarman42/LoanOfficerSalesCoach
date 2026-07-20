@@ -509,7 +509,7 @@ Important: Do NOT recycle plan wording verbatim. Generate fresh, specific daily 
     panel.className = 'bg-white dark:bg-gray-800 border border-dashed border-[#002B5C]/30 rounded-3xl p-6 mb-8';
     panel.innerHTML = `
       <div class="flex items-start gap-3 mb-3">
-        <span class="w-9 h-9 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center shrink-0"><i class="fas fa-link text-[#002B5C]"></i></span>
+        <span class="w-9 h-9 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center shrink-0"><i class="fas fa-link text-[#002B5C] dark:text-white"></i></span>
         <div class="flex-1">
           <div class="text-sm font-bold tracking-wider text-[#002B5C] dark:text-white">OPTIONAL: LINK TO 2026 PLAN</div>
           <p class="text-xs text-gray-500 mt-1">Off by default. When enabled, your weekly plan gets a <em>small</em> slice of annual direction — tasks stay fresh and creative.</p>

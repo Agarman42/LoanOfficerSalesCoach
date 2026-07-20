@@ -751,8 +751,19 @@
     }
   }
 
+  let currentProfileTab = 'identity';
+
+  const PROFILE_TAB_SHORT_LABELS = {
+    identity: 'Identity',
+    business: 'Business',
+    content: 'Voice & Links',
+    prospecting: 'Prospecting',
+    personal: 'Personal'
+  };
+
   function switchProfileTab(tabId) {
     if (!PROFILE_TABS.includes(tabId)) tabId = 'identity';
+    currentProfileTab = tabId;
     PROFILE_TABS.forEach((tab) => {
       const panel = document.getElementById(`profile-tab-panel-${tab}`);
       const btn = document.querySelector(`.profile-tab-btn[data-profile-tab="${tab}"]`);
@@ -766,10 +777,65 @@
         btn.classList.toggle('dark:bg-gray-900', active);
         btn.classList.toggle('border-transparent', !active);
         btn.classList.toggle('text-gray-500', !active);
+        if (active) {
+          try { btn.setAttribute('aria-current', 'page'); } catch (e) { /* ignore */ }
+        } else {
+          btn.removeAttribute('aria-current');
+        }
       }
     });
     const scroll = document.getElementById('profile-form-scroll');
     if (scroll) scroll.scrollTop = 0;
+    updateProfileSectionNav();
+  }
+
+  /** Footer Back / Next for full-profile mode (tabs alone are easy to miss). */
+  function updateProfileSectionNav() {
+    const back = document.getElementById('profile-section-back');
+    const next = document.getElementById('profile-section-next');
+    const hint = document.getElementById('profile-section-nav-hint');
+    if (!back && !next) return;
+
+    const fullFooter = document.getElementById('profile-full-footer');
+    const fullMode = fullFooter && !fullFooter.classList.contains('hidden');
+    if (!fullMode) return;
+
+    const idx = Math.max(0, PROFILE_TABS.indexOf(currentProfileTab));
+    const isFirst = idx <= 0;
+    const isLast = idx >= PROFILE_TABS.length - 1;
+    const nextTab = !isLast ? PROFILE_TABS[idx + 1] : null;
+    const nextLabel = nextTab ? (PROFILE_TAB_SHORT_LABELS[nextTab] || nextTab) : '';
+
+    if (back) {
+      back.classList.toggle('hidden', isFirst);
+      back.disabled = isFirst;
+    }
+    if (next) {
+      if (isLast) {
+        next.classList.add('hidden');
+      } else {
+        next.classList.remove('hidden');
+        next.innerHTML = `Next: ${nextLabel} <i class="fas fa-arrow-right ml-1.5 text-xs opacity-90" aria-hidden="true"></i>`;
+      }
+    }
+    if (hint) {
+      if (isLast) {
+        hint.innerHTML = `You're on the last section (<strong>Personal</strong>). Use <strong>Save Preferences</strong> or <strong>Close</strong> when you're done — or jump with the tabs above.`;
+      } else {
+        hint.innerHTML = `Section <strong>${idx + 1} of ${PROFILE_TABS.length}</strong> — tap <strong>Next: ${nextLabel}</strong> to continue, or use the tabs above to jump.`;
+      }
+    }
+  }
+
+  function goProfileSection(delta) {
+    const idx = Math.max(0, PROFILE_TABS.indexOf(currentProfileTab));
+    const nextIdx = Math.min(PROFILE_TABS.length - 1, Math.max(0, idx + delta));
+    if (nextIdx === idx) return;
+    if (typeof autoSaveProfile === 'function') autoSaveProfile();
+    else if (typeof performSave === 'function') {
+      try { performSave(false, false); } catch (e) { /* ignore */ }
+    }
+    switchProfileTab(PROFILE_TABS[nextIdx]);
   }
 
   function getFirstIncompleteTab(profile) {
@@ -802,6 +868,7 @@
     const fullChrome = document.getElementById('profile-full-chrome');
     const fullFooter = document.getElementById('profile-full-footer');
     const full = document.getElementById('profile-full-view');
+    const tabNav = document.getElementById('profile-tab-nav');
     const modalEl = modal || document.getElementById('user-profile-modal');
 
     wizardActive = view === 'wizard';
@@ -809,12 +876,17 @@
 
     if (wizardHeader) wizardHeader.classList.toggle('hidden', !wizardActive);
     if (wizardFooter) wizardFooter.classList.toggle('hidden', !wizardActive);
-    if (fullChrome) fullChrome.classList.toggle('hidden', wizardActive);
+    // Always keep section tabs visible (same as LO full profile) — only the guided header/footer swap
+    if (fullChrome) fullChrome.classList.remove('hidden');
+    if (tabNav) tabNav.classList.remove('hidden');
+    // Full footer (Back / Next: Section) in normal mode; wizard uses its own Continue footer
     if (fullFooter) fullFooter.classList.toggle('hidden', wizardActive);
     if (full) full.classList.remove('hidden');
 
     const scroll = document.getElementById('profile-form-scroll');
     if (scroll) scroll.scrollTop = 0;
+
+    if (!wizardActive) updateProfileSectionNav();
   }
 
   function shouldShowWizard() {
@@ -845,14 +917,22 @@
           : stepNum < wizardStep
             ? 'bg-[#00A89D]/40'
             : 'bg-gray-300 dark:bg-gray-600';
-        return `<span class="w-2 h-2 rounded-full ${cls}"></span>`;
+        return `<span class="w-2 h-2 rounded-full ${cls}" title="${PROFILE_TAB_SHORT_LABELS[tab] || tab}"></span>`;
       }).join('');
     }
 
     const back = document.getElementById('profile-wizard-back');
     const next = document.getElementById('profile-wizard-next');
     if (back) back.classList.toggle('hidden', wizardStep === 1);
-    if (next) next.textContent = wizardStep === total ? 'Save & finish' : 'Continue';
+    if (next) {
+      if (wizardStep === total) {
+        next.innerHTML = 'Save & finish';
+      } else {
+        const nextTab = PROFILE_TABS[wizardStep]; // 0-based: next step index
+        const nextLabel = PROFILE_TAB_SHORT_LABELS[nextTab] || WIZARD_STEP_LABELS[nextTab] || 'next section';
+        next.innerHTML = `Continue to ${nextLabel} <i class="fas fa-arrow-right ml-1.5 text-xs opacity-90" aria-hidden="true"></i>`;
+      }
+    }
 
     refreshProfileUI();
   }
@@ -895,13 +975,24 @@
       if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
     }
 
+    // Always open the full tabbed profile (Identity / Business / Voice / Prospecting / Personal)
+    // with footer "Next: …" labels — same as LO. Guided wizard is opt-in via "Guided setup".
+    loadProfileIntoForm();
+    showView('full');
+    const p = normalizeProfile(readRawProfile());
+    switchProfileTab(getFirstIncompleteTab(p));
+    updateProfileSectionNav();
+
+    // Soft one-time nudge for incomplete first-time profiles (don't hide the tabs)
     if (!forceFull && shouldShowWizard()) {
-      startProfileWizard(1);
-    } else {
-      loadProfileIntoForm();
-      showView('full');
-      const p = normalizeProfile(readRawProfile());
-      switchProfileTab(getFirstIncompleteTab(p));
+      try {
+        if (!sessionStorage.getItem('coachProfileFullOpenNudge')) {
+          sessionStorage.setItem('coachProfileFullOpenNudge', '1');
+          if (typeof window.showToast === 'function') {
+            window.showToast('Use the tabs or Next: buttons to walk each section — or tap Guided setup for a step-by-step walkthrough.', 'info');
+          }
+        }
+      } catch (e) { /* ignore */ }
     }
   }
 
@@ -971,8 +1062,26 @@
     document.querySelectorAll('.profile-tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const tab = btn.getAttribute('data-profile-tab');
-        if (tab) switchProfileTab(tab);
+        if (!tab) return;
+        // If user is in guided wizard and jumps via tabs, stay in sync with step index
+        if (wizardActive) {
+          const idx = PROFILE_TABS.indexOf(tab);
+          if (idx >= 0) {
+            wizardStep = idx + 1;
+            flushWizardSave();
+            renderWizardStep();
+            return;
+          }
+        }
+        switchProfileTab(tab);
       });
+    });
+
+    document.getElementById('profile-section-next')?.addEventListener('click', () => {
+      goProfileSection(1);
+    });
+    document.getElementById('profile-section-back')?.addEventListener('click', () => {
+      goProfileSection(-1);
     });
   }
 

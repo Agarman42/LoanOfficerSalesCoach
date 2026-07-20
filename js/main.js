@@ -101,28 +101,28 @@
       positionToggleButton(collapsed);
 
       if (save) {
-        try { localStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false'); } catch (e) {}
+        try {
+          localStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false');
+        } catch (e) { /* private mode */ }
       }
     }
 
-    // Click handler
     menuBtn.addEventListener('click', () => {
       if (isDesktop()) {
         const currentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
         applyCollapsedState(!currentlyCollapsed);
       } else {
-        // Mobile overlay
+        // Mobile: isOpen → collapse (close overlay)
         const isOpen = sidebar.classList.contains('left-0');
         applyCollapsedState(isOpen, false);
       }
     });
 
-    // Restore saved desktop preference
     let startCollapsed = false;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved === 'true' && isDesktop()) startCollapsed = true;
-    } catch (e) {}
+    } catch (e) { /* private mode */ }
 
     // Initial state (default = sidebar visible)
     if (startCollapsed && isDesktop()) {
@@ -176,7 +176,6 @@
       }, 120);
     });
 
-    console.log('[main.js] Sidebar toggle initialized (hamburger always in sidebar top-right when open, far top-left when closed)');
   }
 
   // =====================================================
@@ -331,7 +330,6 @@
       }
     }
 
-    console.log('[main.js] Quote rotator initialized');
   }
 
   // =====================================================
@@ -353,23 +351,35 @@
       }
     }
 
-    const savedTheme = localStorage.getItem('theme');
+    function readTheme() {
+      try {
+        return localStorage.getItem('theme');
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeTheme(mode) {
+      try {
+        localStorage.setItem('theme', mode);
+      } catch (e) { /* private mode */ }
+    }
+
+    const savedTheme = readTheme();
     if (savedTheme === 'dark') {
       applyTheme('dark');
     } else {
       applyTheme('light');
-      if (!savedTheme) localStorage.setItem('theme', 'light');
+      if (!savedTheme) writeTheme('light');
     }
 
     if (toggleBtn) {
       toggleBtn.addEventListener('click', () => {
         const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-        localStorage.setItem('theme', next);
+        writeTheme(next);
         applyTheme(next);
       });
     }
-
-    console.log('[main.js] Theme toggle initialized');
   }
 
   // =====================================================
@@ -416,36 +426,39 @@
     }
 
     function showModal() {
-      modal.style.removeProperty('display');
-      modal.style.removeProperty('pointer-events');
-      modal.style.removeProperty('visibility');
-      modal.style.removeProperty('opacity');
-      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      modal.style.display = 'flex';
-      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+      if (typeof window.openAppModal === 'function') {
+        window.openAppModal(modal);
+      } else {
+        modal.style.removeProperty('display');
+        modal.style.removeProperty('pointer-events');
+        modal.style.removeProperty('visibility');
+        modal.style.removeProperty('opacity');
+        if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+      }
       updateStatus();
 
-      const hosted = (typeof window.isProductionHosted === 'function' && window.isProductionHosted()) ||
-                     (typeof window !== 'undefined' && window.location && !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname));
+      const hosted =
+        (typeof window.isProductionHosted === 'function' && window.isProductionHosted()) ||
+        (window.location &&
+          !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname || ''));
 
       if (hosted) {
-        // Hosted production: server has the key. Make the modal informative.
         if (statusEl) {
           statusEl.textContent = 'Managed by server (no user key needed)';
-          statusEl.className = 'font-mono text-sm px-3 py-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200';
+          statusEl.className =
+            'font-mono text-sm px-3 py-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200';
         }
         const hint = modal.querySelector('#api-hosted-hint');
         if (hint) hint.classList.remove('hidden');
-
         if (inputEl) inputEl.style.display = 'none';
         if (saveBtn) saveBtn.style.display = 'none';
         if (clearBtn) clearBtn.style.display = 'none';
       } else {
         const hint = modal.querySelector('#api-hosted-hint');
         if (hint) hint.classList.add('hidden');
-
         if (inputEl) inputEl.style.display = '';
         if (saveBtn) saveBtn.style.display = '';
         if (clearBtn) clearBtn.style.display = '';
@@ -458,9 +471,14 @@
     }
 
     function hideModal() {
-      if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
+      if (typeof window.closeAppModal === 'function') {
+        window.closeAppModal(modal);
+      } else {
+        if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
     }
 
     // Open modal
@@ -475,7 +493,6 @@
       window.ensureModalBackdropClose(modal);
     }
 
-    // Save / Update
     if (saveBtn) {
       saveBtn.addEventListener('click', () => {
         const val = inputEl ? inputEl.value.trim() : '';
@@ -483,276 +500,258 @@
           if (window.showToast) window.showToast('Please paste a valid key', 'warning');
           return;
         }
-        if (!val.startsWith('xai-')) {
-          if (window.showToast) window.showToast('Key should start with "xai-"', 'error');
+        const valid =
+          typeof window.isValidGrokApiKey === 'function'
+            ? window.isValidGrokApiKey(val)
+            : val.startsWith('xai-') && val.length >= 24;
+        if (!valid) {
+          if (window.showToast) {
+            window.showToast('Key should start with "xai-" and look like a real console.x.ai key', 'error');
+          }
           return;
         }
 
         if (window.setGrokApiKey) {
           window.setGrokApiKey(val);
         } else {
-          localStorage.setItem('grokApiKey', val);
+          try {
+            localStorage.setItem('grokApiKey', val);
+          } catch (e) { /* private mode */ }
         }
 
         updateStatus();
         if (inputEl) inputEl.value = '';
-
-        if (window.showToast) {
-          window.showToast('✅ API key saved successfully', 'success');
-        }
+        if (window.showToast) window.showToast('API key saved successfully', 'success');
       });
     }
 
-    // Clear
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         if (window.clearGrokApiKey) {
           window.clearGrokApiKey();
         } else {
-          localStorage.removeItem('grokApiKey');
+          try {
+            localStorage.removeItem('grokApiKey');
+          } catch (e) { /* private mode */ }
         }
         updateStatus();
         if (inputEl) inputEl.value = '';
-        if (window.showToast) {
-          window.showToast('API key cleared from this browser', 'info');
-        }
+        if (window.showToast) window.showToast('API key cleared from this browser', 'info');
       });
     }
-
-    // Keyboard escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-        hideModal();
-      }
-    });
-
-    console.log('[main.js] API Key modal initialized');
   }
-
-  // =====================================================
-  // OLD / SUPERSEDED INITIALIZER (kept for safety during growth — final version is below)
-  // =====================================================
-  function initCoreUI() {
-    // Superseded by the more complete initCoreUI at the bottom of this file.
-    // This stub prevents double-initialization issues from previous merges.
-    if (window.__sidebarToggleInitialized) return;
-  }
-
-  // Social post generate uses onclick on the button — no duplicate listener needed.
-  function initSocialPostButtonFix() {}
 
   // =====================================================
   // 5. NAVIGATION / SECTION SWITCHING (consolidated)
   // =====================================================
+  /** Keep in sync with js/early-boot.js ALIASES */
+  const SECTION_ALIASES = {
+    'social-media-strategy': 'social',
+    'referral-partners': 'referrals',
+    prospecting: 'weekly-win-plan',
+    'database-nurturing': 'database',
+    'loan-process': 'process',
+    content: 'content-hub',
+    'content-studio': 'content-hub',
+    'content-suite': 'content-hub',
+    events: 'eventplanning',
+    'event-planning': 'eventplanning',
+    event: 'eventplanning'
+  };
+
   function showSection(id) {
     if (!id) return;
 
-    // Alias map for old/stale links in saved plans or elsewhere
-    const aliases = {
-      'social-media-strategy': 'social',
-      'referral-partners': 'referrals',
-      'prospecting': 'weekly-win-plan',
-      'database-nurturing': 'database',
-      'loan-process': 'process'
-    };
-    if (aliases[id]) {
-      id = aliases[id];
+    if (SECTION_ALIASES[id]) {
+      id = SECTION_ALIASES[id];
     }
 
-    // Hide all main content sections
+    // Hide top-level tool sections only — never nest-hide Smart Savings panels
+    // (wizard panels live in #smart-savings-root or the guided modal #ss-guided-layer)
     document.querySelectorAll('main section').forEach(sec => {
+      if (sec.closest('#smart-savings-root')) return;
+      if (sec.closest('#ss-guided-layer') || sec.closest('#ss-guided-scroll')) return;
       sec.classList.add('hidden');
     });
 
     // Show the target (fallback to Home if hash/alias is stale)
     const target = document.getElementById(id);
     if (!target) {
-      if (id !== 'home') {
-        showSection('home');
-      }
+      if (id !== 'home') showSection('home');
+      else console.warn('[showSection] Home section missing from DOM');
       return;
     }
 
-    if (target) {
-      target.classList.remove('hidden');
-      if (typeof window.trackCoachSectionOpen === 'function') {
-        try { window.trackCoachSectionOpen(id); } catch (e) { console.warn('[analytics]', e); }
-      }
-      if (typeof window.onCoachSectionShown === 'function') {
-        try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
-      }
-      // Smooth scroll into view
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.classList.remove('hidden');
+    if (typeof window.trackCoachSectionOpen === 'function') {
+      try { window.trackCoachSectionOpen(id); } catch (e) { console.warn('[analytics]', e); }
+    }
+    if (typeof window.onCoachSectionShown === 'function') {
+      try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
+    }
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      // Auto-trigger calculator results when navigating to it
-      if (id === 'calculator') {
-        setTimeout(() => {
-          if (typeof window.calculateAdvanced === 'function') {
-            window.calculateAdvanced();
-          }
-        }, 120);
+    // Smart Savings native section — init (scoped CSS + app) on first show
+    if (id === 'smart-savings') {
+      try {
+        if (typeof window.initSmartSavingsSection === 'function') window.initSmartSavingsSection();
+        else if (typeof window.loadSmartSavingsFrame === 'function') window.loadSmartSavingsFrame();
+        else if (typeof window.initSmartSavings === 'function') window.initSmartSavings();
+      } catch (e) { console.warn('[smart-savings]', e); }
+    }
+
+    // Auto-trigger calculator results when navigating to it
+    if (id === 'calculator') {
+      setTimeout(() => {
+        if (typeof window.calculateAdvanced === 'function') {
+          window.calculateAdvanced();
+        }
+      }, 120);
+    }
+
+    // Weekly Win Plan (separate from 2026 Business Plan) button wiring (robust fallback)
+    // IMPORTANT: Weekly Win Plan (time blocks) and 2026 Business Plan are TWO SEPARATE features.
+    // - Weekly: generateWeeklyPlan(), #weekly-win-plan section, #generate-win-plan-btn
+    // - 2026 Business: generatePlan(), #planning section, #generate-plan-btn, uses wireGeneratePlanButton + enrich panel
+    // Shared file (weekly-win-plan.js) but completely separate functions, prompts, buttons, outputs, and loading UI.
+    if (id === 'weekly-win-plan') {
+      if (typeof window.updateWeeklyCustomizeDisplays === 'function') {
+        try { window.updateWeeklyCustomizeDisplays(); } catch (e) {}
       }
+      if (typeof window.ToolBridges?.rebuildAnnualContextFromDom === 'function') {
+        window.ToolBridges.rebuildAnnualContextFromDom();
+      }
+      if (typeof window.ToolBridges?.refreshAnnualBridgeUI === 'function') {
+        window.ToolBridges.refreshAnnualBridgeUI();
+      }
+      setTimeout(() => {
+        const editBtn = document.getElementById('edit-setup-btn');
+        if (editBtn && typeof window.openSetupWizard === 'function') {
+          editBtn.onclick = window.openSetupWizard;
+        }
 
-      // Weekly Win Plan (separate from 2026 Business Plan) button wiring (robust fallback)
-      // IMPORTANT: Weekly Win Plan (time blocks) and 2026 Business Plan are TWO SEPARATE features.
-      // - Weekly: generateWeeklyPlan(), #weekly-win-plan section, #generate-win-plan-btn
-      // - 2026 Business: generatePlan(), #planning section, #generate-plan-btn, uses wireGeneratePlanButton + enrich panel
-      // Shared file (weekly-win-plan.js) but completely separate functions, prompts, buttons, outputs, and loading UI.
-      if (id === 'weekly-win-plan') {
-        if (typeof window.updateWeeklyCustomizeDisplays === 'function') {
-          try { window.updateWeeklyCustomizeDisplays(); } catch (e) {}
+        // Wire the Weekly Win Plan button as fallback (business plan is wired in weekly-win-plan.js)
+        const wizardGenBtn = document.getElementById('generate-win-plan-btn');
+        if (wizardGenBtn && !wizardGenBtn._wwpWired) {
+          wizardGenBtn._wwpWired = true;
+          wizardGenBtn.addEventListener('click', () => {
+            if (typeof window.forceShowGlobalLoading === 'function') {
+              window.forceShowGlobalLoading('Building Your Weekly Win Plan...');
+            }
+            const le = document.getElementById('global-loading');
+            if (le) {
+              le.classList.remove('hidden');
+              le.style.setProperty('display', 'flex', 'important');
+              le.style.setProperty('z-index', '99999', 'important');
+              le.style.setProperty('visibility', 'visible', 'important');
+              le.style.setProperty('opacity', '1', 'important');
+            }
+            if (typeof window.generateWeeklyPlan === 'function') {
+              window.generateWeeklyPlan();
+            } else {
+              console.warn('Weekly Win Plan generator not ready yet');
+            }
+          });
         }
-        if (typeof window.ToolBridges?.rebuildAnnualContextFromDom === 'function') {
-          window.ToolBridges.rebuildAnnualContextFromDom();
-        }
-        if (typeof window.ToolBridges?.refreshAnnualBridgeUI === 'function') {
-          window.ToolBridges.refreshAnnualBridgeUI();
-        }
-        setTimeout(() => {
-          const editBtn = document.getElementById('edit-setup-btn');
-          if (editBtn && typeof window.openSetupWizard === 'function') {
-            editBtn.onclick = window.openSetupWizard;   // direct assignment as fallback
-          }
+      }, 150);
+    }
 
-          // Wire the Weekly Win Plan button as fallback (the business plan button is wired in weekly-win-plan.js init)
-          const wizardGenBtn = document.getElementById('generate-win-plan-btn');
-          if (wizardGenBtn && !wizardGenBtn._wwpWired) {
-            wizardGenBtn._wwpWired = true;
-            // Use addEventListener to not override other
-            wizardGenBtn.addEventListener('click', () => {
-              console.log('[main.js fallback] Weekly Win Plan button clicked');
-              // Force the (custom weekly) progress UI immediately via the shared helper
+    // 2026 Business Plan — refresh profile header + live insight + wiring when visiting
+    if (id === 'planning') {
+      if (typeof window.wireGeneratePlanButton === 'function') {
+        try { window.wireGeneratePlanButton(); } catch (e) {}
+      }
+      setTimeout(() => {
+        if (typeof window.wireGeneratePlanButton === 'function') {
+          try { window.wireGeneratePlanButton(); } catch (e) {}
+        } else if (typeof window.generatePlan === 'function') {
+          const btn = document.getElementById('generate-plan-btn');
+          if (btn && !btn._gpwWired) {
+            btn._gpwWired = true;
+            btn.addEventListener('click', () => {
               if (typeof window.forceShowGlobalLoading === 'function') {
-                window.forceShowGlobalLoading('Building Your Weekly Win Plan...');
+                window.forceShowGlobalLoading('Crafting Your 2026 Business Plan...');
               }
-              const le = document.getElementById('global-loading');
-              if (le) {
-                le.classList.remove('hidden');
-                le.style.setProperty('display', 'flex', 'important');
-                le.style.setProperty('z-index', '99999', 'important');
-                le.style.setProperty('visibility', 'visible', 'important');
-                le.style.setProperty('opacity', '1', 'important');
-              }
-              if (typeof window.generateWeeklyPlan === 'function') {
-                window.generateWeeklyPlan();
-              } else {
-                console.warn('Weekly Win Plan generator not ready yet');
-              }
+              window.generatePlan('plan-output');
             });
           }
-        }, 150);
-      }
+        }
 
-      // 2026 Business Plan (separate from Weekly Win Plan) — refresh profile header + live insight + wiring when visiting (leverages profile heavily + keeps things feeling alive and low-pressure)
-      // See note in weekly-win-plan.js for separation of the two tools.
-      if (id === 'planning') {
-        // Immediate wiring so clicks right after nav are caught (delegation makes it reliable)
-        if (typeof window.wireGeneratePlanButton === 'function') {
-          try { window.wireGeneratePlanButton(); } catch(e){}
+        if (typeof window.refreshPlanProfileHeader === 'function') window.refreshPlanProfileHeader();
+        if (typeof window.updatePlanLiveInsight === 'function') window.updatePlanLiveInsight();
+        if (typeof window.wirePlanLiveCalculations === 'function') window.wirePlanLiveCalculations();
+        if (typeof window.wirePlanStyleCards === 'function') window.wirePlanStyleCards();
+        if (typeof window.updatePlanCompleteness === 'function') window.updatePlanCompleteness();
+        if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
+        if (typeof window.updateHobbyTactics === 'function') window.updateHobbyTactics();
+        if (typeof window.restoreBusinessPlanningForm === 'function') {
+          try { window.restoreBusinessPlanningForm(); } catch (e) {}
+        }
+        if (typeof window.restoreSavedBusinessPlan === 'function') {
+          try { window.restoreSavedBusinessPlan(); } catch (e) {}
+        }
+        if (typeof window.syncPlanningFormFromProfile === 'function') {
+          window.syncPlanningFormFromProfile();
+        } else {
+          console.warn('[planning] syncPlanningFormFromProfile not available yet');
         }
         setTimeout(() => {
-          // Wire FIRST in the timeout so even if later sync calls throw, the button is guaranteed to work
-          if (typeof window.wireGeneratePlanButton === 'function') {
-            try { window.wireGeneratePlanButton(); } catch(e){}
-          } else if (typeof window.generatePlan === 'function') {
-            const btn = document.getElementById('generate-plan-btn');
-            if (btn && !btn._gpwWired) {
-              btn._gpwWired = true;
-              btn.addEventListener('click', () => {
-                if (typeof window.forceShowGlobalLoading === 'function') window.forceShowGlobalLoading('Crafting Your 2026 Business Plan...');
-                window.generatePlan('plan-output');
-              });
-            }
-          }
-
-          if (typeof window.refreshPlanProfileHeader === 'function') window.refreshPlanProfileHeader();
-          if (typeof window.updatePlanLiveInsight === 'function') window.updatePlanLiveInsight();
-          if (typeof window.wirePlanLiveCalculations === 'function') window.wirePlanLiveCalculations();
-          if (typeof window.wirePlanStyleCards === 'function') window.wirePlanStyleCards();
-          if (typeof window.updatePlanCompleteness === 'function') window.updatePlanCompleteness();
-          if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
-          if (typeof window.updateHobbyTactics === 'function') window.updateHobbyTactics();
-          if (typeof window.restoreBusinessPlanningForm === 'function') {
-            try { window.restoreBusinessPlanningForm(); } catch(e){}
-          }
-          // Ensure any previously generated 2026 Business Plan is visible when arriving at the section.
-          // (init calls this too, but we re-call on nav in case weekly/other tools cleared the DOM output while the saved copy remained in localStorage.)
-          if (typeof window.restoreSavedBusinessPlan === 'function') {
-            try { window.restoreSavedBusinessPlan(); } catch(e){}
-          }
-          // Auto-sync from profile by default (as requested). Button is available for manual re-sync if user made custom changes or updated profile elsewhere.
-          if (typeof window.syncPlanningFormFromProfile === 'function') {
-            window.syncPlanningFormFromProfile();
-          } else {
-            console.warn('[planning] syncPlanningFormFromProfile not available yet');
-          }
-          // Extra safety re-wire shortly after sync (in case sync had side effects)
-          setTimeout(() => {
-            if (typeof window.wireGeneratePlanButton === 'function') window.wireGeneratePlanButton();
-          }, 30);
-        }, 180);
-      }
-
-      if (id === 'referrals') {
-        setTimeout(() => {
-          if (typeof window.renderRuoffFactVault === 'function') {
-            try { window.renderRuoffFactVault(); } catch (e) {}
-          }
-        }, 80);
-      }
-
-      // Mindset Lab — refresh saved button states when returning to the section
-      if (id === 'mindset-motivation') {
-        setTimeout(() => {
-          if (typeof window.renderMindsetLab === 'function') {
-            window.renderMindsetLab();
-          }
-        }, 80);
-      }
-
-      // Book Vault — ensure books, featured row, filters and count are rendered when navigating
-      if (id === 'books') {
-        setTimeout(() => {
-          if (typeof window.renderBookVault === 'function') {
-            try {
-              window.renderBookVault();
-            } catch (e) {
-              console.warn('[Book Vault] Re-render failed:', e);
-            }
-          }
-        }, 80);
-      }
-
-      // Bio Builder — sync profile + restore saved bio
-      if (id === 'bio-creator') {
-        setTimeout(() => {
-          if (typeof window.syncBioFromProfile === 'function') {
-            try { window.syncBioFromProfile(); } catch (e) {}
-          }
-        }, 80);
-      }
-
-      // Newsletter Generator — sync profile fields + ensure listeners + initial previews for custom curated
-      if (id === 'newsletter-generator') {
-        setTimeout(() => {
-          if (typeof window.syncNewsletterFromProfile === 'function') {
-            try { window.syncNewsletterFromProfile(); } catch(e){}
-          }
-          if (typeof window.updatePreviews === 'function') {
-            try { window.updatePreviews(); } catch(e){}
-          }
-          if (typeof window.restoreNewsletterModals === 'function') {
-            try { window.restoreNewsletterModals(); } catch (e) {}
-          }
-        }, 80);
-      }
-    } else {
-      console.warn(`[showSection] Section with id="${id}" not found`);
-      return;
+          if (typeof window.wireGeneratePlanButton === 'function') window.wireGeneratePlanButton();
+        }, 30);
+      }, 180);
     }
 
-    // Auto-close any newsletter-specific modals when leaving the newsletter tool
-    // (the tips modal now lives at top level so it is not auto-hidden by the section)
+    if (id === 'referrals') {
+      setTimeout(() => {
+        if (typeof window.renderRuoffFactVault === 'function') {
+          try { window.renderRuoffFactVault(); } catch (e) {}
+        }
+      }, 80);
+    }
+
+    if (id === 'mindset-motivation') {
+      setTimeout(() => {
+        if (typeof window.renderMindsetLab === 'function') {
+          window.renderMindsetLab();
+        }
+      }, 80);
+    }
+
+    if (id === 'books') {
+      setTimeout(() => {
+        if (typeof window.renderBookVault === 'function') {
+          try {
+            window.renderBookVault();
+          } catch (e) {
+            console.warn('[Book Vault] Re-render failed:', e);
+          }
+        }
+      }, 80);
+    }
+
+    if (id === 'bio-creator') {
+      setTimeout(() => {
+        if (typeof window.syncBioFromProfile === 'function') {
+          try { window.syncBioFromProfile(); } catch (e) {}
+        }
+      }, 80);
+    }
+
+    if (id === 'newsletter-generator') {
+      setTimeout(() => {
+        if (typeof window.syncNewsletterFromProfile === 'function') {
+          try { window.syncNewsletterFromProfile(); } catch (e) {}
+        }
+        if (typeof window.updatePreviews === 'function') {
+          try { window.updatePreviews(); } catch (e) {}
+        }
+        if (typeof window.restoreNewsletterModals === 'function') {
+          try { window.restoreNewsletterModals(); } catch (e) {}
+        }
+      }, 80);
+    }
+
+    // Close newsletter tips when leaving that tool
     if (id !== 'newsletter-generator' && typeof window.closeNewsletterTips === 'function') {
       try { window.closeNewsletterTips(); } catch (e) {}
     }
@@ -772,14 +771,10 @@
       }
     }
 
-    // Update active state on sidebar links (uses permanent .active rule in main.css)
-    document.querySelectorAll('#sidebar a[href^="#"]').forEach(link => {
-      const linkId = link.getAttribute('href').replace('#', '');
-      if (linkId === id) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
+    document.querySelectorAll('#sidebar a[href^="#"]').forEach((link) => {
+      const href = link.getAttribute('href') || '';
+      const linkId = href.replace(/^#/, '');
+      link.classList.toggle('active', linkId === id);
     });
   }
 
@@ -878,29 +873,31 @@
       }, 200);
     }
 
-    console.log('[main.js] Navigation initialized (sidebar links + hash support)');
   }
 
-  // Helper for Weekly Win Plan buttons (retry until the script loads)
-  window.tryCallWeeklyFunction = function(name) {
+  /** Call a Weekly Win Plan window function, retrying briefly while scripts load. */
+  window.tryCallWeeklyFunction = function tryCallWeeklyFunction(name) {
     const fn = window[name];
     if (typeof fn === 'function') {
       fn();
-    } else {
-      // Retry a few times in case the script is still loading
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        const f = window[name];
-        if (typeof f === 'function') {
-          clearInterval(interval);
-          f();
-        } else if (attempts > 20) {
-          clearInterval(interval);
-          alert('Weekly Win Plan script failed to load. Please hard refresh the page (Ctrl+Shift+R).');
-        }
-      }, 100);
+      return;
     }
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts += 1;
+      const f = window[name];
+      if (typeof f === 'function') {
+        clearInterval(interval);
+        f();
+      } else if (attempts > 20) {
+        clearInterval(interval);
+        const msg =
+          'Weekly Win Plan script failed to load. Please hard refresh the page (Ctrl+Shift+R).';
+        if (typeof window.notifyUser === 'function') window.notifyUser(msg, 'error');
+        else if (window.showToast) window.showToast(msg, 'error');
+        else alert(msg);
+      }
+    }, 100);
   };
 
 
@@ -922,26 +919,18 @@
     }
   };
 
-  console.log('[main.js] toggleAccordion exposed globally');
-
   function initCoreUI() {
+    if (window.__coreUiInitialized) return;
+    window.__coreUiInitialized = true;
+
     initSidebarToggle();
     initQuoteRotator();
     initThemeToggle();
     initApiKeyModal();
-    initSocialPostButtonFix();
-    initNavigation();   // ← NEW consolidated nav
+    initNavigation();
 
-    // Pre-create the global loading overlay (self-healing) so that *every* AI tool
-    // (2026 Business Plan, Weekly Win Plan, Social, Blog, Prospecting blocks, etc.)
-    // that calls showLoadingWithTips / force never sees "element not found".
-    // If the static <div id="global-loading"> from index.html is absent (cache, old HTML copy, etc.)
-    // we inject it now (hidden) so it's ready the instant a generate button is clicked.
-    if (typeof ensureGlobalLoadingExists === 'function') {
-      ensureGlobalLoadingExists();
-    }
-
-    console.log('%c[main.js] Core UI initialized successfully (Phase 0.5 + cleanup + nav)', 'color:#00A89D; font-weight:600');
+    // Pre-create #global-loading if missing so generate flows never miss the overlay
+    ensureGlobalLoadingExists();
   }
 
   // Boot on DOM ready (safe even if other scripts also listen)
@@ -1041,8 +1030,6 @@
       attachTo.appendChild(loadingEl);
     }
 
-    console.log('%c[forceShowGlobalLoading] FORCING overlay visible for: ' + title, 'color:#00A89D; font-weight:bold');
-
     loadingEl.classList.remove('hidden');
     loadingEl.removeAttribute('hidden');
 
@@ -1089,8 +1076,6 @@
       console.warn('[showLoadingWithTips] #global-loading element not found in DOM even after force fallback');
       return;
     }
-
-    console.log('[showLoadingWithTips] Showing loading modal for:', title);
 
     if (titleEl) titleEl.textContent = title;
     if (messageEl) messageEl.textContent = tips[0] || 'This can take a moment...';

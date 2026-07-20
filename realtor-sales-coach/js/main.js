@@ -553,7 +553,10 @@
       'social-media-strategy': 'social',
       'referral-partners': 'referrals',
       'prospecting': 'weekly-win-plan',
-      'database-nurturing': 'database'
+      'database-nurturing': 'database',
+      content: 'content-hub',
+      'content-studio': 'content-hub',
+      'content-suite': 'content-hub'
     };
     if (aliases[id]) {
       id = aliases[id];

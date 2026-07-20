@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'nlWizardLastStep';
-  const WIZARD_DOM_VERSION = '18';
+  const WIZARD_DOM_VERSION = '24';
   const PERSONAL_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -737,26 +737,30 @@
   }
 
   function updatePersonalHistoryUI() {
-    const last = loadPersonalStoryHistory();
+    const last = (loadPersonalStoryHistory() || '').trim();
     const trigger = $('nl-wizard-personal-history-trigger');
     const snippet = $('nl-wizard-personal-history-snippet');
-    if (!trigger) return;
-    if (!last) {
-      trigger.classList.add('hidden');
-      return;
-    }
-    trigger.classList.remove('hidden');
-    if (snippet) snippet.textContent = last;
+    if (snippet) snippet.textContent = last || '';
+    // Compact "Last issue" chip inside the free-type box — only when history exists
+    if (trigger) trigger.classList.toggle('hidden', !last);
+    if (!last) $('nl-wizard-personal-history-popover')?.classList.add('hidden');
   }
 
   function applyPersonalStoryHistory() {
     const last = loadPersonalStoryHistory();
     const ta = $('nl-wizard-personal-text');
     if (!ta || !last) return;
+    const personalCb = $('nl-wizard-personal');
+    if (personalCb && !personalCb.checked) {
+      personalCb.checked = true;
+      personalCb.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    $('nl-wizard-personal-fields')?.classList.remove('hidden');
     ta.value = last;
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     updatePersonalCharMeter();
     $('nl-wizard-personal-history-popover')?.classList.add('hidden');
+    if (window.showToast) window.showToast('Loaded your last personal update.', 'success');
   }
 
   function setStep4SubTab(tab) {
@@ -1336,7 +1340,7 @@
 
   function ensureWizardDom() {
     const existing = $('nl-wizard-overlay');
-    if (existing && (existing.dataset.nlWizardVersion !== WIZARD_DOM_VERSION || !$('nl-wizard-step4-tabs') || !$('nl-wizard-paste-video'))) {
+    if (existing && (existing.dataset.nlWizardVersion !== WIZARD_DOM_VERSION || !$('nl-wizard-step4-tabs') || !$('nl-wizard-paste-video') || !existing.querySelector('a[href="https://8upload.com/"]'))) {
       existing.remove();
       wizardEl = null;
     }
@@ -1457,11 +1461,15 @@
               <div class="relative" id="nl-wizard-personal-text-wrap">
                 <textarea id="nl-wizard-personal-text" rows="5" class="w-full p-4 pr-24 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm resize-y" placeholder="e.g., Just wrapped an amazing closing for the Martinez family…"></textarea>
                 <div id="nl-wizard-personal-history-trigger" class="hidden absolute right-3 top-3 z-10">
-                  <span class="nl-wizard-history-pill text-[10px] text-gray-500 border border-gray-200 dark:border-gray-600 rounded-full px-2 py-0.5 bg-white/95 dark:bg-gray-800/95 cursor-default select-none">Last issue</span>
+                  <button type="button" id="nl-wizard-personal-history-load-btn"
+                          class="nl-wizard-history-pill text-[10px] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-full px-2.5 py-0.5 bg-white/95 dark:bg-gray-800/95 hover:border-[#00A89D] hover:text-[#00A89D] transition shadow-sm font-medium"
+                          title="Load the personal update from your last issue">
+                    Last issue
+                  </button>
                   <div id="nl-wizard-personal-history-popover" class="hidden absolute right-0 top-full mt-1.5 w-72 max-w-[calc(100vw-3rem)] p-3 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg bg-white dark:bg-gray-800 text-left z-20">
                     <p class="text-[10px] font-bold uppercase tracking-wide text-gray-400 m-0 mb-1.5">What you wrote last issue</p>
-                    <p id="nl-wizard-personal-history-snippet" class="text-xs text-gray-600 dark:text-gray-300 m-0 mb-2 max-h-28 overflow-y-auto leading-relaxed"></p>
-                    <button type="button" id="nl-wizard-personal-history-use" class="text-xs text-[#00A89D] font-semibold hover:underline">Use this text</button>
+                    <p id="nl-wizard-personal-history-snippet" class="text-xs text-gray-700 dark:text-gray-200 m-0 mb-2 max-h-28 overflow-y-auto leading-relaxed"></p>
+                    <button type="button" id="nl-wizard-personal-history-use" class="text-xs px-3 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition">Use this text</button>
                   </div>
                 </div>
               </div>
@@ -1501,6 +1509,10 @@
                     </div>
                     <p id="nl-wizard-photo-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
                   </div>
+                  <div class="mt-3 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p class="m-0 mb-1"><i class="fas fa-lightbulb text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Free image host — no account required</strong></p>
+                    <p class="m-0">Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a>, then copy the <strong>Hotlink / Direct link</strong> (not the page URL) and paste it above — that works best. Same tip for <strong>headshots</strong> and <strong>company logos</strong>.</p>
+                  </div>
                 </div>
                 <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-800/30">
                   <label class="flex items-center gap-2 mb-3 cursor-pointer">
@@ -1528,6 +1540,10 @@
                       </div>
                     </div>
                     <p id="nl-wizard-video-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
+                  </div>
+                  <div class="mt-3 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p class="m-0 mb-1"><i class="fas fa-video text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Free video link</strong></p>
+                    <p class="m-0">Use a free <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">YouTube</a> account — <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">upload your video or Short</a>, set it to <strong>Unlisted</strong> or <strong>Public</strong>, then paste the share URL above.</p>
                   </div>
                 </div>
               </div>
@@ -1616,13 +1632,13 @@
           </div>
         </div>
 
-        <div class="shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="shrink-0 px-5 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-3">
           <button type="button" id="nl-wizard-full-form" class="text-xs text-[#00A89D] hover:underline font-semibold">Open full setup page</button>
           <div class="flex items-center gap-2 ml-auto">
-            <button type="button" id="nl-wizard-back" class="px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">Back</button>
-            <button type="button" id="nl-wizard-skip" class="hidden px-4 py-2 rounded-full text-sm font-semibold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">Skip</button>
-            <button type="button" id="nl-wizard-next" class="px-5 py-2 rounded-full bg-[#00A89D] hover:bg-[#008F85] text-white text-sm font-semibold transition">Continue</button>
-            <button type="button" id="nl-wizard-generate" class="hidden px-5 py-2 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white text-sm font-bold transition disabled:opacity-50 disabled:cursor-not-allowed">Generate newsletter</button>
+            <button type="button" id="nl-wizard-back" class="px-4 py-2.5 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">Back</button>
+            <button type="button" id="nl-wizard-skip" class="hidden px-4 py-2.5 rounded-full text-sm font-semibold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">Skip</button>
+            <button type="button" id="nl-wizard-next" class="px-5 py-2.5 rounded-full bg-[#00A89D] hover:bg-[#008F85] text-white text-sm font-semibold transition">Continue</button>
+            <button type="button" id="nl-wizard-generate" class="hidden px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white text-sm font-bold shadow-md hover:opacity-95 transition disabled:opacity-50 disabled:cursor-not-allowed">Generate newsletter</button>
           </div>
         </div>
       </div>
@@ -1667,25 +1683,32 @@
 
     const historyTrigger = $('nl-wizard-personal-history-trigger');
     const historyPopover = $('nl-wizard-personal-history-popover');
-    let historyHideTimer = null;
-    const showHistoryPopover = () => {
-      if (historyHideTimer) clearTimeout(historyHideTimer);
-      historyPopover?.classList.remove('hidden');
-    };
-    const hideHistoryPopover = () => {
-      historyHideTimer = setTimeout(() => historyPopover?.classList.add('hidden'), 180);
-    };
-    [historyTrigger, historyPopover].forEach((el) => {
-      if (!el) return;
-      el.addEventListener('mouseenter', showHistoryPopover);
-      el.addEventListener('mouseleave', hideHistoryPopover);
-      el.addEventListener('focusin', showHistoryPopover);
-      el.addEventListener('focusout', hideHistoryPopover);
+    const historyLoadBtn = $('nl-wizard-personal-history-load-btn');
+    historyLoadBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!loadPersonalStoryHistory()) return;
+      if (historyPopover && historyPopover.classList.contains('hidden')) {
+        updatePersonalHistoryUI();
+        historyPopover.classList.remove('hidden');
+      } else {
+        applyPersonalStoryHistory();
+      }
     });
     $('nl-wizard-personal-history-use')?.addEventListener('click', (e) => {
       e.preventDefault();
       applyPersonalStoryHistory();
     });
+    // Save on blur so full-form + wizard share history even before Generate
+    const wizPersonalTa = $('nl-wizard-personal-text');
+    if (wizPersonalTa && !wizPersonalTa.dataset.nlHistoryBlurWired) {
+      wizPersonalTa.dataset.nlHistoryBlurWired = '1';
+      wizPersonalTa.addEventListener('blur', () => {
+        const text = (wizPersonalTa.value || '').trim();
+        if (text.length >= 20) savePersonalStoryHistory();
+      });
+    }
+    updatePersonalHistoryUI();
 
     wizardEl.querySelectorAll('[data-nl-wizard-group-all]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -1949,6 +1972,7 @@
     document.body.style.overflow = 'hidden';
     renderStep();
     focusWizardStepEntry();
+    if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('newsletter', 'guided');
     track('start');
   }
 
@@ -1959,6 +1983,7 @@
     wizardEl.classList.add('hidden');
     wizardEl.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('newsletter', 'full');
   }
 
   function scrollToNewsletterForm() {

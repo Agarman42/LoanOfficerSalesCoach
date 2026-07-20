@@ -41,6 +41,8 @@ const REQUIRED_IDS = [
   'social-post',
   'sales-script',
   'equity-scanner',
+  'smart-savings',
+  'smart-savings-root',
   'underwriting-search',
   'client-translation',
   // Empty states + polish
@@ -57,6 +59,7 @@ const REQUIRED_IDS = [
 
 const REQUIRED_HREF_TARGETS = [
   'equity-scanner',
+  'smart-savings',
   'social',
   'social-post',
   'blog',

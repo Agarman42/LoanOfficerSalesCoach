@@ -39,6 +39,16 @@
         'Naturally mention the agent name, brokerage/team, and local market — never keyword-stuff.',
       ],
     },
+    {
+      id: 'hobbyRestraint',
+      promptLines: [
+        'HOBBIES / PASSIONS RESTRAINT (always on): Profile hobbies and lifestyle details are optional seasoning for authenticity — NOT the theme of the whole output.',
+        'Never force hobby puns, sports metaphors, or hobby-themed tactics into every section. Loving golf does not mean every post, plan, or script is about golf.',
+        'At most 1–2 light hobby-tied ideas or examples unless the user explicitly asked for heavy hobby integration or selected a hobbies-only content theme.',
+        'Market, process, compliance, partner business, and pipeline work stay professional — do not shoehorn hobbies into those.',
+        'When hobbies are used: keep them natural, specific, and sparse. Prefer one genuine touch over a laundry list of passion-branded plays.',
+      ],
+    },
   ];
 
   const QUALITY_NOTE_TEXT =
@@ -55,6 +65,18 @@
     return lines;
   }
 
+  function buildHobbyRestraintBlock() {
+    return [
+      '',
+      'HOBBIES / PASSIONS RESTRAINT (critical — do not overdo personalization):',
+      '- Profile hobbies and lifestyle details are optional seasoning — NOT the theme of the whole plan or content set.',
+      '- Never force hobby puns or hobby-themed tactics into every section. One hobby does not mean every play is about that hobby.',
+      '- Rough guide for plans: at most ~2–3 of 10 tactics may lean on hobbies; the rest = partners, pipeline, process, numbers, and discipline.',
+      '- Power themes may be *inspired* by life/values; they must not turn the entire plan into a hobby brand.',
+      '',
+    ].join('\n');
+  }
+
   function getQualityNoteHtml() {
     return `<p class="nl-quality-note text-xs text-gray-500 dark:text-gray-400 m-0 mt-2 flex items-start gap-2 leading-relaxed">
       <i class="fas fa-shield-alt text-[#00A89D] mt-0.5 flex-shrink-0"></i>
@@ -64,9 +86,11 @@
 
   window.GenerationRules = {
     buildPromptBlock,
+    buildHobbyRestraintBlock,
     getQualityNoteHtml,
     getQualityNoteText: () => QUALITY_NOTE_TEXT,
   };
 
   window.buildGenerationRulesPromptBlock = buildPromptBlock;
+  window.buildHobbyRestraintPromptBlock = buildHobbyRestraintBlock;
 })();

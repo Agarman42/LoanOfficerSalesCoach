@@ -157,8 +157,8 @@ async function generateSocialPost() {
                             <div><strong>Drive engagement</strong> — End with real questions; comments and saves beat vanity metrics every time.</div>
                         </div>
                         <div class="flex gap-3">
-                            <i class="fas fa-bullseye text-[#002B5C] mt-0.5"></i>
-                            <div><strong>Profile-powered</strong> — Uses your hobbies, voice, local market so it actually sounds like you wrote it.</div>
+                            <i class="fas fa-bullseye text-[#002B5C] dark:text-white mt-0.5"></i>
+                            <div><strong>Profile-powered</strong> — Uses your voice and local market so it sounds like you (hobbies only as light optional seasoning).</div>
                         </div>
                     </div>
                 </div>
@@ -618,6 +618,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+/** Remove empty placeholder post boxes (e.g. "---") from a rendered calendar DOM. */
+function scrubEmptySocialPostBoxes(root) {
+    if (!root) return;
+    root.querySelectorAll('[id^="post-"]').forEach((el) => {
+        const t = (el.innerText || '').replace(/\u00a0/g, ' ').trim();
+        const empty = !t
+            || /^[\s\-\u2013\u2014_•·.*]+$/.test(t)
+            || /^(n\/?a|none|tbd)$/i.test(t)
+            || t.length < 12;
+        if (!empty) return;
+        const box = el.closest('.relative.mb-6') || el.parentElement;
+        if (box) box.remove();
+    });
+}
+
 function loadSavedSocialPlan() {
     const savedHTML = localStorage.getItem('lastSocialPlanHTML');
     const savedMonth = localStorage.getItem('lastSocialPlanMonth');
@@ -628,6 +643,8 @@ function loadSavedSocialPlan() {
 
     if (savedHTML) {
         output.innerHTML = savedHTML;
+        scrubEmptySocialPostBoxes(output);
+        try { localStorage.setItem('lastSocialPlanHTML', output.innerHTML); } catch (e) { /* ignore */ }
 
         // Sync dropdowns to the saved plan's month/year
         if (savedMonth) document.getElementById('plan-month').value = savedMonth;
@@ -704,19 +721,21 @@ Weave in these themes naturally: ${themes.length ? themes.join(', ') : 'balanced
 
 Custom instructions: ${customPrompt || 'None — use best judgment'}.
 
-AGENT PROFILE & VOICE (make the overview + every single post idea feel like it was written by *this exact agent* — use their personality, voice traits, tone, hobbies, challenges, and target partners for authentic, personal, non-generic content):
+AGENT PROFILE & VOICE (make the overview + posts feel like *this* agent — personality, voice, tone, market. Hobbies only when a theme day is Personal/Hobbies or when natural; do NOT make the whole month hobby-branded):
 ${personalization}
 ${eff.localArea ? `Primary market: ${eff.localArea}.` : ''}
+${typeof window.buildHobbyRestraintPromptBlock === 'function' ? window.buildHobbyRestraintPromptBlock() : ''}
+HOBBY / CALENDAR RESTRAINT: Unless the user selected a hobbies theme, keep hobby-specific posts sparse (roughly ≤2–4 days in the month). Even with hobbies theme selected, vary topics — not every day is golf/cooking/etc. Market, process, and partner posts stay professional without forced hobby puns.
 
 CRITICAL INSTRUCTIONS — DO NOT VIOLATE:
 - You MUST generate content for EVERY SINGLE ONE of the ${daysInMonth} days. Do not stop early, do not summarize, do not say "and so on".
 - The output table MUST contain EXACTLY ${daysInMonth} data rows (one for each day from 1 to ${daysInMonth}).
-- For EVERY day provide EXACTLY 4 varied, ready-to-post ideas.
+- For EVERY day provide 3–4 varied, ready-to-post ideas (prefer 4). NEVER pad empty slots with "---", "—", "-", "N/A", or blank cells — only real captions.
 - If the month is long, keep individual posts concise but complete — never omit days to save tokens.
 - Output as clean Markdown with:
   - Strong Overview section (key themes, why it works, execution motivation — inspiring and actionable).
   - Calendar as a table: columns "Day", "Date", "Theme", "Post 1", "Post 2", "Post 3", "Post 4".
-  - Each post: full caption + hashtags.
+  - Each post cell: a full caption + hashtags, or leave the cell truly empty if you only have 3 ideas that day (no dashes).
 Include local ${localArea} events, holidays, trends where relevant. Tone: warm, fun, conversational.
 
 ${typeof window.getWeekendSocialRules === 'function' ? window.getWeekendSocialRules() : ''}
@@ -763,10 +782,10 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
                         </div>
                         <div class="flex gap-3">
                             <i class="fas fa-map-marker-alt text-[#00A89D] mt-0.5"></i>
-                            <div><strong>Local &amp; personal flavor:</strong> We weave in your market, hobbies, family, and real life.</div>
+                            <div><strong>Local &amp; personal flavor:</strong> Market and voice first — hobbies only as light optional seasoning.</div>
                         </div>
                         <div class="flex gap-3">
-                            <i class="fas fa-calendar-alt text-[#002B5C] mt-0.5"></i>
+                            <i class="fas fa-calendar-alt text-[#002B5C] dark:text-white mt-0.5"></i>
                             <div><strong>30 days of consistency:</strong> No more blank-page stress — you’ll have ideas for every day.</div>
                         </div>
                         <div class="flex gap-3">
@@ -833,21 +852,27 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
         // Build day cards — use dynamic daysInMonth
         let cardsHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">';
 
+        /** Reject empty / placeholder model cells so we never render a box with just "---". */
+        const isUsableSocialPostContent = (raw) => {
+            const t = String(raw || '').replace(/\u00a0/g, ' ').trim();
+            if (!t) return false;
+            if (/^(n\/?a|none|tbd|empty|null|undefined|nil|\.+)$/i.test(t)) return false;
+            if (/^[\s\-\u2013\u2014_•·.*]+$/.test(t)) return false;
+            if (t.length < 12) return false;
+            return true;
+        };
+        const escapePostHtml = (s) => String(s || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+
         for (let day = 1; day <= daysInMonth; day++) {
             const dayDate = `${monthName} ${day}`;
             let theme = 'Daily Mix';
 
+            // Only real captions — never force 4 empty slots
             const posts = [];
-            // Fallbacks are now varied and lightly personalized from profile/themes when the model didn't return a full table
-            const fallbacks = [
-                '<p class="italic text-gray-500">Free choice — share something personal or local!</p>',
-                '<p class="italic text-gray-500">Your choice — a quick win, family moment, or local spot.</p>',
-                '<p class="italic text-gray-500">Open slot — poll your audience or share a recent small win.</p>',
-                '<p class="italic text-gray-500">Free choice — behind the scenes or a light fun fact.</p>'
-            ];
-            for (let i = 0; i < 4; i++) {
-                posts.push(fallbacks[i % fallbacks.length]);
-            }
 
             // Override with Grok data if available (robust lookup by day number, not position)
             if (table) {
@@ -871,12 +896,16 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
                         theme = cells[2]?.textContent.trim() || theme;
                         for (let i = 3; i < 7 && i < cells.length; i++) {
                             const content = cells[i]?.textContent.trim();
-                            if (content) {
-                                posts[i - 3] = `<p class="leading-relaxed">${content}</p>`;
+                            if (isUsableSocialPostContent(content)) {
+                                posts.push(`<p class="leading-relaxed whitespace-pre-wrap">${escapePostHtml(content)}</p>`);
                             }
                         }
                     }
                 }
+            }
+
+            if (!posts.length) {
+                posts.push('<p class="italic text-gray-500">Free choice — share something personal or local!</p>');
             }
 
             const postBoxes = posts.map((post, pIdx) => {
@@ -1027,6 +1056,11 @@ window.copySinglePost = function(postId, event) {
 
     let text = el.innerText.trim();
     text = text.replace(/^(IG|FB|LinkedIn|TikTok|Reels?|Story|Post|Stories):\s*/i, '').trim();
+    if (!text || /^[\s\-\u2013\u2014_•·.*]+$/.test(text) || text.length < 12) {
+        if (typeof window.notifyUser === 'function') window.notifyUser('That post is empty — pick another idea.', 'info', 2500);
+        else if (typeof window.showToast === 'function') window.showToast('That post is empty — pick another idea.', 'info');
+        return;
+    }
 
     const html = el.innerHTML;
 
@@ -1041,7 +1075,6 @@ window.copySinglePost = function(postId, event) {
             const original = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i>';
             btn.classList.replace('bg-[#00A89D]', 'bg-green-600');
-
             // === GLOBAL PROGRESS TRACKING ===
             let progress = JSON.parse(localStorage.getItem('lastSocialPlanProgress') || '{"copied":0}');
             progress.copied += 1;

@@ -1,16 +1,35 @@
       <!-- Card 4: Personal Update (Highly Recommended) -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
+      <div id="nl-personal-card" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
         <div class="flex items-center mb-4">
-          <input type="checkbox" id="nl-personal" class="mr-3 h-5 w-5 text-[#00A89D]">
+          <input type="checkbox" id="nl-personal" class="mr-3 h-5 w-5 text-[#00A89D] flex-shrink-0">
           <label for="nl-personal" class="text-xl font-semibold text-[#00A89D]">Personal Update ❤️ (Highly Recommended)</label>
         </div>
+
         <div id="personal-fields" class="hidden ml-2 space-y-6">
           <div>
             <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
               <strong class="text-[#002B5C] dark:text-white">Write this fresh every issue</strong> — we won't pull hobbies from your profile. Be specific: a closing, family moment, or community story. If you include a photo or video, describe what's in it.
             </p>
-            <textarea id="nl-personal-text" rows="5" placeholder="e.g., Just helped the Martinez family get keys to their first home — what a joy! (Photo: us at the front door.)" 
-                      class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50"></textarea>
+            <div class="flex flex-wrap gap-2 mb-3" id="nl-story-prompts"></div>
+            <div class="relative" id="nl-personal-text-wrap">
+              <textarea id="nl-personal-text" rows="5" placeholder="e.g., Just helped the Martinez family get keys to their first home — what a joy! (Photo: us at the front door.)" 
+                        class="w-full p-4 pr-24 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50"></textarea>
+              <div id="nl-personal-history-trigger" class="hidden absolute right-3 top-3 z-10">
+                <button type="button" id="nl-personal-history-load-btn"
+                        class="nl-personal-history-pill text-[10px] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-full px-2.5 py-0.5 bg-white/95 dark:bg-gray-800/95 hover:border-[#00A89D] hover:text-[#00A89D] transition shadow-sm font-medium"
+                        title="Load the personal update from your last issue">
+                  Last issue
+                </button>
+                <div id="nl-personal-history-popover" class="hidden absolute right-0 top-full mt-1.5 w-72 max-w-[calc(100vw-3rem)] p-3 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg bg-white dark:bg-gray-800 text-left z-20">
+                  <p class="text-[10px] font-bold uppercase tracking-wide text-gray-400 m-0 mb-1.5">What you wrote last issue</p>
+                  <p id="nl-personal-history-snippet" class="text-xs text-gray-700 dark:text-gray-200 m-0 mb-2 max-h-28 overflow-y-auto leading-relaxed"></p>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" id="nl-personal-history-use" class="text-xs px-3 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition">Use this text</button>
+                    <button type="button" id="nl-personal-history-dismiss" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">Hide</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <button type="button" onclick="if(typeof window.fillPersonalFromProfile==='function'){window.fillPersonalFromProfile();}" class="mt-1 text-xs text-[#00A89D] hover:underline">Optional: starter ideas from my profile</button>
             <div id="nl-personal-char-meter" class="hidden mt-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50">
               <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -32,6 +51,10 @@
               <input type="text" id="nl-personal-photo" placeholder="Paste direct image URL" 
                      class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Best: landscape or square JPG/PNG, 800–1200px wide — displays up to full newsletter width (600px).</p>
+              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p class="m-0 mb-1"><strong>Free image host — no account.</strong></p>
+                <p class="m-0">Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline">8upload.com</a>, copy the <strong>Hotlink / Direct link</strong>, paste above. Also great for headshots &amp; logos.</p>
+              </div>
               <div id="nl-personal-photo-size-wrap" class="hidden mt-2">
                 <div class="flex items-center justify-between gap-2 mb-1">
                   <label for="nl-personal-photo-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Photo size in newsletter</label>
@@ -57,6 +80,9 @@
               <input type="text" id="nl-personal-video" placeholder="Paste YouTube video or Shorts URL" 
                      class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Paste a public YouTube or Shorts link — thumbnail preview appears below when the URL is valid.</p>
+              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p class="m-0">Free <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline">YouTube upload</a> (Unlisted or Public), then paste the share URL.</p>
+              </div>
               <div id="nl-personal-video-size-wrap" class="hidden mt-2">
                 <div class="flex items-center justify-between gap-2 mb-1">
                   <label for="nl-personal-video-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Video size in newsletter</label>

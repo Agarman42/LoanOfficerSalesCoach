@@ -321,7 +321,7 @@ function generateEquityReport() {
                                 <div><strong>Savings Calc:</strong> Current P&amp;I + MI vs. new loan at your selected rate (plus ~$4k costs).</div>
                             </div>
                             <div class="flex gap-3">
-                                <i class="fas fa-chart-line text-[#002B5C] mt-0.5"></i>
+                                <i class="fas fa-chart-line text-[#002B5C] dark:text-white mt-0.5"></i>
                                 <div><strong>Opportunity Flags:</strong> Refi ready (savings &gt;$100/mo), Cash-out (&gt;$50k), Move-up (&gt;$100k equity), PMI removal (LTV ≤80%).</div>
                             </div>
                         </div>

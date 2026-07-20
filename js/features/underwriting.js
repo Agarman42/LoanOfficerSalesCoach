@@ -308,7 +308,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced underwrit
                                 <div><strong>Uploaded context:</strong> Any Ruoff overlays or agency documents you provided are being factored in.</div>
                             </div>
                             <div class="flex gap-3">
-                                <i class="fas fa-balance-scale text-[#002B5C] mt-0.5"></i>
+                                <i class="fas fa-balance-scale text-[#002B5C] dark:text-white mt-0.5"></i>
                                 <div><strong>Practical guidance:</strong> Honest confidence levels and actionable next steps for your specific file.</div>
                             </div>
                         </div>

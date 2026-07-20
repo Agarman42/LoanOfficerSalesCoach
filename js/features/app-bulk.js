@@ -7113,7 +7113,7 @@ Repeat this cycle every 90 days.`
               <i class="fas fa-envelope text-[#00A89D]"></i> <span>Newsletters</span>
             </button>
             <button data-filter="custom" class="filter-btn px-3 py-1 text-xs rounded-full border hover:bg-white dark:hover:bg-gray-800 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
-              <i class="fas fa-edit text-[#002B5C]"></i> <span>Custom</span>
+              <i class="fas fa-edit text-[#002B5C] dark:text-white"></i> <span>Custom</span>
             </button>
           </div>
 

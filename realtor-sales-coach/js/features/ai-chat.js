@@ -232,8 +232,12 @@ function addMessage(role, content, addActions = true) {
   const wrapper = document.createElement('div');
   wrapper.className = isUser ? 'text-right mb-4' : 'text-left mb-4 group';
 
-  let innerHTML = `<div class="${isUser ? 'inline-block bg-[#00A89D] text-white' : 'inline-block bg-[#002B5C] text-white'} rounded-2xl px-5 py-3 max-w-[85%] shadow-sm text-[15px] leading-relaxed">`;
-  innerHTML += isUser ? content : marked.parse(content || '');
+  // chat-bubble-* classes pin white text (global .prose p/li colors were overriding text-white)
+  const bubbleClass = isUser
+    ? 'chat-bubble chat-bubble-user inline-block bg-[#00A89D] text-white rounded-2xl px-5 py-3 max-w-[min(85%,42rem)] shadow-sm text-[15px] leading-relaxed text-left'
+    : 'chat-bubble chat-bubble-assistant inline-block bg-[#002B5C] text-white rounded-2xl px-5 py-3 max-w-[min(90%,48rem)] shadow-sm text-[15px] leading-relaxed text-left';
+  let innerHTML = `<div class="${bubbleClass}">`;
+  innerHTML += isUser ? content : (typeof marked !== 'undefined' && marked.parse ? marked.parse(content || '') : (content || ''));
   innerHTML += `</div>`;
 
   if (!isUser && addActions) {

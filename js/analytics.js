@@ -1,12 +1,14 @@
 /**
  * Centralized GA4 event helpers for tool usage tracking.
  * All coach apps share property G-MDYP4C0BJ1 — app_id separates LO vs Realtor vs Recruiter.
+ * Safe no-ops when gtag is unavailable (ad blockers, offline, etc.).
  */
 (function () {
   'use strict';
 
   const GA_ID = 'G-MDYP4C0BJ1';
 
+  /** @type {Record<string, string>} */
   const TOOL_LABELS = {
     home: 'Home',
     'ai-chat': 'AI Coach',
@@ -16,6 +18,7 @@
     planning: '2026 Business Plan',
     'social-post': 'Social Post Creator',
     social: 'Social Media Strategy',
+    'content-hub': 'Content Studio',
     blog: 'Blog Creator',
     'bio-creator': 'Bio Builder',
     'newsletter-generator': 'Newsletter Generator',
@@ -63,19 +66,23 @@
 
   window.trackCoachEvent = function trackCoachEvent(opts) {
     if (typeof gtag !== 'function') return;
-    const o = opts || {};
-    const tool = o.tool || o.tool_name || 'unknown';
-    const action = o.action || o.tool_action || 'use';
+    try {
+      const o = opts || {};
+      const tool = o.tool || o.tool_name || 'unknown';
+      const action = o.action || o.tool_action || 'use';
 
-    gtag('event', o.eventName || 'tool_use', {
-      tool_name: tool,
-      tool_action: action,
-      app_id: getAppId(),
-      app_name: getAppLabel(),
-      event_category: 'Tool Usage',
-      event_label: o.label || `${toolLabel(tool)} — ${action}`,
-      value: o.value != null ? o.value : 1
-    });
+      gtag('event', o.eventName || 'tool_use', {
+        tool_name: tool,
+        tool_action: action,
+        app_id: getAppId(),
+        app_name: getAppLabel(),
+        event_category: 'Tool Usage',
+        event_label: o.label || `${toolLabel(tool)} — ${action}`,
+        value: o.value != null ? o.value : 1
+      });
+    } catch (e) {
+      /* never break product flows for analytics */
+    }
   };
 
   window.trackCoachSectionOpen = function trackCoachSectionOpen(sectionId) {
@@ -90,11 +97,15 @@
 
   function initGaConfig() {
     if (typeof gtag !== 'function') return;
-    gtag('config', GA_ID, {
-      app_id: getAppId(),
-      app_name: getAppLabel(),
-      send_page_view: true
-    });
+    try {
+      gtag('config', GA_ID, {
+        app_id: getAppId(),
+        app_name: getAppLabel(),
+        send_page_view: true
+      });
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   if (document.readyState === 'loading') {

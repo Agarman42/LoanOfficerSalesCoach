@@ -58,13 +58,19 @@ let chatHistory = [
 ];
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
-    const userMessage = input.value.trim();
+    if (!input) return;
+    const userMessage = (input.value || '').trim();
     if (!userMessage) return;
 
-    // Smart routing (underwriting etc) - uses old logic but with new renderer
+    // Smart routing (underwriting etc) — uses dedicated tool for guideline accuracy
     if (smartRouteChat(userMessage)) {
         addMessage('user', userMessage, false);
-        addMessage('assistant', "I've moved you to the <strong>Underwriting Guideline Search</strong> tool for the most accurate answer. Your question is pre-filled — just hit Search or review the result!", false);
+        addMessage(
+          'assistant',
+          "I've moved you to the <strong>Underwriting Guideline Search</strong> tool for the most accurate answer. Your question is pre-filled — just hit Search or review the result!",
+          false,
+          true
+        );
         input.value = '';
         return;
     }
@@ -79,26 +85,30 @@ async function sendChatMessage() {
     if (!thinkingEl && messagesDiv) {
       thinkingEl = document.createElement('div');
       thinkingEl.id = thinkingId;
-      thinkingEl.className = 'flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 px-3 py-2 mt-1 bg-gray-100 dark:bg-gray-800 rounded-2xl w-fit';
+      thinkingEl.className =
+        'flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 px-3 py-2 mt-1 bg-gray-100 dark:bg-gray-800 rounded-2xl w-fit';
       thinkingEl.innerHTML = `
-        <i class="fas fa-spinner fa-spin text-[#00A89D]"></i>
+        <i class="fas fa-spinner fa-spin text-[#00A89D]" aria-hidden="true"></i>
         <span>Coach is thinking...</span>
       `;
       messagesDiv.appendChild(thinkingEl);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    // Disable input while processing for better UX
     input.disabled = true;
-    const sendButton = input.parentElement ? input.parentElement.querySelector('button') : null;
+    const sendButton = input.parentElement
+      ? input.parentElement.querySelector('button')
+      : null;
     if (sendButton) sendButton.disabled = true;
 
-    // Personalize every time
     injectProfileContext();
-    chatHistory.push({ role: "user", content: userMessage });
+    chatHistory.push({ role: 'user', content: userMessage });
     saveChatHistory();
 
     try {
+        if (typeof window.callGrokAPI !== 'function') {
+          throw new Error('AI client is still loading. Please try again in a moment.');
+        }
         const aiReply = await window.callGrokAPI(null, {
             messages: chatHistory,
             temperature: 0.7,
@@ -107,36 +117,37 @@ async function sendChatMessage() {
 
         if (!aiReply) throw new Error('Empty response from API');
 
-        addMessage('assistant', aiReply, true);  // adds actions
-        chatHistory.push({ role: "assistant", content: aiReply });
+        addMessage('assistant', aiReply, true);
+        chatHistory.push({ role: 'assistant', content: aiReply });
         saveChatHistory();
 
-        if (typeof gtag === 'function') {
-            gtag('event', 'send_chat_message', { event_category: 'Tool Usage', event_label: 'AI Chat Message Sent', value: 1 });
+        if (typeof window.trackCoachEvent === 'function') {
+          window.trackCoachEvent({
+            tool: 'ai-chat',
+            action: 'send',
+            eventName: 'send_chat_message',
+            label: 'AI Chat Message Sent'
+          });
         }
     } catch (error) {
-        console.error(error);
-        let msg = (error && error.message) || 'Could not get a response.';
-        if (/Failed to fetch|proxy|NetworkError/i.test(msg)) {
-            msg = 'Could not reach the AI proxy. On local dev, run `bash start-proxy.sh` and open http://localhost:3000.';
-        } else if (/api key|Invalid Grok|401|400|Incorrect API/i.test(msg)) {
-            msg = 'Invalid or missing API key. Click **API Key** in the header and paste a real `xai-` key from console.x.ai.';
-        } else if (/429|rate limit|temporarily at capacity|Too Many Requests/i.test(msg)) {
-            msg = 'xAI is temporarily at capacity (rate limit). Wait 30–60 seconds, then try again.';
-        } else if (/timed out|AbortError/i.test(msg)) {
-            msg = 'Request timed out. Try a shorter question, or try again in a moment.';
-        }
+        console.error('[ai-chat]', error);
+        const msg =
+          typeof window.formatFriendlyApiError === 'function'
+            ? window.formatFriendlyApiError(error, 'Could not get a response. Please try again.')
+            : (error && error.message) || 'Could not get a response.';
         addMessage('assistant', msg, false);
     } finally {
-        // Remove thinking indicator
         if (thinkingEl && thinkingEl.parentNode) {
             thinkingEl.parentNode.removeChild(thinkingEl);
         }
-        // Re-enable input
         input.disabled = false;
         if (sendButton) sendButton.disabled = false;
-        // Ensure we scroll to bottom
         if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        try {
+          input.focus({ preventScroll: true });
+        } catch (e) {
+          try { input.focus(); } catch (e2) { /* ignore */ }
+        }
     }
 }
 // Chat input Enter key (attached defensively in init)
@@ -194,20 +205,26 @@ function smartRouteChat(message) {
 
     // === ROUTE ONLY IF STRONG SIGNAL ===
     if (hasPrimary && (hasSecondary || isQuestion)) {
-        // Switch to underwriting section
-        document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
-        const uwSection = document.getElementById('underwriting-search');
-        if (uwSection) {
-            uwSection.classList.remove('hidden');
+        // Use real navigation (aliases, SS nest safety, analytics hooks)
+        if (typeof window.showSection === 'function') {
+          window.showSection('underwriting-search');
+        } else {
+          document.querySelectorAll('main section').forEach(sec => {
+            if (sec.closest && (sec.closest('#smart-savings-root') || sec.closest('#ss-guided-layer'))) return;
+            sec.classList.add('hidden');
+          });
+          document.getElementById('underwriting-search')?.classList.remove('hidden');
         }
 
         // Pre-fill and focus (NO auto-search)
-        const uwInput = document.getElementById('uw-question');
-        if (uwInput) {
+        setTimeout(() => {
+          const uwInput = document.getElementById('uw-question');
+          if (uwInput) {
             uwInput.value = message;
             uwInput.focus();
             uwInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+          }
+        }, 80);
 
         return true; // Routed
     }
@@ -271,58 +288,108 @@ function renderChatHistory() {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-function addMessage(role, content, addActions = true) {
+function escapeChatHtml(str) {
+  if (typeof window.escapeHtml === 'function') return window.escapeHtml(str);
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Render a chat bubble. User text is escaped; assistant may use marked (markdown).
+ * Fixed HTML action strings (routing notices) may pass isHtmlTrusted for assistant only.
+ */
+function addMessage(role, content, addActions = true, isHtmlTrusted = false) {
   const messagesDiv = document.getElementById('chat-messages');
   if (!messagesDiv) return;
   const isUser = role === 'user';
   const wrapper = document.createElement('div');
   wrapper.className = isUser ? 'text-right mb-4' : 'text-left mb-4 group';
 
-  let innerHTML = `<div class="${isUser ? 'inline-block bg-[#F15A29] text-white' : 'inline-block bg-[#002B5C] text-white'} rounded-2xl px-5 py-3 max-w-[85%] shadow-sm text-[15px] leading-relaxed">`;
-  innerHTML += isUser ? content : marked.parse(content || '');
-  innerHTML += `</div>`;
+  // chat-bubble-* classes pin white text (global .prose p/li colors were overriding text-white)
+  const bubbleClass = isUser
+    ? 'chat-bubble chat-bubble-user inline-block bg-[#F15A29] text-white rounded-2xl px-5 py-3 max-w-[min(85%,42rem)] shadow-sm text-[15px] leading-relaxed text-left'
+    : 'chat-bubble chat-bubble-assistant inline-block bg-[#002B5C] text-white rounded-2xl px-5 py-3 max-w-[min(90%,48rem)] shadow-sm text-[15px] leading-relaxed text-left';
 
-  if (!isUser && addActions) {
-    innerHTML += `
-      <div class="mt-1 flex gap-1.5 text-[10px] opacity-60 group-hover:opacity-100 transition">
-        <button onclick="copyChatMessage(this)" class="px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Copy</button>
-        <button onclick="saveChatMessage(this)" class="px-2 py-0.5 rounded border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Save to Vault</button>
-        <button onclick="useInTool(this, 'social')" class="px-2 py-0.5 rounded border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white">To Social</button>
-      </div>`;
+  const bubble = document.createElement('div');
+  bubble.className = bubbleClass;
+
+  if (isUser) {
+    bubble.textContent = content == null ? '' : String(content);
+  } else if (isHtmlTrusted) {
+    bubble.innerHTML = content || '';
+  } else if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+    // Markdown from the model — not arbitrary page HTML
+    bubble.innerHTML = marked.parse(content || '');
+  } else {
+    bubble.textContent = content == null ? '' : String(content);
   }
 
-  wrapper.innerHTML = innerHTML;
+  wrapper.appendChild(bubble);
+
+  if (!isUser && addActions) {
+    const actions = document.createElement('div');
+    actions.className =
+      'mt-1 flex gap-1.5 text-[10px] opacity-60 group-hover:opacity-100 transition';
+    actions.innerHTML = `
+        <button type="button" class="px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Copy</button>
+        <button type="button" class="px-2 py-0.5 rounded border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white">Save to Vault</button>
+        <button type="button" class="px-2 py-0.5 rounded border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white">To Social</button>
+      `;
+    const buttons = actions.querySelectorAll('button');
+    if (buttons[0]) buttons[0].addEventListener('click', () => copyChatMessage(buttons[0]));
+    if (buttons[1]) buttons[1].addEventListener('click', () => saveChatMessage(buttons[1]));
+    if (buttons[2]) buttons[2].addEventListener('click', () => useInTool(buttons[2], 'social'));
+    wrapper.appendChild(actions);
+  }
+
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
   return wrapper;
 }
 
 function copyChatMessage(btn) {
-  const bubble = btn.closest('.group') || btn.parentElement.previousElementSibling || btn.closest('div').previousElementSibling;
-  const textEl = bubble ? bubble.querySelector('div') || bubble : btn.parentElement;
-  const text = textEl ? (textEl.innerText || textEl.textContent) : '';
+  const wrapper = btn.closest('.group') || btn.parentElement;
+  const textEl =
+    (wrapper && wrapper.querySelector('.chat-bubble')) ||
+    (wrapper && wrapper.querySelector('div')) ||
+    btn.parentElement;
+  const text = textEl ? textEl.innerText || textEl.textContent : '';
   if (!text) return;
-  navigator.clipboard.writeText(text.trim()).then(() => {
+  const done = () => {
     const orig = btn.textContent;
     btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = orig, 1200);
-  });
+    setTimeout(() => {
+      btn.textContent = orig;
+    }, 1200);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text.trim()).then(done).catch(() => {
+      if (window.showToast) window.showToast('Could not copy to clipboard', 'error');
+    });
+  } else if (window.showToast) {
+    window.showToast('Clipboard not available in this browser', 'warning');
+  }
 }
 
 function saveChatMessage(btn) {
   const wrapper = btn.closest('.group') || btn.parentElement;
-  const contentEl = wrapper.querySelector('div') || wrapper;
+  const contentEl = wrapper.querySelector('.chat-bubble') || wrapper.querySelector('div') || wrapper;
   let text = contentEl.innerText || contentEl.textContent || '';
   text = text.replace(/Copy|Save to Vault|To Social/g, '').trim();
+  if (!text) return;
   if (window.toggleSaveIdea) {
     const content = `
 <div class="coach-saved">
   <div class="text-xs uppercase tracking-widest text-[#00A89D] font-bold mb-1">AI Coach Response</div>
-  <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm whitespace-pre-wrap border border-gray-100 dark:border-gray-700">${text}</div>
+  <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm whitespace-pre-wrap border border-gray-100 dark:border-gray-700">${escapeChatHtml(text)}</div>
 </div>`;
     window.toggleSaveIdea('AI Coach Response', content, null, 'coach');
     if (window.showToast) window.showToast('Saved to My Saved Items!', 'success');
-    else alert('Saved!');
+    else if (typeof window.notifyUser === 'function') window.notifyUser('Saved!', 'success');
   }
 }
 
@@ -381,12 +448,14 @@ function setupChatSuggestions() {
     "Review my goals and suggest my top 3 focus actions this week",
     "Give me a strong referral ask script for a past client"
   ];
-  // Use data attributes + event listener instead of inline onclick to avoid quote escaping / syntax errors in generated HTML
-  container.innerHTML = prompts.map(p => {
-    const safe = p.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const display = p.length > 55 ? p.substring(0,52) + '…' : p;
-    return `<button data-prompt="${safe}" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition bg-white dark:bg-gray-800">${display}</button>`;
-  }).join('');
+  // data-prompt + listeners (avoids inline onclick / quote escaping bugs)
+  container.innerHTML = prompts
+    .map((p) => {
+      const safe = escapeChatHtml(p);
+      const display = escapeChatHtml(p.length > 55 ? p.substring(0, 52) + '…' : p);
+      return `<button type="button" data-prompt="${safe}" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition bg-white dark:bg-gray-800">${display}</button>`;
+    })
+    .join('');
 
   // Attach listeners (event delegation would also work, but direct is fine here)
   container.querySelectorAll('button[data-prompt]').forEach(button => {
@@ -448,7 +517,6 @@ function setupChatSuggestions() {
       modalInput._chatListenerAttached = true;
     }
 
-    console.log('%c[ai-chat.js] AI Chat Assistant initialized (with profile, persistence, suggestions & actions)', 'color:#00A89D');
   }
 
   // =====================================================

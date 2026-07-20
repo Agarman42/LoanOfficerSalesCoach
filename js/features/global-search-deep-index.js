@@ -208,6 +208,10 @@
   ];
 
   const SHARED_TOOLS = [
+    g('content-studio-hub', 'Content Studio', 'Hub for strategy, social, blog, newsletter, and brand tools', 'content-hub',
+      { kind: 'section', sectionId: 'content-hub' },
+      ['content studio', 'content hub', 'content suite', 'create content', 'what to post', 'content tools', 'studio'],
+      'fas fa-pen-nib'),
     g('value-vault-popby', 'Value Vault — Gift & Pop-By Ideas', 'Searchable library of touches and pop-bys', 'value-vault',
       { kind: 'section', sectionId: 'value-vault' },
       ['pop by', 'popby', 'pop by ideas', 'gift ideas', 'gift basket', 'basket', 'value vault', 'client gift', 'realtor gift'],
@@ -231,6 +235,10 @@
   ];
 
   const LO_ONLY = appId === 'lo' ? [
+    g('smart-savings-tool', 'Smart Savings Calculator', 'Refinance & debt consolidation for client meetings', 'smart-savings',
+      { kind: 'section', sectionId: 'smart-savings' },
+      ['smart savings', 'refi calculator', 'refinance calculator', 'debt consolidation', 'savings plan', 'client meeting calculator'],
+      'fas fa-piggy-bank'),
     g('underwriting-search', 'Underwriting Guideline Search', 'AI search for FHA, VA, Conventional & overlays', 'underwriting-search',
       { kind: 'underwriting', loanType: 'any' },
       ['underwriting', 'uw search', 'guidelines', 'underwriting coach', 'du findings', 'du finding', 'lp findings', 'desktop underwriter', 'loan prospector'],

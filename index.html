@@ -48,19 +48,19 @@
     <meta name="theme-color" content="#002B5C">
 
     <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260623-lo-v222">
+    <link rel="stylesheet" href="css/main.css?v=20260720-ai-asterisk">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260715-lo-v291"></script>
+    <script src="js/ui.js?v=20260720-polish"></script>
     <script src="js/features/app-feedback.js?v=20260709-lo-v309"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-    <script defer src="js/main.js?v=20260717-lo-home"></script>
-    <script defer src="js/features/sidebar-ai-indicators.js?v=20260715-lo-v259"></script>
-    <script src="js/early-boot.js?v=20260717-lo-home"></script>
+    <script defer src="js/main.js?v=20260720-polish"></script>
+    <script defer src="js/features/sidebar-ai-indicators.js?v=20260720-ai-asterisk"></script>
+    <script src="js/early-boot.js?v=20260720-review"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -81,32 +81,46 @@
 
 
 <header class="text-white">
-    <div class="max-w-7xl mx-auto px-6 py-4">
-        <div class="relative flex items-center min-h-[2.75rem]">
-            <h1 class="w-full text-center text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight pointer-events-none px-24 sm:px-28">Ultimate Loan Officer Sales Coach</h1>
-            <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 shrink-0 z-10">
-                <button id="theme-toggle" type="button"
-                        class="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all border border-white/15"
-                        title="Switch to dark mode" aria-label="Toggle dark mode">
-                    <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
-                </button>
-                <button id="open-profile-btn"
-                        class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full text-sm font-medium transition-all border border-white/20"
-                        title="My Profile & Preferences">
-                    <i class="fas fa-user-cog"></i>
-                    <span class="hidden sm:inline">My Profile</span>
-                </button>
+    <!-- Navy band — Ruoff logo far-right (same pattern as Recruiting coach) -->
+    <div class="header-navy-band relative">
+        <div class="header-ruoff-logo" aria-hidden="false">
+            <div class="header-ruoff-logo-plate">
+                <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png"
+                     alt="Ruoff Mortgage"
+                     class="header-ruoff-logo-img"
+                     width="240"
+                     height="64"
+                     decoding="async">
             </div>
         </div>
 
-        <div class="mt-3 flex justify-center px-1">
-            <button type="button" data-global-search-trigger
-                    class="w-full max-w-2xl flex items-center gap-3 bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full text-sm transition-all border border-white/20 text-left"
-                    title="Search tools, vault, and saved items (Ctrl+K)">
-                <i class="fas fa-search text-white/60 shrink-0"></i>
-                <span class="flex-1 text-white/60 truncate">Search guides, scripts, tools, vault, saved items…</span>
-                <kbd class="hidden sm:inline-flex shrink-0 px-2 py-0.5 rounded border border-white/25 text-[10px] text-white/50">⌘K</kbd>
-            </button>
+        <div class="max-w-7xl mx-auto px-6 py-4 pr-40 sm:pr-48 md:pr-56">
+            <div class="relative flex items-center min-h-[3.25rem] sm:min-h-[3.5rem]">
+                <h1 class="w-full text-center text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight pointer-events-none px-4 sm:px-6 pr-28 sm:pr-36">Ultimate Loan Officer Sales Coach</h1>
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 sm:gap-2 shrink-0 z-10">
+                    <button id="theme-toggle" type="button"
+                            class="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all border border-white/15"
+                            title="Switch to dark mode" aria-label="Toggle dark mode">
+                        <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
+                    </button>
+                    <button id="open-profile-btn"
+                            class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full text-sm font-medium transition-all border border-white/20"
+                            title="My Profile & Preferences">
+                        <i class="fas fa-user-cog"></i>
+                        <span class="hidden sm:inline">My Profile</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-3 flex justify-center px-1">
+                <button type="button" data-global-search-trigger
+                        class="w-full max-w-2xl flex items-center gap-3 bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full text-sm transition-all border border-white/20 text-left"
+                        title="Search tools, vault, and saved items (Ctrl+K)">
+                    <i class="fas fa-search text-white/60 shrink-0"></i>
+                    <span class="flex-1 text-white/60 truncate">Search guides, scripts, tools, vault, saved items…</span>
+                    <kbd class="hidden sm:inline-flex shrink-0 px-2 py-0.5 rounded border border-white/25 text-[10px] text-white/50">⌘K</kbd>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -172,10 +186,11 @@
             <ul class="space-y-0.5 px-2 text-sm">
 
                 <li><a href="#equity-scanner" class="sidebar-link px-4 py-2.5"><i class="fas fa-search-dollar w-5"></i> Equity &amp; Opportunity Scanner</a></li>
-                <li><a href="#social" class="sidebar-link px-4 py-2.5"><i class="fas fa-share-alt w-5"></i> Social Media Strategy</a></li>
-                <li><a href="#social-post" class="sidebar-link px-4 py-2.5"><i class="fas fa-share-alt w-5"></i> Social Post &amp; Calendar Creator</a></li>
-                <li><a href="#blog" class="sidebar-link px-4 py-2.5"><i class="fas fa-pen-fancy w-5"></i> Blog Creator</a></li>
-                <li><a href="#newsletter-generator" class="sidebar-link px-4 py-2.5"><i class="fas fa-envelope w-5"></i> Newsletter Generator</a></li>
+                <li><a href="#content-hub" class="sidebar-link px-4 py-2.5"><i class="fas fa-pen-nib w-5"></i> Content Studio</a></li>
+                <li><a href="#social" class="sidebar-link px-4 py-2.5 pl-8 text-sm opacity-90"><i class="fas fa-share-alt w-5"></i> Social Media Strategy</a></li>
+                <li><a href="#social-post" class="sidebar-link px-4 py-2.5 pl-8 text-sm opacity-90"><i class="fas fa-calendar-plus w-5"></i> Social Post &amp; Calendar</a></li>
+                <li><a href="#blog" class="sidebar-link px-4 py-2.5 pl-8 text-sm opacity-90"><i class="fas fa-pen-fancy w-5"></i> Blog Creator</a></li>
+                <li><a href="#newsletter-generator" class="sidebar-link px-4 py-2.5 pl-8 text-sm opacity-90"><i class="fas fa-envelope w-5"></i> Newsletter Generator</a></li>
             </ul>
 
             <!-- STRATEGY & PLANNING -->
@@ -202,6 +217,7 @@
             <ul class="space-y-0.5 px-2 text-sm">
                 <li><a href="#process" class="sidebar-link px-4 py-2.5"><i class="fas fa-cogs w-5"></i> Loan Process</a></li>
                 <li><a href="#underwriting-search" class="sidebar-link px-4 py-2.5"><i class="fas fa-search-dollar w-5"></i> Underwriting Guideline Search</a></li>
+                <li><a href="#smart-savings" class="sidebar-link px-4 py-2.5"><i class="fas fa-piggy-bank w-5"></i> Smart Savings Calculator</a></li>
                 <li><a href="#calculator" class="sidebar-link px-4 py-2.5"><i class="fas fa-calculator w-5"></i> Calculator</a></li>
             </ul>
 
@@ -211,7 +227,7 @@
                 <li><a href="#mindset-motivation" class="sidebar-link px-4 py-2.5"><i class="fas fa-brain w-5"></i> Mindset Lab</a></li>
                 <li><a href="#books" class="sidebar-link px-4 py-2.5"><i class="fas fa-book w-5"></i> Book Vault</a></li>
                 <li><a href="#client-translation" class="sidebar-link px-4 py-2.5"><i class="fas fa-language w-5"></i> Client Translation</a></li>
-                <li><a href="#" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link px-4 py-2.5 flex items-center gap-2"><i class="fas fa-bookmark w-5 shrink-0"></i><span class="flex-1">My Saved Items</span><span id="global-saved-count" class="hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#00A89D] text-white rounded-full items-center justify-center shrink-0">0</span></a></li>
+                <li><a href="#saved-items" data-home-fav="saved-items" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link px-4 py-2.5 flex items-center gap-2"><i class="fas fa-bookmark w-5 shrink-0"></i><span class="flex-1">My Saved Items</span><span id="global-saved-count" class="hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#00A89D] text-white rounded-full items-center justify-center shrink-0">0</span></a></li>
             </ul>
 
             <div class="sidebar-footer px-2">
@@ -231,11 +247,11 @@
 </div>
 
 <!-- The full AI Chat section remains where it is, but now accessible from anywhere -->
-<main class="p-6 space-y-8 pt-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
+<main class="p-4 sm:p-6 space-y-5 sm:space-y-6 pt-8 sm:pt-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
     <div id="global-profile-nudge" class="w-full mt-1 hidden" aria-hidden="true"></div>
 
     <!-- ========== HOME / LAUNCHPAD (default landing) ========== -->
-    <section id="home" class="animate-fade-in space-y-6" aria-label="Home launchpad">
+    <section id="home" class="animate-fade-in space-y-4 sm:space-y-5" aria-label="Home launchpad">
       <!-- Hero -->
       <div class="home-hero relative overflow-hidden rounded-[1.75rem] border border-white/10 shadow-2xl shadow-[#002B5C]/20">
         <div class="absolute inset-0 bg-gradient-to-br from-[#001429] via-[#002B5C] to-[#0a3d4a]"></div>
@@ -263,115 +279,176 @@
         </div>
       </div>
 
-      <!-- Setup lives only here (not above every tool) -->
-      <div id="home-setup-slot" class="w-full"></div>
+      <!-- Setup lives only here (not above every tool). Filled immediately by onboarding-coach.js -->
+      <div id="home-setup-slot" class="w-full min-h-[0.5rem]" aria-live="polite"></div>
 
-      <!-- Daily production loop -->
-      <div class="rounded-[1.75rem] border border-gray-200/80 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl shadow-gray-200/40 dark:shadow-none overflow-hidden">
-        <div class="px-6 sm:px-8 pt-6 sm:pt-7 pb-2">
-          <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-1">
-            <div>
-              <div class="text-[10px] font-bold tracking-[0.18em] uppercase text-[#F15A29] mb-1.5">Daily loop</div>
-              <h3 class="text-xl sm:text-2xl font-bold text-[#002B5C] dark:text-white m-0 tracking-tight">Start here today</h3>
-            </div>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 m-0 max-w-md sm:text-right leading-relaxed">Your production circuit — plan, nurture, content, opportunity. Tap any card.</p>
+      <!-- Favorites strip: shell reserved so home-favorites.js doesn't cause a late layout jump -->
+      <div id="home-favorites-panel" class="rounded-2xl border border-gray-200/90 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md overflow-hidden" aria-label="Your favorite tools"></div>
+
+      <!-- Daily production loop — compact rail -->
+      <div class="home-loop-panel rounded-2xl border border-gray-200/90 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md overflow-hidden">
+        <div class="home-loop-head px-4 sm:px-5 pt-4 pb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <div class="flex items-baseline gap-2.5 min-w-0">
+            <span class="text-[11px] font-extrabold tracking-[0.14em] uppercase text-[#F15A29]">Daily loop</span>
+            <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white m-0 tracking-tight">Start here today</h3>
           </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Plan → nurture → content → opportunity</p>
         </div>
-        <div id="home-start-here" class="px-5 sm:px-7 pb-6 sm:pb-8 pt-4">
-          <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-3.5">
-            <button type="button" data-start-step="plan" onclick="window.showSection('weekly-win-plan')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center mb-3 group-hover:bg-[#00A89D] group-hover:text-white transition"><i class="fas fa-fire"></i></div>
-              <div class="text-[10px] font-bold text-[#00A89D] tracking-wider mb-1">01 · PLAN</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Weekly Win Plan</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Protect power hours</div>
+        <div id="home-start-here" class="px-3 sm:px-4 pb-3 sm:pb-4 pt-1">
+          <div class="home-loop-rail">
+            <button type="button" data-start-step="plan" onclick="window.showSection('weekly-win-plan')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#00A89D">1</span>
+              <span class="home-day-icon" style="--step:#00A89D"><i class="fas fa-fire"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Plan</span>
+                <span class="home-day-title">Weekly Win Plan</span>
+              </span>
             </button>
-            <button type="button" data-start-step="gift" onclick="window.showSection('value-vault')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#F15A29]/12 text-[#F15A29] flex items-center justify-center mb-3 group-hover:bg-[#F15A29] group-hover:text-white transition"><i class="fas fa-gift"></i></div>
-              <div class="text-[10px] font-bold text-[#F15A29] tracking-wider mb-1">02 · GIFT</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Value Vault</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Pop-bys &amp; touches</div>
+            <button type="button" data-start-step="gift" onclick="window.showSection('value-vault')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#F15A29">2</span>
+              <span class="home-day-icon" style="--step:#F15A29"><i class="fas fa-gift"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Gift</span>
+                <span class="home-day-title">Value Vault</span>
+              </span>
             </button>
-            <button type="button" data-start-step="nurture" onclick="window.showSection('database')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#002B5C]/10 text-[#002B5C] dark:text-[#7dd3fc] flex items-center justify-center mb-3 group-hover:bg-[#002B5C] group-hover:text-white transition"><i class="fas fa-database"></i></div>
-              <div class="text-[10px] font-bold text-[#002B5C] dark:text-[#7dd3fc] tracking-wider mb-1">03 · NURTURE</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Database</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Past clients &amp; sphere</div>
+            <button type="button" data-start-step="nurture" onclick="window.showSection('database')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#002B5C">3</span>
+              <span class="home-day-icon" style="--step:#002B5C"><i class="fas fa-database"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Nurture</span>
+                <span class="home-day-title">Database</span>
+              </span>
             </button>
-            <button type="button" data-start-step="content" onclick="window.showSection('social-post')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center mb-3 group-hover:bg-[#00A89D] group-hover:text-white transition"><i class="fas fa-share-alt"></i></div>
-              <div class="text-[10px] font-bold text-[#00A89D] tracking-wider mb-1">04 · CONTENT</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Social &amp; posts</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Show up this week</div>
+            <button type="button" data-start-step="content" onclick="window.showSection('content-hub')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#00A89D">4</span>
+              <span class="home-day-icon" style="--step:#00A89D"><i class="fas fa-pen-nib"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Content</span>
+                <span class="home-day-title">Content studio</span>
+              </span>
             </button>
-            <button type="button" data-start-step="opportunity" onclick="window.showSection('equity-scanner')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all col-span-2 lg:col-span-1">
-              <div class="w-9 h-9 rounded-xl bg-[#F15A29]/12 text-[#F15A29] flex items-center justify-center mb-3 group-hover:bg-[#F15A29] group-hover:text-white transition"><i class="fas fa-search-dollar"></i></div>
-              <div class="text-[10px] font-bold text-[#F15A29] tracking-wider mb-1">05 · OPPORTUNITY</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Equity Scanner</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Refi &amp; move-up</div>
+            <button type="button" data-start-step="opportunity" onclick="window.showSection('equity-scanner')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#F15A29">5</span>
+              <span class="home-day-icon" style="--step:#F15A29"><i class="fas fa-search-dollar"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Opportunity</span>
+                <span class="home-day-title">Equity Scanner</span>
+              </span>
+            </button>
+            <button type="button" data-start-step="smart-savings" onclick="window.showSection('smart-savings')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#002B5C">6</span>
+              <span class="home-day-icon" style="--step:#002B5C"><i class="fas fa-piggy-bank"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Meeting</span>
+                <span class="home-day-title">Smart Savings</span>
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Tool shortcuts + Coach callout -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <div class="lg:col-span-8 rounded-[1.75rem] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 sm:p-7 shadow-lg">
-          <div class="flex items-end justify-between gap-3 mb-5">
-            <div>
-              <div class="text-[10px] font-bold tracking-[0.18em] uppercase text-[#00A89D] mb-1">Jump in</div>
-              <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white m-0">Tools you’ll use most</h3>
+      <!-- Jump in tools + AI Coach — denser strip -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+        <div class="lg:col-span-8 home-jump-panel rounded-2xl border border-gray-200/90 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-5 shadow-md">
+          <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-3">
+            <div class="flex items-baseline gap-2.5 min-w-0">
+              <span class="text-[11px] font-extrabold tracking-[0.14em] uppercase text-[#00A89D]">Jump in</span>
+              <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white m-0 tracking-tight">Tools you'll use most</h3>
             </div>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="home-tool-grid">
-            <button type="button" onclick="window.showSection('bio-creator')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-id-card text-[#00A89D] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Bio Builder</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">750-char company voice</div>
+          <div class="home-tool-grid" id="home-tool-grid">
+            <button type="button" onclick="window.showSection('bio-creator')" class="home-tool group">
+              <i class="fas fa-id-card text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Bio Builder</span>
+                <span class="home-tool-sub">Company voice</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('planning')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-chart-line text-[#F15A29] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">2026 Plan</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Annual map</div>
+            <button type="button" onclick="window.showSection('planning')" class="home-tool group">
+              <i class="fas fa-chart-line text-[#F15A29]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">2026 Plan</span>
+                <span class="home-tool-sub">Annual map</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('newsletter-generator')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-envelope text-[#00A89D] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Newsletter</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Stay top of mind</div>
+            <button type="button" onclick="window.showSection('newsletter-generator')" class="home-tool group">
+              <i class="fas fa-envelope text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Newsletter</span>
+                <span class="home-tool-sub">Top of mind</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('sales-script')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-comment-dots text-[#F15A29] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Sales Scripts</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Sound human live</div>
+            <button type="button" onclick="window.showSection('smart-savings')" class="home-tool group">
+              <i class="fas fa-piggy-bank text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Smart Savings</span>
+                <span class="home-tool-sub">Client refi plan</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('blog')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-pen-fancy text-[#00A89D] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Blog Creator</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Authority content</div>
+            <button type="button" onclick="window.showSection('sales-script')" class="home-tool group">
+              <i class="fas fa-comment-dots text-[#F15A29]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Sales Scripts</span>
+                <span class="home-tool-sub">Live conversations</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('referrals')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-handshake text-[#F15A29] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Referrals</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Partner growth</div>
+            <button type="button" onclick="window.showSection('blog')" class="home-tool group">
+              <i class="fas fa-pen-fancy text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Blog Creator</span>
+                <span class="home-tool-sub">Authority content</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
+            </button>
+            <button type="button" onclick="window.showSection('referrals')" class="home-tool group">
+              <i class="fas fa-handshake text-[#F15A29]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Referrals</span>
+                <span class="home-tool-sub">Partner growth</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
+            </button>
+            <button type="button" onclick="window.showSection('content-hub')" class="home-tool group">
+              <i class="fas fa-pen-nib text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Content studio</span>
+                <span class="home-tool-sub">All content tools</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
           </div>
         </div>
 
-        <div class="lg:col-span-4 relative overflow-hidden rounded-[1.75rem] border border-[#00A89D]/25 bg-gradient-to-br from-[#002B5C] to-[#0a3d4a] p-6 sm:p-7 text-white shadow-xl flex flex-col">
-          <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-[#00A89D]/20 blur-2xl pointer-events-none"></div>
-          <div class="relative z-[1] flex flex-col h-full">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#00A89D] to-[#F15A29] flex items-center justify-center mb-4 shadow-lg">
-              <i class="fas fa-robot text-lg"></i>
+        <div class="lg:col-span-4 relative overflow-hidden rounded-2xl border border-[#00A89D]/25 bg-gradient-to-br from-[#002B5C] to-[#0a3d4a] p-4 sm:p-5 text-white shadow-md flex flex-col min-h-0">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-[#00A89D]/20 blur-2xl pointer-events-none"></div>
+          <div class="relative z-[1] flex flex-col h-full gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00A89D] to-[#F15A29] flex items-center justify-center shadow-md shrink-0">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] font-bold tracking-[0.14em] uppercase text-[#5eead4]">Think with me</div>
+                <h3 class="text-lg font-bold m-0 tracking-tight leading-tight">AI Coach</h3>
+              </div>
             </div>
-            <div class="text-[10px] font-bold tracking-[0.18em] uppercase text-[#5eead4] mb-2">When you need to think</div>
-            <h3 class="text-xl font-bold m-0 tracking-tight">AI Coach</h3>
-            <p class="text-sm text-white/55 m-0 mt-2 leading-relaxed flex-1">Scripts, objections, content angles, mindset — personalized from your profile. Best after setup so answers sound like you.</p>
-            <button type="button" onclick="window.showSection('ai-chat')" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full font-bold text-sm bg-white text-[#002B5C] hover:bg-[#5eead4] transition">
+            <p class="text-sm text-white/65 m-0 leading-snug flex-1">Scripts, objections, content angles, mindset — from your profile.</p>
+            <button type="button" onclick="window.showSection('ai-chat')" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full font-bold text-sm bg-white text-[#002B5C] hover:bg-[#5eead4] transition">
               Start a conversation <i class="fas fa-arrow-right text-xs"></i>
             </button>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Home-critical UI: run as soon as #home is parsed (not after the rest of this huge page) -->
+    <script src="js/features/onboarding-coach.js?v=20260720-polish"></script>
+    <script src="js/features/home-favorites.js?v=20260720-fav-catalog"></script>
 
                  <section id="mindset-motivation" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <div class="text-center mb-6">
@@ -479,143 +556,136 @@
             
         </section>
         <section id="planning" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-            <!-- Full-width content (no max-w-5xl cap) to match blog creator, social post & calendar, and other AI tools for visual/UX consistency across the entire coach -->
-        <!-- Consistent premium centered header -->
+        <!-- Title (matches other AI tools — this page is the annual plan only) -->
         <div class="text-center mb-6">
             <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Your Custom 2026 Business Plan</h2>
-            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">
-                Most loan officers feel anxious or overwhelmed by "the plan." This one is different. It starts with who you actually are — your profile, your hobbies, your real life — and turns it into a roadmap that feels doable and even a little exciting.
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto m-0 leading-relaxed">
+              Most loan officers feel anxious or overwhelmed by “the plan.” This one starts with who you actually are —
+              your profile, hobbies, and real life — and turns it into a roadmap that feels doable instead of corporate.
             </p>
         </div>
 
-        <!-- Profile Awareness Banner (for visual/UX consistency with Social Post Creator, Blog Creator, etc.) -->
-        <div class="mb-6 flex flex-wrap items-start gap-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 px-5 py-3 text-sm">
-            <i class="fas fa-user-check text-[#00A89D] mt-0.5"></i>
-            <span class="text-gray-700 dark:text-gray-300 flex-1 min-w-0">
-                Fully personalized from your central profile (goals, hobbies, personality, challenges, preferred activities &amp; tone). Edit profile anytime for better results across every tool.
-            </span>
-        </div>
-
-        <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
+        <!-- How it works (restored + cleaned — same pattern as Newsletter / Weekly Win / Equity) -->
         <div id="plan-pregen-guidance" class="mb-8">
           <div class="text-center mb-3">
             <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">YOUR YEAR, YOUR RULES</span>
           </div>
           <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the 2026 Business Plan works — and how to get the most from it</h3>
-          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">This isn't a corporate template. It's a living roadmap built from your real goals, hobbies, income target, and how you actually want to work — then refined with AI so it feels doable instead of overwhelming.</p>
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">
+            This isn’t a corporate template. It’s a living roadmap built from your goals, hobbies, income target, and how you actually want to work —
+            refined with AI so it feels doable instead of overwhelming.
+          </p>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
               <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
                 <i class="fas fa-user-cog text-xl text-[#00A89D]"></i>
               </div>
-              <div class="font-semibold mb-1">1. Profile-Powered Foundation</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Syncs goals, hobbies, activities, personality, and challenges from your central profile. The plan only works if it reflects your real life — not a generic LO playbook.</div>
+              <div class="font-semibold mb-1">1. Profile-powered foundation</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Goals, hobbies, activities, personality, and challenges load from your central profile automatically. The plan only works if it reflects your real life — not a generic LO playbook.</div>
             </div>
             <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
               <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#F15A29]/10 flex items-center justify-center">
                 <i class="fas fa-route text-xl text-[#F15A29]"></i>
               </div>
-              <div class="font-semibold mb-1">2. Structured + Flexible Output</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Vision, income math, weekly rhythm, partner strategy, and hobby-driven prospecting — all in one plan you can save, refine with feedback, and revisit as the year evolves.</div>
+              <div class="font-semibold mb-1">2. Structured, flexible output</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Vision, income math, weekly rhythm, partner strategy, and hobby-driven prospecting — one plan you can refine with feedback and revisit as the year evolves.</div>
             </div>
             <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
               <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-                <i class="fas fa-link text-xl text-[#002B5C]"></i>
+                <i class="fas fa-link text-xl text-[#002B5C] dark:text-white"></i>
               </div>
-              <div class="font-semibold mb-1">3. Feeds Every Other Tool</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">A strong plan powers Weekly Win Plan, Prospecting Time Blocks, Social, Newsletter, and partner outreach. Fill this once — then execute everywhere else with clarity.</div>
+              <div class="font-semibold mb-1">3. Feeds every other tool</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">A clear annual plan powers prospecting, content, partner outreach, and your week-to-week rhythm — so you’re not reinventing direction every Monday.</div>
             </div>
           </div>
 
           <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
             <div class="flex items-start gap-3 mb-3">
-              <i class="fas fa-tachometer-alt text-[#00A89D] mt-0.5 text-lg"></i>
+              <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fas fa-tachometer-alt text-[#00A89D]"></i></span>
               <div class="flex-1">
                 <div class="font-bold text-[#002B5C] dark:text-white">How to maximize the value of your 2026 Business Plan</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">The best plans are honest, specific, and revisited. Here's how top LOs use this tool.</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">The best plans are honest, specific, and revisited. Here’s how top LOs use this tool.</div>
               </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
-              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Sync from profile first.</strong> Hit Sync from Profile so goals, hobbies, and activities flow in before you generate.</span></div>
-              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use a preset if you're stuck.</strong> Conservative, Realistic, Stretch, or Hobby-First — then customize from there.</span></div>
-              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Watch plan strength climb.</strong> More specifics (income target, notes, activities) = dramatically better AI output.</span></div>
-              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Refine with feedback.</strong> After generation, use the feedback section to tighten tone, focus, or emphasis without starting over.</span></div>
-              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save your baseline.</strong> Lock in a version that feels right so you can reload and iterate instead of rebuilding from scratch.</span></div>
-              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Execute downstream.</strong> Take the rhythm and focus areas straight into Weekly Win Plan and Prospecting Time Blocks.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Start with guided setup</strong> if the full form feels heavy — same fields, shorter path (~3 min).</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Keep My Profile current.</strong> Goals, hobbies, and tone auto-load here; better profile = better plan.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use a number preset if you’re stuck</strong> (Realistic is a strong default), then tweak income and closings.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Watch plan strength climb.</strong> Specifics (targets, hobbies, activities, notes) dramatically improve AI output.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Refine with feedback</strong> after generate — tighten tone or focus without starting over.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Revisit quarterly.</strong> Markets shift — regenerate when goals or capacity change so the plan stays honest.</span></div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              <i class="fas fa-info-circle"></i>
+              <span>Regenerate anytime as life or goals change. Consistency beats a perfect document you never open.</span>
             </div>
           </div>
         </div>
 
-        <!-- PROMINENT PROFILE LEVERAGE (addresses the "leverage the profile section" request + reduces anxiety by showing it's already personalized) -->
-        <div class="mb-8">
-          <!-- Profile info box (separate from buttons for better narrow viewport formatting) -->
-          <div class="bg-gradient-to-br from-[#00A89D]/5 to-white dark:from-gray-800 dark:to-gray-900 border-2 border-[#00A89D]/30 rounded-3xl p-6 md:p-7 mb-3">
-            <div>
-              <div class="flex items-center gap-2 text-[#00A89D] mb-1">
+        <!-- Shared mode switch (same UX family as Smart Savings Guided | Full) -->
+        <div id="bp-wizard-entry" class="coach-mode-bar" data-coach-mode-tool="planning">
+          <div class="coach-mode-toggle" role="group" aria-label="How to build your plan">
+            <button type="button" id="bp-wizard-open-btn" class="coach-mode-btn" data-coach-mode="guided" data-open-fn="openBusinessPlanWizard" aria-pressed="false">
+              <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Guided setup
+            </button>
+            <button type="button" class="coach-mode-btn is-active" data-coach-mode="full" data-scroll-to="plan-full-form" aria-pressed="true">
+              Full form
+            </button>
+          </div>
+          <p class="coach-mode-hint">Same fields either way · ~3 min guided · profile loads automatically</p>
+          <p id="bp-wizard-resume-hint" class="hidden coach-mode-hint text-[#00A89D]" style="color:#00A89D"></p>
+        </div>
+
+        <!-- One profile strip (auto-loaded — no Sync / Baseline button wall) -->
+        <div id="plan-profile-strip" class="mb-6 rounded-2xl border border-[#00A89D]/25 bg-[#00A89D]/5 px-4 py-3 sm:px-5">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#00A89D] mb-1">
                 <i class="fas fa-user-check"></i>
-                <span class="uppercase tracking-[1.5px] text-xs font-bold">POWERED BY YOUR PROFILE</span>
+                <span>Powered by your profile</span>
+                <span class="font-normal normal-case tracking-normal text-gray-500 dark:text-gray-400">· auto-loaded</span>
               </div>
-              <div class="text-lg md:text-base font-semibold text-[#002B5C] dark:text-white">This plan is built around <span id="plan-profile-name">you</span> — your goals, personality, hobbies, challenges, and what you actually like doing.</div>
-              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">The more complete your profile, the more magical (and realistic) the output becomes. No generic corporate nonsense.</div>
-
-              <!-- Extended profile info pulled live (challenges, personality, partner prefs, etc. -- all relevant profile data surfaced on the page) -->
-              <div id="plan-extended-profile" class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-gray-400">
-                <!-- Populated by JS: challenges, personality, preferred partners, family notes, etc. -->
+              <p class="text-sm font-semibold text-[#002B5C] dark:text-white m-0">
+                Planning for <span id="plan-profile-name">you</span>
+              </p>
+              <div id="plan-extended-profile" class="mt-2 flex flex-wrap gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                <!-- Populated by renderExtendedProfileInfo -->
               </div>
             </div>
-          </div>
-
-          <!-- Action buttons in separate box below (prevents squeeze on narrow viewports / devtools open) -->
-          <div class="profile-actions-box bg-gradient-to-br from-[#00A89D]/5 to-white dark:from-gray-900 dark:to-gray-800 border border-[#00A89D]/30 rounded-3xl p-3 shadow-sm">
-            <!-- Buttons laid out in 2-col grid on narrow (much cleaner than previous squeezed flex), flex-wrap on wider screens -->
-            <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5">
-              <button onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}else{alert('Profile editor ready after refresh');}" 
-                      class="px-2.5 py-1 sm:px-4 sm:py-2 rounded-2xl border-2 border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition">
-                <i class="fas fa-cog text-xs"></i> <span>Edit Full Profile</span>
-              </button>
-              <button type="button" onclick="if(typeof window.syncPlanningFormFromProfile==='function')window.syncPlanningFormFromProfile({force:true});"
-                      class="px-2.5 py-1 sm:px-4 sm:py-2 rounded-2xl bg-[#00A89D] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 hover:bg-[#008f85] transition">
-                <i class="fas fa-sync text-xs"></i> <span>Sync from Profile (goals, hobbies, etc.)</span>
-              </button>
-              <button onclick="savePlanBaseline()" 
-                      class="px-2 py-0.5 sm:px-3 sm:py-1.5 text-xs rounded-2xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white transition flex items-center justify-center gap-1">
-                <i class="fas fa-save text-xs"></i> <span>Save as My Baseline</span>
-              </button>
-              <button onclick="loadPlanBaseline()" 
-                      class="px-2 py-0.5 sm:px-3 sm:py-1.5 text-xs rounded-2xl border border-gray-300 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-center gap-1">
-                <i class="fas fa-folder-open text-xs"></i> <span>Load Baseline</span>
-              </button>
-            </div>
+            <button type="button"
+                    onclick="if(typeof window.openUserProfile==='function')window.openUserProfile();"
+                    class="shrink-0 self-start text-xs font-semibold text-[#00A89D] hover:underline px-0 py-1">
+              Edit profile
+            </button>
           </div>
         </div>
 
-        <!-- Fun Quick Start Presets (makes it feel easy and game-like, reduces blank-page anxiety) -->
+        <!-- Plan strength -->
         <div class="mb-8">
-          <div class="text-xs font-bold tracking-widest text-[#00A89D] mb-2 px-1">START HERE IF YOU'RE NOT SURE</div>
-          <div class="flex flex-wrap gap-3">
-            <button onclick="applyPlanPreset('conservative')" class="plan-preset-btn px-5 py-2.5 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Conservative &amp; Sustainable</button>
-            <button onclick="applyPlanPreset('realistic')" class="plan-preset-btn px-5 py-2.5 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Realistic Growth (Recommended)</button>
-            <button onclick="applyPlanPreset('stretch')" class="plan-preset-btn px-5 py-2.5 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Stretch Year</button>
-            <button onclick="applyPlanPreset('moonshot')" class="plan-preset-btn px-5 py-2.5 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Moonshot Mode</button>
-            <button onclick="applyPlanPreset('hobby-first')" class="plan-preset-btn px-5 py-2.5 text-sm rounded-2xl border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white transition font-medium">Hobby-First (Make it fun)</button>
-          </div>
-        </div>
-
-        <!-- Plan Completeness / Confidence meter (next-level polish: makes filling the form feel like progress, gamifies reducing anxiety) -->
-        <div class="mb-8">
-          <div class="flex items-center justify-between text-xs font-semibold mb-1 px-1">
-            <div class="text-[#00A89D]">PLAN STRENGTH (more details = dramatically better AI output)</div>
+          <div class="flex items-center justify-between text-xs font-semibold mb-1 px-0.5">
+            <div class="text-[#00A89D]">Plan strength <span class="font-normal text-gray-400">(more details = better AI output)</span></div>
             <div id="plan-completeness-pct" class="font-mono text-[#F15A29]">35%</div>
           </div>
           <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div id="plan-completeness-bar" class="h-2 bg-gradient-to-r from-[#00A89D] to-[#F15A29] transition-all" style="width:35%"></div>
+            <div id="plan-completeness-bar" class="h-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] transition-all" style="width:35%"></div>
           </div>
-          <div class="text-[10px] text-gray-500 mt-1 px-1">Fill profile + a few numbers + hobbies/activities for 80%+ strength. The AI loves specifics.</div>
         </div>
 
-        <!-- Main beautiful input area (premium v2 cards, grouped like Prospecting/Calculator, all IDs preserved) -->
-        <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-3xl shadow-xl p-8 md:p-10 mb-10">
+        <!-- Full form (presets live here) -->
+        <div id="plan-full-form" class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-3xl shadow-xl p-8 md:p-10 mb-10">
+
+          <div class="mb-8 pb-6 border-b border-gray-100 dark:border-gray-700">
+            <div class="text-xs font-bold tracking-widest text-[#00A89D] mb-2">QUICK START NUMBERS</div>
+            <p class="text-xs text-gray-500 m-0 mb-3">Optional — pick a pace, then tweak. Or skip and fill your own targets.</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="applyPlanPreset('conservative')" class="plan-preset-btn px-3.5 py-2 text-xs sm:text-sm rounded-full border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Conservative</button>
+              <button type="button" onclick="applyPlanPreset('realistic')" class="plan-preset-btn px-3.5 py-2 text-xs sm:text-sm rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition font-medium">Realistic <span class="opacity-70">(recommended)</span></button>
+              <button type="button" onclick="applyPlanPreset('stretch')" class="plan-preset-btn px-3.5 py-2 text-xs sm:text-sm rounded-full border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Stretch</button>
+              <button type="button" onclick="applyPlanPreset('moonshot')" class="plan-preset-btn px-3.5 py-2 text-xs sm:text-sm rounded-full border border-gray-300 dark:border-gray-600 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Moonshot</button>
+              <button type="button" onclick="applyPlanPreset('hobby-first')" class="plan-preset-btn px-3.5 py-2 text-xs sm:text-sm rounded-full border border-[#F15A29] text-[#F15A29] hover:bg-[#F15A29] hover:text-white transition font-medium">Hobby-first</button>
+            </div>
+          </div>
 
           <!-- 1. Your Vision -->
           <div class="mb-9">
@@ -762,19 +832,19 @@
         <!-- Output area (required by weekly-win-plan.js generatePlan / restoreSavedBusinessPlan) -->
         <div id="plan-output" class="hidden"></div>
 
-        <!-- Coaching handoff: annual plan → weekly execution -->
-        <div class="mt-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 text-center">
-          <div class="text-[#00A89D] text-xs font-bold tracking-[2px] mb-2">NEXT LEVEL</div>
-          <p class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Your plan is the map — execution is the journey</p>
-          <p class="text-sm text-gray-600 dark:text-gray-300 mb-5 max-w-md mx-auto">Turn the pillars into Weekly Win Plan tasks, social content, and database touches.</p>
-          <div class="flex flex-wrap gap-3 justify-center">
-            <button type="button" onclick="if(typeof window.showSection==='function') window.showSection('weekly-win-plan')" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002B5C] hover:bg-black text-white text-sm font-semibold transition">
-              <i class="fas fa-fire"></i>
-              <span>Open Weekly Win Plan →</span>
+        <!-- Natural handoff: annual plan → weekly execution (after generate, not in the hero) -->
+        <div class="mt-10 max-w-2xl mx-auto rounded-3xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-6 sm:p-7 text-center">
+          <div class="text-[10px] font-bold tracking-[0.16em] uppercase text-[#00A89D] mb-2">When your plan feels right</div>
+          <p class="text-lg font-semibold text-[#002B5C] dark:text-white m-0 mb-2">Turn the map into this week’s calendar</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400 m-0 mb-5 max-w-md mx-auto leading-relaxed">
+            The annual plan is the direction. Weekly Win Plan is the next step — protected hours and daily tasks from the same profile focus.
+          </p>
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button type="button" onclick="if(typeof window.showSection==='function') window.showSection('weekly-win-plan')" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#002B5C] hover:bg-black text-white text-sm font-semibold transition">
+              <i class="fas fa-fire text-[#F15A29]"></i> Open Weekly Win Plan
             </button>
-            <button type="button" onclick="if(typeof window.showSection==='function') window.showSection('bio-creator')" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D]/10 text-sm font-semibold transition">
-              <i class="fas fa-id-card"></i>
-              <span>Build your bio</span>
+            <button type="button" onclick="if(typeof window.showSection==='function') window.showSection('content-hub')" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-sm font-semibold hover:border-[#00A89D] hover:text-[#00A89D] transition">
+              <i class="fas fa-pen-nib"></i> Content Studio
             </button>
           </div>
         </div>
@@ -784,6 +854,105 @@
         <section id="prospecting" class="hidden" aria-hidden="true"></section>
         <!-- Legacy Prospecting Time Blocks HTML removed (~19KB); feature lives in Weekly Win Plan -->
         <section id="prospecting-legacy-removed" class="hidden" aria-hidden="true" style="display:none!important"></section>
+
+        <!-- CONTENT STUDIO HUB -->
+        <section id="content-hub" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-6 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden" aria-labelledby="content-hub-title">
+          <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-8 sm:mb-10">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00A89D]/12 text-[#00A89D] text-[11px] font-bold tracking-[0.14em] uppercase mb-3">
+                <i class="fas fa-pen-nib"></i> Content studio
+              </div>
+              <h2 id="content-hub-title" class="text-3xl sm:text-4xl font-black text-[#002B5C] dark:text-white tracking-tight m-0">How this coach helps you create content</h2>
+              <p class="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mt-3 leading-relaxed m-0">
+                You don't need to post more — you need the <strong class="text-[#002B5C] dark:text-white">right tool for the job</strong>.
+                Start with strategy when you're stuck on what to say, then open a creator for posts, calendar, blog, newsletter, or bio.
+              </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
+              <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-4 sm:p-5">
+                <div class="w-9 h-9 rounded-xl bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center mb-3"><i class="fas fa-compass"></i></div>
+                <div class="font-bold text-[#002B5C] dark:text-white text-sm mb-1">Know what to publish</div>
+                <p class="text-xs text-gray-600 dark:text-gray-400 m-0 leading-relaxed">Pillars and LO-specific angles so you stay human without sounding salesy.</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-4 sm:p-5">
+                <div class="w-9 h-9 rounded-xl bg-[#F15A29]/15 text-[#F15A29] flex items-center justify-center mb-3"><i class="fas fa-bolt"></i></div>
+                <div class="font-bold text-[#002B5C] dark:text-white text-sm mb-1">Ship faster</div>
+                <p class="text-xs text-gray-600 dark:text-gray-400 m-0 leading-relaxed">AI drafts captions, calendars, blogs, and newsletters from your profile — you edit and post.</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-4 sm:p-5">
+                <div class="w-9 h-9 rounded-xl bg-[#002B5C]/10 text-[#002B5C] dark:text-[#7dd3fc] flex items-center justify-center mb-3"><i class="fas fa-link"></i></div>
+                <div class="font-bold text-[#002B5C] dark:text-white text-sm mb-1">Stay consistent</div>
+                <p class="text-xs text-gray-600 dark:text-gray-400 m-0 leading-relaxed">Weekly posts plus optional blog/newsletter keep sphere and partners warm between closings.</p>
+              </div>
+            </div>
+            <div class="mb-4">
+              <div class="text-[10px] font-bold tracking-[0.16em] uppercase text-[#00A89D] mb-1">Choose a tool</div>
+              <h3 class="text-xl font-bold text-[#002B5C] dark:text-white m-0">What do you need right now?</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <button type="button" onclick="window.showSection('social')" class="content-hub-card group text-left rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 hover:border-[#00A89D] hover:shadow-lg transition-all">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center text-lg shrink-0"><i class="fas fa-lightbulb"></i></div>
+                  <div>
+                    <div class="font-bold text-[#002B5C] dark:text-white mb-1">Social Media Strategy</div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 m-0">Pillars and examples when you're unsure <em>what</em> to post.</p>
+                    <div class="mt-2 text-sm font-semibold text-[#00A89D]">Open strategy →</div>
+                  </div>
+                </div>
+              </button>
+              <button type="button" onclick="window.showSection('social-post')" class="content-hub-card group text-left rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 hover:border-[#00A89D] hover:shadow-lg transition-all">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-[#F15A29]/12 text-[#F15A29] flex items-center justify-center text-lg shrink-0"><i class="fas fa-calendar-plus"></i></div>
+                  <div>
+                    <div class="font-bold text-[#002B5C] dark:text-white mb-1">Social Post &amp; Calendar</div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 m-0">Captions and a week of posts when you need to <em>publish this week</em>.</p>
+                    <div class="mt-2 text-sm font-semibold text-[#F15A29]">Create posts →</div>
+                  </div>
+                </div>
+              </button>
+              <button type="button" onclick="window.showSection('blog')" class="content-hub-card group text-left rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 hover:border-[#00A89D] hover:shadow-lg transition-all">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-[#002B5C]/10 text-[#002B5C] dark:text-[#7dd3fc] flex items-center justify-center text-lg shrink-0"><i class="fas fa-pen-fancy"></i></div>
+                  <div>
+                    <div class="font-bold text-[#002B5C] dark:text-white mb-1">Blog Creator</div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 m-0">Longer authority articles for your site or partners.</p>
+                    <div class="mt-2 text-sm font-semibold text-[#002B5C] dark:text-[#7dd3fc]">Write a blog →</div>
+                  </div>
+                </div>
+              </button>
+              <button type="button" onclick="window.showSection('newsletter-generator')" class="content-hub-card group text-left rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 hover:border-[#00A89D] hover:shadow-lg transition-all">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center text-lg shrink-0"><i class="fas fa-envelope-open-text"></i></div>
+                  <div>
+                    <div class="font-bold text-[#002B5C] dark:text-white mb-1">Newsletter Generator</div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 m-0">Stay top of mind with past clients and sphere.</p>
+                    <div class="mt-2 text-sm font-semibold text-[#00A89D]">Draft newsletter →</div>
+                  </div>
+                </div>
+              </button>
+              <button type="button" onclick="window.showSection('bio-creator')" class="content-hub-card group text-left rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 hover:border-[#00A89D] hover:shadow-lg transition-all md:col-span-2">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-[#F15A29]/12 text-[#F15A29] flex items-center justify-center text-lg shrink-0"><i class="fas fa-id-card"></i></div>
+                  <div>
+                    <div class="font-bold text-[#002B5C] dark:text-white mb-1">Bio Builder</div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 m-0">Company-page and social bios in Ruoff voice.</p>
+                    <div class="mt-2 text-sm font-semibold text-[#F15A29]">Build bio →</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+            <div class="mt-8 rounded-2xl border border-[#00A89D]/25 bg-[#00A89D]/5 dark:bg-[#00A89D]/10 p-5 sm:p-6">
+              <div class="text-[10px] font-bold tracking-[0.14em] uppercase text-[#00A89D] mb-2">Suggested flow</div>
+              <ol class="m-0 pl-5 text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
+                <li><strong>First time this month?</strong> Skim Social Strategy for pillars.</li>
+                <li><strong>Need posts this week?</strong> Open Social Post &amp; Calendar.</li>
+                <li><strong>Own a topic?</strong> Blog Creator, then recycle into social or newsletter.</li>
+                <li><strong>Nurture sphere?</strong> Newsletter + database beats random posting.</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
         <!-- MAIN SOCIAL MEDIA TIPS PAGE -->
 <!-- MAIN SOCIAL MEDIA TIPS PAGE -->
 <section id="social" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
@@ -2362,7 +2531,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
           <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-            <i class="fas fa-chart-line text-xl text-[#002B5C]"></i>
+            <i class="fas fa-chart-line text-xl text-[#002B5C] dark:text-white"></i>
           </div>
           <div class="font-semibold mb-1">3. Explore &amp; Act</div>
           <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Filter by opportunity type, adjust the rate slider live, save standout clients to My Saved Items, and build your outreach list for the week.</div>
@@ -2383,13 +2552,13 @@
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save winners to the vault</strong> so scripts and touches from other tools stay tied to the same clients.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pair with Database Nurturing</strong> for the actual call/text language once you've identified who to contact.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Re-run monthly.</strong> Markets shift — a client who wasn't interesting in January may be your best call in June.</span></div>
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Block prospecting time</strong> in Prospecting Time Blocks specifically for "equity/refi outreach" so it actually happens.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Block prospecting time</strong> in Weekly Win Plan for “equity/refi outreach” so the calls actually happen.</span></div>
         </div>
       </div>
     </div>
 
   <!-- Premium Upload Area -->
-<div id="upload-area" class="group border-2 border-dashed border-[#00A89D] hover:border-[#F15A29] rounded-3xl p-10 text-center transition-all mb-6 max-w-3xl mx-auto bg-white dark:bg-gray-800 cursor-pointer">
+<div id="upload-area" class="group border-2 border-dashed border-[#00A89D] hover:border-[#F15A29] rounded-3xl p-10 text-center transition-all mb-6 max-w-5xl mx-auto bg-white dark:bg-gray-800 cursor-pointer">
     <div class="mx-auto w-16 h-16 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center mb-4 group-hover:bg-[#F15A29]/10 transition">
         <i class="fas fa-file-excel text-4xl text-[#00A89D] group-hover:text-[#F15A29] transition"></i>
     </div>
@@ -2397,7 +2566,7 @@
     <p class="text-sm text-gray-500 dark:text-gray-400">Excel (.xlsx / .xls) or CSV • Uses your team's provided template</p>
     <input type="file" id="database-upload" accept=".csv,.xlsx,.xls" class="hidden">
 </div>
-<div id="file-status" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-2xl flex items-center gap-4 max-w-3xl mx-auto">
+<div id="file-status" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-2xl flex items-center gap-4 max-w-5xl mx-auto">
     <i class="fas fa-check-circle text-2xl text-green-600"></i>
     <div>
         <p class="text-sm font-medium text-green-700 dark:text-green-400">File ready:</p>
@@ -2407,7 +2576,7 @@
             
 <!-- Generate Button -->
 <div class="text-center mb-8">
-        <button onclick="generateEquityReport(event)" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 sm:px-12 md:px-20 py-4 sm:py-6 rounded-full hover:opacity-90 transition-all font-bold text-xl sm:text-2xl shadow-2xl w-full sm:w-auto">
+        <button type="button" id="generate-equity-btn" onclick="generateEquityReport(event)" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-8 sm:px-12 md:px-20 py-4 sm:py-6 rounded-full hover:opacity-90 transition-all font-bold text-xl sm:text-2xl shadow-2xl w-full sm:w-auto">
             Generate Equity Report
         </button>
         <div class="mt-3">
@@ -2431,7 +2600,7 @@
     </section>
 
     <!-- AI Coach — chat-first (setup + daily loop live on Home) -->
-    <section id="ai-chat" class="card bg-white dark:bg-gray-800 pt-6 pb-10 px-5 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden max-w-3xl mx-auto w-full">
+    <section id="ai-chat" class="card bg-white dark:bg-gray-800 pt-6 pb-10 px-5 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden w-full">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
         <div class="min-w-0">
           <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-[#00A89D] m-0 mb-1.5">Conversation</p>
@@ -2467,7 +2636,8 @@
         <div class="flex flex-wrap gap-2" id="ai-chat-prompts"></div>
       </div>
 
-      <div id="chat-messages" class="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-900/80 border border-gray-200 dark:border-gray-700 p-4 sm:p-5 rounded-2xl mb-4 min-h-[240px] max-h-[min(58vh,560px)] overflow-y-auto prose dark:prose-invert max-w-none text-[15px] leading-relaxed shadow-inner">
+      <!-- No global .prose here — it forced dark p/li colors over white bubble text -->
+      <div id="chat-messages" class="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-900/80 border border-gray-200 dark:border-gray-700 p-4 sm:p-6 rounded-2xl mb-4 min-h-[min(52vh,480px)] max-h-[min(68vh,720px)] overflow-y-auto max-w-none text-[15px] leading-relaxed shadow-inner">
       </div>
 
       <div class="flex gap-2 sm:gap-3 items-end rounded-2xl border-2 border-[#00A89D]/35 bg-white dark:bg-gray-900 p-2 sm:p-2.5 shadow-lg shadow-[#00A89D]/10 focus-within:border-[#F15A29]/50 focus-within:shadow-[#F15A29]/10 transition">
@@ -2986,23 +3156,11 @@
     <section id="social-post" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Social Post &amp; Calendar Creator</h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Generate authentic, relationship-building posts and full monthly plans in seconds. Stop staring at a blank screen.</p>
-    </div>
-    
-    <!-- Profile Awareness Banner -->
-    <div class="mb-6 flex items-center gap-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 px-5 py-3 text-sm">
-        <i class="fas fa-user-check text-[#00A89D]"></i>
-        <span class="text-gray-700 dark:text-gray-300">
-            Personalized using your profile preferences (voice, local market, hobbies &amp; tone)
-        </span>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Generate authentic, relationship-building posts and full monthly plans in seconds — tailored to your voice and market.</p>
     </div>
 
-    <p class="mb-8 text-lg text-gray-600 dark:text-gray-400">
-        Generate ready-to-post content that builds real relationships and grows your reach — fully tailored to your voice and market.
-    </p>
-
-    <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
-    <div class="mb-8">
+    <!-- Pre-Generate Explanatory Header -->
+    <div id="social-pregen-guidance" class="mb-8">
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">RELATIONSHIPS FIRST, CONTENT SECOND</span>
       </div>
@@ -3027,7 +3185,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
           <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-            <i class="fas fa-bookmark text-xl text-[#002B5C]"></i>
+            <i class="fas fa-bookmark text-xl text-[#002B5C] dark:text-white"></i>
           </div>
           <div class="font-semibold mb-1">Leverage Saved Ideas &amp; Profile</div>
           <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Pulls from your central profile (hobbies, voice, market) and the "My Saved Items" library right below the generator. The 70% personal rule is built in.</div>
@@ -3255,7 +3413,7 @@
     <!-- Collapsible Content (hidden by default) -->
     <div id="calendar-content" class="hidden mt-12 space-y-12">
         <!-- Intro Description -->
-        <p class="text-lg text-gray-900 dark:dark:text-white max-w-4xl">
+        <p class="text-lg text-gray-900 dark:text-white max-w-4xl">
             Build consistency with a fresh, localized 30-day plan every month. Get 3–5 ready-to-post ideas per day — educational, personal, local, and promotional — tailored to your region and goals. No more blank-page stress.
         </p>
 
@@ -3465,7 +3623,17 @@
         <p class="mt-3"><button type="button" onclick="window.openBioTips && window.openBioTips()" class="text-sm text-[#00A89D] underline hover:text-[#F15A29] font-semibold"><i class="fas fa-lightbulb mr-1"></i>What makes a bio actually work →</button></p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <!-- How it works (same stack as Newsletter / Business Plan / Equity) -->
+    <div id="bio-pregen-guidance" class="mb-8">
+      <div class="text-center mb-3">
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">ONE STORY · EVERY PLATFORM</span>
+      </div>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How Bio Builder works — and how to get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">
+        Your primary bio is the story every other AI tool pulls from. Write it once, save it as Primary, then reuse it for Newsletter, Blog, Social, and AI Coach.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
             <div class="mx-auto mb-2 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center"><i class="fas fa-search text-[#00A89D]"></i></div>
             <div class="font-semibold text-sm mb-1">Found online</div>
@@ -3481,32 +3649,41 @@
             <div class="font-semibold text-sm mb-1">Paste-ready</div>
             <div class="text-xs text-gray-500">Character/word limits match the platform you're updating today.</div>
         </div>
-    </div>
+      </div>
 
-    <div id="bio-primary-status" class="hidden mb-6"></div>
-
-    <div id="bio-wizard-entry" class="mb-8 max-w-3xl mx-auto">
-        <div class="rounded-3xl border-2 border-[#00A89D]/35 bg-gradient-to-br from-[#00A89D]/8 to-white dark:from-[#00A89D]/12 dark:to-gray-900 p-5 sm:p-6 shadow-sm">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold tracking-[1.5px] text-[#00A89D] mb-1">GUIDED SETUP — ~5 MIN</div>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 m-0 leading-relaxed">Fastest path: paste your existing bio on the full form and hit <strong>Rewrite to 750 Characters</strong>. Or use guided setup — profile → your why → how you work → life outside work → generate.</p>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
-                    <button type="button" onclick="if(typeof window.openBioWizard==='function')window.openBioWizard();"
-                            class="w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#00A89D] hover:bg-[#008F85] text-white text-sm font-semibold transition shadow-md">
-                        <i class="fas fa-wand-magic-sparkles mr-1.5"></i>Start guided setup
-                    </button>
-                    <button type="button" onclick="if(typeof window.scrollToBioForm==='function')window.scrollToBioForm();"
-                            class="w-full sm:w-auto px-5 py-2.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                        Full setup page
-                    </button>
-                </div>
-            </div>
+      <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+        <div class="flex items-start gap-3 mb-3">
+          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fas fa-tachometer-alt text-[#00A89D]"></i></span>
+          <div class="flex-1">
+            <div class="font-bold text-[#002B5C] dark:text-white">How to maximize value from Bio Builder</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Specific beats generic. Save your best version as Primary so every tool speaks with one voice.</div>
+          </div>
         </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Start with guided setup</strong> if you prefer one question at a time — same fields as the full form.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Paste an existing bio first</strong> when you already have company-site or Zillow copy — rewrite to the 750-char standard, then refine.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with who you help</strong> (client type + situation). Readers should know in 5 seconds if you’re for them.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Add one human detail</strong> (family, hobby, community) — it dramatically increases trust on public profiles.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Match the platform</strong> before you generate — Google is tight + local; Zillow is consumer-friendly; LinkedIn is professional.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save as Primary</strong> after you like a version — Newsletter, Blog, Social &amp; AI Coach pull from it automatically.</span></div>
+        </div>
+      </div>
     </div>
 
-    <!-- 3-step progress -->
+    <!-- Mode switch sits above the form (same placement as Business Plan / Newsletter) -->
+    <div id="bio-wizard-entry" class="coach-mode-bar mb-8" data-coach-mode-tool="bio">
+      <div class="coach-mode-toggle" role="group" aria-label="How to build your bio">
+        <button type="button" class="coach-mode-btn" data-coach-mode="guided" data-open-fn="openBioWizard" aria-pressed="false">
+          <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Guided setup
+        </button>
+        <button type="button" class="coach-mode-btn is-active" data-coach-mode="full" data-scroll-to="bio-full-form" aria-pressed="true">
+          Full form
+        </button>
+      </div>
+      <p class="coach-mode-hint">Same fields either way · guided walks profile → story → generate · or paste &amp; rewrite on the full form</p>
+    </div>
+
+    <!-- 3-step progress (full-form path) -->
     <div class="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8 text-sm">
         <div id="bio-step-1" class="bio-step-active flex items-center gap-2"><span class="bio-step-num">1</span><span><strong>Profile</strong> <span class="text-gray-500 hidden sm:inline">— auto-loaded</span></span></div>
         <i class="fas fa-chevron-right text-gray-300 text-xs hidden sm:inline"></i>
@@ -3540,12 +3717,10 @@
                     <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center"><i class="fas fa-user text-[#00A89D]"></i></span>
                     Step 1 — From Your Profile
                 </h3>
-                <div class="flex gap-2">
-                    <button type="button" id="bio-sync-profile-btn" class="text-sm font-semibold text-[#00A89D] border border-[#00A89D] px-4 py-2 rounded-xl hover:bg-[#00A89D]/10">Sync</button>
-                    <button type="button" id="bio-edit-profile-btn" class="text-sm font-semibold border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800">Edit Profile</button>
-                </div>
+                <button type="button" id="bio-edit-profile-btn" class="text-sm font-semibold text-[#00A89D] border border-[#00A89D] px-4 py-2 rounded-full hover:bg-[#00A89D] hover:text-white transition">Edit profile</button>
             </div>
-            <p class="text-sm text-gray-500 mb-3">We pull name, market, tone, and intro automatically. <strong>Market + intro</strong> are the biggest upgrades you can make in Profile.</p>
+            <p class="text-sm text-gray-500 mb-3">Name, market, tone, and intro <strong>auto-load</strong> from My Profile. Keep profile current — better profile = better bios. <span class="text-gray-400">(Hidden sync still runs when you open this tool.)</span></p>
+            <button type="button" id="bio-sync-profile-btn" class="sr-only" tabindex="-1" aria-hidden="true">Sync</button>
             <div id="bio-profile-summary"></div>
         </div>
 
@@ -3693,7 +3868,7 @@
         </div>
 
         <div class="text-center">
-            <button type="button" id="generate-bio-btn" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 px-12 rounded-full font-bold text-xl shadow-xl hover:opacity-90 transition inline-flex items-center justify-center gap-3">
+            <button type="button" id="generate-bio-btn" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 px-12 rounded-full font-bold text-xl shadow-2xl hover:opacity-90 transition inline-flex items-center justify-center gap-3">
                 <i class="fas fa-magic"></i> Generate My Bio
             </button>
             <p id="bio-generate-hint" class="text-xs text-gray-500 mt-3 max-w-lg mx-auto">Complete essentials for best results. Answers auto-save as you type.</p>
@@ -3706,6 +3881,9 @@
             <div id="bio-output"></div>
         </div>
     </div>
+
+    <!-- Primary status lives with saved versions (not at the top of the tool) -->
+    <div id="bio-primary-status" class="hidden mb-6"></div>
 
     <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm">
         <h3 class="text-lg font-bold text-[#002B5C] dark:text-white mb-2"><i class="fas fa-history text-[#00A89D] mr-2"></i>Saved Versions</h3>
@@ -3737,17 +3915,8 @@
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Sales Script Generator</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Generate natural, relationship-focused scripts for any sales situation. Select a common scenario or type your own — get 3–5 warm, effective scripts instantly.</p>
     </div>
-
-    <!-- Profile Awareness Banner -->
-    <div class="mb-8 flex items-center gap-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 px-5 py-3 text-sm">
-        <i class="fas fa-user-check text-[#00A89D]"></i>
-        <span class="text-gray-700 dark:text-gray-300">
-            Scripts are personalized using your voice, tone, local market, and communication style
-        </span>
-    </div>
-
-    <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
-    <div class="mb-8">
+<!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
+    <div id="script-pregen-guidance" class="mb-8">
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">SOUND LIKE YOU, NOT A SCRIPT</span>
       </div>
@@ -3772,7 +3941,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
           <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-            <i class="fas fa-save text-xl text-[#002B5C]"></i>
+            <i class="fas fa-save text-xl text-[#002B5C] dark:text-white"></i>
           </div>
           <div class="font-semibold mb-1">Save &amp; Reuse Winners</div>
           <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Great scripts get saved to My Saved Items. Build your own personal playbook over time. Use the tips modal for even better context.</div>
@@ -3867,11 +4036,12 @@
             </button>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">We'll generate 4 natural, relationship-focused scripts tailored to your voice and style.</p>
         </div>
+    </div><!-- /.space-y-8 form stack -->
 
     <div id="script-empty-state" class="mt-8 rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900"></div>
 
     <!-- Output -->
-    <div id="script-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden" role="region" aria-live="polite" aria-label="Generated sales scripts">
+    <div id="script-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden mt-8" role="region" aria-live="polite" aria-label="Generated sales scripts">
         <div class="prose prose-lg dark:prose-invert max-w-none">
             <!-- Scripts will be inserted here (each with its own Copy + Save buttons) -->
         </div>
@@ -4189,7 +4359,7 @@
             <div class="accordion border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
                 <button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between text-left font-semibold py-4 px-5 bg-gray-50 dark:bg-gray-800/70 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                     <span class="flex items-center gap-2">
-                        <i class="fas fa-file-alt text-[#002B5C]"></i>
+                        <i class="fas fa-file-alt text-[#002B5C] dark:text-white"></i>
                         <span>Templates Library</span>
                     </span>
                     <i class="fas fa-chevron-down transition-transform"></i>
@@ -4364,6 +4534,15 @@
         <p id="tr-hero-subtitle" class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Translate client emails, texts, disclosures, and outreach — with mortgage-aware tone and glossary lock.</p>
     </div>
 
+    <div id="tr-pregen-guidance" class="mb-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 p-5">
+      <div class="text-[10px] font-bold tracking-[2px] text-[#00A89D] mb-2">HOW TO GET THE MOST FROM IT</div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-gray-700 dark:text-gray-300">
+        <div class="flex gap-2"><span class="text-[#00A89D] font-bold">•</span> <span><strong>Paste or upload</strong> the full message — more context = better mortgage terminology.</span></div>
+        <div class="flex gap-2"><span class="text-[#00A89D] font-bold">•</span> <span><strong>Pick tone</strong> (warm, plain, or formal) to match the relationship.</span></div>
+        <div class="flex gap-2"><span class="text-[#00A89D] font-bold">•</span> <span><strong>Use Check meaning</strong> before client-facing sends — especially disclosures.</span></div>
+      </div>
+    </div>
+
     <div class="mb-6 rounded-2xl border border-amber-300/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
         <i class="fas fa-info-circle mr-1"></i>
         <strong>Review before sending.</strong> AI translations help you communicate faster — they are not certified legal interpretations. Always verify meaning before client-facing use, especially on disclosures and contracts.
@@ -4500,7 +4679,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
           <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-            <i class="fas fa-comments text-xl text-[#002B5C]"></i>
+            <i class="fas fa-comments text-xl text-[#002B5C] dark:text-white"></i>
           </div>
           <div class="font-semibold mb-1">3. Continue the Thread</div>
           <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Follow up on the same file — alternative programs, compensating factors, conditions lists, or borrower/realtor scripts — without re-explaining everything.</div>
@@ -4578,7 +4757,7 @@
         <!-- Search Button -->
         <div class="pt-2">
             <button onclick="searchUnderwriting()" 
-                    class="w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] hover:opacity-90 transition-all text-white font-bold text-xl py-5 rounded-full shadow-xl flex items-center justify-center gap-3">
+                    class="w-full md:w-auto mx-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] hover:opacity-90 transition-all text-white font-bold text-xl py-5 px-12 rounded-full shadow-2xl flex items-center justify-center gap-3">
                 <i class="fas fa-search"></i>
                 <span>Search Guidelines</span>
             </button>
@@ -4789,23 +4968,11 @@
               <section id="blog" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Blog Creator – Authority-Building Content in Seconds</h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Turn one idea into a full, SEO-friendly blog post with title, outline, and ready-to-use copy tailored to your voice and market.</p>
-    </div>
-    
-    <!-- Profile Awareness Banner -->
-    <div class="mb-6 flex items-center gap-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 px-5 py-3 text-sm">
-        <i class="fas fa-user-check text-[#00A89D]"></i>
-        <span class="text-gray-700 dark:text-gray-300">
-            Personalized using your profile preferences (voice, tone, local market, and goals)
-        </span>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Turn one idea into an SEO + GEO-friendly blog post plus matching social caption, Google Business post, and Reel script — tailored to your voice and market.</p>
     </div>
 
-    <p class="mb-8 text-lg text-gray-600 dark:text-gray-400">
-        Generate SEO + GEO-optimized blog posts (plus matching social caption, Google Business post, and a ready-to-film 30–45 second Reel script). Select or type a topic, pick your tone, and get everything you need to publish across channels.
-    </p>
-
-    <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
-    <div class="mb-8">
+    <!-- Pre-Generate Explanatory Header -->
+    <div id="blog-pregen-guidance" class="mb-8">
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">ONE POST, MANY TOUCHES</span>
       </div>
@@ -4831,7 +4998,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
           <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-            <i class="fas fa-handshake text-xl text-[#002B5C]"></i>
+            <i class="fas fa-handshake text-xl text-[#002B5C] dark:text-white"></i>
           </div>
           <div class="font-semibold mb-1">Build Instant Trust &amp; Authority</div>
           <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Detailed, helpful, local-flavored answers (programs, stats, real stories) make people feel you “get” their situation.</div>
@@ -5280,10 +5447,101 @@
     
 </section>
                        
+
+    <!-- Smart Savings Calculator (native LO section — no iframe; body from smart-savings/app.html) -->
+    <section id="smart-savings" class="card bg-white dark:bg-gray-800 pt-6 pb-8 px-0 sm:px-0 rounded-3xl shadow-xl animate-fade-in hidden overflow-x-hidden overflow-y-visible" aria-labelledby="smart-savings-title">
+      <div class="px-6 sm:px-8">
+        <div class="text-center mb-4">
+          <h2 id="smart-savings-title" class="text-3xl font-bold mb-2 text-[#F15A29]">Smart Savings Calculator</h2>
+          <p class="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto m-0 leading-relaxed">
+            Client-ready refinance &amp; debt consolidation scenarios — build a plan in a live meeting, save A/B/C compares, and walk the guided tour when you want structure.
+          </p>
+          <p id="smart-savings-status" class="text-xs text-gray-500 mt-2 mb-0" role="status"></p>
+        </div>
+
+        <!-- How it works — same premium pattern as Equity / Weekly Win / Business Plan -->
+        <div id="smart-savings-pregen-guidance" class="mb-8">
+          <div class="text-center mb-3">
+            <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">NUMBERS YOU CAN TRUST IN A MEETING</span>
+          </div>
+          <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How Smart Savings works — and how to get the most from it</h3>
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">
+            Build a client-ready refinance &amp; debt-consolidation scenario in a live meeting: cash flow, cash at closing, break-even, and a narrated Smart Plan —
+            with math that stays client-side and branding from your profile.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+              <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
+                <i class="fas fa-house-chimney text-xl text-[#00A89D]"></i>
+              </div>
+              <div class="font-semibold mb-1">1. Capture the situation</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Home value, current mortgage, and optional other debts (paste a liabilities screenshot or enter by hand). Equity and LTV update live as you dial.</div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+              <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#F15A29]/10 flex items-center justify-center">
+                <i class="fas fa-sliders text-xl text-[#F15A29]"></i>
+              </div>
+              <div class="font-semibold mb-1">2. Shape the path</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Rate, term, loan amount, and closing costs — watch cash flow, cash at closing, and break-even move. Compare A/B/C scenarios side by side.</div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
+              <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
+                <i class="fas fa-file-signature text-xl text-[#002B5C] dark:text-white"></i>
+              </div>
+              <div class="font-semibold mb-1">3. Present the plan</div>
+              <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Generate a Smart Plan that narrates <em>your</em> calculated numbers (AI doesn’t invent payments). Print PDF, share snapshot, or email the story.</div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6">
+            <div class="flex items-start gap-3 mb-3">
+              <i class="fas fa-tachometer-alt text-[#00A89D] mt-0.5 text-lg"></i>
+              <div class="flex-1">
+                <div class="font-bold text-[#002B5C] dark:text-white">How to maximize Smart Savings in a live meeting</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Treat it as a conversation tool — not a homework calculator.</div>
+              </div>
+              <button type="button" id="ss-toggle-guidance" class="text-xs font-semibold text-[#00A89D] hover:underline shrink-0">Hide tips</button>
+            </div>
+            <div id="ss-guidance-body" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Full form is the default</strong> for meetings — keep everything open while you talk numbers.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Use Guided setup</strong> when you want a 6-step checklist (or when learning the tool for the first time).</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Fill My Profile branding</strong> so plans, PDFs, and borrower links look like you without retyping NMLS each time.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Scan debts from a screenshot</strong> (Ctrl+V) instead of typing every card — then confirm balances before you size the loan.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Save A/B/C scenarios</strong> so you can show rate-and-term vs debt consolidation without losing the first path.</span></div>
+              <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Generate the Smart Plan last</strong> — AI narrates locked math; it never invents a payment or savings figure.</span></div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              <i class="fas fa-info-circle"></i>
+              <span>Estimates only — not a commitment to lend. Always verify against credit and underwriting before locking a scenario.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="smart-savings-root" class="smart-savings-root mode-expert text-zinc-900 dark:text-white border-t border-gray-200 dark:border-gray-700" data-ss-embed="1">
+        <div class="ss-embed-placeholder flex flex-col items-center justify-center gap-3 py-16 px-6 text-center" id="smart-savings-placeholder">
+          <div class="w-12 h-12 rounded-2xl bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center text-xl">
+            <i class="fas fa-piggy-bank"></i>
+          </div>
+          <p class="text-sm text-gray-500 m-0 max-w-md">Loading Smart Savings Calculator…</p>
+        </div>
+      </div>
+    </section>
+
     <section id="calculator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Advanced Payment Calculator</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Estimate monthly payments with taxes, insurance, PMI, extra payments, and biweekly options. See lifetime interest, payoff timeline, and potential savings.</p>
+    </div>
+
+    <div id="calc-pregen-guidance" class="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 p-5 max-w-5xl mx-auto">
+      <div class="text-[10px] font-bold tracking-[2px] text-[#00A89D] mb-2 text-center">HOW TO GET THE MOST FROM IT</div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-gray-700 dark:text-gray-300">
+        <div class="flex gap-2"><span class="text-[#00A89D] font-bold">•</span> <span><strong>Pick Purchase or Refinance</strong>, then use a quick preset if you’re stuck.</span></div>
+        <div class="flex gap-2"><span class="text-[#00A89D] font-bold">•</span> <span><strong>Include taxes, insurance, PMI</strong> for a realistic housing payment — not P&amp;I only.</span></div>
+        <div class="flex gap-2"><span class="text-[#00A89D] font-bold">•</span> <span><strong>Model extra / biweekly</strong> to show lifetime interest savings in the conversation.</span></div>
+      </div>
     </div>
 
     <!-- Mode Toggle -->
@@ -6670,44 +6928,15 @@
 <!-- Full Updated Weekly Win Plan Section -->
  <!-- NEWSLETTER GENERATOR TOOL -->
 <section id="newsletter-generator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
-    <!-- Profile Awareness Banner (consistent with Blog, 2026 Plan, Social) -->
-    <div class="mb-6 flex items-center gap-3 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 px-5 py-3 text-sm">
-        <i class="fas fa-user-check text-[#00A89D]"></i>
-        <span class="text-gray-700 dark:text-gray-300">
-            Personalized using your profile (market, voice, and story). Settings auto-fill when you open this tool — your company signature adds when you send in Outlook.
-        </span>
-    </div>
-
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Newsletter Generator – Personalized Emails in Seconds</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">
-            Create beautiful, compliant, profile-powered newsletters your database will actually open. Mix value, local flavor, and personal updates effortlessly.
+            Create beautiful, compliant newsletters your database will actually open — market, voice, and local flavor pull from your profile automatically.
         </p>
     </div>
 
-    <div id="nl-wizard-entry" class="mb-8 max-w-3xl mx-auto">
-        <div class="rounded-3xl border-2 border-[#00A89D]/35 bg-gradient-to-br from-[#00A89D]/8 to-white dark:from-[#00A89D]/12 dark:to-gray-900 p-5 sm:p-6 shadow-sm">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold tracking-[1.5px] text-[#00A89D] mb-1">GUIDED SETUP — ~3 MIN</div>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 m-0 leading-relaxed">Profile check → audience &amp; style → your story → pick your sections → monthly direction → review &amp; generate. Full form below for power users.</p>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
-                    <button type="button" onclick="if(typeof window.openNewsletterWizard==='function')window.openNewsletterWizard();"
-                            class="w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#00A89D] hover:bg-[#008F85] text-white text-sm font-semibold transition shadow-md">
-                        <i class="fas fa-wand-magic-sparkles mr-1.5"></i>Start guided setup
-                    </button>
-                    <button type="button" onclick="if(typeof window.scrollToNewsletterForm==='function')window.scrollToNewsletterForm();"
-                            class="w-full sm:w-auto px-5 py-2.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                        Full setup page
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
-    <div class="mb-8">
+    <!-- Pre-Generate Explanatory Header -->
+    <div id="nl-pregen-guidance" class="mb-8">
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">CONSISTENCY + PERSONAL = REFERRALS</span>
       </div>
@@ -6733,7 +6962,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
           <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-            <i class="fas fa-link text-xl text-[#002B5C]"></i>
+            <i class="fas fa-link text-xl text-[#002B5C] dark:text-white"></i>
           </div>
           <div class="font-semibold mb-1">Turn Sends into Referrals</div>
           <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Every issue ends with a soft, natural ask. Great content + personal touch = warm inbound and "I know a guy" moments without any cold calling.</div>
@@ -6751,7 +6980,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Keep <em>My Profile</em> current</strong> (market, voice, personalization) — local sections and tone pull from there. Your company signature adds automatically when you send.</span></div>
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, family moment, or community story — and describe any photo/video you're including.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, family moment, or community story — and describe any photo/video you're including. Free hosts: <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> (use the <strong>Hotlink / Direct link</strong> for photos, headshots, logos — no account) and free <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">YouTube upload</a> for video links.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Add direction to core sections.</strong> Tap <em>Add direction</em> under Market, Local, etc. — a link or one-line topic makes each issue feel written for <em>your</em> borrowers, not generic AI filler.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pick a sustainable cadence</strong> (monthly is fine). Use the generator every time so the voice and mix stay consistent. Block the send date in your Weekly Win Plan.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Repurpose winners.</strong> A great issue becomes 3–4 social posts, a Reel script, or a blog angle. The output is designed for this — copy the sections and save ideas to your vault.</span></div>
@@ -6762,6 +6991,19 @@
           <span>Regenerate or tweak as needed. Save your best issues (or individual sections) to My Saved Items. One consistent newsletter at a time, you’re building an asset that compounds for years.</span>
         </div>
       </div>
+    </div>
+
+    <!-- Mode switch sits above the form (same placement as Business Plan / Bio) -->
+    <div id="nl-wizard-entry" class="coach-mode-bar mb-8" data-coach-mode-tool="newsletter">
+      <div class="coach-mode-toggle" role="group" aria-label="How to build your newsletter">
+        <button type="button" class="coach-mode-btn" data-coach-mode="guided" data-open-fn="openNewsletterWizard" aria-pressed="false">
+          <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Guided setup
+        </button>
+        <button type="button" class="coach-mode-btn is-active" data-coach-mode="full" data-scroll-to="nl-form-start" aria-pressed="true">
+          Full form
+        </button>
+      </div>
+      <p class="coach-mode-hint">Same fields either way · ~3 min guided · company signature adds when you send</p>
     </div>
 
     <!-- Hidden name/email for referral links + AI personalization — synced from My Profile -->
@@ -6836,9 +7078,10 @@
       <!-- Card 2: Personal Update (Highly Recommended) — before sections, matches wizard flow -->
       <div id="nl-personal-card" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
         <div class="flex items-center mb-4">
-          <input type="checkbox" id="nl-personal" class="mr-3 h-5 w-5 text-[#00A89D]">
+          <input type="checkbox" id="nl-personal" class="mr-3 h-5 w-5 text-[#00A89D] flex-shrink-0">
           <label for="nl-personal" class="text-xl font-semibold text-[#00A89D]">Personal Update ❤️ (Highly Recommended)</label>
         </div>
+
         <div id="personal-fields" class="hidden ml-2 space-y-6">
           <div>
             <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
@@ -6848,12 +7091,20 @@
             <div class="relative" id="nl-personal-text-wrap">
               <textarea id="nl-personal-text" rows="5" placeholder="e.g., Just wrapped an amazing closing for the Martinez family — their first home after years of saving. The kids were thrilled to pick their bedrooms! (Photo: us at the front door with their new keys.)&#10;&#10;Or: Spent Saturday at the local food bank — grateful for this community we get to serve. (Video: quick clip from our volunteer shift.)" 
                         class="w-full p-4 pr-24 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+              <!-- Compact "Last issue" chip inside the free-type box (shows when prior text is saved) -->
               <div id="nl-personal-history-trigger" class="hidden absolute right-3 top-3 z-10">
-                <span class="text-[10px] text-gray-500 border border-gray-200 dark:border-gray-600 rounded-full px-2 py-0.5 bg-white/95 dark:bg-gray-800/95 cursor-default select-none">Last issue</span>
+                <button type="button" id="nl-personal-history-load-btn"
+                        class="nl-personal-history-pill text-[10px] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-full px-2.5 py-0.5 bg-white/95 dark:bg-gray-800/95 hover:border-[#00A89D] hover:text-[#00A89D] transition shadow-sm font-medium"
+                        title="Load the personal update from your last issue">
+                  Last issue
+                </button>
                 <div id="nl-personal-history-popover" class="hidden absolute right-0 top-full mt-1.5 w-72 max-w-[calc(100vw-3rem)] p-3 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg bg-white dark:bg-gray-800 text-left z-20">
                   <p class="text-[10px] font-bold uppercase tracking-wide text-gray-400 m-0 mb-1.5">What you wrote last issue</p>
-                  <p id="nl-personal-history-snippet" class="text-xs text-gray-600 dark:text-gray-300 m-0 mb-2 max-h-28 overflow-y-auto leading-relaxed"></p>
-                  <button type="button" id="nl-personal-history-use" class="text-xs text-[#00A89D] font-semibold hover:underline">Use this text</button>
+                  <p id="nl-personal-history-snippet" class="text-xs text-gray-700 dark:text-gray-200 m-0 mb-2 max-h-28 overflow-y-auto leading-relaxed"></p>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" id="nl-personal-history-use" class="text-xs px-3 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition">Use this text</button>
+                    <button type="button" id="nl-personal-history-dismiss" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">Hide</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -6882,9 +7133,9 @@
               <div id="nl-personal-photo-size-wrap" class="hidden mt-2">
                 <div class="flex items-center justify-between gap-2 mb-1">
                   <label for="nl-personal-photo-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Photo size in newsletter</label>
-                  <span id="nl-personal-photo-size-label" class="text-xs font-semibold text-[#00A89D]">Full width (540px)</span>
+                  <span id="nl-personal-photo-size-label" class="text-xs font-semibold text-[#00A89D]">Max size (400px)</span>
                 </div>
-                <input type="range" id="nl-personal-photo-size" min="30" max="100" step="5" value="100"
+                <input type="range" id="nl-personal-photo-size" min="30" max="75" step="5" value="70"
                        class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
                 <div class="flex justify-between text-[10px] text-gray-400 mt-0.5">
                   <span>Smaller</span><span>Full width</span>
@@ -6898,7 +7149,11 @@
                 </div>
                 <p id="nl-personal-photo-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
               </div>
-              <p class="text-xs text-gray-500 mt-1">Appears below your personal note — mention the photo in your update above.</p>
+              <p class="text-xs text-gray-500 mt-1 mb-2">Appears below your personal note — mention the photo in your update above.</p>
+              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p class="m-0 mb-1"><i class="fas fa-lightbulb text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Need a free image link? No account required.</strong></p>
+                <p class="m-0">Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a>, then copy the <strong>Hotlink / Direct link</strong> (not the page URL) and paste it above — that works best in the newsletter. Same host is great for <strong>headshots</strong> and <strong>company logos</strong> anywhere this coach asks for an image URL.</p>
+              </div>
             </div>
             <div>
               <div class="flex items-center mb-2">
@@ -6913,9 +7168,9 @@
               <div id="nl-personal-video-size-wrap" class="hidden mt-2">
                 <div class="flex items-center justify-between gap-2 mb-1">
                   <label for="nl-personal-video-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Video size in newsletter</label>
-                  <span id="nl-personal-video-size-label" class="text-xs font-semibold text-[#00A89D]">Full width (540px)</span>
+                  <span id="nl-personal-video-size-label" class="text-xs font-semibold text-[#00A89D]">Max size (400px)</span>
                 </div>
-                <input type="range" id="nl-personal-video-size" min="30" max="100" step="5" value="100"
+                <input type="range" id="nl-personal-video-size" min="30" max="75" step="5" value="70"
                        class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
                 <div class="flex justify-between text-[10px] text-gray-400 mt-0.5">
                   <span>Smaller</span><span>Full width</span>
@@ -6931,7 +7186,11 @@
                 </div>
                 <p id="nl-personal-video-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
               </div>
-              <p class="text-xs text-gray-500 mt-1">Video appears below note (or photo) — describe it in your update above.</p>
+              <p class="text-xs text-gray-500 mt-1 mb-2">Video appears below note (or photo) — describe it in your update above.</p>
+              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p class="m-0 mb-1"><i class="fas fa-video text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Need a free video link?</strong></p>
+                <p class="m-0">Use a free <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">YouTube</a> account — <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">upload your video or Short</a>, set it to <strong>Unlisted</strong> or <strong>Public</strong>, then paste the share URL above. Thumbnail preview appears when the link is valid.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -7295,13 +7554,16 @@
           </div>
 
           <div class="flex gap-3 flex-wrap justify-center mb-6">
-            <button onclick="downloadNewsletterHTML()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
+            <button type="button" onclick="downloadNewsletterHTML()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               <i class="fas fa-download"></i> Download .html
             </button>
-            <button onclick="copyForOutlook()" class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
+            <button type="button" onclick="copyForOutlook()" class="bg-gradient-to-r from-[#002B5C] to-[#00A89D] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               📋 Copy for Outlook / Email
             </button>
-            <button onclick="if (typeof window.saveNewsletterToVault === 'function') { window.saveNewsletterToVault(); } else if (typeof window.toggleSaveIdea === 'function' && typeof window.getCleanOutlookHTML === 'function') { const clean = window.getCleanOutlookHTML(); const title = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter'; window.toggleSaveIdea(title, clean || 'Newsletter', null, 'newsletter'); if (window.showToast) window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success'); }" class="bg-[#00A89D] hover:bg-[#008F85] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
+            <button type="button" onclick="if(typeof window.openNewsletterNextSteps==='function')window.openNewsletterNextSteps();" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition hover:bg-[#00A89D]/10">
+              <i class="fas fa-list-check"></i> Next Steps
+            </button>
+            <button type="button" onclick="if (typeof window.saveNewsletterToVault === 'function') { window.saveNewsletterToVault(); } else if (typeof window.toggleSaveIdea === 'function' && typeof window.getCleanOutlookHTML === 'function') { const clean = window.getCleanOutlookHTML(); const title = (document.getElementById('nl-title') && document.getElementById('nl-title').value) || 'My Newsletter'; window.toggleSaveIdea(title, clean || 'Newsletter', null, 'newsletter'); if (window.showToast) window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success'); }" class="bg-[#00A89D] hover:bg-[#008F85] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               <i class="far fa-bookmark"></i> Save to Vault (Outlook version)
             </button>
           </div>
@@ -7362,7 +7624,7 @@
             </div>
             <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
               <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#002B5C]/10 flex items-center justify-center">
-                <i class="fas fa-link text-xl text-[#002B5C]"></i>
+                <i class="fas fa-link text-xl text-[#002B5C] dark:text-white"></i>
               </div>
               <div class="font-semibold mb-1">3. Execution + Cross-Tool Growth</div>
               <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Add your own tasks on the fly. Regenerate as life changes. One-click deep links from results into Social scripts, Referral Partner plays, Database nurture, and Events. Save wins directly to My Saved Items.</div>
@@ -7394,65 +7656,31 @@
           </div>
         </div>
 
-        <!-- Preferences Accordion (Inline - replaces old giant modal) -->
-        <div class="accordion mb-8 border border-gray-200 dark:border-gray-600 rounded-3xl overflow-hidden bg-white dark:bg-gray-800">
-            <button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between text-left font-semibold py-4 px-6 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50">
-                <span class="flex-1 text-center">Your Profile Summary (how this plan is personalized)</span>
-                <i class="fas fa-chevron-up text-gray-400"></i>
+        <!-- Single profile strip (plan-style — no dual accordion + snapshot) -->
+        <div id="weekly-profile-strip" class="mb-8 rounded-2xl border border-[#00A89D]/25 bg-[#00A89D]/5 px-4 py-4 sm:px-5">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#00A89D] mb-1.5">
+                <i class="fas fa-user-check"></i>
+                <span>Powered by your profile</span>
+                <span class="font-normal normal-case tracking-normal text-gray-500 dark:text-gray-400">· auto-loaded</span>
+              </div>
+              <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <div><span id="wwp-goal-display" class="text-2xl font-extrabold text-[#002B5C] dark:text-white">8</span> <span class="text-sm font-normal text-gray-500">loan goal</span></div>
+                <div class="text-gray-300 dark:text-gray-600">·</div>
+                <div><span id="wwp-hours-display" class="text-2xl font-extrabold text-[#002B5C] dark:text-white">15–20</span> <span class="text-sm font-normal text-gray-500">hrs/week</span></div>
+                <div class="text-gray-300 dark:text-gray-600">·</div>
+                <div><span id="wwp-focus-display" class="font-bold text-[#F15A29]">Balanced</span></div>
+              </div>
+              <div id="weekly-profile-summary" class="w-full text-sm text-left text-gray-600 dark:text-gray-400">
+                <!-- Dynamically populated from central userProfile -->
+              </div>
+            </div>
+            <button type="button" onclick="if(typeof window.openUserProfile==='function')window.openUserProfile()"
+                    class="shrink-0 text-sm px-5 py-2.5 rounded-full border-2 border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition flex items-center gap-2 font-semibold">
+              <i class="fas fa-cog"></i> <span>Edit profile</span>
             </button>
-            <div class="accordion-content">
-                <div class="p-6">
-                    <div class="w-full bg-gray-50/50 dark:bg-gray-800/40 p-5 rounded-2xl border border-gray-100 dark:border-gray-700/60">
-                      <div id="weekly-profile-summary" class="w-full text-sm text-left">
-                          <!-- Dynamically populated from central userProfile (robust cards) -->
-                      </div>
-                    </div>
-
-                    <div class="mt-6 pt-5 border-t border-gray-200 dark:border-gray-700 bg-[#00A89D]/5 p-4 rounded-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                        <p class="text-[15px] text-gray-700 dark:text-gray-300">
-                            <strong>Tip:</strong> This summary pulls directly from your central profile. Update your preferences anytime.
-                        </p>
-                        <button onclick="openUserProfile()"
-                                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white text-xs font-semibold transition-all whitespace-nowrap self-start md:self-auto">
-                            <i class="fas fa-cog"></i>
-                            <span>Edit My Profile</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <!-- Profile snapshot + customize (merged from former Prospecting Time Blocks) -->
-        <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 mb-8 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-center gap-5">
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i class="fas fa-user-check text-[#00A89D]"></i>
-                        <div class="uppercase tracking-[1.5px] text-xs font-bold text-[#00A89D]">PULLED FROM YOUR PROFILE</div>
-                    </div>
-                    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-lg font-semibold text-gray-900 dark:text-white">
-                        <div><span id="wwp-goal-display" class="text-2xl font-extrabold text-[#002B5C] dark:text-white">8</span> <span class="text-sm font-normal text-gray-500">loan goal</span></div>
-                        <div class="text-gray-300 dark:text-gray-600">•</div>
-                        <div><span id="wwp-hours-display" class="text-2xl font-extrabold text-[#002B5C] dark:text-white">15–20</span> <span class="text-sm font-normal text-gray-500">hrs/week</span></div>
-                        <div class="text-gray-300 dark:text-gray-600">•</div>
-                        <div><span id="wwp-focus-display" class="font-bold text-[#F15A29]">Balanced</span></div>
-                    </div>
-                </div>
-                <button onclick="openUserProfile()" class="flex-shrink-0 text-sm px-6 py-3 rounded-2xl border-2 border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition flex items-center gap-2 font-semibold">
-                    <i class="fas fa-cog"></i> <span>Edit Profile &amp; Hobbies</span>
-                </button>
-            </div>
+          </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 mb-8 shadow-sm">
@@ -7482,9 +7710,9 @@
                 </div>
                 <div class="bg-gradient-to-br from-[#00A89D]/10 to-white dark:to-gray-800 border border-[#00A89D]/30 rounded-2xl p-5">
                     <label class="flex items-start gap-3 cursor-pointer select-none">
-                        <input type="checkbox" id="wwp-weave-hobbies" checked class="w-5 h-5 mt-0.5 accent-[#00A89D] flex-shrink-0">
-                        <div><span class="font-bold text-[#00A89D]"><i class="fas fa-heart mr-1"></i> Blend hobbies &amp; interests</span>
-                        <div class="text-xs text-gray-600 dark:text-gray-300 mt-2">Weave your real life into blocks and tasks for warmer, more sustainable prospecting.</div></div>
+                        <input type="checkbox" id="wwp-weave-hobbies" class="w-5 h-5 mt-0.5 accent-[#00A89D] flex-shrink-0">
+                        <div><span class="font-bold text-[#00A89D]"><i class="fas fa-heart mr-1"></i> Light hobby touch <span class="text-[10px] font-normal text-gray-500">(optional)</span></span>
+                        <div class="text-xs text-gray-600 dark:text-gray-300 mt-2">Off by default. When on, at most 1–2 light personal notes — never hobby-themed weeks or puns.</div></div>
                     </label>
                 </div>
             </div>
@@ -7502,7 +7730,7 @@
               One click turns the guidance above into your personalized 7-day prospecting roadmap — sized to your goals, hours, and style.
             </p>
             <button type="button" id="generate-win-plan-btn"
-                    class="group px-12 py-4 bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white rounded-2xl font-semibold text-lg shadow-xl transition-all flex items-center gap-3 mx-auto hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0"
+                    class="group px-12 py-4 bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white rounded-full font-bold text-lg sm:text-xl shadow-2xl transition-all flex items-center gap-3 mx-auto hover:opacity-95 hover:-translate-y-0.5 active:translate-y-0"
                     aria-label="Build this week's win plan">
                 <i class="fas fa-bolt-lightning group-active:scale-90 transition" aria-hidden="true"></i>
                 <span>Build This Week's Plan</span>
@@ -7830,36 +8058,46 @@
 <script src="js/features/saved-items-library.js?v=20260715-lo-v290"></script>
 <script src="js/features/save-ribbon.js"></script>
 <script src="js/features/equity-scanner.js?v=20260623-lo-v222"></script>
+
+<script src="smart-savings/js/calculator-core.js?v=20260719-ss-restore"></script>
+<script src="smart-savings/js/app.js?v=20260719-ss-bal-white"></script>
+<script src="js/features/smart-savings-scope-css.js?v=20260719-ss-bal-white"></script>
+<script src="js/features/smart-savings-host.js?v=20260720-review"></script>
+<script src="js/features/smart-savings-polish.js?v=20260719-ss-bal-white"></script>
+
 <script src="js/features/calculator.js"></script>
 <script src="js/features/sales-scripts.js?v=20260715-lo-v225"></script>
-<script src="js/features/social-post.js?v=20260715-lo-v276"></script>
+<script src="js/features/social-post.js?v=20260720-empty-posts"></script>
 <script src="js/features/mindset-lab.js"></script>
 <script src="js/data/weekend-plan-policy.js"></script>
-<script src="js/features/weekly-win-plan.js?v=20260715-lo-v225"></script>
+<script src="js/features/weekly-win-plan.js?v=20260720-hobby-restraint"></script>
 <script src="js/features/tool-bridges.js"></script>
 <script src="js/features/prospecting-time-blocks.js"></script>
-<script src="js/features/generation-rules.js?v=20260708-lo-v269"></script>
+<script src="js/features/generation-rules.js?v=20260720-hobby-restraint"></script>
 <script src="js/features/publish-kit.js?v=20260711-lo-v273"></script>
-<script src="js/features/blog-creator.js?v=20260715-lo-v275"></script>
+<script src="js/features/blog-creator.js?v=20260720-p2-hashtag"></script>
 <script src="js/features/referral-rich-modals.js?v=20260623-lo-v222"></script>
 <script src="js/features/legacy-helpers.js?v=20260623-lo-v222"></script>
-<script src="js/features/global-search-deep-index.js?v=20260709-lo-v292"></script>
+<script src="js/features/global-search-deep-index.js?v=20260719-content-hub"></script>
 <script src="js/features/global-search-dynamic-index.js?v=20260709-lo-v292"></script>
-<script src="js/features/global-search-config.js?v=20260709-lo-v292"></script>
-<script src="js/features/global-search.js?v=20260709-lo-v292"></script>
+<script src="js/features/global-search-config.js?v=20260719-content-hub"></script>
+<script src="js/features/global-search.js?v=20260719-content-hub"></script>
 <script src="js/data/newsletter-dad-jokes.js?v=20260625-lo-v231"></script>
 <script src="js/data/newsletter-brain-teasers.js?v=20260625-lo-v233"></script>
 <script src="js/features/newsletter-entertainment.js?v=20260710-lo-engagement-polish-v6"></script>
 <script src="js/features/newsletter-color-bundles.js?v=20260710-lo-v286"></script>
-<script src="js/features/newsletter-generator.js?v=20260715-lo-v307"></script>
-<script src="js/features/newsletter-setup-form.js?v=20260710-lo-setup-v4"></script>
-<script src="js/features/newsletter-wizard.js?v=20260710-lo-wizard-v19"></script>
-<script src="js/features/ai-chat.js?v=20260715-lo-v223"></script>
+<script src="js/features/newsletter-generator.js?v=20260720-lo-media-cap"></script>
+<script src="js/features/newsletter-setup-form.js?v=20260720-last-issue-chip"></script>
+<script src="js/features/newsletter-wizard.js?v=20260720-last-issue-chip"></script>
+<script src="js/features/wizard-a11y.js?v=20260720-polish2"></script>
+<script src="js/features/business-plan-wizard.js?v=20260720-polish2"></script>
+<script src="js/features/coach-mode-switch.js?v=20260720-polish"></script>
+<script src="js/features/ai-chat.js?v=20260720-polish"></script>
 <script src="js/features/underwriting.js?v=20260715-lo-v1"></script>
 <script>window.TRANSLATION_COACH_VARIANT = 'lo';</script>
 <script src="js/features/translation-tool.js?v=20260715-tr-v265"></script>
 <script src="js/features/value-vault.js?v=20260623-lo-v222"></script>
-<script defer src="js/features/onboarding-coach.js?v=20260717-lo-home"></script>
+<!-- onboarding-coach + home-favorites load mid-page (right after #home) for early paint -->
 <script src="js/features/fact-vault-ui.js?v=20260623-lo-v222"></script>
 
 <script defer src="js/features/referral-event-modals.js?v=20260623-lo-v222"></script>
@@ -8123,6 +8361,20 @@
                         <div id="profile-newsletter-color-preview"></div>
                         <p id="profile-newsletter-color-desc" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0"></p>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" for="profile-logo-url">Company Logo URL</label>
+                        <input type="url" id="profile-logo-url" placeholder="https://… or Hotlink from 8upload" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">PNG with transparent background · 400–600px wide (horizontal)</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" for="profile-headshot-url">Professional Headshot URL</label>
+                        <input type="url" id="profile-headshot-url" placeholder="https://… or Hotlink from 8upload" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Square crop · 400×400px minimum · shoulders-up portrait</p>
+                    </div>
+                    <div class="md:col-span-2 rounded-xl border border-[#00A89D]/20 bg-[#00A89D]/5 px-4 py-3">
+                        <p class="text-xs font-semibold text-[#002B5C] dark:text-[#00A89D] m-0 mb-1.5"><i class="fas fa-wand-magic-sparkles mr-1"></i> Branding image tips</p>
+                        <p class="text-[11px] text-gray-600 dark:text-gray-300 m-0 leading-relaxed">Need a free host with no account? Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> and paste the <strong>Hotlink / Direct link</strong> (not the page URL) — that works best for logos, headshots, and newsletter photos. Website or public Drive links also work.</p>
+                    </div>
                 </div>
                 <div class="p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 space-y-3">
                     <div>
@@ -8324,34 +8576,45 @@
         </div>
 
         <!-- Modal Footer -->
-        <div id="profile-full-footer" class="flex-shrink-0 px-4 sm:px-8 py-4 sm:py-6 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-gray-50 dark:bg-gray-800">
-            <div class="flex flex-col gap-2 min-w-0">
-                <div id="profile-save-status" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 transition-opacity">
-                    <i class="fas fa-check text-[#00A89D]"></i>
-                    <span>All changes saved automatically</span>
+        <div id="profile-full-footer" class="flex-shrink-0 px-4 sm:px-8 py-4 sm:py-6 border-t border-gray-200 dark:border-gray-700 flex flex-col gap-3 bg-gray-50 dark:bg-gray-800">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div class="flex flex-col gap-2 min-w-0">
+                    <div id="profile-save-status" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 transition-opacity">
+                        <i class="fas fa-check text-[#00A89D]"></i>
+                        <span>All changes saved automatically</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <button type="button" id="profile-export-data" class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] transition" title="Download profile, plans, and key drafts as JSON">
+                            <i class="fas fa-download mr-1"></i>Export backup
+                        </button>
+                        <button type="button" id="profile-import-data" class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] transition" title="Restore from a previous export">
+                            <i class="fas fa-upload mr-1"></i>Import backup
+                        </button>
+                        <input type="file" id="profile-import-file" accept="application/json,.json" class="hidden">
+                    </div>
                 </div>
-                <div class="flex flex-wrap gap-2 items-center">
-                    <button type="button" id="profile-export-data" class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] transition" title="Download profile, plans, and key drafts as JSON">
-                        <i class="fas fa-download mr-1"></i>Export backup
+                <div class="flex flex-wrap gap-2 sm:gap-3 justify-end items-center">
+                    <button type="button" id="profile-section-back" class="hidden px-4 py-2.5 rounded-2xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-1.5 text-xs opacity-70"></i>Back
                     </button>
-                    <button type="button" id="profile-import-data" class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] transition" title="Restore from a previous export">
-                        <i class="fas fa-upload mr-1"></i>Import backup
+                    <button type="button" id="cancel-profile" class="px-5 py-2.5 rounded-2xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Close</button>
+                    <button type="button" id="save-profile" class="px-6 py-2.5 bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] rounded-2xl font-semibold hover:bg-[#00A89D]/10">Save Preferences</button>
+                    <button type="button" id="profile-section-next" class="px-6 py-2.5 bg-[#00A89D] text-white rounded-2xl font-semibold hover:bg-[#008f85] shadow-sm">
+                        Next section <i class="fas fa-arrow-right ml-1.5 text-xs opacity-90"></i>
                     </button>
-                    <input type="file" id="profile-import-file" accept="application/json,.json" class="hidden">
                 </div>
             </div>
-            <div class="flex gap-3">
-                <button id="cancel-profile" class="px-6 py-2.5 rounded-2xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Close</button>
-                <button id="save-profile" class="px-8 py-2.5 bg-[#00A89D] text-white rounded-2xl font-semibold hover:bg-[#008f85]">Save Preferences</button>
-            </div>
+            <p id="profile-section-nav-hint" class="text-[11px] text-gray-500 dark:text-gray-400 m-0 text-right sm:text-left">
+                Tip: use <strong>Next section</strong> to walk through each tab — or jump with the tabs above.
+            </p>
         </div>
 
     </div>
 </div>
 
-<script src="js/features/user-profile.js?v=20260715-lo-v290"></script>
+<script src="js/features/user-profile.js?v=20260720-profile-tabs-full"></script>
 <script src="js/features/bio-creator.js?v=20260715-lo-v14"></script>
-<script src="js/features/bio-wizard.js?v=20260715-lo-v6"></script>
+<script src="js/features/bio-wizard.js?v=20260720-polish2"></script>
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -9048,9 +9311,9 @@
 <div id="app-version-line" data-app-name="Ultimate Loan Officer Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Ultimate Loan Officer Sales Coach • v… • … • Render
 </div>
-<script defer src="js/features/section-bottom-banners.js?v=20260715-lo-v223"></script>
+<script defer src="js/features/section-bottom-banners.js?v=20260720-review"></script>
 <script defer src="js/features/coach-polish.js?v=20260715-lo-v2"></script>
-<script src="js/app-version.js?v=20260717-lo-home"></script>
+<script src="js/app-version.js?v=20260720-polish"></script>
 
 </body>
 </html>

@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'bioWizardLastStep';
-  const WIZARD_DOM_VERSION = '5';
+  const WIZARD_DOM_VERSION = '6';
   const LOVES_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -372,7 +372,7 @@
     overlay.dataset.bioWizardVersion = WIZARD_DOM_VERSION;
 
     overlay.innerHTML = `
-      <div class="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[92vh] overflow-hidden rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
+      <div class="bg-white dark:bg-gray-900 w-full max-w-3xl max-h-[92vh] overflow-hidden rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
         <div class="shrink-0 border-b border-gray-200 dark:border-gray-700 px-5 sm:px-6 py-4">
           <div class="flex items-start justify-between gap-3 mb-3">
             <div class="min-w-0">
@@ -475,11 +475,11 @@
         </div>
 
         <div class="shrink-0 px-5 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-3">
-          <button type="button" id="bio-wizard-skip" class="hidden text-xs text-gray-500 hover:text-[#00A89D]">Skip personal details</button>
+          <button type="button" id="bio-wizard-skip" class="hidden text-xs font-semibold text-gray-500 hover:text-[#00A89D] transition">Skip personal details</button>
           <div class="flex gap-2 ml-auto">
-            <button type="button" id="bio-wizard-back" class="px-4 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Back</button>
-            <button type="button" id="bio-wizard-next" class="px-6 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-semibold hover:bg-[#008f85]">Continue</button>
-            <button type="button" id="bio-wizard-generate" class="hidden px-6 py-2 text-sm rounded-2xl bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white font-semibold shadow-md">Generate My Bio</button>
+            <button type="button" id="bio-wizard-back" class="px-4 py-2.5 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">Back</button>
+            <button type="button" id="bio-wizard-next" class="px-5 py-2.5 rounded-full bg-[#00A89D] hover:bg-[#008F85] text-white text-sm font-semibold transition">Continue</button>
+            <button type="button" id="bio-wizard-generate" class="hidden px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white text-sm font-bold shadow-md hover:opacity-95 transition">Generate My Bio</button>
           </div>
         </div>
       </div>`;
@@ -495,6 +495,22 @@
     $('bio-wizard-edit-profile')?.addEventListener('click', () => {
       if (typeof window.openUserProfile === 'function') window.openUserProfile(true);
     });
+
+    if (window.CoachWizardA11y && typeof window.CoachWizardA11y.wireWizardA11y === 'function') {
+      window.CoachWizardA11y.wireWizardA11y(
+        () => wizardEl,
+        () => closeBioWizard(),
+        () => wizardEl && !wizardEl.classList.contains('hidden')
+      );
+    } else {
+      document.addEventListener('keydown', (e) => {
+        if (!wizardEl || wizardEl.classList.contains('hidden')) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeBioWizard();
+        }
+      });
+    }
 
     $('bio-wizard-years')?.addEventListener('input', updateWizardYearsHint);
 
@@ -525,6 +541,7 @@
     wizardEl.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     renderStep();
+    if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('bio', 'guided');
   }
 
   function closeBioWizard() {
@@ -533,10 +550,10 @@
     wizardEl.classList.add('hidden');
     wizardEl.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('bio', 'full');
   }
 
   window.openBioWizard = openBioWizard;
   window.closeBioWizard = closeBioWizard;
 
-  console.log('%c[bio-wizard.js] Guided Bio Builder wizard ready', 'color:#00A89D');
 })();

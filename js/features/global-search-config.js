@@ -22,6 +22,7 @@
     objection: ['partner objection', 'referral objection', 'pushback', 'rebuttal'],
     rates: ['rate', 'interest rate', 'too high', 'high rates'],
     blog: ['article', 'seo', 'content creator'],
+    content: ['content studio', 'content hub', 'studio', 'what to post', 'create content'],
     onboarding: ['onboard', 'new partner', 'new realtor', '60 day', '30 day'],
   };
 
@@ -61,6 +62,15 @@
       group: 'Quick Actions',
     },
     {
+      id: 'action-content-studio',
+      title: 'Content Studio',
+      subtitle: 'Strategy, posts, blog, newsletter & bio',
+      icon: 'fas fa-pen-nib',
+      keywords: ['content', 'studio', 'hub', 'social', 'blog', 'newsletter', 'post'],
+      sectionId: 'content-hub',
+      group: 'Quick Actions',
+    },
+    {
       id: 'action-coach',
       title: 'AI Coach',
       subtitle: 'Profile-aware conversation coach',
@@ -96,6 +106,15 @@
       sectionId: 'underwriting-search',
       group: 'Quick Actions',
     },
+    {
+      id: 'action-smart-savings',
+      title: 'Smart Savings Calculator',
+      subtitle: 'Refi & debt scenarios for client meetings',
+      icon: 'fas fa-piggy-bank',
+      keywords: ['smart savings', 'refi', 'refinance', 'debt consolidation', 'calculator'],
+      sectionId: 'smart-savings',
+      group: 'Quick Actions',
+    },
   ];
 
   const realtorQuickActions = [
@@ -106,6 +125,15 @@
       icon: 'fas fa-bookmark',
       keywords: ['saved', 'library', 'bookmark'],
       action: 'saved',
+      group: 'Quick Actions',
+    },
+    {
+      id: 'action-content-studio',
+      title: 'Content Studio',
+      subtitle: 'Strategy, posts, blog, newsletter, listings & bio',
+      icon: 'fas fa-pen-nib',
+      keywords: ['content', 'studio', 'hub', 'social', 'blog', 'newsletter', 'listing'],
+      sectionId: 'content-hub',
       group: 'Quick Actions',
     },
     {

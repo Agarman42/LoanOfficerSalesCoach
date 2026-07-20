@@ -428,7 +428,7 @@
 
 Plan Style Chosen: ${style}
 
-DEEP PERSONALIZATION FROM PROFILE (make every section feel written exclusively for this person — hobbies, family, and personality must be woven naturally and specifically into tactics, motivation, and examples):
+PERSONALIZATION FROM PROFILE (sound like this person — but do NOT overdo hobbies/passions):
 - Name: ${richProfile.name}
 - Email: ${richProfile.email || profile.email || 'not specified'}
 - Years in business: ${profile.years || 'not specified'}
@@ -436,9 +436,10 @@ DEEP PERSONALIZATION FROM PROFILE (make every section feel written exclusively f
 - Preferred Tone for communication: ${profile.tone || richProfile.tone || 'warm and professional'}
 - Key Challenges they face: ${(profile.challenges || []).join(', ') || 'general growth and consistency'}
 - Target Partner Types: ${(profile.partnerTypes || []).join(', ') || 'realtors and local businesses'}
-- Hobbies & Passions (integrate these authentically into relationship-building tactics, content ideas, motivation, and workarounds — this is critical for the plan to feel alive and stickable): ${[...(profile.hobbies || []), profile.hobbiesOther].filter(Boolean).join(', ') || (hobbiesList.length ? hobbiesList.join(', ') : 'not specified')}
-- Preferred Prospecting Activities (build the plan around these where possible): ${[...(profile.activities || []), ...(richProfile.preferredActivities || [])].filter(Boolean).join(', ') || (activitiesList.length ? activitiesList.join(', ') : 'balanced mix')}
+- Hobbies & Passions (OPTIONAL seasoning only — at most a few tactics/content angles may use these; never force hobby puns or make the whole plan about one hobby): ${[...(profile.hobbies || []), profile.hobbiesOther].filter(Boolean).join(', ') || (hobbiesList.length ? hobbiesList.join(', ') : 'not specified')}
+- Preferred Prospecting Activities (prefer these activity styles over inventing hobby-only plays): ${[...(profile.activities || []), ...(richProfile.preferredActivities || [])].filter(Boolean).join(', ') || (activitiesList.length ? activitiesList.join(', ') : 'balanced mix')}
 - Family / Life notes: ${profile.family || 'not specified'}
+${typeof window.buildHobbyRestraintPromptBlock === 'function' ? window.buildHobbyRestraintPromptBlock() : ''}
 
 BUSINESS NUMBERS (be precise with the math, show realistic lead/partner requirements, and ground everything in their actual situation):
 - Target Income: ${inputs.income || 'user will calculate from closings'}
@@ -454,7 +455,7 @@ BUSINESS NUMBERS (be precise with the math, show realistic lead/partner requirem
 REQUIRED STRUCTURE — Use these exact markdown headings in this order. The plan must read like a premium, team-ready business document while preserving the human elements that make it special and executable:
 
 # Your 2026 Power Theme
-One memorable, powerful theme phrase inspired by their hobbies + personality + style. 2-3 sentences explaining exactly why it fits them and will keep them motivated.
+One memorable theme phrase grounded in their business goals, personality, and preferred work style. Hobbies may lightly inspire the wording but the theme must NOT be a hobby brand or pun (e.g. avoid golf/food/fitness slogans). 2-3 sentences on why it fits and keeps them motivated.
 
 ## Executive Snapshot
 Clear, inspiring summary of the year: target closings, volume, income. Include the key math (leads, partners, conversion needed). Grounded encouragement.
@@ -473,16 +474,16 @@ Strategic overview tailored to their style, challenges, and real life. Then a de
 ### Q4
 
 ## Weekly Rhythm & Scorecard
-Sustainable weekly operating system Mon–Fri: prospecting touches, partner touches, database touches, personal brand activity. Saturdays and Sundays are rest, family, and recharge — optional light prep only, never networking events or heavy outreach. Weave in 1-2 natural references to their hobbies or life. End with 3 non-negotiables they will protect every single week (weekdays).
+Sustainable weekly operating system Mon–Fri: prospecting touches, partner touches, database touches, personal brand activity. Saturdays and Sundays are rest, family, and recharge — optional light prep only, never networking events or heavy outreach. Optional: at most one light life/hobby reference if natural — not required. End with 3 non-negotiables they will protect every single week (weekdays).
 
 ## Tactics That Actually Fit You
-10 highly specific, copy-paste-ready tactics. Every single one must feel custom-designed for their hobbies, personality, preferred activities, family situation, or challenges. Prioritize quality and relevance over quantity. This is a star section.
+10 highly specific, copy-paste-ready tactics. Most should fit their partner types, preferred activities, challenges, and numbers. At most 2–3 of the 10 may lightly use a hobby for rapport or content — the rest must work without hobbies. No hobby puns. Prioritize quality and relevance. This is a star section.
 
 ## Tool Ties — Execute This Plan Inside Your Sales Coach
 Actionable, specific bridges to the rest of the toolkit (use real names like Personal pillar, Evergreen vault, A+ tier, Value Vault, Weekly Win Plan, etc.):
-- Social: 2-3 exact content angles or story ideas from their Power Theme/hobbies for the Personal pillar or Evergreen vault.
+- Social: 2-3 content angles from Power Theme and/or market/partners; at most one may lean on a hobby for a Personal pillar post.
 - Referral Partners: 1-2 named High-Impact Plays or Tier strategies to run this quarter with their specific partner types.
-- Value Vault / Gifts: 2 pop-by or appreciation ideas directly tied to one of their hobbies — instruct them to save each in the Value Vault.
+- Value Vault / Gifts: 2 pop-by or appreciation ideas (one may relate to a hobby if natural; the other should be professional/value-based) — instruct them to save each in the Value Vault.
 - Book Vault & Mindset Lab: The single best book + one mindset principle for their biggest challenge, with how to apply it.
 - Prospecting Time Blocks + Weekly Win: How to convert one quarterly milestone into protected Weekly Win time blocks.
 - Database Nurturing: A simple, sustainable system matched to their current database size.
@@ -491,18 +492,18 @@ Actionable, specific bridges to the rest of the toolkit (use real names like Per
 A prioritized, concrete 90-day execution calendar pulled from the Tactics and Tool Ties. Break into First 30 Days (ignition momentum), Days 31-60, and Days 61-90. Be extremely specific with days, people, and actions ("Tuesday: Run Coffee + Value Drop with top 3 A+ realtors"). Keep it exciting and doable.
 
 ## Personal Fuel & Accountability
-Motivating, personalized pep talk in their preferred tone. Reference their Power Theme, a specific hobby, or family note for emotional connection. Add 1-2 accountability mechanisms that will actually work for their personality and life.
+Motivating, personalized pep talk in their preferred tone. Reference their Power Theme and goals; a single optional hobby or family note is fine if natural — do not force it. Add 1-2 accountability mechanisms that fit their personality and life.
 
 ## Obstacles, Energy & Sustainable Workarounds
-Anticipate 3 likely roadblocks based on their challenges + real life (time, family, energy, etc.). For each, give a practical workaround that leverages one of their hobbies, strengths, or preferred activities.
+Anticipate 3 likely roadblocks based on their challenges + real life (time, family, energy, etc.). For each, give a practical workaround using strengths, preferred activities, systems, or support — hobbies only if they genuinely help, not as a gimmick.
 
 ## Key Success Metrics & Tracking System
 Define 5-7 leading and lagging KPIs they will track (e.g. weekly conversations, new partners added, specific plays run, database touches). Suggest a simple tracking method (spreadsheet, Weekly Win blocks, or notes in the app).
 
 ## 12-Month Strategic Calendar (High Level)
-A bird's-eye view of the year: what the big seasons and focus areas look like month-by-month or quarter-by-quarter. Tie major pushes to their hobbies or life events where relevant.
+A bird's-eye view of the year: what the big seasons and focus areas look like month-by-month or quarter-by-quarter. Tie major pushes to business seasons and partner rhythms; life events only if clearly relevant — do not schedule the year around hobbies.
 
-Make the entire plan feel like an elite, professional business document that a loan officer would be proud to use themselves or hand to a team member — while staying warm, specific, motivating, and unmistakably personal. Use their exact hobbies, personality, challenges, and numbers throughout. Be ruthlessly specific and copy-paste ready. Never generic or fluffy. Output ONLY clean markdown with the exact headings above — nothing else before or after.`;
+Make the entire plan feel like an elite, professional business document — warm and personal without overdoing hobbies. Lead with numbers, partners, and discipline; use personality and (sparingly) hobbies as flavor. Be ruthlessly specific and copy-paste ready. Never generic or fluffy. Output ONLY clean markdown with the exact headings above — nothing else before or after.`;
 
     // Note: The form also has plan-notes for extra context, hobbiesList, activitiesList already collected.
 
@@ -981,7 +982,8 @@ function renderWeeklyCustomTaskTimeUI(dayName, blockIndex, taskIndex, task, cust
 
 function getWeeklyCustomizePrefs() {
   const hours = parseInt(document.getElementById('wwp-hours')?.value) || 15;
-  const weaveHobbies = document.getElementById('wwp-weave-hobbies')?.checked !== false;
+  // Default OFF when checkbox missing; only weave if user explicitly checks
+  const weaveHobbies = !!document.getElementById('wwp-weave-hobbies')?.checked;
   const focusAreas = [];
   const emphasisMap = [
     ['wwp-emphasis-realtors', 'Realtor outreach'],
@@ -1153,7 +1155,9 @@ User Profile:
 - This week they want to block approximately ${hours} hours total.
 
 Emphasis this week: ${focusAreas.length ? focusAreas.join(', ') : 'balanced across all areas'}
-${weaveHobbies ? 'Naturally weave in their hobbies where it makes sense for relationship building.' : ''}
+${weaveHobbies
+    ? 'Light hobby touch (user opted in): at most 1–2 weekly blocks or notes may lightly reference a hobby for rapport — never hobby puns, never make the whole week about one passion. Most blocks stay pipeline/partner focused.'
+    : 'Do NOT weave hobbies into blocks or tasks unless a task is explicitly personal/lifestyle. Keep prospecting professional and activity-based.'}
 ${annualBridge}
 
 ${typeof window.getWeekendPlanRules === 'function' ? window.getWeekendPlanRules() : ''}
@@ -1675,7 +1679,7 @@ async function generateWeeklyPlan(options = {}) {
                             <div><strong>Personal + Business mix:</strong> Top producers blend value touches with genuine relationship building.</div>
                         </div>
                         <div class="flex gap-3">
-                            <i class="fas fa-chart-line text-[#002B5C] mt-0.5"></i>
+                            <i class="fas fa-chart-line text-[#002B5C] dark:text-white mt-0.5"></i>
                             <div><strong>Personalized to you:</strong> Your plan is built around your actual schedule, goals, and strengths.</div>
                         </div>
                     </div>
@@ -3378,41 +3382,40 @@ function renderExtendedProfileInfo() {
 
   const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
   const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : {};
+  const esc = (s) => String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+  const chip = (label, value) => {
+    if (!value) return '';
+    const v = String(value).trim();
+    if (!v) return '';
+    // Compact chip for the profile strip
+    return `<span class="inline-flex items-center gap-1 max-w-full px-2 py-0.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300"><span class="text-gray-400 font-medium shrink-0">${esc(label)}</span><span class="truncate font-semibold text-[#002B5C] dark:text-white">${esc(v)}</span></span>`;
+  };
 
   const parts = [];
-
-  const intro = p.intro || eff.intro || '';
-  if (intro) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Intro:</span> ${intro}</div>`);
-
   const market = p.location || p.localArea || p.market || eff.localArea || '';
-  if (market) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Market:</span> ${market}</div>`);
-
   const focus = p.focusLabel || p.focus || eff.focus || '';
-  if (focus) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Focus:</span> ${focus}</div>`);
-
   const database = p.databaseSizeLabel || p.databaseSize || eff.databaseSizeLabel || eff.databaseSize || '';
-  if (database) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Database:</span> ${database}</div>`);
-
-  const partnerFocus = p.partnerFocus || eff.partnerFocus || '';
-  if (partnerFocus) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Partner focus:</span> ${partnerFocus}</div>`);
-
-  const challenges = (p.challenges || []).join(', ') || (eff.challenges || []).join(', ');
-  if (challenges) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Challenges:</span> ${challenges}</div>`);
-
-  const personality = p.personality || eff.personality || '';
+  const challenges = (p.challenges || []).slice(0, 2).join(', ') || (eff.challenges || []).slice(0, 2).join(', ');
+  const hobbies = (p.hobbies || []).slice(0, 3).join(', ');
+  const activities = (p.activities || []).slice(0, 2).join(', ');
   const tone = p.tone || eff.tone || '';
-  if (personality || tone) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Personality/Tone:</span> ${[personality, tone].filter(Boolean).join(' • ')}</div>`);
 
-  const partnerTypes = (p.partnerTypes || []).join(', ') || (eff.partnerTypes || []).join(', ');
-  if (partnerTypes) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Focus Partners:</span> ${partnerTypes}</div>`);
+  parts.push(chip('Market', market));
+  parts.push(chip('Focus', focus));
+  parts.push(chip('Database', database));
+  parts.push(chip('Hobbies', hobbies));
+  parts.push(chip('Activities', activities));
+  parts.push(chip('Tone', tone));
+  parts.push(chip('Challenges', challenges));
 
-  const family = p.family || '';
-  if (family) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Life/Family:</span> ${family}</div>`);
-
-  const voice = (p.voiceTraits || []).join(', ');
-  if (voice) parts.push(`<div><span class="font-semibold text-[#002B5C] dark:text-white">Voice:</span> ${voice}</div>`);
-
-  container.innerHTML = parts.length ? parts.join('') : '<div class="text-gray-400">Complete your profile for even richer personalization (challenges, voice, partners, etc. all feed the plan).</div>';
+  const html = parts.filter(Boolean).join('');
+  container.innerHTML = html
+    || '<span class="text-gray-400 text-[11px]">Complete your profile for richer plan personalization.</span>';
 }
 
 window.renderExtendedProfileInfo = renderExtendedProfileInfo;window.copyPlanFormatted = copyPlanFormatted;
@@ -3692,7 +3695,7 @@ function updatePlanLiveInsight() {
     html += `<div class="flex items-center gap-2"><i class="fas fa-comments text-[#00A89D]"></i> <span><strong class="tabular-nums">${weeklyConvos}</strong> focused convos/week on avg — easy when you use the activities you picked.</span></div>`;
   }
   if (partnerGrowth > 0) {
-    html += `<div class="flex items-center gap-2"><i class="fas fa-user-plus text-[#002B5C]"></i> <span>Adding <strong class="tabular-nums">${partnerGrowth}</strong> solid new partners this year changes everything.</span></div>`;
+    html += `<div class="flex items-center gap-2"><i class="fas fa-user-plus text-[#002B5C] dark:text-white"></i> <span>Adding <strong class="tabular-nums">${partnerGrowth}</strong> solid new partners this year changes everything.</span></div>`;
   }
   html += `</div><div class="text-[11px] mt-1 text-gray-500">The AI will build the plan around your real capacity and what you enjoy — no heroic sprints required.</div>`;
   if (!closings && !weeklyConvos) html = 'Nice numbers. The AI will turn these into a plan that respects your actual schedule and personality.';

@@ -1846,9 +1846,14 @@ const persistentFields = [
     'nl-direction-market', 'nl-direction-industry', 'nl-direction-local', 'nl-direction-recipes'
 ];
 
-const NL_MEDIA_SIZE_DEFAULT = 100;
+// OUTLOOK PASTE (2026-07-20, confirmed): oversized personal photo/video (full ~540px)
+// mis-formats desktop Outlook paste. Caps below fixed it — see docs/NEWSLETTER-OUTLOOK-PASTE.md.
+// Do NOT raise MAX/MAX_PX to “full card width” without re-testing Outlook desktop paste.
+const NL_MEDIA_SIZE_DEFAULT = 70;
 const NL_MEDIA_SIZE_MIN = 30;
-const NL_MEDIA_SIZE_MAX = 100;
+const NL_MEDIA_SIZE_MAX = 75;
+/** Absolute max rendered width (px) for personal photo / video thumb in email HTML */
+const NL_MEDIA_MAX_PX = 400;
 const NL_PHOTO_SIZE_DEFAULT = NL_MEDIA_SIZE_DEFAULT;
 const NL_PHOTO_SIZE_MIN = NL_MEDIA_SIZE_MIN;
 const NL_PHOTO_SIZE_MAX = NL_MEDIA_SIZE_MAX;
@@ -1911,13 +1916,14 @@ function getPersonalPhotoWidthPercent() {
 }
 
 function getPersonalPhotoWidthPx() {
-    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    const fromPct = Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    return Math.min(NL_MEDIA_MAX_PX, Math.max(120, fromPct));
 }
 
 function formatPersonalPhotoSizeLabel() {
     const pct = getPersonalPhotoWidthPercent();
     const px = getPersonalPhotoWidthPx();
-    if (pct >= 100) return `Full width (${px}px)`;
+    if (pct >= NL_PHOTO_SIZE_MAX) return `Max size (${px}px)`;
     return `${pct}% (${px}px)`;
 }
 
@@ -1931,9 +1937,25 @@ function buildPersonalPhotoInsert(photoUrl) {
 </table>`;
 }
 
+function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
+    if (!el) return;
+    el.max = String(maxPct);
+    el.min = String(NL_MEDIA_SIZE_MIN);
+    let v = parseInt(el.value, 10);
+    if (Number.isNaN(v)) v = defaultPct;
+    if (v > maxPct) {
+        el.value = String(maxPct);
+        try { localStorage.setItem(el.id, String(maxPct)); } catch (e) { /* ignore */ }
+    } else if (v < NL_MEDIA_SIZE_MIN) {
+        el.value = String(defaultPct);
+    }
+}
+
 function updatePersonalPhotoSizeUI() {
     const sizeWrap = document.getElementById('nl-personal-photo-size-wrap');
     const labelEl = document.getElementById('nl-personal-photo-size-label');
+    const sizeEl = document.getElementById('nl-personal-photo-size');
+    clampPersonalMediaSizeSlider(sizeEl, NL_PHOTO_SIZE_MAX, NL_PHOTO_SIZE_DEFAULT);
     const photoEnabled = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
     if (sizeWrap) sizeWrap.classList.toggle('hidden', !photoEnabled);
     if (labelEl) labelEl.textContent = formatPersonalPhotoSizeLabel();
@@ -1964,19 +1986,22 @@ function getPersonalVideoWidthPercent() {
 }
 
 function getPersonalVideoWidthPx() {
-    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalVideoWidthPercent() / 100);
+    const fromPct = Math.round(NL_CARD_CONTENT_WIDTH * getPersonalVideoWidthPercent() / 100);
+    return Math.min(NL_MEDIA_MAX_PX, Math.max(120, fromPct));
 }
 
 function formatPersonalVideoSizeLabel() {
     const pct = getPersonalVideoWidthPercent();
     const px = getPersonalVideoWidthPx();
-    if (pct >= 100) return `Full width (${px}px)`;
+    if (pct >= NL_MEDIA_SIZE_MAX) return `Max size (${px}px)`;
     return `${pct}% (${px}px)`;
 }
 
 function updatePersonalVideoSizeUI() {
     const sizeWrap = document.getElementById('nl-personal-video-size-wrap');
     const labelEl = document.getElementById('nl-personal-video-size-label');
+    const sizeEl = document.getElementById('nl-personal-video-size');
+    clampPersonalMediaSizeSlider(sizeEl, NL_MEDIA_SIZE_MAX, NL_MEDIA_SIZE_DEFAULT);
     const videoEnabled = !!document.getElementById('nl-include-video')?.checked && !!document.getElementById('nl-personal')?.checked;
     if (sizeWrap) sizeWrap.classList.toggle('hidden', !videoEnabled);
     if (labelEl) labelEl.textContent = formatPersonalVideoSizeLabel();
@@ -4854,10 +4879,10 @@ function copyForOutlook() {
   function parsePersonalMediaWidthPx(imgAttrs, fallbackPx) {
       const s = String(imgAttrs || '');
       const styleW = s.match(/width:\s*(\d+)px/i);
-      if (styleW) return Math.min(parseInt(styleW[1], 10), NL_CARD_CONTENT_WIDTH);
+      if (styleW) return Math.min(parseInt(styleW[1], 10), NL_MEDIA_MAX_PX);
       const attrW = s.match(/\bwidth=["'](\d+)["']/i);
-      if (attrW) return Math.min(parseInt(attrW[1], 10), NL_CARD_CONTENT_WIDTH);
-      return fallbackPx;
+      if (attrW) return Math.min(parseInt(attrW[1], 10), NL_MEDIA_MAX_PX);
+      return Math.min(fallbackPx, NL_MEDIA_MAX_PX);
   }
 
   function resolvePersonalPhotoWidthPx(imgAttrs) {

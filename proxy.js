@@ -5,6 +5,13 @@ try {
   // dotenv optional on hosted (env vars come from the platform)
 }
 
+// Sync Smart Savings LO assets (refinance calculator → smart-savings/) if source is present
+try {
+  require('./smart-savings/_boot_sync.cjs').sync();
+} catch (e) {
+  // non-fatal — directory may already be fully checked in
+}
+
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -60,14 +67,55 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Health first (Render / monitors) — never blocked by static
 app.get('/api/health', (_req, res) => {
+  const rawKey = String(process.env.XAI_API_KEY || process.env.GROK_API_KEY || '').trim();
+  // Real xAI keys are long (xai-…); short/placeholder values make AI calls fail with 400
+  const keyLooksValid = rawKey.startsWith('xai-') && rawKey.length >= 40;
   res.status(200).json({
     ok: true,
     service: 'lo-sales-coach-proxy',
-    hasServerKey: !!(process.env.XAI_API_KEY || process.env.GROK_API_KEY),
+    hasServerKey: !!rawKey,
+    keyLooksValid,
+    keyHint: !rawKey
+      ? 'No XAI_API_KEY in env — set it in .env and restart proxy'
+      : keyLooksValid
+        ? 'Server key present and looks like a real xai- key'
+        : 'Server key is set but looks like a placeholder (too short). Put a real key from https://console.x.ai in .env and restart proxy.js',
     node: process.version,
     time: new Date().toISOString()
   });
 });
+
+// Optional: refinance calculator source (dev) for smart-savings until assets are synced in-tree
+const REFI_SRC =
+  process.env.SMART_SAVINGS_SRC ||
+  path.join(path.dirname(ROOT), '..', 'refinance calculators', '2026-07-16-baa3a2de');
+// Prefer absolute path used by worktrees on this machine
+const REFI_SRC_CANDIDATES = [
+  process.env.SMART_SAVINGS_SRC,
+  '/home/adam/.grok/worktrees/refinance calculators/2026-07-16-baa3a2de',
+  REFI_SRC
+].filter(Boolean);
+const fs = require('fs');
+for (const candidate of REFI_SRC_CANDIDATES) {
+  try {
+    if (fs.existsSync(path.join(candidate, 'js', 'app.js'))) {
+      app.use(
+        '/__refi_src',
+        express.static(candidate, {
+          index: false,
+          dotfiles: 'ignore',
+          setHeaders(res) {
+            res.setHeader('Cache-Control', 'no-store');
+          }
+        })
+      );
+      console.info('[smart-savings] mounted calculator source at /__refi_src from', candidate);
+      break;
+    }
+  } catch (e) {
+    /* ignore */
+  }
+}
 
 // Static app files — do not expose node_modules / .git / env
 app.use(

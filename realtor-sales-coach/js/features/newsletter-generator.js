@@ -2795,9 +2795,14 @@ const MODULE_PADDING = 20;      // consistent spacing between modules
 const HEADER_HEIGHT = 60;       // recommended for headers (used if needed)
 
 // === NEWSLETTER UI PARITY (LO) — photo/video sizing, char meter, preflight ===
-const NL_MEDIA_SIZE_DEFAULT = 100;
+// OUTLOOK PASTE (2026-07-20, confirmed): oversized personal photo/video (full ~540px)
+// mis-formats desktop Outlook paste. Caps below fixed it — see docs/NEWSLETTER-OUTLOOK-PASTE.md.
+// Same rule as LO coach. Do NOT raise MAX/MAX_PX without re-testing Outlook desktop paste.
+const NL_MEDIA_SIZE_DEFAULT = 70;
 const NL_MEDIA_SIZE_MIN = 30;
-const NL_MEDIA_SIZE_MAX = 100;
+const NL_MEDIA_SIZE_MAX = 75;
+/** Absolute max rendered width (px) for personal photo / video thumb in email HTML */
+const NL_MEDIA_MAX_PX = 400;
 const NL_PHOTO_SIZE_DEFAULT = NL_MEDIA_SIZE_DEFAULT;
 const NL_PHOTO_SIZE_MIN = NL_MEDIA_SIZE_MIN;
 const NL_PHOTO_SIZE_MAX = NL_MEDIA_SIZE_MAX;
@@ -2859,13 +2864,14 @@ function getPersonalPhotoWidthPercent() {
 }
 
 function getPersonalPhotoWidthPx() {
-    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    const fromPct = Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    return Math.min(NL_MEDIA_MAX_PX, Math.max(120, fromPct));
 }
 
 function formatPersonalPhotoSizeLabel() {
     const pct = getPersonalPhotoWidthPercent();
     const px = getPersonalPhotoWidthPx();
-    if (pct >= 100) return `Full width (${px}px)`;
+    if (pct >= NL_PHOTO_SIZE_MAX) return `Max size (${px}px)`;
     return `${pct}% (${px}px)`;
 }
 
@@ -2879,9 +2885,25 @@ function buildPersonalPhotoInsert(photoUrl) {
 </table>`;
 }
 
+function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
+    if (!el) return;
+    el.max = String(maxPct);
+    el.min = String(NL_MEDIA_SIZE_MIN);
+    let v = parseInt(el.value, 10);
+    if (Number.isNaN(v)) v = defaultPct;
+    if (v > maxPct) {
+        el.value = String(maxPct);
+        try { localStorage.setItem(el.id, String(maxPct)); } catch (e) { /* ignore */ }
+    } else if (v < NL_MEDIA_SIZE_MIN) {
+        el.value = String(defaultPct);
+    }
+}
+
 function updatePersonalPhotoSizeUI() {
     const sizeWrap = document.getElementById('nl-personal-photo-size-wrap');
     const labelEl = document.getElementById('nl-personal-photo-size-label');
+    const sizeEl = document.getElementById('nl-personal-photo-size');
+    clampPersonalMediaSizeSlider(sizeEl, NL_PHOTO_SIZE_MAX, NL_PHOTO_SIZE_DEFAULT);
     const photoEnabled = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
     if (sizeWrap) sizeWrap.classList.toggle('hidden', !photoEnabled);
     if (labelEl) labelEl.textContent = formatPersonalPhotoSizeLabel();
@@ -2911,19 +2933,22 @@ function getPersonalVideoWidthPercent() {
 }
 
 function getPersonalVideoWidthPx() {
-    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalVideoWidthPercent() / 100);
+    const fromPct = Math.round(NL_CARD_CONTENT_WIDTH * getPersonalVideoWidthPercent() / 100);
+    return Math.min(NL_MEDIA_MAX_PX, Math.max(120, fromPct));
 }
 
 function formatPersonalVideoSizeLabel() {
     const pct = getPersonalVideoWidthPercent();
     const px = getPersonalVideoWidthPx();
-    if (pct >= 100) return `Full width (${px}px)`;
+    if (pct >= NL_MEDIA_SIZE_MAX) return `Max size (${px}px)`;
     return `${pct}% (${px}px)`;
 }
 
 function updatePersonalVideoSizeUI() {
     const sizeWrap = document.getElementById('nl-personal-video-size-wrap');
     const labelEl = document.getElementById('nl-personal-video-size-label');
+    const sizeEl = document.getElementById('nl-personal-video-size');
+    clampPersonalMediaSizeSlider(sizeEl, NL_MEDIA_SIZE_MAX, NL_MEDIA_SIZE_DEFAULT);
     const videoEnabled = !!document.getElementById('nl-include-video')?.checked && !!document.getElementById('nl-personal')?.checked;
     if (sizeWrap) sizeWrap.classList.toggle('hidden', !videoEnabled);
     if (labelEl) labelEl.textContent = formatPersonalVideoSizeLabel();
@@ -4306,13 +4331,13 @@ async function generateNewsletter(feedback = '') {
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
-                'AGENT PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* agent. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
+                'AGENT PROFILE & VOICE CONTEXT (use for overall tone, local flavor, and relatable language — NOT for personal update facts. The personal note uses only user-typed Personal Update text. Blend voice naturally elsewhere; do not force profile hobbies/challenges into the personal section):',
                 '- Name: ' + (p.name || ''),
                 '- Email: ' + (p.email || p.workEmail || ''),
                 '- Personality / lifestyle: ' + (p.personality || ''),
                 '- Voice traits: ' + ((p.voiceTraits && p.voiceTraits.length) ? p.voiceTraits.join(', ') : ''),
                 '- Preferred tone: ' + (p.tone || document.getElementById('nl-tone').value || 'warm and professional'),
-                '- Hobbies & passions (weave naturally for authenticity in personal note or relatable examples): ' + ((p.hobbies && p.hobbies.length) ? p.hobbies.join(', ') : (p.hobbiesOther || p['hobbies-other'] || '')),
+                '- Hobbies & passions (optional seasoning for other sections only — never invent into the personal note): ' + ((p.hobbies && p.hobbies.length) ? p.hobbies.join(', ') : (p.hobbiesOther || p['hobbies-other'] || '')),
                 '- Key challenges they help clients with: ' + ((p.challenges && p.challenges.length) ? p.challenges.join(', ') : ''),
                 '- Primary focus style: ' + (p.focus || ''),
                 '- Years in business / team: ' + (p.years || '') + (p.team ? ' / ' + p.team : ''),
@@ -4326,7 +4351,7 @@ async function generateNewsletter(feedback = '') {
                     ? '- Industry News section (ONLY if included): ALWAYS include 1-2 HYPERLINKED sources in the same Sources paragraph format as Market Updates.'
                     : '- Industry News is EXCLUDED — do not create an Industry section.'),
                 (selections.personal
-                    ? '- PERSONAL UPDATE: Rewrite/polish ONLY the raw personal update input — warm, relatable, newsletter-perfect. Do NOT invent personal details not in the user input.'
+                    ? '- PERSONAL UPDATE: Rewrite/polish ONLY the raw personal update input the user provided — warm, relatable, newsletter-perfect. Do NOT invent personal details, hobbies, family facts, or wins that are not in that input.'
                     : '- PERSONAL UPDATE: User did not check Personal Update — skip the entire personal note block.'),
                 '- PERSONAL NOTE TITLE RULE (only when Personal Update is included): Title exactly "A Note From [Name]" using ONLY THE FIRST NAME from the Name field.',
                 (selections.personal && (selections.includePhoto || selections.includeVideo)
@@ -4725,15 +4750,25 @@ function downloadNewsletterHTML() {
     window.notifyUser('Newsletter downloaded! Double-click the file to preview.', 'success', 3200);
 }
 
+/**
+ * Simple LO-style Outlook body wrap.
+ * Do NOT stack/split modules or peel/rebuild footers here — those rewrites caused
+ * partial paste (footer-only / referral+disclaimer only). See docs/NEWSLETTER-OUTLOOK-PASTE.md.
+ */
 function wrapBodyForOutlookPaste(html) {
     const bodyMatch = String(html || '').match(/^([\s\S]*?<body[^>]*>)([\s\S]*)(<\/body>[\s\S]*)$/i);
     if (!bodyMatch) return html;
     let inner = bodyMatch[2].trim();
     if (/data-nl-outlook-body\s*=\s*["']1["']/i.test(inner)) return html;
-    inner = stackOutlookBodyModules(inner);
+    inner = `<table role="presentation" data-nl-outlook-body="1" width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;background:#f4f4f4;"><tr><td align="center" style="padding:0;margin:0;">${inner}</td></tr></table>`;
     return bodyMatch[1] + inner + bodyMatch[3];
 }
 
+/**
+ * Copy path aligned with LO coach getCleanOutlookHTML:
+ * light cleanup only (hero, card padding, media caps, module widths, center rows) + simple body wrap.
+ * Intentionally skips hardenNewsletterForOutlookPaste / stackOutlookBodyModules / peelAndRebuildOutlookFooter.
+ */
 function getCleanOutlookHTML() {
     const rawEl = document.getElementById('nl-html-raw');
     if (!rawEl || !rawEl.value) {
@@ -4742,13 +4777,15 @@ function getCleanOutlookHTML() {
 
     let cleanHTML = rawEl.value;
 
-    if (!/data-nl-signature-block/i.test(cleanHTML)) {
+    // Ensure signature/referral/disclaimer exist when generation skipped branding post-process
+    if (!/data-nl-signature-block/i.test(cleanHTML) && !/data-nl-disclaimer-block/i.test(cleanHTML)) {
         try {
             cleanHTML = stripReferralFromBody(cleanHTML);
             cleanHTML = injectAgentBranding(cleanHTML);
         } catch (e) {}
     }
 
+    // === HERO IMAGE - Light gray background on sides + centered (same as LO) ===
     cleanHTML = cleanHTML.replace(
         /<tr>\s*<td[^>]*>\s*<img src="([^"]+)"[^>]*alt=["']Hero[^>]*>[\s\S]*?<\/td>\s*<\/tr>/gi,
         `<tr>
@@ -4757,9 +4794,10 @@ function getCleanOutlookHTML() {
                      style="width:600px; max-width:600px; height:auto; display:block; margin:0 auto; border:0;">
             </td>
         </tr>
-        ${NL_OUTLOOK_SECTION_SPACER_ROW}`
+        <tr><td height="20" align="center"></td></tr>`
     );
 
+    // === UNIFORM PADDING ON EVERY TEAL CARD'S CONTENT TD (same as LO) ===
     cleanHTML = cleanHTML.replace(
         /(<table[^>]*?border-left:\s*8px solid #?[0-9a-fA-F]{6}[^>]*>)([\s\S]*?<td[^>]*?)(style="[^"]*?")/gi,
         (match, tableStart, tdBeforeStyle, styleAttr) => {
@@ -4776,10 +4814,33 @@ function getCleanOutlookHTML() {
 
     cleanHTML = normalizePersonalPhotoBlocks(cleanHTML);
     cleanHTML = normalizePersonalVideoBlocks(cleanHTML);
-    cleanHTML = hardenNewsletterForOutlookPaste(cleanHTML);
+    if (typeof normalizeNewsletterModuleWidths === 'function') {
+        cleanHTML = normalizeNewsletterModuleWidths(cleanHTML);
+    }
+    if (typeof ensureContentRowsCentered === 'function') {
+        cleanHTML = ensureContentRowsCentered(cleanHTML);
+    }
     cleanHTML = wrapBodyForOutlookPaste(cleanHTML);
 
     return cleanHTML;
+}
+
+function copyHtmlToOutlookClipboard(html, onSuccess, onError) {
+    const clean = String(html || '');
+    if (!clean) return Promise.reject(new Error('empty'));
+
+    const done = () => {
+        if (typeof onSuccess === 'function') onSuccess();
+    };
+
+    if (navigator.clipboard && window.ClipboardItem) {
+        const blob = new Blob([clean], { type: 'text/html' });
+        return navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]).then(done);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(clean).then(done);
+    }
+    return Promise.reject(new Error('clipboard unavailable'));
 }
 
 function copyForOutlook() {
@@ -4789,14 +4850,23 @@ function copyForOutlook() {
         return;
     }
 
-    const blob = new Blob([cleanHTML], { type: 'text/html' });
-    const data = [new ClipboardItem({ 'text/html': blob })];
-
-    navigator.clipboard.write(data).then(() => {
+    const onSuccess = () => {
         window.notifyUser('✅ Outlook-optimized HTML copied!\n\nPaste into a NEW email in Outlook.', 'success', 3200);
-    }).catch(err => {
-        console.error(err);
-        window.notifyUser('Clipboard issue — try the regular Copy HTML button instead.', 'error', 5000);
+    };
+
+    copyHtmlToOutlookClipboard(cleanHTML, onSuccess).catch(() => {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = cleanHTML;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            onSuccess();
+        } catch (err) {
+            console.error(err);
+            window.notifyUser('Clipboard issue — try the regular Copy HTML button instead.', 'error', 5000);
+        }
     });
 }
 
@@ -4904,10 +4974,10 @@ function copyForOutlook() {
   function parsePersonalMediaWidthPx(imgAttrs, fallbackPx) {
       const s = String(imgAttrs || '');
       const styleW = s.match(/width:\s*(\d+)px/i);
-      if (styleW) return Math.min(parseInt(styleW[1], 10), NL_CARD_CONTENT_WIDTH);
+      if (styleW) return Math.min(parseInt(styleW[1], 10), NL_MEDIA_MAX_PX);
       const attrW = s.match(/\bwidth=["'](\d+)["']/i);
-      if (attrW) return Math.min(parseInt(attrW[1], 10), NL_CARD_CONTENT_WIDTH);
-      return fallbackPx;
+      if (attrW) return Math.min(parseInt(attrW[1], 10), NL_MEDIA_MAX_PX);
+      return Math.min(fallbackPx, NL_MEDIA_MAX_PX);
   }
 
   function normalizePersonalPhotoBlocks(htmlString) {
@@ -5096,6 +5166,10 @@ function copyForOutlook() {
     }
   }
 
+  /**
+   * Starter template only — does NOT invent hobbies/goals from profile.
+   * Personal note should be the user's own words; profile hobbies are never auto-injected.
+   */
   function fillPersonalFromProfile(silent = false) {
     const personalCb = document.getElementById('nl-personal');
     const personalFields = document.getElementById('personal-fields');
@@ -5109,49 +5183,25 @@ function copyForOutlook() {
     const textEl = document.getElementById('nl-personal-text');
     if (!textEl) return;
 
-    // Robust normalizer: profile stores arrays for hobbies/challenges/activities but older data or merges may be strings
-    const safeList = (val) => {
-      if (!val) return [];
-      if (Array.isArray(val)) return val.filter(Boolean);
-      if (typeof val === 'string') return val.split(/[,/&]+/).map(s => s.trim()).filter(Boolean);
-      return [String(val)];
-    };
-    const safeText = (val) => {
-      if (!val) return '';
-      if (Array.isArray(val)) return val.filter(Boolean).join(', ');
-      return String(val);
-    };
-
-    let parts = [];
-    if (p.name) parts.push(`Hi, it's ${p.name.split(' ')[0]}!`);
-
-    const hobbies = safeList(p.hobbies);
-    if (hobbies.length) {
-      parts.push(`Lately I've been enjoying ${hobbies.slice(0, 2).join(' and ')}.`);
+    // Never overwrite a note the user already wrote
+    if (textEl.value && textEl.value.trim().length > 20) {
+      if (!silent && typeof window.showToast === 'function') {
+        window.showToast('Personal note already has text — edit it in place, or clear first to use a blank starter.', 'info');
+      }
+      if (!silent) {
+        textEl.focus();
+        textEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
     }
 
-    if (p.personality) {
-      const pers = String(p.personality).trim();
-      if (pers) parts.push(`As someone who's ${pers.toLowerCase()}, I'm always looking for ways to help families like yours.`);
-    }
-
-    const goals = safeText(p.goals).trim();
-    if (goals) parts.push(goals);
-
-    const challenges = safeList(p.challenges);
-    if (challenges.length) {
-      parts.push(`Helping with things like ${challenges.join(', ').toLowerCase()}.`);
-    } else if (p.challenges && typeof p.challenges === 'string') {
-      const ch = p.challenges.trim();
-      if (ch) parts.push(`Helping with things like ${ch.toLowerCase()}.`);
-    }
-
-    const fill = parts.join(' ') || 'Excited to help more families find the right home — or sell for top dollar — this year!';
+    const first = (p.name || '').trim().split(/\s+/)[0] || 'there';
+    const fill =
+      `Hi, it's ${first}! [Share a short real update — a win, a client story, something local, or a personal moment you're comfortable putting in print. Keep it warm and human — this is your voice, not a profile dump.]`;
     textEl.value = fill;
     if (!silent) {
       textEl.focus();
       textEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // No toast for auto-fill — keeps UI clean
     }
   }
 

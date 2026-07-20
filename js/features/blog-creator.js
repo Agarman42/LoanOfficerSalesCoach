@@ -153,16 +153,164 @@
       .trim();
   }
 
+  function escapeBlogHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /** Caption: body + hashtag chips (premium, readable) */
+  function formatCaptionHtml(raw) {
+    const text = trimBundleSectionEdges(raw);
+    if (!text) {
+      return '<p class="blog-companion-empty">No caption generated — try regenerating!</p>';
+    }
+    // Split hashtags from body
+    const tags = [];
+    const body = text
+      .replace(/#[\w-]+/g, (m) => {
+        tags.push(m);
+        return ' ';
+      })
+      .replace(/\s+/g, ' ')
+      .trim();
+    let html = '<div class="blog-companion-body">';
+    if (body) html += `<p class="blog-caption-text">${escapeBlogHtml(body)}</p>`;
+    if (tags.length) {
+      html +=
+        '<div class="blog-hashtag-row" aria-label="Hashtags">' +
+        tags
+          .map((t) => `<span class="blog-hashtag">${escapeBlogHtml(t)}</span>`)
+          .join('') +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  /** Google post: clean paragraph(s), preserve light emphasis */
+  function formatGooglePostHtml(raw) {
+    const text = trimBundleSectionEdges(raw);
+    if (!text) {
+      return '<p class="blog-companion-empty">No Google post generated — try a different topic or regenerate.</p>';
+    }
+    // Strip leftover label if model re-echoed it
+    let cleaned = text.replace(/^\*{0,2}(?:Suggested\s+)?Google(?:\s+Business)?(?:\s+Profile)?\s*Post:?\*{0,2}\s*/i, '').trim();
+    // Convert **bold** to <strong>, then escape rest carefully
+    const withBreaks = cleaned
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const escaped = escapeBlogHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        return `<p class="blog-google-p">${escaped}</p>`;
+      })
+      .join('');
+    return `<div class="blog-companion-body">${withBreaks || `<p class="blog-google-p">${escapeBlogHtml(cleaned)}</p>`}</div>`;
+  }
+
+  /**
+   * Reel script: structure Hook / Spoken / Visuals / Audio / CTA into labeled rows.
+   * Handles both multiline and single-line model dumps.
+   */
+  function formatReelScriptHtml(raw) {
+    const text = trimBundleSectionEdges(raw);
+    if (!text) {
+      return '<p class="blog-companion-empty">No Reel script generated — try regenerating!</p>';
+    }
+
+    const labels = [
+      { key: 'hook', re: /Hook\s*(?:\([^)]*\))?\s*:/i, title: 'Hook' },
+      { key: 'spoken', re: /Spoken\s*script\s*(?:\([^)]*\))?\s*:/i, title: 'Spoken script' },
+      { key: 'visuals', re: /Visuals?\s*(?:\/\s*B-?roll)?\s*:/i, title: 'Visuals / B-roll' },
+      { key: 'audio', re: /Audio\s*style\s*:/i, title: 'Audio style' },
+      { key: 'cta', re: /CTA\s*(?:\([^)]*\))?\s*:/i, title: 'CTA' },
+    ];
+
+    // Normalize so each known label starts a line
+    let normalized = text.replace(/\r\n/g, '\n');
+    labels.forEach((l) => {
+      normalized = normalized.replace(l.re, (m) => '\n' + m);
+    });
+    normalized = normalized.replace(/\n{3,}/g, '\n\n').trim();
+
+    const sections = [];
+    const found = [];
+    labels.forEach((l) => {
+      const m = l.re.exec(normalized);
+      if (m) found.push({ key: l.key, title: l.title, index: m.index, end: m.index + m[0].length });
+    });
+    found.sort((a, b) => a.index - b.index);
+
+    if (found.length) {
+      for (let i = 0; i < found.length; i++) {
+        const start = found[i].end;
+        const end = i + 1 < found.length ? found[i + 1].index : normalized.length;
+        let body = normalized.slice(start, end).trim().replace(/^["']|["']$/g, '');
+        // Pull timing from original match if present
+        const labelSlice = normalized.slice(found[i].index, found[i].end);
+        const timing = (labelSlice.match(/\(([^)]+)\)/) || [])[1];
+        sections.push({
+          title: found[i].title,
+          timing: timing || '',
+          body: body,
+        });
+      }
+    } else {
+      // Fallback: paragraph split
+      normalized
+        .split(/\n+/)
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .forEach((line) => {
+          sections.push({ title: '', timing: '', body: line });
+        });
+    }
+
+    if (!sections.length) {
+      return `<div class="blog-companion-body"><p class="blog-google-p">${escapeBlogHtml(text)}</p></div>`;
+    }
+
+    return (
+      '<div class="blog-reel-grid">' +
+      sections
+        .map((s) => {
+          const label = s.title
+            ? `<div class="blog-reel-label">${escapeBlogHtml(s.title)}${
+                s.timing ? ` <span class="blog-reel-timing">(${escapeBlogHtml(s.timing)})</span>` : ''
+              }</div>`
+            : '';
+          const body = escapeBlogHtml(s.body).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+          return `<div class="blog-reel-row">${label}<div class="blog-reel-body">${body}</div></div>`;
+        })
+        .join('') +
+      '</div>'
+    );
+  }
+
   /** Split API response into blog + caption + Google + Reel using section labels (not every ---). */
   function parseBlogBundleFromResponse(fullContent) {
     const content = (fullContent || '').trim();
     const fallback = { blogMarkdown: content, captionText: '', googlePostText: '', reelScriptText: '' };
     if (!content) return fallback;
 
+    // Accept many label variants the model actually produces
     const markerDefs = [
-      { key: 'captionText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Social Media Caption:?\*{0,2}\s*/i },
-      { key: 'googlePostText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Google Post:?\*{0,2}\s*/i },
-      { key: 'reelScriptText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}30-45 Second Reel Script(?:\s*&\s*Video Idea)?:?\*{0,2}\s*/i },
+      {
+        key: 'captionText',
+        // Require "Social" or "Suggested … Caption" so we don't match body text containing "caption"
+        regex: /(?:^|\n)\s*(?:---\s*)?(?:#{1,3}\s*)?\*{0,2}(?:Suggested\s+Social\s+Media\s+Caption|Social\s+Media\s+Caption|Suggested\s+Caption):?\*{0,2}\s*/i,
+      },
+      {
+        key: 'googlePostText',
+        regex: /(?:^|\n)\s*(?:---\s*)?(?:#{1,3}\s*)?\*{0,2}(?:Suggested\s+)?Google(?:\s+Business)?(?:\s+Profile)?\s*Post:?\*{0,2}\s*/i,
+      },
+      {
+        key: 'reelScriptText',
+        regex: /(?:^|\n)\s*(?:---\s*)?(?:#{1,3}\s*)?\*{0,2}(?:30-45\s*Second\s+)?Reel(?:\s*\/\s*Short\s+Video)?\s*Script(?:\s*&\s*Video\s*Idea)?:?\*{0,2}\s*/i,
+      },
     ];
 
     const markers = [];
@@ -174,25 +322,15 @@
     }
 
     if (markers.length === 0) {
-      const parts = content.split(/(?:^|\n)---\s*\n?\s*(?=\*{0,2}(?:Suggested Social Media Caption|Suggested Google Post|30-45 Second Reel Script))/i);
-      if (parts.length >= 2) {
-        const result = {
+      // Last-ditch: split on --- and assign trailing parts
+      const parts = content.split(/(?:^|\n)---\s*\n/).map((p) => p.trim()).filter(Boolean);
+      if (parts.length >= 4) {
+        return {
           blogMarkdown: trimBundleSectionEdges(parts[0]),
-          captionText: '',
-          googlePostText: '',
-          reelScriptText: '',
+          captionText: trimBundleSectionEdges(parts[1].replace(/^\*{0,2}.*caption:?\*{0,2}\s*/i, '')),
+          googlePostText: trimBundleSectionEdges(parts[2].replace(/^\*{0,2}.*google.*post:?\*{0,2}\s*/i, '')),
+          reelScriptText: trimBundleSectionEdges(parts[3].replace(/^\*{0,2}.*reel.*:?\*{0,2}\s*/i, '')),
         };
-        if (parts.length >= 4) {
-          result.captionText = trimBundleSectionEdges(parts[1]);
-          result.googlePostText = trimBundleSectionEdges(parts[2]);
-          result.reelScriptText = trimBundleSectionEdges(parts[3]);
-        } else if (parts.length >= 3) {
-          result.captionText = trimBundleSectionEdges(parts[1]);
-          result.googlePostText = trimBundleSectionEdges(parts[2]);
-        } else {
-          result.captionText = trimBundleSectionEdges(parts[1]);
-        }
-        return result;
       }
       return fallback;
     }
@@ -213,6 +351,39 @@
     }
 
     return result;
+  }
+
+  /** When the main call truncates or skips extras, fetch caption + Google + Reel only. */
+  async function generateBlogExtrasFromBlog(blogMarkdown, topicInput) {
+    const excerpt = String(blogMarkdown || '').slice(0, 4500);
+    const prompt = `You write companion assets for a mortgage blog. Return ONLY the three labeled sections below — no blog body, no commentary, no code fences.
+
+**Suggested Social Media Caption:**
+(100–200 characters, engaging, 4–6 hashtags. Clean text only.)
+
+**Suggested Google Post:**
+(Under 1400 characters. Standalone teaser for Google Business Profile. Clean text only.)
+
+**30-45 Second Reel Script & Video Idea:**
+(Hook, spoken script ~30–45s, visuals/B-roll, audio style, CTA. Clean markdown.)
+
+Topic: ${topicInput || 'mortgage'}
+Blog excerpt:
+${excerpt}`;
+
+    try {
+      const raw = await window.callGrokAPI(prompt, { temperature: 0.35, max_tokens: 2500 });
+      if (!raw) return null;
+      return parseBlogBundleFromResponse(raw);
+    } catch (e) {
+      console.warn('[blog-creator] extras pass failed', e);
+      return null;
+    }
+  }
+
+  function bundleExtrasMissing(bundle) {
+    if (!bundle) return true;
+    return !bundle.captionText || !bundle.googlePostText || !bundle.reelScriptText;
   }
 
   function extractBlogTitle(blogMarkdown) {
@@ -392,7 +563,7 @@ const blogLoadingContent = `
                             <div><strong>Multiplies across channels:</strong> Becomes the foundation for 5–10 social posts, Reels, and newsletter features.</div>
                         </div>
                         <div class="flex gap-3">
-                            <i class="fas fa-user-tie text-[#002B5C] mt-0.5"></i>
+                            <i class="fas fa-user-tie text-[#002B5C] dark:text-white mt-0.5"></i>
                             <div><strong>Positions you as expert:</strong> Clients and realtors remember and refer the LO who publishes thoughtful local content.</div>
                         </div>
                         <div class="flex gap-3">
@@ -450,16 +621,20 @@ ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-ou
 - Voice: Match the loan officer's personality and voice traits above — helpful, trustworthy, conversational, and authentic — never salesy.
 - Language: Check the "Additional instructions" / additional context field. If the user requests a different language there (e.g. "Prepare the full blog in Spanish", "Generate in French", "in German", "en español"), produce the **entire output** — the blog post, the social media caption, the Google Business post, **and** the Reel script — fully in that requested language. Translate everything naturally and accurately while preserving the exact required structure, headings, SEO intent, and professional tone.
 
-After the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**). Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags. **Do NOT include any character count at the end — output clean caption text only.**
+CRITICAL — after the blog body you MUST output these three companion sections using these EXACT labels on their own lines (bold markdown). Do not skip them even if the blog is long; prefer slightly shorter blog over missing companions.
 
-Add another separator (---) followed by a clearly labeled Google Business Profile post (e.g., **Suggested Google Post:**) optimized for SEO/GEO. This must be under 1400 characters total. Make it a standalone teaser/summary of the blog that can be copied/pasted directly into Google Business Profile. Maximize SEO/GEO by naturally incorporating the primary keyword, local area references (if provided), related terms, and calls-to-action. Use engaging language, emojis if fitting the tone. **Do NOT include any character count at the end — output clean post text only.** Ensure it's formatted in plain text with bold (**text**) where emphasis helps.
+**Suggested Social Media Caption:**
+(100–200 characters, engaging, 4–6 hashtags. Clean caption text only — no character counts.)
 
-Add a final separator (---) followed by a clearly labeled 30–45 second Reel / Short Video Script & Idea (e.g., **30-45 Second Reel Script & Video Idea:**). 
-Provide: strong 3s hook, full spoken script (~30-45s), key visuals/B-roll ideas, suggested audio style, and a natural CTA that drives back to the blog topic. Keep it film-ready and concise.
+**Suggested Google Post:**
+(Under 1400 characters. Standalone Google Business Profile teaser. Clean text only — no character counts.)
+
+**30-45 Second Reel Script & Video Idea:**
+(Hook, spoken script ~30–45s, visuals/B-roll, audio style, CTA. Clean markdown only.)
 
 ABSOLUTE RULE: NEVER include any word count, character count, or length estimate at the end of the blog, caption, Google post, or Reel script — output clean content only.
 
-Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *italic*, - bullets, etc.) followed by the separators and the four sections — no HTML tags, no extra commentary, no code fences, no explanations.`;
+Output ONLY clean Markdown for the blog, then the three labeled companion sections above — no HTML tags, no extra commentary, no code fences. Prefer exact labels over --- separators (blog bodies may contain --- rules).`;
     // === STRONG DOCUMENT INJECTION (this is the fix) ===
 let finalPrompt = systemPrompt;
 
@@ -528,7 +703,27 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 
         if (!fullContent) throw new Error('Empty response from API');
 
-        const { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
+        let { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
+
+        // Model often truncates before companions when blog is long — second pass for extras only
+        if (bundleExtrasMissing({ captionText, googlePostText, reelScriptText }) && blogMarkdown) {
+          if (typeof window.showLoading === 'function') {
+            try { window.showLoading('Finishing social caption, Google post & Reel…'); } catch (e) { /* ignore */ }
+          }
+          const extras = await generateBlogExtrasFromBlog(blogMarkdown, topicInput);
+          if (extras) {
+            captionText = captionText || extras.captionText || '';
+            googlePostText = googlePostText || extras.googlePostText || '';
+            reelScriptText = reelScriptText || extras.reelScriptText || '';
+            // If parser put the whole extras blob in blogMarkdown of extras, re-parse full raw-like
+            if (!captionText && extras.blogMarkdown && /caption/i.test(extras.blogMarkdown)) {
+              const re = parseBlogBundleFromResponse(extras.blogMarkdown);
+              captionText = re.captionText || captionText;
+              googlePostText = re.googlePostText || googlePostText;
+              reelScriptText = re.reelScriptText || reelScriptText;
+            }
+          }
+        }
 
         lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
         window._blogNextStepsId = `blog_${Date.now().toString(36)}`;
@@ -537,109 +732,108 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
           ? window.GenerationRules.getQualityNoteText()
           : 'Built for compliance, credible sources, local relevance, and clear structure.';
 
-        // === Render output - Premium Card Style matching Social section ===
+        // === Render output — clean editorial cards (navy hierarchy, no carnival orange headers) ===
         output.innerHTML = `
-    <!-- Main Blog Content Card - premium match to 2026 Plan / Social Post tools -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/30 rounded-3xl shadow-2xl p-8 md:p-10 mb-8">
-        <!-- Hero header badge like 2026 plan -->
-        <div class="flex items-center justify-between mb-6">
+    <div class="ai-output mb-6">
+        <div class="ai-output-header">
             <div>
-                <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-[#F15A29] text-white text-xs font-bold tracking-[2px] mb-3">
-                    <i class="fas fa-check-circle"></i> YOUR AUTHORITY BLOG POST IS READY
-                </div>
-                <h3 class="text-3xl md:text-4xl font-bold text-[#F15A29]">Your Custom Blog Post</h3>
-                <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm">In your exact voice, with matching social caption, Google post, and Reel script.</p>
+                <div class="ai-output-kicker"><i class="fas fa-check-circle" aria-hidden="true"></i> Ready</div>
+                <h3 class="ai-output-title">Blog post</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mt-1">In your voice, with matching social caption, Google post, and reel script below.</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-2 flex items-start gap-2 leading-relaxed max-w-xl">
                   <i class="fas fa-shield-alt text-[#00A89D] mt-0.5 flex-shrink-0"></i>
                   <span>${qualityNote}</span>
                 </p>
             </div>
-            <span class="text-xs px-3 py-1 bg-[#00A89D]/10 text-[#00A89D] rounded-full font-medium hidden md:block">Ready to publish</span>
+            <span class="text-[11px] px-2.5 py-1 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold shrink-0 hidden sm:inline">Publish-ready</span>
         </div>
-        <div class="prose prose-lg dark:prose-invert max-w-none">
+        <div class="ai-output-body prose dark:prose-invert max-w-none text-[15px] leading-relaxed">
             ${marked.parse(blogMarkdown)}
         </div>
     </div>
 
-    <!-- Blog Actions -->
-    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-        <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#F15A29]/90 transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-copy"></i> Copy Blog
+    <div class="flex flex-wrap gap-2 sm:gap-3 mb-8">
+        <button id="copy-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#002B5C] text-white text-sm font-semibold hover:bg-black transition">
+            <i class="fas fa-copy"></i> Copy blog
         </button>
-        <button id="download-blog-btn" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
+        <button id="download-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition">
             <i class="fas fa-download"></i> Download .doc
         </button>
         ${getRuoffPublishButtonHtml()}
-        <button type="button" id="blog-next-steps-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#00A89D]/10 transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-list-check"></i> Next Steps
+        <button type="button" id="blog-next-steps-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#00A89D] text-[#00A89D] text-sm font-semibold hover:bg-[#00A89D]/10 transition">
+            <i class="fas fa-list-check"></i> Next steps
         </button>
-        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-bookmark"></i> Save Bundle to Vault
+        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+            <i class="fas fa-bookmark"></i> Save to vault
         </button>
-        <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="bg-red-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-red-600 transition-all flex items-center justify-center gap-2 flex-1">
+        <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
             <i class="fas fa-trash"></i> Clear
         </button>
     </div>
 
-    <!-- Social Caption Card - consistent premium card style (matching 2026 Plan supporting cards) -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 mb-8 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-[#F15A29]">Social Media Caption</h3>
-            <div class="flex items-center gap-2">
-            <button id="copy-caption-btn" class="text-sm px-4 py-2 bg-[#00A89D] text-white rounded-xl hover:bg-[#008F85] flex items-center gap-2">
-                <i class="fas fa-share-alt"></i> Copy
-            </button>
-            <button id="save-caption-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('caption', this)" class="text-sm px-4 py-2 border border-[#00A89D] text-[#00A89D] rounded-xl hover:bg-[#00A89D] hover:text-white flex items-center gap-2">
-                <i class="far fa-bookmark"></i> Save
-            </button>
+    <div class="ai-output blog-companion-card mb-5">
+        <div class="ai-output-header">
+            <div>
+                <div class="ai-output-kicker">Social</div>
+                <h3 class="ai-output-title">Caption</h3>
             </div>
-        </div>
-        <div id="social-caption" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base whitespace-pre-wrap font-medium border border-gray-200 dark:border-gray-700">
-            ${captionText || 'No caption generated — try regenerating!'}
-        </div>
-    </div>
-
-    <!-- Google Post Card -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 mb-8 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-[#F15A29]">Google Business Profile Post</h3>
             <div class="flex items-center gap-2">
-            <button id="copy-google-btn" class="text-sm px-4 py-2 bg-[#F15A29] text-white rounded-xl hover:bg-[#F15A29]/90 flex items-center gap-2">
+            <button id="copy-caption-btn" class="text-sm px-3 py-1.5 rounded-lg bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] inline-flex items-center gap-1.5">
                 <i class="fas fa-copy"></i> Copy
             </button>
-            <button id="save-google-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('google', this)" class="text-sm px-4 py-2 border border-[#F15A29] text-[#F15A29] rounded-xl hover:bg-[#F15A29] hover:text-white flex items-center gap-2">
+            <button id="save-caption-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('caption', this)" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
                 <i class="far fa-bookmark"></i> Save
             </button>
             </div>
         </div>
-        <div id="google-post" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base prose border border-gray-200 dark:border-gray-700">
-            ${googlePostText ? marked.parse(googlePostText) : 'No Google post generated — try a different topic or regenerate.'}
+        <div id="social-caption" class="blog-companion-panel" data-raw-text="${escapeBlogHtml(captionText || '')}">
+            ${formatCaptionHtml(captionText)}
         </div>
     </div>
 
-    <!-- Reel Script Card + cross link to related tools for better UX -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-[#F15A29]">30–45 Second Reel / Video Script</h3>
+    <div class="ai-output blog-companion-card mb-5">
+        <div class="ai-output-header">
+            <div>
+                <div class="ai-output-kicker">Google Business</div>
+                <h3 class="ai-output-title">Profile post</h3>
+            </div>
             <div class="flex items-center gap-2">
-            <button id="copy-reel-btn" class="text-sm px-4 py-2 bg-[#00A89D] text-white rounded-xl hover:bg-[#008F85] flex items-center gap-2">
-                <i class="fas fa-video"></i> Copy Script
+            <button id="copy-google-btn" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
+                <i class="fas fa-copy"></i> Copy
             </button>
-            <button id="save-reel-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('reel', this)" class="text-sm px-4 py-2 border border-[#00A89D] text-[#00A89D] rounded-xl hover:bg-[#00A89D] hover:text-white flex items-center gap-2">
+            <button id="save-google-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('google', this)" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
                 <i class="far fa-bookmark"></i> Save
             </button>
             </div>
         </div>
-        <div id="reel-script" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base prose border border-gray-200 dark:border-gray-700">
-            ${reelScriptText ? marked.parse(reelScriptText) : 'No Reel script generated — try regenerating!'}
+        <div id="google-post" class="blog-companion-panel" data-raw-text="${escapeBlogHtml(googlePostText || '')}">
+            ${formatGooglePostHtml(googlePostText)}
         </div>
-        <p class="text-xs text-gray-500 mt-3">Ready to film — hook, script, visuals, and CTA included.</p>
+    </div>
 
-        <!-- Mini cross-link bar to keep user in the ecosystem (consistent with plan execution hubs) -->
-        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
-            <span>Next steps:</span>
-            <a href="#social-post" onclick="if(typeof window.showSection==='function'){window.showSection('social-post');}return false;" class="text-[#00A89D] hover:underline">Turn more ideas into posts in Social Post &amp; Calendar</a>
-            <a href="#social" onclick="if(typeof window.showSection==='function'){window.showSection('social');}return false;" class="text-[#00A89D] hover:underline">Browse full strategy + evergreen ideas</a>
+    <div class="ai-output blog-companion-card mb-2">
+        <div class="ai-output-header">
+            <div>
+                <div class="ai-output-kicker">Video</div>
+                <h3 class="ai-output-title">30–45s reel script</h3>
+            </div>
+            <div class="flex items-center gap-2">
+            <button id="copy-reel-btn" class="text-sm px-3 py-1.5 rounded-lg bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] inline-flex items-center gap-1.5">
+                <i class="fas fa-video"></i> Copy
+            </button>
+            <button id="save-reel-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('reel', this)" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
+                <i class="far fa-bookmark"></i> Save
+            </button>
+            </div>
+        </div>
+        <div id="reel-script" class="blog-companion-panel blog-companion-panel-reel" data-raw-text="${escapeBlogHtml(reelScriptText || '')}">
+            ${formatReelScriptHtml(reelScriptText)}
+        </div>
+        <p class="text-xs text-gray-500 m-0 mt-3">Structured for filming — copy the full block or each section as needed.</p>
+        <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+            <span>Next:</span>
+            <a href="#social-post" onclick="if(typeof window.showSection==='function'){window.showSection('social-post');}return false;" class="text-[#00A89D] hover:underline">Social Post &amp; Calendar</a>
+            <a href="#social" onclick="if(typeof window.showSection==='function'){window.showSection('social');}return false;" class="text-[#00A89D] hover:underline">Evergreen ideas</a>
         </div>
     </div>
 
@@ -667,11 +861,11 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             copyReelBtn.onclick = () => {
                 const reelEl = document.getElementById('reel-script');
                 if (!reelEl) return;
-                const text = reelEl.innerText || reelEl.textContent || '';
+                const raw = reelEl.getAttribute('data-raw-text');
+                const text = (raw && raw.trim()) || reelEl.innerText || reelEl.textContent || '';
                 navigator.clipboard.writeText(text.trim()).then(() => {
                     alert('Reel script & video idea copied!');
                 }).catch(() => {
-                    // fallback
                     const range = document.createRange();
                     range.selectNodeContents(reelEl);
                     const sel = window.getSelection();
@@ -1017,11 +1211,12 @@ window.copySocialCaption = function copySocialCaption() {
     const captionEl = document.getElementById('social-caption');
     if (!captionEl) return alert('No social caption to copy!');
 
-    const text = captionEl.innerText || captionEl.textContent || '';
+    // Prefer original raw (with hashtags) over structured DOM text
+    const raw = captionEl.getAttribute('data-raw-text');
+    const text = (raw && raw.trim()) || captionEl.innerText || captionEl.textContent || '';
     navigator.clipboard.writeText(text.trim()).then(() => {
         alert('Social caption copied!');
     }).catch(() => {
-        // Fallback
         const range = document.createRange();
         range.selectNodeContents(captionEl);
         const sel = window.getSelection();

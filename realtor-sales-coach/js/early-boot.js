@@ -9,7 +9,9 @@
   var ALIASES = {
     'social-media-strategy': 'social',
     'referral-partners': 'referrals',
-    'prospecting': 'weekly-win-plan'
+    'prospecting': 'weekly-win-plan',
+    'content': 'content-hub',
+    'content-studio': 'content-hub'
   };
 
   function resolveId(id) {
