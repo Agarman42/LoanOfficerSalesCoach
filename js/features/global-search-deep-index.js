@@ -357,6 +357,9 @@
           group: 'Script Scenarios',
           _baseScore: 13,
         });
+  g('mortgage-calculator-tool', 'Mortgage Calculator', 'Payment, taxes, insurance, PMI, extra payments', 'calculator',
+    ['mortgage calculator', 'payment calculator', 'amortization', 'pmi', 'biweekly', 'extra payment'],
+    'tools');
       });
     }
 

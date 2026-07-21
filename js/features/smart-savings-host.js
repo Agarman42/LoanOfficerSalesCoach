@@ -200,11 +200,29 @@
     })
       .then(function (r) {
         if (!r.ok) throw new Error('app.html ' + r.status);
+        // Guard Content-Type when present
+        var ct = (r.headers && r.headers.get && r.headers.get('content-type')) || '';
+        if (ct && ct.indexOf('text/html') === -1 && ct.indexOf('text/plain') === -1) {
+          throw new Error('app.html unexpected type ' + ct);
+        }
         return r.text();
       })
       .then(function (html) {
+        // SPA fallback (Render) often returns coach index.html for missing files.
+        // Injecting that clones #sidebar → dual sidebars. Never inject coach chrome.
+        if (
+          !html ||
+          html.indexOf('id="home-value"') === -1 ||
+          html.indexOf('id="sidebar"') !== -1 ||
+          html.indexOf('Ultimate Loan Officer Sales Coach') !== -1 ||
+          html.indexOf('COACH_APP_ID') !== -1
+        ) {
+          throw new Error(
+            'smart-savings/app.html missing or SPA-fallback (got coach shell). Deploy smart-savings/ assets.'
+          );
+        }
         var markup = extractBodyMarkup(html);
-        if (!markup || markup.length < 200) {
+        if (!markup || markup.length < 200 || markup.indexOf('home-value') === -1) {
           throw new Error('empty calculator body');
         }
         // Never clobber an open portal
@@ -386,32 +404,53 @@
     if (typeof prev !== 'function') return;
     if (prev.__ssHostId === 'v3-modal') return;
 
+    function clearSmartSavingsBodyModes() {
+      try {
+        // Never leave SS mode classes on document — they break other coach tools
+        document.body.classList.remove(
+          'mode-guided',
+          'mode-expert',
+          'ss-guided-modal-open',
+          'ss-smart-savings-modal-open',
+          'modal-open'
+        );
+        document.documentElement.classList.remove(
+          'ss-guided-modal-open',
+          'mode-guided',
+          'mode-expert'
+        );
+      } catch (e) { /* ignore */ }
+    }
+
     function wrapped(id) {
       var nextId = id != null ? String(id) : '';
-      // Leaving Smart Savings while guided modal is open → close to full workspace
-      // Always restore shell hard so we never leave a white portal sheet
-      if (nextId && nextId !== SECTION_ID && isGuidedPortalOpen()) {
+      // Leaving Smart Savings → close guided portal + strip body mode classes
+      if (nextId && nextId !== SECTION_ID) {
         try {
-          if (window.RuoffApp && typeof window.RuoffApp.setExperienceMode === 'function') {
+          if (isGuidedPortalOpen() && window.RuoffApp && typeof window.RuoffApp.setExperienceMode === 'function') {
             window.RuoffApp.setExperienceMode('expert', { silent: true });
           }
         } catch (e) { /* ignore */ }
         try {
           var layer = document.getElementById('ss-guided-layer');
           if (layer) {
-            layer.classList.remove('is-open');
+            layer.classList.remove('is-open', 'mode-guided', 'mode-expert');
             layer.setAttribute('aria-hidden', 'true');
           }
-          restoreShellFromPortal(true);
-          document.body.classList.remove('ss-guided-modal-open');
-          document.documentElement.classList.remove('ss-guided-modal-open');
+          if (typeof restoreShellFromPortal === 'function') restoreShellFromPortal(true);
           var root = document.getElementById(ROOT_ID);
-          if (root) root.classList.remove('mode-guided');
+          if (root) {
+            root.classList.remove('mode-guided', 'ss-guided-portal-active', 'ss-guided-inline', 'ss-guided-inplace');
+            root.classList.add('mode-expert');
+          }
         } catch (e2) { /* ignore */ }
+        clearSmartSavingsBodyModes();
       }
       var result = prev.apply(this, arguments);
       if (nextId === SECTION_ID) {
         initSmartSavingsNative();
+      } else {
+        clearSmartSavingsBodyModes();
       }
       return result;
     }

@@ -3099,15 +3099,31 @@ function applyNewsletterColorBundle(html) {
     return applyFn(html, bundle);
 }
 
+function hideNewsletterEmptyPreview() {
+    const empty = document.getElementById('nl-empty-state');
+    if (empty) {
+        empty.classList.add('hidden');
+        empty.setAttribute('aria-hidden', 'true');
+        empty.style.setProperty('display', 'none', 'important');
+    }
+    try {
+        if (window.CoachPolish && typeof window.CoachPolish.hideEmpty === 'function') {
+            window.CoachPolish.hideEmpty('nl-empty-state');
+        }
+    } catch (e) { /* ignore */ }
+}
+
 function refreshNewsletterColorScheme() {
     const rawEl = document.getElementById('nl-html-raw');
     let html = (rawEl?.value || '').trim() || (lastGeneratedHTML || '').trim();
     if (!html || !window.NlColorBundles) return;
     html = applyNewsletterColorBundle(html);
     lastGeneratedHTML = html;
+    window.lastGeneratedHTML = html;
     if (rawEl) rawEl.value = html;
     const previewEl = document.getElementById('nl-preview');
     if (previewEl) mountNewsletterPreviewIframe(previewEl, html);
+    hideNewsletterEmptyPreview();
     try { localStorage.setItem('lastNewsletterHTML', html); } catch (e) {}
     if (window.NlColorBundles.renderBundlePreview) {
         window.NlColorBundles.renderBundlePreview(
@@ -3934,6 +3950,28 @@ async function generateNewsletter(feedback = '') {
     if (!feedback && !validatePersonalUpdateForGeneration()) {
         return;
     }
+
+    const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
+    const displayTitle = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
+
+    // Show progress modal FIRST (before any form sync / heavy prep) so wizard Generate feels instant
+    if (typeof window.forceShowGlobalLoading === 'function') {
+        window.forceShowGlobalLoading(titleText);
+    }
+    const le0 = document.getElementById('global-loading');
+    if (le0) {
+        le0.classList.remove('hidden');
+        le0.classList.add('is-visible');
+        le0.removeAttribute('hidden');
+        le0.style.setProperty('display', 'flex', 'important');
+        le0.style.setProperty('z-index', '99999', 'important');
+        le0.style.setProperty('visibility', 'visible', 'important');
+        le0.style.setProperty('opacity', '1', 'important');
+        le0.style.setProperty('position', 'fixed', 'important');
+        le0.style.setProperty('inset', '0', 'important');
+        le0.style.setProperty('pointer-events', 'auto', 'important');
+    }
+
     _nlGenerating = true;
 
     if (!feedback) {
@@ -3941,27 +3979,6 @@ async function generateNewsletter(feedback = '') {
         if (typeof window.saveNewsletterPersonalHistory === 'function') {
             window.saveNewsletterPersonalHistory();
         }
-    }
-
-    const titleText = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
-    const displayTitle = feedback ? 'Updating Your Newsletter...' : 'Building Your Newsletter...';
-
-    // Use the shared robust force helper (matches Weekly Win Plan, Social Calendar, Blog Creator, etc.)
-    // so the progress modal appears immediately and survives cache / timing issues.
-    if (typeof window.forceShowGlobalLoading === 'function') {
-        window.forceShowGlobalLoading(titleText);
-    }
-
-    // Belt-and-suspenders force visibility (exact pattern from weekly-win-plan.js)
-    const le0 = document.getElementById('global-loading');
-    if (le0) {
-        le0.classList.remove('hidden');
-        le0.style.setProperty('display', 'flex', 'important');
-        le0.style.setProperty('z-index', '99999', 'important');
-        le0.style.setProperty('visibility', 'visible', 'important');
-        le0.style.setProperty('opacity', '1', 'important');
-        le0.style.setProperty('position', 'fixed', 'important');
-        le0.style.setProperty('inset', '0', 'important');
     }
 
     const selectedHero = heroImages[Math.floor(Math.random() * heroImages.length)];
@@ -4503,6 +4520,9 @@ if (postSelections?.includeReferral) {
             try {
               localStorage.setItem('lastNewsletterHTML', html);
             } catch (e) {}
+            lastGeneratedHTML = html;
+            window.lastGeneratedHTML = html;
+            hideNewsletterEmptyPreview();
 
             gtag('event', feedback ? 'edit_newsletter' : 'generate_newsletter', {
                 event_category: 'Tool Usage',
@@ -4516,16 +4536,26 @@ if (postSelections?.includeReferral) {
 
             if (!feedback) {
                 window._nlNextStepsId = `nl_${Date.now().toString(36)}`;
-                showNewsletterReviewHandoff();
             }
         }
 
         const output = document.getElementById('newsletter-output');
         if (output) {
             output.classList.remove('hidden');
-            if (feedback) {
-                output.scrollIntoView({ behavior: 'smooth' });
+            hideNewsletterEmptyPreview();
+            // Unhide "ready" handoff AFTER output is visible, then scroll there
+            if (!feedback) {
+                showNewsletterReviewHandoff();
             }
+            // Always land on the ready section (wizard and full form)
+            requestAnimationFrame(() => {
+                const ready = document.getElementById('nl-review-handoff') || output;
+                try {
+                    ready.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch (e) {
+                    try { output.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e2) {}
+                }
+            });
             // Add a visible Clear button (premium pill style) so user can discard the persisted last version
             if (!output.querySelector('.nl-clear-btn')) {
               const clr = document.createElement('button');

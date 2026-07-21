@@ -235,8 +235,8 @@
 
   /** Public API used by generators (optional). */
   window.CoachPolish = {
-    showEmpty,
     hideEmpty,
+    showEmpty,
     mountHandoff,
     go,
     refreshOutput: refreshOneOutput
@@ -289,6 +289,19 @@
   }
 
   function measureHasContent(out) {
+    if (!out) return false;
+    // Newsletter / iframe previews: iframe text is not in parent textContent
+    if (out.id === 'nl-preview') {
+      const iframe = out.querySelector('iframe');
+      if (iframe && (iframe.getAttribute('srcdoc') || iframe.srcdoc || iframe.src)) return true;
+      try {
+        if (typeof window.lastGeneratedHTML === 'string' && window.lastGeneratedHTML.trim().length > 80) {
+          return true;
+        }
+      } catch (e) { /* ignore */ }
+      const raw = document.getElementById('nl-html-raw');
+      if (raw && (raw.value || '').trim().length > 80) return true;
+    }
     let textLen = 0;
     let meaningfulChildren = 0;
     Array.from(out.childNodes).forEach((node) => {
@@ -296,6 +309,11 @@
       if (node.nodeType === 1 && node.id === 'nl-empty-state') return;
       if (node.nodeType === 3) textLen += (node.textContent || '').trim().length;
       if (node.nodeType === 1) {
+        if (node.tagName === 'IFRAME') {
+          meaningfulChildren += 1;
+          textLen += 100;
+          return;
+        }
         const t = (node.textContent || '').trim().length;
         // Ignore shell-only wrappers with almost no text
         if (t > 20) {

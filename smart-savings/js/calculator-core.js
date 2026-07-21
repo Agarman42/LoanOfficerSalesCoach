@@ -1,0 +1,1007 @@
+/**
+ * Ruoff Smart Savings Calculator — pure calculation engine
+ * Source of truth for all money math. No DOM. Safe for unit tests.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.RuoffCalc = factory();
+  }
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const DEFAULTS = {
+    homeValue: 450000,
+    currentBalance: 320000,
+    currentRate: 6.75,
+    yearsRemaining: 27,
+    totalPayment: 2400,
+    taxes: 350,
+    insurance: 150,
+    pmi: 0,
+    escrowIncluded: true,
+    newLoanAmount: 320000,
+    newRate: 5.875,
+    newTerm: 30,
+    closingCosts: 6000,
+    debts: []
+  };
+
+  /** Used when sizing loan to cover debts if closing costs are blank / zero */
+  const SIZE_LOAN_CLOSING_FLOOR = 6000;
+
+  function roundMoney(n) {
+    return Math.round((Number(n) || 0) * 100) / 100;
+  }
+
+  function roundDollar(n) {
+    return Math.round(Number(n) || 0);
+  }
+
+  function clamp(n, min, max) {
+    return Math.min(max, Math.max(min, n));
+  }
+
+  /** Standard amortizing monthly P&I payment */
+  function calculateMonthlyPayment(principal, annualRate, years) {
+    const p = Number(principal) || 0;
+    if (p <= 0) return 0;
+    const yearsNum = Number(years) || 0;
+    if (yearsNum <= 0) return 0;
+    const monthlyRate = (Number(annualRate) || 0) / 100 / 12;
+    const numPayments = yearsNum * 12;
+    if (monthlyRate <= 0) return p / numPayments;
+    const power = Math.pow(1 + monthlyRate, numPayments);
+    return p * monthlyRate * power / (power - 1);
+  }
+
+  /** Total interest paid over full amortizing loan life */
+  function totalInterestPaid(principal, annualRate, years) {
+    const p = Number(principal) || 0;
+    const payment = calculateMonthlyPayment(p, annualRate, years);
+    const n = (Number(years) || 0) * 12;
+    if (n <= 0) return 0;
+    return Math.max(0, payment * n - p);
+  }
+
+  /**
+   * Remaining interest if balance amortizes at rate for remaining years.
+   * Uses contractual P&I from balance/rate/term (not the escrowed total payment).
+   */
+  function remainingInterest(balance, annualRate, yearsRemaining) {
+    return totalInterestPaid(balance, annualRate, yearsRemaining);
+  }
+
+  /** Months to amortize a debt given balance, rate, and fixed monthly payment */
+  function monthsToPayOff(balance, annualRate, monthlyPayment) {
+    const b = Number(balance) || 0;
+    const pay = Number(monthlyPayment) || 0;
+    if (b <= 0) return 0;
+    if (pay <= 0) return Infinity;
+    const r = (Number(annualRate) || 0) / 100 / 12;
+    if (r <= 0) return Math.ceil(b / pay);
+    if (pay <= b * r) return Infinity; // never pays down
+    const n = -Math.log(1 - (b * r) / pay) / Math.log(1 + r);
+    return Math.ceil(n);
+  }
+
+  /** Interest remaining on a consumer debt with fixed payment */
+  function debtRemainingInterest(balance, annualRate, monthlyPayment, remainingMonths) {
+    const b = Number(balance) || 0;
+    const pay = Number(monthlyPayment) || 0;
+    let months = Number(remainingMonths) || 0;
+    if (months <= 0 && pay > 0) {
+      months = monthsToPayOff(b, annualRate, pay);
+    }
+    if (!isFinite(months) || months <= 0) {
+      // fallback: crude estimate
+      return Math.max(0, pay * 12 * 5 - b);
+    }
+    const r = (Number(annualRate) || 0) / 100 / 12;
+    let bal = b;
+    let interest = 0;
+    for (let i = 0; i < months && bal > 0.01; i++) {
+      const int = bal * r;
+      interest += int;
+      const principal = Math.min(bal, pay - int);
+      if (principal <= 0) {
+        // payment doesn't cover interest
+        interest += int * (months - i - 1);
+        break;
+      }
+      bal -= principal;
+    }
+    return Math.max(0, interest);
+  }
+
+  function equity(homeValue, balance) {
+    return Math.max(0, (Number(homeValue) || 0) - (Number(balance) || 0));
+  }
+
+  function ltv(balance, homeValue) {
+    const h = Number(homeValue) || 0;
+    if (h <= 0) return 0;
+    return ((Number(balance) || 0) / h) * 100;
+  }
+
+  function derivePi(totalPayment, taxes, insurance, pmi, escrowIncluded) {
+    const total = Number(totalPayment) || 0;
+    const t = Number(taxes) || 0;
+    const ins = Number(insurance) || 0;
+    const p = Number(pmi) || 0;
+    if (escrowIncluded) {
+      return Math.max(0, total - t - ins - p);
+    }
+    return Math.max(0, total - p);
+  }
+
+  function totalHousingCost(totalPayment, taxes, insurance, pmi, escrowIncluded) {
+    const total = Number(totalPayment) || 0;
+    const t = Number(taxes) || 0;
+    const ins = Number(insurance) || 0;
+    if (escrowIncluded) return total;
+    return total + t + ins;
+  }
+
+  function escrowMonthly(taxes, insurance, pmi) {
+    return (Number(taxes) || 0) + (Number(insurance) || 0) + (Number(pmi) || 0);
+  }
+
+  /**
+   * Rough PMI estimate if new LTV > 80%. Uses ~0.5% annual of loan / 12.
+   * Returns 0 if LTV <= 80 or existing PMI should roll off.
+   */
+  function estimateNewPmi(newLoan, homeValue, annualFactor) {
+    const factor = annualFactor == null ? 0.005 : annualFactor;
+    const l = ltv(newLoan, homeValue);
+    if (l <= 80) return 0;
+    return (Number(newLoan) || 0) * factor / 12;
+  }
+
+  function hasCashOutDebts(debts) {
+    return (debts || []).some(function (d) {
+      return d.payOff && d.name !== 'Current Mortgage';
+    });
+  }
+
+  /**
+   * True cash-out: consumer debts marked for payoff, OR new loan meaningfully exceeds
+   * mortgage + selected debts + closing costs (pure cash-back).
+   */
+  function isCashOutRequest(newLoan, currentBalance, debts, closingCosts) {
+    if (hasCashOutDebts(debts)) return true;
+    const needed =
+      (Number(currentBalance) || 0) +
+      otherDebtsPaidOff(debts) +
+      (Number(closingCosts) || 0);
+    return (Number(newLoan) || 0) > needed + 500;
+  }
+
+  /**
+   * Max LTV: cash-out / debt consolidation 80%; rate-and-term conventional-style 97%.
+   * Pass opts.forceCashOut or opts.newLoan + balance/costs to detect pure cash-out.
+   */
+  function maxLtvRatio(debts, opts) {
+    const o = opts || {};
+    if (hasCashOutDebts(debts) || o.forceCashOut) return 0.80;
+    if (
+      o.newLoan != null &&
+      isCashOutRequest(o.newLoan, o.currentBalance, debts, o.closingCosts)
+    ) {
+      return 0.80;
+    }
+    return 0.97;
+  }
+
+  function maxLoanAmount(homeValue, debts, opts) {
+    return Math.floor((Number(homeValue) || 0) * maxLtvRatio(debts, opts));
+  }
+
+  function otherDebtsPaidOff(debts) {
+    return (debts || []).reduce(function (sum, d) {
+      if (d.payOff && d.name !== 'Current Mortgage') return sum + (Number(d.bal) || 0);
+      return sum;
+    }, 0);
+  }
+
+  function otherDebtMonthlyPayments(debts) {
+    return (debts || []).reduce(function (sum, d) {
+      if (d.payOff && d.name !== 'Current Mortgage') return sum + (Number(d.pay) || 0);
+      return sum;
+    }, 0);
+  }
+
+  function totalDebtsPaidOff(currentBalance, debts) {
+    return (Number(currentBalance) || 0) + otherDebtsPaidOff(debts);
+  }
+
+  /**
+   * Cash at closing (positive = cash back; negative = cash to close).
+   * cashAtClosing = newLoan - mortgagePayoff - otherDebts - closingCosts
+   */
+  function cashAtClosing(newLoan, currentBalance, debts, closingCosts) {
+    return (Number(newLoan) || 0)
+      - (Number(currentBalance) || 0)
+      - otherDebtsPaidOff(debts)
+      - (Number(closingCosts) || 0);
+  }
+
+  /**
+   * Lifetime interest: shorter new term vs 30-year same new loan (educational comparison).
+   */
+  function shorterTermInterestSavings(newLoan, newRate, newTerm) {
+    const term = Number(newTerm) || 30;
+    if (term >= 30) return null;
+    const pi30 = calculateMonthlyPayment(newLoan, newRate, 30);
+    const piShort = calculateMonthlyPayment(newLoan, newRate, term);
+    return roundDollar(pi30 * 360 - piShort * term * 12);
+  }
+
+  /**
+   * Interest remaining if borrower keeps paying a fixed monthly P&I (actual payment).
+   * Falls back to contractual amortizing schedule when payment is missing/too low.
+   */
+  function remainingInterestWithPayment(balance, annualRate, yearsRemaining, monthlyPi) {
+    const bal0 = Number(balance) || 0;
+    const pay = Number(monthlyPi) || 0;
+    const contractualPi = calculateMonthlyPayment(bal0, annualRate, yearsRemaining);
+    if (bal0 <= 0) {
+      return { interest: 0, method: 'none', monthlyPiUsed: 0, contractualMonthlyPi: 0 };
+    }
+    if (pay > 0) {
+      const r = (Number(annualRate) || 0) / 100 / 12;
+      if (r > 0 && pay <= bal0 * r + 0.01) {
+        // Payment doesn't cover interest — contractual fallback
+        return {
+          interest: remainingInterest(bal0, annualRate, yearsRemaining),
+          method: 'amortizing_fallback',
+          monthlyPiUsed: contractualPi,
+          contractualMonthlyPi: contractualPi,
+          actualMonthlyPi: pay
+        };
+      }
+      let bal = bal0;
+      let interest = 0;
+      const cap = Math.max(12, Math.ceil((Number(yearsRemaining) || 30) * 12) + 600);
+      for (let i = 0; i < cap && bal > 0.01; i++) {
+        const int = bal * r;
+        interest += int;
+        let principal = pay - int;
+        if (r <= 0) principal = pay;
+        if (principal <= 0) {
+          return {
+            interest: remainingInterest(bal0, annualRate, yearsRemaining),
+            method: 'amortizing_fallback',
+            monthlyPiUsed: contractualPi,
+            contractualMonthlyPi: contractualPi,
+            actualMonthlyPi: pay
+          };
+        }
+        if (principal > bal) principal = bal;
+        bal -= principal;
+      }
+      return {
+        interest: Math.max(0, interest),
+        method: 'actual_payment',
+        monthlyPiUsed: pay,
+        contractualMonthlyPi: contractualPi,
+        actualMonthlyPi: pay
+      };
+    }
+    return {
+      interest: remainingInterest(bal0, annualRate, yearsRemaining),
+      method: 'amortizing',
+      monthlyPiUsed: contractualPi,
+      contractualMonthlyPi: contractualPi,
+      actualMonthlyPi: null
+    };
+  }
+
+  /**
+   * Keep-vs-refi mortgage interest comparison (ignores consumer debt).
+   * opts.actualMonthlyPi — when set, keep-path uses the borrower's real P&I
+   * (aligned with cash-flow), not a re-amortized contractual payment.
+   */
+  function mortgageInterestComparison(
+    currentBalance,
+    currentRate,
+    yearsRemaining,
+    newLoan,
+    newRate,
+    newTerm,
+    opts
+  ) {
+    const o = opts || {};
+    const keep = remainingInterestWithPayment(
+      currentBalance,
+      currentRate,
+      yearsRemaining,
+      o.actualMonthlyPi
+    );
+    const refiInterest = totalInterestPaid(newLoan, newRate, newTerm);
+    const keepInterest = keep.interest;
+    return {
+      keepInterest: roundDollar(keepInterest),
+      refiInterest: roundDollar(refiInterest),
+      savings: roundDollar(keepInterest - refiInterest),
+      keepMethod: keep.method,
+      keepMonthlyPiUsed: roundDollar(keep.monthlyPiUsed),
+      contractualMonthlyPi: roundDollar(keep.contractualMonthlyPi),
+      actualMonthlyPi:
+        keep.actualMonthlyPi != null ? roundDollar(keep.actualMonthlyPi) : null
+    };
+  }
+
+  /**
+   * Interest avoided by paying off selected non-mortgage debts.
+   * Uses rate + remaining months when available; if rate is set without months,
+   * months are derived from payment schedule.
+   */
+  function consumerDebtInterestAvoided(debts) {
+    return roundDollar((debts || []).reduce(function (sum, d) {
+      if (!d.payOff || d.name === 'Current Mortgage') return sum;
+      if (!(Number(d.rate) > 0) && !(Number(d.months) > 0)) return sum;
+      return sum + debtRemainingInterest(d.bal, d.rate, d.pay, d.months);
+    }, 0));
+  }
+
+  /**
+   * Per-debt interest avoided estimate (same math as rollup).
+   * Returns 0 when rate/term detail is missing.
+   */
+  function debtInterestAvoidedEst(d) {
+    if (!d || !d.payOff || d.name === 'Current Mortgage') return 0;
+    if (!(Number(d.rate) > 0) && !(Number(d.months) > 0)) return 0;
+    return roundDollar(debtRemainingInterest(d.bal, d.rate, d.pay, d.months));
+  }
+
+  /**
+   * Loan amount to cover mortgage + selected other debts + closing costs.
+   * If closingCosts is blank/zero, applies SIZE_LOAN_CLOSING_FLOOR ($6,000)
+   * so cash-to-close is not understated.
+   */
+  function sizeLoanToCover(currentBalance, debts, closingCosts, homeValue) {
+    const entered = Number(closingCosts) || 0;
+    const usedClosingFloor = !(entered > 0);
+    const costs = usedClosingFloor ? SIZE_LOAN_CLOSING_FLOOR : entered;
+    const mortgage = Number(currentBalance) || 0;
+    const other = otherDebtsPaidOff(debts);
+    const needed = mortgage + other + costs;
+    const maxLoan = maxLoanAmount(homeValue, debts);
+    const maxLtvPct = Math.round(maxLtvRatio(debts) * 100);
+    const target = Math.min(needed, maxLoan);
+    return {
+      mortgagePayoff: roundDollar(mortgage),
+      otherDebts: roundDollar(other),
+      closingCostsUsed: roundDollar(costs),
+      usedClosingFloor: usedClosingFloor,
+      closingFloor: SIZE_LOAN_CLOSING_FLOOR,
+      needed: roundDollar(needed),
+      maxLoan: maxLoan,
+      maxLtvPct: maxLtvPct,
+      target: roundDollar(target),
+      capped: needed > maxLoan
+    };
+  }
+
+  /**
+   * Full scenario snapshot — single source for UI + AI prompts.
+   */
+  function computeScenario(input) {
+    const s = Object.assign({}, DEFAULTS, input || {});
+    s.debts = Array.isArray(s.debts) ? s.debts : [];
+    s.closingCosts = Number(s.closingCosts) || 0;
+
+    const home = Number(s.homeValue) || 0;
+    const bal = Number(s.currentBalance) || 0;
+    const currentEq = equity(home, bal);
+    const currentLtv = ltv(bal, home);
+
+    const oldPi = derivePi(s.totalPayment, s.taxes, s.insurance, s.pmi, s.escrowIncluded);
+    const oldHousing = totalHousingCost(s.totalPayment, s.taxes, s.insurance, s.pmi, s.escrowIncluded);
+    const oldEscrow = escrowMonthly(s.taxes, s.insurance, s.pmi);
+
+    const newLoan = Number(s.newLoanAmount) || 0;
+    const newRate = Number(s.newRate) || 0;
+    const newTerm = Number(s.newTerm) || 30;
+    const newPi = calculateMonthlyPayment(newLoan, newRate, newTerm);
+
+    // Project PMI: default estimate when LTV > 80%; optional manual override for quotes
+    const estimatedNewPmi = estimateNewPmi(newLoan, home);
+    const manualPmi = s.newPmiManual === true || s.newPmiManual === 'true' || s.newPmiManual === 1;
+    const newPmi = manualPmi
+      ? Math.max(0, Number(s.newPmi) || 0)
+      : estimatedNewPmi;
+    const newEscrow = (Number(s.taxes) || 0) + (Number(s.insurance) || 0) + newPmi;
+    const newHousing = newPi + newEscrow;
+
+    const otherBal = otherDebtsPaidOff(s.debts);
+    const otherPay = otherDebtMonthlyPayments(s.debts);
+    const debtsTotal = bal + otherBal;
+
+    // Old total monthly obligations (housing P&I path + selected debts)
+    // Cash-flow change: (old housing + debt pays) - (new housing)
+    // Using total housing (incl taxes/ins) on both sides for honesty.
+    const oldMonthlyObligations = oldHousing + otherPay;
+    const newMonthlyObligations = newHousing;
+    const monthlyCashFlowChange = oldMonthlyObligations - newMonthlyObligations;
+
+    // P&I-only delta (useful detail)
+    const piOnlyChange = (oldPi + otherPay) - newPi;
+
+    const cash = cashAtClosing(newLoan, bal, s.debts, s.closingCosts);
+    const newEq = equity(home, newLoan);
+    const newLtvPct = ltv(newLoan, home);
+    const cashOut = isCashOutRequest(newLoan, bal, s.debts, s.closingCosts);
+    const maxLoan = maxLoanAmount(home, s.debts, {
+      forceCashOut: cashOut,
+      newLoan: newLoan,
+      currentBalance: bal,
+      closingCosts: s.closingCosts
+    });
+
+    // Escrow integrity: included total but near-zero T&I → new housing drops T&I and inflates CF
+    const taxIns = (Number(s.taxes) || 0) + (Number(s.insurance) || 0);
+    const escrowDataWeak =
+      !!s.escrowIncluded && taxIns < 50 && (Number(s.totalPayment) || 0) > 500;
+
+    const shorter = shorterTermInterestSavings(newLoan, newRate, newTerm);
+    // Align keep-interest with cash-flow P&I (actual derived payment)
+    const mortInt = mortgageInterestComparison(
+      bal,
+      s.currentRate,
+      s.yearsRemaining,
+      newLoan,
+      newRate,
+      newTerm,
+      { actualMonthlyPi: oldPi }
+    );
+    const consumerInt = consumerDebtInterestAvoided(s.debts);
+
+    // Break-even: only when monthly savings are meaningful (< ~10 yr recovery)
+    const MIN_CF_FOR_BREAKEVEN = 50;
+    const MAX_BREAKEVEN_MONTHS = 120;
+    let breakEvenMonths = null;
+    let breakEvenNotMeaningful = false;
+    if (monthlyCashFlowChange >= MIN_CF_FOR_BREAKEVEN && s.closingCosts > 0) {
+      const rawBe = Math.ceil(s.closingCosts / monthlyCashFlowChange);
+      if (rawBe <= MAX_BREAKEVEN_MONTHS) {
+        breakEvenMonths = rawBe;
+      } else {
+        breakEvenNotMeaningful = true;
+      }
+    } else if (monthlyCashFlowChange > 0 && monthlyCashFlowChange < MIN_CF_FOR_BREAKEVEN) {
+      breakEvenNotMeaningful = true;
+    } else if (monthlyCashFlowChange <= 0) {
+      breakEvenMonths = null;
+    } else if (s.closingCosts <= 0 && monthlyCashFlowChange > 0) {
+      breakEvenMonths = 0;
+    }
+
+    // Extra principal strategy: apply 50% of positive monthly savings to principal
+    let halfSavingsPaydown = null;
+    if (monthlyCashFlowChange > 0) {
+      const extra = monthlyCashFlowChange / 2;
+      const accelerated = simulatePaydown(newLoan, newRate, newTerm, extra);
+      const baseline = {
+        months: newTerm * 12,
+        totalInterest: mortInt.refiInterest
+      };
+      halfSavingsPaydown = {
+        extraMonthly: roundDollar(extra),
+        months: accelerated.months,
+        years: roundMoney(accelerated.months / 12),
+        totalInterest: accelerated.totalInterest,
+        interestSavedVsBaseline: roundDollar(baseline.totalInterest - accelerated.totalInterest),
+        yearsSaved: roundMoney((baseline.months - accelerated.months) / 12)
+      };
+    }
+
+    return {
+      homeValue: home,
+      currentBalance: bal,
+      currentRate: Number(s.currentRate) || 0,
+      yearsRemaining: Number(s.yearsRemaining) || 0,
+      equity: roundDollar(currentEq),
+      ltv: Math.round(currentLtv),
+      ltvExact: roundMoney(currentLtv),
+
+      oldPi: roundDollar(oldPi),
+      oldHousing: roundDollar(oldHousing),
+      oldEscrow: roundDollar(oldEscrow),
+      escrowIncluded: !!s.escrowIncluded,
+      taxes: Number(s.taxes) || 0,
+      insurance: Number(s.insurance) || 0,
+      pmi: Number(s.pmi) || 0,
+      totalPayment: Number(s.totalPayment) || 0,
+
+      newLoanAmount: newLoan,
+      newRate: newRate,
+      newTerm: newTerm,
+      newPi: roundDollar(newPi),
+      newPmi: roundDollar(newPmi),
+      estimatedNewPmi: roundDollar(estimatedNewPmi),
+      newPmiIsManual: !!manualPmi,
+      newEscrow: roundDollar(newEscrow),
+      newHousing: roundDollar(newHousing),
+      newEquity: roundDollar(newEq),
+      newLtv: Math.round(newLtvPct),
+      newLtvExact: roundMoney(newLtvPct),
+
+      otherDebtsPaidOff: roundDollar(otherBal),
+      otherDebtMonthly: roundDollar(otherPay),
+      totalDebtsPaidOff: roundDollar(debtsTotal),
+      closingCosts: roundDollar(s.closingCosts),
+      cashAtClosing: roundDollar(cash),
+      isCashBack: cash >= 0,
+
+      monthlyCashFlowChange: roundDollar(monthlyCashFlowChange),
+      piOnlyChange: roundDollar(piOnlyChange),
+      oldMonthlyObligations: roundDollar(oldMonthlyObligations),
+      newMonthlyObligations: roundDollar(newMonthlyObligations),
+
+      breakEvenMonths: breakEvenMonths,
+      breakEvenNotMeaningful: breakEvenNotMeaningful,
+      shorterTermInterestSavings: shorter,
+      mortgageInterest: mortInt,
+      consumerDebtInterestAvoided: consumerInt,
+      totalInterestPicture: roundDollar(mortInt.savings + consumerInt),
+
+      halfSavingsPaydown: halfSavingsPaydown,
+
+      maxLoanAmount: maxLoan,
+      maxLtvPct: Math.round(
+        maxLtvRatio(s.debts, {
+          forceCashOut: cashOut,
+          newLoan: newLoan,
+          currentBalance: bal,
+          closingCosts: s.closingCosts
+        }) * 100
+      ),
+      isCashOutScenario: cashOut,
+      overMaxLoan: newLoan > maxLoan,
+      escrowDataWeak: escrowDataWeak,
+      taxInsuranceMonthly: roundDollar(taxIns),
+
+      debts: s.debts
+    };
+  }
+
+  /**
+   * Full amortization path sampled for charts.
+   * Returns yearly (or custom) balance points plus totals.
+   */
+  function amortizationBalanceSeries(principal, annualRate, years, sampleEveryMonths) {
+    const p0 = Number(principal) || 0;
+    const yrs = Number(years) || 0;
+    const step = Math.max(1, Number(sampleEveryMonths) || 12);
+    if (p0 <= 0 || yrs <= 0) {
+      return { payment: 0, points: [{ month: 0, year: 0, balance: 0 }], totalInterest: 0, months: 0 };
+    }
+    const payment = calculateMonthlyPayment(p0, annualRate, yrs);
+    const r = (Number(annualRate) || 0) / 100 / 12;
+    const n = Math.round(yrs * 12);
+    let bal = p0;
+    let totalInterest = 0;
+    const points = [{ month: 0, year: 0, balance: roundMoney(bal) }];
+    let m = 0;
+    while (m < n && bal > 0.01) {
+      m++;
+      const interest = bal * r;
+      totalInterest += interest;
+      let principalPaid = payment - interest;
+      if (principalPaid <= 0) {
+        // interest-only / invalid
+        break;
+      }
+      if (principalPaid > bal) principalPaid = bal;
+      bal -= principalPaid;
+      if (bal < 0.01) bal = 0;
+      if (m % step === 0 || m === n || bal === 0) {
+        points.push({ month: m, year: roundMoney(m / 12), balance: roundMoney(bal) });
+      }
+      if (bal === 0) break;
+    }
+    return {
+      payment: roundMoney(payment),
+      points: points,
+      totalInterest: roundDollar(totalInterest),
+      months: m
+    };
+  }
+
+  /** Amortization with optional extra principal each month */
+  function simulatePaydown(principal, annualRate, years, extraMonthly) {
+    let bal = Number(principal) || 0;
+    const scheduled = calculateMonthlyPayment(bal, annualRate, years);
+    const r = (Number(annualRate) || 0) / 100 / 12;
+    const extra = Number(extraMonthly) || 0;
+    const maxMonths = (Number(years) || 0) * 12 + 600;
+    let months = 0;
+    let totalInterest = 0;
+    while (bal > 0.01 && months < maxMonths) {
+      const int = bal * r;
+      totalInterest += int;
+      let principalPaid = scheduled - int + extra;
+      if (principalPaid <= 0) {
+        // can't pay down
+        return { months: Infinity, totalInterest: roundDollar(totalInterest) };
+      }
+      if (principalPaid > bal) principalPaid = bal;
+      bal -= principalPaid;
+      months++;
+    }
+    return { months: months, totalInterest: roundDollar(totalInterest) };
+  }
+
+  function formatMoney(n, opts) {
+    const options = opts || {};
+    const v = Number(n) || 0;
+    const abs = Math.abs(v);
+    const formatted = abs.toLocaleString(undefined, {
+      maximumFractionDigits: options.cents ? 2 : 0,
+      minimumFractionDigits: options.cents ? 2 : 0
+    });
+    if (options.signed) {
+      return (v < 0 ? '-$' : '+$') + formatted;
+    }
+    if (v < 0) return '-$' + formatted;
+    return '$' + formatted;
+  }
+
+  function applyPreset(preset, state) {
+    const home = Number(state.homeValue) || 0;
+    const bal = Number(state.currentBalance) || 0;
+    const debts = state.debts || [];
+    const costs = Number(state.closingCosts) || SIZE_LOAN_CLOSING_FLOOR;
+    const other = otherDebtsPaidOff(debts);
+    const rate = Number(state.newRate) || 5.875;
+    const yearsRem = Number(state.yearsRemaining) || 27;
+
+    switch (preset) {
+      case 'rate-term': {
+        // Pay off mortgage only + closing costs rolled in optionally
+        const loan = Math.min(bal + costs, maxLoanAmount(home, debts.filter(function (d) {
+          return d.name === 'Current Mortgage';
+        })));
+        return { newLoanAmount: roundDollar(loan), newTerm: Math.min(30, Math.max(10, Math.ceil(yearsRem))), newRate: rate };
+      }
+      case 'lower-payment': {
+        const loan = Math.min(bal + costs, Math.floor(home * 0.97));
+        return { newLoanAmount: roundDollar(loan), newTerm: 30, newRate: rate };
+      }
+      case 'shorten-term': {
+        const loan = Math.min(bal + costs, Math.floor(home * 0.97));
+        const term = yearsRem <= 15 ? 10 : 15;
+        return { newLoanAmount: roundDollar(loan), newTerm: term, newRate: rate };
+      }
+      case 'debt-wipeout': {
+        // Ensure all non-mortgage debts marked payoff in caller; size loan for all
+        const needed = bal + other + costs;
+        const max = Math.floor(home * 0.80);
+        return { newLoanAmount: roundDollar(Math.min(needed, max)), newTerm: 30, newRate: rate, markAllDebtsPayoff: true };
+      }
+      case 'cash-project': {
+        const targetCash = Number(state.projectCash) || 30000;
+        const needed = bal + other + costs + targetCash;
+        const max = Math.floor(home * 0.80);
+        return { newLoanAmount: roundDollar(Math.min(needed, max)), newTerm: 30, newRate: rate };
+      }
+      default:
+        return {};
+    }
+  }
+
+  /**
+   * Compact metrics snapshot for side-by-side AI alternatives (no full debt lists).
+   */
+  function scenarioMetricsSummary(scenario, label, id, description, debtsInPlay) {
+    const s = scenario;
+    return {
+      id: id,
+      label: label,
+      description: description || '',
+      debtsPaidOffNames: debtsInPlay || [],
+      newLoanAmount: s.newLoanAmount,
+      newRate: s.newRate,
+      newTerm: s.newTerm,
+      newPi: s.newPi,
+      newTotalHousing: s.newHousing,
+      newLtv: s.newLtv,
+      monthlyCashFlowChange: s.monthlyCashFlowChange,
+      otherDebtsPaidOff: s.otherDebtsPaidOff,
+      otherDebtMonthly: s.otherDebtMonthly,
+      cashAtClosing: s.cashAtClosing,
+      cashAtClosingLabel: s.isCashBack ? 'cash_back' : 'cash_to_close',
+      breakEvenMonths: s.breakEvenMonths,
+      consumerDebtInterestAvoided: s.consumerDebtInterestAvoided,
+      mortgageInterestSavings: s.mortgageInterest && s.mortgageInterest.savings,
+      totalInterestPicture: s.totalInterestPicture,
+      isCashOutScenario: s.isCashOutScenario,
+      overMaxLoan: s.overMaxLoan
+    };
+  }
+
+  /**
+   * Precomputed refinance paths from the same inputs so AI can recommend
+   * alternatives without inventing math.
+   *
+   * Always includes:
+   *  - primary (current calculator selection)
+   *  - rate_and_term_only (mortgage only, no consumer debt payoff)
+   *  - high_apr_debts_only when any consumer debt has rate >= 12%
+   *  - all_consumer_debts when there are consumer debts not already all selected
+   */
+  function buildScenarioAlternatives(input) {
+    const base = Object.assign({}, DEFAULTS, input || {});
+    const debts = Array.isArray(base.debts)
+      ? base.debts.map(function (d) { return Object.assign({}, d); })
+      : [];
+    const consumer = debts.filter(function (d) { return d.name !== 'Current Mortgage'; });
+    const primary = computeScenario(base);
+    const primaryNames = consumer.filter(function (d) { return d.payOff; }).map(function (d) { return d.name; });
+
+    const alts = [];
+    alts.push(scenarioMetricsSummary(
+      primary,
+      'Primary (current calculator selection)',
+      'primary',
+      'The path currently set in the tool — use these numbers as the main story.',
+      primaryNames
+    ));
+
+    // Rate-and-term only: no consumer payoff; loan = mortgage + closing costs (capped)
+    const noConsumerDebts = debts.map(function (d) {
+      if (d.name === 'Current Mortgage') return Object.assign({}, d, { payOff: true });
+      return Object.assign({}, d, { payOff: false });
+    });
+    const rateTermSize = sizeLoanToCover(
+      base.currentBalance,
+      noConsumerDebts,
+      base.closingCosts,
+      base.homeValue
+    );
+    const rateTermScenario = computeScenario(Object.assign({}, base, {
+      debts: noConsumerDebts,
+      newLoanAmount: rateTermSize.target
+    }));
+    alts.push(scenarioMetricsSummary(
+      rateTermScenario,
+      'Rate-and-term only (keep other debts)',
+      'rate_and_term_only',
+      'Refinance the mortgage only; do not roll in consumer debts. Other monthly debt payments continue.',
+      []
+    ));
+
+    // High-APR only (rate >= 12%)
+    const highAprPresent = consumer.some(function (d) { return (Number(d.rate) || 0) >= 12; });
+    if (highAprPresent) {
+      const highAprDebts = debts.map(function (d) {
+        if (d.name === 'Current Mortgage') return Object.assign({}, d, { payOff: true });
+        const rate = Number(d.rate) || 0;
+        return Object.assign({}, d, { payOff: rate >= 12 });
+      });
+      const highNames = highAprDebts
+        .filter(function (d) { return d.payOff && d.name !== 'Current Mortgage'; })
+        .map(function (d) { return d.name; });
+      // Only add if selection differs from primary
+      const sameAsPrimary = highNames.length === primaryNames.length &&
+        highNames.every(function (n) { return primaryNames.indexOf(n) >= 0; });
+      if (!sameAsPrimary && highNames.length > 0) {
+        const highSize = sizeLoanToCover(
+          base.currentBalance,
+          highAprDebts,
+          base.closingCosts,
+          base.homeValue
+        );
+        const highScenario = computeScenario(Object.assign({}, base, {
+          debts: highAprDebts,
+          newLoanAmount: highSize.target
+        }));
+        alts.push(scenarioMetricsSummary(
+          highScenario,
+          'Pay off high-APR debts only (12%+)',
+          'high_apr_debts_only',
+          'Roll in only consumer debts at 12% APR or higher; leave lower-rate debts alone.',
+          highNames
+        ));
+      }
+    }
+
+    // All consumer debts
+    if (consumer.length > 0) {
+      const allDebts = debts.map(function (d) {
+        return Object.assign({}, d, { payOff: true });
+      });
+      const allNames = consumer.map(function (d) { return d.name; });
+      const sameAll = allNames.length === primaryNames.length &&
+        allNames.every(function (n) { return primaryNames.indexOf(n) >= 0; });
+      if (!sameAll) {
+        const allSize = sizeLoanToCover(
+          base.currentBalance,
+          allDebts,
+          base.closingCosts,
+          base.homeValue
+        );
+        const allScenario = computeScenario(Object.assign({}, base, {
+          debts: allDebts,
+          newLoanAmount: allSize.target
+        }));
+        alts.push(scenarioMetricsSummary(
+          allScenario,
+          'Consolidate all listed consumer debts',
+          'all_consumer_debts',
+          'Roll every non-mortgage debt into the new loan (subject to LTV cap).',
+          allNames
+        ));
+      }
+    }
+
+    // Simple engine hint: which alternative has the best monthly cash flow among alts
+    let bestCashFlowId = alts[0].id;
+    let bestCashFlow = alts[0].monthlyCashFlowChange;
+    alts.forEach(function (a) {
+      if (a.monthlyCashFlowChange > bestCashFlow) {
+        bestCashFlow = a.monthlyCashFlowChange;
+        bestCashFlowId = a.id;
+      }
+    });
+    let bestInterestAvoidedId = alts[0].id;
+    let bestInt = alts[0].consumerDebtInterestAvoided || 0;
+    alts.forEach(function (a) {
+      if ((a.consumerDebtInterestAvoided || 0) > bestInt) {
+        bestInt = a.consumerDebtInterestAvoided || 0;
+        bestInterestAvoidedId = a.id;
+      }
+    });
+
+    return {
+      alternatives: alts,
+      comparisonHints: {
+        bestMonthlyCashFlowId: bestCashFlowId,
+        bestConsumerInterestAvoidedId: bestInterestAvoidedId,
+        note:
+          'All alternative figures were calculated by the same engine as the primary path. ' +
+          'Narrate the primary path first, then recommend an alternative when its metrics are stronger ' +
+          '(e.g. high-APR payoff improves cash flow or interest avoided). Never invent loan amounts or payments.'
+      }
+    };
+  }
+
+  /** Canonical numbers blob for AI — model must not recalculate */
+  function buildCanonicalNumbers(scenario, client) {
+    const c = client || {};
+    const s = scenario;
+    const debtsDetailed = (s.debts || []).map(function (d) {
+      const rate = Number(d.rate) || 0;
+      const months = Number(d.months) || 0;
+      const hasRateTerm = rate > 0 || months > 0;
+      const interestAvoided = debtInterestAvoidedEst(d);
+      return {
+        name: d.name,
+        balance: d.bal || 0,
+        monthlyPayment: d.pay || 0,
+        interestRate: rate,
+        remainingMonths: months,
+        payOff: !!d.payOff,
+        isMortgage: d.name === 'Current Mortgage',
+        hasRateOrTermDetail: hasRateTerm,
+        interestAvoidedIfPaidOff: interestAvoided,
+        priorityHint: (!d.payOff || d.name === 'Current Mortgage')
+          ? 'n/a'
+          : (rate >= 15
+            ? 'high_apr_priority'
+            : rate >= 8
+              ? 'moderate_apr'
+              : hasRateTerm
+                ? 'lower_apr_or_short_term'
+                : 'missing_rate_term_detail')
+      };
+    });
+    const payoffConsumer = debtsDetailed.filter(function (d) {
+      return d.payOff && !d.isMortgage;
+    });
+    const highAprPayoffs = payoffConsumer
+      .filter(function (d) { return d.interestRate >= 12; })
+      .sort(function (a, b) { return b.interestRate - a.interestRate; });
+    const missingRateTerm = payoffConsumer.filter(function (d) {
+      return !d.hasRateOrTermDetail;
+    });
+
+    return {
+      clientName: c.clientName || 'Valued Client',
+      clientEmail: c.clientEmail || '',
+      clientPhone: c.clientPhone || '',
+      clientNotes: c.clientNotes || '',
+      homeValue: s.homeValue,
+      currentBalance: s.currentBalance,
+      currentRate: s.currentRate,
+      yearsRemaining: s.yearsRemaining,
+      currentEquity: s.equity,
+      currentLtv: s.ltv,
+      currentPi: s.oldPi,
+      currentTotalHousing: s.oldHousing,
+      currentEscrow: s.oldEscrow,
+      taxes: s.taxes,
+      insurance: s.insurance,
+      currentPmi: s.pmi,
+      newLoanAmount: s.newLoanAmount,
+      newRate: s.newRate,
+      newTerm: s.newTerm,
+      newPi: s.newPi,
+      newPmi: s.newPmi,
+      newTotalHousing: s.newHousing,
+      newEquity: s.newEquity,
+      newLtv: s.newLtv,
+      monthlyCashFlowChange: s.monthlyCashFlowChange,
+      totalDebtsPaidOff: s.totalDebtsPaidOff,
+      otherDebtsPaidOff: s.otherDebtsPaidOff,
+      otherDebtMonthly: s.otherDebtMonthly,
+      closingCosts: s.closingCosts,
+      cashAtClosing: s.cashAtClosing,
+      cashAtClosingLabel: s.isCashBack ? 'cash_back' : 'cash_to_close',
+      breakEvenMonths: s.breakEvenMonths,
+      keepMortgageInterest: s.mortgageInterest.keepInterest,
+      refiMortgageInterest: s.mortgageInterest.refiInterest,
+      mortgageInterestSavings: s.mortgageInterest.savings,
+      consumerDebtInterestAvoided: s.consumerDebtInterestAvoided,
+      totalInterestPicture: s.totalInterestPicture,
+      shorterTermInterestSavings: s.shorterTermInterestSavings,
+      halfSavingsPaydown: s.halfSavingsPaydown,
+      maxLoanAmount: s.maxLoanAmount,
+      isCashOutScenario: s.isCashOutScenario,
+      debts: debtsDetailed,
+      debtInsights: {
+        consumerDebtsMarkedPayoff: payoffConsumer.length,
+        highAprDebtsToHighlight: highAprPayoffs,
+        debtsMissingRateOrTerm: missingRateTerm.map(function (d) { return d.name; }),
+        consumerDebtInterestAvoided: s.consumerDebtInterestAvoided,
+        guidance:
+          'When recommending benefits, prioritize paying off high interestRate consumer debts. ' +
+          'Use interestAvoidedIfPaidOff and remainingMonths when present. ' +
+          'If hasRateOrTermDetail is false, do not invent APR or term — say rate/term was not provided.'
+      }
+    };
+  }
+
+  return {
+    DEFAULTS: DEFAULTS,
+    roundMoney: roundMoney,
+    roundDollar: roundDollar,
+    clamp: clamp,
+    calculateMonthlyPayment: calculateMonthlyPayment,
+    totalInterestPaid: totalInterestPaid,
+    remainingInterest: remainingInterest,
+    monthsToPayOff: monthsToPayOff,
+    debtRemainingInterest: debtRemainingInterest,
+    equity: equity,
+    ltv: ltv,
+    derivePi: derivePi,
+    totalHousingCost: totalHousingCost,
+    escrowMonthly: escrowMonthly,
+    estimateNewPmi: estimateNewPmi,
+    hasCashOutDebts: hasCashOutDebts,
+    isCashOutRequest: isCashOutRequest,
+    maxLtvRatio: maxLtvRatio,
+    maxLoanAmount: maxLoanAmount,
+    remainingInterestWithPayment: remainingInterestWithPayment,
+    otherDebtsPaidOff: otherDebtsPaidOff,
+    otherDebtMonthlyPayments: otherDebtMonthlyPayments,
+    totalDebtsPaidOff: totalDebtsPaidOff,
+    cashAtClosing: cashAtClosing,
+    shorterTermInterestSavings: shorterTermInterestSavings,
+    mortgageInterestComparison: mortgageInterestComparison,
+    consumerDebtInterestAvoided: consumerDebtInterestAvoided,
+    debtInterestAvoidedEst: debtInterestAvoidedEst,
+    sizeLoanToCover: sizeLoanToCover,
+    SIZE_LOAN_CLOSING_FLOOR: SIZE_LOAN_CLOSING_FLOOR,
+    computeScenario: computeScenario,
+    simulatePaydown: simulatePaydown,
+    amortizationBalanceSeries: amortizationBalanceSeries,
+    formatMoney: formatMoney,
+    applyPreset: applyPreset,
+    buildCanonicalNumbers: buildCanonicalNumbers,
+    buildScenarioAlternatives: buildScenarioAlternatives
+  };
+});

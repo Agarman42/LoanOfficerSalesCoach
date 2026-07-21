@@ -2722,6 +2722,20 @@ function applyNewsletterColorBundle(html) {
     return applyFn(html, bundle);
 }
 
+function hideNewsletterEmptyPreview() {
+    const empty = document.getElementById('nl-empty-state');
+    if (empty) {
+        empty.classList.add('hidden');
+        empty.setAttribute('aria-hidden', 'true');
+        empty.style.setProperty('display', 'none', 'important');
+    }
+    try {
+        if (window.CoachPolish && typeof window.CoachPolish.hideEmpty === 'function') {
+            window.CoachPolish.hideEmpty('nl-empty-state');
+        }
+    } catch (e) { /* ignore */ }
+}
+
 function refreshNewsletterColorScheme() {
     const rawEl = document.getElementById('nl-html-raw');
     let html = (rawEl?.value || '').trim() || (lastGeneratedHTML || '').trim();

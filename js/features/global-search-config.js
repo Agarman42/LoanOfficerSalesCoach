@@ -115,6 +115,16 @@
       sectionId: 'smart-savings',
       group: 'Quick Actions',
     },
+    {
+      id: 'action-mortgage-calculator',
+      title: 'Mortgage Calculator',
+      subtitle: 'Payment, taxes, insurance, PMI, extra payments',
+      icon: 'fas fa-calculator',
+      keywords: ['mortgage calculator', 'payment calculator', 'amortization', 'pmi', 'biweekly', 'taxes insurance'],
+      sectionId: 'calculator',
+      group: 'Quick Actions',
+    },
+
   ];
 
   const realtorQuickActions = [

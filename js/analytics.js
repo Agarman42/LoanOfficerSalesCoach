@@ -28,7 +28,7 @@
     'value-vault': 'Value Vault',
     process: 'Loan / Buying Process',
     'underwriting-search': 'Underwriting Search',
-    calculator: 'Calculator',
+    calculator: 'Mortgage Calculator',
     'equity-scanner': 'Equity Scanner',
     'mindset-motivation': 'Mindset Lab',
     books: 'Book Vault',

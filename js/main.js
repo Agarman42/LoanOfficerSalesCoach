@@ -591,6 +591,21 @@
     }
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    // Smart Savings sets body.mode-guided / mode-expert for its CSS.
+    // Those classes leak into coach <main> rules and can blank other tools (e.g. Calculator).
+    if (id !== 'smart-savings') {
+      try {
+        document.body.classList.remove(
+          'mode-guided',
+          'mode-expert',
+          'ss-guided-modal-open',
+          'ss-smart-savings-modal-open',
+          'modal-open'
+        );
+        document.documentElement.classList.remove('ss-guided-modal-open', 'mode-guided', 'mode-expert');
+      } catch (e) { /* ignore */ }
+    }
+
     // Smart Savings native section — init (scoped CSS + app) on first show
     if (id === 'smart-savings') {
       try {
@@ -602,6 +617,18 @@
 
     // Auto-trigger calculator results when navigating to it
     if (id === 'calculator') {
+      // Ensure section is not stuck display:none from leaked Smart Savings CSS
+      try {
+        target.style.removeProperty('display');
+        target.style.removeProperty('visibility');
+        target.style.removeProperty('opacity');
+        target.querySelectorAll('#calc-form, #purchase-inputs, #refinance-inputs, #calc-results').forEach((el) => {
+          if (el) {
+            el.style.removeProperty('display');
+            el.classList.remove('hidden');
+          }
+        });
+      } catch (e) { /* ignore */ }
       setTimeout(() => {
         if (typeof window.calculateAdvanced === 'function') {
           window.calculateAdvanced();

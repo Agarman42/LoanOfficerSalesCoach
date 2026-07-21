@@ -1915,11 +1915,28 @@
   }
 
   async function finishAndGenerate() {
+    // Progress modal immediately — before form sync / wizard close feels laggy
+    if (typeof window.forceShowGlobalLoading === 'function') {
+      window.forceShowGlobalLoading('Building Your Newsletter...');
+    } else {
+      const le = document.getElementById('global-loading');
+      if (le) {
+        le.classList.remove('hidden');
+        le.classList.add('is-visible');
+        le.style.setProperty('display', 'flex', 'important');
+      }
+    }
+
     savePersonalStoryHistory();
     writeWizardIntoForm({ syncUi: true });
     buildReviewPanel();
     const blockers = $('nl-wizard-review-blockers');
-    if (blockers && !blockers.classList.contains('hidden')) return;
+    if (blockers && !blockers.classList.contains('hidden')) {
+      if (typeof window.hideLoading === 'function') {
+        try { window.hideLoading(); } catch (e) {}
+      }
+      return;
+    }
 
     track('complete');
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}

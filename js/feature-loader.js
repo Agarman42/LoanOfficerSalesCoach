@@ -7,18 +7,18 @@
   'use strict';
   var SCRIPTS = [
   'js/features/user-profile.js?v=20260720-ruoff-logo-hardcoded',
-  'js/features/home-favorites.js?v=20260721-endbody-paint',
+  'js/features/home-favorites.js?v=20260721-ux-polish',
   'js/features/onboarding-coach.js?v=20260721-endbody-paint',
   'js/features/bio-creator.js?v=20260715-lo-v14',
   'js/features/bio-wizard.js?v=20260720-polish2',
   'js/features/saved-items-library.js?v=20260715-lo-v290',
-  'js/features/global-search-deep-index.js?v=20260719-content-hub',
+  'js/features/global-search-deep-index.js?v=20260721-ux-polish',
   'js/features/global-search-dynamic-index.js?v=20260709-lo-v292',
-  'js/features/global-search-config.js?v=20260719-content-hub',
+  'js/features/global-search-config.js?v=20260721-ux-polish',
   'js/features/global-search.js?v=20260719-content-hub',
   'js/features/section-bottom-banners.js?v=20260720-review',
-  'js/features/coach-polish.js?v=20260715-lo-v2',
-  'js/app-version.js?v=20260721-v333',
+  'js/features/coach-polish.js?v=20260721-ux-polish',
+  'js/app-version.js?v=20260721-v334',
   'js/features/generation-rules.js?v=20260720-hobby-restraint',
   'js/features/save-ribbon.js',
   'js/features/wizard-a11y.js?v=20260720-polish2',
@@ -47,9 +47,9 @@
   'js/data/newsletter-brain-teasers.js?v=20260625-lo-v233',
   'js/features/newsletter-entertainment.js?v=20260710-lo-engagement-polish-v6',
   'js/features/newsletter-color-bundles.js?v=20260710-lo-v286',
-  'js/features/newsletter-generator.js?v=20260720-lo-media-cap',
+  'js/features/newsletter-generator.js?v=20260721-ux-polish',
   'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
-  'js/features/newsletter-wizard.js?v=20260720-last-issue-chip',
+  'js/features/newsletter-wizard.js?v=20260721-ux-polish',
   'js/features/business-plan-wizard.js?v=20260720-polish2',
   'js/features/ai-chat.js?v=20260720-polish',
   'js/features/underwriting.js?v=20260715-lo-v1',
@@ -59,10 +59,12 @@
   'js/features/vault-rich-modals.js?v=20260623-lo-v222',
   'js/features/referral-event-modals.js?v=20260623-lo-v222',
   'js/features/app-bulk.js?v=20260709-lo-v290',
-  'js/features/smart-savings-scope-css.js?v=20260719-ss-bal-white',
-  'js/features/smart-savings-host.js?v=20260720-review',
-  'js/features/smart-savings-polish.js?v=20260719-ss-bal-white',
-  'js/features/calculator.js'
+  'smart-savings/js/calculator-core.js?v=20260721-v334',
+  'smart-savings/js/app.js?v=20260721-v334',
+  'js/features/smart-savings-scope-css.js?v=20260721-v334',
+  'js/features/smart-savings-host.js?v=20260721-v334',
+  'js/features/smart-savings-polish.js?v=20260721-v334',
+  'js/features/calculator.js?v=20260721-v334'
   ];
   var i = 0;
   function next() {

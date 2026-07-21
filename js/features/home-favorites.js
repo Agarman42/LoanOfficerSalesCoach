@@ -38,7 +38,7 @@
     { sectionId: 'books', title: 'Book Vault', icon: 'fa-book', sub: 'Read & apply', accent: '#00A89D' },
     { sectionId: 'client-translation', title: 'Client Translation', icon: 'fa-language', sub: 'Multilingual', accent: '#002B5C' },
     { sectionId: 'underwriting-search', title: 'Underwriting Search', icon: 'fa-search-dollar', sub: 'Guidelines', accent: '#F15A29' },
-    { sectionId: 'calculator', title: 'Calculator', icon: 'fa-calculator', sub: 'Quick math', accent: '#00A89D' },
+    { sectionId: 'calculator', title: 'Mortgage Calculator', icon: 'fa-calculator', sub: 'Payment & savings math', accent: '#00A89D' },
     { sectionId: 'saved-items', title: 'My Saved Items', icon: 'fa-bookmark', sub: 'Your library', accent: '#F15A29', openAction: 'saved-items' }
   ];
 
