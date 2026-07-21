@@ -1306,14 +1306,16 @@
         console.warn('[onboarding-coach] paint failed', e);
       }
     };
-    // Double rAF: after layout of the home section we just finished parsing
+    // Paint ASAP — do not wait double-rAF (felt like late Coach Setup pop-in).
+    // One rAF is enough to avoid layout thrash mid-style calc.
     if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(function () {
-        requestAnimationFrame(paint);
-      });
+      requestAnimationFrame(paint);
     } else {
       paint();
     }
+    // Re-paint once profile storage is fully readable (user-profile may still be initing)
+    setTimeout(paint, 0);
+    setTimeout(paint, 120);
     // After full DOM is ready, run section hooks once (safe)
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {

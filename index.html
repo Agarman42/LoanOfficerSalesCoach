@@ -118,6 +118,13 @@
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
     <script defer src="js/main.js?v=20260721-ux-polish"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260720-ai-asterisk"></script>
+    <!--
+      Home Coach Setup: must not wait for sequential feature-loader (50+ scripts).
+      defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
+    -->
+    <script defer src="js/features/user-profile.js?v=20260721-home-fast"></script>
+    <script defer src="js/features/home-favorites.js?v=20260721-home-fast"></script>
+    <script defer src="js/features/onboarding-coach.js?v=20260721-home-fast"></script>
     <script src="js/early-boot.js?v=20260721-noloadspin"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">

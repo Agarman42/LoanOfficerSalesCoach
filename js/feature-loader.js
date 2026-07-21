@@ -1,14 +1,14 @@
 /**
- * Loads feature scripts AFTER DOM ready so the address bar can finish
+ * Loads non-critical feature scripts AFTER DOM ready so the address bar can finish
  * and early-boot navigation stays responsive.
- * High-priority UI (profile, home, onboarding) loads first; heavy bulk last.
+ *
+ * Home Coach Setup (user-profile, home-favorites, onboarding-coach) loads via
+ * <script defer> in <head> — NOT here — so setup paints right after main.js
+ * instead of waiting on this sequential queue.
  */
 (function () {
   'use strict';
   var SCRIPTS = [
-  'js/features/user-profile.js?v=20260720-ruoff-logo-hardcoded',
-  'js/features/home-favorites.js?v=20260721-ux-polish',
-  'js/features/onboarding-coach.js?v=20260721-endbody-paint',
   'js/features/bio-creator.js?v=20260715-lo-v14',
   'js/features/bio-wizard.js?v=20260720-polish2',
   'js/features/saved-items-library.js?v=20260715-lo-v290',
@@ -18,7 +18,7 @@
   'js/features/global-search.js?v=20260719-content-hub',
   'js/features/section-bottom-banners.js?v=20260720-review',
   'js/features/coach-polish.js?v=20260721-ux-polish',
-  'js/app-version.js?v=20260721-v334',
+  'js/app-version.js?v=20260721-v335',
   'js/features/generation-rules.js?v=20260720-hobby-restraint',
   'js/features/save-ribbon.js',
   'js/features/wizard-a11y.js?v=20260720-polish2',
