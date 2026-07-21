@@ -17,7 +17,7 @@
   'js/features/global-search-config.js?v=20260719-content-hub',
   'js/features/global-search.js?v=20260719-content-hub',
   'js/features/section-bottom-banners.js?v=20260720-p2-content-hub',
-  'js/app-version.js?v=20260717-realtor-home',
+  'js/app-version.js?v=20260721-v304',
   'js/features/generation-rules.js?v=20260720-hobby-restraint',
   'js/features/feature-checkboxes.js?v=20260706-realtor-v277',
   'js/features/save-ribbon.js?v=20260706-realtor-v273',
