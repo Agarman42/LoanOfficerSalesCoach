@@ -4,7 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ultimate Loan Officer Sales Coach</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style id="coach-boot-css">
+      /* Boot-critical: overlay NEVER visible unless .is-visible is set by generate */
+      #global-loading,
+      #global-loading.coach-loading-overlay {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 99999 !important;
+      }
+      #global-loading.is-visible {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0,0,0,0.6) !important;
+      }
+      /* If JS dies, still show a hint after 8s via animation on a boot flag */
+      #coach-boot-fail {
+        display: none;
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100000;
+        background: #002B5C;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font: 14px/1.3 system-ui, sans-serif;
+        box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      }
+      html.coach-boot-stuck #coach-boot-fail { display: block; }
+    </style>
+    <script>
+      // Absolute first JS: kill any leftover overlay + mark boot; stuck detector
+      (function () {
+        try {
+          if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+        } catch (e) {}
+        function kill() {
+          try {
+            var el = document.getElementById('global-loading');
+            if (!el) return;
+            el.classList.remove('is-visible', 'flex');
+            el.classList.add('hidden');
+            el.setAttribute('hidden', '');
+            el.setAttribute('aria-hidden', 'true');
+            el.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
+          } catch (e) {}
+        }
+        window.__hardHideGlobalLoading = kill;
+        kill();
+        document.addEventListener('DOMContentLoaded', kill);
+        window.addEventListener('load', kill);
+        // If main never sets ready within 8s, show recovery chip
+        setTimeout(function () {
+          if (!window.__mainNavReady) document.documentElement.classList.add('coach-boot-stuck');
+        }, 8000);
+        setInterval(function () {
+          if (!window.__mainNavReady) kill();
+        }, 500);
+      })();
+    </script>
+
+    <!-- No SRI: broken placeholders block FA entirely in modern browsers -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MDYP4C0BJ1"></script>
 <script>
@@ -16,24 +87,12 @@
   gtag('config', 'G-MDYP4C0BJ1', { app_id: 'loan_officer' });
 </script>
     <script src="js/analytics.js?v=20260717-lo-home"></script>
-    
-    <!-- Tailwind CDN is heavy on this 1MB page; load first, then defer non-critical libs -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SWITCH TO CLASS MODE (must stay before body paint for dark mode) -->
-    <script>
-      tailwind.config = {
-        darkMode: 'class'
-      }
-    </script>
-    <!-- Heavy libs deferred: not needed for first paint / navigation -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- === PDF.js — Blog Document Upload (defer; blog checks when used) === -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script defer src="js/pdf-worker-boot.js?v=20260715-lo-v1"></script>
+
+    <!--
+      CRITICAL BOOT (2026-07-21): NEVER load cdn.tailwindcss.com on this ~1MB page.
+      Play CDN JIT freezes the tab (address bar spins, clicks die). Use prebuilt CSS.
+      Heavy export libs (xlsx/html2pdf/…) load AFTER window load via js/lazy-libs.js.
+    -->
     <script>
       (function () {
         try {
@@ -41,14 +100,13 @@
         } catch (e) {}
       })();
     </script>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#002B5C">
 
-    <!-- Extracted external stylesheet (Phase 0 refactor) -->
-    <link rel="stylesheet" href="css/main.css?v=20260720-ai-asterisk">
+    <!-- Static Tailwind (built offline) — no Play CDN -->
+    <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
+    <!-- App-specific styles -->
+    <link rel="stylesheet" href="css/main.css?v=20260721-noloadspin">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
@@ -58,27 +116,14 @@
     <script src="js/features/app-feedback.js?v=20260709-lo-v309"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-    <script defer src="js/main.js?v=20260720-polish"></script>
+    <script defer src="js/main.js?v=20260721-noloadspin"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260720-ai-asterisk"></script>
-    <script src="js/early-boot.js?v=20260720-review"></script>
+    <script src="js/early-boot.js?v=20260721-noloadspin"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
-<!-- Boot guard: hide stuck overlays immediately (before the heavy inline script block parses) -->
-<div id="global-loading" class="hidden fixed inset-0 z-[99999] items-center justify-center bg-black/60 backdrop-blur-md" aria-hidden="true" style="display:none!important;pointer-events:none!important;visibility:hidden!important;">
-    <div class="bg-white dark:bg-gray-900 p-8 md:p-10 rounded-3xl shadow-2xl text-center w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700">
-        <div class="flex justify-center mb-6">
-            <div class="relative">
-                <i class="fas fa-spinner fa-spin text-6xl text-[#00A89D]"></i>
-            </div>
-        </div>
-        <h3 id="global-loading-title" class="text-3xl font-bold text-[#F15A29] mb-3 tracking-tight">Working on it...</h3>
-        <div id="global-loading-message" class="text-lg text-gray-600 dark:text-gray-300 min-h-[60px] transition-opacity duration-300 leading-relaxed">Personalized content incoming — this can take up to a minute.</div>
-        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">Good things take time. We’re building something great for you.</div>
-        <div id="plan-enrich-panel"></div>
-    </div>
-</div>
-
+<!-- Global loading: empty shell only. Spinner injected when a generate starts. Never visible at boot. -->
+<div id="global-loading" class="coach-loading-overlay" aria-hidden="true" hidden></div>
 
 <header class="text-white">
     <!-- Navy band — Ruoff logo far-right (same pattern as Recruiting coach) -->
@@ -446,10 +491,6 @@
       </div>
     </section>
 
-    <!-- Home-critical UI: run as soon as #home is parsed (not after the rest of this huge page) -->
-    <script src="js/features/onboarding-coach.js?v=20260720-polish"></script>
-    <script src="js/features/home-favorites.js?v=20260720-fav-catalog"></script>
-
                  <section id="mindset-motivation" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <div class="text-center mb-6">
                 <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Mindset Lab</h2>
@@ -624,7 +665,7 @@
         </div>
 
         <!-- Shared mode switch (same UX family as Smart Savings Guided | Full) -->
-        <div id="bp-wizard-entry" class="coach-mode-bar" data-coach-mode-tool="planning">
+        <div id="bp-wizard-entry" class="coach-mode-bar scroll-mt-4" data-coach-mode-tool="planning">
           <div class="coach-mode-toggle" role="group" aria-label="How to build your plan">
             <button type="button" id="bp-wizard-open-btn" class="coach-mode-btn" data-coach-mode="guided" data-open-fn="openBusinessPlanWizard" aria-pressed="false">
               <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Guided setup
@@ -3671,7 +3712,7 @@
     </div>
 
     <!-- Mode switch sits above the form (same placement as Business Plan / Newsletter) -->
-    <div id="bio-wizard-entry" class="coach-mode-bar mb-8" data-coach-mode-tool="bio">
+    <div id="bio-wizard-entry" class="coach-mode-bar mb-8 scroll-mt-4" data-coach-mode-tool="bio">
       <div class="coach-mode-toggle" role="group" aria-label="How to build your bio">
         <button type="button" class="coach-mode-btn" data-coach-mode="guided" data-open-fn="openBioWizard" aria-pressed="false">
           <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Guided setup
@@ -6994,7 +7035,7 @@
     </div>
 
     <!-- Mode switch sits above the form (same placement as Business Plan / Bio) -->
-    <div id="nl-wizard-entry" class="coach-mode-bar mb-8" data-coach-mode-tool="newsletter">
+    <div id="nl-wizard-entry" class="coach-mode-bar mb-8 scroll-mt-4" data-coach-mode-tool="newsletter">
       <div class="coach-mode-toggle" role="group" aria-label="How to build your newsletter">
         <button type="button" class="coach-mode-btn" data-coach-mode="guided" data-open-fn="openNewsletterWizard" aria-pressed="false">
           <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Guided setup
@@ -7887,16 +7928,16 @@
     </div>
 </div>
 
-<script src="js/data/popby-library.js?v=20260623-lo-v222"></script>
-<script src="js/data/lo-fact-vault.js?v=20260623-lo-v222"></script>
-<script src="js/features/social-modals.js?v=20260623-lo-v222"></script>
-<script src="js/features/vault-rich-modals.js?v=20260623-lo-v222"></script>
-<script src="js/features/process-rich-modals.js?v=20260623-lo-v222"></script>
-<script src="js/features/nurture-rich-modals.js?v=20260623-lo-v222"></script>
-<script src="js/features/database-rich-modals.js?v=20260623-lo-v222"></script>
-<script src="js/features/event-rich-modals.js?v=20260623-lo-v222"></script>
-<script defer src="js/features/app-bulk.js?v=20260709-lo-v290"></script>
-<script defer src="js/features/popby-seasonal.js?v=20260623-lo-v222"></script>
+<!-- deferred to feature-loader: js/data/popby-library.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/data/lo-fact-vault.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/social-modals.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/vault-rich-modals.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/process-rich-modals.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/nurture-rich-modals.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/database-rich-modals.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/event-rich-modals.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/app-bulk.js?v=20260709-lo-v290 -->
+<!-- deferred to feature-loader: js/features/popby-seasonal.js?v=20260623-lo-v222 -->
 
 
 <!-- Equity Scanner Detail Modal -->
@@ -8055,52 +8096,52 @@
 </div>
 
 <!-- Extracted Features (Phase 1) -->
-<script src="js/features/saved-items-library.js?v=20260715-lo-v290"></script>
-<script src="js/features/save-ribbon.js"></script>
-<script src="js/features/equity-scanner.js?v=20260623-lo-v222"></script>
+<!-- deferred to feature-loader: js/features/saved-items-library.js?v=20260715-lo-v290 -->
+<!-- deferred to feature-loader: js/features/save-ribbon.js -->
+<!-- deferred to feature-loader: js/features/equity-scanner.js?v=20260623-lo-v222 -->
 
-<script src="smart-savings/js/calculator-core.js?v=20260719-ss-restore"></script>
-<script src="smart-savings/js/app.js?v=20260719-ss-bal-white"></script>
-<script src="js/features/smart-savings-scope-css.js?v=20260719-ss-bal-white"></script>
-<script src="js/features/smart-savings-host.js?v=20260720-review"></script>
-<script src="js/features/smart-savings-polish.js?v=20260719-ss-bal-white"></script>
+<!-- deferred to feature-loader: smart-savings/js/calculator-core.js?v=20260719-ss-restore -->
+<!-- deferred to feature-loader: smart-savings/js/app.js?v=20260719-ss-bal-white -->
+<!-- deferred to feature-loader: js/features/smart-savings-scope-css.js?v=20260719-ss-bal-white -->
+<!-- deferred to feature-loader: js/features/smart-savings-host.js?v=20260720-review -->
+<!-- deferred to feature-loader: js/features/smart-savings-polish.js?v=20260719-ss-bal-white -->
 
-<script src="js/features/calculator.js"></script>
-<script src="js/features/sales-scripts.js?v=20260715-lo-v225"></script>
-<script src="js/features/social-post.js?v=20260720-empty-posts"></script>
-<script src="js/features/mindset-lab.js"></script>
-<script src="js/data/weekend-plan-policy.js"></script>
-<script src="js/features/weekly-win-plan.js?v=20260720-hobby-restraint"></script>
-<script src="js/features/tool-bridges.js"></script>
-<script src="js/features/prospecting-time-blocks.js"></script>
-<script src="js/features/generation-rules.js?v=20260720-hobby-restraint"></script>
-<script src="js/features/publish-kit.js?v=20260711-lo-v273"></script>
-<script src="js/features/blog-creator.js?v=20260720-p2-hashtag"></script>
-<script src="js/features/referral-rich-modals.js?v=20260623-lo-v222"></script>
-<script src="js/features/legacy-helpers.js?v=20260623-lo-v222"></script>
-<script src="js/features/global-search-deep-index.js?v=20260719-content-hub"></script>
-<script src="js/features/global-search-dynamic-index.js?v=20260709-lo-v292"></script>
-<script src="js/features/global-search-config.js?v=20260719-content-hub"></script>
-<script src="js/features/global-search.js?v=20260719-content-hub"></script>
-<script src="js/data/newsletter-dad-jokes.js?v=20260625-lo-v231"></script>
-<script src="js/data/newsletter-brain-teasers.js?v=20260625-lo-v233"></script>
-<script src="js/features/newsletter-entertainment.js?v=20260710-lo-engagement-polish-v6"></script>
-<script src="js/features/newsletter-color-bundles.js?v=20260710-lo-v286"></script>
-<script src="js/features/newsletter-generator.js?v=20260720-lo-media-cap"></script>
-<script src="js/features/newsletter-setup-form.js?v=20260720-last-issue-chip"></script>
-<script src="js/features/newsletter-wizard.js?v=20260720-last-issue-chip"></script>
-<script src="js/features/wizard-a11y.js?v=20260720-polish2"></script>
-<script src="js/features/business-plan-wizard.js?v=20260720-polish2"></script>
-<script src="js/features/coach-mode-switch.js?v=20260720-polish"></script>
-<script src="js/features/ai-chat.js?v=20260720-polish"></script>
-<script src="js/features/underwriting.js?v=20260715-lo-v1"></script>
+<!-- deferred to feature-loader: js/features/calculator.js -->
+<!-- deferred to feature-loader: js/features/sales-scripts.js?v=20260715-lo-v225 -->
+<!-- deferred to feature-loader: js/features/social-post.js?v=20260720-empty-posts -->
+<!-- deferred to feature-loader: js/features/mindset-lab.js -->
+<!-- deferred to feature-loader: js/data/weekend-plan-policy.js -->
+<!-- deferred to feature-loader: js/features/weekly-win-plan.js?v=20260720-hobby-restraint -->
+<!-- deferred to feature-loader: js/features/tool-bridges.js -->
+<!-- deferred to feature-loader: js/features/prospecting-time-blocks.js -->
+<!-- deferred to feature-loader: js/features/generation-rules.js?v=20260720-hobby-restraint -->
+<!-- deferred to feature-loader: js/features/publish-kit.js?v=20260711-lo-v273 -->
+<!-- deferred to feature-loader: js/features/blog-creator.js?v=20260720-p2-hashtag -->
+<!-- deferred to feature-loader: js/features/referral-rich-modals.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/legacy-helpers.js?v=20260623-lo-v222 -->
+<!-- deferred to feature-loader: js/features/global-search-deep-index.js?v=20260719-content-hub -->
+<!-- deferred to feature-loader: js/features/global-search-dynamic-index.js?v=20260709-lo-v292 -->
+<!-- deferred to feature-loader: js/features/global-search-config.js?v=20260719-content-hub -->
+<!-- deferred to feature-loader: js/features/global-search.js?v=20260719-content-hub -->
+<!-- deferred to feature-loader: js/data/newsletter-dad-jokes.js?v=20260625-lo-v231 -->
+<!-- deferred to feature-loader: js/data/newsletter-brain-teasers.js?v=20260625-lo-v233 -->
+<!-- deferred to feature-loader: js/features/newsletter-entertainment.js?v=20260710-lo-engagement-polish-v6 -->
+<!-- deferred to feature-loader: js/features/newsletter-color-bundles.js?v=20260710-lo-v286 -->
+<!-- deferred to feature-loader: js/features/newsletter-generator.js?v=20260720-lo-media-cap -->
+<!-- deferred to feature-loader: js/features/newsletter-setup-form.js?v=20260720-last-issue-chip -->
+<!-- deferred to feature-loader: js/features/newsletter-wizard.js?v=20260720-last-issue-chip -->
+<!-- deferred to feature-loader: js/features/wizard-a11y.js?v=20260720-polish2 -->
+<!-- deferred to feature-loader: js/features/business-plan-wizard.js?v=20260720-polish2 -->
+<!-- deferred to feature-loader: js/features/coach-mode-switch.js?v=20260720-polish -->
+<!-- deferred to feature-loader: js/features/ai-chat.js?v=20260720-polish -->
+<!-- deferred to feature-loader: js/features/underwriting.js?v=20260715-lo-v1 -->
 <script>window.TRANSLATION_COACH_VARIANT = 'lo';</script>
-<script src="js/features/translation-tool.js?v=20260715-tr-v265"></script>
-<script src="js/features/value-vault.js?v=20260623-lo-v222"></script>
-<!-- onboarding-coach + home-favorites load mid-page (right after #home) for early paint -->
-<script src="js/features/fact-vault-ui.js?v=20260623-lo-v222"></script>
+<!-- deferred to feature-loader: js/features/translation-tool.js?v=20260715-tr-v265 -->
+<!-- deferred to feature-loader: js/features/value-vault.js?v=20260623-lo-v222 -->
+<!-- onboarding-coach + home-favorites load at end of body (never mid-page — mid-page scripts blocked HTML parse) -->
+<!-- deferred to feature-loader: js/features/fact-vault-ui.js?v=20260623-lo-v222 -->
 
-<script defer src="js/features/referral-event-modals.js?v=20260623-lo-v222"></script>
+<!-- deferred to feature-loader: js/features/referral-event-modals.js?v=20260623-lo-v222 -->
 
 
 <!-- =====================================================
@@ -8361,10 +8402,17 @@
                         <div id="profile-newsletter-color-preview"></div>
                         <p id="profile-newsletter-color-desc" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0"></p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1" for="profile-logo-url">Company Logo URL</label>
-                        <input type="url" id="profile-logo-url" placeholder="https://… or Hotlink from 8upload" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">PNG with transparent background · 400–600px wide (horizontal)</p>
+                    <div class="md:col-span-2 rounded-2xl border border-[#002B5C]/15 bg-gradient-to-r from-[#002B5C]/5 to-transparent px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div class="flex-shrink-0 w-28 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center p-1.5">
+                            <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png"
+                                 alt="Ruoff Mortgage"
+                                 class="max-h-full max-w-full object-contain"
+                                 width="120" height="40" decoding="async">
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-[#002B5C] dark:text-white m-0">Company logo · Ruoff Mortgage</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 m-0 mt-0.5">Built into this coach — no URL needed. Your personal headshot below is still yours to set.</p>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1" for="profile-headshot-url">Professional Headshot URL</label>
@@ -8372,8 +8420,8 @@
                         <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Square crop · 400×400px minimum · shoulders-up portrait</p>
                     </div>
                     <div class="md:col-span-2 rounded-xl border border-[#00A89D]/20 bg-[#00A89D]/5 px-4 py-3">
-                        <p class="text-xs font-semibold text-[#002B5C] dark:text-[#00A89D] m-0 mb-1.5"><i class="fas fa-wand-magic-sparkles mr-1"></i> Branding image tips</p>
-                        <p class="text-[11px] text-gray-600 dark:text-gray-300 m-0 leading-relaxed">Need a free host with no account? Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> and paste the <strong>Hotlink / Direct link</strong> (not the page URL) — that works best for logos, headshots, and newsletter photos. Website or public Drive links also work.</p>
+                        <p class="text-xs font-semibold text-[#002B5C] dark:text-[#00A89D] m-0 mb-1.5"><i class="fas fa-wand-magic-sparkles mr-1"></i> Headshot &amp; photo tips</p>
+                        <p class="text-[11px] text-gray-600 dark:text-gray-300 m-0 leading-relaxed">Need a free host with no account? Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> and paste the <strong>Hotlink / Direct link</strong> (not the page URL) — best for headshots and newsletter photos.</p>
                     </div>
                 </div>
                 <div class="p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 space-y-3">
@@ -8612,9 +8660,12 @@
     </div>
 </div>
 
-<script src="js/features/user-profile.js?v=20260720-profile-tabs-full"></script>
-<script src="js/features/bio-creator.js?v=20260715-lo-v14"></script>
-<script src="js/features/bio-wizard.js?v=20260720-polish2"></script>
+<!-- deferred to feature-loader: js/features/user-profile.js?v=20260720-ruoff-logo-hardcoded -->
+<!-- deferred to feature-loader: js/features/bio-creator.js?v=20260715-lo-v14 -->
+<!-- deferred to feature-loader: js/features/bio-wizard.js?v=20260720-polish2 -->
+<!-- Home setup + favorites: end of body so they never block HTML parse (mid-page scripts froze the tab) -->
+<!-- deferred to feature-loader: js/features/onboarding-coach.js?v=20260721-endbody-paint -->
+<!-- deferred to feature-loader: js/features/home-favorites.js?v=20260721-endbody-paint -->
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -9311,9 +9362,19 @@
 <div id="app-version-line" data-app-name="Ultimate Loan Officer Sales Coach" class="text-center text-[9px] text-gray-400 dark:text-gray-500 py-2 mt-6 border-t border-gray-200 dark:border-gray-700">
   Ultimate Loan Officer Sales Coach • v… • … • Render
 </div>
-<script defer src="js/features/section-bottom-banners.js?v=20260720-review"></script>
-<script defer src="js/features/coach-polish.js?v=20260715-lo-v2"></script>
-<script src="js/app-version.js?v=20260720-polish"></script>
+<!-- deferred to feature-loader: js/features/section-bottom-banners.js?v=20260720-review -->
+<!-- deferred to feature-loader: js/features/coach-polish.js?v=20260715-lo-v2 -->
+<!-- deferred to feature-loader: js/app-version.js?v=20260720-polish -->
+
+
+<!-- Heavy CDNs after load — keeps address bar from spinning forever -->
+<script src="js/feature-loader.js?v=20260721-noloadspin"></script>
+<script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
+
+<div id="coach-boot-fail" role="status">
+  Page still loading? <a href="?boot=1" style="color:#7CFFEE;font-weight:700">Force reload</a>
+  · or open <a href="http://127.0.0.1:3000/?boot=1" style="color:#7CFFEE">127.0.0.1</a>
+</div>
 
 </body>
 </html>

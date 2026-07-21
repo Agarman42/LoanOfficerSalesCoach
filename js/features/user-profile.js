@@ -8,6 +8,10 @@
   const STORAGE_KEY = 'userProfile';
   const WIZARD_DONE_KEY = 'coachProfileWizardDone';
 
+  /** Ruoff company logo — hardcoded for LO coach (not user-editable). Same asset as app header. */
+  const RUOFF_COMPANY_LOGO_URL =
+    'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png';
+
   const FOCUS_OPTIONS = {
     'balanced-growth': 'Balanced Growth',
     'referral-partners': 'Heavy Realtor Partnerships',
@@ -217,7 +221,7 @@
       voiceTraits,
       goals,
       newsletterColorBundle: (p.newsletterColorBundle || 'coastal-teal').trim(),
-      logoUrl: (p.logoUrl || p['logo-url'] || '').trim(),
+      logoUrl: RUOFF_COMPANY_LOGO_URL,
       headshotUrl: (p.headshotUrl || p['headshot-url'] || '').trim(),
       blogPageUrl: (p.blogPageUrl || p.blogUrl || '').trim(),
       linkedInUrl: (p.linkedInUrl || p.linkedin || '').trim(),
@@ -291,7 +295,7 @@
       previewRow('Niches', [...p.niches, p.nichesOther].filter(Boolean).join(', ')),
       previewRow('Tone', p.tone),
       previewRow('Voice', p.voiceTraits),
-      previewRow('Logo', p.logoUrl ? 'Set' : ''),
+      previewRow('Logo', 'Ruoff Mortgage (built-in)'),
       previewRow('Headshot', p.headshotUrl ? 'Set' : ''),
       previewRow('Personality', p.personality),
       previewRow('Formats', p.formats),
@@ -451,7 +455,7 @@
       income: getRaw('profile-income'),
       focus: getRaw('profile-focus') || 'balanced-growth',
       newsletterColorBundle: getRaw('profile-newsletter-color-bundle') || 'coastal-teal',
-      logoUrl: getVal('profile-logo-url'),
+      logoUrl: RUOFF_COMPANY_LOGO_URL,
       headshotUrl: getVal('profile-headshot-url'),
       hours: getRaw('profile-hours'),
       databaseSize: getRaw('profile-database-size'),
@@ -536,12 +540,11 @@
       'monthly-units', 'monthly-goal', 'income', 'focus', 'hours',
       'database-size', 'partner-focus', 'family', 'personality', 'tone',
       'content-notes', 'hobbies-other', 'niche-other', 'challenge-other', 'partner-other',
-      'newsletter-color-bundle', 'logo-url', 'headshot-url', 'blog-url', 'linkedin-url', 'company-website'
+      'newsletter-color-bundle', 'headshot-url', 'blog-url', 'linkedin-url', 'company-website'
     ];
 
     const fieldKeyMap = {
       'newsletter-color-bundle': 'newsletterColorBundle',
-      'logo-url': 'logoUrl',
       'headshot-url': 'headshotUrl',
       'blog-url': 'blogPageUrl',
       'linkedin-url': 'linkedInUrl',

@@ -205,9 +205,11 @@ app.use((err, req, res, _next) => {
   return res.status(500).type('text').send('Internal Server Error');
 });
 
-// Bind 0.0.0.0 so Render / Docker can reach the process
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Grok Proxy running on http://0.0.0.0:${PORT}`);
+// Dual-stack: browsers often resolve "localhost" to IPv6 ::1 first.
+// Binding only 0.0.0.0 made http://127.0.0.1:PORT work and http://localhost:PORT fail.
+// host '::' + ipv6Only:false accepts IPv6 and IPv4-mapped connections (Render/Docker fine).
+const server = app.listen({ port: PORT, host: '::', ipv6Only: false }, () => {
+  console.log(`✅ Grok Proxy running on http://localhost:${PORT} (IPv4+IPv6)`);
   console.log(`✅ Health: /api/health`);
   console.log(`✅ Static root: ${ROOT}`);
   if (!process.env.XAI_API_KEY && !process.env.GROK_API_KEY) {

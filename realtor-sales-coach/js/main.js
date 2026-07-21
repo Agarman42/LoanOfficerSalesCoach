@@ -1000,63 +1000,56 @@
     let loadingEl = document.getElementById('global-loading');
 
     if (!loadingEl) {
-      console.warn('[forceShowGlobalLoading] #global-loading element not found in DOM — will create dynamically');
-      console.info('%c[forceShowGlobalLoading] Dynamically injected the loading overlay. Hard-refresh (Ctrl/Cmd+Shift+R) the page for the static version in index.html to take effect. This fallback keeps the 2026 + Weekly progress modals working.', 'color:#F15A29; font-weight:500');
-
-      // Create the outer overlay
       loadingEl = document.createElement('div');
       loadingEl.id = 'global-loading';
-      // Base classes (we will force the important styles below anyway)
-      loadingEl.className = 'fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-md';
+      loadingEl.className = 'coach-loading-overlay';
+      (document.body || document.documentElement).appendChild(loadingEl);
+    }
 
-      // The card (exact structure expected by enrichPlanLoading which does .querySelector('div') for the white card,
-      // and by title/message getters)
+    if (!loadingEl.querySelector('#global-loading-title')) {
       const card = document.createElement('div');
       card.className = 'bg-white dark:bg-gray-900 p-8 md:p-10 rounded-3xl shadow-2xl text-center w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700';
       card.innerHTML = GLOBAL_LOADING_CARD_INNER;
-
+      loadingEl.innerHTML = '';
       loadingEl.appendChild(card);
-
-      // Append as high as possible so it is always discoverable and on top
-      const attachTo = document.body || document.documentElement;
-      attachTo.appendChild(loadingEl);
     }
 
     if (typeof window.ensureModalInViewport === 'function') {
       window.ensureModalInViewport(loadingEl);
-    } else if (loadingEl.parentElement !== document.body) {
+    } else if (loadingEl.parentElement !== document.body && document.body) {
       document.body.appendChild(loadingEl);
     }
 
-    console.log('%c[forceShowGlobalLoading] FORCING overlay visible for: ' + title, 'color:#00A89D; font-weight:bold');
-
     loadingEl.classList.remove('hidden');
+    loadingEl.classList.add('is-visible', 'flex', 'items-center', 'justify-center');
     loadingEl.removeAttribute('hidden');
-    loadingEl.classList.add('flex', 'items-center', 'justify-center');
+    loadingEl.setAttribute('aria-hidden', 'false');
 
-    // Set every critical property with !important so no Tailwind class, ancestor, or late stylesheet can hide it
     const forceStyles = {
-      'display': 'flex',
-      'position': 'fixed',
-      'top': '0',
-      'left': '0',
-      'right': '0',
-      'bottom': '0',
-      'inset': '0',
+      display: 'flex',
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      right: '0',
+      bottom: '0',
+      inset: '0',
       'z-index': '99999',
-      'visibility': 'visible',
-      'opacity': '1'
+      visibility: 'visible',
+      opacity: '1',
+      'pointer-events': 'auto',
+      'align-items': 'center',
+      'justify-content': 'center',
+      background: 'rgba(0,0,0,0.6)'
     };
     Object.keys(forceStyles).forEach(function (prop) {
       loadingEl.style.setProperty(prop, forceStyles[prop], 'important');
     });
 
-    // Set title if the standard title element still exists (business plan path keeps original structure)
     const titleEl = document.getElementById('global-loading-title');
     if (titleEl && title) {
       titleEl.textContent = title;
     }
-    return loadingEl;   // always return the element now (never false)
+    return loadingEl;
   };
 
   window.showLoadingWithTips = function showLoadingWithTips(tips = [], title = 'Working on it...') {
@@ -1121,12 +1114,19 @@
   };
 
   window.hideLoading = function hideLoading() {
+    if (typeof window.__hardHideGlobalLoading === 'function') {
+      try { window.__hardHideGlobalLoading(); } catch (e) { /* ignore */ }
+    }
     const loadingEl = document.getElementById('global-loading');
     if (loadingEl) {
       loadingEl.classList.add('hidden');
+      loadingEl.classList.remove('flex', 'is-visible');
+      loadingEl.setAttribute('hidden', '');
+      loadingEl.setAttribute('aria-hidden', 'true');
       loadingEl.style.setProperty('display', 'none', 'important');
       loadingEl.style.setProperty('visibility', 'hidden', 'important');
-      // Clean up any plan-specific enrich panel (clear placeholder if present, don't remove the div from static)
+      loadingEl.style.setProperty('opacity', '0', 'important');
+      loadingEl.style.setProperty('pointer-events', 'none', 'important');
       const enrich = loadingEl.querySelector('#plan-enrich-panel');
       if (enrich) {
         enrich.innerHTML = '';

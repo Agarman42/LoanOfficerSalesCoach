@@ -384,11 +384,12 @@
 
   function init() {
     if (!document.getElementById('home')) return;
+    // Paint favorites strip immediately (no idle delay — avoids late pop-in on Home)
     render();
     paintSidebarStars();
-    // Re-paint stars after sidebar may re-render
-    setTimeout(paintSidebarStars, 800);
-    setTimeout(paintSidebarStars, 2000);
+    // Sidebar may re-render after main.js / early-boot; light re-sync only
+    setTimeout(paintSidebarStars, 300);
+    setTimeout(paintSidebarStars, 1200);
 
     window.toggleHomeFavorite = toggleFavorite;
     window.isHomeFavorite = isFavorite;
@@ -396,9 +397,14 @@
     window.refreshHomeFavorites = render;
   }
 
-  if (document.readyState === 'loading') {
+  // Prefer immediate run when this script is placed right after #home
+  // (parser has the home section already). Fall back to DOMContentLoaded.
+  if (document.getElementById('home')) {
+    init();
+  } else if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 })();
+

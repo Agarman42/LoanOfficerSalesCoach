@@ -447,15 +447,15 @@
     target.insertBefore(badge, target.firstChild);
   }
 
-  // Section guides: tip chrome only. Primary action stays on *this* tool
-  // (scroll to form / generate / same-section anchor). Cross-tool handoffs
-  // live in bottom banners — not the hero strip.
+  // Section guides: tip chrome only. Primary action stays on *this* tool and
+  // scrolls to the *form start* (not Generate) so users fill inputs first.
+  // Cross-tool handoffs live in bottom banners — not the hero strip.
   const SECTION_GUIDES = {
     'weekly-win-plan': {
       icon: 'fa-fire',
       title: 'Start here this week',
-      body: 'Generate your plan, block 2–3 power hours on your calendar, then execute one partner touch the same day. Cross-tool ideas (Pop-Bys, scripts) live in the bottom banner.',
-      action: { label: 'Jump to build →', scroll: 'generate-win-plan-btn' },
+      body: 'Set hours and focus below, then generate. Block 2–3 power hours and execute one partner touch the same day. Cross-tool ideas (Pop-Bys, scripts) live in the bottom banner.',
+      action: { label: 'Jump to form →', scroll: 'wwp-hours' },
       needsProfile: ['name', 'location']
     },
     'value-vault': {
@@ -491,42 +491,44 @@
     'social-post': {
       icon: 'fa-magic',
       title: 'Batch content in minutes',
-      body: 'Generate 3 post options or a full 30-day calendar. Save winners to My Saved Items, then protect posting time in Weekly Win Plan (bottom banner).',
-      action: { label: 'Jump to generate →', scroll: 'generate-social-btn' },
+      body: 'Pick an idea (or type your own), generate 3 options or a 30-day calendar, save winners, then protect posting time in Weekly Win Plan (bottom banner).',
+      action: { label: 'Jump to form →', scroll: 'post-type' },
       needsProfile: ['name', 'location', 'tone']
     },
     'equity-scanner': {
       icon: 'fa-chart-line',
       title: 'Opportunity hunting',
       body: 'Upload or load demo data, generate the equity report, prioritize PMI-drop and move-up candidates. Pair with Sales Scripts from the bottom banner.',
-      action: { label: 'Jump to upload →', scroll: 'upload-area' }
+      action: { label: 'Jump to form →', scroll: 'upload-area' }
     },
     'bio-creator': {
       icon: 'fa-id-card',
       title: 'Your voice starts with one bio',
       body: 'Use Guided setup or Full form below. Save a Primary Bio so Newsletter, Blog, Social, and AI Coach speak like you.',
-      action: { label: 'Jump to form →', scroll: 'bio-full-form' },
+      // Land on Guided | Full toggle (not below it into the full form only)
+      action: { label: 'Jump to form →', scroll: 'bio-wizard-entry' },
       needsProfile: ['name', 'location']
     },
     'blog': {
       icon: 'fa-newspaper',
       title: 'Authority content, full package',
-      body: 'One generate = blog + social caption + Google post + Reel. Add your market in the form (auto-saves to profile) for stronger GEO.',
-      action: { label: 'Jump to generate →', scroll: 'generate-blog-btn' },
+      body: 'Set length, tone, and topic below — one generate = blog + social caption + Google post + Reel. Market from the form auto-saves to profile.',
+      action: { label: 'Jump to form →', scroll: 'blog-length' },
       needsProfile: ['location']
     },
     'newsletter-generator': {
       icon: 'fa-envelope-open-text',
       title: 'Stay top of mind monthly',
       body: 'Write a real Personal Update first, then generate. Review the preview before copy/download — compliance-safe by design. Use Guided setup or Full form below when you’re ready.',
-      // No Primary bio CTA here — Bio handoff stays in bottom banner / empty-state.
+      // Land on Guided | Full toggle so the mode switch stays in view
+      action: { label: 'Jump to form →', scroll: 'nl-wizard-entry' },
       needsProfile: ['name', 'location']
     },
     'sales-script': {
       icon: 'fa-comments',
       title: 'Sound human under pressure',
-      body: 'Pick a scenario, add context, generate 4 scripts. Save keepers to My Saved Items before your next call block.',
-      action: { label: 'Jump to generate →', scroll: 'generate-script-btn' },
+      body: 'Pick a category and scenario, add context, then generate 4 scripts. Save keepers to My Saved Items before your next call block.',
+      action: { label: 'Jump to form →', scroll: 'sales-category-cards' },
       needsProfile: ['name', 'tone']
     },
     'planning': {
@@ -540,14 +542,14 @@
       icon: 'fa-robot',
       title: 'Conversation first',
       body: 'Ask anything — voice, market, and bio from My Profile shape the answers. Setup and your daily loop live on Home.',
-      action: { label: 'Focus chat →', scroll: 'chat-input' },
+      action: { label: 'Jump to form →', scroll: 'chat-input' },
       needsProfile: ['name', 'location']
     },
     'underwriting-search': {
       icon: 'fa-balance-scale',
       title: 'Guideline clarity, not guesswork',
       body: 'Describe the messy scenario, upload overlays if you have them, then search. Follow-ups stay on the same file.',
-      action: { label: 'Jump to search →', scroll: 'uw-question' }
+      action: { label: 'Jump to form →', scroll: 'uw-question' }
     },
     'smart-savings': {
       icon: 'fa-piggy-bank',
@@ -559,7 +561,7 @@
       icon: 'fa-language',
       title: 'Mortgage-aware translation',
       body: 'Paste email or upload a file, pick languages, then Translate. Check meaning before you send.',
-      action: { label: 'Jump to translate →', scroll: 'tr-translate-btn' }
+      action: { label: 'Jump to form →', scroll: 'tr-source-text' }
     },
     home: {
       icon: 'fa-home',
@@ -1186,8 +1188,16 @@
         if (scrollTarget) {
           const node = document.getElementById(scrollTarget);
           if (node) {
-            node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            try { node.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+            // Form jumps: pin near top so inputs aren't buried under the fold
+            node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try {
+              if (typeof node.focus === 'function' && !/^(DIV|SECTION|SPAN)$/i.test(node.tagName)) {
+                node.focus({ preventScroll: true });
+              } else {
+                const focusable = node.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])');
+                focusable?.focus({ preventScroll: true });
+              }
+            } catch (e) { /* ignore */ }
           }
         }
         if (guide.action.pillar && typeof window.openVaultPillar === 'function') {
@@ -1281,16 +1291,17 @@
 
     // Paint home chrome immediately — idle delay (up to 2.5s) made Coach Setup
     // and related hero bits pop in after the static home shell, which felt broken.
+    // Keep this light: do NOT call onCoachSectionShown here (avoids double work +
+    // section-guide work while the rest of the huge HTML is still parsing).
     const paint = () => {
       try {
+        if (typeof window.__hardHideGlobalLoading === 'function') {
+          window.__hardHideGlobalLoading();
+        }
         renderProfileNudge();
         updateHomeHero();
         renderFirstRunChecklist();
         applyProfileAwareStartHere();
-        const visible = document.querySelector('main section:not(.hidden)');
-        if (visible?.id && typeof window.onCoachSectionShown === 'function') {
-          window.onCoachSectionShown(visible.id);
-        }
       } catch (e) {
         console.warn('[onboarding-coach] paint failed', e);
       }
@@ -1302,6 +1313,18 @@
       });
     } else {
       paint();
+    }
+    // After full DOM is ready, run section hooks once (safe)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        try {
+          if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
+          const visible = document.querySelector('main section:not(.hidden)');
+          if (visible?.id && typeof window.onCoachSectionShown === 'function') {
+            window.onCoachSectionShown(visible.id);
+          }
+        } catch (e) { /* ignore */ }
+      });
     }
 
     // Cross-tool bridges can wait — not needed for first Home paint

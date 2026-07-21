@@ -451,8 +451,8 @@
     'weekly-win-plan': {
       icon: 'fa-fire',
       title: 'Start here this week',
-      body: 'Generate your plan, block 2–3 power hours on your calendar, then execute one partner touch from Value Vault the same day.',
-      action: { label: 'Pick a Pop-By →', section: 'value-vault' },
+      body: 'Set hours and focus below, then generate. Block 2–3 power hours and execute one partner touch the same day. Pop-Bys live in the bottom banner / Value Vault.',
+      action: { label: 'Jump to form →', scroll: 'wwp-hours' },
       needsProfile: ['name', 'location']
     },
     'value-vault': {
@@ -488,43 +488,38 @@
     'social-post': {
       icon: 'fa-magic',
       title: 'Batch content in minutes',
-      body: 'Generate 3 post options or a full 30-day calendar. Save winners to My Saved Items, then protect posting time in Weekly Win Plan.',
-      action: { label: 'Content studio →', section: 'content-hub' },
+      body: 'Pick an idea (or type your own), generate 3 options or a 30-day calendar, save winners, then protect posting time in Weekly Win Plan.',
+      action: { label: 'Jump to form →', scroll: 'post-type' },
       needsProfile: ['name', 'location', 'tone']
-    },
-    'equity-scanner': {
-      icon: 'fa-chart-line',
-      title: 'Opportunity hunting',
-      body: 'Upload or review your pipeline, prioritize PMI-drop and move-up candidates, and use the outreach scripts with your voice.',
-      action: { label: 'Sales scripts →', section: 'sales-script' }
     },
     'bio-creator': {
       icon: 'fa-id-card',
       title: 'Your voice starts with one bio',
-      body: 'Save a Primary Bio so Newsletter, Blog, Social, and AI Coach speak like you. Company website = 750 characters is the default standard.',
-      action: { label: 'Open My Profile →', openProfile: true },
+      body: 'Use Guided setup or Full form below. Save a Primary Bio so Newsletter, Blog, Social, and AI Coach speak like you.',
+      // Land on Guided | Full toggle (not below it into the full form only)
+      action: { label: 'Jump to form →', scroll: 'bio-wizard-entry' },
       needsProfile: ['name', 'location']
     },
     'blog': {
       icon: 'fa-newspaper',
       title: 'Authority content, full package',
-      body: 'One generate = blog + social caption + Google post + Reel. Add your market in the form (auto-saves to profile) for stronger GEO.',
-      action: { label: 'Newsletter next →', section: 'newsletter-generator' },
+      body: 'Set length, tone, and topic below — one generate = blog + social caption + Google post + Reel. Market from the form auto-saves to profile.',
+      action: { label: 'Jump to form →', scroll: 'blog-length' },
       needsProfile: ['location']
     },
     'newsletter-generator': {
       icon: 'fa-envelope-open-text',
       title: 'Stay top of mind monthly',
-      body: 'Write a real Personal Update first, then generate. Review the preview before copy/download — compliance-safe by design. Use Guided setup or Full form below when you’re ready.',
-      // No Primary bio CTA here — it felt like chrome for Bio at the top of Newsletter.
-      // Bio handoff stays in the bottom banner / empty-state links.
+      body: 'Write a real Personal Update first, then generate. Review the preview before copy/download — compliance-safe by design. Use Guided setup or the form below when you’re ready.',
+      // Land on guided-entry strip (wizard CTA) so it stays in view — not mid-form fields
+      action: { label: 'Jump to form →', scroll: 'nl-wizard-entry' },
       needsProfile: ['name', 'location']
     },
     'sales-script': {
       icon: 'fa-comments',
       title: 'Sound human under pressure',
-      body: 'Pick a scenario, add context, generate 4 scripts. Save keepers to My Saved Items before your next call block.',
-      action: { label: 'Equity opportunities →', section: 'equity-scanner' },
+      body: 'Pick a category and scenario, add context, then generate 4 scripts. Save keepers to My Saved Items before your next call block.',
+      action: { label: 'Jump to form →', scroll: 'sales-category-cards' },
       needsProfile: ['name', 'tone']
     },
     'planning': {
@@ -1161,7 +1156,18 @@
       }
       setTimeout(() => {
         if (guide.action.scroll) {
-          document.getElementById(guide.action.scroll)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const node = document.getElementById(guide.action.scroll);
+          if (node) {
+            node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try {
+              if (typeof node.focus === 'function' && !/^(DIV|SECTION|SPAN)$/i.test(node.tagName)) {
+                node.focus({ preventScroll: true });
+              } else {
+                const focusable = node.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])');
+                focusable?.focus({ preventScroll: true });
+              }
+            } catch (e) { /* ignore */ }
+          }
         }
         if (guide.action.pillar && typeof window.openVaultPillar === 'function') {
           window.openVaultPillar(guide.action.pillar);
@@ -1275,32 +1281,51 @@
       localStorage.setItem('coachFirstRunChecklistVersion', CHECKLIST_VERSION);
     }
 
-    // Stagger heavy UI chrome so first paint isn't blocked
+    // Paint home chrome immediately after scripts load (end of body — never mid-page).
+    // Keep light: avoid onCoachSectionShown double-work on first paint.
     const paint = () => {
       try {
+        if (typeof window.__hardHideGlobalLoading === 'function') {
+          window.__hardHideGlobalLoading();
+        }
         renderProfileNudge();
         updateHomeHero();
         renderFirstRunChecklist();
         applyProfileAwareStartHere();
-        const visible = document.querySelector('main section:not(.hidden)');
-        if (visible?.id) window.onCoachSectionShown(visible.id);
       } catch (e) {
         console.warn('[onboarding-coach] paint failed', e);
       }
     };
-    if (typeof requestIdleCallback === 'function') {
-      requestIdleCallback(paint, { timeout: 2500 });
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(paint);
+      });
     } else {
-      setTimeout(paint, 50);
+      paint();
     }
-
-    // Bridges only when those sections matter
+    // Section guides after full DOM is ready
     setTimeout(() => {
+      try {
+        if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
+        const visible = document.querySelector('main section:not(.hidden)');
+        if (visible?.id && typeof window.onCoachSectionShown === 'function') {
+          window.onCoachSectionShown(visible.id);
+        }
+      } catch (e) { /* ignore */ }
+    }, 0);
+
+    // Cross-tool bridges can wait — not needed for first Home paint
+    const injectBridges = () => {
       try {
         injectVaultWeeklyBridge();
         injectWeeklyVaultBridge();
-      } catch (e) {}
-    }, 800);
+      } catch (e) { /* ignore */ }
+    };
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(injectBridges, { timeout: 2000 });
+    } else {
+      setTimeout(injectBridges, 400);
+    }
 
     window.addEventListener('storage', (e) => {
       if (
@@ -1337,7 +1362,10 @@
     window.renderCoachFirstRunChecklist = renderFirstRunChecklist;
   }
 
-  if (document.readyState === 'loading') {
+  // Prefer immediate run when placed right after #home (parser already has the section).
+  if (document.getElementById('home')) {
+    init();
+  } else if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();

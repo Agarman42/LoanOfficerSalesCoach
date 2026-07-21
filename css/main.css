@@ -4,15 +4,27 @@
    Phase 0 - Structure & Maintainability Refactor
    ============================================ */
 
-/* Loading overlay only — do NOT add a global .hidden rule (breaks Tailwind responsive utilities + modals) */
-#global-loading.hidden {
+/* Loading overlay: hidden by default. Only .is-visible (set by generate) may show it. */
+#global-loading,
+#global-loading.hidden,
+#global-loading:not(.is-visible) {
     display: none !important;
     pointer-events: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
-#global-loading:not(.hidden) {
+#global-loading.is-visible {
     display: flex !important;
     pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .dark { 
