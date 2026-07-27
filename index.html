@@ -106,7 +106,7 @@
     <!-- Static Tailwind (built offline) — no Play CDN -->
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <!-- App-specific styles -->
-    <link rel="stylesheet" href="css/main.css?v=20260721-blog-kicker">
+    <link rel="stylesheet" href="css/main.css?v=20260727-quote-center">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
@@ -116,7 +116,7 @@
     <script src="js/features/app-feedback.js?v=20260709-lo-v309"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-    <script defer src="js/main.js?v=20260721-ux-polish"></script>
+    <script defer src="js/main.js?v=20260727-sidebar-closed"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260720-ai-asterisk"></script>
     <!--
       Home Coach Setup: must not wait for sequential feature-loader (50+ scripts).
@@ -127,16 +127,33 @@
     <script defer src="js/features/onboarding-coach.js?v=20260721-home-fast"></script>
     <script src="js/early-boot.js?v=20260721-noloadspin"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
+<body class="sidebar-collapsed bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
 <!-- Global loading: empty shell only. Spinner injected when a generate starts. Never visible at boot. -->
 <div id="global-loading" class="coach-loading-overlay" aria-hidden="true" hidden></div>
 
 <header class="text-white">
-    <!-- Navy band — Ruoff logo far-right (same pattern as Recruiting coach) -->
-    <div class="header-navy-band relative">
-        <div class="header-ruoff-logo" aria-hidden="false">
-            <div class="header-ruoff-logo-plate">
+    <!--
+      Full-bleed navy band.
+      - Title + search: true viewport center (ignore logo width).
+      - Logo + theme/profile: absolute far-right of the band (edge of screen).
+    -->
+    <div class="header-navy-band">
+        <div class="header-center-stack">
+            <h1 class="header-app-title">Ultimate Loan Officer Sales Coach</h1>
+            <div class="header-search-wrap">
+                <button type="button" data-global-search-trigger
+                        class="header-search-btn"
+                        title="Search tools, vault, and saved items (Ctrl+K)">
+                    <i class="fas fa-search text-white/60 shrink-0"></i>
+                    <span class="flex-1 text-white/60 truncate text-left">Search guides, scripts, tools, vault, saved items…</span>
+                    <kbd class="hidden sm:inline-flex shrink-0 px-2 py-0.5 rounded border border-white/25 text-[10px] text-white/50">⌘K</kbd>
+                </button>
+            </div>
+        </div>
+
+        <div class="header-ruoff-cluster">
+            <div class="header-ruoff-logo-plate" aria-hidden="false">
                 <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png"
                      alt="Ruoff Mortgage"
                      class="header-ruoff-logo-img"
@@ -144,48 +161,30 @@
                      height="64"
                      decoding="async">
             </div>
-        </div>
-
-        <div class="max-w-7xl mx-auto px-6 py-4 pr-40 sm:pr-48 md:pr-56">
-            <div class="relative flex items-center min-h-[3.25rem] sm:min-h-[3.5rem]">
-                <h1 class="w-full text-center text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight pointer-events-none px-4 sm:px-6 pr-28 sm:pr-36">Ultimate Loan Officer Sales Coach</h1>
-                <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 sm:gap-2 shrink-0 z-10">
-                    <button id="theme-toggle" type="button"
-                            class="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all border border-white/15"
-                            title="Switch to dark mode" aria-label="Toggle dark mode">
-                        <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
-                    </button>
-                    <button id="open-profile-btn"
-                            class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full text-sm font-medium transition-all border border-white/20"
-                            title="My Profile & Preferences">
-                        <i class="fas fa-user-cog"></i>
-                        <span class="hidden sm:inline">My Profile</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="mt-3 flex justify-center px-1">
-                <button type="button" data-global-search-trigger
-                        class="w-full max-w-2xl flex items-center gap-3 bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full text-sm transition-all border border-white/20 text-left"
-                        title="Search tools, vault, and saved items (Ctrl+K)">
-                    <i class="fas fa-search text-white/60 shrink-0"></i>
-                    <span class="flex-1 text-white/60 truncate">Search guides, scripts, tools, vault, saved items…</span>
-                    <kbd class="hidden sm:inline-flex shrink-0 px-2 py-0.5 rounded border border-white/25 text-[10px] text-white/50">⌘K</kbd>
+            <div class="header-ruoff-actions">
+                <button id="theme-toggle" type="button"
+                        class="header-icon-btn"
+                        title="Switch to dark mode" aria-label="Toggle dark mode">
+                    <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
+                </button>
+                <button id="open-profile-btn" type="button"
+                        class="header-profile-btn"
+                        title="My Profile & Preferences">
+                    <i class="fas fa-user-cog"></i>
+                    <span class="hidden sm:inline">My Profile</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Separate clean Quote Bar (v2.3 style) -->
-    <div class="bg-gradient-to-r from-[#001429] to-[#00A89D] py-2.5">
-        <div class="max-w-4xl mx-auto px-6 quote-container">
-            <div id="quote-display" class="quote-text text-white font-medium text-center text-base md:text-lg">
+    <!-- Quote: full-bleed gradient; content column matches search width & true center -->
+    <div class="header-quote-band">
+        <div class="header-quote-inner">
+            <button id="quote-prev" type="button" class="header-quote-btn" aria-label="Previous quote">‹</button>
+            <div id="quote-display" class="header-quote-text">
                 "The harder you work, the luckier you get."
             </div>
-            <div class="quote-arrows">
-                <button id="quote-prev">‹</button>
-                <button id="quote-next">›</button>
-            </div>
+            <button id="quote-next" type="button" class="header-quote-btn" aria-label="Next quote">›</button>
         </div>
     </div>
 </header>
@@ -197,30 +196,37 @@
   This avoids any "floating in middle" look.
 -->
 <button id="menu-toggle" 
-        class="fixed top-4 left-[15rem] z-[60] text-2xl md:text-3xl focus:outline-none w-11 h-11 flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all active:scale-95 text-white shadow-lg"
-        aria-label="Close sidebar" aria-expanded="true">
+        class="fixed top-4 left-4 z-[60] text-2xl md:text-3xl focus:outline-none w-11 h-11 flex items-center justify-center rounded-2xl bg-white/90 hover:bg-[#00A89D] border border-[#00A89D] transition-all active:scale-95 text-[#00A89D] hover:text-white shadow-lg"
+        aria-label="Open sidebar" aria-expanded="false"
+        style="left:1rem;top:1rem;">
     <i class="fas fa-bars"></i>
 </button>
 
-<!-- Early sync positioning for the toggle button to avoid flash on load when sidebar was previously closed by user.
-     Sets it to far top-left + teal color immediately if localStorage says closed. -->
+<!-- Default: sidebar CLOSED (hamburger top-left). Only open if user previously chose open (localStorage false). -->
 <script>
 (function(){
   try {
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+    var wantOpen = localStorage.getItem('sidebarCollapsed') === 'false';
+    if (!wantOpen) {
+      document.body.classList.add('sidebar-collapsed');
       var b = document.getElementById('menu-toggle');
       if (b) {
         b.style.left = '1rem';
         b.style.top = '1rem';
-        b.classList.remove('text-white', '!bg-[#001f3f]/90', '!border-white/20');
-        b.classList.add('!text-[#00A89D]');
+        b.setAttribute('aria-label', 'Open sidebar');
+        b.setAttribute('aria-expanded', 'false');
+      }
+      if (localStorage.getItem('sidebarCollapsed') == null) {
+        localStorage.setItem('sidebarCollapsed', 'true');
       }
     }
-  } catch(e){}
+  } catch(e){
+    document.body.classList.add('sidebar-collapsed');
+  }
 })();
 </script>
 
-<aside id="sidebar" class="fixed left-[-300px] top-0 bottom-0 w-72 bg-gradient-to-b from-[#001429] to-[#001f3f] text-white overflow-y-auto transition-all duration-300 z-50 shadow-2xl md:left-0 md:w-64 lg:w-72 sidebar-hover-scroll">
+<aside id="sidebar" class="fixed left-[-300px] top-0 bottom-0 w-72 bg-gradient-to-b from-[#001429] to-[#001f3f] text-white overflow-y-auto transition-all duration-300 z-50 shadow-2xl md:w-64 lg:w-72 sidebar-hover-scroll">
         <div class="p-5">
             <!-- Brand header (v2.3 style) -->
             <div class="mb-4 px-3">
