@@ -170,6 +170,12 @@ function sanitizePublicCard(input) {
   if (!phone && !email) {
     return { ok: false, error: 'Add a phone or email so partners can reach you.' };
   }
+  if (!headshotUrl) {
+    return {
+      ok: false,
+      error: 'Add a Professional Headshot URL so partners see your photo on the brand plate.'
+    };
+  }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: 'Email does not look valid.' };
   }

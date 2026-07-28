@@ -74,7 +74,6 @@
   function getPartnerFieldGaps(card) {
     card = card || buildPublicCardFromProfile();
     const required = [];
-    const recommended = [];
 
     if (!card.name) {
       required.push({ id: 'profile-name', tab: 'identity', label: 'Full Name' });
@@ -87,20 +86,21 @@
         alsoIds: ['profile-email']
       });
     }
+    // Headshot required so partners always see a professional plate
     if (!card.headshotUrl) {
-      recommended.push({
+      required.push({
         id: 'profile-headshot-url',
         tab: 'content',
         label: 'Professional Headshot URL'
       });
     }
-    return { required, recommended, card };
+    return { required, recommended: [], card };
   }
 
   function validateCard(card) {
     const { required } = getPartnerFieldGaps(card);
     if (!required.length) return '';
-    return 'Complete in My Profile: ' + required.map((r) => r.label).join(', ') + '.';
+    return 'Before you can share, complete: ' + required.map((r) => r.label).join(', ') + '.';
   }
 
   function notify(msg, type) {
@@ -172,9 +172,17 @@
       ? `<img src="${escapeAttr(card.headshotUrl)}" alt="" class="partner-share-avatar object-cover border border-gray-200 bg-white" onerror="this.style.display='none'">`
       : `<div class="partner-share-avatar partner-share-avatar--placeholder bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center text-lg font-bold">${escapeHtml((card.name || '?').charAt(0))}</div>`;
     const bits = [card.phone, card.email, card.nmls ? `NMLS ${card.nmls}` : ''].filter(Boolean);
-    const headshotHint = card.headshotUrl
-      ? ''
-      : `<p class="text-[11px] text-[#F15A29] m-0 mt-2"><i class="fas fa-camera mr-1"></i>Add a Professional Headshot URL (Voice &amp; Links) so partners see your photo.</p>`;
+    const gaps = getPartnerFieldGaps(card);
+    const checklist = gaps.required.length
+      ? `<ul class="text-[11px] text-[#F15A29] m-0 mt-2 pl-4 list-disc space-y-0.5">
+          ${gaps.required
+            .map(
+              (r) =>
+                `<li><button type="button" class="underline font-semibold partner-gap-jump" data-gap-id="${escapeAttr(r.id)}" data-gap-tab="${escapeAttr(r.tab)}">${escapeHtml(r.label)}</button> — required</li>`
+            )
+            .join('')}
+        </ul>`
+      : `<p class="text-[11px] text-[#00A89D] m-0 mt-2"><i class="fas fa-check-circle mr-1"></i>Ready to publish — partners will see this plate.</p>`;
     box.innerHTML = `
       <p class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-2">What partners see</p>
       <div class="flex items-center gap-3">
@@ -185,7 +193,15 @@
           <div class="text-[11px] text-gray-600 dark:text-gray-300 truncate">${escapeHtml(bits.join(' · ') || 'Add phone or email')}</div>
         </div>
       </div>
-      ${headshotHint}`;
+      ${checklist}`;
+    box.querySelectorAll('.partner-gap-jump').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        goToProfileField({
+          id: btn.getAttribute('data-gap-id'),
+          tab: btn.getAttribute('data-gap-tab')
+        });
+      });
+    });
   }
 
   async function copyText(text) {
@@ -308,17 +324,15 @@
 
       const copied = opts.skipAutoCopy ? false : await copyText(data.shareUrl || '');
       let okMsg = copied
-        ? 'Partner card published — link copied to your clipboard.'
-        : 'Partner card published. Copy the link below or email it to your realtor.';
-      if (gaps.recommended.length) {
-        okMsg += ' Tip: add a headshot (Voice & Links) so partners see your photo.';
-      }
-      if (data.durable) {
-        okMsg += ' This link is durable (survives server redeploys).';
-      }
+        ? 'Published — short link copied. Next: Email to realtor (or paste anywhere).'
+        : 'Published. Copy the short link below, then Email to realtor.';
       setStatus(statusEl, okMsg, true);
-      notify(copied ? 'Link copied — ready to share' : 'Partner link ready', 'success');
+      notify(copied ? 'Link copied — ready to email' : 'Partner link ready', 'success');
       updateHomeShareCard();
+      // One-click path: publish then open email draft
+      if (opts.openEmailAfter) {
+        openPartnerEmailDraft(data.shareUrl || '', card);
+      }
       return data;
     } catch (e) {
       const msg =
@@ -351,13 +365,23 @@
   }
 
   async function emailPartnerLink() {
+    // Always refresh card if profile is complete so plate stays current
+    const gaps = getPartnerFieldGaps();
+    if (gaps.required.length) {
+      notify(validateCard(gaps.card), 'warning');
+      openShareWithPartners();
+      return;
+    }
     let url = localStorage.getItem(LAST_URL_KEY) || document.getElementById('partner-share-url')?.value || '';
     if (!url) {
-      const data = await publishPartnerCard();
+      const data = await publishPartnerCard({ skipAutoCopy: false, openEmailAfter: false });
       url = (data && data.shareUrl) || '';
+      if (!url) return;
+      openPartnerEmailDraft(url, buildPublicCardFromProfile());
+      return;
     }
-    if (!url) return;
-    openPartnerEmailDraft(url, buildPublicCardFromProfile());
+    // Re-publish quietly so contact/photo updates ship with the same short code when possible
+    await publishPartnerCard({ skipAutoCopy: true, openEmailAfter: true });
   }
 
   function ensurePartnerShareStyles() {
@@ -404,36 +428,37 @@
         <div class="min-w-0">
           <h3 class="text-base font-bold text-[#002B5C] dark:text-white m-0">Share with Partners</h3>
           <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">
-            Publish a <strong>public</strong> partner card (name, photo, phone, email, NMLS).
-            Agents open your link in the Realtor coach and see you as their <strong>Loan Officer</strong>.
-            Your full profile stays private on this device. Links are <strong>durable</strong> (they survive server redeploys).
+            Create a short branded link to the Realtor coach. Agents see you as their <strong>Loan Officer</strong>
+            (photo, phone, email) in the header. Your full profile stays private.
           </p>
         </div>
       </div>
       <div id="partner-share-preview" class="mb-3 p-3 rounded-xl bg-white/80 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700"></div>
-      <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Partner link</label>
+      <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Your short partner link</label>
       <input type="text" id="partner-share-url" readonly
         class="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs text-gray-800 dark:text-gray-100 mb-3"
-        placeholder="Publish to generate a link…">
+        placeholder="Publish to generate a short link…">
       <div class="flex flex-wrap gap-2">
         <button type="button" id="partner-share-publish"
-          class="px-4 py-2 rounded-full bg-[#00A89D] text-white text-sm font-semibold hover:bg-[#008F85] transition">
-          <i class="fas fa-cloud-upload-alt mr-1"></i> Publish / update card
+          class="px-4 py-2 rounded-full bg-[#00A89D] text-white text-sm font-semibold hover:bg-[#008F85] transition"
+          title="Saves your public card and copies the short link">
+          <i class="fas fa-cloud-upload-alt mr-1"></i> Publish &amp; copy link
+        </button>
+        <button type="button" id="partner-share-email"
+          class="px-4 py-2 rounded-full bg-[#F15A29] text-white text-sm font-semibold hover:opacity-90 transition"
+          title="Publish if needed, then open Outlook with a ready message">
+          <i class="fas fa-envelope mr-1"></i> Email to realtor
         </button>
         <button type="button" id="partner-share-copy"
           class="px-4 py-2 rounded-full border-2 border-[#002B5C] text-[#002B5C] dark:text-gray-100 dark:border-gray-400 text-sm font-semibold hover:bg-[#002B5C]/5 transition">
-          <i class="fas fa-copy mr-1"></i> Copy link
-        </button>
-        <button type="button" id="partner-share-email"
-          class="px-4 py-2 rounded-full border-2 border-[#F15A29] text-[#F15A29] text-sm font-semibold hover:bg-[#F15A29]/10 transition">
-          <i class="fas fa-envelope mr-1"></i> Email to realtor
+          <i class="fas fa-copy mr-1"></i> Copy again
         </button>
       </div>
       <p id="partner-share-status" class="text-xs text-gray-500 m-0 mt-3"></p>
       <p class="text-[11px] text-gray-400 m-0 mt-2">
-        Required: Full Name + Phone or Email. Recommended: Headshot (Voice &amp; Links).
-        <strong>Publish</strong> auto-copies your link.
-        <strong>Email to realtor</strong> opens your mail app with subject + message + link only (no signature in the draft — your Outlook signature attaches automatically). Just add their address and send.
+        <strong>Required:</strong> Full Name, Phone or Email, and Headshot URL (Voice &amp; Links tab).
+        <strong>Publish &amp; copy</strong> updates your card and copies the short link.
+        <strong>Email to realtor</strong> opens Outlook with subject + message + link (no signature in the draft — yours attaches automatically). Add their address and send.
       </p>
     `;
     host.appendChild(panel);
@@ -458,46 +483,81 @@
     const slot = document.getElementById('partner-share-home-card');
     if (!slot) return;
     const card = buildPublicCardFromProfile();
-    const hasLink = !!(localStorage.getItem(LAST_URL_KEY) || '');
+    const link = localStorage.getItem(LAST_URL_KEY) || '';
+    const hasLink = !!link;
     const gaps = getPartnerFieldGaps(card);
     const ready = gaps.required.length === 0;
+    const missingLabels = gaps.required.map((r) => r.label).join(', ');
+
+    let blurb;
+    let primaryLabel;
+    let primaryAction = 'open';
+    if (!ready) {
+      blurb = `Almost there — add ${missingLabels} in My Profile, then you can share a branded coach link in one click.`;
+      primaryLabel = 'Complete profile';
+      primaryAction = 'open';
+    } else if (hasLink) {
+      blurb = 'Your short partner link is ready. Email a realtor or copy the link anytime.';
+      primaryLabel = 'Email realtor';
+      primaryAction = 'email';
+    } else {
+      blurb = 'Publish your Loan Officer card (photo + contact) to get a short branded link for realtors.';
+      primaryLabel = 'Publish & email';
+      primaryAction = 'publish-email';
+    }
+
     slot.innerHTML = `
-      <div class="rounded-2xl border border-[#00A89D]/30 bg-white dark:bg-gray-900 shadow-md p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div class="flex items-start gap-3 flex-1 min-w-0">
-          <span class="shrink-0 w-11 h-11 rounded-2xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center text-lg">
-            <i class="fas fa-handshake"></i>
-          </span>
-          <div class="min-w-0">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">Partners</div>
-            <h3 class="text-base sm:text-lg font-bold text-[#002B5C] dark:text-white m-0">Share with Partners</h3>
-            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">
+      <div class="rounded-2xl border border-[#00A89D]/30 bg-gradient-to-r from-[#00A89D]/8 via-white to-white dark:from-[#00A89D]/15 dark:via-gray-900 dark:to-gray-900 shadow-md p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex items-start gap-3 flex-1 min-w-0">
+            <span class="shrink-0 w-11 h-11 rounded-2xl bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center text-lg">
+              <i class="fas fa-handshake"></i>
+            </span>
+            <div class="min-w-0">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">Partners · 1-click share</div>
+              <h3 class="text-base sm:text-lg font-bold text-[#002B5C] dark:text-white m-0">Share with Partners</h3>
+              <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">${escapeHtml(blurb)}</p>
               ${
-                ready
-                  ? hasLink
-                    ? 'Your partner link is ready — copy it or email it to a realtor in one click.'
-                    : 'Publish your public Loan Officer card, then share a branded Realtor coach link.'
-                  : 'Finish name + phone or email in My Profile, then publish your partner link.'
+                hasLink
+                  ? `<p class="text-[11px] font-mono text-gray-500 m-0 mt-1.5 truncate" title="${escapeAttr(link)}">${escapeHtml(link)}</p>`
+                  : ''
               }
-            </p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 shrink-0">
+            <button type="button" data-partner-home="${primaryAction}"
+              class="px-4 py-2.5 rounded-full bg-[#00A89D] text-white text-sm font-semibold hover:bg-[#008F85] transition">
+              ${primaryAction === 'email' ? '<i class="fas fa-envelope mr-1"></i>' : ''}${escapeHtml(primaryLabel)}
+            </button>
+            ${
+              hasLink
+                ? `<button type="button" data-partner-home="copy"
+                    class="px-4 py-2.5 rounded-full border-2 border-[#002B5C] text-[#002B5C] dark:text-gray-100 dark:border-gray-500 text-sm font-semibold hover:bg-[#002B5C]/5 transition">
+                    <i class="fas fa-copy mr-1"></i>Copy link
+                  </button>`
+                : ready
+                  ? `<button type="button" data-partner-home="open"
+                      class="px-4 py-2.5 rounded-full border-2 border-[#00A89D] text-[#00A89D] text-sm font-semibold hover:bg-[#00A89D]/10 transition">
+                      Manage
+                    </button>`
+                  : ''
+            }
           </div>
         </div>
-        <div class="flex flex-wrap gap-2 shrink-0">
-          <button type="button" data-partner-home="open"
-            class="px-4 py-2.5 rounded-full bg-[#00A89D] text-white text-sm font-semibold hover:bg-[#008F85] transition">
-            ${ready ? (hasLink ? 'Manage link' : 'Publish card') : 'Complete profile'}
-          </button>
-          ${
-            hasLink
-              ? `<button type="button" data-partner-home="email"
-                  class="px-4 py-2.5 rounded-full border-2 border-[#F15A29] text-[#F15A29] text-sm font-semibold hover:bg-[#F15A29]/10 transition">
-                  <i class="fas fa-envelope mr-1"></i>Email realtor
-                </button>`
-              : ''
-          }
-        </div>
       </div>`;
-    slot.querySelector('[data-partner-home="open"]')?.addEventListener('click', () => openShareWithPartners());
-    slot.querySelector('[data-partner-home="email"]')?.addEventListener('click', () => emailPartnerLink());
+
+    slot.querySelectorAll('[data-partner-home]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const act = btn.getAttribute('data-partner-home');
+        if (act === 'email') return emailPartnerLink();
+        if (act === 'copy') return copyPartnerLink();
+        if (act === 'publish-email') {
+          await publishPartnerCard({ openEmailAfter: true });
+          return;
+        }
+        openShareWithPartners();
+      });
+    });
   }
 
   function ensureHomeShareCard() {
@@ -550,7 +610,7 @@
         const msg =
           'Before you can share with partners, complete: ' +
           labels +
-          '. We’ve opened those fields for you.';
+          '. We’ve opened the first missing field for you.';
         setStatus(statusEl, msg, false);
         notify(msg, 'warning');
         goToProfileField(gaps.required[0]);
@@ -562,19 +622,14 @@
       }
       setTimeout(() => {
         scrollToPartnerPanel();
-        if (gaps.recommended.length) {
-          setStatus(
-            statusEl,
-            'Ready to publish. Optional: add a Professional Headshot URL under Voice & Links for a better partner plate.',
-            true
-          );
-        } else {
-          setStatus(
-            statusEl,
-            'Ready — publish updates your card, copies the link, then use Email to realtor when you’re ready.',
-            true
-          );
-        }
+        const hasLink = !!(localStorage.getItem(LAST_URL_KEY) || '');
+        setStatus(
+          statusEl,
+          hasLink
+            ? 'Ready — Publish & copy updates your plate, or Email to realtor in one click.'
+            : 'Ready — click Publish & copy link, then Email to realtor.',
+          true
+        );
       }, 80);
     }, 150);
   }
