@@ -2303,57 +2303,86 @@ const BODY_PADDING = 90;        // left + right padding for centering
 const MODULE_PADDING = 20;      // consistent spacing between modules
 const HEADER_HEIGHT = 60;       // recommended for headers (used if needed)
 
-// Load saved values on page load
-document.addEventListener('DOMContentLoaded', () => {
-    persistentFields.forEach(id => {
+/**
+ * Restore form field values + section checkboxes.
+ * Must run even when this script loads after DOMContentLoaded (feature-loader).
+ * Does NOT restore personal update text (user has explicit history button).
+ */
+function restoreNewsletterFormPersistence() {
+    persistentFields.forEach((id) => {
+        // Never restore personal note from generic field map — history button owns that
+        if (id === 'nl-personal-text') return;
         const el = document.getElementById(id);
-        if (el) {
-            const saved = localStorage.getItem(id);
-            if (saved !== null) {
-                if (id === 'nl-logo') {
-                    if (saved && saved.trim() !== '') {
-                        el.value = saved;
-                    }
-                } else {
-                    el.value = saved;
-                }
-            }
+        if (!el) return;
+        const saved = localStorage.getItem(id);
+        if (saved === null) return;
+        if (id === 'nl-logo') {
+            if (saved && saved.trim() !== '') el.value = saved;
+        } else {
+            el.value = saved;
         }
     });
 
+    // Section checkboxes (nl-*) — persist previous edition choices
     const savedSections = safeParseJSONArray('nl-sections');
-    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
-        if (savedSections.includes(cb.id)) {
-            cb.checked = true;
+    const hasSaved = Array.isArray(savedSections) && savedSections.length > 0;
+    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
+        if (!cb.id || !cb.id.startsWith('nl-')) return;
+        // Personal update stays user's choice each time unless they checked it before
+        if (hasSaved) {
+            cb.checked = savedSections.includes(cb.id);
         } else if (cb.id === 'nl-include-referral') {
             cb.checked = true;
-        } else if (savedSections.length > 0) {
-            cb.checked = false;
         }
     });
 
-    // Load used items and selections
     usedFunFacts = safeParseJSONArray('usedFunFacts');
     usedProTips = safeParseJSONArray('usedProTips');
     usedQuotes = safeParseJSONArray('usedQuotes');
 
     if (!funFactIsCustom) {
-        selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
+        selectedFunFact = funFacts.includes(selectedFunFact)
+            ? selectedFunFact
+            : getRandomItem(funFacts, usedFunFacts);
     }
     if (!proTipIsCustom) {
-        selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
+        selectedProTip = proTips.includes(selectedProTip)
+            ? selectedProTip
+            : getRandomItem(proTips, usedProTips);
     }
     if (!quoteIsCustom) {
-        selectedQuote = motivationalQuotes.includes(selectedQuote) ? selectedQuote : getRandomItem(motivationalQuotes, usedQuotes);
+        selectedQuote = motivationalQuotes.includes(selectedQuote)
+            ? selectedQuote
+            : getRandomItem(motivationalQuotes, usedQuotes);
     }
 
-    updatePreviews();
+    try {
+        updatePreviews();
+    } catch (e) { /* previews may load later */ }
 
-    // Ensure profile sync on this legacy load path too (for name/email/market etc)
     if (typeof syncNewsletterFromProfile === 'function') {
-      setTimeout(() => { try { syncNewsletterFromProfile(); } catch(e){} }, 60);
+        setTimeout(() => {
+            try {
+                syncNewsletterFromProfile();
+            } catch (e) {}
+        }, 60);
     }
-});
+
+    // Re-apply expand/collapse for personal/blog after checkbox restore
+    const personalCb = document.getElementById('nl-personal');
+    const personalFields = document.getElementById('personal-fields');
+    if (personalCb && personalFields) {
+        personalFields.classList.toggle('hidden', !personalCb.checked);
+    }
+    const blogCb = document.getElementById('nl-include-blog');
+    const blogFields = document.getElementById('blog-fields');
+    if (blogCb && blogFields) {
+        blogFields.classList.toggle('hidden', !blogCb.checked);
+    }
+    // Visibility / entertainment wire-up happens in initNewsletterGenerator
+    // AFTER NL_CUSTOM_CONTENT_BLOCKS and related helpers are defined.
+    // (Calling those mid-script throws and silently kills engagement pickers.)
+}
 
 // Auto-save on change
 persistentFields.forEach(id => {
@@ -2364,13 +2393,22 @@ persistentFields.forEach(id => {
     }
 });
 
-// Save checkboxes on change + handle show/hide for Personal and Blog sections
-document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', () => {
-        const checked = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked'))
-                             .map(c => c.id)
-                             .filter((id) => id.startsWith('nl-'));
+function persistNewsletterSectionCheckboxes() {
+    const checked = Array.from(
+        document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked')
+    )
+        .map((c) => c.id)
+        .filter((id) => id && id.startsWith('nl-'));
+    try {
         localStorage.setItem('nl-sections', JSON.stringify(checked));
+    } catch (e) { /* private mode */ }
+}
+
+// Save checkboxes on change + handle show/hide for Personal and Blog sections
+// (NL_CUSTOM_CONTENT_BLOCKS is defined later — only read on user change events.)
+document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
+    cb.addEventListener('change', () => {
+        persistNewsletterSectionCheckboxes();
 
         // Visual toggles for expandable sections
         if (cb.id === 'nl-personal') {
@@ -2383,20 +2421,27 @@ document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEac
             if (personalCb && !personalCb.checked) {
                 personalCb.checked = true;
                 if (fields) fields.classList.remove('hidden');
+                persistNewsletterSectionCheckboxes();
             }
         }
         if (cb.id === 'nl-include-blog') {
             const fields = document.getElementById('blog-fields');
             if (fields) fields.classList.toggle('hidden', !cb.checked);
         }
-        if (Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)) {
+        if (
+            typeof NL_CUSTOM_CONTENT_BLOCKS !== 'undefined' &&
+            Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)
+        ) {
             updateCustomContentChoicesVisibility();
         }
     });
 });
 
-// Initial state on load (restore visibility if checkboxes were checked before)
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Expand/collapse + show engagement pickers + wire entertainment UI.
+ * Must run only after NL_CUSTOM_CONTENT_BLOCKS / helpers exist (end of file init).
+ */
+function wireNewsletterSectionUiAfterLoad() {
     const personalCb = document.getElementById('nl-personal');
     const personalFields = document.getElementById('personal-fields');
     if (personalCb && personalFields) {
@@ -2409,17 +2454,30 @@ document.addEventListener('DOMContentLoaded', () => {
         blogFields.classList.toggle('hidden', !blogCb.checked);
     }
 
-    updateCustomContentChoicesVisibility();
-    updateSpecificTopicsPlaceholder();
+    try {
+        updateCustomContentChoicesVisibility();
+    } catch (e) {
+        console.warn('[newsletter] updateCustomContentChoicesVisibility failed', e);
+    }
+    try {
+        if (typeof updateSpecificTopicsPlaceholder === 'function') updateSpecificTopicsPlaceholder();
+    } catch (e) { /* optional */ }
     if (window.NlEntertainment && typeof window.NlEntertainment.wireUI === 'function') {
-        window.NlEntertainment.wireUI();
+        try {
+            window.NlEntertainment.wireUI();
+        } catch (e) {
+            console.warn('[newsletter] NlEntertainment.wireUI failed', e);
+        }
     }
 
-    // Profile sync on this load path too
     if (typeof syncNewsletterFromProfile === 'function') {
-      setTimeout(() => { try { syncNewsletterFromProfile(); } catch(e){} }, 70);
+        setTimeout(() => {
+            try {
+                syncNewsletterFromProfile();
+            } catch (e) {}
+        }, 70);
     }
-});
+}
 
 document.getElementById('generate-newsletter-btn')?.addEventListener('click', async () => {
     generateNewsletter('');
@@ -3065,15 +3123,67 @@ function wireNewsletterPreviewIframeScroll(iframe) {
     iframe.addEventListener('load', () => configureNewsletterPreviewIframeOnLoad(iframe));
 }
 
+/**
+ * Preview iframe is sandboxed (no scripts). Links/video/mailto must open via the
+ * parent page — otherwise Chrome blocks popups and custom protocols.
+ */
+function wireNewsletterPreviewLinkBridge(iframe) {
+    if (!iframe || iframe.dataset.nlLinkBridge === '1') return;
+    iframe.dataset.nlLinkBridge = '1';
+
+    function attach() {
+        try {
+            const doc = iframe.contentDocument;
+            if (!doc || doc.documentElement?.dataset?.nlLinkBridge === '1') return;
+            doc.documentElement.dataset.nlLinkBridge = '1';
+            doc.addEventListener(
+                'click',
+                (e) => {
+                    const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+                    if (!a) return;
+                    const href = (a.getAttribute('href') || '').trim();
+                    if (!href || href === '#' || href.toLowerCase().startsWith('javascript:')) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        // Parent window is not sandboxed — opens https, mailto, etc.
+                        window.open(href, '_blank', 'noopener,noreferrer');
+                    } catch (err) {
+                        try {
+                            window.location.href = href;
+                        } catch (e2) { /* ignore */ }
+                    }
+                },
+                true
+            );
+        } catch (err) {
+            console.warn('[newsletter] preview link bridge failed', err);
+        }
+    }
+
+    iframe.addEventListener('load', attach);
+    // srcdoc often completes before load handlers attach
+    setTimeout(attach, 0);
+    setTimeout(attach, 50);
+}
+
 function applyNewsletterPreviewIframeIsolation(iframe) {
     if (!iframe) return;
     iframe.setAttribute('tabindex', '0');
-    iframe.setAttribute('sandbox', 'allow-same-origin');
+    // allow-same-origin: parent can attach click bridge
+    // allow-popups + allow-popups-to-escape-sandbox: target=_blank / video / mailto from frame
+    // allow-top-navigation-by-user-activation: fallback navigations on user click
+    // Do NOT allow-scripts — keeps untrusted HTML from running JS in the preview
+    iframe.setAttribute(
+        'sandbox',
+        'allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'
+    );
     iframe.setAttribute('scrolling', 'yes');
     iframe.title = 'Newsletter preview — scroll inside to review';
     iframe.style.pointerEvents = 'auto';
     iframe.style.display = 'block';
     wireNewsletterPreviewIframeScroll(iframe);
+    wireNewsletterPreviewLinkBridge(iframe);
 }
 
 function mountNewsletterPreviewIframe(previewEl, html) {
@@ -5148,6 +5258,25 @@ function copyForOutlook() {
     try { wireNewsletterFeedbackFocusGuard(); } catch (e) {}
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
+
+    // Restore form/checkboxes THEN show engagement pickers.
+    // Must run here (end of file) so NL_CUSTOM_CONTENT_BLOCKS exists — mid-script
+    // restore was throwing and leaving Shuffle/Customize/preview permanently hidden.
+    try {
+      if (typeof restoreNewsletterFormPersistence === 'function') {
+        restoreNewsletterFormPersistence();
+      }
+    } catch (e) {
+      console.warn('[newsletter] restoreNewsletterFormPersistence failed', e);
+    }
+    try {
+      if (typeof wireNewsletterSectionUiAfterLoad === 'function') {
+        wireNewsletterSectionUiAfterLoad();
+      }
+    } catch (e) {
+      console.warn('[newsletter] wireNewsletterSectionUiAfterLoad failed', e);
+    }
+
     setTimeout(() => {
       if (typeof window.initNewsletterSetupForm === 'function') {
         try { window.initNewsletterSetupForm(); } catch (e) {}
@@ -5179,6 +5308,12 @@ function copyForOutlook() {
         blogCb.addEventListener('change', toggleBlog);
         toggleBlog();
       }
+      // Re-apply engagement row visibility after any late checkbox/profile tweaks
+      try {
+        if (typeof updateCustomContentChoicesVisibility === 'function') {
+          updateCustomContentChoicesVisibility();
+        }
+      } catch (e) { /* ignore */ }
     }, 80);
 
     // Defer restore until profile + checkbox state are settled (avoids footer/referral drift on refresh).

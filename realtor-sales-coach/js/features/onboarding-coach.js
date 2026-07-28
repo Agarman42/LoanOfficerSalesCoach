@@ -1296,23 +1296,37 @@
         console.warn('[onboarding-coach] paint failed', e);
       }
     };
+    // Paint ASAP — one rAF is enough (double-rAF felt like late Coach Setup pop-in).
     if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(function () {
-        requestAnimationFrame(paint);
-      });
+      requestAnimationFrame(paint);
     } else {
       paint();
     }
-    // Section guides after full DOM is ready
-    setTimeout(() => {
-      try {
-        if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
-        const visible = document.querySelector('main section:not(.hidden)');
-        if (visible?.id && typeof window.onCoachSectionShown === 'function') {
-          window.onCoachSectionShown(visible.id);
-        }
-      } catch (e) { /* ignore */ }
-    }, 0);
+    // Re-paint once profile storage is fully readable (user-profile may still be initing)
+    setTimeout(paint, 0);
+    setTimeout(paint, 120);
+    // After full DOM is ready, run section hooks once (safe)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        try {
+          if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
+          const visible = document.querySelector('main section:not(.hidden)');
+          if (visible?.id && typeof window.onCoachSectionShown === 'function') {
+            window.onCoachSectionShown(visible.id);
+          }
+        } catch (e) { /* ignore */ }
+      });
+    } else {
+      setTimeout(() => {
+        try {
+          if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
+          const visible = document.querySelector('main section:not(.hidden)');
+          if (visible?.id && typeof window.onCoachSectionShown === 'function') {
+            window.onCoachSectionShown(visible.id);
+          }
+        } catch (e) { /* ignore */ }
+      }, 0);
+    }
 
     // Cross-tool bridges can wait — not needed for first Home paint
     const injectBridges = () => {

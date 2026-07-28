@@ -1,14 +1,14 @@
 /**
- * Loads feature scripts AFTER DOM ready so the address bar can finish
+ * Loads non-critical feature scripts AFTER DOM ready so the address bar can finish
  * and early-boot navigation stays responsive.
- * High-priority UI (profile, home, onboarding) loads first; heavy bulk last.
+ *
+ * Home Coach Setup (user-profile, home-favorites, onboarding-coach) loads via
+ * <script defer> in <head> — NOT here — so setup paints right after main.js
+ * instead of waiting on this sequential queue.
  */
 (function () {
   'use strict';
   var SCRIPTS = [
-  'js/features/user-profile.js?v=20260721-unfreeze',
-  'js/features/home-favorites.js?v=20260721-endbody-paint',
-  'js/features/onboarding-coach.js?v=20260721-endbody-paint',
   'js/features/bio-creator.js?v=20260717-realtor-home',
   'js/features/bio-wizard.js?v=20260720-polish2',
   'js/features/saved-items-library.js?v=20260709-realtor-v287',
@@ -17,7 +17,8 @@
   'js/features/global-search-config.js?v=20260719-content-hub',
   'js/features/global-search.js?v=20260719-content-hub',
   'js/features/section-bottom-banners.js?v=20260720-p2-content-hub',
-  'js/app-version.js?v=20260721-v305',
+  'js/features/coach-polish.js?v=20260728-realtor-parity',
+  'js/app-version.js?v=20260728-v306',
   'js/features/generation-rules.js?v=20260720-hobby-restraint',
   'js/features/feature-checkboxes.js?v=20260706-realtor-v277',
   'js/features/save-ribbon.js?v=20260706-realtor-v273',
@@ -49,7 +50,7 @@
   'js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273',
   'js/features/newsletter-entertainment.js?v=20260706-realtor-v273',
   'js/features/newsletter-color-bundles.js?v=20260707-realtor-v303',
-  'js/features/newsletter-generator.js?v=20260720-outlook-paste-lo',
+  'js/features/newsletter-generator.js?v=20260728-realtor-parity',
   'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
   'js/features/newsletter-wizard.js?v=20260720-last-issue-chip',
   'js/features/ai-chat.js?v=20260720-ai-chat',

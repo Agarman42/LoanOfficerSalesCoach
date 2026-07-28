@@ -101,41 +101,52 @@
       positionToggleButton(collapsed);
 
       if (save) {
-        try { localStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false'); } catch (e) {}
+        try {
+          localStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false');
+        } catch (e) { /* private mode */ }
       }
     }
 
-    // Click handler
     menuBtn.addEventListener('click', () => {
       if (isDesktop()) {
         const currentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
         applyCollapsedState(!currentlyCollapsed);
       } else {
-        // Mobile overlay
+        // Mobile: isOpen → collapse (close overlay)
         const isOpen = sidebar.classList.contains('left-0');
         applyCollapsedState(isOpen, false);
       }
     });
 
-    // Restore saved desktop preference
-    let startCollapsed = false;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === 'true' && isDesktop()) startCollapsed = true;
-    } catch (e) {}
+    // Default: sidebar CLOSED until user opens it (hamburger).
+    // localStorage: only 'false' means "keep open"; missing/'true' = collapsed.
+    function prefersCollapsed() {
+      try {
+        return localStorage.getItem(STORAGE_KEY) !== 'false';
+      } catch (e) {
+        return true;
+      }
+    }
 
-    // Initial state (default = sidebar visible)
-    if (startCollapsed && isDesktop()) {
+    let startCollapsed = prefersCollapsed();
+
+    // Initial state (default = sidebar closed on all viewports)
+    if (startCollapsed || !isDesktop()) {
       document.body.classList.add('sidebar-collapsed');
       sidebar.classList.remove('left-0', 'open');
       sidebar.classList.add('left-[-300px]');
       setIcon(true);
-      positionToggleButton(true); // far left
+      positionToggleButton(true); // far left hamburger
+      try {
+        if (localStorage.getItem(STORAGE_KEY) == null) {
+          localStorage.setItem(STORAGE_KEY, 'true');
+        }
+      } catch (e) { /* private mode */ }
     } else {
+      document.body.classList.remove('sidebar-collapsed');
       if (isDesktop()) {
         sidebar.classList.add('left-0');
         setIcon(false);
-        // Small delay so sidebar width is accurate for positioning
         setTimeout(() => positionToggleButton(false), 30);
       } else {
         sidebar.classList.remove('left-0', 'open');
@@ -160,23 +171,20 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         if (isDesktop()) {
-          const savedPref = localStorage.getItem(STORAGE_KEY) === 'true';
-          if (savedPref && !document.body.classList.contains('sidebar-collapsed')) {
+          const wantCollapsed = prefersCollapsed();
+          if (wantCollapsed && !document.body.classList.contains('sidebar-collapsed')) {
             applyCollapsedState(true, false);
-          } else if (!savedPref && document.body.classList.contains('sidebar-collapsed')) {
+          } else if (!wantCollapsed && document.body.classList.contains('sidebar-collapsed')) {
             applyCollapsedState(false, false);
           } else {
-            // Re-position in case width changed
             positionToggleButton(document.body.classList.contains('sidebar-collapsed'));
           }
         } else {
-          document.body.classList.remove('sidebar-collapsed');
-          positionToggleButton(true);
+          // Mobile: always closed until hamburger opens overlay
+          applyCollapsedState(true, false);
         }
       }, 120);
     });
-
-    console.log('[main.js] Sidebar toggle initialized (hamburger always in sidebar top-right when open, far top-left when closed)');
   }
 
   // =====================================================

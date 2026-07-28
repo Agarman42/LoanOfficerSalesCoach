@@ -272,72 +272,92 @@ Do not add extra fluff or marketing language. Be the calm, experienced underwrit
         ? 'Incorporating your new details into the full scenario context.' 
         : 'Cross-referencing agency guidelines, any uploaded overlays/manuals, and compensating factors.';
 
-    // === CUSTOM RICH PROGRESS MODAL (matches premium style of Newsletter, Weekly Win, Blog, etc.) ===
+    // === CUSTOM RICH PROGRESS MODAL (centered like other tools) ===
     const loadingEl = document.getElementById('global-loading');
     if (loadingEl) {
-        loadingEl.dataset.originalContent = loadingEl.innerHTML;
+        if (!loadingEl.dataset.originalContent) {
+            loadingEl.dataset.originalContent = loadingEl.innerHTML;
+        }
 
+        // Single centered card — do NOT nest min-h-screen (that shifted the modal left)
         const customLoadingHTML = `
-            <div class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
-                <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl border border-gray-200 dark:border-gray-700">
-                    
-                    <div class="text-center mb-8">
-                        <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
-                        <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">
-                            ${loadingTitle}
-                        </h3>
-                        <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">
-                            This usually takes just a few seconds.
-                        </p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            ${loadingSub}
-                        </p>
-                    </div>
-
-                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
-                        <h4 class="text-xl font-bold text-[#F15A29] mb-5 text-center">
-                            While we analyze your scenario
-                        </h4>
-                        <div class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
-                            <div class="flex gap-3">
-                                <i class="fas fa-shield-alt text-[#F15A29] mt-0.5"></i>
-                                <div><strong>Layered &amp; gray areas:</strong> Real underwriting is rarely black-and-white. We're weighing guidelines, overlays, and compensating factors.</div>
-                            </div>
-                            <div class="flex gap-3">
-                                <i class="fas fa-file-alt text-[#00A89D] mt-0.5"></i>
-                                <div><strong>Uploaded context:</strong> Any Ruoff overlays or agency documents you provided are being factored in.</div>
-                            </div>
-                            <div class="flex gap-3">
-                                <i class="fas fa-balance-scale text-[#002B5C] dark:text-white mt-0.5"></i>
-                                <div><strong>Practical guidance:</strong> Honest confidence levels and actionable next steps for your specific file.</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <p class="text-xs font-semibold text-[#F15A29] mb-2">Pro Tips:</p>
-                            <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc pl-5">
-                                <li>The more specific details you provide (credit, DTI, LTV, recent events), the sharper the analysis.</li>
-                                <li>Upload your latest overlays for customized results beyond standard agency rules.</li>
-                                <li>Use follow-ups to explore "what if" changes or alternative programs.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5">
-                        AI-assisted analysis — always verify with official guidelines and your underwriter.
+            <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700">
+                <div class="text-center mb-8">
+                    <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
+                    <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">
+                        ${loadingTitle}
+                    </h3>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">
+                        This usually takes just a few seconds.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        ${loadingSub}
                     </p>
                 </div>
+
+                <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                    <h4 class="text-xl font-bold text-[#F15A29] mb-5 text-center">
+                        While we analyze your scenario
+                    </h4>
+                    <div class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                        <div class="flex gap-3">
+                            <i class="fas fa-shield-alt text-[#F15A29] mt-0.5"></i>
+                            <div><strong>Layered &amp; gray areas:</strong> Real underwriting is rarely black-and-white. We're weighing guidelines, overlays, and compensating factors.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-file-alt text-[#00A89D] mt-0.5"></i>
+                            <div><strong>Uploaded context:</strong> Any Ruoff overlays or agency documents you provided are being factored in.</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-balance-scale text-[#002B5C] dark:text-white mt-0.5"></i>
+                            <div><strong>Practical guidance:</strong> Honest confidence levels and actionable next steps for your specific file.</div>
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-semibold text-[#F15A29] mb-2">Pro Tips:</p>
+                        <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc pl-5">
+                            <li>The more specific details you provide (credit, DTI, LTV, recent events), the sharper the analysis.</li>
+                            <li>Upload your latest overlays for customized results beyond standard agency rules.</li>
+                            <li>Use follow-ups to explore "what if" changes or alternative programs.</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5">
+                    AI-assisted analysis — always verify with official guidelines and your underwriter.
+                </p>
             </div>
         `;
 
         loadingEl.innerHTML = customLoadingHTML;
         loadingEl.classList.remove('hidden');
-        loadingEl.style.setProperty('display', 'flex', 'important');
-        loadingEl.style.setProperty('z-index', '99999', 'important');
-        loadingEl.style.setProperty('visibility', 'visible', 'important');
-        loadingEl.style.setProperty('opacity', '1', 'important');
-        loadingEl.style.setProperty('position', 'fixed', 'important');
-        loadingEl.style.setProperty('inset', '0', 'important');
+        loadingEl.classList.add('is-visible');
+        loadingEl.removeAttribute('hidden');
+        loadingEl.setAttribute('aria-hidden', 'false');
+        // Explicit centering on the overlay itself (same pattern as forceShowGlobalLoading)
+        const forceStyles = {
+            display: 'flex',
+            'flex-direction': 'row',
+            'align-items': 'center',
+            'justify-content': 'center',
+            position: 'fixed',
+            inset: '0',
+            top: '0',
+            left: '0',
+            right: '0',
+            bottom: '0',
+            width: '100%',
+            height: '100%',
+            'z-index': '99999',
+            visibility: 'visible',
+            opacity: '1',
+            'pointer-events': 'auto',
+            margin: '0',
+            padding: '1rem',
+            'box-sizing': 'border-box'
+        };
+        Object.keys(forceStyles).forEach((prop) => {
+            loadingEl.style.setProperty(prop, forceStyles[prop], 'important');
+        });
     } else if (typeof window.forceShowGlobalLoading === 'function') {
         window.forceShowGlobalLoading(loadingTitle);
     }
@@ -439,7 +459,7 @@ Do not add extra fluff or marketing language. Be the calm, experienced underwrit
     let currentSection = null;
     const lines = safeAnswer.split('\n');
 
-    lines.forEach(line => {
+    lines.forEach((line) => {
       const headerMatch = line.match(/^##\s*(.+?)\s*$/);
       if (headerMatch) {
         currentSection = headerMatch[1].trim();
@@ -449,62 +469,61 @@ Do not add extra fluff or marketing language. Be the calm, experienced underwrit
       }
     });
 
-    // Build premium HTML
-    let html = `
-      <div class="space-y-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-xs uppercase tracking-widest text-[#00A89D] font-semibold">Underwriting Analysis</div>
-            <div class="text-xl font-bold text-[#002B5C] dark:text-white">${currentScenario.question.substring(0, 90)}${currentScenario.question.length > 90 ? '...' : ''}</div>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="window.copyFullUwResponse()" class="text-xs px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
-              <i class="fas fa-copy"></i> Copy Full
-            </button>
-            <button onclick="window.saveUwScenarioToVault()" class="text-xs px-4 py-2 rounded-xl bg-[#00A89D] text-white flex items-center gap-2 hover:bg-[#008F85]">
-              <i class="far fa-bookmark"></i> Save to My Saved Items
-            </button>
-          </div>
-        </div>
-    `;
+    // Fallback when model doesn't use ## headers — still show the answer
+    const hasStructured = sectionOrder.some((name) => sections[name] && sections[name].trim());
+    if (!hasStructured && safeAnswer.trim()) {
+      sections['Direct Answer'] = safeAnswer;
+    }
 
-    sectionOrder.forEach(sectionName => {
-      if (!sections[sectionName]) return;
+    function buildSectionsHtml() {
+      let html = '';
+      sectionOrder.forEach((sectionName) => {
+        if (!sections[sectionName]) return;
+        const content = sections[sectionName].trim();
+        if (!content) return;
+        const isConfidence = sectionName === 'Confidence Level';
 
-      const content = sections[sectionName].trim();
-      const isConfidence = sectionName === 'Confidence Level';
+        let icon = 'fa-file-alt';
+        if (sectionName.includes('Answer')) icon = 'fa-check-circle';
+        if (sectionName.includes('Confidence')) icon = 'fa-shield-alt';
+        if (sectionName.includes('Compensating')) icon = 'fa-balance-scale';
+        if (sectionName.includes('Next')) icon = 'fa-list-check';
+        if (sectionName.includes('Client')) icon = 'fa-comments';
 
-      let icon = 'fa-file-alt';
-      if (sectionName.includes('Answer')) icon = 'fa-check-circle';
-      if (sectionName.includes('Confidence')) icon = 'fa-shield-alt';
-      if (sectionName.includes('Compensating')) icon = 'fa-balance-scale';
-      if (sectionName.includes('Next')) icon = 'fa-list-check';
-      if (sectionName.includes('Client')) icon = 'fa-comments';
+        const parseMd =
+          typeof marked !== 'undefined' && marked.parse
+            ? marked.parse(content)
+            : content.replace(/</g, '&lt;').replace(/\n/g, '<br>');
 
-      html += `
+        html += `
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
           <div class="flex items-center gap-3 mb-3">
             <i class="fas ${icon} text-[#00A89D]"></i>
             <h4 class="font-bold text-[#002B5C] dark:text-white">${sectionName}</h4>
-            <button onclick="window.copyUwSection('${sectionName.replace(/'/g, "\\'")}', this)" class="ml-auto text-xs px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1">
+            <button type="button" onclick="window.copyUwSection('${sectionName.replace(/'/g, "\\'")}', this)" class="ml-auto text-xs px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1">
               <i class="fas fa-copy text-[10px]"></i> <span class="hidden sm:inline">Copy</span>
             </button>
           </div>
           <div class="prose prose-sm dark:prose-invert max-w-none text-[15px]">
-            ${marked.parse(content)}
+            ${parseMd}
           </div>
       `;
 
-      if (isConfidence) {
-        // Simple visual confidence bar
-        const confText = content.toLowerCase();
-        let pct = 65;
-        let color = '#F15A29';
-        if (confText.includes('high')) { pct = 88; color = '#00A89D'; }
-        else if (confText.includes('medium')) { pct = 65; color = '#F15A29'; }
-        else if (confText.includes('low')) { pct = 38; color = '#ef4444'; }
-
-        html += `
+        if (isConfidence) {
+          const confText = content.toLowerCase();
+          let pct = 65;
+          let color = '#F15A29';
+          if (confText.includes('high')) {
+            pct = 88;
+            color = '#00A89D';
+          } else if (confText.includes('medium')) {
+            pct = 65;
+            color = '#F15A29';
+          } else if (confText.includes('low')) {
+            pct = 38;
+            color = '#ef4444';
+          }
+          html += `
           <div class="mt-4">
             <div class="flex justify-between text-xs mb-1">
               <span class="font-medium">Confidence</span>
@@ -515,25 +534,102 @@ Do not add extra fluff or marketing language. Be the calm, experienced underwrit
             </div>
           </div>
         `;
-      }
-
-      html += `</div>`;
-    });
-
-    // Add conversation context note if follow-up
-    if (currentScenario.history.length > 2) {
-      html += `
-        <div class="text-[11px] text-gray-500 dark:text-gray-400 italic px-1">
-          This answer is part of an ongoing conversation on this specific scenario. Previous context was included.
-        </div>
-      `;
+        }
+        html += `</div>`;
+      });
+      return html;
     }
 
-    html += `</div>`;
+    const qEsc = (s) =>
+      String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // Follow-ups: keep prior answers visible; append this turn instead of replacing
+    if (isFollowUp) {
+      let thread = output.querySelector('#uw-conversation-thread');
+      if (!thread) {
+        // First follow-up after an initial answer — wrap existing content
+        const prior = output.innerHTML;
+        output.innerHTML = `
+          <div class="space-y-6" id="uw-conversation-root">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <div class="text-xs uppercase tracking-widest text-[#00A89D] font-semibold">Underwriting Analysis</div>
+                <div class="text-xl font-bold text-[#002B5C] dark:text-white">${qEsc(
+                  currentScenario.question
+                ).substring(0, 90)}${currentScenario.question.length > 90 ? '...' : ''}</div>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" onclick="window.copyFullUwResponse()" class="text-xs px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                  <i class="fas fa-copy"></i> Copy Full
+                </button>
+                <button type="button" onclick="window.saveUwScenarioToVault()" class="text-xs px-4 py-2 rounded-xl bg-[#00A89D] text-white flex items-center gap-2 hover:bg-[#008F85]">
+                  <i class="far fa-bookmark"></i> Save to My Saved Items
+                </button>
+              </div>
+            </div>
+            <div id="uw-conversation-thread" class="space-y-8">${prior}</div>
+          </div>`;
+        thread = output.querySelector('#uw-conversation-thread');
+      }
+
+      const turn = document.createElement('div');
+      turn.className = 'uw-follow-up-turn space-y-4 pt-6 border-t-2 border-[#00A89D]/30';
+      turn.innerHTML = `
+        <div class="rounded-2xl bg-[#00A89D]/10 border border-[#00A89D]/25 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D] mb-1">Your follow-up</div>
+          <div class="text-[15px] font-semibold text-[#002B5C] dark:text-white">${qEsc(
+            currentScenario.history[currentScenario.history.length - 2]?.content || ''
+          )}</div>
+        </div>
+        <div class="space-y-4">
+          <div class="text-xs uppercase tracking-widest text-[#F15A29] font-semibold">Updated analysis</div>
+          ${buildSectionsHtml()}
+        </div>
+      `;
+      if (thread) {
+        thread.appendChild(turn);
+        try {
+          turn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) { /* ignore */ }
+      }
+
+      // Full transcript for copy/save
+      const transcript = (currentScenario.history || [])
+        .map((t) => (t.role === 'user' ? `### You\n${t.content}` : `### Coach\n${t.content}`))
+        .join('\n\n');
+      output.dataset.latestAnswer = transcript || safeAnswer;
+      return;
+    }
+
+    // Fresh scenario — full replace
+    let html = `
+      <div class="space-y-6" id="uw-conversation-root">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <div class="text-xs uppercase tracking-widest text-[#00A89D] font-semibold">Underwriting Analysis</div>
+            <div class="text-xl font-bold text-[#002B5C] dark:text-white">${qEsc(
+              currentScenario.question
+            ).substring(0, 90)}${currentScenario.question.length > 90 ? '...' : ''}</div>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="window.copyFullUwResponse()" class="text-xs px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-copy"></i> Copy Full
+            </button>
+            <button type="button" onclick="window.saveUwScenarioToVault()" class="text-xs px-4 py-2 rounded-xl bg-[#00A89D] text-white flex items-center gap-2 hover:bg-[#008F85]">
+              <i class="far fa-bookmark"></i> Save to My Saved Items
+            </button>
+          </div>
+        </div>
+        <div id="uw-conversation-thread" class="space-y-6">
+          ${buildSectionsHtml()}
+        </div>
+      </div>
+    `;
 
     output.innerHTML = html;
-
-    // Store latest answer for copy/save
     output.dataset.latestAnswer = safeAnswer;
   }
 

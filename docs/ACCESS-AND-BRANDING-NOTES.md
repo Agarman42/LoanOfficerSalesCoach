@@ -72,3 +72,25 @@ Correct designs require **proof of control** (code in inbox or real Google login
 3. Realtor invite/OTP or Google + allowlist.
 4. LO share link + branded Realtor chrome from LO public profile.
 5. Admin revoke + basic audit (who logged in).
+
+
+## Realtor parity backlog (2026-07-28)
+
+### Shipped in Realtor v3.06 (2026-07-28)
+
+1. ✅ Sidebar default closed (`main.js` prefersCollapsed + body class + early script)
+2. ✅ Header layout (true-centered title/search/quote; far-right theme/profile; `#lo-brand-plate` hook for LO branding phase)
+3. ✅ Head defer for user-profile / home-favorites / onboarding-coach
+4. ✅ Onboarding paint (single rAF + re-paint at 0/120ms)
+5. ✅ Newsletter empty hide + review handoff + scroll-to-ready
+6. ✅ coach-polish.js (Realtor-adapted: no equity scanner)
+7. ✅ Version → 3.06
+
+### Intentionally not ported (LO-only)
+
+Smart Savings package, Mortgage Calculator, Equity Scanner, Underwriting, app-bulk.
+
+### Next phase
+
+Personally branded Realtor tool: resolve LO share token → fill `#lo-brand-plate` + header chrome from LO public profile.
+

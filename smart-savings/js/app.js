@@ -7396,6 +7396,9 @@
         monthlyCashFlowChange: lastScenario.monthlyCashFlowChange,
         newHousing: lastScenario.newHousing,
         oldHousing: lastScenario.oldHousing,
+        oldMonthlyObligations: lastScenario.oldMonthlyObligations,
+        newMonthlyObligations: lastScenario.newMonthlyObligations,
+        otherDebtMonthly: lastScenario.otherDebtMonthly,
         cashAtClosing: lastScenario.cashAtClosing,
         isCashBack: lastScenario.isCashBack,
         breakEvenMonths: lastScenario.breakEvenMonths,
@@ -7487,6 +7490,10 @@
       metrics: {
         monthlyCashFlowChange: lastScenario.monthlyCashFlowChange,
         newHousing: lastScenario.newHousing,
+        oldHousing: lastScenario.oldHousing,
+        oldMonthlyObligations: lastScenario.oldMonthlyObligations,
+        newMonthlyObligations: lastScenario.newMonthlyObligations,
+        otherDebtMonthly: lastScenario.otherDebtMonthly,
         cashAtClosing: lastScenario.cashAtClosing,
         isCashBack: lastScenario.isCashBack,
         breakEvenMonths: lastScenario.breakEvenMonths,
@@ -7506,6 +7513,8 @@
     if (!c || !c.metrics) return null;
     if (key === 'cf') return Number(c.metrics.monthlyCashFlowChange);
     if (key === 'housing') return Number(c.metrics.newHousing);
+    if (key === 'oldOb') return Number(c.metrics.oldMonthlyObligations);
+    if (key === 'newOb') return Number(c.metrics.newMonthlyObligations);
     if (key === 'be') return c.metrics.breakEvenMonths == null ? null : Number(c.metrics.breakEvenMonths);
     if (key === 'debts') return Number(c.metrics.totalDebtsPaidOff);
     if (key === 'ltv') return c.metrics.newLtv == null ? null : Number(c.metrics.newLtv);
@@ -7685,14 +7694,14 @@
       const d = a - b;
       if (Math.abs(d) < 0.75) return '<div class="sc-delta sc-delta-flat">≈ Now</div>';
       const better = preferHigh ? d > 0 : d < 0;
-      if (key === 'cf' || key === 'housing' || key === 'close' || key === 'debts') {
+      if (key === 'cf' || key === 'housing' || key === 'close' || key === 'debts' || key === 'newOb' || key === 'oldOb') {
         return (
           '<div class="sc-delta ' +
           (better ? 'sc-delta-better' : 'sc-delta-worse') +
           '">' +
           (d > 0 ? '+' : '−') +
           money(Math.abs(d)) +
-          (key === 'cf' ? '/mo' : '') +
+          (key === 'cf' || key === 'newOb' || key === 'oldOb' || key === 'housing' ? '/mo' : '') +
           ' vs Now</div>'
         );
       }
@@ -7836,7 +7845,22 @@
       '</tr></thead><tbody>' +
       row('Loan', loanCell, null) +
       row(
-        'New housing',
+        'Was paying (housing + debts)',
+        function (c) {
+          const v = c.metrics && c.metrics.oldMonthlyObligations;
+          if (v == null || !isFinite(Number(v))) {
+            return '<span class="sc-main number opacity-50">—</span>';
+          }
+          return (
+            '<span class="sc-main number">' +
+            money(v) +
+            '</span><div class="sc-sub">/mo total obligations</div>'
+          );
+        },
+        null
+      ) +
+      row(
+        'New housing payment',
         function (c) {
           return (
             '<span class="sc-main number">' +
@@ -7847,7 +7871,26 @@
         },
         bestHousing
       ) +
-      row('Cash flow', cfCell, bestCf, { highlight: true }) +
+      row(
+        'New total obligations',
+        function (c) {
+          const v =
+            c.metrics && c.metrics.newMonthlyObligations != null
+              ? c.metrics.newMonthlyObligations
+              : c.metrics && c.metrics.newHousing;
+          if (v == null || !isFinite(Number(v))) {
+            return '<span class="sc-main number opacity-50">—</span>';
+          }
+          return (
+            '<span class="sc-main number">' +
+            money(v) +
+            '</span><div class="sc-sub">after payoff</div>' +
+            deltaVsCurrent(c, 'newOb', false)
+          );
+        },
+        scBestIndex(cols, 'newOb', false)
+      ) +
+      row('Monthly savings', cfCell, bestCf, { highlight: true }) +
       row('Cash at close', cashCell, bestClose) +
       row(
         'Break-even',

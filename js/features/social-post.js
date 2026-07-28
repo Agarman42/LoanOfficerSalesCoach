@@ -1140,62 +1140,116 @@ window.copySinglePost = function(postId, event) {
     });
 };
 
-// Load saved personal info and themes + pre-fill from central profile
-document.addEventListener('DOMContentLoaded', () => {
-    const savedPersonal = localStorage.getItem('socialPlanPersonal');
-    if (savedPersonal) {
-        const data = JSON.parse(savedPersonal);
-        if (document.getElementById('plan-areas')) document.getElementById('plan-areas').value = data.areas || '';
-        if (document.getElementById('plan-hobbies')) document.getElementById('plan-hobbies').value = data.hobbies || '';
-        if (document.getElementById('plan-family')) document.getElementById('plan-family').value = data.family || '';
-        if (document.getElementById('custom-plan-prompt')) document.getElementById('custom-plan-prompt').value = data.custom || '';
-    }
-
-    const savedThemes = localStorage.getItem('socialPlanThemes');
-    if (savedThemes) {
-        const themes = JSON.parse(savedThemes);
-        const themeIds = [
-            'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
-            'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
-            'theme-recipes', 'theme-trivia', 'theme-localbusiness'
-        ];
-        themeIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && themes[id] !== undefined) el.checked = themes[id];
-        });
-    }
-
-    // Pre-fill from central userProfile if the fields are still empty
-    prefillCalendarFromProfile();
-});
-
-function prefillCalendarFromProfile() {
+function prefillCalendarFromProfile(forceFromProfile) {
     const profile = getCentralProfile();
-    if (!profile) return;
+    if (!profile) return false;
 
     const areasEl = document.getElementById('plan-areas');
     const hobbiesEl = document.getElementById('plan-hobbies');
     const familyEl = document.getElementById('plan-family');
+    let filled = false;
 
-    if (areasEl && !areasEl.value.trim()) {
-        const loc = profile.localArea || profile.location || profile.market || '';
-        if (loc) areasEl.value = loc;
+    const loc = (
+      profile.localArea ||
+      profile.location ||
+      profile.market ||
+      ''
+    ).toString().trim();
+
+    let hobbies = '';
+    if (Array.isArray(profile.hobbies) && profile.hobbies.length) {
+      hobbies = profile.hobbies.join(', ');
+    } else if (profile.hobbies) {
+      hobbies = String(profile.hobbies);
     }
-    if (hobbiesEl && !hobbiesEl.value.trim()) {
-        let hobbies = '';
-        if (Array.isArray(profile.hobbies) && profile.hobbies.length) {
-            hobbies = profile.hobbies.join(', ');
-        } else if (profile.hobbies) {
-            hobbies = profile.hobbies;
-        }
-        const other = profile.hobbiesOther || profile['hobbies-other'] || '';
-        if (other) hobbies += (hobbies ? ', ' : '') + other;
-        if (hobbies) hobbiesEl.value = hobbies;
+    const other = (profile.hobbiesOther || profile['hobbies-other'] || '').toString().trim();
+    if (other) hobbies += (hobbies ? ', ' : '') + other;
+    hobbies = hobbies.trim();
+
+    const family = (profile.family || '').toString().trim();
+
+    // forceFromProfile: always apply profile when plan fields are empty or only whitespace
+    if (areasEl && (forceFromProfile || !areasEl.value.trim()) && loc) {
+      areasEl.value = loc;
+      filled = true;
     }
-    if (familyEl && !familyEl.value.trim() && profile.family) {
-        familyEl.value = profile.family;
+    if (hobbiesEl && (forceFromProfile || !hobbiesEl.value.trim()) && hobbies) {
+      hobbiesEl.value = hobbies;
+      filled = true;
     }
+    if (familyEl && (forceFromProfile || !familyEl.value.trim()) && family) {
+      familyEl.value = family;
+      filled = true;
+    }
+    return filled;
 }
+
+/** Restore calendar form: saved plan fields, then fill gaps from central userProfile. */
+function restoreSocialCalendarForm() {
+    // 1) Profile first so empty saved blobs don't block pull-through
+    prefillCalendarFromProfile(true);
+
+    // 2) Overlay non-empty saved personal fields (user edits win)
+    try {
+      const savedPersonal = localStorage.getItem('socialPlanPersonal');
+      if (savedPersonal) {
+        const data = JSON.parse(savedPersonal);
+        const areasEl = document.getElementById('plan-areas');
+        const hobbiesEl = document.getElementById('plan-hobbies');
+        const familyEl = document.getElementById('plan-family');
+        const customEl = document.getElementById('custom-plan-prompt');
+        if (areasEl && (data.areas || '').trim()) areasEl.value = data.areas;
+        if (hobbiesEl && (data.hobbies || '').trim()) hobbiesEl.value = data.hobbies;
+        if (familyEl && (data.family || '').trim()) familyEl.value = data.family;
+        if (customEl && data.custom != null) customEl.value = data.custom || '';
+      }
+    } catch (e) { /* ignore */ }
+
+    // 3) Themes
+    try {
+      const savedThemes = localStorage.getItem('socialPlanThemes');
+      if (savedThemes) {
+        const themes = JSON.parse(savedThemes);
+        [
+          'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
+          'theme-refi', 'theme-cashout', 'theme-purchase', 'theme-equity',
+          'theme-recipes', 'theme-trivia', 'theme-localbusiness'
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && themes[id] !== undefined) el.checked = !!themes[id];
+        });
+      }
+    } catch (e) { /* ignore */ }
+
+    // 4) If still empty after save overlay, profile again (handles race with user-profile.js)
+    prefillCalendarFromProfile(true);
+
+    // Persist merged result so next visit keeps profile-backed values
+    try {
+      const data = {
+        areas: document.getElementById('plan-areas')?.value || '',
+        hobbies: document.getElementById('plan-hobbies')?.value || '',
+        family: document.getElementById('plan-family')?.value || '',
+        custom: document.getElementById('custom-plan-prompt')?.value || ''
+      };
+      if (data.areas || data.hobbies || data.family) {
+        localStorage.setItem('socialPlanPersonal', JSON.stringify(data));
+      }
+    } catch (e) { /* ignore */ }
+}
+
+// Feature-loader often runs after DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', restoreSocialCalendarForm);
+} else {
+  restoreSocialCalendarForm();
+}
+// user-profile may finish init slightly later
+setTimeout(restoreSocialCalendarForm, 200);
+setTimeout(() => prefillCalendarFromProfile(true), 800);
+
+window.prefillCalendarFromProfile = prefillCalendarFromProfile;
+window.restoreSocialCalendarForm = restoreSocialCalendarForm;
 
 // Save personal info on change
 ['plan-areas', 'plan-hobbies', 'plan-family', 'custom-plan-prompt'].forEach(id => {
