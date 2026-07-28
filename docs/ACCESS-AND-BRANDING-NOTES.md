@@ -101,16 +101,19 @@ Monorepo path for Realtor source of truth: `realtor-sales-coach/`. After LO mono
 
 ### Personally branded Realtor tool (MVP 2026-07-28+)
 
-#### Durable cards cost: **$0**
+#### Short share links (email-friendly)
 
-Links use **signed tokens** (HMAC). The public card lives in the `?lo=` value and is verified with `PARTNER_CARD_SECRET`.  
-Free Render redeploys **do not wipe** these links. No paid database required.
+Share URLs look like:
 
-| Approach | Cost | Survives redeploy? |
-|----------|------|--------------------|
-| **Signed token (primary)** | Free | Yes |
-| File JSON on free disk | Free | No (optional cache only) |
-| Paid Postgres / disk | Paid | Yes (not needed now) |
+`https://ruoffagentsalescoach.onrender.com/?lo=xK9m2pQ4`
+
+(not a long `s1.eyJ...` blob — those mangled in Outlook and looked bad).
+
+| Approach | Cost | Survives free Render redeploy? |
+|----------|------|--------------------------------|
+| **Short code + server store** (primary) | Free | While LO service is up; file may wipe on redeploy |
+| **+ free Upstash Redis** (optional env) | Free tier | Yes |
+| Legacy long signed `s1.*` links | Free | Yes (still accepted; no longer used for new publishes) |
 
 #### Production wiring (Render) — live hosts
 

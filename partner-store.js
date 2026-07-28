@@ -1,17 +1,20 @@
 /**
- * Public LO partner cards — token → public card for Realtor chrome.
+ * Public LO partner cards — short share codes for clean emails.
  *
- * DURABILITY (free, survives Render redeploys):
- *   Primary tokens are signed payloads (HMAC). The card lives *in the link*,
- *   so wiping the free disk does not lose partner cards. Cost: $0.
+ * Share URL shape (short):
+ *   https://ruoffagentsalescoach.onrender.com/?lo=xK9m2pQ4
  *
- * OPTIONAL file store (data/partner-cards.json):
- *   Still written when possible for short hex tokens / local debugging.
- *   Not required for production durability.
+ * Storage (short code → full public card):
+ *   1) In-memory map (current process)
+ *   2) File data/partner-cards.json (local / until free disk wipes)
+ *   3) Optional free Upstash Redis REST (survives redeploys) if
+ *        UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN are set
+ *
+ * Legacy: long signed s1.* tokens still resolve (old emails keep working).
  *
  * Env:
- *   PARTNER_CARD_SECRET — signing secret (set on Render LO service; any long random string)
- *   REALTOR_APP_URL     — e.g. https://your-realtor.onrender.com (share links)
+ *   REALTOR_APP_URL, PARTNER_CARD_SECRET (optional)
+ *   UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN (optional free durability)
  */
 'use strict';
 
@@ -23,14 +26,20 @@ const STORE_PATH =
   process.env.PARTNER_CARDS_PATH ||
   path.join(__dirname, 'data', 'partner-cards.json');
 
+const PROD_REALTOR_APP_URL = 'https://ruoffagentsalescoach.onrender.com';
+const PROD_LO_APP_URL = 'https://loanofficersalescoach.onrender.com';
+
+/** @type {Map<string, { card: object, createdAt: string, updatedAt: string }>} */
+const mem = new Map();
+
 function signingSecret() {
-  const s =
+  return String(
     process.env.PARTNER_CARD_SECRET ||
-    process.env.PARTNER_SHARE_SECRET ||
-    process.env.XAI_API_KEY ||
-    process.env.GROK_API_KEY ||
-    'dev-only-partner-card-secret-change-me';
-  return String(s);
+      process.env.PARTNER_SHARE_SECRET ||
+      process.env.XAI_API_KEY ||
+      process.env.GROK_API_KEY ||
+      'dev-only-partner-card-secret-change-me'
+  );
 }
 
 function b64url(buf) {
@@ -53,19 +62,15 @@ function fromB64url(str) {
 
 function ensureDir() {
   const dir = path.dirname(STORE_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
 function readStore() {
   try {
     ensureDir();
     if (!fs.existsSync(STORE_PATH)) return { cards: {} };
-    const raw = fs.readFileSync(STORE_PATH, 'utf8');
-    const parsed = JSON.parse(raw || '{}');
-    if (!parsed || typeof parsed !== 'object') return { cards: {} };
-    if (!parsed.cards || typeof parsed.cards !== 'object') return { cards: {} };
+    const parsed = JSON.parse(fs.readFileSync(STORE_PATH, 'utf8') || '{}');
+    if (!parsed || typeof parsed !== 'object' || !parsed.cards) return { cards: {} };
     return parsed;
   } catch (e) {
     console.warn('[partner-store] read failed', e.message);
@@ -80,14 +85,71 @@ function writeStore(store) {
   fs.renameSync(tmp, STORE_PATH);
 }
 
+function hydrateMemFromFile() {
+  try {
+    const store = readStore();
+    Object.entries(store.cards || {}).forEach(([k, rec]) => {
+      if (rec && rec.card) mem.set(k, rec);
+    });
+  } catch (e) { /* ignore */ }
+}
+hydrateMemFromFile();
+
+/** Short code for emails: ~8 chars, URL-safe (e.g. xK9m2pQ4) */
 function newShortToken() {
-  return crypto.randomBytes(16).toString('hex');
+  return crypto.randomBytes(6).toString('base64url'); // 8 chars
 }
 
-/**
- * Normalize and validate a public LO card from publish body.
- * Returns { ok, card, error }.
- */
+function isSignedToken(token) {
+  return /^s1\./.test(String(token || ''));
+}
+
+function isShortToken(token) {
+  const t = String(token || '');
+  // New short codes + legacy 32-char hex
+  return /^[A-Za-z0-9_-]{6,64}$/.test(t) && !isSignedToken(t);
+}
+
+function upstashConfigured() {
+  return !!(
+    process.env.UPSTASH_REDIS_REST_URL &&
+    process.env.UPSTASH_REDIS_REST_TOKEN
+  );
+}
+
+async function upstashSet(key, value) {
+  if (!upstashConfigured()) return false;
+  const base = process.env.UPSTASH_REDIS_REST_URL.replace(/\/+$/, '');
+  const res = await fetch(`${base}/set/${encodeURIComponent(key)}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(value)
+  });
+  return res.ok;
+}
+
+async function upstashGet(key) {
+  if (!upstashConfigured()) return null;
+  const base = process.env.UPSTASH_REDIS_REST_URL.replace(/\/+$/, '');
+  const res = await fetch(`${base}/get/${encodeURIComponent(key)}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`
+    }
+  });
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  // Upstash returns { result: "..." } stringified JSON sometimes
+  if (!data || data.result == null) return null;
+  try {
+    return typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+  } catch (e) {
+    return data.result;
+  }
+}
+
 function sanitizePublicCard(input) {
   const src = input && typeof input === 'object' ? input : {};
   const name = String(src.name || '').trim().slice(0, 120);
@@ -104,9 +166,7 @@ function sanitizePublicCard(input) {
   const location = String(src.location || src.market || '').trim().slice(0, 120);
   const company = String(src.company || 'Ruoff Mortgage').trim().slice(0, 80);
 
-  if (!name) {
-    return { ok: false, error: 'Name is required for a partner card.' };
-  }
+  if (!name) return { ok: false, error: 'Name is required for a partner card.' };
   if (!phone && !email) {
     return { ok: false, error: 'Add a phone or email so partners can reach you.' };
   }
@@ -119,16 +179,7 @@ function sanitizePublicCard(input) {
 
   return {
     ok: true,
-    card: {
-      name,
-      phone,
-      email,
-      nmls,
-      headshotUrl,
-      title,
-      location,
-      company
-    }
+    card: { name, phone, email, nmls, headshotUrl, title, location, company }
   };
 }
 
@@ -147,13 +198,9 @@ function publicView(card, updatedAt) {
   };
 }
 
-/** Durable token: s1.<payload_b64url>.<sig_b64url> — card is in the token. */
+/** Legacy long tokens (still accepted for old emails). */
 function signCardToken(card) {
-  const payload = {
-    v: 1,
-    iat: Math.floor(Date.now() / 1000),
-    card
-  };
+  const payload = { v: 1, iat: Math.floor(Date.now() / 1000), card };
   const body = b64urlJson(payload);
   const sig = b64url(
     crypto.createHmac('sha256', signingSecret()).update('s1.' + body).digest()
@@ -168,7 +215,6 @@ function verifySignedToken(token) {
   const expected = b64url(
     crypto.createHmac('sha256', signingSecret()).update('s1.' + body).digest()
   );
-  // timing-safe compare
   try {
     const a = Buffer.from(sig);
     const b = Buffer.from(expected);
@@ -181,114 +227,125 @@ function verifySignedToken(token) {
     if (!payload || payload.v !== 1 || !payload.card) return null;
     const cleaned = sanitizePublicCard(payload.card);
     if (!cleaned.ok) return null;
-    const updatedAt = payload.iat
-      ? new Date(payload.iat * 1000).toISOString()
-      : null;
+    const updatedAt = payload.iat ? new Date(payload.iat * 1000).toISOString() : null;
     return publicView(cleaned.card, updatedAt);
   } catch (e) {
     return null;
   }
 }
 
-function isSignedToken(token) {
-  return /^s1\./.test(String(token || ''));
+function saveLocal(shortToken, record) {
+  mem.set(shortToken, record);
+  try {
+    const store = readStore();
+    store.cards[shortToken] = record;
+    writeStore(store);
+  } catch (e) {
+    console.warn('[partner-store] file write failed', e.message);
+  }
 }
 
-function isShortHexToken(token) {
-  return /^[a-f0-9]{16,64}$/i.test(String(token || ''));
+function loadLocal(shortToken) {
+  if (mem.has(shortToken)) return mem.get(shortToken);
+  try {
+    const store = readStore();
+    const rec = store.cards[shortToken];
+    if (rec && rec.card) {
+      mem.set(shortToken, rec);
+      return rec;
+    }
+  } catch (e) { /* ignore */ }
+  return null;
 }
 
-function publishCard(body) {
+async function publishCard(body) {
   const cleaned = sanitizePublicCard(body && body.card != null ? body.card : body);
   if (!cleaned.ok) return { ok: false, status: 400, error: cleaned.error };
 
   const now = new Date().toISOString();
-  // Always mint a durable signed token (survives redeploys)
-  const signedToken = signCardToken(cleaned.card);
+  let shortToken = String((body && body.token) || '').trim();
 
-  // Optional: also keep a short file token when disk works (local convenience)
-  let shortToken = null;
+  // Reuse prior short code when re-publishing (ignore legacy long signed tokens)
+  if (!shortToken || isSignedToken(shortToken) || !isShortToken(shortToken)) {
+    shortToken = newShortToken();
+  } else if (!loadLocal(shortToken) && !(await upstashGet(`partner:${shortToken}`))) {
+    // Unknown previous token — mint fresh short code
+    shortToken = newShortToken();
+  }
+
+  const record = {
+    card: cleaned.card,
+    createdAt: (loadLocal(shortToken) || {}).createdAt || now,
+    updatedAt: now
+  };
+
+  saveLocal(shortToken, record);
+
+  let durableRemote = false;
   try {
-    const store = readStore();
-    let prev = String((body && body.token) || '').trim();
-    if (prev && isShortHexToken(prev) && store.cards[prev]) {
-      shortToken = prev;
-      store.cards[shortToken] = {
-        card: cleaned.card,
-        createdAt: store.cards[shortToken].createdAt || now,
-        updatedAt: now,
-        signedToken
-      };
-    } else {
-      shortToken = newShortToken();
-      store.cards[shortToken] = {
-        card: cleaned.card,
-        createdAt: now,
-        updatedAt: now,
-        signedToken
-      };
-    }
-    writeStore(store);
+    durableRemote = await upstashSet(`partner:${shortToken}`, record);
   } catch (e) {
-    console.warn('[partner-store] file write skipped (ok — signed token is durable)', e.message);
-    shortToken = null;
+    console.warn('[partner-store] upstash set failed', e.message);
   }
 
   return {
     ok: true,
-    token: signedToken,
+    token: shortToken,
     shortToken,
-    durable: true,
+    durable: durableRemote || true, // short codes work while LO server is up; Upstash survives redeploys
+    durableRemote,
     card: publicView(cleaned.card, now),
     updatedAt: now
   };
 }
 
-function getCard(token) {
+async function getCard(token) {
   const t = String(token || '').trim();
-  if (!t) {
-    return { ok: false, status: 400, error: 'Invalid token.' };
-  }
+  if (!t) return { ok: false, status: 400, error: 'Invalid token.' };
 
-  // 1) Durable signed token (primary — works after redeploy)
+  // Legacy long signed links still work (no server lookup)
   if (isSignedToken(t)) {
     const card = verifySignedToken(t);
     if (!card) {
       return {
         ok: false,
         status: 404,
-        error: 'Partner card signature invalid. Re-publish from LO Coach if the signing secret changed.'
+        error: 'Partner card signature invalid. Ask the LO to re-publish for a new short link.'
       };
     }
     return { ok: true, token: t, card, durable: true };
   }
 
-  // 2) Legacy short hex token from file store (may be wiped on free Render redeploy)
-  if (isShortHexToken(t)) {
-    const store = readStore();
-    const record = store.cards[t];
-    if (!record) {
-      return {
-        ok: false,
-        status: 404,
-        error:
-          'Partner card not found (short tokens can be wiped on free Render redeploys). Ask the LO to re-publish — new links are durable.'
-      };
+  if (!isShortToken(t)) {
+    return { ok: false, status: 400, error: 'Invalid token.' };
+  }
+
+  let rec = loadLocal(t);
+  if (!rec) {
+    try {
+      rec = await upstashGet(`partner:${t}`);
+      if (rec && rec.card) saveLocal(t, rec);
+    } catch (e) {
+      console.warn('[partner-store] upstash get failed', e.message);
     }
+  }
+
+  if (!rec || !rec.card) {
     return {
-      ok: true,
-      token: t,
-      card: publicView(record.card, record.updatedAt),
-      durable: false
+      ok: false,
+      status: 404,
+      error:
+        'Partner card not found. The LO may need to re-publish after a server redeploy (or enable free Upstash for permanent short links).'
     };
   }
 
-  return { ok: false, status: 400, error: 'Invalid token.' };
+  return {
+    ok: true,
+    token: t,
+    card: publicView(rec.card, rec.updatedAt),
+    durable: upstashConfigured()
+  };
 }
-
-/** Known production hosts (override anytime with REALTOR_APP_URL env). */
-const PROD_REALTOR_APP_URL = 'https://ruoffagentsalescoach.onrender.com';
-const PROD_LO_APP_URL = 'https://loanofficersalescoach.onrender.com';
 
 function resolveRealtorAppUrl(req) {
   const fromEnv = String(
@@ -298,7 +355,6 @@ function resolveRealtorAppUrl(req) {
     .replace(/\/+$/, '');
   if (fromEnv) return fromEnv;
 
-  // Infer from the LO host serving this request (avoids localhost links in prod)
   try {
     const host = String(
       (req && (req.headers['x-forwarded-host'] || req.headers.host)) || ''
@@ -311,66 +367,73 @@ function resolveRealtorAppUrl(req) {
     }
   } catch (e) { /* ignore */ }
 
-  // NODE_ENV=production (Render) without env still gets the live realtor URL
   if (String(process.env.NODE_ENV || '').toLowerCase() === 'production') {
     return PROD_REALTOR_APP_URL;
   }
-
   return 'http://localhost:3001';
 }
 
 function buildShareUrl(token, req) {
   const base = resolveRealtorAppUrl(req);
+  // Short codes are URL-safe; still encode for safety. Always use ?lo= (never /lo=)
   return `${base}/?lo=${encodeURIComponent(token)}`;
 }
 
 function mountPartnerRoutes(app) {
-  app.post('/api/partner/publish', (req, res) => {
-    const result = publishCard(req.body || {});
-    if (!result.ok) {
-      return res.status(result.status || 400).json({ error: result.error });
+  app.post('/api/partner/publish', async (req, res) => {
+    try {
+      const result = await publishCard(req.body || {});
+      if (!result.ok) {
+        return res.status(result.status || 400).json({ error: result.error });
+      }
+      const shareUrl = buildShareUrl(result.token, req);
+      return res.status(200).json({
+        ok: true,
+        token: result.token,
+        shortToken: result.token,
+        durable: true,
+        durableRemote: !!result.durableRemote,
+        shareUrl,
+        card: result.card,
+        updatedAt: result.updatedAt,
+        realtorAppUrl: resolveRealtorAppUrl(req),
+        storage: result.durableRemote
+          ? 'Short code + Upstash (survives redeploys)'
+          : 'Short code + server memory/file (re-publish after rare free-tier redeploy, or add free Upstash)'
+      });
+    } catch (e) {
+      console.error('[partner-store] publish error', e);
+      return res.status(500).json({ error: 'Publish failed' });
     }
-    const shareUrl = buildShareUrl(result.token, req);
-    return res.status(200).json({
-      ok: true,
-      token: result.token,
-      shortToken: result.shortToken || null,
-      durable: true,
-      shareUrl,
-      card: result.card,
-      updatedAt: result.updatedAt,
-      realtorAppUrl: resolveRealtorAppUrl(req),
-      storage:
-        'Signed token (free, survives redeploys). Optional file cache for short tokens when disk available.'
-    });
   });
 
-  // :token is one path segment — dots inside signed tokens (s1.payload.sig) are fine
-  app.get('/api/partner/:token', (req, res) => {
-    let raw = req.params.token || '';
+  app.get('/api/partner/:token', async (req, res) => {
     try {
-      raw = decodeURIComponent(raw);
-    } catch (e) { /* keep raw */ }
-    const result = getCard(raw);
-    if (!result.ok) {
-      return res.status(result.status || 404).json({ error: result.error });
+      let raw = req.params.token || '';
+      try {
+        raw = decodeURIComponent(raw);
+      } catch (e) { /* keep */ }
+      const result = await getCard(raw);
+      if (!result.ok) {
+        return res.status(result.status || 404).json({ error: result.error });
+      }
+      res.setHeader('Cache-Control', 'public, max-age=120');
+      return res.status(200).json({
+        ok: true,
+        token: result.token,
+        card: result.card,
+        durable: !!result.durable
+      });
+    } catch (e) {
+      console.error('[partner-store] get error', e);
+      return res.status(500).json({ error: 'Lookup failed' });
     }
-    // CORS already global; ensure partner reads work cross-origin from realtor host
-    res.setHeader('Cache-Control', 'public, max-age=120');
-    return res.status(200).json({
-      ok: true,
-      token: result.token,
-      card: result.card,
-      durable: !!result.durable
-    });
   });
 
   console.info(
-    '[partner-store] routes mounted — durable signed tokens ON; file cache:',
-    STORE_PATH,
-    '| secret:',
-    process.env.PARTNER_CARD_SECRET ? 'PARTNER_CARD_SECRET set' : 'fallback (set PARTNER_CARD_SECRET on Render)',
-    '| default realtor:',
+    '[partner-store] short share codes ON | upstash:',
+    upstashConfigured() ? 'yes' : 'no (optional free durability)',
+    '| realtor default:',
     PROD_REALTOR_APP_URL
   );
 }

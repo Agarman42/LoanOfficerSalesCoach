@@ -221,6 +221,7 @@
     card = card || buildPublicCardFromProfile();
     const loFirst = firstName(card.name) || 'I';
     const subject = `${loFirst} shared a free sales tool to help grow your business`;
+    // No signature block in the body — Outlook/Exchange attaches the LO’s official signature.
     const body = [
       'Hi,',
       '',
@@ -230,24 +231,13 @@
       '',
       `I've personalized a link so when you open it, you'll see my contact info right in the header. Use it anytime — and please reach out if I can help with financing, pre-approvals, or partnering on your next file.`,
       '',
-      `Your link:`,
+      'Open your personalized coach here:',
       shareUrl,
       '',
       `I'm grateful for our partnership and want to be a resource for your business in every way I can. If something would make this more useful for you, just tell me.`,
       '',
-      `Looking forward to working together,`,
-      card.name || '',
-      card.phone ? card.phone : '',
-      card.email ? card.email : '',
-      card.nmls ? `NMLS ${card.nmls}` : '',
-      card.company || 'Ruoff Mortgage'
-    ]
-      .filter((line, i, arr) => {
-        // drop trailing empty name-only blanks already handled
-        return true;
-      })
-      .join('\n')
-      .replace(/\n{3,}/g, '\n\n');
+      'Looking forward to working together,'
+    ].join('\n');
 
     return { subject, body };
   }
@@ -443,7 +433,7 @@
       <p class="text-[11px] text-gray-400 m-0 mt-2">
         Required: Full Name + Phone or Email. Recommended: Headshot (Voice &amp; Links).
         <strong>Publish</strong> auto-copies your link.
-        <strong>Email to realtor</strong> opens Outlook/your mail app with subject + message + link — just add their address and send (signature attaches via Outlook).
+        <strong>Email to realtor</strong> opens your mail app with subject + message + link only (no signature in the draft — your Outlook signature attaches automatically). Just add their address and send.
       </p>
     `;
     host.appendChild(panel);
