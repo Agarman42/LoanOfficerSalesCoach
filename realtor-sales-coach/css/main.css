@@ -145,17 +145,102 @@ body > header {
     .header-actions-cluster { right: 1rem; }
 }
 
-/* Optional LO partner brand plate (filled by branded-share phase) */
-#lo-brand-plate:empty {
-    display: none;
+/* LO partner brand plate (populated by lo-brand-chrome.js) */
+#lo-brand-plate:not(.is-populated),
+#lo-brand-plate[hidden] {
+    display: none !important;
 }
-.header-lo-brand-plate {
+.header-lo-brand-plate,
+#lo-brand-plate.is-populated {
+    display: block;
     background: #ffffff;
-    border-radius: 0.9rem;
-    padding: 0.4rem 0.65rem;
+    border-radius: 0.85rem;
+    padding: 0.4rem 0.55rem;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-    line-height: 0;
-    pointer-events: none;
+    line-height: 1.2;
+    pointer-events: auto;
+    max-width: min(18rem, 46vw);
+}
+.lo-brand-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+.lo-brand-photo-wrap {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: #e6f7f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.lo-brand-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.lo-brand-initial {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #00A89D;
+}
+.lo-brand-text {
+    min-width: 0;
+    text-align: left;
+}
+.lo-brand-kicker {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #00A89D;
+    line-height: 1.2;
+}
+.lo-brand-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #002B5C;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lo-brand-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.45rem;
+    font-size: 0.62rem;
+    color: #4b5563;
+    margin-top: 0.1rem;
+}
+.lo-brand-contact {
+    color: #002B5C;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.lo-brand-contact:hover {
+    color: #00A89D;
+    text-decoration: underline;
+}
+.lo-brand-nmls {
+    opacity: 0.85;
+}
+@media (max-width: 640px) {
+    .header-lo-brand-plate,
+    #lo-brand-plate.is-populated {
+        max-width: min(11.5rem, 42vw);
+        padding: 0.3rem 0.4rem;
+    }
+    .lo-brand-meta {
+        display: none; /* keep header compact on phones; name + photo stay */
+    }
+    .lo-brand-name {
+        font-size: 0.72rem;
+    }
 }
 
 .header-actions-row {

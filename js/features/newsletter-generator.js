@@ -3062,6 +3062,15 @@ function getNewsletterHtmlForFeedbackEdit() {
 function hardenNewsletterPreviewHtml(html) {
     let out = String(html || '');
     if (!out.trim()) return out;
+
+    // Preview iframe is sandboxed WITHOUT allow-scripts (intentional security).
+    // Strip scripts so Chrome doesn't log "Blocked script execution in about:srcdoc".
+    // Download/copy paths still use the original HTML if scripts were ever present.
+    out = out
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<script\b[^>]*\/>/gi, '')
+        .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+
     if (/<html\b/i.test(out)) {
         out = out.replace(/<html\b([^>]*)>/i, (tag, attrs) => {
             let a = String(attrs);

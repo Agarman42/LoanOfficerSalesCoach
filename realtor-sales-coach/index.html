@@ -104,7 +104,25 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260728-sidebar-ai-asterisk">
+    <link rel="stylesheet" href="css/main.css?v=20260728-lo-brand">
+
+    <!-- LO partner API host (public cards). Local: LO proxy :3000. Production: set to LO Render URL. -->
+    <meta name="lo-partner-api" content="">
+    <script>
+      (function () {
+        try {
+          var h = location.hostname;
+          var local = h === 'localhost' || h === '127.0.0.1' || h === '[::1]';
+          var meta = document.querySelector('meta[name="lo-partner-api"]');
+          var fromMeta = meta && meta.getAttribute('content');
+          if (fromMeta && String(fromMeta).trim()) {
+            window.LO_PARTNER_API_BASE = String(fromMeta).trim().replace(/\/+$/, '');
+          } else if (local) {
+            window.LO_PARTNER_API_BASE = 'http://localhost:3000';
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260706-realtor-v273"></script>
@@ -115,6 +133,8 @@
     <!-- Core UI (Phase 0.5) - menu, quotes, theme -->
     <script defer src="js/main.js?v=20260728-realtor-parity"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260728-ai-asterisk"></script>
+    <!-- LO brand plate from ?lo= token (must not wait for full feature-loader) -->
+    <script defer src="js/features/lo-brand-chrome.js?v=20260728-partner-brand"></script>
     <!--
       Home Coach Setup: must not wait for sequential feature-loader (40+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.

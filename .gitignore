@@ -40,3 +40,7 @@ private/
 .cache/
 tmp/
 temp/
+
+# Partner card store (runtime; not source of truth for code)
+data/partner-cards.json
+data/partner-cards.json.tmp

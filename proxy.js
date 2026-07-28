@@ -81,9 +81,18 @@ app.get('/api/health', (_req, res) => {
         ? 'Server key present and looks like a real xai- key'
         : 'Server key is set but looks like a placeholder (too short). Put a real key from https://console.x.ai in .env and restart proxy.js',
     node: process.version,
-    time: new Date().toISOString()
+    time: new Date().toISOString(),
+    partnerCards: true,
+    realtorAppUrl: process.env.REALTOR_APP_URL || process.env.PARTNER_REALTOR_URL || 'http://localhost:3001'
   });
 });
+
+// Public LO partner cards (token → name/photo/phone for Realtor chrome)
+try {
+  require('./partner-store').mountPartnerRoutes(app);
+} catch (e) {
+  console.warn('[partner-store] failed to mount routes', e && e.message ? e.message : e);
+}
 
 // Optional: refinance calculator source (dev) for smart-savings until assets are synced in-tree
 const REFI_SRC =

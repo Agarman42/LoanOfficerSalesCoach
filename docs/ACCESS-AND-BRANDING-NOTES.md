@@ -90,7 +90,24 @@ Correct designs require **proof of control** (code in inbox or real Google login
 
 Smart Savings package, Mortgage Calculator, Equity Scanner, Underwriting, app-bulk.
 
-### Next phase
+### Personally branded Realtor tool (MVP 2026-07-28)
 
-Personally branded Realtor tool: resolve LO share token → fill `#lo-brand-plate` + header chrome from LO public profile.
+**Storage:** LO Coach proxy (`proxy.js` + `partner-store.js`) is source of truth.  
+File: `data/partner-cards.json` (gitignored). On free Render, disk can reset on redeploy — use a DB when partners depend on it.
+
+**API (LO host, e.g. :3000 / LO Render URL)**  
+- `POST /api/partner/publish` — body `{ card, token? }` → `{ token, shareUrl, card }`  
+- `GET /api/partner/:token` — public read of card  
+
+**Env**  
+- `REALTOR_APP_URL` — base for share links (default `http://localhost:3001`)  
+- Realtor: `window.LO_PARTNER_API_BASE` or `<meta name="lo-partner-api">` (local defaults to `http://localhost:3000`)
+
+**LO UI:** My Profile → Identity → **Share with partners** (`js/features/partner-share.js`)  
+**Realtor UI:** `?lo=TOKEN` → fetch → `#lo-brand-plate` (`lo-brand-chrome.js`)
+
+**Public fields only:** name, phone, email, nmls, headshotUrl, title, location, company.  
+Full profile stays in LO browser localStorage.
+
+**Later:** revoke token, OTP gate on publish, durable DB, invite-only access.
 
