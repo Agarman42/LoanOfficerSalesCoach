@@ -1,7 +1,7 @@
 /**
  * LO brand chrome on Realtor coach.
- * Reads ?lo=TOKEN (or sessionStorage), fetches public card from LO partner API, paints #lo-brand-plate.
- * Phone/email are clickable (tel: / mailto:) with hyphenated phone display.
+ * Reads ?lo=TOKEN (kept in the address bar so favorites/bookmarks stay branded),
+ * falls back to localStorage/sessionStorage for in-app navigation, fetches card, paints plate + footer.
  */
 (function () {
   'use strict';
@@ -40,15 +40,38 @@
     }
   }
 
-  function persistToken(token) {
+  /**
+   * Keep short ?lo= in the address bar so "Add to favorites / bookmark" preserves branding.
+   * Only used to *restore* the param if something stripped it (SPA nav edge cases).
+   */
+  function ensureTokenInUrl(token) {
+    if (!token) return;
     try {
-      if (token) sessionStorage.setItem(TOKEN_KEY, token);
+      const u = new URL(location.href);
+      const current = (u.searchParams.get('lo') || '').trim();
+      if (current === token) return;
+      // Don't force a huge legacy s1.* blob back into the bar if user already cleaned it
+      if (/^s1\./.test(token) && !current) return;
+      u.searchParams.set('lo', token);
+      u.searchParams.delete('partner');
+      history.replaceState({}, '', u.pathname + u.search + u.hash);
+    } catch (e) { /* ignore */ }
+  }
+
+  function persistToken(token) {
+    if (!token) return;
+    try {
+      sessionStorage.setItem(TOKEN_KEY, token);
+    } catch (e) { /* ignore */ }
+    try {
+      // Survives new tabs / reopen favorite on this browser even if URL was cleaned somehow
+      localStorage.setItem(TOKEN_KEY, token);
     } catch (e) { /* ignore */ }
   }
 
   function loadStoredToken() {
     try {
-      return sessionStorage.getItem(TOKEN_KEY) || '';
+      return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || '';
     } catch (e) {
       return '';
     }
@@ -215,19 +238,15 @@
   }
 
   async function resolveAndPaint() {
+    // Prefer URL so bookmarks/favorites with ?lo= always win
     let token = readTokenFromUrl();
     if (token) {
       persistToken(token);
-      try {
-        const u = new URL(location.href);
-        if (u.searchParams.has('lo') || u.searchParams.has('partner')) {
-          u.searchParams.delete('lo');
-          u.searchParams.delete('partner');
-          history.replaceState({}, '', u.pathname + u.search + u.hash);
-        }
-      } catch (e) { /* ignore */ }
+      // Keep ?lo= in the bar — do NOT strip it (favorites need it)
     } else {
       token = loadStoredToken();
+      // If we only have storage (e.g. SPA nav lost the query), put short code back in the URL
+      if (token) ensureTokenInUrl(token);
     }
 
     if (!token) {
@@ -236,7 +255,7 @@
     }
 
     try {
-      const cached = sessionStorage.getItem(CARD_KEY);
+      const cached = sessionStorage.getItem(CARD_KEY) || localStorage.getItem(CARD_KEY);
       if (cached) paintBrandPlate(JSON.parse(cached));
     } catch (e) { /* ignore */ }
 
@@ -244,12 +263,16 @@
       const card = await fetchCard(token);
       try {
         sessionStorage.setItem(CARD_KEY, JSON.stringify(card));
+        localStorage.setItem(CARD_KEY, JSON.stringify(card));
       } catch (e) { /* ignore */ }
       paintBrandPlate(card);
+      // After success, ensure short code remains bookmarkable
+      ensureTokenInUrl(token);
     } catch (e) {
       console.warn('[lo-brand] fetch failed', e.message || e);
       try {
-        if (!sessionStorage.getItem(CARD_KEY)) paintBrandPlate(null);
+        const cached = sessionStorage.getItem(CARD_KEY) || localStorage.getItem(CARD_KEY);
+        if (!cached) paintBrandPlate(null);
       } catch (e2) {
         paintBrandPlate(null);
       }
@@ -260,6 +283,7 @@
   window.getLoPartnerCard = function () {
     return window.__loPartnerCard || null;
   };
+  window.getLoPartnerToken = loadStoredToken;
   window.formatPartnerPhoneDisplay = formatPhoneDisplay;
 
   if (document.readyState === 'loading') {
@@ -267,4 +291,10 @@
   } else {
     resolveAndPaint();
   }
+
+  // If in-app nav changes the URL without ?lo=, re-attach short code from storage
+  window.addEventListener('hashchange', () => {
+    const t = readTokenFromUrl() || loadStoredToken();
+    if (t) ensureTokenInUrl(t);
+  });
 })();
