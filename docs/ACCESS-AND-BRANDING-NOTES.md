@@ -112,15 +112,20 @@ Free Render redeploys **do not wipe** these links. No paid database required.
 | File JSON on free disk | Free | No (optional cache only) |
 | Paid Postgres / disk | Paid | Yes (not needed now) |
 
-#### Production wiring (Render)
+#### Production wiring (Render) — live hosts
 
-**LO service env**
-- `REALTOR_APP_URL=https://<realtor-on-render>` — share/email links point at production  
-- `PARTNER_CARD_SECRET=<long random string>` — keep stable (changing it invalidates old links)  
+| App | Live URL |
+|-----|----------|
+| **LO** | `https://loanofficersalescoach.onrender.com` |
+| **Realtor** | `https://ruoffagentsalescoach.onrender.com` |
+
+**LO service env (Render dashboard → Environment)**
+- `REALTOR_APP_URL=https://ruoffagentsalescoach.onrender.com` (recommended; also auto-inferred off localhost)  
+- `PARTNER_CARD_SECRET=<long random string>` — optional but preferred; if unset, signing falls back to `XAI_API_KEY`  
 - `XAI_API_KEY` as today  
 
 **Realtor**
-- Set `<meta name="lo-partner-api" content="https://<lo-on-render>">` in `index.html` so plates can fetch the LO API.
+- `index.html` meta `lo-partner-api` points at `https://loanofficersalescoach.onrender.com` (local hostnames still use `http://localhost:3000`).
 
 #### API (LO host)
 - `POST /api/partner/publish` → `{ token, shareUrl, card, durable: true }`  

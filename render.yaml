@@ -14,8 +14,14 @@ services:
         value: "20"
       - key: XAI_API_KEY
         sync: false
+      # Partner share links → live Realtor app
+      - key: REALTOR_APP_URL
+        value: "https://ruoffagentsalescoach.onrender.com"
+      # Optional: dedicated signing secret for durable partner tokens (else falls back to XAI_API_KEY)
+      - key: PARTNER_CARD_SECRET
+        sync: false
       # Optional: lock CORS to your Render URL(s), e.g.
-      # https://loan-officer-sales-coach.onrender.com
+      # https://loanofficersalescoach.onrender.com,https://ruoffagentsalescoach.onrender.com
       # Leave unset to allow all origins (default).
       - key: CORS_ORIGINS
         sync: false

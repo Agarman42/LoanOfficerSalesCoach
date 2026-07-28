@@ -286,14 +286,41 @@ function getCard(token) {
   return { ok: false, status: 400, error: 'Invalid token.' };
 }
 
-function buildShareUrl(token) {
-  const base = String(
-    process.env.REALTOR_APP_URL ||
-      process.env.PARTNER_REALTOR_URL ||
-      'http://localhost:3001'
+/** Known production hosts (override anytime with REALTOR_APP_URL env). */
+const PROD_REALTOR_APP_URL = 'https://ruoffagentsalescoach.onrender.com';
+const PROD_LO_APP_URL = 'https://loanofficersalescoach.onrender.com';
+
+function resolveRealtorAppUrl(req) {
+  const fromEnv = String(
+    process.env.REALTOR_APP_URL || process.env.PARTNER_REALTOR_URL || ''
   )
     .trim()
     .replace(/\/+$/, '');
+  if (fromEnv) return fromEnv;
+
+  // Infer from the LO host serving this request (avoids localhost links in prod)
+  try {
+    const host = String(
+      (req && (req.headers['x-forwarded-host'] || req.headers.host)) || ''
+    )
+      .split(',')[0]
+      .trim()
+      .toLowerCase();
+    if (host && !/localhost|127\.0\.0\.1/.test(host)) {
+      return PROD_REALTOR_APP_URL;
+    }
+  } catch (e) { /* ignore */ }
+
+  // NODE_ENV=production (Render) without env still gets the live realtor URL
+  if (String(process.env.NODE_ENV || '').toLowerCase() === 'production') {
+    return PROD_REALTOR_APP_URL;
+  }
+
+  return 'http://localhost:3001';
+}
+
+function buildShareUrl(token, req) {
+  const base = resolveRealtorAppUrl(req);
   return `${base}/?lo=${encodeURIComponent(token)}`;
 }
 
@@ -303,14 +330,16 @@ function mountPartnerRoutes(app) {
     if (!result.ok) {
       return res.status(result.status || 400).json({ error: result.error });
     }
+    const shareUrl = buildShareUrl(result.token, req);
     return res.status(200).json({
       ok: true,
       token: result.token,
       shortToken: result.shortToken || null,
       durable: true,
-      shareUrl: buildShareUrl(result.token),
+      shareUrl,
       card: result.card,
       updatedAt: result.updatedAt,
+      realtorAppUrl: resolveRealtorAppUrl(req),
       storage:
         'Signed token (free, survives redeploys). Optional file cache for short tokens when disk available.'
     });
@@ -326,6 +355,7 @@ function mountPartnerRoutes(app) {
     if (!result.ok) {
       return res.status(result.status || 404).json({ error: result.error });
     }
+    // CORS already global; ensure partner reads work cross-origin from realtor host
     res.setHeader('Cache-Control', 'public, max-age=120');
     return res.status(200).json({
       ok: true,
@@ -339,7 +369,9 @@ function mountPartnerRoutes(app) {
     '[partner-store] routes mounted — durable signed tokens ON; file cache:',
     STORE_PATH,
     '| secret:',
-    process.env.PARTNER_CARD_SECRET ? 'PARTNER_CARD_SECRET set' : 'fallback (set PARTNER_CARD_SECRET on Render)'
+    process.env.PARTNER_CARD_SECRET ? 'PARTNER_CARD_SECRET set' : 'fallback (set PARTNER_CARD_SECRET on Render)',
+    '| default realtor:',
+    PROD_REALTOR_APP_URL
   );
 }
 
@@ -348,7 +380,10 @@ module.exports = {
   publishCard,
   getCard,
   buildShareUrl,
+  resolveRealtorAppUrl,
   sanitizePublicCard,
   signCardToken,
-  verifySignedToken
+  verifySignedToken,
+  PROD_REALTOR_APP_URL,
+  PROD_LO_APP_URL
 };

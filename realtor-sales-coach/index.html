@@ -106,8 +106,12 @@
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <link rel="stylesheet" href="css/main.css?v=20260728-footer-email">
 
-    <!-- LO partner API host (public cards). Local: LO proxy :3000. Production: set to LO Render URL. -->
-    <meta name="lo-partner-api" content="">
+    <!--
+      LO partner API host (public cards for brand plate).
+      Production default: https://loanofficersalescoach.onrender.com
+      Local: http://localhost:3000 (script below). Override with non-empty meta content.
+    -->
+    <meta name="lo-partner-api" content="https://loanofficersalescoach.onrender.com">
     <script>
       (function () {
         try {
@@ -115,12 +119,17 @@
           var local = h === 'localhost' || h === '127.0.0.1' || h === '[::1]';
           var meta = document.querySelector('meta[name="lo-partner-api"]');
           var fromMeta = meta && meta.getAttribute('content');
-          if (fromMeta && String(fromMeta).trim()) {
-            window.LO_PARTNER_API_BASE = String(fromMeta).trim().replace(/\/+$/, '');
-          } else if (local) {
+          if (local) {
+            // Always prefer local LO proxy when developing
             window.LO_PARTNER_API_BASE = 'http://localhost:3000';
+          } else if (fromMeta && String(fromMeta).trim()) {
+            window.LO_PARTNER_API_BASE = String(fromMeta).trim().replace(/\/+$/, '');
+          } else {
+            window.LO_PARTNER_API_BASE = 'https://loanofficersalescoach.onrender.com';
           }
-        } catch (e) {}
+        } catch (e) {
+          window.LO_PARTNER_API_BASE = 'https://loanofficersalescoach.onrender.com';
+        }
       })();
     </script>
 

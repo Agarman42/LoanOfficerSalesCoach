@@ -85,7 +85,13 @@ app.get('/api/health', (_req, res) => {
     partnerCards: true,
     partnerCardsDurable: true,
     partnerCardSecretSet: !!(process.env.PARTNER_CARD_SECRET || process.env.PARTNER_SHARE_SECRET),
-    realtorAppUrl: process.env.REALTOR_APP_URL || process.env.PARTNER_REALTOR_URL || 'http://localhost:3001'
+    realtorAppUrl:
+      process.env.REALTOR_APP_URL ||
+      process.env.PARTNER_REALTOR_URL ||
+      (String(process.env.NODE_ENV || '').toLowerCase() === 'production'
+        ? 'https://ruoffagentsalescoach.onrender.com'
+        : 'http://localhost:3001'),
+    loAppUrl: 'https://loanofficersalescoach.onrender.com'
   });
 });
 
