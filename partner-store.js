@@ -1,7 +1,17 @@
 /**
  * Public LO partner cards — token → public card for Realtor chrome.
- * File-backed JSON for local/dev; on free Render disk may reset on redeploy
- * (migrate to DB when partners rely on it in production).
+ *
+ * DURABILITY (free, survives Render redeploys):
+ *   Primary tokens are signed payloads (HMAC). The card lives *in the link*,
+ *   so wiping the free disk does not lose partner cards. Cost: $0.
+ *
+ * OPTIONAL file store (data/partner-cards.json):
+ *   Still written when possible for short hex tokens / local debugging.
+ *   Not required for production durability.
+ *
+ * Env:
+ *   PARTNER_CARD_SECRET — signing secret (set on Render LO service; any long random string)
+ *   REALTOR_APP_URL     — e.g. https://your-realtor.onrender.com (share links)
  */
 'use strict';
 
@@ -12,6 +22,34 @@ const crypto = require('crypto');
 const STORE_PATH =
   process.env.PARTNER_CARDS_PATH ||
   path.join(__dirname, 'data', 'partner-cards.json');
+
+function signingSecret() {
+  const s =
+    process.env.PARTNER_CARD_SECRET ||
+    process.env.PARTNER_SHARE_SECRET ||
+    process.env.XAI_API_KEY ||
+    process.env.GROK_API_KEY ||
+    'dev-only-partner-card-secret-change-me';
+  return String(s);
+}
+
+function b64url(buf) {
+  return Buffer.from(buf)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+function b64urlJson(obj) {
+  return b64url(JSON.stringify(obj));
+}
+
+function fromB64url(str) {
+  const s = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+  const pad = s.length % 4 === 0 ? '' : '='.repeat(4 - (s.length % 4));
+  return Buffer.from(s + pad, 'base64').toString('utf8');
+}
 
 function ensureDir() {
   const dir = path.dirname(STORE_PATH);
@@ -42,7 +80,7 @@ function writeStore(store) {
   fs.renameSync(tmp, STORE_PATH);
 }
 
-function newToken() {
+function newShortToken() {
   return crypto.randomBytes(16).toString('hex');
 }
 
@@ -54,7 +92,6 @@ function sanitizePublicCard(input) {
   const src = input && typeof input === 'object' ? input : {};
   const name = String(src.name || '').trim().slice(0, 120);
   let phone = String(src.phone || '').trim().slice(0, 40);
-  // Normalize US numbers to 317-555-0100 for display on partner plate
   {
     let d = phone.replace(/\D/g, '');
     if (d.length === 11 && d.startsWith('1')) d = d.slice(1);
@@ -95,73 +132,158 @@ function sanitizePublicCard(input) {
   };
 }
 
-function publicView(record) {
-  if (!record || !record.card) return null;
+function publicView(card, updatedAt) {
+  if (!card) return null;
   return {
-    name: record.card.name || '',
-    phone: record.card.phone || '',
-    email: record.card.email || '',
-    nmls: record.card.nmls || '',
-    headshotUrl: record.card.headshotUrl || '',
-    title: record.card.title || '',
-    location: record.card.location || '',
-    company: record.card.company || '',
-    updatedAt: record.updatedAt || null
+    name: card.name || '',
+    phone: card.phone || '',
+    email: card.email || '',
+    nmls: card.nmls || '',
+    headshotUrl: card.headshotUrl || '',
+    title: card.title || '',
+    location: card.location || '',
+    company: card.company || '',
+    updatedAt: updatedAt || null
   };
+}
+
+/** Durable token: s1.<payload_b64url>.<sig_b64url> — card is in the token. */
+function signCardToken(card) {
+  const payload = {
+    v: 1,
+    iat: Math.floor(Date.now() / 1000),
+    card
+  };
+  const body = b64urlJson(payload);
+  const sig = b64url(
+    crypto.createHmac('sha256', signingSecret()).update('s1.' + body).digest()
+  );
+  return `s1.${body}.${sig}`;
+}
+
+function verifySignedToken(token) {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 3 || parts[0] !== 's1') return null;
+  const [, body, sig] = parts;
+  const expected = b64url(
+    crypto.createHmac('sha256', signingSecret()).update('s1.' + body).digest()
+  );
+  // timing-safe compare
+  try {
+    const a = Buffer.from(sig);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  } catch (e) {
+    return null;
+  }
+  try {
+    const payload = JSON.parse(fromB64url(body));
+    if (!payload || payload.v !== 1 || !payload.card) return null;
+    const cleaned = sanitizePublicCard(payload.card);
+    if (!cleaned.ok) return null;
+    const updatedAt = payload.iat
+      ? new Date(payload.iat * 1000).toISOString()
+      : null;
+    return publicView(cleaned.card, updatedAt);
+  } catch (e) {
+    return null;
+  }
+}
+
+function isSignedToken(token) {
+  return /^s1\./.test(String(token || ''));
+}
+
+function isShortHexToken(token) {
+  return /^[a-f0-9]{16,64}$/i.test(String(token || ''));
 }
 
 function publishCard(body) {
   const cleaned = sanitizePublicCard(body && body.card != null ? body.card : body);
   if (!cleaned.ok) return { ok: false, status: 400, error: cleaned.error };
 
-  const store = readStore();
-  let token = String((body && body.token) || '').trim();
-  if (token && !/^[a-f0-9]{16,64}$/i.test(token)) {
-    return { ok: false, status: 400, error: 'Invalid token format.' };
-  }
-
   const now = new Date().toISOString();
-  if (token && store.cards[token]) {
-    store.cards[token] = {
-      card: cleaned.card,
-      createdAt: store.cards[token].createdAt || now,
-      updatedAt: now
-    };
-  } else {
-    token = newToken();
-    store.cards[token] = {
-      card: cleaned.card,
-      createdAt: now,
-      updatedAt: now
-    };
-  }
+  // Always mint a durable signed token (survives redeploys)
+  const signedToken = signCardToken(cleaned.card);
 
+  // Optional: also keep a short file token when disk works (local convenience)
+  let shortToken = null;
   try {
+    const store = readStore();
+    let prev = String((body && body.token) || '').trim();
+    if (prev && isShortHexToken(prev) && store.cards[prev]) {
+      shortToken = prev;
+      store.cards[shortToken] = {
+        card: cleaned.card,
+        createdAt: store.cards[shortToken].createdAt || now,
+        updatedAt: now,
+        signedToken
+      };
+    } else {
+      shortToken = newShortToken();
+      store.cards[shortToken] = {
+        card: cleaned.card,
+        createdAt: now,
+        updatedAt: now,
+        signedToken
+      };
+    }
     writeStore(store);
   } catch (e) {
-    console.error('[partner-store] write failed', e.message);
-    return { ok: false, status: 500, error: 'Could not save partner card on server.' };
+    console.warn('[partner-store] file write skipped (ok — signed token is durable)', e.message);
+    shortToken = null;
   }
 
   return {
     ok: true,
-    token,
-    card: publicView(store.cards[token]),
+    token: signedToken,
+    shortToken,
+    durable: true,
+    card: publicView(cleaned.card, now),
     updatedAt: now
   };
 }
 
 function getCard(token) {
   const t = String(token || '').trim();
-  if (!t || !/^[a-f0-9]{16,64}$/i.test(t)) {
+  if (!t) {
     return { ok: false, status: 400, error: 'Invalid token.' };
   }
-  const store = readStore();
-  const record = store.cards[t];
-  if (!record) {
-    return { ok: false, status: 404, error: 'Partner card not found.' };
+
+  // 1) Durable signed token (primary — works after redeploy)
+  if (isSignedToken(t)) {
+    const card = verifySignedToken(t);
+    if (!card) {
+      return {
+        ok: false,
+        status: 404,
+        error: 'Partner card signature invalid. Re-publish from LO Coach if the signing secret changed.'
+      };
+    }
+    return { ok: true, token: t, card, durable: true };
   }
-  return { ok: true, token: t, card: publicView(record) };
+
+  // 2) Legacy short hex token from file store (may be wiped on free Render redeploy)
+  if (isShortHexToken(t)) {
+    const store = readStore();
+    const record = store.cards[t];
+    if (!record) {
+      return {
+        ok: false,
+        status: 404,
+        error:
+          'Partner card not found (short tokens can be wiped on free Render redeploys). Ask the LO to re-publish — new links are durable.'
+      };
+    }
+    return {
+      ok: true,
+      token: t,
+      card: publicView(record.card, record.updatedAt),
+      durable: false
+    };
+  }
+
+  return { ok: false, status: 400, error: 'Invalid token.' };
 }
 
 function buildShareUrl(token) {
@@ -184,26 +306,41 @@ function mountPartnerRoutes(app) {
     return res.status(200).json({
       ok: true,
       token: result.token,
+      shortToken: result.shortToken || null,
+      durable: true,
       shareUrl: buildShareUrl(result.token),
       card: result.card,
-      updatedAt: result.updatedAt
+      updatedAt: result.updatedAt,
+      storage:
+        'Signed token (free, survives redeploys). Optional file cache for short tokens when disk available.'
     });
   });
 
+  // :token is one path segment — dots inside signed tokens (s1.payload.sig) are fine
   app.get('/api/partner/:token', (req, res) => {
-    const result = getCard(req.params.token);
+    let raw = req.params.token || '';
+    try {
+      raw = decodeURIComponent(raw);
+    } catch (e) { /* keep raw */ }
+    const result = getCard(raw);
     if (!result.ok) {
       return res.status(result.status || 404).json({ error: result.error });
     }
-    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.setHeader('Cache-Control', 'public, max-age=120');
     return res.status(200).json({
       ok: true,
       token: result.token,
-      card: result.card
+      card: result.card,
+      durable: !!result.durable
     });
   });
 
-  console.info('[partner-store] routes mounted — store:', STORE_PATH);
+  console.info(
+    '[partner-store] routes mounted — durable signed tokens ON; file cache:',
+    STORE_PATH,
+    '| secret:',
+    process.env.PARTNER_CARD_SECRET ? 'PARTNER_CARD_SECRET set' : 'fallback (set PARTNER_CARD_SECRET on Render)'
+  );
 }
 
 module.exports = {
@@ -211,5 +348,7 @@ module.exports = {
   publishCard,
   getCard,
   buildShareUrl,
-  sanitizePublicCard
+  sanitizePublicCard,
+  signCardToken,
+  verifySignedToken
 };

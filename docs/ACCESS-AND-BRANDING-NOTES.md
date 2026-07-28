@@ -99,24 +99,38 @@ Smart Savings package, Mortgage Calculator, Equity Scanner, Underwriting, app-bu
 
 Monorepo path for Realtor source of truth: `realtor-sales-coach/`. After LO monorepo commits, **also sync** that folder to `RuoffAgentSalesCoach` `main` or production stays on an old version.
 
-### Personally branded Realtor tool (MVP 2026-07-28)
+### Personally branded Realtor tool (MVP 2026-07-28+)
 
-**Storage:** LO Coach proxy (`proxy.js` + `partner-store.js`) is source of truth.  
-File: `data/partner-cards.json` (gitignored). On free Render, disk can reset on redeploy — use a DB when partners depend on it.
+#### Durable cards cost: **$0**
 
-**API (LO host, e.g. :3000 / LO Render URL)**  
-- `POST /api/partner/publish` — body `{ card, token? }` → `{ token, shareUrl, card }`  
-- `GET /api/partner/:token` — public read of card  
+Links use **signed tokens** (HMAC). The public card lives in the `?lo=` value and is verified with `PARTNER_CARD_SECRET`.  
+Free Render redeploys **do not wipe** these links. No paid database required.
 
-**Env**  
-- `REALTOR_APP_URL` — base for share links (default `http://localhost:3001`)  
-- Realtor: `window.LO_PARTNER_API_BASE` or `<meta name="lo-partner-api">` (local defaults to `http://localhost:3000`)
+| Approach | Cost | Survives redeploy? |
+|----------|------|--------------------|
+| **Signed token (primary)** | Free | Yes |
+| File JSON on free disk | Free | No (optional cache only) |
+| Paid Postgres / disk | Paid | Yes (not needed now) |
 
-**LO UI:** My Profile → Identity → **Share with partners** (`js/features/partner-share.js`)  
-**Realtor UI:** `?lo=TOKEN` → fetch → `#lo-brand-plate` (`lo-brand-chrome.js`)
+#### Production wiring (Render)
 
-**Public fields only:** name, phone, email, nmls, headshotUrl, title, location, company.  
-Full profile stays in LO browser localStorage.
+**LO service env**
+- `REALTOR_APP_URL=https://<realtor-on-render>` — share/email links point at production  
+- `PARTNER_CARD_SECRET=<long random string>` — keep stable (changing it invalidates old links)  
+- `XAI_API_KEY` as today  
 
-**Later:** revoke token, OTP gate on publish, durable DB, invite-only access.
+**Realtor**
+- Set `<meta name="lo-partner-api" content="https://<lo-on-render>">` in `index.html` so plates can fetch the LO API.
+
+#### API (LO host)
+- `POST /api/partner/publish` → `{ token, shareUrl, card, durable: true }`  
+- `GET /api/partner/:token` → public card  
+
+#### LO UI
+Sidebar + Home **Share with Partners**; publish **auto-copies** link; **Email to realtor** opens mail app with subject/body/link (LO only types To: address; Outlook signature attaches).
+
+#### Realtor UI
+Header brand plate + sticky footer **Provided by your Loan Officer** with clickable phone/email.
+
+**Later:** revoke UI, OTP, invite-only access.
 

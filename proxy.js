@@ -83,6 +83,8 @@ app.get('/api/health', (_req, res) => {
     node: process.version,
     time: new Date().toISOString(),
     partnerCards: true,
+    partnerCardsDurable: true,
+    partnerCardSecretSet: !!(process.env.PARTNER_CARD_SECRET || process.env.PARTNER_SHARE_SECRET),
     realtorAppUrl: process.env.REALTOR_APP_URL || process.env.PARTNER_REALTOR_URL || 'http://localhost:3001'
   });
 });

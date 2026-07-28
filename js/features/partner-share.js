@@ -1,5 +1,5 @@
 /**
- * LO → partner share: publish public LO card to server, copy Realtor link.
+ * LO → partner share: publish public LO card, auto-copy link, open Outlook/email draft.
  * Private full profile stays in localStorage; only public fields are posted.
  */
 (function () {
@@ -23,7 +23,6 @@
     }
   }
 
-  /** Prefer live form values when the profile modal is open. */
   function readLiveOrProfile() {
     const p = getProfile();
     const val = (id) => {
@@ -72,21 +71,13 @@
     return live;
   }
 
-  /**
-   * Required for publish: name + (phone or email).
-   * Headshot recommended for brand plate quality.
-   */
   function getPartnerFieldGaps(card) {
     card = card || buildPublicCardFromProfile();
     const required = [];
     const recommended = [];
 
     if (!card.name) {
-      required.push({
-        id: 'profile-name',
-        tab: 'identity',
-        label: 'Full Name'
-      });
+      required.push({ id: 'profile-name', tab: 'identity', label: 'Full Name' });
     }
     if (!card.phone && !card.email) {
       required.push({
@@ -109,11 +100,7 @@
   function validateCard(card) {
     const { required } = getPartnerFieldGaps(card);
     if (!required.length) return '';
-    return (
-      'Complete in My Profile: ' +
-      required.map((r) => r.label).join(', ') +
-      '.'
-    );
+    return 'Complete in My Profile: ' + required.map((r) => r.label).join(', ') + '.';
   }
 
   function notify(msg, type) {
@@ -132,12 +119,7 @@
 
   function clearFieldHighlights() {
     document.querySelectorAll('.partner-share-need-field').forEach((el) => {
-      el.classList.remove(
-        'partner-share-need-field',
-        'ring-2',
-        'ring-[#F15A29]',
-        'ring-offset-2'
-      );
+      el.classList.remove('partner-share-need-field', 'ring-2', 'ring-[#F15A29]', 'ring-offset-2');
     });
   }
 
@@ -166,31 +148,9 @@
       highlightField(field.id);
       (field.alsoIds || []).forEach((id) => {
         const el = document.getElementById(id);
-        if (el) {
-          el.classList.add('partner-share-need-field', 'ring-2', 'ring-[#F15A29]', 'ring-offset-2');
-        }
+        if (el) el.classList.add('partner-share-need-field', 'ring-2', 'ring-[#F15A29]', 'ring-offset-2');
       });
     }, 120);
-  }
-
-  function renderPreview(card) {
-    const box = document.getElementById('partner-share-preview');
-    if (!box) return;
-    card = card || buildPublicCardFromProfile();
-    // Portrait oval — taller than wide so faces aren’t cropped like a circle
-    const photo = card.headshotUrl
-      ? `<img src="${escapeAttr(card.headshotUrl)}" alt="" class="partner-share-avatar object-cover border border-gray-200 bg-white" onerror="this.style.display='none'">`
-      : `<div class="partner-share-avatar partner-share-avatar--placeholder bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center text-lg font-bold">${escapeHtml((card.name || '?').charAt(0))}</div>`;
-    const bits = [card.phone, card.email, card.nmls ? `NMLS ${card.nmls}` : ''].filter(Boolean);
-    box.innerHTML = `
-      <div class="flex items-center gap-3">
-        ${photo}
-        <div class="min-w-0">
-          <div class="text-sm font-bold text-[#002B5C] dark:text-white truncate">${escapeHtml(card.name || 'Your name')}</div>
-          <div class="text-[11px] text-gray-500 truncate">${escapeHtml(card.title || DEFAULT_TITLE)}${card.location ? ' · ' + escapeHtml(card.location) : ''}</div>
-          <div class="text-[11px] text-gray-600 dark:text-gray-300 truncate">${escapeHtml(bits.join(' · ') || 'Add phone or email')}</div>
-        </div>
-      </div>`;
   }
 
   function escapeHtml(s) {
@@ -204,7 +164,120 @@
     return escapeHtml(s).replace(/'/g, '&#39;');
   }
 
-  async function publishPartnerCard() {
+  function renderPreview(card) {
+    const box = document.getElementById('partner-share-preview');
+    if (!box) return;
+    card = card || buildPublicCardFromProfile();
+    const photo = card.headshotUrl
+      ? `<img src="${escapeAttr(card.headshotUrl)}" alt="" class="partner-share-avatar object-cover border border-gray-200 bg-white" onerror="this.style.display='none'">`
+      : `<div class="partner-share-avatar partner-share-avatar--placeholder bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center text-lg font-bold">${escapeHtml((card.name || '?').charAt(0))}</div>`;
+    const bits = [card.phone, card.email, card.nmls ? `NMLS ${card.nmls}` : ''].filter(Boolean);
+    const headshotHint = card.headshotUrl
+      ? ''
+      : `<p class="text-[11px] text-[#F15A29] m-0 mt-2"><i class="fas fa-camera mr-1"></i>Add a Professional Headshot URL (Voice &amp; Links) so partners see your photo.</p>`;
+    box.innerHTML = `
+      <p class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-2">What partners see</p>
+      <div class="flex items-center gap-3">
+        ${photo}
+        <div class="min-w-0">
+          <div class="text-sm font-bold text-[#002B5C] dark:text-white truncate">${escapeHtml(card.name || 'Your name')}</div>
+          <div class="text-[11px] text-gray-500 truncate">${escapeHtml(card.title || DEFAULT_TITLE)}${card.location ? ' · ' + escapeHtml(card.location) : ''}</div>
+          <div class="text-[11px] text-gray-600 dark:text-gray-300 truncate">${escapeHtml(bits.join(' · ') || 'Add phone or email')}</div>
+        </div>
+      </div>
+      ${headshotHint}`;
+  }
+
+  async function copyText(text) {
+    if (!text) return false;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (e) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e2) {
+        return false;
+      }
+    }
+  }
+
+  function firstName(full) {
+    const n = String(full || '').trim();
+    if (!n) return '';
+    return n.split(/\s+/)[0];
+  }
+
+  function buildPartnerEmailDraft(shareUrl, card) {
+    card = card || buildPublicCardFromProfile();
+    const loFirst = firstName(card.name) || 'I';
+    const subject = `${loFirst} shared a free sales tool to help grow your business`;
+    const body = [
+      'Hi,',
+      '',
+      `I wanted to share a free resource I think you'll get a lot out of — the Ultimate Agent Sales Coach.`,
+      '',
+      `It's a practical toolkit built for real estate agents: listing descriptions, open house scripts, buyer/seller consults, social & newsletter content, weekly planning, and more — so you spend less time staring at a blank page and more time winning business.`,
+      '',
+      `I've personalized a link so when you open it, you'll see my contact info right in the header. Use it anytime — and please reach out if I can help with financing, pre-approvals, or partnering on your next file.`,
+      '',
+      `Your link:`,
+      shareUrl,
+      '',
+      `I'm grateful for our partnership and want to be a resource for your business in every way I can. If something would make this more useful for you, just tell me.`,
+      '',
+      `Looking forward to working together,`,
+      card.name || '',
+      card.phone ? card.phone : '',
+      card.email ? card.email : '',
+      card.nmls ? `NMLS ${card.nmls}` : '',
+      card.company || 'Ruoff Mortgage'
+    ]
+      .filter((line, i, arr) => {
+        // drop trailing empty name-only blanks already handled
+        return true;
+      })
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n');
+
+    return { subject, body };
+  }
+
+  function openPartnerEmailDraft(shareUrl, card) {
+    const url = shareUrl || localStorage.getItem(LAST_URL_KEY) || '';
+    if (!url) {
+      notify('Publish your partner card first so we can include your link.', 'warning');
+      return;
+    }
+    const draft = buildPartnerEmailDraft(url, card || buildPublicCardFromProfile());
+    // Leave "to" blank — LO types the realtor's address (signature comes from Outlook)
+    const mailto =
+      'mailto:?' +
+      'subject=' +
+      encodeURIComponent(draft.subject) +
+      '&body=' +
+      encodeURIComponent(draft.body);
+    // Prefer window.open for Outlook desktop protocol handlers; fallback location
+    try {
+      const w = window.open(mailto, '_self');
+      if (!w) window.location.href = mailto;
+    } catch (e) {
+      window.location.href = mailto;
+    }
+    notify('Email draft opened — add the realtor’s address and send. Your Outlook signature will attach as usual.', 'success');
+  }
+
+  async function publishPartnerCard(opts) {
+    opts = opts || {};
     const statusEl = document.getElementById('partner-share-status');
     const urlEl = document.getElementById('partner-share-url');
     const card = buildPublicCardFromProfile();
@@ -220,6 +293,7 @@
     }
 
     setStatus(statusEl, 'Publishing partner card…', null);
+    // Prefer last durable signed token when re-publishing (server always mints new signed)
     const prevToken = localStorage.getItem(TOKEN_KEY) || '';
 
     try {
@@ -241,17 +315,24 @@
       } catch (e) { /* private mode */ }
       if (urlEl) urlEl.value = data.shareUrl || '';
       clearFieldHighlights();
-      let okMsg = 'Partner card published. Copy the link and send it to your agents.';
+
+      const copied = opts.skipAutoCopy ? false : await copyText(data.shareUrl || '');
+      let okMsg = copied
+        ? 'Partner card published — link copied to your clipboard.'
+        : 'Partner card published. Copy the link below or email it to your realtor.';
       if (gaps.recommended.length) {
-        okMsg +=
-          ' Tip: add a Professional Headshot URL (Voice & Links) so partners see your photo.';
+        okMsg += ' Tip: add a headshot (Voice & Links) so partners see your photo.';
+      }
+      if (data.durable) {
+        okMsg += ' This link is durable (survives server redeploys).';
       }
       setStatus(statusEl, okMsg, true);
-      notify('Partner link ready', 'success');
+      notify(copied ? 'Link copied — ready to share' : 'Partner link ready', 'success');
+      updateHomeShareCard();
       return data;
     } catch (e) {
       const msg =
-        'Could not reach the LO server. Start the LO proxy (e.g. port 3000) and try again.';
+        'Could not reach the LO server. On production, confirm the LO app is deployed; locally start the proxy on port 3000.';
       setStatus(statusEl, msg, false);
       notify(msg, 'error');
       return null;
@@ -262,21 +343,53 @@
     const urlEl = document.getElementById('partner-share-url');
     let url = (urlEl && urlEl.value) || localStorage.getItem(LAST_URL_KEY) || '';
     if (!url) {
-      const data = await publishPartnerCard();
+      const data = await publishPartnerCard({ skipAutoCopy: true });
       url = (data && data.shareUrl) || '';
     }
     if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
+    const ok = await copyText(url);
+    if (ok) {
       notify('Partner link copied', 'success');
       setStatus(document.getElementById('partner-share-status'), 'Link copied to clipboard.', true);
-    } catch (e) {
+    } else {
       if (urlEl) {
         urlEl.focus();
         urlEl.select();
       }
       notify('Select the link and copy manually (Ctrl/Cmd+C)', 'info');
     }
+  }
+
+  async function emailPartnerLink() {
+    let url = localStorage.getItem(LAST_URL_KEY) || document.getElementById('partner-share-url')?.value || '';
+    if (!url) {
+      const data = await publishPartnerCard();
+      url = (data && data.shareUrl) || '';
+    }
+    if (!url) return;
+    openPartnerEmailDraft(url, buildPublicCardFromProfile());
+  }
+
+  function ensurePartnerShareStyles() {
+    if (document.getElementById('partner-share-avatar-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'partner-share-avatar-styles';
+    style.textContent = `
+      .partner-share-avatar {
+        width: 3.25rem;
+        height: 4rem;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: center 18%;
+        flex-shrink: 0;
+      }
+      .partner-share-avatar--placeholder { object-fit: unset; }
+      #partner-share-home-card .partner-share-avatar {
+        width: 2.75rem;
+        height: 3.35rem;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   function ensurePartnerSharePanel() {
@@ -287,25 +400,7 @@
       document.getElementById('profile-form-scroll');
     if (!host) return;
 
-    // Inject avatar styles once
-    if (!document.getElementById('partner-share-avatar-styles')) {
-      const style = document.createElement('style');
-      style.id = 'partner-share-avatar-styles';
-      style.textContent = `
-        .partner-share-avatar {
-          width: 3rem;
-          height: 3.65rem;
-          border-radius: 50%;
-          object-fit: cover;
-          object-position: center 18%;
-          flex-shrink: 0;
-        }
-        .partner-share-avatar--placeholder {
-          object-fit: unset;
-        }
-      `;
-      document.head.appendChild(style);
-    }
+    ensurePartnerShareStyles();
 
     const panel = document.createElement('div');
     panel.id = 'partner-share-panel';
@@ -319,9 +414,9 @@
         <div class="min-w-0">
           <h3 class="text-base font-bold text-[#002B5C] dark:text-white m-0">Share with Partners</h3>
           <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">
-            Publish a <strong>public</strong> partner card (name, photo, phone, email, NMLS) to the LO server,
-            then copy a link. Agents open it in the Realtor coach and see you as their <strong>Loan Officer</strong> in the header.
-            Your full profile stays private on this device.
+            Publish a <strong>public</strong> partner card (name, photo, phone, email, NMLS).
+            Agents open your link in the Realtor coach and see you as their <strong>Loan Officer</strong>.
+            Your full profile stays private on this device. Links are <strong>durable</strong> (they survive server redeploys).
           </p>
         </div>
       </div>
@@ -339,9 +434,17 @@
           class="px-4 py-2 rounded-full border-2 border-[#002B5C] text-[#002B5C] dark:text-gray-100 dark:border-gray-400 text-sm font-semibold hover:bg-[#002B5C]/5 transition">
           <i class="fas fa-copy mr-1"></i> Copy link
         </button>
+        <button type="button" id="partner-share-email"
+          class="px-4 py-2 rounded-full border-2 border-[#F15A29] text-[#F15A29] text-sm font-semibold hover:bg-[#F15A29]/10 transition">
+          <i class="fas fa-envelope mr-1"></i> Email to realtor
+        </button>
       </div>
       <p id="partner-share-status" class="text-xs text-gray-500 m-0 mt-3"></p>
-      <p class="text-[11px] text-gray-400 m-0 mt-2">Required: Full Name + Phone or Email. Recommended: Headshot (Voice &amp; Links tab).</p>
+      <p class="text-[11px] text-gray-400 m-0 mt-2">
+        Required: Full Name + Phone or Email. Recommended: Headshot (Voice &amp; Links).
+        <strong>Publish</strong> auto-copies your link.
+        <strong>Email to realtor</strong> opens Outlook/your mail app with subject + message + link — just add their address and send (signature attaches via Outlook).
+      </p>
     `;
     host.appendChild(panel);
 
@@ -351,11 +454,80 @@
     document.getElementById('partner-share-copy')?.addEventListener('click', () => {
       copyPartnerLink();
     });
+    document.getElementById('partner-share-email')?.addEventListener('click', () => {
+      emailPartnerLink();
+    });
 
     const saved = localStorage.getItem(LAST_URL_KEY) || '';
     const urlEl = document.getElementById('partner-share-url');
     if (urlEl && saved) urlEl.value = saved;
     renderPreview(buildPublicCardFromProfile());
+  }
+
+  function updateHomeShareCard() {
+    const slot = document.getElementById('partner-share-home-card');
+    if (!slot) return;
+    const card = buildPublicCardFromProfile();
+    const hasLink = !!(localStorage.getItem(LAST_URL_KEY) || '');
+    const gaps = getPartnerFieldGaps(card);
+    const ready = gaps.required.length === 0;
+    slot.innerHTML = `
+      <div class="rounded-2xl border border-[#00A89D]/30 bg-white dark:bg-gray-900 shadow-md p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+          <span class="shrink-0 w-11 h-11 rounded-2xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center text-lg">
+            <i class="fas fa-handshake"></i>
+          </span>
+          <div class="min-w-0">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">Partners</div>
+            <h3 class="text-base sm:text-lg font-bold text-[#002B5C] dark:text-white m-0">Share with Partners</h3>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">
+              ${
+                ready
+                  ? hasLink
+                    ? 'Your partner link is ready — copy it or email it to a realtor in one click.'
+                    : 'Publish your public Loan Officer card, then share a branded Realtor coach link.'
+                  : 'Finish name + phone or email in My Profile, then publish your partner link.'
+              }
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0">
+          <button type="button" data-partner-home="open"
+            class="px-4 py-2.5 rounded-full bg-[#00A89D] text-white text-sm font-semibold hover:bg-[#008F85] transition">
+            ${ready ? (hasLink ? 'Manage link' : 'Publish card') : 'Complete profile'}
+          </button>
+          ${
+            hasLink
+              ? `<button type="button" data-partner-home="email"
+                  class="px-4 py-2.5 rounded-full border-2 border-[#F15A29] text-[#F15A29] text-sm font-semibold hover:bg-[#F15A29]/10 transition">
+                  <i class="fas fa-envelope mr-1"></i>Email realtor
+                </button>`
+              : ''
+          }
+        </div>
+      </div>`;
+    slot.querySelector('[data-partner-home="open"]')?.addEventListener('click', () => openShareWithPartners());
+    slot.querySelector('[data-partner-home="email"]')?.addEventListener('click', () => emailPartnerLink());
+  }
+
+  function ensureHomeShareCard() {
+    if (document.getElementById('partner-share-home-card')) {
+      updateHomeShareCard();
+      return;
+    }
+    const setup = document.getElementById('home-setup-slot');
+    const home = document.getElementById('home');
+    const host = setup || home;
+    if (!host) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'partner-share-home-card';
+    wrap.className = 'w-full';
+    if (setup && setup.parentNode) {
+      setup.parentNode.insertBefore(wrap, setup.nextSibling);
+    } else if (home) {
+      home.insertBefore(wrap, home.firstChild?.nextSibling || null);
+    }
+    updateHomeShareCard();
   }
 
   function scrollToPartnerPanel() {
@@ -366,9 +538,6 @@
     } catch (e) { /* ignore */ }
   }
 
-  /**
-   * Sidebar / header entry: open profile, validate fields, focus gaps or share panel.
-   */
   function openShareWithPartners() {
     clearFieldHighlights();
     ensurePartnerSharePanel();
@@ -412,7 +581,7 @@
         } else {
           setStatus(
             statusEl,
-            'Ready — publish your card, then copy the partner link.',
+            'Ready — publish updates your card, copies the link, then use Email to realtor when you’re ready.',
             true
           );
         }
@@ -427,6 +596,7 @@
 
   function init() {
     ensurePartnerSharePanel();
+    ensureHomeShareCard();
     renderPreview(buildPublicCardFromProfile());
 
     const openBtn = document.getElementById('open-profile-btn');
@@ -444,21 +614,28 @@
       });
     }
 
-    ['profile-name', 'profile-phone', 'profile-email', 'profile-nmls', 'profile-headshot-url', 'profile-location'].forEach(
-      (id) => {
-        const el = document.getElementById(id);
-        if (!el || el.dataset.partnerShareWired) return;
-        el.dataset.partnerShareWired = '1';
-        el.addEventListener('input', () => {
-          el.classList.remove('partner-share-need-field', 'ring-2', 'ring-[#F15A29]', 'ring-offset-2');
-          renderPreview(readLiveOrProfile());
-        });
-      }
-    );
+    [
+      'profile-name',
+      'profile-phone',
+      'profile-email',
+      'profile-nmls',
+      'profile-headshot-url',
+      'profile-location'
+    ].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el || el.dataset.partnerShareWired) return;
+      el.dataset.partnerShareWired = '1';
+      el.addEventListener('input', () => {
+        el.classList.remove('partner-share-need-field', 'ring-2', 'ring-[#F15A29]', 'ring-offset-2');
+        renderPreview(buildPublicCardFromProfile());
+        updateHomeShareCard();
+      });
+    });
   }
 
   window.publishPartnerCard = publishPartnerCard;
   window.copyPartnerShareLink = copyPartnerLink;
+  window.emailPartnerShareLink = emailPartnerLink;
   window.buildPublicLoCard = buildPublicCardFromProfile;
   window.openShareWithPartners = openShareWithPartners;
   window.getPartnerFieldGaps = getPartnerFieldGaps;
@@ -469,4 +646,5 @@
     init();
   }
   setTimeout(init, 400);
+  setTimeout(ensureHomeShareCard, 800);
 })();

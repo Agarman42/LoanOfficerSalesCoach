@@ -279,6 +279,72 @@ body > header {
     }
 }
 
+/* Sticky “Provided by your Loan Officer” under tools (above floating coach button) */
+.lo-brand-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    background: linear-gradient(90deg, #001429 0%, #002B5C 45%, #0a4a4a 100%);
+    color: #fff;
+    border-top: 2px solid rgba(0, 168, 157, 0.55);
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25);
+    padding: 0.55rem 1rem;
+    padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
+}
+.lo-brand-footer[hidden] {
+    display: none !important;
+}
+.lo-brand-footer-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem 0.75rem;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+.lo-brand-footer-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5eead4;
+}
+.lo-brand-footer-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+}
+.lo-brand-footer-meta {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.8rem;
+}
+.lo-brand-footer-link {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+}
+.lo-brand-footer-link:hover {
+    color: #5eead4;
+}
+.lo-brand-footer-sep {
+    opacity: 0.5;
+    margin: 0 0.15rem;
+}
+/* Room so floating Coach button + last content aren’t covered */
+body.has-lo-brand-footer main {
+    padding-bottom: 5.5rem;
+}
+body.has-lo-brand-footer .fixed.bottom-4.right-4 {
+    bottom: 4.25rem;
+}
+
 .header-actions-row {
     display: flex;
     align-items: center;

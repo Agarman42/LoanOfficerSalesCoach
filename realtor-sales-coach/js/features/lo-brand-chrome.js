@@ -94,6 +94,53 @@
     return raw;
   }
 
+  function ensureBrandFooter() {
+    let el = document.getElementById('lo-brand-footer');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'lo-brand-footer';
+    el.className = 'lo-brand-footer';
+    el.setAttribute('role', 'contentinfo');
+    el.hidden = true;
+    // Sit above the floating AI coach button
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function paintBrandFooter(card) {
+    const footer = ensureBrandFooter();
+    if (!card || !card.name) {
+      footer.hidden = true;
+      footer.innerHTML = '';
+      document.body.classList.remove('has-lo-brand-footer');
+      return;
+    }
+
+    const phoneDisplay = formatPhoneDisplay(card.phone);
+    const phoneHref = telHref(card.phone);
+    const phoneLink =
+      phoneDisplay && phoneHref
+        ? `<a class="lo-brand-footer-link" href="${escapeHtml(phoneHref)}">${escapeHtml(phoneDisplay)}</a>`
+        : '';
+    const email = (card.email || '').trim();
+    const emailLink = email
+      ? `<a class="lo-brand-footer-link" href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`
+      : '';
+    const bits = [phoneLink, emailLink, card.nmls ? `NMLS ${escapeHtml(card.nmls)}` : '']
+      .filter(Boolean)
+      .join(' <span class="lo-brand-footer-sep" aria-hidden="true">·</span> ');
+
+    footer.hidden = false;
+    document.body.classList.add('has-lo-brand-footer');
+    footer.innerHTML = `
+      <div class="lo-brand-footer-inner">
+        <span class="lo-brand-footer-label">Provided by your Loan Officer</span>
+        <strong class="lo-brand-footer-name">${escapeHtml(card.name)}</strong>
+        ${bits ? `<span class="lo-brand-footer-meta">${bits}</span>` : ''}
+      </div>
+    `;
+  }
+
   function paintBrandPlate(card) {
     const plate = document.getElementById('lo-brand-plate');
     if (!plate) return;
@@ -104,6 +151,7 @@
       plate.innerHTML = '';
       plate.classList.remove('is-populated');
       document.body.classList.remove('has-lo-brand');
+      paintBrandFooter(null);
       return;
     }
 
@@ -146,6 +194,7 @@
     `;
     document.body.classList.add('has-lo-brand');
     window.__loPartnerCard = card;
+    paintBrandFooter(card);
   }
 
   async function fetchCard(token) {
