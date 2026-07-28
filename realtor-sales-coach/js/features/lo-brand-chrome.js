@@ -99,7 +99,7 @@
       <div class="lo-brand-inner">
         <div class="lo-brand-photo-wrap">${photo}</div>
         <div class="lo-brand-text">
-          <div class="lo-brand-kicker">${escapeHtml(card.title || 'Your loan officer')}</div>
+          <div class="lo-brand-kicker">${escapeHtml(card.title || 'Your Loan Officer')}</div>
           <div class="lo-brand-name">${escapeHtml(card.name)}</div>
           <div class="lo-brand-meta">
             ${phoneLink}

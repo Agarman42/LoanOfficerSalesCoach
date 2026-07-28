@@ -167,11 +167,12 @@ body > header {
     gap: 0.5rem;
     min-width: 0;
 }
+/* Portrait oval (not circle) so headshots are not cropped at the top */
 .lo-brand-photo-wrap {
     flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 9999px;
+    width: 2.55rem;
+    height: 3.15rem;
+    border-radius: 50%; /* ellipse on non-square box */
     overflow: hidden;
     background: #e6f7f6;
     display: flex;
@@ -182,6 +183,7 @@ body > header {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 18%; /* keep face/forehead in frame */
     display: block;
 }
 .lo-brand-initial {

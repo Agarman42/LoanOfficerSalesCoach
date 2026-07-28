@@ -57,7 +57,7 @@ function sanitizePublicCard(input) {
   const email = String(src.email || '').trim().slice(0, 120);
   const nmls = String(src.nmls || '').trim().slice(0, 40);
   const headshotUrl = String(src.headshotUrl || src.headshot || '').trim().slice(0, 500);
-  const title = String(src.title || 'Your Ruoff loan officer').trim().slice(0, 80);
+  const title = String(src.title || 'Your Ruoff Loan Officer').trim().slice(0, 80);
   const location = String(src.location || src.market || '').trim().slice(0, 120);
   const company = String(src.company || 'Ruoff Mortgage').trim().slice(0, 80);
 
