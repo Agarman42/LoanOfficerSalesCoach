@@ -90,6 +90,15 @@ Correct designs require **proof of control** (code in inbox or real Google login
 
 Smart Savings package, Mortgage Calculator, Equity Scanner, Underwriting, app-bulk.
 
+### Deploy remotes (do not mix up)
+
+| App | GitHub repo | Branch to push |
+|-----|-------------|----------------|
+| **LO Sales Coach** | `Agarman42/LoanOfficerSalesCoach` monorepo | **`master`** |
+| **Realtor / Agent Sales Coach** | `Agarman42/RuoffAgentSalesCoach` (flat app root) | **`main`** |
+
+Monorepo path for Realtor source of truth: `realtor-sales-coach/`. After LO monorepo commits, **also sync** that folder to `RuoffAgentSalesCoach` `main` or production stays on an old version.
+
 ### Personally branded Realtor tool (MVP 2026-07-28)
 
 **Storage:** LO Coach proxy (`proxy.js` + `partner-store.js`) is source of truth.  

@@ -65,8 +65,8 @@ body > header {
 /*
   Header layout (parity with LO coach):
   1) Title + search + quote centered on FULL header width (true page center).
-  2) Theme/profile (and future LO brand plate) absolutely pinned far-right.
-  3) Right cluster must NOT shift the center axis of title/search/quote.
+  2) LO brand plate on navy far-right; theme/profile on teal quote bar far-right.
+  3) Right chrome must NOT shift the center axis of title/search/quote.
 */
 .header-navy-band {
     position: relative;
@@ -125,7 +125,7 @@ body > header {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Far-right of the navy band — theme/profile + optional LO brand plate (next phase) */
+/* Far-right of the navy band — LO brand plate only (larger without theme/profile stack) */
 .header-actions-cluster {
     position: absolute;
     right: 0.5rem;
@@ -135,11 +135,11 @@ body > header {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.4rem;
+    gap: 0;
     pointer-events: none;
 }
 @media (min-width: 640px) {
-    .header-actions-cluster { right: 0.75rem; gap: 0.45rem; }
+    .header-actions-cluster { right: 0.75rem; }
 }
 @media (min-width: 1024px) {
     .header-actions-cluster { right: 1rem; }
@@ -154,24 +154,24 @@ body > header {
 #lo-brand-plate.is-populated {
     display: block;
     background: #ffffff;
-    border-radius: 0.85rem;
-    padding: 0.4rem 0.55rem;
+    border-radius: 0.95rem;
+    padding: 0.55rem 0.7rem;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-    line-height: 1.2;
+    line-height: 1.25;
     pointer-events: auto;
-    max-width: min(18rem, 46vw);
+    max-width: min(22rem, 52vw);
 }
 .lo-brand-inner {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.65rem;
     min-width: 0;
 }
 /* Portrait oval (not circle) so headshots are not cropped at the top */
 .lo-brand-photo-wrap {
     flex-shrink: 0;
-    width: 2.55rem;
-    height: 3.15rem;
+    width: 3.1rem;
+    height: 3.85rem;
     border-radius: 50%; /* ellipse on non-square box */
     overflow: hidden;
     background: #e6f7f6;
@@ -187,7 +187,7 @@ body > header {
     display: block;
 }
 .lo-brand-initial {
-    font-size: 1rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #00A89D;
 }
@@ -196,7 +196,7 @@ body > header {
     text-align: left;
 }
 .lo-brand-kicker {
-    font-size: 0.55rem;
+    font-size: 0.58rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -204,7 +204,7 @@ body > header {
     line-height: 1.2;
 }
 .lo-brand-name {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #002B5C;
     white-space: nowrap;
@@ -213,35 +213,42 @@ body > header {
 }
 .lo-brand-meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.15rem 0.45rem;
-    font-size: 0.62rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.12rem;
+    font-size: 0.72rem;
     color: #4b5563;
-    margin-top: 0.1rem;
+    margin-top: 0.2rem;
 }
 .lo-brand-contact {
     color: #002B5C;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
     white-space: nowrap;
+    font-weight: 600;
 }
 .lo-brand-contact:hover {
     color: #00A89D;
-    text-decoration: underline;
 }
 .lo-brand-nmls {
     opacity: 0.85;
+    font-size: 0.65rem;
 }
 @media (max-width: 640px) {
     .header-lo-brand-plate,
     #lo-brand-plate.is-populated {
-        max-width: min(11.5rem, 42vw);
-        padding: 0.3rem 0.4rem;
+        max-width: min(14rem, 48vw);
+        padding: 0.4rem 0.5rem;
     }
-    .lo-brand-meta {
-        display: none; /* keep header compact on phones; name + photo stay */
+    .lo-brand-photo-wrap {
+        width: 2.6rem;
+        height: 3.2rem;
     }
     .lo-brand-name {
-        font-size: 0.72rem;
+        font-size: 0.8rem;
+    }
+    .lo-brand-meta {
+        font-size: 0.65rem;
     }
 }
 
@@ -291,8 +298,9 @@ body > header {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Quote band: full-bleed gradient; row matches search width, true page center */
+/* Quote band: full-bleed gradient; quote centered; theme/profile far-right */
 .header-quote-band {
+    position: relative;
     background: linear-gradient(to right, #001429, #00A89D);
     padding-top: 0.55rem;
     padding-bottom: 0.55rem;
@@ -313,6 +321,26 @@ body > header {
     padding-left: 0;
     padding-right: 0;
     box-sizing: border-box;
+}
+
+.header-quote-actions {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+    pointer-events: auto;
+}
+@media (min-width: 640px) {
+    .header-quote-actions { right: 0.75rem; gap: 0.45rem; }
+}
+@media (min-width: 1024px) {
+    .header-quote-actions { right: 1rem; }
 }
 
 .header-quote-btn {

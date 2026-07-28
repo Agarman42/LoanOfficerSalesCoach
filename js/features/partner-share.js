@@ -47,11 +47,18 @@
     };
   }
 
+  function formatPhoneHyphens(phone) {
+    let d = String(phone || '').replace(/\D/g, '');
+    if (d.length === 11 && d.startsWith('1')) d = d.slice(1);
+    if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+    return String(phone || '').trim();
+  }
+
   function buildPublicCardFromProfile(p) {
     if (p && typeof p === 'object' && (p.name != null || p.phone != null)) {
       return {
         name: (p.name || '').trim(),
-        phone: (p.phone || '').trim(),
+        phone: formatPhoneHyphens(p.phone),
         email: (p.email || '').trim(),
         nmls: (p.nmls || '').trim(),
         headshotUrl: (p.headshotUrl || p['headshot-url'] || '').trim(),
@@ -60,7 +67,9 @@
         company: (p.company || 'Ruoff Mortgage').trim()
       };
     }
-    return readLiveOrProfile();
+    const live = readLiveOrProfile();
+    live.phone = formatPhoneHyphens(live.phone);
+    return live;
   }
 
   /**

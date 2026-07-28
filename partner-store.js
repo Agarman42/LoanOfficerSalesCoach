@@ -53,7 +53,13 @@ function newToken() {
 function sanitizePublicCard(input) {
   const src = input && typeof input === 'object' ? input : {};
   const name = String(src.name || '').trim().slice(0, 120);
-  const phone = String(src.phone || '').trim().slice(0, 40);
+  let phone = String(src.phone || '').trim().slice(0, 40);
+  // Normalize US numbers to 317-555-0100 for display on partner plate
+  {
+    let d = phone.replace(/\D/g, '');
+    if (d.length === 11 && d.startsWith('1')) d = d.slice(1);
+    if (d.length === 10) phone = `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  }
   const email = String(src.email || '').trim().slice(0, 120);
   const nmls = String(src.nmls || '').trim().slice(0, 40);
   const headshotUrl = String(src.headshotUrl || src.headshot || '').trim().slice(0, 500);

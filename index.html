@@ -106,7 +106,7 @@
     <!-- Static Tailwind (built offline) — no Play CDN -->
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <!-- App-specific styles -->
-    <link rel="stylesheet" href="css/main.css?v=20260727-quote-center">
+    <link rel="stylesheet" href="css/main.css?v=20260728-quote-actions">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
@@ -135,8 +135,8 @@
 <header class="text-white">
     <!--
       Full-bleed navy band.
-      - Title + search: true viewport center (ignore logo width).
-      - Logo + theme/profile: absolute far-right of the band (edge of screen).
+      - Title + search: true viewport center.
+      - Ruoff logo only: far-right (theme/profile live on the teal quote bar so logo can be larger).
     -->
     <div class="header-navy-band">
         <div class="header-center-stack">
@@ -157,27 +157,14 @@
                 <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png"
                      alt="Ruoff Mortgage"
                      class="header-ruoff-logo-img"
-                     width="240"
-                     height="64"
+                     width="280"
+                     height="80"
                      decoding="async">
-            </div>
-            <div class="header-ruoff-actions">
-                <button id="theme-toggle" type="button"
-                        class="header-icon-btn"
-                        title="Switch to dark mode" aria-label="Toggle dark mode">
-                    <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
-                </button>
-                <button id="open-profile-btn" type="button"
-                        class="header-profile-btn"
-                        title="My Profile & Preferences">
-                    <i class="fas fa-user-cog"></i>
-                    <span class="hidden sm:inline">My Profile</span>
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Quote: full-bleed gradient; content column matches search width & true center -->
+    <!-- Teal quote bar: centered quote + far-right theme / My Profile -->
     <div class="header-quote-band">
         <div class="header-quote-inner">
             <button id="quote-prev" type="button" class="header-quote-btn" aria-label="Previous quote">‹</button>
@@ -185,6 +172,19 @@
                 "The harder you work, the luckier you get."
             </div>
             <button id="quote-next" type="button" class="header-quote-btn" aria-label="Next quote">›</button>
+        </div>
+        <div class="header-quote-actions">
+            <button id="theme-toggle" type="button"
+                    class="header-icon-btn"
+                    title="Switch to dark mode" aria-label="Toggle dark mode">
+                <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
+            </button>
+            <button id="open-profile-btn" type="button"
+                    class="header-profile-btn"
+                    title="My Profile & Preferences">
+                <i class="fas fa-user-cog"></i>
+                <span class="hidden sm:inline">My Profile</span>
+            </button>
         </div>
     </div>
 </header>

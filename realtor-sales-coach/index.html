@@ -104,7 +104,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260728-lo-brand-oval">
+    <link rel="stylesheet" href="css/main.css?v=20260728-quote-actions">
 
     <!-- LO partner API host (public cards). Local: LO proxy :3000. Production: set to LO Render URL. -->
     <meta name="lo-partner-api" content="">
@@ -134,7 +134,7 @@
     <script defer src="js/main.js?v=20260728-realtor-parity"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260728-ai-asterisk"></script>
     <!-- LO brand plate from ?lo= token (must not wait for full feature-loader) -->
-    <script defer src="js/features/lo-brand-chrome.js?v=20260728-lo-brand-oval"></script>
+    <script defer src="js/features/lo-brand-chrome.js?v=20260728-quote-actions"></script>
     <!--
       Home Coach Setup: must not wait for sequential feature-loader (40+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
@@ -153,7 +153,7 @@
     <!--
       Full-bleed navy band.
       - Title + search: true viewport center.
-      - Theme/profile (+ optional LO brand plate for next phase): absolute far-right.
+      - LO brand plate only: far-right (theme/profile on teal quote bar so plate can be larger).
     -->
     <div class="header-navy-band">
         <div class="header-center-stack">
@@ -170,26 +170,12 @@
         </div>
 
         <div class="header-actions-cluster">
-            <!-- Filled by LO-branded share phase when a partner token is present -->
+            <!-- Filled by lo-brand-chrome.js when ?lo= partner token is present -->
             <div id="lo-brand-plate" class="header-lo-brand-plate" hidden aria-hidden="true"></div>
-            <div class="header-actions-row">
-                <button id="theme-toggle" type="button"
-                        class="header-icon-btn"
-                        title="Switch to dark mode" aria-label="Toggle dark mode">
-                    <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
-                </button>
-                <button id="open-profile-btn" type="button"
-                        onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}"
-                        class="header-profile-btn"
-                        title="My Profile & Preferences">
-                    <i class="fas fa-user-cog"></i>
-                    <span class="hidden sm:inline">My Profile</span>
-                </button>
-            </div>
         </div>
     </div>
 
-    <!-- Quote: full-bleed gradient; content column matches search width & true center -->
+    <!-- Teal quote bar: centered quote + far-right theme / My Profile -->
     <div class="header-quote-band">
         <div class="header-quote-inner">
             <button id="quote-prev" type="button" class="header-quote-btn" aria-label="Previous quote">‹</button>
@@ -197,6 +183,20 @@
                 "The harder you work, the luckier you get."
             </div>
             <button id="quote-next" type="button" class="header-quote-btn" aria-label="Next quote">›</button>
+        </div>
+        <div class="header-quote-actions">
+            <button id="theme-toggle" type="button"
+                    class="header-icon-btn"
+                    title="Switch to dark mode" aria-label="Toggle dark mode">
+                <i id="theme-icon" class="fas fa-circle-half-stroke text-sm"></i>
+            </button>
+            <button id="open-profile-btn" type="button"
+                    onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}"
+                    class="header-profile-btn"
+                    title="My Profile & Preferences">
+                <i class="fas fa-user-cog"></i>
+                <span class="hidden sm:inline">My Profile</span>
+            </button>
         </div>
     </div>
 </header>

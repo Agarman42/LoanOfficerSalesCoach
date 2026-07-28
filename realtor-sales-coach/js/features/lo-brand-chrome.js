@@ -1,6 +1,7 @@
 /**
  * LO brand chrome on Realtor coach.
  * Reads ?lo=TOKEN (or sessionStorage), fetches public card from LO partner API, paints #lo-brand-plate.
+ * Phone/email are clickable (tel: / mailto:) with hyphenated phone display.
  */
 (function () {
   'use strict';
@@ -27,7 +28,6 @@
       if (saved) return saved.replace(/\/+$/, '');
     } catch (e) { /* ignore */ }
     if (isLocalHost()) return 'http://localhost:3000';
-    // Same origin only if LO API were mounted on this host (not default)
     return '';
   }
 
@@ -62,9 +62,36 @@
       .replace(/"/g, '&quot;');
   }
 
+  /** Digits only for tel: href (keeps leading + for international). */
   function telHref(phone) {
-    const digits = String(phone || '').replace(/[^\d+]/g, '');
+    const raw = String(phone || '').trim();
+    if (!raw) return '';
+    if (raw.startsWith('+')) {
+      const rest = raw.slice(1).replace(/\D/g, '');
+      return rest ? `tel:+${rest}` : '';
+    }
+    const digits = raw.replace(/\D/g, '');
     return digits ? `tel:${digits}` : '';
+  }
+
+  /**
+   * Display phone with hyphens: 317-555-0100
+   * Handles 10-digit US, 11-digit leading 1, otherwise returns cleaned input.
+   */
+  function formatPhoneDisplay(phone) {
+    const raw = String(phone || '').trim();
+    if (!raw) return '';
+    let digits = raw.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('1')) {
+      digits = digits.slice(1);
+    }
+    if (digits.length === 10) {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    // Already well-formed with separators — normalize common (xxx) xxx-xxxx
+    const m = raw.match(/^\(?(\d{3})\)?[\s.-]*(\d{3})[\s.-]*(\d{4})$/);
+    if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+    return raw;
   }
 
   function paintBrandPlate(card) {
@@ -81,15 +108,23 @@
     }
 
     const photo = card.headshotUrl
-      ? `<img class="lo-brand-photo" src="${escapeHtml(card.headshotUrl)}" alt="" width="40" height="40" onerror="this.remove()">`
+      ? `<img class="lo-brand-photo" src="${escapeHtml(card.headshotUrl)}" alt="${escapeHtml(card.name)}" width="56" height="70" onerror="this.remove()">`
       : `<span class="lo-brand-initial" aria-hidden="true">${escapeHtml(card.name.charAt(0))}</span>`;
 
-    const phoneLink = card.phone
-      ? `<a class="lo-brand-contact" href="${escapeHtml(telHref(card.phone))}">${escapeHtml(card.phone)}</a>`
+    const phoneDisplay = formatPhoneDisplay(card.phone);
+    const phoneHref = telHref(card.phone);
+    const phoneLink =
+      phoneDisplay && phoneHref
+        ? `<a class="lo-brand-contact lo-brand-phone" href="${escapeHtml(phoneHref)}" title="Call ${escapeHtml(phoneDisplay)}">${escapeHtml(phoneDisplay)}</a>`
+        : phoneDisplay
+          ? `<span class="lo-brand-phone">${escapeHtml(phoneDisplay)}</span>`
+          : '';
+
+    const email = (card.email || '').trim();
+    const emailLink = email
+      ? `<a class="lo-brand-contact lo-brand-email" href="mailto:${escapeHtml(email)}" title="Email ${escapeHtml(email)}">${escapeHtml(email)}</a>`
       : '';
-    const emailLink = card.email
-      ? `<a class="lo-brand-contact" href="mailto:${escapeHtml(card.email)}">${escapeHtml(card.email)}</a>`
-      : '';
+
     const nmls = card.nmls ? `<span class="lo-brand-nmls">NMLS ${escapeHtml(card.nmls)}</span>` : '';
 
     plate.hidden = false;
@@ -134,7 +169,6 @@
     let token = readTokenFromUrl();
     if (token) {
       persistToken(token);
-      // Clean URL so token isn’t left in shared screenshots forever (keep session)
       try {
         const u = new URL(location.href);
         if (u.searchParams.has('lo') || u.searchParams.has('partner')) {
@@ -152,7 +186,6 @@
       return;
     }
 
-    // Optimistic paint from session cache
     try {
       const cached = sessionStorage.getItem(CARD_KEY);
       if (cached) paintBrandPlate(JSON.parse(cached));
@@ -166,7 +199,6 @@
       paintBrandPlate(card);
     } catch (e) {
       console.warn('[lo-brand] fetch failed', e.message || e);
-      // Keep cached paint if any; otherwise clear
       try {
         if (!sessionStorage.getItem(CARD_KEY)) paintBrandPlate(null);
       } catch (e2) {
@@ -179,6 +211,7 @@
   window.getLoPartnerCard = function () {
     return window.__loPartnerCard || null;
   };
+  window.formatPartnerPhoneDisplay = formatPhoneDisplay;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', resolveAndPaint);
