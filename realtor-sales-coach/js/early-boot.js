@@ -24,6 +24,21 @@
     return ALIASES[id] || id;
   }
 
+  /** Home/load: page top so header + LO brand plate stay visible. */
+  function scrollAfterSectionShow(id, target) {
+    try {
+      if (id === DEFAULT_SECTION || id === 'home') {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        return;
+      }
+      if (target && typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   function showSectionEarly(id) {
     id = resolveId(id);
     var sections = document.querySelectorAll('main section');
@@ -35,9 +50,7 @@
 
     if (target) {
       target.classList.remove('hidden');
-      try {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (e) { /* ignore */ }
+      scrollAfterSectionShow(id, target);
     } else if (id !== DEFAULT_SECTION) {
       showSectionEarly(DEFAULT_SECTION);
       return;
@@ -102,6 +115,10 @@
     if (!sidebar) return;
     navReady = true;
 
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    } catch (e) { /* ignore */ }
+
     sidebar.addEventListener('click', onSidebarClick);
     window.addEventListener('hashchange', function () {
       if (window.__mainNavReady) return;
@@ -114,6 +131,9 @@
     } else {
       showSectionEarly(DEFAULT_SECTION);
     }
+    try {
+      window.scrollTo(0, 0);
+    } catch (e) { /* ignore */ }
     hardHideGlobalLoading();
   }
 

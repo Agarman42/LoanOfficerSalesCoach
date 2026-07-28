@@ -41,6 +41,21 @@
     );
   }
 
+  /** Home/load: stay at page top so the header (logo / LO brand plate) stays visible. */
+  function scrollAfterSectionShow(id, target) {
+    try {
+      if (id === DEFAULT_SECTION || id === 'home') {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        return;
+      }
+      if (target && typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   function showSectionEarly(id) {
     id = resolveId(id);
     const target = document.getElementById(id);
@@ -52,9 +67,7 @@
 
     if (target) {
       target.classList.remove('hidden');
-      try {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (e) { /* ignore */ }
+      scrollAfterSectionShow(id, target);
       if (id === 'smart-savings') {
         try {
           if (typeof window.initSmartSavingsSection === 'function') {
@@ -134,6 +147,11 @@
     if (!sidebar) return;
     navReady = true;
 
+    // Prevent browser restoring a mid-page scroll that hides the header
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    } catch (e) { /* ignore */ }
+
     sidebar.addEventListener('click', onSidebarClick);
     window.addEventListener('hashchange', onHashChange);
     window.__earlyNavSidebarClick = onSidebarClick;
@@ -144,6 +162,10 @@
     } else {
       showSectionEarly(DEFAULT_SECTION);
     }
+    // Extra guard after layout: keep header in view on first paint
+    try {
+      window.scrollTo(0, 0);
+    } catch (e) { /* ignore */ }
     hardHideGlobalLoading();
   }
 

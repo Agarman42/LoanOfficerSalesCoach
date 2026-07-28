@@ -589,8 +589,16 @@
       if (typeof window.trackCoachSectionOpen === 'function') {
         try { window.trackCoachSectionOpen(id); } catch (e) { console.warn('[analytics]', e); }
       }
-      // Smooth scroll into view
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Home: full page top so header + LO brand plate stay visible
+      try {
+        if (id === 'home') {
+          window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        } else {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (e) { /* ignore */ }
 
       if (typeof window.onCoachSectionShown === 'function') {
         try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
@@ -847,6 +855,7 @@
     });
 
     // On initial page load, respect a hash if present, otherwise land on Home
+    // Home stays at scrollY=0 so the header (and LO brand plate) remain visible
     if (location.hash) {
       const id = location.hash.replace('#', '');
       setTimeout(() => {
@@ -860,6 +869,11 @@
         if (home) {
           document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
           home.classList.remove('hidden');
+          try {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+          } catch (e) { /* ignore */ }
           if (typeof window.onCoachSectionShown === 'function') {
             try { window.onCoachSectionShown('home'); } catch (e) {}
           }

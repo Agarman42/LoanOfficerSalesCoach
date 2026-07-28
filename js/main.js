@@ -599,7 +599,16 @@
     if (typeof window.onCoachSectionShown === 'function') {
       try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
     }
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Home: full page top so header stays visible. Other tools: scroll section into view.
+    try {
+      if (id === 'home') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } else {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (e) { /* ignore */ }
 
     // Smart Savings sets body.mode-guided / mode-expert for its CSS.
     // Those classes leak into coach <main> rules and can blank other tools (e.g. Calculator).
@@ -894,6 +903,7 @@
     });
 
     // On initial page load, respect a hash if present, otherwise land on Home
+    // (showSection('home') scrolls to page top — keeps header visible)
     if (location.hash) {
       const id = location.hash.replace('#', '');
       setTimeout(() => showSection(id), 150);
@@ -903,6 +913,11 @@
         if (home) {
           document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
           home.classList.remove('hidden');
+          try {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+          } catch (e) { /* ignore */ }
           if (typeof window.onCoachSectionShown === 'function') {
             try { window.onCoachSectionShown('home'); } catch (e) {}
           }

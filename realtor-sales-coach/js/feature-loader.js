@@ -18,7 +18,7 @@
   'js/features/global-search.js?v=20260719-content-hub',
   'js/features/section-bottom-banners.js?v=20260720-p2-content-hub',
   'js/features/coach-polish.js?v=20260728-realtor-parity',
-  'js/app-version.js?v=20260728-v311',
+  'js/app-version.js?v=20260728-v312',
   'js/features/generation-rules.js?v=20260720-hobby-restraint',
   'js/features/feature-checkboxes.js?v=20260706-realtor-v277',
   'js/features/save-ribbon.js?v=20260706-realtor-v273',
