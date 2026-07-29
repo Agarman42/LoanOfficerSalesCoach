@@ -86,11 +86,11 @@
         alsoIds: ['profile-email']
       });
     }
-    // Headshot required so partners always see a professional plate
+    // Headshot required so partners always see a professional plate (Identity tab)
     if (!card.headshotUrl) {
       required.push({
         id: 'profile-headshot-url',
-        tab: 'content',
+        tab: 'identity',
         label: 'Professional Headshot URL'
       });
     }
@@ -637,6 +637,12 @@
   function refreshOnProfileOpen() {
     ensurePartnerSharePanel();
     renderPreview(buildPublicCardFromProfile());
+    updateHomeShareCard();
+  }
+
+  function refreshPartnerSharePreview() {
+    renderPreview(buildPublicCardFromProfile());
+    updateHomeShareCard();
   }
 
   function init() {
@@ -684,6 +690,11 @@
   window.buildPublicLoCard = buildPublicCardFromProfile;
   window.openShareWithPartners = openShareWithPartners;
   window.getPartnerFieldGaps = getPartnerFieldGaps;
+  window.refreshPartnerSharePreview = refreshPartnerSharePreview;
+
+  window.addEventListener('profile-updated', () => {
+    try { refreshPartnerSharePreview(); } catch (e) { /* ignore */ }
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

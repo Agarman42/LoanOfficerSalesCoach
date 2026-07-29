@@ -2909,6 +2909,7 @@ function syncNewsletterContactFromProfile() {
         emailEl.value = String(p.email || p.workEmail || '').trim();
     }
 }
+window.syncNewsletterContactFromProfile = syncNewsletterContactFromProfile;
 
 function getLoFooterBrandingContext() {
     const profile = getCentralProfile();

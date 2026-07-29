@@ -106,13 +106,13 @@
     <!-- Static Tailwind (built offline) — no Play CDN -->
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <!-- App-specific styles -->
-    <link rel="stylesheet" href="css/main.css?v=20260728-quote-actions">
+    <link rel="stylesheet" href="css/main.css?v=20260729-profile-ux">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260720-polish"></script>
+    <script src="js/ui.js?v=20260729-profile-ux"></script>
     <script src="js/features/app-feedback.js?v=20260709-lo-v309"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
@@ -122,7 +122,7 @@
       Home Coach Setup: must not wait for sequential feature-loader (50+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
-    <script defer src="js/features/user-profile.js?v=20260721-home-fast"></script>
+    <script defer src="js/features/user-profile.js?v=20260729-profile-ux"></script>
     <script defer src="js/features/home-favorites.js?v=20260721-home-fast"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260721-home-fast"></script>
     <script src="js/early-boot.js?v=20260728-scroll-top-home"></script>
@@ -8166,25 +8166,24 @@
 <!-- =====================================================
      CENTRAL USER PROFILE / PREFERENCES MODAL
      ===================================================== -->
-<div id="user-profile-modal" class="fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center">
+<div id="user-profile-modal" class="fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center" data-no-backdrop-close="1" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
     <div class="bg-white dark:bg-gray-900 w-full max-w-4xl mx-4 rounded-3xl shadow-2xl max-h-[92vh] min-h-0 overflow-hidden flex flex-col">
         
         <!-- Modal Header -->
         <div class="flex items-center justify-between px-4 sm:px-6 md:px-8 py-4 sm:py-6 border-b border-gray-200 dark:border-gray-700">
             <div class="min-w-0 pr-2">
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">My Profile & Preferences</h2>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Powers AI Coach, Weekly Plan, Scripts, Social, Newsletter & more.</p>
+                <h2 id="profile-modal-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">My Profile & Preferences</h2>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Powers AI Coach, Weekly Plan, Scripts, Social, Newsletter & more. Closes only via <strong>×</strong> or <strong>Save</strong>.</p>
             </div>
-            <button id="close-profile-modal" class="text-3xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0">&times;</button>
+            <button type="button" id="close-profile-modal" class="text-3xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0" aria-label="Close profile">&times;</button>
         </div>
 
-        <!-- Quick Profile Wizard (~90 sec) -->
-        <!-- Profile setup wizard (header — one full tab per step) -->
+        <!-- Guided setup header (step-by-step mode — tabs/chrome hidden) -->
         <div id="profile-wizard-view" class="hidden flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 to-transparent">
             <div class="px-4 sm:px-6 md:px-8 py-4">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase">Profile setup</div>
+                        <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase">Guided setup · one section at a time</div>
                         <h3 id="profile-wizard-step-title" class="text-lg font-bold text-[#002B5C] dark:text-white mt-0.5">Identity &amp; Branding</h3>
                         <p id="profile-wizard-progress" class="text-xs text-gray-500 mt-1">Step 1 of 5</p>
                         <p id="profile-wizard-step-hint" class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-2xl"></p>
@@ -8202,7 +8201,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between mb-3">
                 <div class="flex items-center flex-wrap gap-2 sm:gap-3">
                     <div class="text-sm font-semibold text-[#002B5C] dark:text-white">Profile strength: <span id="profile-strength-score" class="text-[#00A89D]">0%</span></div>
-                    <button type="button" id="profile-open-wizard" class="text-[10px] px-2 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">Guided setup</button>
+                    <button type="button" id="profile-open-wizard" class="text-[10px] px-2 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition" title="Walk through each section one step at a time (hides tabs until you finish)">Guided setup</button>
                     <span id="profile-last-updated" class="text-[10px] text-gray-400 hidden"></span>
                 </div>
                 <div class="flex-1 max-w-xs h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -8267,16 +8266,34 @@
                         <input type="text" id="profile-years" inputmode="text" autocomplete="off" placeholder="e.g. 12, since 2004, licensed since 2010" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
                         <p id="profile-years-hint" class="hidden text-xs text-[#00A89D] mt-1.5 m-0"></p>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Team Situation</label>
+                        <select id="profile-team" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <option value="">Select...</option>
+                            <option>Solo Loan Officer</option>
+                            <option>Have an Assistant</option>
+                            <option>Small Team (2-4 people)</option>
+                            <option>Larger Team / Branch</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Team Situation</label>
-                    <select id="profile-team" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <option value="">Select...</option>
-                        <option>Solo Loan Officer</option>
-                        <option>Have an Assistant</option>
-                        <option>Small Team (2-4 people)</option>
-                        <option>Larger Team / Branch</option>
-                    </select>
+                <!-- Headshot lives in Identity (partner share, signatures, branding) -->
+                <div class="rounded-2xl border border-[#00A89D]/25 bg-[#00A89D]/5 p-4 space-y-3">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:items-start">
+                        <div class="flex-shrink-0 flex flex-col items-center gap-2">
+                            <div id="profile-headshot-preview-wrap" class="w-[4.5rem] h-[5.5rem] rounded-full overflow-hidden border-2 border-white shadow-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                <img id="profile-headshot-preview" alt="" class="hidden w-full h-full object-cover object-top" width="72" height="88" decoding="async">
+                                <span id="profile-headshot-placeholder" class="text-[10px] text-gray-400 text-center px-1 leading-tight"><i class="fas fa-user text-lg block mb-0.5 opacity-50"></i>Photo</span>
+                            </div>
+                            <span class="text-[10px] text-gray-500 font-medium">Preview</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <label class="block text-sm font-medium mb-1" for="profile-headshot-url">Professional Headshot URL <span class="text-[10px] text-[#F15A29] font-semibold">Partner share</span></label>
+                            <input type="url" id="profile-headshot-url" placeholder="https://… or Hotlink from 8upload" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Square crop · 400×400px minimum · shoulders-up portrait. Used for <strong>Share with partners</strong> and branded plates.</p>
+                            <p class="text-[11px] text-gray-600 dark:text-gray-300 m-0 mt-2 leading-relaxed">Free host (no account): <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> → paste the <strong>Hotlink / Direct link</strong> (not the page URL).</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -8430,17 +8447,8 @@
                         </div>
                         <div class="min-w-0">
                             <p class="text-sm font-semibold text-[#002B5C] dark:text-white m-0">Company logo · Ruoff Mortgage</p>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 m-0 mt-0.5">Built into this coach — no URL needed. Your personal headshot below is still yours to set.</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 m-0 mt-0.5">Built into this coach — no URL needed. Your personal headshot is on the <strong>Identity</strong> tab.</p>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1" for="profile-headshot-url">Professional Headshot URL</label>
-                        <input type="url" id="profile-headshot-url" placeholder="https://… or Hotlink from 8upload" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Square crop · 400×400px minimum · shoulders-up portrait</p>
-                    </div>
-                    <div class="md:col-span-2 rounded-xl border border-[#00A89D]/20 bg-[#00A89D]/5 px-4 py-3">
-                        <p class="text-xs font-semibold text-[#002B5C] dark:text-[#00A89D] m-0 mb-1.5"><i class="fas fa-wand-magic-sparkles mr-1"></i> Headshot &amp; photo tips</p>
-                        <p class="text-[11px] text-gray-600 dark:text-gray-300 m-0 leading-relaxed">Need a free host with no account? Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> and paste the <strong>Hotlink / Direct link</strong> (not the page URL) — best for headshots and newsletter photos.</p>
                     </div>
                 </div>
                 <div class="p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 space-y-3">

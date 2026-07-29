@@ -430,13 +430,42 @@
     };
   }
 
+  function notifyProfileConsumers(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    try {
+      window.dispatchEvent(new CustomEvent('profile-updated', { detail: { profile: p } }));
+    } catch (e) { /* ignore */ }
+
+    if (typeof window.refreshCoachOnboarding === 'function') {
+      try { window.refreshCoachOnboarding(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.syncNewsletterFromProfile === 'function') {
+      try { window.syncNewsletterFromProfile(true); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.renderWeeklyProfileSummary === 'function') {
+      try { window.renderWeeklyProfileSummary(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.renderExtendedProfileInfo === 'function') {
+      try { window.renderExtendedProfileInfo(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.updatePTBProfileDisplay === 'function') {
+      try { window.updatePTBProfileDisplay(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.prefillCalendarFromProfile === 'function') {
+      try { window.prefillCalendarFromProfile(); } catch (e) { /* ignore */ }
+    }
+  }
+
   function patchUserProfile(partial, opts) {
     const options = opts || {};
     const merged = normalizeProfile({ ...readRawProfile(), ...partial, lastUpdated: new Date().toISOString() });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
     const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
     localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
-    if (!options.silent) refreshProfileUI();
+    if (!options.silent) {
+      refreshProfileUI();
+      notifyProfileConsumers(merged);
+    }
     if (options.showFeedback) {
       const msg = options.feedbackMessage || 'Profile updated.';
       if (typeof window.showToast === 'function') {
@@ -454,10 +483,7 @@
     localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...normalized }));
 
     refreshProfileUI();
-    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
-    if (typeof window.syncNewsletterFromProfile === 'function') {
-      try { window.syncNewsletterFromProfile(true); } catch (e) {}
-    }
+    notifyProfileConsumers(normalized);
 
     if (closeAfter) closeModal();
 
@@ -870,18 +896,24 @@
     const full = document.getElementById('profile-full-view');
     const tabNav = document.getElementById('profile-tab-nav');
     const modalEl = modal || document.getElementById('user-profile-modal');
+    const modalTitle = document.getElementById('profile-modal-title');
 
     wizardActive = view === 'wizard';
     if (modalEl) modalEl.classList.toggle('profile-modal--wizard', wizardActive);
 
     if (wizardHeader) wizardHeader.classList.toggle('hidden', !wizardActive);
     if (wizardFooter) wizardFooter.classList.toggle('hidden', !wizardActive);
-    // Always keep section tabs visible (same as LO full profile) — only the guided header/footer swap
-    if (fullChrome) fullChrome.classList.remove('hidden');
-    if (tabNav) tabNav.classList.remove('hidden');
-    // Full footer (Back / Next: Section) in normal mode; wizard uses its own Continue footer
+    // Guided mode: hide strength meter / tabs so it is not the same as full profile
+    if (fullChrome) fullChrome.classList.toggle('hidden', wizardActive);
+    if (tabNav) tabNav.classList.toggle('hidden', wizardActive);
     if (fullFooter) fullFooter.classList.toggle('hidden', wizardActive);
     if (full) full.classList.remove('hidden');
+
+    if (modalTitle) {
+      modalTitle.textContent = wizardActive
+        ? 'Guided Profile Setup'
+        : 'My Profile & Preferences';
+    }
 
     const scroll = document.getElementById('profile-form-scroll');
     if (scroll) scroll.scrollTop = 0;
@@ -946,20 +978,17 @@
     loadProfileIntoForm();
     showView('full');
     switchProfileTab(getFirstIncompleteTab(merged));
-    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
-    if (typeof window.syncNewsletterFromProfile === 'function') {
-      try { window.syncNewsletterFromProfile(true); } catch (e) {}
-    }
+    notifyProfileConsumers(merged);
     if (typeof window.showToast === 'function') {
-      window.showToast('Profile setup complete — edit anytime from My Profile.', 'success');
+      window.showToast('Profile setup complete — edit any tab anytime, or re-run Guided setup.', 'success');
     }
   }
 
   function startProfileWizard(step) {
     loadProfileIntoForm();
     wizardStep = step || 1;
-    renderWizardStep();
     showView('wizard');
+    renderWizardStep();
   }
 
   function openModal(forceFull) {
@@ -975,25 +1004,18 @@
       if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
     }
 
-    // Always open the full tabbed profile (Identity / Business / Voice / Prospecting / Personal)
-    // with footer "Next: …" labels — same as LO. Guided wizard is opt-in via "Guided setup".
     loadProfileIntoForm();
+
+    // Incomplete profiles open Guided setup. forceFull always uses the full tab editor.
+    if (!forceFull && shouldShowWizard()) {
+      startProfileWizard(1);
+      return;
+    }
+
     showView('full');
     const p = normalizeProfile(readRawProfile());
     switchProfileTab(getFirstIncompleteTab(p));
     updateProfileSectionNav();
-
-    // Soft one-time nudge for incomplete first-time profiles (don't hide the tabs)
-    if (!forceFull && shouldShowWizard()) {
-      try {
-        if (!sessionStorage.getItem('coachProfileFullOpenNudge')) {
-          sessionStorage.setItem('coachProfileFullOpenNudge', '1');
-          if (typeof window.showToast === 'function') {
-            window.showToast('Use the tabs or Next: buttons to walk each section — or tap Guided setup for a step-by-step walkthrough.', 'info');
-          }
-        }
-      } catch (e) { /* ignore */ }
-    }
   }
 
   function closeModal() {
@@ -1008,9 +1030,7 @@
       modal.classList.add('hidden');
     }
 
-    if (typeof window.renderWeeklyProfileSummary === 'function') window.renderWeeklyProfileSummary();
-    if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
-    if (typeof window.updatePTBProfileDisplay === 'function') window.updatePTBProfileDisplay();
+    notifyProfileConsumers();
   }
 
   function autoSaveProfile() {
@@ -1160,11 +1180,16 @@
       return;
     }
     document.getElementById('close-profile-modal')?.addEventListener('click', closeModal);
-    document.getElementById('cancel-profile')?.addEventListener('click', closeModal);
+    document.getElementById('cancel-profile')?.addEventListener('click', () => {
+      performSave(false, true);
+    });
 
-    if (typeof window.ensureModalBackdropClose === 'function') {
-      window.ensureModalBackdropClose(modal);
-    }
+    // Profile must NOT close on outside click — only × / Save / Close
+    try {
+      modal.setAttribute('data-no-backdrop-close', '1');
+      modal._backdropHandlerAttached = true;
+    } catch (e) { /* ignore */ }
+
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
 
     modal.addEventListener('input', autoSaveProfile);
@@ -1180,7 +1205,7 @@
     loadProfileIntoForm();
     refreshProfileUI();
 
-    console.log('%c[user-profile] Initialized — wizard, meter, normalized schema', 'color:#00A89D');
+    console.log('%c[user-profile] Initialized — guided setup distinct, no-backdrop close', 'color:#00A89D');
   }
 
   window.getUserProfile = function getUserProfile() {

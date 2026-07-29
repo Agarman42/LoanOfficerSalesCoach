@@ -686,6 +686,24 @@ body.modal-open {
     overscroll-behavior: contain;
 }
 
+/* Guided setup: focus on one section; softer panel edges */
+#user-profile-modal.profile-modal--wizard #profile-form-scroll {
+    padding-top: 0.5rem;
+}
+#user-profile-modal.profile-modal--wizard .profile-tab-panel {
+    animation: profileWizardIn 0.22s ease-out;
+}
+@keyframes profileWizardIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+#profile-headshot-preview-wrap {
+    background: linear-gradient(145deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+.dark #profile-headshot-preview-wrap {
+    background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+}
+
 /* Nuclear fix for Chrome fixed modal offset + repaint delay */
 #detail-modal {
     opacity: 0;

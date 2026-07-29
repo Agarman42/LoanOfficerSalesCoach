@@ -1250,6 +1250,9 @@ setTimeout(() => prefillCalendarFromProfile(true), 800);
 
 window.prefillCalendarFromProfile = prefillCalendarFromProfile;
 window.restoreSocialCalendarForm = restoreSocialCalendarForm;
+window.addEventListener('profile-updated', () => {
+  try { prefillCalendarFromProfile(false); } catch (e) { /* ignore */ }
+});
 
 // Save personal info on change
 ['plan-areas', 'plan-hobbies', 'plan-family', 'custom-plan-prompt'].forEach(id => {

@@ -62,7 +62,7 @@
   };
 
   const WIZARD_STEP_HINTS = {
-    identity: 'Name, contact, market, and NMLS — used in Newsletter, Scripts, and AI Coach.',
+    identity: 'Name, contact, market, NMLS, and headshot — used in Newsletter, Scripts, partner share, and AI Coach.',
     business: 'Focus, goals, and challenges — powers Weekly Win Plan and business planning.',
     content: 'Tone, guardrails, and links — shapes how every AI post and email sounds.',
     prospecting: 'Activities and partner types — tailors referral plays and outreach.',
@@ -490,7 +490,10 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
     const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
     localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
-    if (!options.silent) refreshProfileUI();
+    if (!options.silent) {
+      refreshProfileUI();
+      notifyProfileConsumers(merged);
+    }
     if (options.showFeedback) {
       const msg = options.feedbackMessage || 'Profile updated.';
       if (typeof window.showToast === 'function') {
@@ -498,6 +501,39 @@
       }
     }
     return merged;
+  }
+
+  /** Push profile into tools that cache or display LO details. */
+  function notifyProfileConsumers(profile) {
+    const p = profile || normalizeProfile(readRawProfile());
+    try {
+      window.dispatchEvent(new CustomEvent('profile-updated', { detail: { profile: p } }));
+    } catch (e) { /* ignore */ }
+
+    if (typeof window.refreshCoachOnboarding === 'function') {
+      try { window.refreshCoachOnboarding(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.syncNewsletterFromProfile === 'function') {
+      try { window.syncNewsletterFromProfile(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.syncNewsletterContactFromProfile === 'function') {
+      try { window.syncNewsletterContactFromProfile(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.renderWeeklyProfileSummary === 'function') {
+      try { window.renderWeeklyProfileSummary(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.renderExtendedProfileInfo === 'function') {
+      try { window.renderExtendedProfileInfo(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.updatePTBProfileDisplay === 'function') {
+      try { window.updatePTBProfileDisplay(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.prefillCalendarFromProfile === 'function') {
+      try { window.prefillCalendarFromProfile(false); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.refreshPartnerSharePreview === 'function') {
+      try { window.refreshPartnerSharePreview(); } catch (e) { /* ignore */ }
+    }
   }
 
   function persistProfile(profile, showFeedback, closeAfter) {
@@ -508,10 +544,7 @@
     localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...normalized }));
 
     refreshProfileUI();
-    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
-    if (typeof window.syncNewsletterFromProfile === 'function') {
-      try { window.syncNewsletterFromProfile(); } catch (e) {}
-    }
+    notifyProfileConsumers(normalized);
 
     if (closeAfter) closeModal();
 
@@ -601,7 +634,28 @@
     }
 
     syncSelectAllStates();
+    updateHeadshotPreview(profile.headshotUrl);
     refreshProfileUI();
+  }
+
+  function updateHeadshotPreview(url) {
+    const img = document.getElementById('profile-headshot-preview');
+    const placeholder = document.getElementById('profile-headshot-placeholder');
+    if (!img) return;
+    const src = String(url || '').trim();
+    if (src && /^https?:\/\//i.test(src)) {
+      img.src = src;
+      img.classList.remove('hidden');
+      if (placeholder) placeholder.classList.add('hidden');
+      img.onerror = () => {
+        img.classList.add('hidden');
+        if (placeholder) placeholder.classList.remove('hidden');
+      };
+    } else {
+      img.removeAttribute('src');
+      img.classList.add('hidden');
+      if (placeholder) placeholder.classList.remove('hidden');
+    }
   }
 
   function backfillBlankProfileFields() {
@@ -687,7 +741,8 @@
         () => p.name,
         () => p.email,
         () => p.location,
-        () => p.intro
+        () => p.intro,
+        () => p.headshotUrl
       ],
       business: [
         () => p.focus,
@@ -917,17 +972,25 @@
     const full = document.getElementById('profile-full-view');
     const tabNav = document.getElementById('profile-tab-nav');
     const modalEl = modal || document.getElementById('user-profile-modal');
+    const modalTitle = document.getElementById('profile-modal-title');
 
     wizardActive = view === 'wizard';
     if (modalEl) modalEl.classList.toggle('profile-modal--wizard', wizardActive);
 
     if (wizardHeader) wizardHeader.classList.toggle('hidden', !wizardActive);
     if (wizardFooter) wizardFooter.classList.toggle('hidden', !wizardActive);
-    // Always keep section tabs visible — only the guided header/footer swap
-    if (fullChrome) fullChrome.classList.remove('hidden');
-    if (tabNav) tabNav.classList.remove('hidden');
+    // Guided mode: hide strength meter, live preview, and tab strip so it feels
+    // like a true step-by-step walkthrough (not the full editor with a banner on top).
+    if (fullChrome) fullChrome.classList.toggle('hidden', wizardActive);
+    if (tabNav) tabNav.classList.toggle('hidden', wizardActive);
     if (fullFooter) fullFooter.classList.toggle('hidden', wizardActive);
     if (full) full.classList.remove('hidden');
+
+    if (modalTitle) {
+      modalTitle.textContent = wizardActive
+        ? 'Guided Profile Setup'
+        : 'My Profile & Preferences';
+    }
 
     const scroll = document.getElementById('profile-form-scroll');
     if (scroll) scroll.scrollTop = 0;
@@ -992,20 +1055,17 @@
     loadProfileIntoForm();
     showView('full');
     switchProfileTab(getFirstIncompleteTab(merged));
-    if (typeof window.refreshCoachOnboarding === 'function') window.refreshCoachOnboarding();
-    if (typeof window.syncNewsletterFromProfile === 'function') {
-      try { window.syncNewsletterFromProfile(); } catch (e) {}
-    }
+    notifyProfileConsumers(merged);
     if (typeof window.showToast === 'function') {
-      window.showToast('Profile setup complete — edit anytime from My Profile.', 'success');
+      window.showToast('Profile setup complete — you can edit any tab anytime, or re-run Guided setup.', 'success');
     }
   }
 
   function startProfileWizard(step) {
     loadProfileIntoForm();
     wizardStep = step || 1;
-    renderWizardStep();
     showView('wizard');
+    renderWizardStep();
   }
 
   function openModal(forceFull) {
@@ -1021,24 +1081,19 @@
       if (typeof window.resetModalScroll === 'function') window.resetModalScroll(modal);
     }
 
-    // Always open the full tabbed profile with footer "Next: …" labels.
-    // Guided wizard is opt-in via "Guided setup".
     loadProfileIntoForm();
+
+    // Incomplete profiles open Guided setup (distinct step-by-step UI).
+    // forceFull (partner share, deep links, explicit full edit) always uses tabs.
+    if (!forceFull && shouldShowWizard()) {
+      startProfileWizard(1);
+      return;
+    }
+
     showView('full');
     const p = normalizeProfile(readRawProfile());
     switchProfileTab(getFirstIncompleteTab(p));
     updateProfileSectionNav();
-
-    if (!forceFull && shouldShowWizard()) {
-      try {
-        if (!sessionStorage.getItem('coachProfileFullOpenNudge')) {
-          sessionStorage.setItem('coachProfileFullOpenNudge', '1');
-          if (typeof window.showToast === 'function') {
-            window.showToast('Use the tabs or Next: buttons to walk each section — or tap Guided setup for a step-by-step walkthrough.', 'info');
-          }
-        }
-      } catch (e) { /* ignore */ }
-    }
   }
 
   function closeModal() {
@@ -1053,9 +1108,7 @@
       modal.classList.add('hidden');
     }
 
-    if (typeof window.renderWeeklyProfileSummary === 'function') window.renderWeeklyProfileSummary();
-    if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
-    if (typeof window.updatePTBProfileDisplay === 'function') window.updatePTBProfileDisplay();
+    notifyProfileConsumers();
   }
 
   function autoSaveProfile() {
@@ -1204,17 +1257,26 @@
       return;
     }
     document.getElementById('close-profile-modal')?.addEventListener('click', closeModal);
-    document.getElementById('cancel-profile')?.addEventListener('click', closeModal);
+    // Close button intentionally saves+closes like Save — no accidental dismiss via backdrop
+    document.getElementById('cancel-profile')?.addEventListener('click', () => {
+      performSave(false, true);
+    });
 
-    if (typeof window.ensureModalBackdropClose === 'function') {
-      window.ensureModalBackdropClose(modal);
-    }
+    // Profile must NOT close on outside click — only × / Save / Close.
+    // Mark + skip ensureModalBackdropClose (ui.js also respects data-no-backdrop-close).
+    try {
+      modal.setAttribute('data-no-backdrop-close', '1');
+      modal._backdropHandlerAttached = true;
+    } catch (e) { /* ignore */ }
 
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
 
     modal.addEventListener('input', (e) => {
       if (e.target?.id === 'profile-years') {
         updateExperienceYearsHint(e.target, document.getElementById('profile-years-hint'));
+      }
+      if (e.target?.id === 'profile-headshot-url') {
+        updateHeadshotPreview(e.target.value);
       }
       autoSaveProfile();
     });
@@ -1226,13 +1288,14 @@
     document.getElementById('profile-ruoff-blog-preset')?.addEventListener('click', applyRuoffBlogPreset);
 
     document.addEventListener('keydown', (e) => {
+      // Escape does not close profile (prevents accidental loss while editing)
       if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) e.preventDefault();
     });
 
     loadProfileIntoForm();
     refreshProfileUI();
 
-    console.log('%c[user-profile] Initialized — wizard, meter, normalized schema', 'color:#00A89D');
+    console.log('%c[user-profile] Initialized — guided setup, identity headshot, no-backdrop close', 'color:#00A89D');
   }
 
   window.getUserProfile = function getUserProfile() {

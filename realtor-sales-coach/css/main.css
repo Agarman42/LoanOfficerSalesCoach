@@ -996,6 +996,17 @@ body.modal-open {
     overscroll-behavior: contain;
 }
 
+#user-profile-modal.profile-modal--wizard #profile-form-scroll {
+    padding-top: 0.5rem;
+}
+#user-profile-modal.profile-modal--wizard .profile-tab-panel {
+    animation: profileWizardIn 0.22s ease-out;
+}
+@keyframes profileWizardIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Nuclear fix for Chrome fixed modal offset + repaint delay */
 #detail-modal {
     opacity: 0;

@@ -1162,13 +1162,19 @@ function prefillCalendarFromProfile() {
         } else if (profile.hobbies) {
             hobbies = profile.hobbies;
         }
-        if (profile['hobbies-other']) hobbies += (hobbies ? ', ' : '') + profile['hobbies-other'];
+        if (profile['hobbies-other'] || profile.hobbiesOther) {
+            hobbies += (hobbies ? ', ' : '') + (profile.hobbiesOther || profile['hobbies-other']);
+        }
         if (hobbies) hobbiesEl.value = hobbies;
     }
     if (familyEl && !familyEl.value.trim() && profile.family) {
         familyEl.value = profile.family;
     }
 }
+window.prefillCalendarFromProfile = prefillCalendarFromProfile;
+window.addEventListener('profile-updated', () => {
+    try { prefillCalendarFromProfile(); } catch (e) { /* ignore */ }
+});
 
 // Save personal info on change
 ['plan-areas', 'plan-hobbies', 'plan-family', 'custom-plan-prompt'].forEach(id => {

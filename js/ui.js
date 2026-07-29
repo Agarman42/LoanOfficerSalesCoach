@@ -902,6 +902,15 @@
    */
   window.ensureModalBackdropClose = function ensureModalBackdropClose(modal) {
     if (!modal || modal._backdropHandlerAttached) return;
+    // Opt-out: data-no-backdrop-close="1" (e.g. My Profile — only × / Save / Close)
+    if (
+      modal.getAttribute('data-no-backdrop-close') === '1' ||
+      modal.dataset.noBackdropClose === '1' ||
+      modal.id === 'user-profile-modal'
+    ) {
+      modal._backdropHandlerAttached = true;
+      return;
+    }
     const id = modal.id || '';
     let pressedOnBackdrop = false;
 
