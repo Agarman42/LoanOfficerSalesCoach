@@ -6572,15 +6572,11 @@ Repeat this cycle every 90 days.`
         modal.classList.add('flex');
       }
 
-      // Ensure dynamic instances support backdrop click to close (static HTML has it; created ones need this)
-      if (!modal._backdropHandlerAttached) {
-        modal.addEventListener('click', function(e) {
-          if (e.target.id === 'detail-modal' && typeof closeDetailModal === 'function') {
-            closeDetailModal();
-          }
-        });
+      // No outside-click dismiss (app-wide modal policy)
+      try {
+        modal.setAttribute('data-no-backdrop-close', '1');
         modal._backdropHandlerAttached = true;
-      }
+      } catch (e) { /* ignore */ }
       console.log('[DetailModal] SUCCESS - modal should now be visible');
 
     } catch (err) {
@@ -6828,17 +6824,11 @@ Repeat this cycle every 90 days.`
       modal.classList.add('flex');
     }
 
-    // Attach backdrop-close handler for dynamically created instances
-    if (!modal._backdropHandlerAttached) {
-      modal.addEventListener('click', function(e) {
-        if (e.target.id === 'client-appreciation-modal') {
-          if (typeof window.closeNamedModal === 'function') window.closeNamedModal(modal);
-          else if (typeof window.closeAppModal === 'function') window.closeAppModal(modal);
-          else { modal.classList.add('hidden'); modal.classList.remove('flex'); modal.style.display = 'none'; }
-        }
-      });
+    // No outside-click dismiss (app-wide modal policy)
+    try {
+      modal.setAttribute('data-no-backdrop-close', '1');
       modal._backdropHandlerAttached = true;
-    }
+    } catch (e) { /* ignore */ }
     } catch (err) {
       console.error('Error in showClientAppreciationModal:', err);
       alert('Could not open the modal. Please use the "Close Modals" button or press Escape, then try again.');
@@ -6963,12 +6953,7 @@ Repeat this cycle every 90 days.`
     panel.id = 'my-saved-items-library';
     panel.className = 'fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 saved-library-panel';
 
-    // Close modal when clicking on the backdrop (outside the content)
-    panel.addEventListener('click', function(e) {
-      if (e.target === panel) {
-        panel.remove();
-      }
-    });
+    // No outside-click dismiss — use explicit Close / × only (app-wide modal policy)
 
     function renderItems(filter = 'all', searchTerm = '') {
       let filtered = allItems;

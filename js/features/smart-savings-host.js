@@ -18,7 +18,7 @@
   var CSS_INJECT_ID = 'smart-savings-scoped-css-v20260720-review';
   var APP_HTML_SRC = '/smart-savings/app.html';
   var APP_CSS_SRC = '/smart-savings/css/app.css';
-  var ASSET_V = '20260720-review';
+  var ASSET_V = '20260729-profile-stack';
   var cssReady = null;
   var bodyReady = null;
   var initStarted = false;

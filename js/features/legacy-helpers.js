@@ -700,15 +700,14 @@
     }
   };
 
-  // Allow closing the referral modal by clicking on the backdrop (outside the content)
+  // Referral modal: no outside-click dismiss (app-wide modal policy — use X only)
   document.addEventListener('DOMContentLoaded', function() {
     const referralModal = document.getElementById('referral-modal');
     if (referralModal) {
-      referralModal.addEventListener('click', function(e) {
-        if (e.target === referralModal) {
-          closeReferralModal();
-        }
-      });
+      try {
+        referralModal.setAttribute('data-no-backdrop-close', '1');
+        referralModal._backdropHandlerAttached = true;
+      } catch (e) { /* ignore */ }
     }
   });
 

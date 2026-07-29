@@ -982,13 +982,15 @@ function renderWeeklyCustomTaskTimeUI(dayName, blockIndex, taskIndex, task, cust
 
 function getWeeklyCustomizePrefs() {
   const hours = parseInt(document.getElementById('wwp-hours')?.value) || 15;
-  // Default OFF when checkbox missing; only weave if user explicitly checks
-  const weaveHobbies = !!document.getElementById('wwp-weave-hobbies')?.checked;
+  // Default ON when checkbox missing (matches HTML); only skip if user unchecks
+  const weaveEl = document.getElementById('wwp-weave-hobbies');
+  const weaveHobbies = weaveEl ? !!weaveEl.checked : true;
   const focusAreas = [];
   const emphasisMap = [
     ['wwp-emphasis-realtors', 'Realtor outreach'],
     ['wwp-emphasis-sphere', 'Sphere & past client nurturing'],
     ['wwp-emphasis-past', 'Past client follow-up'],
+    // Equity / refi removed from UI defaults — still read if present in older HTML
     ['wwp-emphasis-equity', 'Equity / refinance opportunities'],
     ['wwp-emphasis-listings', 'Listing and buyer lead opportunities']
   ];
@@ -996,6 +998,10 @@ function getWeeklyCustomizePrefs() {
     const el = document.getElementById(id);
     if (el && el.checked) focusAreas.push(label);
   });
+  // Safe defaults if nothing checked (or markup missing)
+  if (!focusAreas.length) {
+    focusAreas.push('Realtor outreach', 'Past client follow-up');
+  }
   return { hours, weaveHobbies, focusAreas };
 }
 
@@ -1206,12 +1212,9 @@ function buildWeeklyFeedbackPrompt(feedback) {
   const { hours, weaveHobbies, focusAreas } = getWeeklyCustomizePrefs();
   const defaultFocus = [
     'Realtor outreach',
-    'Sphere & past client nurturing',
-    'Past client follow-up',
-    'Equity / refinance opportunities',
-    'Listing and buyer lead opportunities'
+    'Past client follow-up'
   ];
-  const prefsContext = `Weekly hours target: ~${hours}. Focus areas: ${(focusAreas.length ? focusAreas : defaultFocus).join(', ')}. Weave hobbies: ${weaveHobbies ? 'yes' : 'no'}.`;
+  const prefsContext = `Weekly hours target: ~${hours}. Focus areas: ${(focusAreas.length ? focusAreas : defaultFocus).join(', ')}. Weave hobbies: ${weaveHobbies ? 'yes (light touch only)' : 'no'}.`;
 
   const annualBridge = (typeof window.ToolBridges?.getAnnualPlanPromptSlice === 'function')
     ? window.ToolBridges.getAnnualPlanPromptSlice()
@@ -3188,11 +3191,12 @@ function closeTaskHelp() {
         }
     });
 
-    // Persist plan-style radio selection
+    // Persist plan-style radio selection (user click = lock style from profile auto-sync)
     document.querySelectorAll('input[name="plan-style"]').forEach(radio => {
         radio.addEventListener('change', () => {
             if (radio.checked) {
                 localStorage.setItem('winPlan_plan-style', radio.value);
+                try { localStorage.setItem('winPlan_plan-style_user', '1'); } catch (e) {}
             }
         });
     });
@@ -3275,30 +3279,140 @@ window.syncPlanningFormFromProfile = function(options) {
   const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
   const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : {};
 
-  const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
-  const setValIfEmpty = (id, val) => {
+  const setVal = (id, val) => {
     const el = document.getElementById(id);
-    if (el && val && (force || !String(el.value || '').trim())) el.value = val;
+    if (!el || val === undefined || val === null || val === '') return false;
+    el.value = val;
+    try {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (e) { /* ignore */ }
+    return true;
+  };
+  const fieldEmpty = (id) => {
+    const el = document.getElementById(id);
+    return !el || !String(el.value || '').trim();
+  };
+  const setValIfEmpty = (id, val) => {
+    if (val === undefined || val === null || val === '') return false;
+    if (force || fieldEmpty(id)) return setVal(id, val);
+    return false;
+  };
+  const localEmpty = (key) => {
+    try {
+      const v = localStorage.getItem(key);
+      return v == null || !String(v).trim() || v === 'null' || v === 'undefined' || v === '[]';
+    } catch (e) {
+      return true;
+    }
   };
 
-  // Only pull annual numbers from profile if the user hasn't set specific local values yet (persistence wins for 2026-specific targets)
-  const hasLocalClosings = localStorage.getItem('winPlan_target-closings');
-  const hasLocalIncome = localStorage.getItem('winPlan_target-income');
-  const monthlyUnits = parseInt(p.monthlyUnits || eff.monthlyUnits || 8, 10);
-  if (monthlyUnits && (force || !hasLocalClosings)) {
+  // Parse "6-8 loans" / "8" → first integer for annual closings
+  const parseMonthlyUnits = (raw) => {
+    const m = String(raw || '').match(/(\d{1,3})/);
+    if (!m) return 0;
+    const n = parseInt(m[1], 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  };
+
+  // Map profile focus → plan-style radio values
+  const focusToPlanStyle = (focus) => {
+    const f = String(focus || '').toLowerCase().replace(/[_-]+/g, ' ').trim();
+    if (!f) return '';
+    if (f.includes('referral') || f.includes('partner') || f.includes('realtor')) return 'Referral Mastery';
+    if (f.includes('database') || f.includes('past client') || f.includes('sphere')) return 'Database Reactor';
+    if (f.includes('balanced') || f.includes('equity') || f.includes('refi') || f.includes('growth')) {
+      return 'Balanced Growth';
+    }
+    // raw value keys from profile select
+    if (f === 'balanced growth' || f === 'balancedgrowth') return 'Balanced Growth';
+    if (f === 'referral partners') return 'Referral Mastery';
+    return '';
+  };
+
+  const applyPlanStyle = (styleValue) => {
+    if (!styleValue) return false;
+    const styleRadio = Array.from(document.querySelectorAll('input[name="plan-style"]')).find(
+      (r) => r.value === styleValue
+    );
+    if (!styleRadio) return false;
+    document.querySelectorAll('input[name="plan-style"]').forEach((r) => {
+      r.checked = r.value === styleValue;
+    });
+    try {
+      styleRadio.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (e) { /* ignore */ }
+    document.querySelectorAll('.plan-style-card').forEach((card) => {
+      const input = card.querySelector('input[name="plan-style"]');
+      if (!input) return;
+      if (input.checked) {
+        card.classList.add('border-[#00A89D]', 'bg-[#00A89D]/5');
+        card.classList.remove('border-gray-200', 'dark:border-gray-700');
+      } else {
+        card.classList.remove('border-[#00A89D]', 'bg-[#00A89D]/5');
+        card.classList.add('border-gray-200', 'dark:border-gray-700');
+      }
+    });
+    try { localStorage.setItem('winPlan_plan-style', styleValue); } catch (e) {}
+    return true;
+  };
+
+  // Database size tier → midpoint for numeric #database-size field
+  const databaseTierMid = {
+    'under-50': 40,
+    '50-200': 125,
+    '200-500': 350,
+    '500-1000': 750,
+    '1000-plus': 1200
+  };
+
+  // --- Production goals from profile ---
+  // Prefer live form emptiness over stale localStorage keys (old bug wrote volume text into income).
+  const monthlyUnits = parseMonthlyUnits(p.monthlyUnits || eff.monthlyUnits);
+  if (monthlyUnits && (force || fieldEmpty('target-closings') || localEmpty('winPlan_target-closings'))) {
     setVal('target-closings', String(monthlyUnits * 12));
+    try { localStorage.setItem('winPlan_target-closings', String(monthlyUnits * 12)); } catch (e) {}
   }
-  if ((p.monthlyGoal || eff.monthlyVolume) && (force || !hasLocalIncome)) {
-    setVal('target-income', p.monthlyGoal || eff.monthlyVolume);
+
+  // Annual income is profile.income (number) — NOT monthlyGoal (volume text like "$3M")
+  let annualIncome = p.income || eff.income || '';
+  // If someone stored a pure number in monthlyGoal by mistake, accept it only when income empty
+  if (!annualIncome && p.monthlyGoal && /^\d{4,}$/.test(String(p.monthlyGoal).replace(/[,$]/g, ''))) {
+    annualIncome = String(p.monthlyGoal).replace(/[,$]/g, '');
+  }
+  if (annualIncome && (force || fieldEmpty('target-income') || localEmpty('winPlan_target-income'))) {
+    // Reject non-numeric volume strings
+    const num = String(annualIncome).replace(/[,$]/g, '').trim();
+    if (/^\d+(\.\d+)?$/.test(num)) {
+      setVal('target-income', num);
+      try { localStorage.setItem('winPlan_target-income', num); } catch (e) {}
+    }
   }
   if (p.hours) setVal('weekly-hours-hint', p.hours);
 
-  // Set a balanced style by default ONLY if nothing chosen and no local saved style
-  const savedStyle = localStorage.getItem('winPlan_plan-style');
+  // Database size midpoint when empty / forced
+  const dbMid = databaseTierMid[p.databaseSize] || databaseTierMid[eff.databaseSize];
+  if (dbMid) setValIfEmpty('database-size', String(dbMid));
+
+  // Focus → plan style
+  // HTML used to hard-check "Referral Mastery", so profile focus never applied.
+  // Apply profile focus when: force, user never explicitly chose a style, or form still on default.
+  const userChoseStyle = localStorage.getItem('winPlan_plan-style_user') === '1';
   const checked = document.querySelector('input[name="plan-style"]:checked');
-  if (!checked && !savedStyle) {
-    const bal = Array.from(document.querySelectorAll('input[name="plan-style"]')).find(r => r.value === 'Balanced Growth');
-    if (bal) bal.checked = true;
+  const checkedVal = checked?.value || '';
+  const mappedStyle = focusToPlanStyle(p.focus || p.focusLabel || p.focusValue || eff.focus);
+  const shouldApplyStyle =
+    !!mappedStyle &&
+    (force ||
+      !userChoseStyle ||
+      !checkedVal ||
+      // Treat HTML default Referral Mastery as unset when profile has a different focus
+      (checkedVal === 'Referral Mastery' && mappedStyle !== 'Referral Mastery' && !userChoseStyle));
+
+  if (shouldApplyStyle) {
+    applyPlanStyle(mappedStyle);
+  } else if (!checkedVal) {
+    applyPlanStyle(mappedStyle || 'Balanced Growth');
   }
 
   // === Hobbies & activities from central profile ===

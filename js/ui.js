@@ -897,20 +897,28 @@
   }
 
   /**
-   * Close on intentional backdrop click only — not when the user drags a text
-   * selection from inside the panel and releases outside (mousedown ≠ mouseup target).
+   * App-wide policy: modals do NOT close when the user clicks/releases outside
+   * the panel. Only explicit X / Close / Save / Escape handlers dismiss.
+   * Callers may still invoke ensureModalBackdropClose for API compatibility —
+   * it only marks the modal so we never attach a dismiss handler.
+   *
+   * Opt-in exception: data-backdrop-close="1" restores intentional outside-click
+   * dismiss (mousedown + mouseup both on the overlay root).
    */
   window.ensureModalBackdropClose = function ensureModalBackdropClose(modal) {
     if (!modal || modal._backdropHandlerAttached) return;
-    // Opt-out: data-no-backdrop-close="1" (e.g. My Profile — only × / Save / Close)
-    if (
-      modal.getAttribute('data-no-backdrop-close') === '1' ||
-      modal.dataset.noBackdropClose === '1' ||
-      modal.id === 'user-profile-modal'
-    ) {
+
+    const allowBackdrop =
+      modal.getAttribute('data-backdrop-close') === '1' ||
+      modal.dataset.backdropClose === '1';
+
+    if (!allowBackdrop) {
+      // Explicit no-op attach so re-calls and old code paths stay quiet
+      modal.setAttribute('data-no-backdrop-close', '1');
       modal._backdropHandlerAttached = true;
       return;
     }
+
     const id = modal.id || '';
     let pressedOnBackdrop = false;
 

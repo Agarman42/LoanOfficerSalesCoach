@@ -325,9 +325,7 @@
     document.body.appendChild(el);
     el.querySelector('#home-favorites-manager-close')?.addEventListener('click', closeManager);
     el.querySelector('#home-favorites-manager-done')?.addEventListener('click', closeManager);
-    el.addEventListener('click', (e) => {
-      if (e.target === el) closeManager();
-    });
+    // No outside-click dismiss — only Done / × (app-wide modal policy)
     return el;
   }
 

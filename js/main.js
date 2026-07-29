@@ -118,43 +118,9 @@
       }
     });
 
-    // Default: sidebar CLOSED until user opens it (hamburger).
-    // localStorage: only 'false' means "keep open"; missing/'true' = collapsed.
-    function prefersCollapsed() {
-      try {
-        return localStorage.getItem(STORAGE_KEY) !== 'false';
-      } catch (e) {
-        return true;
-      }
-    }
-
-    let startCollapsed = prefersCollapsed();
-
-    // Initial state (default = sidebar closed on all viewports)
-    if (startCollapsed || !isDesktop()) {
-      document.body.classList.add('sidebar-collapsed');
-      sidebar.classList.remove('left-0', 'open');
-      sidebar.classList.add('left-[-300px]');
-      setIcon(true);
-      positionToggleButton(true); // far left hamburger
-      try {
-        if (localStorage.getItem(STORAGE_KEY) == null) {
-          localStorage.setItem(STORAGE_KEY, 'true');
-        }
-      } catch (e) { /* private mode */ }
-    } else {
-      document.body.classList.remove('sidebar-collapsed');
-      if (isDesktop()) {
-        sidebar.classList.add('left-0');
-        setIcon(false);
-        setTimeout(() => positionToggleButton(false), 30);
-      } else {
-        sidebar.classList.remove('left-0', 'open');
-        sidebar.classList.add('left-[-300px]');
-        setIcon(true);
-        positionToggleButton(true);
-      }
-    }
+    // Always boot with sidebar CLOSED (home-first). Open only via hamburger.
+    // Do not restore a prior "open" preference across reloads.
+    applyCollapsedState(true, true);
 
     // Clicking outside closes on mobile only
     document.addEventListener('click', (e) => {
@@ -165,23 +131,16 @@
       }
     });
 
-    // Resize handling
+    // Resize handling — keep closed on mobile; on desktop preserve in-session toggle only
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        if (isDesktop()) {
-          const wantCollapsed = prefersCollapsed();
-          if (wantCollapsed && !document.body.classList.contains('sidebar-collapsed')) {
-            applyCollapsedState(true, false);
-          } else if (!wantCollapsed && document.body.classList.contains('sidebar-collapsed')) {
-            applyCollapsedState(false, false);
-          } else {
-            positionToggleButton(document.body.classList.contains('sidebar-collapsed'));
-          }
-        } else {
+        if (!isDesktop()) {
           // Mobile: always closed until hamburger opens overlay
           applyCollapsedState(true, false);
+        } else {
+          positionToggleButton(document.body.classList.contains('sidebar-collapsed'));
         }
       }, 120);
     });

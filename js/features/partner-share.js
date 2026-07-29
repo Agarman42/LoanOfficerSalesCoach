@@ -449,25 +449,19 @@
           title="Publish if needed, then open Outlook with a ready message">
           <i class="fas fa-envelope mr-1"></i> Email to realtor
         </button>
-        <button type="button" id="partner-share-copy"
-          class="px-4 py-2 rounded-full border-2 border-[#002B5C] text-[#002B5C] dark:text-gray-100 dark:border-gray-400 text-sm font-semibold hover:bg-[#002B5C]/5 transition">
-          <i class="fas fa-copy mr-1"></i> Copy again
-        </button>
       </div>
       <p id="partner-share-status" class="text-xs text-gray-500 m-0 mt-3"></p>
       <p class="text-[11px] text-gray-400 m-0 mt-2">
-        <strong>Required:</strong> Full Name, Phone or Email, and Headshot URL (Voice &amp; Links tab).
-        <strong>Publish &amp; copy</strong> updates your card and copies the short link.
-        <strong>Email to realtor</strong> opens Outlook with subject + message + link (no signature in the draft — yours attaches automatically). Add their address and send.
+        <strong>Required:</strong> Full Name, Phone or Email, and Headshot URL (Identity tab).
+        <strong>Publish &amp; copy</strong> updates your card and copies the short link (tap again anytime to re-copy after a profile change).
+        <strong>Email to realtor</strong> opens Outlook with subject + message + link (your signature attaches automatically). Add their address and send.
+        The link field above is also selectable if you prefer to copy manually.
       </p>
     `;
     host.appendChild(panel);
 
     document.getElementById('partner-share-publish')?.addEventListener('click', () => {
       publishPartnerCard();
-    });
-    document.getElementById('partner-share-copy')?.addEventListener('click', () => {
-      copyPartnerLink();
     });
     document.getElementById('partner-share-email')?.addEventListener('click', () => {
       emailPartnerLink();

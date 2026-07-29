@@ -1109,7 +1109,8 @@ function getCheckedEngagementHubTabs() {
 }
 
 function shouldKeepEngagementHubOpen(hubMode) {
-    return !!hubMode && getCheckedEngagementHubTabs().length >= 2;
+    // Always keep the multi-section hub open once opened — switch types without closing
+    return !!hubMode;
 }
 
 function getCuratedSelectionText(category) {
@@ -1184,18 +1185,22 @@ function updateEngagementSectionSummary() {
     const ready = checked.filter(([key]) => getCuratedPickStatus(key) !== 'empty');
 
     if (!checked.length) {
-        textEl.textContent = 'No curated sections checked — fun facts, tips, and jokes live here.';
+        textEl.textContent = 'Check Fun Facts, Tips, Quotes, etc. — then open the engagement picker to choose them all in one place.';
         if (shuffleAllBtn) shuffleAllBtn.classList.add('hidden');
-        if (hubBtn) hubBtn.classList.add('hidden');
+        // Keep Pick all visible so users discover the multi-section modal
+        if (hubBtn) {
+            hubBtn.classList.remove('hidden');
+            hubBtn.title = 'Open the engagement picker (check sections first, or open and pick types inside)';
+        }
         return;
     }
 
     const allReady = ready.length === checked.length;
     textEl.innerHTML = allReady
-        ? `<strong class="text-[#00A89D]">${ready.length} of ${checked.length} picks ready</strong> — you're set for engagement content.`
-        : `<strong>${ready.length} of ${checked.length}</strong> curated sections have picks · finish the rest or hit Shuffle all.`;
+        ? `<strong class="text-[#00A89D]">${ready.length} of ${checked.length} picks ready</strong> — open the picker to review or change any type.`
+        : `<strong>${ready.length} of ${checked.length}</strong> curated sections have picks · open the picker or hit Shuffle all.`;
     if (shuffleAllBtn) shuffleAllBtn.classList.toggle('hidden', !checked.length);
-    if (hubBtn) hubBtn.classList.toggle('hidden', checked.length < 2);
+    if (hubBtn) hubBtn.classList.remove('hidden');
 }
 
 function shuffleAllCheckedEngagement() {
@@ -1210,7 +1215,17 @@ function shuffleAllCheckedEngagement() {
 
 function openFirstCheckedEngagementHub() {
     const first = getCheckedEngagementHubTabs()[0];
-    if (first) openNewsletterEngagementHub(first.key);
+    if (first) {
+        openNewsletterEngagementHub(first.key);
+        return;
+    }
+    // Nothing checked yet — open hub on Fun Fact and auto-check it so tabs appear
+    const funCb = document.getElementById('nl-fun');
+    if (funCb && !funCb.checked) {
+        funCb.checked = true;
+        funCb.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    openNewsletterEngagementHub('fun');
 }
 
 function getCuratedResetKey(category) {
@@ -1280,35 +1295,70 @@ function renderEngagementModalToolbar(category, modal, hubMode) {
 function renderNewsletterEngagementHubTabs(activeCategory, modal) {
     const m = modal || getNewsletterChoiceModal();
     if (!m) return;
+    ensureNewsletterChoiceModalScaffold(m);
     const tabsHost = m.querySelector('#nl-choice-modal-tabs');
     if (!tabsHost) return;
 
-    const checkedTabs = getCheckedEngagementHubTabs();
-    if (!isEngagementHubCategory(activeCategory) || checkedTabs.length < 2) {
+    if (!isEngagementHubCategory(activeCategory)) {
         tabsHost.classList.add('hidden');
         tabsHost.innerHTML = '';
         return;
     }
 
+    // Always show ALL engagement types in the hub so users can decide everything in one modal
+    const tabs = NL_ENGAGEMENT_HUB_TABS.slice();
+    const readyCount = tabs.filter((tab) => {
+        const cfg = NL_CUSTOM_CONTENT_BLOCKS[tab.key];
+        if (!cfg) return false;
+        const on = !!document.getElementById(cfg.checkboxId)?.checked;
+        return on && getCuratedPickStatus(tab.key) !== 'empty';
+    }).length;
+
     tabsHost.classList.remove('hidden');
     tabsHost.innerHTML = `
-        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 m-0 mb-2">Engagement picker</p>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 m-0">All engagement types · pick without leaving</p>
+            <p class="text-[11px] text-gray-500 m-0 tabular-nums"><strong class="text-[#00A89D]">${readyCount}</strong> of ${tabs.length} ready</p>
+        </div>
         <div class="flex flex-wrap gap-1.5" role="tablist" aria-label="Engagement content types">
-            ${checkedTabs.map((tab) => {
+            ${tabs.map((tab) => {
+                const cfg = NL_CUSTOM_CONTENT_BLOCKS[tab.key];
+                const included = !!(cfg && document.getElementById(cfg.checkboxId)?.checked);
                 const active = tab.category === activeCategory;
-                const hasPick = getCuratedPickStatus(tab.key) !== 'empty';
-                const dot = hasPick ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-[#00A89D] ml-0.5 align-middle"></span>' : '';
-                return `<button type="button" role="tab" aria-selected="${active ? 'true' : 'false'}" data-nl-hub-tab="${tab.category}" class="text-xs sm:text-sm px-3 py-1.5 rounded-full border-2 font-semibold transition whitespace-nowrap inline-flex items-center gap-1 ${active ? 'border-[#00A89D] bg-[#00A89D]/15 text-[#002B5C] dark:text-white' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#00A89D]/50'}">${tab.icon} ${tab.label}${dot}</button>`;
+                const hasPick = included && getCuratedPickStatus(tab.key) !== 'empty';
+                const statusDot = hasPick
+                    ? '<span class="inline-flex w-1.5 h-1.5 rounded-full bg-[#00A89D] ml-0.5" title="Pick ready"></span>'
+                    : included
+                        ? '<span class="inline-flex w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5" title="Included — needs pick"></span>'
+                        : '';
+                const cls = active
+                    ? 'border-[#00A89D] bg-[#00A89D]/15 text-[#002B5C] dark:text-white'
+                    : included
+                        ? 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-[#00A89D]/50'
+                        : 'border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-[#00A89D]/40 hover:text-gray-600';
+                const title = included
+                    ? (hasPick ? `${tab.label} — pick ready` : `${tab.label} — included, needs a pick`)
+                    : `${tab.label} — click to include in this edition`;
+                return `<button type="button" role="tab" aria-selected="${active ? 'true' : 'false'}" data-nl-hub-tab="${tab.category}" data-nl-hub-key="${tab.key}" title="${title}" class="text-xs sm:text-sm px-3 py-1.5 rounded-full border-2 font-semibold transition whitespace-nowrap inline-flex items-center gap-1 ${cls}">${tab.icon} ${tab.label}${statusDot}</button>`;
             }).join('')}
-        </div>`;
+        </div>
+        <p class="text-[11px] text-gray-500 m-0 mt-2">Tabs stay open after you pick — finish every type, then close when done.</p>`;
 
     tabsHost.querySelectorAll('[data-nl-hub-tab]').forEach((btn) => {
-        if (btn.dataset.nlHubTabWired === '1') return;
-        btn.dataset.nlHubTabWired = '1';
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             const cat = btn.getAttribute('data-nl-hub-tab');
-            if (!cat || cat === activeCategory) return;
+            const key = btn.getAttribute('data-nl-hub-key');
+            if (!cat) return;
+            // Auto-include section when jumping to an unchecked type
+            if (key && NL_CUSTOM_CONTENT_BLOCKS[key]) {
+                const cb = document.getElementById(NL_CUSTOM_CONTENT_BLOCKS[key].checkboxId);
+                if (cb && !cb.checked) {
+                    cb.checked = true;
+                    cb.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+            if (cat === activeCategory) return;
             openModal(cat, { hub: true, keepOpen: true });
         });
     });
@@ -1326,9 +1376,44 @@ function openNewsletterEngagementHub(sectionKey) {
     openModal(cfg.category, { hub: true });
 }
 
+/** Ensure static HTML modal has tab/toolbar hosts (older shells were missing them → hub looked single-type only). */
+function ensureNewsletterChoiceModalScaffold(modal) {
+    if (!modal) return modal;
+    const content = modal.querySelector('.modal-content') || modal.firstElementChild;
+    if (!content) return modal;
+
+    let tabs = modal.querySelector('#nl-choice-modal-tabs');
+    let toolbar = modal.querySelector('#nl-choice-modal-toolbar');
+    const list = modal.querySelector('#nl-choice-modal-list');
+    const listWrap = list?.parentElement;
+
+    if (!tabs) {
+        tabs = document.createElement('div');
+        tabs.id = 'nl-choice-modal-tabs';
+        tabs.className = 'hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50';
+        if (listWrap && listWrap.parentElement === content) {
+            content.insertBefore(tabs, listWrap);
+        } else {
+            content.appendChild(tabs);
+        }
+    }
+    if (!toolbar) {
+        toolbar = document.createElement('div');
+        toolbar.id = 'nl-choice-modal-toolbar';
+        toolbar.className = 'hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900';
+        if (tabs.nextSibling) content.insertBefore(toolbar, tabs.nextSibling);
+        else if (listWrap) content.insertBefore(toolbar, listWrap);
+        else content.appendChild(toolbar);
+    }
+    return modal;
+}
+
 function ensureNewsletterChoiceModal() {
     let modal = document.getElementById(NL_CHOICE_MODAL_ID);
-    if (modal) return modal;
+    if (modal) {
+        ensureNewsletterChoiceModalScaffold(modal);
+        return modal;
+    }
 
     modal = document.createElement('div');
     modal.id = NL_CHOICE_MODAL_ID;
@@ -1385,6 +1470,14 @@ function openModal(category, options) {
     const list = getNewsletterChoiceListEl(modal);
     const hubMode = opts.hub !== false && isEngagementHubCategory(category);
     const modalAlreadyOpen = !modal.classList.contains('hidden') && modal.getAttribute('aria-hidden') !== 'true';
+    // Clear search/chrome when switching hub tabs or reopening a different category
+    const prevCat = window._nlChoiceLastCategory;
+    if (prevCat && prevCat !== category) {
+        cleanupNewsletterChoiceChrome(modal);
+    } else if (!opts.keepOpen) {
+        cleanupNewsletterChoiceChrome(modal);
+    }
+    window._nlChoiceLastCategory = category;
 
     let data = [];
     let modalTitleText = '';
@@ -1477,12 +1570,13 @@ function openModal(category, options) {
 
     const hubTab = getEngagementHubTabByCategory(category);
     if (title) {
-        title.textContent = hubMode && hubTab
-            ? `Engagement Picker · ${hubTab.label}`
+        title.textContent = hubMode
+            ? (hubTab ? `Engagement hub · ${hubTab.label}` : 'Engagement hub')
             : modalTitleText;
         title.style.color = '#fff';
         title.style.setProperty('color', '#fff', 'important');
     }
+    ensureNewsletterChoiceModalScaffold(modal);
 
     // Dynamically inject a search input for this choice modal only (so it does not pollute social pillar modals)
     let search = modal.querySelector('#modal-search');
@@ -1590,7 +1684,8 @@ function openModal(category, options) {
     }
 
     if (search) {
-        if (!opts.keepOpen) search.value = '';
+        // Always reset search when category changes or when not keepOpen-refreshing same tab
+        if (!opts.keepOpen || prevCat !== category) search.value = '';
         search.placeholder = `Search ${modalTitleText.toLowerCase().replace('choose a ', '')}...`;
         search.oninput = () => {
             const filter = search.value.toLowerCase();
@@ -1599,9 +1694,23 @@ function openModal(category, options) {
                 li.style.display = li.innerText.toLowerCase().includes(filter) ? '' : 'none';
             });
         };
-        search.focus();
+        if (!opts.keepOpen) search.focus();
     }
 
+}
+
+function cleanupNewsletterChoiceChrome(modal) {
+    const root = modal || getNewsletterChoiceModal();
+    document.getElementById('modal-search')?.remove();
+    document.getElementById('modal-puzzle-type-bar')?.remove();
+    document.getElementById('modal-puzzle-filter-bar')?.remove();
+    document.getElementById('modal-tip-toolbar')?.remove();
+    if (root) {
+        root.querySelector('#modal-search')?.remove();
+        root.querySelector('#modal-puzzle-type-bar')?.remove();
+        root.querySelector('#modal-puzzle-filter-bar')?.remove();
+        root.querySelector('#modal-tip-toolbar')?.remove();
+    }
 }
 
 // Close newsletter choice modal (separate from social pillar #content-modal)
@@ -1622,10 +1731,7 @@ function closeModal() {
         modal.onclick = null;
         modal.setAttribute('aria-hidden', 'true');
     }
-    const search = document.getElementById('modal-search');
-    if (search && search.parentElement) {
-        search.parentElement.removeChild(search);
-    }
+    cleanupNewsletterChoiceChrome(modal);
 }
 
 function isNewsletterChoiceModalOpen() {
@@ -4987,6 +5093,13 @@ function copyForOutlook() {
   // so later inline scripts that redefine window.openModal / closeModal do not break "Choose Specific"
   if (typeof openModal === 'function') {
     window.openNewsletterChoiceModal = openModal;
+    window.openModal = openModal;
+    window.openNewsletterEngagementHub = typeof openNewsletterEngagementHub === 'function'
+      ? openNewsletterEngagementHub
+      : window.openNewsletterEngagementHub;
+    window.getEngagementHubTabByCategory = typeof getEngagementHubTabByCategory === 'function'
+      ? getEngagementHubTabByCategory
+      : window.getEngagementHubTabByCategory;
   }
   if (typeof closeModal === 'function') {
     window.closeNewsletterChoiceModal = closeModal;

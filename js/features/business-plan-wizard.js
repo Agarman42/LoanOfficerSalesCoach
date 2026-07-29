@@ -8,7 +8,7 @@
 
   const TOTAL_STEPS = 6;
   const STORAGE_KEY = 'bizPlanWizardLastStep';
-  const WIZARD_DOM_VERSION = '4';
+  const WIZARD_DOM_VERSION = '6';
 
   const STEP_META = [
     { title: 'Welcome', subtitle: 'Profile foundation' },
@@ -183,7 +183,17 @@
     if ($('bp-wizard-profile-name')) $('bp-wizard-profile-name').textContent = name;
     if ($('bp-wizard-profile-market')) $('bp-wizard-profile-market').textContent = market;
     if ($('bp-wizard-profile-focus')) $('bp-wizard-profile-focus').textContent = String(focus);
-    const weak = !p.name || !(p.location || p.localArea || p.market);
+
+    const monthlyMatch = String(p.monthlyUnits || '').match(/(\d{1,3})/);
+    const monthlyN = monthlyMatch ? parseInt(monthlyMatch[1], 10) : null;
+    const annualUnits = monthlyN ? `${monthlyN * 12}/yr` : '—';
+    const income = p.income ? `$${Number(p.income).toLocaleString()}` : '—';
+    const db = p.databaseSizeLabel || p.databaseSize || '—';
+    if ($('bp-wizard-profile-income')) $('bp-wizard-profile-income').textContent = income;
+    if ($('bp-wizard-profile-units')) $('bp-wizard-profile-units').textContent = annualUnits;
+    if ($('bp-wizard-profile-db')) $('bp-wizard-profile-db').textContent = String(db);
+
+    const weak = !p.name || !(p.location || p.localArea || p.market) || !p.income;
     $('bp-wizard-profile-warn')?.classList.toggle('hidden', !weak);
   }
 
@@ -415,12 +425,15 @@
             </div>
             <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-[#00A89D]">From your profile</span>
-              <dl class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm m-0 mt-3">
+              <dl class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm m-0 mt-3">
                 <div><dt class="text-gray-400 text-xs mb-0.5">Name</dt><dd id="bp-wizard-profile-name" class="font-semibold m-0 truncate">—</dd></div>
                 <div><dt class="text-gray-400 text-xs mb-0.5">Market</dt><dd id="bp-wizard-profile-market" class="font-semibold m-0 truncate">—</dd></div>
                 <div><dt class="text-gray-400 text-xs mb-0.5">Focus</dt><dd id="bp-wizard-profile-focus" class="font-semibold m-0 truncate">—</dd></div>
+                <div><dt class="text-gray-400 text-xs mb-0.5">Annual income</dt><dd id="bp-wizard-profile-income" class="font-semibold m-0 truncate">—</dd></div>
+                <div><dt class="text-gray-400 text-xs mb-0.5">Unit pace</dt><dd id="bp-wizard-profile-units" class="font-semibold m-0 truncate">—</dd></div>
+                <div><dt class="text-gray-400 text-xs mb-0.5">Database</dt><dd id="bp-wizard-profile-db" class="font-semibold m-0 truncate">—</dd></div>
               </dl>
-              <p id="bp-wizard-profile-warn" class="hidden text-xs text-amber-700 dark:text-amber-300 mt-3 mb-0">Tip: Open <strong>My Profile</strong> for richer personalization (goals, hobbies, challenges all feed this plan).</p>
+              <p id="bp-wizard-profile-warn" class="hidden text-xs text-amber-700 dark:text-amber-300 mt-3 mb-0">Tip: Open <strong>My Profile → Business</strong> and set annual income + monthly units so Sync can fill this plan.</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button type="button" id="bp-wizard-sync-profile" class="text-sm px-4 py-2 rounded-full border-2 border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D] hover:text-white transition">
@@ -571,26 +584,40 @@
       });
     }
     overlay.querySelector('#bp-wizard-sync-profile')?.addEventListener('click', () => {
+      try { localStorage.removeItem('winPlan_plan-style_user'); } catch (e) {}
       if (typeof window.syncPlanningFormFromProfile === 'function') {
         window.syncPlanningFormFromProfile({ force: true });
       }
       pullFormIntoWizard();
+      applyProfileFallbackToWizard();
       refreshProfileCard();
       updateStrengthHint();
+      const p = getProfile();
+      if (typeof window.showToast === 'function') {
+        const bits = [];
+        if (p.focusLabel || p.focus) bits.push(p.focusLabel || p.focus);
+        if (p.income) bits.push('income $' + Number(p.income).toLocaleString());
+        if (p.monthlyUnits) bits.push(p.monthlyUnits + ' units/mo');
+        window.showToast(
+          bits.length
+            ? 'Synced from profile: ' + bits.join(' · ')
+            : 'Synced from profile. Add focus & income in My Profile → Business for richer pull-through.',
+          'success'
+        );
+      }
     });
     overlay.querySelector('#bp-wizard-skip-full')?.addEventListener('click', () => {
       pushWizardToForm();
       closeWizard();
       track('skip_full_form');
     });
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeWizard();
-    });
+    // No outside-click dismiss — only × / explicit buttons (app-wide modal policy)
 
     overlay.querySelectorAll('[data-plan-style]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const v = btn.getAttribute('data-plan-style');
         setPlanStyle(v);
+        try { localStorage.setItem('winPlan_plan-style_user', '1'); } catch (e) {}
         pullFormIntoWizard();
       });
     });
@@ -613,12 +640,16 @@
       return;
     }
     ensureWizardDom();
+    // Pull focus, income, units from My Profile into the plan form, then mirror into wizard fields
     if (typeof window.syncPlanningFormFromProfile === 'function') {
       try {
-        window.syncPlanningFormFromProfile();
+        // force:false still applies profile when fields empty / style not user-chosen
+        window.syncPlanningFormFromProfile({ force: false });
       } catch (e) {}
     }
     pullFormIntoWizard();
+    // Safety net: if plan form still empty, write profile values straight into wizard inputs
+    applyProfileFallbackToWizard();
     const start = opts && opts.step ? parseInt(opts.step, 10) : 1;
     currentStep = Number.isFinite(start) && start >= 1 && start <= TOTAL_STEPS ? start : 1;
     wizardEl.classList.remove('hidden');
@@ -627,6 +658,36 @@
     renderStep();
     if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('planning', 'guided');
     track('open');
+  }
+
+  /** Direct profile → wizard fields when form sync left them blank. */
+  function applyProfileFallbackToWizard() {
+    const p = getProfile();
+    if (!p) return;
+    const incomeEl = $('bp-wizard-income');
+    const closingsEl = $('bp-wizard-closings');
+    if (incomeEl && !String(incomeEl.value || '').trim() && p.income) {
+      const num = String(p.income).replace(/[,$]/g, '').trim();
+      if (/^\d+(\.\d+)?$/.test(num)) incomeEl.value = num;
+    }
+    if (closingsEl && !String(closingsEl.value || '').trim() && p.monthlyUnits) {
+      const m = String(p.monthlyUnits).match(/(\d{1,3})/);
+      if (m) closingsEl.value = String(parseInt(m[1], 10) * 12);
+    }
+    // Highlight style card from profile focus
+    const focus = String(p.focus || p.focusLabel || '').toLowerCase();
+    let style = 'Balanced Growth';
+    if (focus.includes('referral') || focus.includes('partner') || focus.includes('realtor')) style = 'Referral Mastery';
+    else if (focus.includes('database') || focus.includes('past client')) style = 'Database Reactor';
+    else if (focus.includes('balanced') || focus.includes('equity') || focus.includes('growth') || focus === 'balanced-growth') {
+      style = 'Balanced Growth';
+    }
+    // Only auto-select if user hasn't locked a style
+    const userChose = localStorage.getItem('winPlan_plan-style_user') === '1';
+    if (!userChose && typeof setPlanStyle === 'function') {
+      setPlanStyle(style);
+      pullFormIntoWizard();
+    }
   }
 
   function closeWizard() {

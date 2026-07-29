@@ -16,7 +16,13 @@
     'Detail-oriented & thorough',
     'Creative problem solver',
     'Relationship-first (not transactional)',
-    'White-glove, high-touch experience'
+    'White-glove, high-touch experience',
+    'Honest timeline expectations — no sugarcoating',
+    'Text-friendly — meet clients where they are',
+    'Bilingual or multilingual support',
+    'Hand-holds complex files end-to-end',
+    'Evening & weekend availability when it counts',
+    'Follows up so clients never chase me'
   ];
 
   const WHO_HELP_CHIPS = [
@@ -27,7 +33,13 @@
     'Self-employed / 1099',
     'Investors',
     'Down payment assistance',
-    'Credit-challenged buyers'
+    'Credit-challenged buyers',
+    'New construction buyers',
+    'Divorce / life-transition buyers',
+    'Multi-generational households',
+    'Relocating to the area',
+    'Healthcare & professional workers',
+    'Realtor-referred clients'
   ];
 
   const PERSONAL_LIFE_CHIPS = [
@@ -39,7 +51,12 @@
     'Foodie / cooking',
     'Travel lover',
     'Volunteer / giving back',
-    'Local roots — born & raised'
+    'Local roots — born & raised',
+    'Golf enthusiast',
+    'Youth sports / coaching',
+    'Music & live events',
+    'DIY / home projects',
+    'Reading / continuous learner'
   ];
 
   const DIFF_CHIPS = [
@@ -50,7 +67,30 @@
     'Smooth closings for agents',
     'Educational, low-pressure style',
     'Available when clients need me',
-    'Strong post-close support'
+    'Strong post-close support',
+    'Protects realtor reputation at the table',
+    'Explains options without jargon',
+    'Fights for the best fit — not just fastest close',
+    'Coordinates every moving piece (title, insurance, HOA)',
+    'Same LO from first call through keys',
+    'Local underwriting & process know-how'
+  ];
+
+  /** Map profile hobby tokens → personal-life bio chips */
+  const HOBBY_TO_PERSONAL_CHIP = [
+    { chip: 'Family-oriented', match: /family/i },
+    { chip: 'Pet parent', match: /pet|animal|dog|cat/i },
+    { chip: 'Sports fan', match: /sports|cards|poker|fantasy/i },
+    { chip: 'Outdoors / fitness', match: /outdoor|fitness|gym|hike|run|cycl|yoga|wellness|hunt|fish|boat|beach|snow|ski|lake/i },
+    { chip: 'Faith & community', match: /faith|church|community/i },
+    { chip: 'Foodie / cooking', match: /cook|food|wine|beer|bake/i },
+    { chip: 'Travel lover', match: /travel/i },
+    { chip: 'Volunteer / giving back', match: /volunteer|community|giving/i },
+    { chip: 'Golf enthusiast', match: /golf/i },
+    { chip: 'Youth sports / coaching', match: /youth|coach/i },
+    { chip: 'Music & live events', match: /music|concert/i },
+    { chip: 'DIY / home projects', match: /craft|diy|home project|renovat/i },
+    { chip: 'Reading / continuous learner', match: /read|podcast/i }
   ];
 
   const REFINE_CHIPS = [
@@ -123,7 +163,9 @@
       { label: 'Volunteer', text: 'Regular volunteer at our local food bank and youth mentoring programs — this community gave me my start.' }
     ],
     additional: [
-      { label: 'NMLS line', text: 'NMLS #______ | [Languages spoken] | [Designations, e.g. CMB, CPA partner network]' }
+      { label: 'NMLS line', text: 'NMLS #______' },
+      { label: 'Languages', text: 'I work with clients in English and [language] — clear explanations either way.' },
+      { label: 'Designations', text: 'Credentials: [e.g. CMB, VA specialist] — happy to walk you through what that means for your loan.' }
     ]
   };
 
@@ -719,11 +761,63 @@
     return [...(p.hobbies || []), p.hobbiesOther].filter(Boolean).join(', ');
   }
 
-  function seedBioFieldsFromProfile(profile) {
+  function personalChipsFromProfile(p) {
+    const tokens = [
+      ...(Array.isArray(p.hobbies) ? p.hobbies : []),
+      p.hobbiesOther || '',
+      p.personality || '',
+      p.family || ''
+    ]
+      .filter(Boolean)
+      .join(' | ');
+    const selected = new Set();
+    if (/family|married|kids|children|parent/i.test(p.family || '')) {
+      selected.add('Family-oriented');
+    }
+    HOBBY_TO_PERSONAL_CHIP.forEach(({ chip, match }) => {
+      if (match.test(tokens)) selected.add(chip);
+    });
+    return Array.from(selected);
+  }
+
+  function seedPersonalChipsFromProfile(p, force) {
+    const chips = personalChipsFromProfile(p);
+    if (!chips.length) return;
+    const boxes = document.querySelectorAll('input[data-bio-chip="personal"]');
+    if (!boxes.length) return;
+    const anyChecked = Array.from(boxes).some((cb) => cb.checked);
+    // Don't stomp a user/draft selection unless forced (Sync button)
+    if (anyChecked && !force) return;
+    const want = new Set(chips);
+    boxes.forEach((cb) => {
+      if (want.has(cb.value)) cb.checked = true;
+    });
+  }
+
+  function seedWhoChipsFromProfile(p, force) {
+    const niches = [...(p.niches || []), p.nichesOther || ''].filter(Boolean);
+    if (!niches.length) return;
+    const boxes = document.querySelectorAll('input[data-bio-chip="who"]');
+    if (!boxes.length) return;
+    const anyChecked = Array.from(boxes).some((cb) => cb.checked);
+    if (anyChecked && !force) return;
+    const hay = niches.join(' ').toLowerCase();
+    boxes.forEach((cb) => {
+      const v = cb.value.toLowerCase();
+      const key = v.split(/[/(]/)[0].trim();
+      if (hay.includes(key) || niches.some((n) => String(n).toLowerCase().includes(key))) {
+        cb.checked = true;
+      }
+    });
+  }
+
+  function seedBioFieldsFromProfile(profile, opts) {
+    const force = !!(opts && opts.force);
     const p = profile || getCentralProfile();
     const setIfEmpty = (id, val) => {
       const el = document.getElementById(id);
-      if (el && !String(el.value || '').trim() && val) {
+      if (!el || !val) return;
+      if (force || !String(el.value || '').trim()) {
         el.value = val;
         el.dispatchEvent(new Event('input', { bubbles: true }));
       }
@@ -733,6 +827,27 @@
     setIfEmpty('bio-tone', p.tone);
     setIfEmpty('bio-family', p.family);
     setIfEmpty('bio-hobbies', hobbiesTextFromProfile(p));
+    // Prefill extras with NMLS from profile when empty (or force sync)
+    const nmls = profileNmls(p);
+    if (nmls) {
+      const addEl = document.getElementById('bio-additional');
+      if (addEl) {
+        const cur = String(addEl.value || '').trim();
+        const hasNmls = /NMLS\s*#?\s*\d/i.test(cur);
+        if (force || !cur) {
+          addEl.value = buildNmlsLine(p);
+          addEl.dispatchEvent(new Event('input', { bubbles: true }));
+        } else if (!hasNmls && (force || /NMLS\s*#?_+/i.test(cur))) {
+          addEl.value = cur.replace(/NMLS\s*#?_+/gi, `NMLS #${nmls}`);
+          if (!/NMLS\s*#?\s*\d/i.test(addEl.value)) {
+            addEl.value = (cur + '\n' + buildNmlsLine(p)).trim();
+          }
+          addEl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+    }
+    seedPersonalChipsFromProfile(p, force);
+    seedWhoChipsFromProfile(p, force);
   }
 
   function syncBioFromProfile() {
@@ -744,7 +859,7 @@
       refreshAllUI();
     }
 
-    seedBioFieldsFromProfile(p);
+    seedBioFieldsFromProfile(p, { force: false });
     updateBioYearsHint();
     if (!document.getElementById('bio-existing-paste')?.value?.trim()) {
       const seedBio = p.professionalBio || p.bioBuilderDraft?.existingBioPaste;
@@ -771,6 +886,17 @@
     if (row) row.classList.toggle('hidden', dest !== 'custom');
   }
 
+  function profileNmls(p) {
+    const src = p || getCentralProfile();
+    return String(src.nmls || src.NMLS || src.nmlsNumber || '').trim();
+  }
+
+  /** NMLS only — no language/designation placeholders */
+  function buildNmlsLine(p) {
+    const nmls = profileNmls(p);
+    return nmls ? `NMLS #${nmls}` : 'NMLS #______';
+  }
+
   function insertStarter(fieldKey, idx) {
     const starter = STARTERS[fieldKey]?.[idx];
     if (!starter) return;
@@ -788,7 +914,24 @@
     const el = document.getElementById(idMap[fieldKey]);
     if (!el) return;
     const p = getCentralProfile();
-    let text = starter.text.replace('[your market]', p.location || 'your market').replace('[your city]', p.location || 'your city');
+    let text = starter.text
+      .replace(/\[your market\]/gi, p.location || 'your market')
+      .replace(/\[your city\]/gi, p.location || 'your city');
+
+    // NMLS line chip — always inject real NMLS from My Profile when present
+    const isNmlsStarter =
+      fieldKey === 'additional' &&
+      (/nmls/i.test(starter.label || '') || /NMLS\s*#/i.test(starter.text || ''));
+    if (isNmlsStarter) {
+      const nmls = profileNmls(p);
+      text = buildNmlsLine(p);
+      if (!nmls && typeof window.showToast === 'function') {
+        window.showToast('No NMLS in My Profile yet — add it under Identity, then tap NMLS line again.', 'info');
+      } else if (nmls && typeof window.showToast === 'function') {
+        window.showToast(`Inserted NMLS #${nmls} from your profile.`, 'success');
+      }
+    }
+
     if (el.value.trim()) {
       el.value = el.value.trim() + '\n\n' + text;
     } else {
@@ -1676,7 +1819,17 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       }
     });
 
-    document.getElementById('bio-sync-profile-btn')?.addEventListener('click', syncBioFromProfile);
+    document.getElementById('bio-sync-profile-btn')?.addEventListener('click', () => {
+      const p = getCentralProfile();
+      // Force re-pull chips + text fields from profile (after draft restore)
+      syncBioFromProfile();
+      seedBioFieldsFromProfile(p, { force: true });
+      updateQualityChecklist();
+      scheduleDraftSave();
+      if (typeof window.showToast === 'function') {
+        window.showToast('Bio form refreshed from My Profile (hobbies → life chips, niches → who you help).', 'success');
+      }
+    });
     document.getElementById('bio-edit-profile-btn')?.addEventListener('click', () => {
       if (typeof window.openUserProfile === 'function') window.openUserProfile(true);
     });

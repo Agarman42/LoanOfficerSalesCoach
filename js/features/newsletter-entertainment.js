@@ -1090,6 +1090,8 @@
       typeBar.querySelectorAll('[data-modal-puzzle-type]').forEach((btn) => {
         btn.addEventListener('click', () => {
           setPuzzleType(btn.getAttribute('data-modal-puzzle-type'));
+          const existingSearch = modal.querySelector('#modal-search');
+          if (existingSearch) existingSearch.value = '';
           openChoiceModal(category, modalApi);
         });
       });

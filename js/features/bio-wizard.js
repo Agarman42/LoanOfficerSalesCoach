@@ -514,9 +514,7 @@
 
     $('bio-wizard-years')?.addEventListener('input', updateWizardYearsHint);
 
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeBioWizard();
-    });
+    // No outside-click dismiss — only × / explicit buttons (app-wide modal policy)
 
     $('bio-wizard-step-nav')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-bio-wizard-goto]');

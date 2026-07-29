@@ -106,23 +106,23 @@
     <!-- Static Tailwind (built offline) — no Play CDN -->
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <!-- App-specific styles -->
-    <link rel="stylesheet" href="css/main.css?v=20260729-profile-ux">
+    <link rel="stylesheet" href="css/main.css?v=20260729-blank-preview-fix">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
 
     <!-- Shared UI (toast + search) - Phase 0 -->
-    <script src="js/ui.js?v=20260729-profile-ux"></script>
+    <script src="js/ui.js?v=20260729-no-backdrop"></script>
     <script src="js/features/app-feedback.js?v=20260709-lo-v309"></script>
 
     <!-- Core UI (Phase 0.5) - menu, quotes, theme, API key modal -->
-    <script defer src="js/main.js?v=20260728-scroll-top-home"></script>
+    <script defer src="js/main.js?v=20260729-sidebar-closed-boot"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260720-ai-asterisk"></script>
     <!--
       Home Coach Setup: must not wait for sequential feature-loader (50+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
-    <script defer src="js/features/user-profile.js?v=20260729-profile-ux"></script>
+    <script defer src="js/features/user-profile.js?v=20260729-blank-preview-fix"></script>
     <script defer src="js/features/home-favorites.js?v=20260721-home-fast"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260721-home-fast"></script>
     <script src="js/early-boot.js?v=20260728-scroll-top-home"></script>
@@ -202,23 +202,23 @@
     <i class="fas fa-bars"></i>
 </button>
 
-<!-- Default: sidebar CLOSED (hamburger top-left). Only open if user previously chose open (localStorage false). -->
+<!-- Always boot with sidebar CLOSED (home-first). Hamburger top-left opens it. -->
 <script>
 (function(){
   try {
-    var wantOpen = localStorage.getItem('sidebarCollapsed') === 'false';
-    if (!wantOpen) {
-      document.body.classList.add('sidebar-collapsed');
-      var b = document.getElementById('menu-toggle');
-      if (b) {
-        b.style.left = '1rem';
-        b.style.top = '1rem';
-        b.setAttribute('aria-label', 'Open sidebar');
-        b.setAttribute('aria-expanded', 'false');
-      }
-      if (localStorage.getItem('sidebarCollapsed') == null) {
-        localStorage.setItem('sidebarCollapsed', 'true');
-      }
+    document.body.classList.add('sidebar-collapsed');
+    try { localStorage.setItem('sidebarCollapsed', 'true'); } catch (e2) {}
+    var b = document.getElementById('menu-toggle');
+    if (b) {
+      b.style.left = '1rem';
+      b.style.top = '1rem';
+      b.setAttribute('aria-label', 'Open sidebar');
+      b.setAttribute('aria-expanded', 'false');
+    }
+    var sb = document.getElementById('sidebar');
+    if (sb) {
+      sb.classList.remove('left-0', 'open');
+      sb.classList.add('left-[-300px]');
     }
   } catch(e){
     document.body.classList.add('sidebar-collapsed');
@@ -760,7 +760,7 @@
             <!-- Plan Style - identical base cards, only selected one highlighted (fixed for consistency) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
-                <input type="radio" name="plan-style" value="Referral Mastery" checked class="hidden">
+                <input type="radio" name="plan-style" value="Referral Mastery" class="hidden">
                 <div class="font-bold text-[#002B5C] dark:text-white">Referral Mastery</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">80%+ of business from realtors &amp; partners you love working with.</div>
               </label>
@@ -772,7 +772,7 @@
               <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
                 <input type="radio" name="plan-style" value="Balanced Growth" class="hidden">
                 <div class="font-bold text-[#002B5C] dark:text-white">Balanced Growth</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Mix of referrals + database + social/prospecting + events. The flexible path.</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Mix of referrals + database + social/prospecting + events. The flexible path. <span class="text-[#00A89D] font-medium">(synced from My Profile when set)</span></div>
               </label>
             </div>
 
@@ -4640,7 +4640,7 @@
         <div>
             <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Quick target languages</div>
             <div id="tr-favorite-chips" class="flex flex-wrap gap-1.5"></div>
-            <p class="text-[10px] text-gray-400 mt-1 m-0">Set your default in <strong>My Profile → Voice &amp; Links</strong>.</p>
+            <p class="text-[10px] text-gray-400 mt-1 m-0">Set your default in <strong>My Profile → Links</strong>.</p>
         </div>
     </div>
 
@@ -7040,7 +7040,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2.5 text-sm text-gray-700 dark:text-gray-300">
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Keep <em>My Profile</em> current</strong> (market, voice, personalization) — local sections and tone pull from there. Your company signature adds automatically when you send.</span></div>
-          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, family moment, or community story — and describe any photo/video you're including. Free hosts: <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> (use the <strong>Hotlink / Direct link</strong> for photos, headshots, logos — no account) and free <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">YouTube upload</a> for video links.</span></div>
+          <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Lead with the Personal Update + photo or video.</strong> This is the highest-open section. Share a real win, family moment, or community story — and describe any photo/video you're including. Free host for personal newsletter photos: <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> (use the <strong>Hotlink / Direct link</strong> — no account). Official headshots: request via My Profile → Identity (Marketing). Video: free <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">YouTube upload</a>.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Add direction to core sections.</strong> Tap <em>Add direction</em> under Market, Local, etc. — a link or one-line topic makes each issue feel written for <em>your</em> borrowers, not generic AI filler.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Pick a sustainable cadence</strong> (monthly is fine). Use the generator every time so the voice and mix stay consistent. Block the send date in your Weekly Win Plan.</span></div>
           <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span><strong>Repurpose winners.</strong> A great issue becomes 3–4 social posts, a Reel script, or a blog angle. The output is designed for this — copy the sections and save ideas to your vault.</span></div>
@@ -7212,7 +7212,7 @@
               <p class="text-xs text-gray-500 mt-1 mb-2">Appears below your personal note — mention the photo in your update above.</p>
               <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
                 <p class="m-0 mb-1"><i class="fas fa-lightbulb text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Need a free image link? No account required.</strong></p>
-                <p class="m-0">Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a>, then copy the <strong>Hotlink / Direct link</strong> (not the page URL) and paste it above — that works best in the newsletter. Same host is great for <strong>headshots</strong> and <strong>company logos</strong> anywhere this coach asks for an image URL.</p>
+                <p class="m-0">For <strong>newsletter personal photos</strong> (not your official headshot), upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a>, then copy the <strong>Hotlink / Direct link</strong> (not the page URL) and paste it above. Official LO headshots come from <strong>Marketing</strong> via My Profile → Identity.</p>
               </div>
             </div>
             <div>
@@ -7383,7 +7383,7 @@
             </div>
             <div class="flex flex-wrap gap-1.5 flex-shrink-0">
               <button type="button" id="nl-shuffle-all-engagement" class="hidden text-xs px-2.5 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition" title="Shuffle every checked section"><i class="fas fa-dice mr-1"></i>Shuffle all</button>
-              <button type="button" id="nl-open-engagement-hub" class="hidden text-xs px-2.5 py-1.5 rounded-full border border-[#002B5C] text-[#002B5C] dark:text-gray-200 font-semibold hover:bg-[#002B5C]/5 transition" title="Open picker for all checked sections"><i class="fas fa-sliders-h mr-1"></i>Pick all</button>
+              <button type="button" id="nl-open-engagement-hub" class="text-xs px-2.5 py-1.5 rounded-full border border-[#002B5C] text-[#002B5C] dark:text-gray-200 font-semibold hover:bg-[#002B5C]/5 transition" title="Open one modal to pick Fun Facts, Tips, Quotes, Dad Jokes &amp; Brain Teasers"><i class="fas fa-sliders-h mr-1"></i>Engagement hub</button>
             </div>
           </div>
           <div class="grid grid-cols-1 gap-3">
@@ -7764,15 +7764,15 @@
                     <label class="block text-sm font-semibold text-[#00A89D] mb-3"><i class="fas fa-bullseye mr-1"></i> Focus This Week</label>
                     <div class="flex flex-wrap gap-2">
                         <label class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-[#00A89D] transition"><input type="checkbox" id="wwp-emphasis-realtors" checked class="accent-[#00A89D]"> <span class="font-medium">Realtor Outreach</span></label>
-                        <label class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-[#00A89D] transition"><input type="checkbox" id="wwp-emphasis-past" class="accent-[#00A89D]"> <span class="font-medium">Past Clients</span></label>
-                        <label class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-[#00A89D] transition"><input type="checkbox" id="wwp-emphasis-equity" class="accent-[#00A89D]"> <span class="font-medium">Equity / Refi</span></label>
+                        <label class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-[#00A89D] transition"><input type="checkbox" id="wwp-emphasis-past" checked class="accent-[#00A89D]"> <span class="font-medium">Past Clients</span></label>
                     </div>
+                    <p class="text-[11px] text-gray-500 mt-2 m-0">Default focus: realtor partners + past clients. Uncheck either if you want a narrower week.</p>
                 </div>
                 <div class="bg-gradient-to-br from-[#00A89D]/10 to-white dark:to-gray-800 border border-[#00A89D]/30 rounded-2xl p-5">
                     <label class="flex items-start gap-3 cursor-pointer select-none">
-                        <input type="checkbox" id="wwp-weave-hobbies" class="w-5 h-5 mt-0.5 accent-[#00A89D] flex-shrink-0">
-                        <div><span class="font-bold text-[#00A89D]"><i class="fas fa-heart mr-1"></i> Light hobby touch <span class="text-[10px] font-normal text-gray-500">(optional)</span></span>
-                        <div class="text-xs text-gray-600 dark:text-gray-300 mt-2">Off by default. When on, at most 1–2 light personal notes — never hobby-themed weeks or puns.</div></div>
+                        <input type="checkbox" id="wwp-weave-hobbies" checked class="w-5 h-5 mt-0.5 accent-[#00A89D] flex-shrink-0">
+                        <div><span class="font-bold text-[#00A89D]"><i class="fas fa-heart mr-1"></i> Light hobby touch <span class="text-[10px] font-normal text-gray-500">(on by default)</span></span>
+                        <div class="text-xs text-gray-600 dark:text-gray-300 mt-2">On by default — at most 1–2 light personal notes in the plan. Never hobby-themed weeks or puns. Turn off for a pure pipeline week.</div></div>
                     </label>
                 </div>
             </div>
@@ -7931,7 +7931,7 @@
 
 </main>
 
-<!-- Newsletter fun-fact / pro-tip / quote picker (also auto-created by newsletter-generator.js if missing) -->
+<!-- Newsletter engagement / fun-fact / tip / quote picker (tabs + toolbar required for multi-section hub) -->
 <div id="newsletter-choice-modal" class="modal app-modal-overlay hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4" aria-hidden="true">
     <div onclick="event.stopImmediatePropagation()" class="modal-content bg-white dark:bg-gray-900 rounded-3xl max-w-3xl w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-6 md:px-8 py-5 flex items-center justify-between">
@@ -7941,6 +7941,8 @@
             </div>
             <button type="button" onclick="if(typeof window.closeNewsletterChoiceModal==='function')window.closeNewsletterChoiceModal();" class="text-white/80 hover:text-white text-4xl leading-none transition flex-shrink-0" aria-label="Close">&times;</button>
         </div>
+        <div id="nl-choice-modal-tabs" class="hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50"></div>
+        <div id="nl-choice-modal-toolbar" class="hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"></div>
         <div class="p-6 md:p-8">
             <ul id="nl-choice-modal-list" class="space-y-4 max-h-[62vh] overflow-y-auto pr-1 list-none m-0 p-0"></ul>
         </div>
@@ -8167,278 +8169,415 @@
      CENTRAL USER PROFILE / PREFERENCES MODAL
      ===================================================== -->
 <div id="user-profile-modal" class="fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center" data-no-backdrop-close="1" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
-    <div class="bg-white dark:bg-gray-900 w-full max-w-4xl mx-4 rounded-3xl shadow-2xl max-h-[92vh] min-h-0 overflow-hidden flex flex-col">
+    <div class="bg-white dark:bg-gray-900 w-full max-w-4xl mx-4 rounded-3xl shadow-2xl max-h-[92vh] min-h-0 overflow-hidden flex flex-col profile-modal-shell">
         
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between px-4 sm:px-6 md:px-8 py-4 sm:py-6 border-b border-gray-200 dark:border-gray-700">
-            <div class="min-w-0 pr-2">
-                <h2 id="profile-modal-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">My Profile & Preferences</h2>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Powers AI Coach, Weekly Plan, Scripts, Social, Newsletter & more. Closes only via <strong>×</strong> or <strong>Save</strong>.</p>
+        <!-- Modal Header — compact intro strip -->
+        <div class="profile-modal-header flex items-center justify-between gap-3 px-4 sm:px-6 md:px-8 py-3.5 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3 min-w-0">
+                <div id="profile-header-avatar" class="profile-header-avatar is-empty flex-shrink-0" aria-hidden="true">
+                    <img id="profile-header-photo" alt="" width="42" height="42" decoding="async">
+                    <span id="profile-header-initials">?</span>
+                </div>
+                <div class="min-w-0">
+                    <h2 id="profile-modal-title" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight m-0">My Profile</h2>
+                    <p id="profile-modal-subtitle" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 m-0 leading-snug">One profile powers every tool — fill it once, sound like you everywhere.</p>
+                </div>
             </div>
-            <button type="button" id="close-profile-modal" class="text-3xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0" aria-label="Close profile">&times;</button>
+            <button type="button" id="close-profile-modal" class="profile-close-btn flex-shrink-0" aria-label="Close profile">&times;</button>
         </div>
 
         <!-- Guided setup header (step-by-step mode — tabs/chrome hidden) -->
-        <div id="profile-wizard-view" class="hidden flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/5 to-transparent">
-            <div class="px-4 sm:px-6 md:px-8 py-4">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                        <div class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase">Guided setup · one section at a time</div>
-                        <h3 id="profile-wizard-step-title" class="text-lg font-bold text-[#002B5C] dark:text-white mt-0.5">Identity &amp; Branding</h3>
-                        <p id="profile-wizard-progress" class="text-xs text-gray-500 mt-1">Step 1 of 5</p>
-                        <p id="profile-wizard-step-hint" class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-2xl"></p>
-                    </div>
-                    <div id="profile-wizard-dots" class="flex gap-1.5 justify-center sm:justify-end flex-shrink-0" aria-hidden="true"></div>
+        <div id="profile-wizard-view" class="hidden flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#00A89D]/8 via-transparent to-[#F15A29]/5">
+            <div class="px-4 sm:px-6 md:px-8 py-3.5 space-y-2.5">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-bold tracking-[1.5px] text-[#00A89D] uppercase">Guided setup</span>
+                    <span id="profile-wizard-mini-score" class="text-[10px] font-semibold text-gray-500 tabular-nums">0% complete</span>
+                    <span class="text-[10px] text-gray-400">· ~4 min</span>
+                    <span id="profile-wizard-progress" class="text-[10px] font-semibold text-gray-500 ml-auto tabular-nums">Step 1 of 6</span>
                 </div>
+                <div>
+                    <h3 id="profile-wizard-step-title" class="text-base sm:text-lg font-bold text-[#002B5C] dark:text-white m-0 leading-tight">Identity &amp; Branding</h3>
+                    <p id="profile-wizard-step-hint" class="text-xs text-gray-500 dark:text-gray-400 mt-1 m-0 max-w-2xl leading-relaxed"></p>
+                </div>
+                <div class="h-1 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div id="profile-wizard-progress-bar" class="h-full rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] transition-all duration-300" style="width:16%"></div>
+                </div>
+                <div id="profile-wizard-dots" class="profile-wizard-stepper flex gap-1 sm:gap-1.5 overflow-x-auto pb-0.5" role="list" aria-label="Setup steps"></div>
             </div>
         </div>
 
 <!-- Full Profile Form -->
         <div id="profile-full-view" class="flex flex-col flex-1 min-h-0">
         <div id="profile-full-chrome">
-        <!-- Strength meter + live preview -->
-        <div class="flex-shrink-0 px-4 sm:px-6 md:px-8 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-[#00A89D]/5 to-transparent">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between mb-3">
-                <div class="flex items-center flex-wrap gap-2 sm:gap-3">
-                    <div class="text-sm font-semibold text-[#002B5C] dark:text-white">Profile strength: <span id="profile-strength-score" class="text-[#00A89D]">0%</span></div>
-                    <button type="button" id="profile-open-wizard" class="text-[10px] px-2 py-1 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition" title="Walk through each section one step at a time (hides tabs until you finish)">Guided setup</button>
-                    <span id="profile-last-updated" class="text-[10px] text-gray-400 hidden"></span>
+        <!-- Unified status card: strength + coach preview + tips -->
+        <div class="profile-full-chrome-strip flex-shrink-0 pb-2.5 border-b border-gray-100 dark:border-gray-800">
+            <div class="profile-status-card">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="min-w-0">
+                            <div class="flex items-baseline gap-2 flex-wrap">
+                                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Strength</span>
+                                <span id="profile-strength-score" class="text-lg font-bold text-[#00A89D] tabular-nums leading-none">0%</span>
+                                <span id="profile-strength-label" class="text-[10px] font-semibold text-gray-400">Just starting</span>
+                                <span id="profile-last-updated" class="text-[10px] text-gray-400 hidden"></span>
+                            </div>
+                            <div class="mt-1.5 h-1.5 w-full max-w-[14rem] rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                <div id="profile-strength-bar" class="h-full rounded-full bg-gradient-to-r from-[#F15A29] to-[#00A89D] transition-all duration-500 profile-strength-bar--low" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <button type="button" id="profile-open-wizard" class="profile-guided-cta flex-shrink-0" title="Walk through each section one step at a time (~4 min)">
+                            <i class="fas fa-route opacity-80" aria-hidden="true"></i>
+                            <span>Guided setup</span>
+                        </button>
+                    </div>
+                    <div id="profile-live-preview" class="profile-live-preview-inline min-w-0 sm:max-w-[48%] sm:text-right">
+                        <span class="profile-live-preview-label">Coach sees you as</span>
+                        <p id="profile-live-preview-text" class="text-xs sm:text-sm text-[#002B5C] dark:text-gray-200 m-0 leading-snug">Complete your profile so every tool sounds like you.</p>
+                        <div id="profile-live-preview-tools" class="flex flex-wrap gap-1 mt-1 sm:justify-end"></div>
+                    </div>
                 </div>
-                <div class="flex-1 max-w-xs h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                    <div id="profile-strength-bar" class="h-full rounded-full bg-gradient-to-r from-[#F15A29] to-[#00A89D] transition-all duration-500" style="width:0%"></div>
-                </div>
-            </div>
-            <div id="profile-strength-hints" class="flex flex-wrap gap-x-4 gap-y-1 mb-3"></div>
-            <div id="profile-live-preview" class="p-3 rounded-2xl border border-[#00A89D]/25 bg-white/70 dark:bg-gray-800/60 mb-2">
-                <p class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-1">How the coach sees you</p>
-                <p id="profile-live-preview-text" class="text-sm text-[#002B5C] dark:text-gray-200 m-0 leading-relaxed">Complete your profile so every tool sounds like you.</p>
-                <div id="profile-live-preview-tools" class="flex flex-wrap gap-1.5 mt-2"></div>
+                <div id="profile-strength-hints" class="profile-strength-hints flex flex-wrap gap-1.5 mt-2.5" aria-label="Suggested next fields"></div>
             </div>
         </div>
 
-        <!-- Tab navigation -->
-        <div id="profile-tab-nav" class="flex-shrink-0 flex flex-wrap gap-1 px-4 sm:px-6 md:px-8 pt-3 pb-0 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-            <button type="button" class="profile-tab-btn active px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-[#00A89D] text-[#00A89D] bg-white dark:bg-gray-900" data-profile-tab="identity">Identity <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
-            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="business">Business <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
-            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="content">Voice &amp; Links <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
-            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="prospecting">Prospecting <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
-            <button type="button" class="profile-tab-btn px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D]" data-profile-tab="personal">Personal <span class="profile-tab-badge text-[10px] font-normal opacity-70"></span></button>
+        <!-- Tab navigation (stays visible while form scrolls) -->
+        <div id="profile-tab-nav" class="flex-shrink-0 flex flex-nowrap gap-1 px-4 sm:px-6 md:px-8 pt-2.5 pb-0 border-b border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-gray-900/80 overflow-x-auto profile-tab-nav-scroll" role="tablist" aria-label="Profile sections">
+            <button type="button" role="tab" class="profile-tab-btn active is-tab-empty px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-[#00A89D] text-[#00A89D] bg-white dark:bg-gray-900 flex-shrink-0" data-profile-tab="identity">Identity <span class="profile-tab-badge" aria-hidden="true"></span></button>
+            <button type="button" role="tab" class="profile-tab-btn is-tab-empty px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D] flex-shrink-0" data-profile-tab="business">Business <span class="profile-tab-badge" aria-hidden="true"></span></button>
+            <button type="button" role="tab" class="profile-tab-btn is-tab-empty px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D] flex-shrink-0" data-profile-tab="voice">Voice <span class="profile-tab-badge" aria-hidden="true"></span></button>
+            <button type="button" role="tab" class="profile-tab-btn is-tab-empty px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D] flex-shrink-0" data-profile-tab="links">Links <span class="profile-tab-badge" aria-hidden="true"></span></button>
+            <button type="button" role="tab" class="profile-tab-btn is-tab-empty px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D] flex-shrink-0" data-profile-tab="prospecting">Prospecting <span class="profile-tab-badge" aria-hidden="true"></span></button>
+            <button type="button" role="tab" class="profile-tab-btn is-tab-empty px-3 py-2 text-xs sm:text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-[#00A89D] flex-shrink-0" data-profile-tab="personal">Personal <span class="profile-tab-badge" aria-hidden="true"></span></button>
         </div>
         </div><!-- /profile-full-chrome -->
 
-        <div id="profile-form-scroll" class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 md:p-8">
+        <div id="profile-form-scroll" class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-5 md:p-6">
 
             <!-- TAB: Identity -->
-            <div id="profile-tab-panel-identity" class="profile-tab-panel space-y-4" data-profile-section="identity">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Identity &amp; Contact</h3>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#F15A29]/10 text-[#F15A29] font-semibold">Essential</span>
+            <div id="profile-tab-panel-identity" class="profile-tab-panel space-y-3.5" data-profile-section="identity">
+                <div id="profile-empty-welcome" class="profile-empty-welcome" role="status">
+                    <div class="profile-empty-welcome-icon" aria-hidden="true"><i class="fas fa-user-edit"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-[#002B5C] dark:text-white m-0">Welcome — start with name + market</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-0.5 leading-relaxed">About 30 seconds. Every tool personalizes from this profile.</p>
+                    </div>
                 </div>
-                <p class="text-xs text-gray-500 m-0">Used in <strong>Newsletter</strong>, <strong>Scripts</strong>, signatures, and AI Coach.</p>
+                <div class="profile-panel-intro">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Who you are</h3>
+                        <span class="profile-panel-pill profile-panel-pill--start">Start here</span>
+                    </div>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">Name, market, and headshot feed Newsletter, Scripts, partner share, and AI Coach.</p>
+                </div>
+                <div class="profile-section-card">
+                <p class="profile-section-label">Identity</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Full Name <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
-                        <input type="text" id="profile-name" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    <div class="profile-field profile-field--essential profile-field-stack">
+                        <label class="block text-sm font-medium" for="profile-name">Full Name <span class="profile-field-tag profile-field-tag--essential">Essential</span></label>
+                        <input type="text" id="profile-name" class="profile-input w-full" autocomplete="name" placeholder="Your full name">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Email Address <span class="text-[10px] text-gray-400">Recommended</span></label>
-                        <input type="email" id="profile-email" placeholder="you@example.com" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Phone <span class="text-gray-400 font-normal text-xs">optional</span></label>
-                        <input type="tel" id="profile-phone" placeholder="(317) 555-0100" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">NMLS # <span class="text-gray-400 font-normal text-xs">optional</span></label>
-                        <input type="text" id="profile-nmls" placeholder="e.g. 123456" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium mb-1">One-line intro <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
-                        <input type="text" id="profile-intro" placeholder="I'm the LO who makes pre-approvals feel fast, clear, and human..." class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <p class="text-[11px] text-gray-500 mt-1 m-0">How you describe yourself to partners — scripts and social pull from this.</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Primary Market / Location <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
-                        <input type="text" id="profile-location" placeholder="e.g. Fort Wayne, IN" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Years in the Business</label>
-                        <input type="text" id="profile-years" inputmode="text" autocomplete="off" placeholder="e.g. 12, since 2004, licensed since 2010" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <p id="profile-years-hint" class="hidden text-xs text-[#00A89D] mt-1.5 m-0"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Team Situation</label>
-                        <select id="profile-team" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option>Solo Loan Officer</option>
-                            <option>Have an Assistant</option>
-                            <option>Small Team (2-4 people)</option>
-                            <option>Larger Team / Branch</option>
-                        </select>
+                    <div class="profile-field profile-field--essential profile-field-stack">
+                        <label class="block text-sm font-medium" for="profile-location">Primary Market <span class="profile-field-tag profile-field-tag--essential">Essential</span></label>
+                        <input type="text" id="profile-location" placeholder="Fort Wayne, IN" class="profile-input w-full">
                     </div>
                 </div>
-                <!-- Headshot lives in Identity (partner share, signatures, branding) -->
-                <div class="rounded-2xl border border-[#00A89D]/25 bg-[#00A89D]/5 p-4 space-y-3">
-                    <div class="flex flex-col sm:flex-row gap-4 sm:items-start">
-                        <div class="flex-shrink-0 flex flex-col items-center gap-2">
-                            <div id="profile-headshot-preview-wrap" class="w-[4.5rem] h-[5.5rem] rounded-full overflow-hidden border-2 border-white shadow-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                                <img id="profile-headshot-preview" alt="" class="hidden w-full h-full object-cover object-top" width="72" height="88" decoding="async">
-                                <span id="profile-headshot-placeholder" class="text-[10px] text-gray-400 text-center px-1 leading-tight"><i class="fas fa-user text-lg block mb-0.5 opacity-50"></i>Photo</span>
+
+                <div class="profile-intro-block profile-field profile-field--essential">
+                    <label class="block text-sm font-medium mb-1" for="profile-intro">One-line intro <span class="profile-field-tag profile-field-tag--essential">Essential</span></label>
+                    <p class="profile-field-help mb-2">How partners and AI describe you in one sentence — scripts, social, and bios pull from this.</p>
+                    <input type="text" id="profile-intro" maxlength="160" placeholder="Tap a suggestion below, or write your own" class="profile-input w-full">
+                    <div class="profile-intro-meta">
+                        <p class="text-[11px] text-gray-500 m-0">Stuck? Tap a chip — then edit to sound like you.</p>
+                        <span id="profile-intro-char" class="profile-intro-char">0 / 160</span>
+                    </div>
+                    <div class="profile-intro-suggestions" id="profile-intro-suggestions" aria-label="Intro suggestions">
+                        <p class="profile-intro-suggestions-label">Ready-to-use intros — no full profile needed</p>
+                        <div id="profile-intro-chip-row" class="profile-intro-chip-row"></div>
+                    </div>
+                </div>
+
+                <div class="profile-identity-sub">
+                    <p class="profile-section-label">Experience</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-years">Years in the Business</label>
+                            <input type="text" id="profile-years" inputmode="text" autocomplete="off" placeholder="12 or since 2004" class="profile-input w-full">
+                            <p id="profile-years-hint" class="profile-years-hint hidden text-xs text-[#00A89D] m-0"></p>
+                        </div>
+                        <div class="profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-team">Team Situation</label>
+                            <div class="profile-select-wrap">
+                                <select id="profile-team" class="profile-input w-full">
+                                    <option value="">Select...</option>
+                                    <option>Solo Loan Officer</option>
+                                    <option>Have an Assistant</option>
+                                    <option>Small Team (2-4 people)</option>
+                                    <option>Larger Team / Branch</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <div class="profile-section-card">
+                <p class="profile-section-label">Contact &amp; compliance</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-sm font-medium mb-1" for="profile-email">Email <span class="profile-field-tag">Recommended</span></label>
+                        <input type="email" id="profile-email" placeholder="you@example.com" class="profile-input w-full" autocomplete="email">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" for="profile-phone">Phone <span class="profile-field-tag">Optional</span></label>
+                        <input type="tel" id="profile-phone" placeholder="(317) 555-0100" class="profile-input w-full" autocomplete="tel">
+                    </div>
+                    <div class="md:col-span-2 md:max-w-sm">
+                        <label class="block text-sm font-medium mb-1" for="profile-nmls">NMLS # <span class="profile-field-tag">Optional</span></label>
+                        <input type="text" id="profile-nmls" placeholder="123456" class="profile-input w-full" inputmode="numeric">
+                    </div>
+                </div>
+                </div>
+                <!-- Headshot: Marketing team provides sized URL (LO only) -->
+                <div class="profile-section-card space-y-3">
+                    <p class="profile-section-label">Professional headshot</p>
+                    <div class="flex flex-col sm:flex-row gap-3.5 sm:items-start">
+                        <div class="flex-shrink-0 flex flex-col items-center gap-1.5">
+                            <div id="profile-headshot-preview-wrap" aria-hidden="true">
+                                <img id="profile-headshot-preview" alt="" class="hidden" width="52" height="60" decoding="async">
+                                <span id="profile-headshot-placeholder"><i class="fas fa-user" aria-hidden="true"></i>Photo</span>
                             </div>
                             <span class="text-[10px] text-gray-500 font-medium">Preview</span>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <label class="block text-sm font-medium mb-1" for="profile-headshot-url">Professional Headshot URL <span class="text-[10px] text-[#F15A29] font-semibold">Partner share</span></label>
-                            <input type="url" id="profile-headshot-url" placeholder="https://… or Hotlink from 8upload" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Square crop · 400×400px minimum · shoulders-up portrait. Used for <strong>Share with partners</strong> and branded plates.</p>
-                            <p class="text-[11px] text-gray-600 dark:text-gray-300 m-0 mt-2 leading-relaxed">Free host (no account): <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a> → paste the <strong>Hotlink / Direct link</strong> (not the page URL).</p>
+                        <div class="flex-1 min-w-0 space-y-2">
+                            <label class="block text-sm font-medium mb-1" for="profile-headshot-url">Headshot URL <span class="profile-field-tag profile-field-tag--partner">Partner share</span></label>
+                            <input type="url" id="profile-headshot-url" placeholder="https://… (from Marketing)" class="profile-input w-full">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 m-0 leading-relaxed">Paste Marketing’s sized link for partner share and branded plates.</p>
+                            <a href="https://ruoffplus.ruoff.com/marketing/library/508?productId=1527"
+                               target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-2 rounded-full bg-[#002B5C] text-white hover:bg-[#00A89D] transition shadow-sm">
+                                <i class="fas fa-camera" aria-hidden="true"></i>
+                                Request headshot from Marketing
+                                <i class="fas fa-external-link-alt text-[10px] opacity-80" aria-hidden="true"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- TAB: Business -->
-            <div id="profile-tab-panel-business" class="profile-tab-panel hidden space-y-4" data-profile-section="business">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Business &amp; Goals</h3>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold">Weekly Plan</span>
+            <div id="profile-tab-panel-business" class="profile-tab-panel hidden space-y-3.5" data-profile-section="business">
+                <div class="profile-panel-intro">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Business &amp; goals</h3>
+                        <span class="profile-panel-pill">2026 Plan · Weekly Plan</span>
+                    </div>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">Focus and goals pull into your Business Plan and Weekly Win Plan automatically.</p>
                 </div>
-                <p class="text-xs text-gray-500 m-0">Shapes your <strong>Weekly Win Plan</strong>, coaching insights, and goal tracking.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Primary Focus Style <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
-                        <select id="profile-focus" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option value="balanced-growth">Balanced Growth</option>
-                            <option value="referral-partners">Heavy Realtor Partnerships</option>
-                            <option value="database">Past Client / Database Focus</option>
-                            <option value="equity-refi">Equity & Refinance Opportunities</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Past Client Database Size</label>
-                        <select id="profile-database-size" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option value="under-50">Under 50 past clients</option>
-                            <option value="50-200">50–200 past clients</option>
-                            <option value="200-500">200–500 past clients</option>
-                            <option value="500-1000">500–1,000 past clients</option>
-                            <option value="1000-plus">1,000+ past clients</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Monthly Unit Goal (loans)</label>
-                        <input type="text" id="profile-monthly-units" placeholder="e.g. 6 or 8–10" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <select onchange="if (this.value) { document.getElementById('profile-monthly-units').value = this.value; this.selectedIndex = 0; }" class="mt-1 w-full text-xs py-1.5 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Quick suggestions...</option>
-                            <option value="2-3 loans">2–3 loans / mo</option>
-                            <option value="4-5 loans">4–5 loans / mo</option>
-                            <option value="6-8 loans">6–8 loans / mo</option>
-                            <option value="8-10 loans">8–10 loans / mo</option>
-                            <option value="10-12 loans">10–12 loans / mo</option>
-                            <option value="12+ loans">12+ loans / mo</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Monthly Volume Goal</label>
-                        <input type="text" id="profile-monthly-goal" placeholder="e.g. $3M – $4M" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        <select onchange="if (this.value) { document.getElementById('profile-monthly-goal').value = this.value; this.selectedIndex = 0; }" class="mt-1 w-full text-xs py-1.5 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Quick suggestions...</option>
-                            <option value="Under $2M">Under $2M</option>
-                            <option value="$2M – $3M">$2M – $3M</option>
-                            <option value="$3M – $4M">$3M – $4M</option>
-                            <option value="$4M – $5M">$4M – $5M</option>
-                            <option value="$5M – $7M">$5M – $7M</option>
-                            <option value="$7M – $10M">$7M – $10M</option>
-                            <option value="$10M+">$10M+</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium mb-1">Weekly Prospecting Hours Available</label>
-                        <select id="profile-hours" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option>Less than 10</option>
-                            <option>10–15</option>
-                            <option>15–20</option>
-                            <option>20+</option>
-                        </select>
+                <div class="profile-section-card">
+                    <p class="profile-section-label">Focus &amp; capacity</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="profile-field profile-field--essential profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-focus">Primary Focus Style <span class="profile-field-tag profile-field-tag--essential">Essential</span></label>
+                            <div class="profile-select-wrap">
+                                <select id="profile-focus" class="profile-input w-full">
+                                    <option value="">Select...</option>
+                                    <option value="balanced-growth">Balanced Growth</option>
+                                    <option value="referral-partners">Heavy Realtor Partnerships</option>
+                                    <option value="database">Past Client / Database Focus</option>
+                                    <option value="equity-refi">Equity & Refinance Opportunities</option>
+                                </select>
+                            </div>
+                            <p class="profile-field-help">Maps to plan vision (Referral Mastery / Database / Balanced).</p>
+                        </div>
+                        <div class="profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-database-size">Past Client Database Size</label>
+                            <div class="profile-select-wrap">
+                                <select id="profile-database-size" class="profile-input w-full">
+                                    <option value="">Select...</option>
+                                    <option value="under-50">Under 50 past clients</option>
+                                    <option value="50-200">50–200 past clients</option>
+                                    <option value="200-500">200–500 past clients</option>
+                                    <option value="500-1000">500–1,000 past clients</option>
+                                    <option value="1000-plus">1,000+ past clients</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-hours">Weekly Prospecting Hours</label>
+                            <div class="profile-select-wrap">
+                                <select id="profile-hours" class="profile-input w-full">
+                                    <option value="">Select...</option>
+                                    <option>Less than 10</option>
+                                    <option>10–15</option>
+                                    <option>15–20</option>
+                                    <option>20+</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="profile-field profile-field--essential profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-income">Target Annual Income <span class="profile-field-tag profile-field-tag--essential">2026 Plan</span></label>
+                            <input type="number" id="profile-income" placeholder="275000" class="profile-input w-full" min="0" step="1000">
+                            <p class="profile-field-help">Private — pre-fills the 2026 Business Plan wizard.</p>
+                        </div>
                     </div>
                 </div>
-                <details class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
-                    <summary class="text-sm font-medium cursor-pointer text-gray-600 dark:text-gray-400">Optional planning &amp; niches</summary>
-                    <div class="mt-4 space-y-4">
+                <div class="profile-section-card">
+                    <p class="profile-section-label">Production goals</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Target Annual Income <span class="text-gray-400 font-normal text-xs">private — optional</span></label>
-                            <input type="number" id="profile-income" placeholder="e.g. 300000" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <label class="block text-sm font-medium mb-1" for="profile-monthly-units">Monthly Unit Goal (loans)</label>
+                            <input type="text" id="profile-monthly-units" placeholder="6 or 8–10" class="profile-input w-full">
+                            <div class="profile-select-wrap mt-1">
+                                <select onchange="if (this.value) { document.getElementById('profile-monthly-units').value = this.value; this.selectedIndex = 0; document.getElementById('profile-monthly-units').dispatchEvent(new Event('input',{bubbles:true})); }" class="profile-input w-full text-xs py-1.5">
+                                    <option value="">Quick suggestions…</option>
+                                    <option value="2-3 loans">2–3 loans / mo</option>
+                                    <option value="4-5 loans">4–5 loans / mo</option>
+                                    <option value="6-8 loans">6–8 loans / mo</option>
+                                    <option value="8-10 loans">8–10 loans / mo</option>
+                                    <option value="10-12 loans">10–12 loans / mo</option>
+                                    <option value="12+ loans">12+ loans / mo</option>
+                                </select>
+                            </div>
+                            <p id="profile-annual-units-hint" class="hidden text-xs text-[#00A89D] mt-1.5 m-0"></p>
                         </div>
                         <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="block text-sm font-medium">Ideal Clients &amp; Niches</label>
-                                <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-niche"> Select all</label>
+                            <label class="block text-sm font-medium mb-1" for="profile-monthly-goal">Monthly Volume Goal</label>
+                            <input type="text" id="profile-monthly-goal" placeholder="$3M – $4M" class="profile-input w-full">
+                            <div class="profile-select-wrap mt-1">
+                                <select onchange="if (this.value) { document.getElementById('profile-monthly-goal').value = this.value; this.selectedIndex = 0; document.getElementById('profile-monthly-goal').dispatchEvent(new Event('input',{bubbles:true})); }" class="profile-input w-full text-xs py-1.5">
+                                    <option value="">Quick suggestions…</option>
+                                    <option value="Under $2M">Under $2M</option>
+                                    <option value="$2M – $3M">$2M – $3M</option>
+                                    <option value="$3M – $4M">$3M – $4M</option>
+                                    <option value="$4M – $5M">$4M – $5M</option>
+                                    <option value="$5M – $7M">$5M – $7M</option>
+                                    <option value="$7M – $10M">$7M – $10M</option>
+                                    <option value="$10M+">$10M+</option>
+                                </select>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                                <label class="flex items-center gap-2"><input type="checkbox" value="First-time homebuyers" class="profile-niche"> First-time homebuyers</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Move-up buyers" class="profile-niche"> Move-up buyers</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Real estate investors" class="profile-niche"> Real estate investors</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Self-employed / Business owners" class="profile-niche"> Self-employed / Business owners</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Military / Veterans" class="profile-niche"> Military / Veterans</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Luxury / High-end clients" class="profile-niche"> Luxury / High-end clients</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Refinance clients" class="profile-niche"> Refinance clients</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Young professionals" class="profile-niche"> Young professionals</label>
-                            </div>
-                            <input type="text" id="profile-niche-other" placeholder="Other niches (comma separated)" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="block text-sm font-medium">Current Challenges</label>
-                                <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-challenge"> Select all</label>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Generating consistent leads" class="profile-challenge"> Generating consistent leads</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Building realtor relationships" class="profile-challenge"> Building realtor relationships</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Staying consistent with prospecting" class="profile-challenge"> Staying consistent with prospecting</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Creating social media content" class="profile-challenge"> Creating social media content</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Converting leads to clients" class="profile-challenge"> Converting leads to clients</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Standing out from other loan officers" class="profile-challenge"> Standing out from other loan officers</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Engaging my past client database" class="profile-challenge"> Engaging my past client database</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="Time management" class="profile-challenge"> Time management</label>
-                            </div>
-                            <input type="text" id="profile-challenge-other" placeholder="Other challenges" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                         </div>
                     </div>
-                </details>
+                    <p class="text-[11px] text-gray-500 m-0 mt-3"><i class="fas fa-link text-[#00A89D] mr-1"></i>Units × 12 pre-fill Business Plan funded-loan target when empty.</p>
+                </div>
+                <div class="profile-section-card">
+                    <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <p class="profile-section-label m-0">Ideal clients &amp; niches</p>
+                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-niche"> Select all</label>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm profile-chip-grid">
+                        <label class="profile-check-chip"><input type="checkbox" value="First-time homebuyers" class="profile-niche accent-[#00A89D]"> First-time homebuyers</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Move-up buyers" class="profile-niche accent-[#00A89D]"> Move-up buyers</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Real estate investors" class="profile-niche accent-[#00A89D]"> Real estate investors</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Self-employed / Business owners" class="profile-niche accent-[#00A89D]"> Self-employed / Business owners</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Military / Veterans" class="profile-niche accent-[#00A89D]"> Military / Veterans</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Luxury / High-end clients" class="profile-niche accent-[#00A89D]"> Luxury / High-end clients</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Refinance clients" class="profile-niche accent-[#00A89D]"> Refinance clients</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Young professionals" class="profile-niche accent-[#00A89D]"> Young professionals</label>
+                    </div>
+                    <input type="text" id="profile-niche-other" placeholder="Other niches (comma separated)" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                </div>
+                <div class="profile-section-card">
+                    <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <p class="profile-section-label m-0">Current challenges</p>
+                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-challenge"> Select all</label>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm profile-chip-grid">
+                        <label class="profile-check-chip"><input type="checkbox" value="Generating consistent leads" class="profile-challenge accent-[#00A89D]"> Generating consistent leads</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Building realtor relationships" class="profile-challenge accent-[#00A89D]"> Building realtor relationships</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Staying consistent with prospecting" class="profile-challenge accent-[#00A89D]"> Staying consistent with prospecting</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Creating social media content" class="profile-challenge accent-[#00A89D]"> Creating social media content</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Converting leads to clients" class="profile-challenge accent-[#00A89D]"> Converting leads to clients</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Standing out from other loan officers" class="profile-challenge accent-[#00A89D]"> Standing out from other loan officers</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Engaging my past client database" class="profile-challenge accent-[#00A89D]"> Engaging my past client database</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Time management" class="profile-challenge accent-[#00A89D]"> Time management</label>
+                    </div>
+                    <input type="text" id="profile-challenge-other" placeholder="Other challenges" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                </div>
             </div>
 
-            <!-- TAB: Voice & Links -->
-            <div id="profile-tab-panel-content" class="profile-tab-panel hidden space-y-4" data-profile-section="content">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Voice, Content &amp; Links</h3>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#F15A29]/10 text-[#F15A29] font-semibold">Essential</span>
+            <!-- TAB: Voice (tone only — links live on Links tab) -->
+            <div id="profile-tab-panel-voice" class="profile-tab-panel hidden space-y-3.5" data-profile-section="voice">
+                <div class="profile-panel-intro">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Voice &amp; writing style</h3>
+                        <span class="profile-panel-pill profile-panel-pill--start">Essential</span>
+                    </div>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">One main tone + optional fine-tunes. URLs live on the <strong>Links</strong> tab.</p>
                 </div>
-                <p class="text-xs text-gray-500 m-0">Powers <strong>Newsletter</strong>, <strong>Blog Creator</strong>, <strong>Social</strong>, and all AI writing.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Preferred Content Tone <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
-                        <select id="profile-tone" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                            <option value="">Select...</option>
-                            <option>Warm and casual (like a trusted friend)</option>
-                            <option>Professional but approachable</option>
-                            <option>Witty and fun</option>
-                            <option>Straightforward and helpful</option>
-                        </select>
+                <div class="profile-section-card">
+                    <p class="profile-section-label">Main tone</p>
+                    <p class="text-xs text-gray-500 m-0 mb-3 leading-relaxed">Your <strong>primary voice</strong> for Newsletter, Blog, Social, Scripts, and AI Coach. Pick one — this is the main control.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <div class="profile-field profile-field--essential profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-tone">Preferred Content Tone <span class="profile-field-tag profile-field-tag--essential">Essential</span></label>
+                            <div class="profile-select-wrap">
+                                <select id="profile-tone" class="profile-input w-full">
+                                    <option value="">Select...</option>
+                                    <option>Warm and casual (like a trusted friend)</option>
+                                    <option>Professional but approachable</option>
+                                    <option>Witty and fun</option>
+                                    <option>Straightforward and helpful</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="profile-field-stack">
+                            <label class="block text-sm font-medium" for="profile-content-notes">Never say / Always say <span class="profile-field-tag">Guardrails</span></label>
+                            <textarea id="profile-content-notes" rows="3" placeholder="Always local market; never public rates; no politics" class="profile-input w-full text-sm min-h-[5.5rem]"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-section-card">
+                    <p class="profile-section-label m-0 mb-1">Optional style fine-tunes</p>
+                    <p class="text-xs text-gray-500 m-0 mb-3 leading-relaxed">Extra habits layered on top of your main tone (not a second tone picker). <strong>Pick up to 3</strong> — e.g. stories + short &amp; direct.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm profile-chip-grid">
+                        <label class="profile-check-chip"><input type="checkbox" value="Uses personal stories" class="profile-voice accent-[#00A89D]"> Uses personal stories</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Uses humor lightly" class="profile-voice accent-[#00A89D]"> Uses humor lightly</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Short & direct" class="profile-voice accent-[#00A89D]"> Short &amp; direct</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Warm and encouraging" class="profile-voice accent-[#00A89D]"> Warm and encouraging</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Data-backed / specific" class="profile-voice accent-[#00A89D]"> Data-backed / specific</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Partner-first language" class="profile-voice accent-[#00A89D]"> Partner-first language</label>
+                    </div>
+                    <p id="profile-voice-cap-hint" class="text-[11px] text-gray-400 m-0 mt-2 hidden">Max 3 fine-tunes — uncheck one to pick another.</p>
+                </div>
+            </div>
+
+            <!-- TAB: Links (URLs, brand, translation prefs) -->
+            <div id="profile-tab-panel-links" class="profile-tab-panel hidden space-y-3.5" data-profile-section="links">
+                <div class="profile-panel-intro">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Links &amp; branding</h3>
+                        <span class="profile-panel-pill">Newsletter · Blog</span>
+                    </div>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">URLs and visual defaults. Headshot → <strong>Identity</strong>; writing style → <strong>Voice</strong>.</p>
+                </div>
+                <div class="profile-section-card space-y-3">
+                    <div class="profile-field profile-field--essential">
+                        <label class="block text-sm font-medium mb-1" for="profile-blog-url"><i class="fas fa-blog text-[#00A89D] mr-1"></i>Blog Page URL <span class="profile-field-tag profile-field-tag--essential">Essential</span></label>
+                        <p class="text-[11px] text-gray-500 m-0 mb-2">Author column home — Newsletter’s default link.</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="url" id="profile-blog-url" placeholder="https://mortgage-column.ruoff.com/yourname" class="profile-input flex-1 text-sm">
+                            <button type="button" id="profile-ruoff-blog-preset" class="text-xs px-4 py-2.5 rounded-xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition whitespace-nowrap">Ruoff column preset</button>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Never say / Always say <span class="text-gray-400 font-normal text-xs">guardrails</span></label>
-                        <textarea id="profile-content-notes" rows="3" placeholder="e.g. Always mention local market; never post rates publicly; avoid politics" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></textarea>
+                        <label class="block text-sm font-medium mb-1" for="profile-company-website">Company Website <span class="profile-field-tag">Optional</span></label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="url" id="profile-company-website" placeholder="https://www.ruoff.com/yourname" class="profile-input flex-1 text-sm">
+                            <button type="button" id="profile-ruoff-website-preset" class="text-xs px-4 py-2.5 rounded-xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition whitespace-nowrap" title="Uses your full name from Identity">
+                                Ruoff.com + name
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-1 m-0">Builds from Full Name on Identity — edit if your slug differs.</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1" for="profile-newsletter-color-bundle">Newsletter color bundle</label>
-                        <select id="profile-newsletter-color-bundle" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                        </select>
-                        <div id="profile-newsletter-color-preview"></div>
-                        <p id="profile-newsletter-color-desc" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0"></p>
+                </div>
+                <div class="profile-section-card">
+                    <p class="profile-section-label">Newsletter look</p>
+                    <label class="block text-sm font-medium mb-1" for="profile-newsletter-color-bundle">Color bundle</label>
+                    <div class="profile-select-wrap">
+                        <select id="profile-newsletter-color-bundle" class="profile-input w-full"></select>
                     </div>
-                    <div class="md:col-span-2 rounded-2xl border border-[#002B5C]/15 bg-gradient-to-r from-[#002B5C]/5 to-transparent px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div id="profile-newsletter-color-preview" class="mt-2"></div>
+                    <p id="profile-newsletter-color-desc" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 m-0"></p>
+                    <div class="mt-4 rounded-2xl border border-[#002B5C]/15 bg-gradient-to-r from-[#002B5C]/5 to-transparent px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
                         <div class="flex-shrink-0 w-28 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center p-1.5">
                             <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png"
                                  alt="Ruoff Mortgage"
@@ -8447,38 +8586,33 @@
                         </div>
                         <div class="min-w-0">
                             <p class="text-sm font-semibold text-[#002B5C] dark:text-white m-0">Company logo · Ruoff Mortgage</p>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 m-0 mt-0.5">Built into this coach — no URL needed. Your personal headshot is on the <strong>Identity</strong> tab.</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 m-0 mt-0.5">Built-in — no URL needed. Personal headshot lives on <strong>Identity</strong>.</p>
                         </div>
                     </div>
                 </div>
-                <div class="p-4 rounded-2xl border border-[#00A89D]/30 bg-[#00A89D]/5 space-y-3">
-                    <div>
-                        <label class="block text-sm font-medium mb-1"><i class="fas fa-blog text-[#00A89D] mr-1"></i>Blog Page URL <span class="text-[10px] text-[#F15A29] font-semibold">Essential</span></label>
-                        <p class="text-[11px] text-gray-500 m-0 mb-2">Your author column or blog home — e.g. <code class="text-xs">https://mortgage-column.ruoff.com/adamgarman</code>. Newsletter uses this as a default; paste a specific post URL per issue when you want to feature one article.</p>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input type="url" id="profile-blog-url" placeholder="https://mortgage-column.ruoff.com/yourname" class="flex-1 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-                            <button type="button" id="profile-ruoff-blog-preset" class="text-xs px-4 py-2.5 rounded-2xl border border-[#002B5C] text-[#002B5C] dark:text-white font-semibold hover:bg-[#002B5C] hover:text-white transition whitespace-nowrap">Ruoff column preset</button>
-                        </div>
-                    </div>
+                <div class="profile-section-card">
+                    <p class="profile-section-label">Client Translation defaults</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium mb-1"><i class="fas fa-language text-[#00A89D] mr-1"></i>Default translation language <span class="text-gray-400 font-normal text-xs">Client Translation tool</span></label>
-                            <select id="profile-translation-default" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-                                <option value="es">Spanish</option>
-                                <option value="vi">Vietnamese</option>
-                                <option value="zh">Chinese (Simplified)</option>
-                                <option value="ar">Arabic</option>
-                                <option value="pt">Portuguese</option>
-                                <option value="fr">French</option>
-                                <option value="ko">Korean</option>
-                                <option value="ru">Russian</option>
-                                <option value="ht">Haitian Creole</option>
-                                <option value="tl">Tagalog</option>
-                                <option value="en">English</option>
-                            </select>
+                            <label class="block text-sm font-medium mb-1" for="profile-translation-default"><i class="fas fa-language text-[#00A89D] mr-1"></i>Default language</label>
+                            <div class="profile-select-wrap">
+                                <select id="profile-translation-default" class="profile-input w-full text-sm">
+                                    <option value="es">Spanish</option>
+                                    <option value="vi">Vietnamese</option>
+                                    <option value="zh">Chinese (Simplified)</option>
+                                    <option value="ar">Arabic</option>
+                                    <option value="pt">Portuguese</option>
+                                    <option value="fr">French</option>
+                                    <option value="ko">Korean</option>
+                                    <option value="ru">Russian</option>
+                                    <option value="ht">Haitian Creole</option>
+                                    <option value="tl">Tagalog</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Quick-pick languages <span class="text-gray-400 font-normal text-xs">chips in Client Translation</span></label>
+                            <label class="block text-sm font-medium mb-1">Quick-pick languages</label>
                             <div class="flex flex-wrap gap-2 p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                                 <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="es" checked> Spanish</label>
                                 <label class="inline-flex items-center gap-1.5"><input type="checkbox" class="profile-translation-fav" value="vi"> Vietnamese</label>
@@ -8489,148 +8623,114 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">LinkedIn Profile <span class="text-gray-400 font-normal text-xs">optional</span></label>
-                            <input type="url" id="profile-linkedin-url" placeholder="https://linkedin.com/in/..." class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Company Website <span class="text-gray-400 font-normal text-xs">optional</span></label>
-                            <input type="url" id="profile-company-website" placeholder="https://ruoff.com" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm font-medium">Voice &amp; Tone Traits</label>
-                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-voice"> Select all</label>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Uses humor / light-hearted" class="profile-voice"> Uses humor / light-hearted</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Very professional & polished" class="profile-voice"> Very professional & polished</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Conversational (like a trusted friend)" class="profile-voice"> Conversational (like a trusted friend)</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Uses personal stories" class="profile-voice"> Uses personal stories</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Short & direct" class="profile-voice"> Short & direct</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Warm and encouraging" class="profile-voice"> Warm and encouraging</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Straightforward / no fluff" class="profile-voice"> Straightforward / no fluff</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Witty and clever" class="profile-voice"> Witty and clever</label>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm font-medium">Preferred Content Formats</label>
-                        <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-format"> Select all</label>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Short text posts / Captions" class="profile-format"> Short text posts / Captions</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Carousel posts" class="profile-format"> Carousel posts</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Reels / Short videos" class="profile-format"> Reels / Short videos</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Stories" class="profile-format"> Stories</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Long-form posts" class="profile-format"> Long-form posts</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Email newsletters" class="profile-format"> Email newsletters</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Live videos" class="profile-format"> Live videos</label>
-                    </div>
                 </div>
             </div>
 
             <!-- TAB: Prospecting -->
-            <div id="profile-tab-panel-prospecting" class="profile-tab-panel hidden space-y-4" data-profile-section="prospecting">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Prospecting Style</h3>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold">Weekly Plan</span>
+            <div id="profile-tab-panel-prospecting" class="profile-tab-panel hidden space-y-3.5" data-profile-section="prospecting">
+                <div class="profile-panel-intro">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Prospecting style</h3>
+                        <span class="profile-panel-pill">Weekly Plan</span>
+                    </div>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">How you hunt — shapes Weekly Win Plan and Value Vault recommendations.</p>
                 </div>
-                <p class="text-xs text-gray-500 m-0">How you hunt — shapes <strong>Weekly Win Plan</strong> and <strong>Value Vault</strong> recommendations.</p>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm font-medium">Preferred Prospecting Activities</label>
+                <div class="profile-section-card">
+                    <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <p class="profile-section-label m-0">Preferred activities</p>
                         <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-activity"> Select all</label>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Coffee/Drink Appointments" class="profile-activity"> Coffee or Drink Appointments</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Lunch Appointments" class="profile-activity"> Lunch Appointments</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Personal Notes/Cards" class="profile-activity"> Personal Notes & Cards</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Deliveries" class="profile-activity"> Pop-By Gift Deliveries</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Phone Calls" class="profile-activity"> Phone Calls</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Networking Events" class="profile-activity"> Networking Events</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Social Media Videos" class="profile-activity"> Social Media Videos</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Video Messages" class="profile-activity"> Video Messages</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm profile-chip-grid">
+                        <label class="profile-check-chip"><input type="checkbox" value="Coffee/Drink Appointments" class="profile-activity accent-[#00A89D]"> Coffee or Drink Appointments</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Lunch Appointments" class="profile-activity accent-[#00A89D]"> Lunch Appointments</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Personal Notes/Cards" class="profile-activity accent-[#00A89D]"> Personal Notes &amp; Cards</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Deliveries" class="profile-activity accent-[#00A89D]"> Pop-By Gift Deliveries</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Phone Calls" class="profile-activity accent-[#00A89D]"> Phone Calls</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Networking Events" class="profile-activity accent-[#00A89D]"> Networking Events</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Social Media Videos" class="profile-activity accent-[#00A89D]"> Social Media Videos</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Video Messages" class="profile-activity accent-[#00A89D]"> Video Messages</label>
                     </div>
                 </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm font-medium">Target Partner Types <span class="text-gray-400 font-normal text-xs">categories</span></label>
+                <div class="profile-section-card">
+                    <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <p class="profile-section-label m-0">Target partner types</p>
                         <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-partner"> Select all</label>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Realtors / Real Estate Agents" class="profile-partner"> Realtors / Real Estate Agents</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Real Estate Attorneys" class="profile-partner"> Real Estate Attorneys</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Financial Advisors / Wealth Managers" class="profile-partner"> Financial Advisors / Wealth Managers</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="CPAs / Accountants" class="profile-partner"> CPAs / Accountants</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Insurance Agents" class="profile-partner"> Insurance Agents</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Small Business Owners" class="profile-partner"> Small Business Owners</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Home Inspectors" class="profile-partner"> Home Inspectors</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Title Company Representatives" class="profile-partner"> Title Company Representatives</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="Mortgage Brokers (cross-referrals)" class="profile-partner"> Mortgage Brokers (cross-referrals)</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm profile-chip-grid">
+                        <label class="profile-check-chip"><input type="checkbox" value="Realtors / Real Estate Agents" class="profile-partner accent-[#00A89D]"> Realtors / Real Estate Agents</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Real Estate Attorneys" class="profile-partner accent-[#00A89D]"> Real Estate Attorneys</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Financial Advisors / Wealth Managers" class="profile-partner accent-[#00A89D]"> Financial Advisors / Wealth Managers</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="CPAs / Accountants" class="profile-partner accent-[#00A89D]"> CPAs / Accountants</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Insurance Agents" class="profile-partner accent-[#00A89D]"> Insurance Agents</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Small Business Owners" class="profile-partner accent-[#00A89D]"> Small Business Owners</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Home Inspectors" class="profile-partner accent-[#00A89D]"> Home Inspectors</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Title Company Representatives" class="profile-partner accent-[#00A89D]"> Title Company Representatives</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Mortgage Brokers (cross-referrals)" class="profile-partner accent-[#00A89D]"> Mortgage Brokers (cross-referrals)</label>
                     </div>
                     <input type="text" id="profile-partner-other" placeholder="Other partner types" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Specific partners you're growing <span class="text-gray-400 font-normal text-xs">names &amp; teams</span></label>
+                <div class="profile-section-card">
+                    <p class="profile-section-label">Partners you're growing now</p>
                     <textarea id="profile-partner-focus" rows="2" placeholder="e.g. Sarah &amp; Mike at ABC Realty; downtown investor agents..." class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"></textarea>
-                    <p class="text-[11px] text-gray-500 mt-1 m-0">Partner <strong>types</strong> above = categories. This field = actual people or brokerages you're focused on right now.</p>
+                    <p class="text-[11px] text-gray-500 mt-1.5 m-0">Types above = categories. This field = actual people or brokerages you're focused on right now.</p>
                 </div>
             </div>
 
             <!-- TAB: Personal -->
-            <div id="profile-tab-panel-personal" class="profile-tab-panel hidden space-y-4" data-profile-section="personal">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 class="text-lg font-semibold text-[#00A89D] m-0">Personal Flavor</h3>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold">Optional</span>
+            <div id="profile-tab-panel-personal" class="profile-tab-panel hidden space-y-3.5" data-profile-section="personal">
+                <div class="profile-panel-intro">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Personal flavor</h3>
+                        <span class="profile-panel-pill profile-panel-pill--muted">Optional</span>
+                    </div>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">Inspires Social and AI Coach. Newsletter personal notes stay manual each issue.</p>
                 </div>
-                <p class="text-xs text-gray-500 m-0">Inspires <strong>Social</strong> and <strong>AI Coach</strong> ideas. Newsletter personal notes are <strong>not</strong> auto-filled from here — you write those fresh each issue.</p>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm font-medium">Hobbies &amp; Passions <span class="text-gray-400 font-normal text-xs">(pick all that fit)</span></label>
+                <div class="profile-section-card">
+                    <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <p class="profile-section-label m-0">Hobbies &amp; passions</p>
                         <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-hobby"> Select all</label>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Golf" class="profile-hobby accent-[#00A89D]"> Golf</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Cards/Poker" class="profile-hobby accent-[#00A89D]"> Cards / Poker</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Sports" class="profile-hobby accent-[#00A89D]"> Sports (any)</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Fitness" class="profile-hobby accent-[#00A89D]"> Fitness / Gym</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Family Time" class="profile-hobby accent-[#00A89D]"> Family Time</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Outdoors" class="profile-hobby accent-[#00A89D]"> Outdoors / Hiking</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Cooking" class="profile-hobby accent-[#00A89D]"> Cooking / Foodie</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Crafts" class="profile-hobby accent-[#00A89D]"> Crafts / DIY</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Travel" class="profile-hobby accent-[#00A89D]"> Travel</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Pets" class="profile-hobby accent-[#00A89D]"> Pets / Animals</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Boating" class="profile-hobby accent-[#00A89D]"> Boating / Lake Life</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Hunting/Fishing" class="profile-hobby accent-[#00A89D]"> Hunting / Fishing</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Running/Cycling" class="profile-hobby accent-[#00A89D]"> Running / Cycling</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Yoga/Wellness" class="profile-hobby accent-[#00A89D]"> Yoga / Wellness</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Live Music" class="profile-hobby accent-[#00A89D]"> Live Music / Concerts</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Wine/Beer" class="profile-hobby accent-[#00A89D]"> Wine / Craft Beer</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Gardening" class="profile-hobby accent-[#00A89D]"> Gardening</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Volunteering" class="profile-hobby accent-[#00A89D]"> Volunteering / Community</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Youth Coaching" class="profile-hobby accent-[#00A89D]"> Youth Sports Coaching</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Home Projects" class="profile-hobby accent-[#00A89D]"> Home Projects / Renovating</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Photography" class="profile-hobby accent-[#00A89D]"> Photography</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Cars/Motorsports" class="profile-hobby accent-[#00A89D]"> Cars / Motorsports</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Beach/Water Sports" class="profile-hobby accent-[#00A89D]"> Beach / Water Sports</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Snow Sports" class="profile-hobby accent-[#00A89D]"> Snow Sports / Skiing</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Faith/Community" class="profile-hobby accent-[#00A89D]"> Faith / Church Community</label>
-                        <label class="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/60 has-[:checked]:border-[#00A89D] has-[:checked]:bg-[#00A89D]/5 transition"><input type="checkbox" value="Reading/Podcasts" class="profile-hobby accent-[#00A89D]"> Reading / Podcasts</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm profile-chip-grid">
+                        <label class="profile-check-chip"><input type="checkbox" value="Golf" class="profile-hobby accent-[#00A89D]"> Golf</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Cards/Poker" class="profile-hobby accent-[#00A89D]"> Cards / Poker</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Sports" class="profile-hobby accent-[#00A89D]"> Sports (any)</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Fitness" class="profile-hobby accent-[#00A89D]"> Fitness / Gym</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Family Time" class="profile-hobby accent-[#00A89D]"> Family Time</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Outdoors" class="profile-hobby accent-[#00A89D]"> Outdoors / Hiking</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Cooking" class="profile-hobby accent-[#00A89D]"> Cooking / Foodie</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Crafts" class="profile-hobby accent-[#00A89D]"> Crafts / DIY</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Travel" class="profile-hobby accent-[#00A89D]"> Travel</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Pets" class="profile-hobby accent-[#00A89D]"> Pets / Animals</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Boating" class="profile-hobby accent-[#00A89D]"> Boating / Lake Life</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Hunting/Fishing" class="profile-hobby accent-[#00A89D]"> Hunting / Fishing</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Running/Cycling" class="profile-hobby accent-[#00A89D]"> Running / Cycling</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Yoga/Wellness" class="profile-hobby accent-[#00A89D]"> Yoga / Wellness</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Live Music" class="profile-hobby accent-[#00A89D]"> Live Music / Concerts</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Wine/Beer" class="profile-hobby accent-[#00A89D]"> Wine / Craft Beer</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Gardening" class="profile-hobby accent-[#00A89D]"> Gardening</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Volunteering" class="profile-hobby accent-[#00A89D]"> Volunteering / Community</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Youth Coaching" class="profile-hobby accent-[#00A89D]"> Youth Sports Coaching</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Home Projects" class="profile-hobby accent-[#00A89D]"> Home Projects / Renovating</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Photography" class="profile-hobby accent-[#00A89D]"> Photography</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Cars/Motorsports" class="profile-hobby accent-[#00A89D]"> Cars / Motorsports</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Beach/Water Sports" class="profile-hobby accent-[#00A89D]"> Beach / Water Sports</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Snow Sports" class="profile-hobby accent-[#00A89D]"> Snow Sports / Skiing</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Faith/Community" class="profile-hobby accent-[#00A89D]"> Faith / Church Community</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Reading/Podcasts" class="profile-hobby accent-[#00A89D]"> Reading / Podcasts</label>
                     </div>
-                    <input type="text" id="profile-hobbies-other" placeholder="Other hobbies or passions (e.g. pickleball, baking, fantasy football)" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+                    <input type="text" id="profile-hobbies-other" placeholder="Other hobbies (e.g. pickleball, baking, fantasy football)" class="mt-3 w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Family Situation</label>
-                        <input type="text" id="profile-family" placeholder="e.g. Married with two young kids" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Personality / Lifestyle Keywords</label>
-                        <input type="text" id="profile-personality" placeholder="e.g. outdoorsy, foodie, competitive, family-first" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                <div class="profile-section-card">
+                    <p class="profile-section-label">Family &amp; lifestyle</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1" for="profile-family">Family situation</label>
+                            <input type="text" id="profile-family" placeholder="e.g. Married with two young kids" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1" for="profile-personality">Personality / lifestyle keywords</label>
+                            <input type="text" id="profile-personality" placeholder="e.g. outdoorsy, foodie, competitive, family-first" class="w-full p-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -8639,48 +8739,46 @@
         </div><!-- /profile-full-view -->
 
 
-        <div id="profile-wizard-footer" class="hidden flex-shrink-0 px-4 sm:px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-            <div class="flex items-center justify-between gap-3">
-                <button type="button" id="profile-wizard-skip" class="text-xs text-gray-500 hover:text-[#00A89D]">Skip to full profile</button>
-                <div class="flex flex-wrap gap-2 justify-end">
-                    <button type="button" id="profile-wizard-back" class="hidden px-4 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Back</button>
-                    <button type="button" id="profile-wizard-save-exit" class="px-4 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-[#00A89D] hover:text-[#00A89D] transition">Save &amp; exit</button>
-                    <button type="button" id="profile-wizard-next" class="px-6 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-semibold hover:bg-[#008f85]">Continue</button>
+        <div id="profile-wizard-footer" class="hidden flex-shrink-0 px-4 sm:px-6 md:px-8 py-3 sm:py-3.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50/95 dark:bg-gray-800/95">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                <button type="button" id="profile-wizard-skip" class="text-xs text-gray-500 hover:text-[#00A89D] text-left order-2 sm:order-1">Skip · open full profile</button>
+                <div class="flex flex-wrap gap-2 justify-end order-1 sm:order-2">
+                    <button type="button" id="profile-wizard-back" class="hidden px-3.5 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 font-medium">Back</button>
+                    <button type="button" id="profile-wizard-save-exit" class="px-3.5 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-[#00A89D] hover:text-[#00A89D] transition font-medium">Save &amp; exit</button>
+                    <button type="button" id="profile-wizard-next" class="px-5 py-2 text-sm rounded-xl bg-[#00A89D] text-white font-semibold hover:bg-[#008f85] shadow-sm">Continue</button>
                 </div>
             </div>
         </div>
 
-        <!-- Modal Footer -->
-        <div id="profile-full-footer" class="flex-shrink-0 px-4 sm:px-8 py-4 sm:py-6 border-t border-gray-200 dark:border-gray-700 flex flex-col gap-3 bg-gray-50 dark:bg-gray-800">
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <div class="flex flex-col gap-2 min-w-0">
+        <!-- Modal Footer — segmented: utility left · navigate/save right -->
+        <div id="profile-full-footer" class="profile-full-footer flex-shrink-0 px-4 sm:px-6 md:px-8 py-3 sm:py-3.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50/95 dark:bg-gray-800/95">
+            <div class="profile-footer-row">
+                <div class="profile-footer-left">
                     <div id="profile-save-status" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 transition-opacity">
-                        <i class="fas fa-check text-[#00A89D]"></i>
-                        <span>All changes saved automatically</span>
+                        <i class="fas fa-check text-[#00A89D]" aria-hidden="true"></i>
+                        <span>Auto-saved</span>
                     </div>
-                    <div class="flex flex-wrap gap-2 items-center">
-                        <button type="button" id="profile-export-data" class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] transition" title="Download profile, plans, and key drafts as JSON">
-                            <i class="fas fa-download mr-1"></i>Export backup
-                        </button>
-                        <button type="button" id="profile-import-data" class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#00A89D] hover:text-[#00A89D] transition" title="Restore from a previous export">
-                            <i class="fas fa-upload mr-1"></i>Import backup
-                        </button>
-                        <input type="file" id="profile-import-file" accept="application/json,.json" class="hidden">
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-2 sm:gap-3 justify-end items-center">
-                    <button type="button" id="profile-section-back" class="hidden px-4 py-2.5 rounded-2xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium">
-                        <i class="fas fa-arrow-left mr-1.5 text-xs opacity-70"></i>Back
+                    <button type="button" id="profile-export-data" class="profile-footer-ghost" title="Download profile, plans, and key drafts as JSON">
+                        <i class="fas fa-download" aria-hidden="true"></i><span>Export</span>
                     </button>
-                    <button type="button" id="cancel-profile" class="px-5 py-2.5 rounded-2xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Close</button>
-                    <button type="button" id="save-profile" class="px-6 py-2.5 bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] rounded-2xl font-semibold hover:bg-[#00A89D]/10">Save Preferences</button>
-                    <button type="button" id="profile-section-next" class="px-6 py-2.5 bg-[#00A89D] text-white rounded-2xl font-semibold hover:bg-[#008f85] shadow-sm">
-                        Next section <i class="fas fa-arrow-right ml-1.5 text-xs opacity-90"></i>
+                    <button type="button" id="profile-import-data" class="profile-footer-ghost" title="Restore from a previous export">
+                        <i class="fas fa-upload" aria-hidden="true"></i><span>Import</span>
+                    </button>
+                    <input type="file" id="profile-import-file" accept="application/json,.json" class="hidden">
+                </div>
+                <div class="profile-footer-actions">
+                    <button type="button" id="profile-section-back" class="profile-btn-secondary hidden">
+                        <i class="fas fa-arrow-left mr-1 text-xs opacity-70" aria-hidden="true"></i>Back
+                    </button>
+                    <button type="button" id="cancel-profile" class="profile-btn-secondary">Close</button>
+                    <button type="button" id="save-profile" class="profile-btn-save">Save</button>
+                    <button type="button" id="profile-section-next" class="profile-btn-next">
+                        Next <i class="fas fa-arrow-right ml-1 text-xs opacity-90" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
-            <p id="profile-section-nav-hint" class="text-[11px] text-gray-500 dark:text-gray-400 m-0 text-right sm:text-left">
-                Tip: use <strong>Next section</strong> to walk through each tab — or jump with the tabs above.
+            <p id="profile-section-nav-hint" class="text-[10px] text-gray-400 dark:text-gray-500 m-0 text-right sm:text-left leading-snug">
+                Use <strong class="font-semibold text-gray-500 dark:text-gray-400">Next</strong> to walk sections, or jump with the tabs above.
             </p>
         </div>
 

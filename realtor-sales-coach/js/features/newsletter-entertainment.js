@@ -402,6 +402,21 @@
     return (checked && checked.value) || nlPuzzleType || 'trivia';
   }
 
+  function setPuzzleType(type) {
+    if (!PUZZLE_TYPES[type]) return;
+    nlPuzzleType = type;
+    try { localStorage.setItem('nl-puzzle-type', type); } catch (e) { /* ignore */ }
+    document.querySelectorAll('input[name="nl-puzzle-type"]').forEach((radio) => {
+      radio.checked = radio.value === type;
+    });
+    syncPuzzleTypeRadiosUI();
+    if (typeof ensureSelectionMatchesFilters === 'function') {
+      try { ensureSelectionMatchesFilters(); } catch (e) { /* ignore */ }
+    }
+    try { updateFilterCountUI(); } catch (e) { /* ignore */ }
+    updatePreviews();
+  }
+
   function syncPuzzleTypeFromUI() {
     nlPuzzleType = getActivePuzzleType();
     localStorage.setItem('nl-puzzle-type', nlPuzzleType);
@@ -531,23 +546,51 @@
     updatePreviews();
   }
 
+  function setPreviewHtml(ids, html) {
+    (Array.isArray(ids) ? ids : [ids]).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    });
+  }
+
+  function formatInlinePuzzlePreview(type, item) {
+    if (!item) {
+      return '<span class="text-gray-400 italic">Click to pick a brain teaser — or hit Shuffle</span>';
+    }
+    const badge = isCustomPuzzleItem(item)
+      ? '<span class="inline-block text-[10px] px-2 py-0.5 mb-1 rounded-full bg-[#F15A29]/10 text-[#F15A29] font-semibold">Your custom</span> '
+      : '';
+    const typeLabel = PUZZLE_TYPES[type]?.label || 'Brain Teaser';
+    let body = '';
+    if (type === 'trivia') body = item.question || '';
+    else if (type === 'scramble') body = `${item.prompt || ''} → ${item.scrambled || ''}`.trim();
+    else body = item.riddle || '';
+    return `${badge}<span class="text-[10px] font-bold uppercase tracking-wide text-[#00A89D] mr-1.5">${escapeHtml(typeLabel)}</span>${escapeHtml(body)}`;
+  }
+
   function updatePreviews() {
-    const dadEl = document.getElementById('dad-joke-preview');
-    const puzzleEl = document.getElementById('brain-teaser-preview');
-    if (dadEl) {
-      const badge = isCustomDadJokeActive() ? customPreviewBadge() : '';
-      dadEl.innerHTML = selectedDadJoke
-        ? `${badge}${escapeHtml(selectedDadJoke)}`
-        : '<span class="text-gray-500">No dad joke selected</span>';
-    }
-    if (puzzleEl) {
-      const type = getActivePuzzleType();
-      const item = getSelectedPuzzle(type);
-      puzzleEl.innerHTML = formatPuzzlePreview(type, item);
-    }
+    // Engagement rows use *-inline; lower custom panel uses base ids — keep both in sync
+    const badge = isCustomDadJokeActive() ? customPreviewBadge() : '';
+    const dadHtml = selectedDadJoke
+      ? `${badge}${escapeHtml(selectedDadJoke)}`
+      : '<span class="text-gray-400 italic">Click to pick a dad joke — or hit Shuffle</span>';
+    setPreviewHtml(['dad-joke-preview', 'dad-joke-preview-inline'], dadHtml);
+
+    const type = getActivePuzzleType();
+    const item = getSelectedPuzzle(type);
+    // Full detail for lower panel; compact one-liner for engagement row
+    setPreviewHtml(['brain-teaser-preview'], formatPuzzlePreview(type, item));
+    setPreviewHtml(['brain-teaser-preview-inline'], formatInlinePuzzlePreview(type, item));
+
     syncPuzzleTypeRadiosUI();
     syncCustomPuzzleFieldsUI();
     updateFilterCountUI();
+    if (typeof window.updateCuratedRowStatuses === 'function') {
+      try { window.updateCuratedRowStatuses(); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.updateEngagementSectionSummary === 'function') {
+      try { window.updateEngagementSectionSummary(); } catch (e) { /* ignore */ }
+    }
   }
 
   function syncPuzzleTypeRadiosUI() {
@@ -644,11 +687,74 @@
     return null;
   }
 
+  function getSetupPreviewPlainText() {
+    const type = getActivePuzzleType();
+    const item = getSelectedPuzzle(type);
+    if (!item) return '';
+    if (type === 'trivia') return item.question || '';
+    if (type === 'scramble') return `${item.prompt || ''} → ${item.scrambled || ''}`.trim();
+    return item.riddle || '';
+  }
+
+  function getSelectionText(category) {
+    if (category === 'dadJoke') return selectedDadJoke || '';
+    if (category === 'puzzle') return getSetupPreviewPlainText();
+    return '';
+  }
+
+  function getPoolStats(category) {
+    if (category === 'dadJoke') {
+      return { total: dadJokes.length, used: usedDadJokes.length, label: 'dad jokes' };
+    }
+    if (category === 'puzzle') {
+      const type = getActivePuzzleType();
+      const pool = getFilteredPuzzleList(type);
+      const used = getUsedIds(type).length;
+      return {
+        total: pool.length,
+        used,
+        label: `${(PUZZLE_TYPES[type]?.label || 'brain teaser').toLowerCase()} items`
+      };
+    }
+    return { total: 0, used: 0, label: 'items' };
+  }
+
+  function getPickStatus(sectionKey) {
+    if (sectionKey === 'dadjoke') {
+      if (!selectedDadJoke) return 'empty';
+      if (isCustomDadJokeActive()) return 'custom';
+      return 'library';
+    }
+    if (sectionKey === 'puzzle') {
+      const type = getActivePuzzleType();
+      const item = getSelectedPuzzle(type);
+      if (!item) return 'empty';
+      if (isCustomPuzzleItem(item)) return 'custom';
+      return 'library';
+    }
+    return null;
+  }
+
+  function afterEngagementModalPick(modalApi, category, modal, search) {
+    persistUsed();
+    updatePreviews();
+    const { hideModal, shouldKeepOpen, refreshModal } = modalApi || {};
+    if (typeof shouldKeepOpen === 'function' && shouldKeepOpen() && typeof refreshModal === 'function') {
+      refreshModal(category);
+      return;
+    }
+    if (typeof hideModal === 'function') hideModal(modal);
+    if (search) search.value = '';
+  }
+
   function openChoiceModal(category, modalApi) {
     const meta = getChoiceModalMeta(category);
     if (!meta || !modalApi) return;
 
-    const { ensureModal, getTitleEl, getListEl, showModal, hideModal } = modalApi;
+    const {
+      ensureModal, getTitleEl, getListEl, showModal, hideModal,
+      renderHubTabs, renderToolbar, hubMode, shouldKeepOpen, refreshModal
+    } = modalApi;
     const modal = ensureModal();
     if (!modal) return;
 
@@ -657,13 +763,59 @@
     const data = meta.data || [];
 
     showModal(modal);
+    if (typeof renderHubTabs === 'function' && hubMode) {
+      renderHubTabs(category, modal);
+    }
+    if (typeof renderToolbar === 'function' && hubMode) {
+      renderToolbar(category, modal, hubMode);
+    }
     if (title) {
-      title.textContent = meta.title;
+      const hubTab = typeof window.getEngagementHubTabByCategory === 'function'
+        ? window.getEngagementHubTabByCategory(category)
+        : null;
+      title.textContent = hubMode && hubTab
+        ? `Engagement hub · ${hubTab.label}`
+        : meta.title;
       title.style.color = '#fff';
+      title.style.setProperty('color', '#fff', 'important');
+    }
+
+    const contentBody = list ? list.parentElement : null;
+
+    // Format switcher: Trivia · Word Scramble · Riddle (missing before — hub looked trivia-only)
+    let typeBar = modal.querySelector('#modal-puzzle-type-bar');
+    if (category === 'puzzle' && contentBody) {
+      if (!typeBar) {
+        typeBar = document.createElement('div');
+        typeBar.id = 'modal-puzzle-type-bar';
+        typeBar.className = 'mb-4';
+        contentBody.insertBefore(typeBar, list);
+      }
+      const activeType = getActivePuzzleType();
+      typeBar.innerHTML = `
+        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Format</p>
+        <div class="grid grid-cols-3 gap-2">
+          ${Object.entries(PUZZLE_TYPES).map(([key, cfg]) => `
+            <button type="button" data-modal-puzzle-type="${key}" class="text-xs sm:text-sm px-2 py-2.5 rounded-xl border-2 font-semibold transition ${activeType === key ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C] dark:text-white' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#00A89D]/50'}">
+              ${key === 'trivia' ? '🧠 ' : key === 'scramble' ? '🔤 ' : '❓ '}${cfg.label}
+            </button>
+          `).join('')}
+        </div>`;
+      typeBar.classList.remove('hidden');
+      typeBar.querySelectorAll('[data-modal-puzzle-type]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          setPuzzleType(btn.getAttribute('data-modal-puzzle-type'));
+          // Clear search when switching Trivia / Scramble / Riddle
+          const existingSearch = modal.querySelector('#modal-search');
+          if (existingSearch) existingSearch.value = '';
+          openChoiceModal(category, modalApi);
+        });
+      });
+    } else if (typeBar) {
+      typeBar.classList.add('hidden');
     }
 
     let search = modal.querySelector('#modal-search');
-    const contentBody = list ? list.parentElement : null;
     if (!search && contentBody) {
       search = document.createElement('input');
       search.id = 'modal-search';
@@ -736,8 +888,7 @@
       randomLi.innerHTML = `<i class="fas fa-dice"></i> <span>Pick a random one for me</span>`;
       randomLi.addEventListener('click', () => {
         regenerateRandom(category);
-        hideModal(modal);
-        if (search) search.value = '';
+        afterEngagementModalPick(modalApi, category, modal, search);
       });
       list.appendChild(randomLi);
 
@@ -752,8 +903,7 @@
             dadJokeIsCustom = false;
             persistUsed();
             updatePreviews();
-            hideModal(modal);
-            if (search) search.value = '';
+            afterEngagementModalPick(modalApi, category, modal, search);
           });
           list.appendChild(li);
         });
@@ -772,14 +922,17 @@
           }
           li.className = `p-4 bg-white dark:bg-gray-800 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-gray-900 dark:text-gray-100 text-base border ${isCurrent ? 'border-[#00A89D] ring-1 ring-[#00A89D]/30' : 'border-gray-200 dark:border-gray-700 hover:border-[#00A89D]'} flex items-start gap-3`;
           const answerLine = item.answer ? `<span class="block text-sm font-medium text-[#002B5C] dark:text-white mt-1.5">Answer: ${escapeHtml(item.answer)}</span>` : '';
-          li.innerHTML = `<i class="fas fa-puzzle-piece text-[#00A89D] mt-0.5 flex-shrink-0"></i> <span class="flex-1"><span class="block">${escapeHtml(display)}</span>${answerLine}${badges.length ? `<span class="flex flex-wrap gap-1.5 mt-2">${badges.join('')}</span>` : ''}</span> ${isCurrent ? '<span class="text-[10px] px-2 py-0.5 bg-[#00A89D]/10 text-[#00A89D] rounded-full self-start">current</span>' : ''}`;
+          const typeIcon = meta.puzzleType === 'scramble' ? 'fa-font' : meta.puzzleType === 'riddle' ? 'fa-question' : 'fa-puzzle-piece';
+          li.innerHTML = `<i class="fas ${typeIcon} text-[#00A89D] mt-0.5 flex-shrink-0"></i> <span class="flex-1"><span class="block">${escapeHtml(display)}</span>${answerLine}${badges.length ? `<span class="flex flex-wrap gap-1.5 mt-2">${badges.join('')}</span>` : ''}</span> ${isCurrent ? '<span class="text-[10px] px-2 py-0.5 bg-[#00A89D]/10 text-[#00A89D] rounded-full self-start">current</span>' : ''}`;
           li.dataset.searchText = `${display} ${item.answer || ''} ${item.category || ''} ${(item.tags || []).join(' ')}`.toLowerCase();
           li.addEventListener('click', () => {
+            if (meta.puzzleType && meta.puzzleType !== getActivePuzzleType()) {
+              setPuzzleType(meta.puzzleType);
+            }
             setSelectedPuzzle(meta.puzzleType, item);
             persistUsed();
             updatePreviews();
-            hideModal(modal);
-            if (search) search.value = '';
+            afterEngagementModalPick(modalApi, category, modal, search);
           });
           list.appendChild(li);
         });
@@ -988,10 +1141,15 @@
   window.NlEntertainment = {
     PUZZLE_TYPES,
     getActivePuzzleType,
+    setPuzzleType,
     updatePreviews,
     regenerateRandom,
     resetUsed,
     openChoiceModal,
+    getSetupPreviewPlainText,
+    getSelectionText,
+    getPoolStats,
+    getPickStatus,
     buildPromptLines,
     injectIntoHtml,
     injectTeaserAnswerAtEnd,

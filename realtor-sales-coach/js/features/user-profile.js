@@ -34,19 +34,20 @@
   };
 
   const COMPLETENESS_CHECKS = [
-    { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach' },
-    { key: 'email', weight: 10, hint: 'Add your email', tools: 'Newsletter signature' },
-    { key: 'phone', weight: 8, hint: 'Add your phone', tools: 'Scripts, Newsletter' },
-    { key: 'location', weight: 12, hint: 'Add your market', tools: 'Social, Newsletter' },
-    { key: 'blogPageUrl', weight: 8, hint: 'Add your blog page URL', tools: 'Newsletter, Blog' },
-    { key: 'focus', weight: 10, hint: 'Pick your business focus', tools: 'Weekly Plan' },
-    { key: 'monthlyUnits', weight: 10, hint: 'Set a monthly closing goal', tools: 'Weekly Plan' },
-    { key: 'hobbies', weight: 10, hint: 'Add 1–2 hobbies', tools: 'Social, Content' },
-    { key: 'tone', weight: 10, hint: 'Choose your tone', tools: 'AI, Scripts' },
-    { key: 'partnerTypes', weight: 10, hint: 'Select referral partner types', tools: 'Referrals' },
-    { key: 'challenges', weight: 8, hint: 'Pick your top challenge', tools: 'Weekly Plan' },
-    { key: 'activities', weight: 8, hint: 'Preferred prospecting activities', tools: 'Weekly Plan' },
-    { key: 'contentNotes', weight: 10, hint: 'Content guardrails', tools: 'All AI tools' }
+    { key: 'name', weight: 12, hint: 'Add your name', tools: 'Scripts, AI Coach', tab: 'identity', focusId: 'profile-name' },
+    { key: 'location', weight: 12, hint: 'Add your market', tools: 'Social, Newsletter', tab: 'identity', focusId: 'profile-location' },
+    { key: 'intro', weight: 8, hint: 'Add a one-line intro', tools: 'Scripts, Social', tab: 'identity', focusId: 'profile-intro' },
+    { key: 'email', weight: 8, hint: 'Add your email', tools: 'Newsletter signature', tab: 'identity', focusId: 'profile-email' },
+    { key: 'phone', weight: 6, hint: 'Add your phone', tools: 'Scripts, Newsletter', tab: 'identity', focusId: 'profile-phone' },
+    { key: 'blogPageUrl', weight: 8, hint: 'Add your blog page URL', tools: 'Newsletter, Blog', tab: 'content', focusId: 'profile-blog-url' },
+    { key: 'focus', weight: 10, hint: 'Pick your business focus', tools: 'Weekly Plan', tab: 'business', focusId: 'profile-focus' },
+    { key: 'monthlyUnits', weight: 8, hint: 'Set a monthly closing goal', tools: 'Weekly Plan', tab: 'business', focusId: 'profile-monthly-units' },
+    { key: 'hobbies', weight: 8, hint: 'Add 1–2 hobbies', tools: 'Social, Content', tab: 'personal', focusId: 'profile-hobbies-other' },
+    { key: 'tone', weight: 10, hint: 'Choose your tone', tools: 'AI, Scripts', tab: 'content', focusId: 'profile-tone' },
+    { key: 'partnerTypes', weight: 8, hint: 'Select partner types', tools: 'Referrals', tab: 'prospecting', focusId: 'profile-partner-other' },
+    { key: 'challenges', weight: 6, hint: 'Pick your top challenge', tools: 'Weekly Plan', tab: 'business', focusId: 'profile-challenge-other' },
+    { key: 'activities', weight: 6, hint: 'Preferred prospecting activities', tools: 'Weekly Plan', tab: 'prospecting', focusId: null },
+    { key: 'contentNotes', weight: 4, hint: 'Content guardrails', tools: 'All AI tools', tab: 'content', focusId: 'profile-content-notes' }
   ];
 
   const PROFILE_TABS = ['identity', 'business', 'content', 'prospecting', 'personal'];
@@ -60,11 +61,46 @@
   };
 
   const WIZARD_STEP_HINTS = {
-    identity: 'Name, contact, market, and branding — used in Newsletter, Scripts, and AI Coach.',
-    business: 'Focus, goals, and challenges — powers Weekly Win Plan and business planning.',
-    content: 'Tone, guardrails, and links — shapes how every AI post and email sounds.',
-    prospecting: 'Activities and partner types — tailors referral plays and outreach.',
-    personal: 'Hobbies and personality — makes social content authentically you.'
+    identity: '~45 sec · Name, market, intro, and branding power Newsletter, Scripts, and AI Coach.',
+    business: '~60 sec · Focus + goals feed Weekly Win Plan.',
+    content: '~45 sec · Tone, fine-tunes, and links for every AI writing tool.',
+    prospecting: '~40 sec · Activities and partner types for outreach plans.',
+    personal: '~30 sec · Optional flavor for Social and AI Coach.'
+  };
+
+  const PROFILE_TAB_HINT_LABELS = {
+    identity: 'ID',
+    business: 'Biz',
+    content: 'Voice',
+    prospecting: 'Pros',
+    personal: 'Pers'
+  };
+
+  const PROFILE_TAB_SHORT_LABELS = {
+    identity: 'Identity',
+    business: 'Business',
+    content: 'Voice & Links',
+    prospecting: 'Prospecting',
+    personal: 'Personal'
+  };
+
+  const VOICE_TRAIT_LEGACY = {
+    'Uses humor / light-hearted': 'Uses humor lightly',
+    'Witty and clever': 'Uses humor lightly',
+    'Very professional & polished': 'Partner-first language',
+    'Conversational (like a trusted friend)': 'Warm and encouraging',
+    Conversational: 'Warm and encouraging',
+    'Straightforward / no fluff': 'Short & direct'
+  };
+
+  const VOICE_TRAIT_MAX = 3;
+
+  const INTRO_FOCUS_SNIPPETS = {
+    'balanced-growth': 'balanced growth across sphere and co-broke',
+    'agent-network': 'strong agent relationships and clean co-broke',
+    database: 'staying useful to past clients long after closing',
+    listings: 'winning listings with clear pricing and marketing',
+    buyers: 'guiding buyers from first search to keys'
   };
 
   function asArray(val) {
@@ -261,7 +297,8 @@
 
     return {
       score: Math.min(100, score),
-      missing: missing.slice(0, 4),
+      missing,
+      missingCount: missing.length,
       isComplete: score >= 70
     };
   }
@@ -538,11 +575,11 @@
       }
     });
 
-    const yearsEl = document.getElementById('profile-years');
-    if (yearsEl?.type === 'number') {
-      const num = parseInt(yearsEl.value, 10);
-      yearsEl.value = isNaN(num) ? '' : String(num);
-    }
+    const mappedVoice = asArray(profile.voiceTraits).map((v) => VOICE_TRAIT_LEGACY[v] || v);
+    document.querySelectorAll('.profile-voice').forEach((cb) => {
+      cb.checked = mappedVoice.includes(cb.value);
+    });
+    enforceVoiceTraitCap(false);
 
     const sets = [
       ['.profile-hobby', 'hobbies'],
@@ -550,7 +587,6 @@
       ['.profile-niche', 'niches'],
       ['.profile-challenge', 'challenges'],
       ['.profile-format', 'formats'],
-      ['.profile-voice', 'voiceTraits'],
       ['.profile-partner', 'partnerTypes']
     ];
 
@@ -593,7 +629,234 @@
     }
 
     syncSelectAllStates();
+    refreshIntroHelpers(profile);
     refreshProfileUI();
+  }
+
+  function firstNameFrom(name) {
+    const n = String(name || '').trim();
+    if (!n) return '';
+    return n.split(/\s+/)[0];
+  }
+
+  function yearsSnippet(yearsRaw) {
+    const raw = String(yearsRaw || '').trim();
+    if (!raw) return '';
+    const m = raw.match(/(\d+)/);
+    if (m) return `${m[1]} years of real estate experience`;
+    return raw;
+  }
+
+  function buildIntroSuggestions(profile) {
+    const p = profile || normalizeProfile(isProfileModalOpen() ? collectProfileFromForm() : readRawProfile());
+    const first = firstNameFrom(p.name);
+    const market = (p.location || '').trim();
+    const years = yearsSnippet(p.years);
+    const focusKey = p.focus || '';
+    const focusBit = INTRO_FOCUS_SNIPPETS[focusKey] || (p.focusLabel || '').trim();
+    const niches = asArray(p.niches).slice(0, 2);
+    const nicheBit = niches.length ? niches.join(' & ').toLowerCase() : '';
+    const tone = String(p.tone || '').toLowerCase();
+    const team = (p.companyName || '').trim();
+    const bio = String(p.professionalBio || '').trim();
+
+    const list = [];
+    const push = (text, source) => {
+      const t = String(text || '').trim().replace(/\s+/g, ' ');
+      if (!t || t.length < 20) return;
+      if (list.some((x) => x.text === t)) return;
+      list.push({ text: t.length > 160 ? `${t.slice(0, 157)}…` : t, source: source || 'template' });
+    };
+
+    // Ready-to-use (no profile required) — partner-facing service language first
+    push("I'm committed to delivering world-class service through clear, proactive communication — and bringing value long after closing.", 'template');
+    push('Clear communication and proactive updates so clients always know what’s next.', 'template');
+    push('Partner-friendly agent: proactive updates, clean deals, and no surprises at closing.', 'template');
+    push("I'm the agent who makes buying and selling feel clear, calm, and human.", 'template');
+    push('I help first-time and move-up buyers feel confident — not confused — about their options.', 'template');
+    push('Local market guidance that puts education first and pressure last.', 'template');
+
+    // Bio-powered (once a professional bio exists)
+    if (bio) {
+      const sentMatch = bio.match(/^(.{28,160}?[.!?])(?:\s|$)/);
+      const firstSentence = (sentMatch ? sentMatch[1] : '').trim().replace(/^["']|["']$/g, '');
+      if (firstSentence) {
+        push(firstSentence, 'bio');
+      } else if (bio.length <= 160) {
+        push(bio, 'bio');
+      }
+      if (first && market) {
+        push(`${first} — ${market} real estate rooted in the same promise as my bio: clear guidance and follow-through.`, 'bio');
+      }
+    }
+
+    // Profile-powered (fills in as you complete identity / market)
+    if (first && market && years) {
+      push(
+        `I'm ${first}, a real estate agent in ${market} with ${years} — clear guidance so clients always know what's next.`,
+        'profile'
+      );
+    }
+    if (first && market) {
+      push(`${first} — ${market} real estate help that feels clear, calm, and human.`, 'profile');
+    }
+    if (market && years) {
+      push(
+        `${market} agent with ${years}, focused on making buying and selling feel simple.`,
+        'profile'
+      );
+    }
+    if (focusBit && market) {
+      push(`${market} agent known for ${focusBit}.`, 'profile');
+    } else if (focusBit) {
+      push(`Known for ${focusBit} — clear communication every step of the way.`, 'profile');
+    }
+    if (nicheBit && market) {
+      push(`Helping ${nicheBit} in ${market} feel confident from first tour to closing day.`, 'profile');
+    } else if (nicheBit) {
+      push(`Helping ${nicheBit} feel confident from first tour to closing day.`, 'profile');
+    }
+    if (team && market) {
+      push(`${first || 'Your agent'} with ${team} — local expertise for ${market} buyers and sellers.`, 'profile');
+    } else if (team) {
+      push(`${first || 'Your agent'} with ${team} — local expertise, proactive communication, clean deals.`, 'profile');
+    }
+    if (tone.includes('warm') || tone.includes('casual')) {
+      push(
+        market
+          ? `Your approachable ${market} real estate guide — no jargon, just a clear path home.`
+          : 'Your approachable real estate guide — no jargon, just a clear path home.',
+        'tone'
+      );
+    }
+    if (tone.includes('straightforward') || tone.includes('helpful')) {
+      push(
+        market
+          ? `Straightforward ${market} real estate help — options explained clearly, next steps always obvious.`
+          : 'Straightforward real estate help — options explained clearly, next steps always obvious.',
+        'tone'
+      );
+    }
+    if (tone.includes('professional')) {
+      push(
+        market
+          ? `Professional, responsive guidance for ${market} buyers and sellers.`
+          : 'Professional, responsive guidance for buyers and sellers.',
+        'tone'
+      );
+    }
+    if (tone.includes('witty') || tone.includes('fun')) {
+      push(
+        market
+          ? `${market} real estate without the stiff suit vibe — smart guidance, human delivery.`
+          : 'Real estate without the stiff suit vibe — smart guidance, human delivery.',
+        'tone'
+      );
+    }
+
+    // Prefer tailored (bio → profile → tone), but always keep 2 ready templates
+    const bioOnes = list.filter((x) => x.source === 'bio');
+    const personalized = list.filter((x) => x.source === 'profile' || x.source === 'tone');
+    const templates = list.filter((x) => x.source === 'template');
+    const tailored = [...bioOnes, ...personalized].slice(0, 4);
+    const ready = templates.slice(0, Math.max(2, 6 - tailored.length));
+    return [...tailored, ...ready].slice(0, 6);
+  }
+
+  function refreshIntroHelpers(profile) {
+    const p = profile || normalizeProfile(isProfileModalOpen() ? collectProfileFromForm() : readRawProfile());
+    const input = document.getElementById('profile-intro');
+    const charEl = document.getElementById('profile-intro-char');
+    const row = document.getElementById('profile-intro-chip-row');
+    const label = document.querySelector('#profile-intro-suggestions .profile-intro-suggestions-label');
+    if (charEl && input) {
+      const len = String(input.value || '').length;
+      charEl.textContent = `${len} / 160`;
+      charEl.classList.toggle('text-[#F15A29]', len > 140);
+    }
+    if (!row) return;
+    const suggestions = buildIntroSuggestions(p);
+    const hasTailored = suggestions.some((s) => s.source === 'profile' || s.source === 'tone' || s.source === 'bio');
+    if (label) {
+      label.textContent = hasTailored
+        ? 'Tailored from your profile · ready options too'
+        : 'Ready-to-use intros — no full profile needed';
+    }
+    const current = String(input?.value || '').trim();
+    row.innerHTML = suggestions.map((s) => {
+      const active = current && current === s.text ? ' is-active' : '';
+      return `<button type="button" class="profile-intro-chip${active}" data-intro-text="${escapeHtml(s.text)}" title="Use this intro">
+        <i class="fas fa-magic" aria-hidden="true"></i>
+        <span>${escapeHtml(s.text)}</span>
+      </button>`;
+    }).join('');
+  }
+
+  function applyIntroSuggestion(text) {
+    const input = document.getElementById('profile-intro');
+    if (!input || !text) return;
+    input.value = text;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    try { input.focus({ preventScroll: true }); } catch (e) { try { input.focus(); } catch (e2) {} }
+    refreshIntroHelpers();
+    autoSaveProfile();
+  }
+
+  function enforceVoiceTraitCap(showHint) {
+    const boxes = Array.from(document.querySelectorAll('.profile-voice'));
+    const checked = boxes.filter((b) => b.checked);
+    const hint = document.getElementById('profile-voice-cap-hint');
+    if (checked.length > VOICE_TRAIT_MAX) {
+      checked.slice(VOICE_TRAIT_MAX).forEach((b) => { b.checked = false; });
+    }
+    const over = boxes.filter((b) => b.checked).length >= VOICE_TRAIT_MAX;
+    boxes.forEach((b) => {
+      if (!b.checked) b.disabled = over;
+    });
+    if (hint) hint.classList.toggle('hidden', !(showHint && over));
+  }
+
+  function updateHeaderAvatar(profile) {
+    const wrap = document.getElementById('profile-header-avatar');
+    const initialsEl = document.getElementById('profile-header-initials');
+    const photoEl = document.getElementById('profile-header-photo');
+    if (!wrap || !initialsEl) return;
+    const p = profile || normalizeProfile(isProfileModalOpen() ? collectProfileFromForm() : readRawProfile());
+    const name = String(p.name || '').trim();
+    const headshot = String(p.headshotUrl || '').trim();
+    const parts = name.split(/\s+/).filter(Boolean);
+    const initials = !name
+      ? '?'
+      : parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : name.slice(0, 2).toUpperCase();
+    initialsEl.textContent = initials;
+    wrap.title = name || '';
+    const applyPhoto = headshot && /^https?:\/\//i.test(headshot);
+    if (photoEl && applyPhoto) {
+      photoEl.src = headshot;
+      photoEl.alt = name ? `${name} headshot` : 'Headshot';
+      wrap.classList.add('has-photo');
+      wrap.classList.remove('is-empty');
+      photoEl.onerror = () => {
+        wrap.classList.remove('has-photo');
+        photoEl.removeAttribute('src');
+        wrap.classList.toggle('is-empty', !name);
+      };
+    } else {
+      if (photoEl) {
+        photoEl.removeAttribute('src');
+        photoEl.alt = '';
+      }
+      wrap.classList.remove('has-photo');
+      wrap.classList.toggle('is-empty', !name);
+    }
+  }
+
+  function updateEmptyWelcome(score) {
+    const el = document.getElementById('profile-empty-welcome');
+    if (!el) return;
+    el.classList.toggle('is-visible', !wizardActive && score < 15);
   }
 
   function backfillBlankProfileFields() {
@@ -614,7 +877,6 @@
   }
 
   function refreshProfileUI() {
-    // Score from localStorage when modal is closed — form fields are empty until loadProfileIntoForm runs
     const profile = isProfileModalOpen()
       ? normalizeProfile(collectProfileFromForm())
       : normalizeProfile(readRawProfile());
@@ -623,29 +885,78 @@
     const scoreEl = document.getElementById('profile-strength-score');
     const barEl = document.getElementById('profile-strength-bar');
     const hintsEl = document.getElementById('profile-strength-hints');
+    const strengthLabel = document.getElementById('profile-strength-label');
 
     if (scoreEl) scoreEl.textContent = `${score}%`;
-    if (barEl) barEl.style.width = `${score}%`;
+    if (barEl) {
+      barEl.style.width = `${score}%`;
+      barEl.classList.toggle('profile-strength-bar--strong', score >= 70);
+      barEl.classList.toggle('profile-strength-bar--mid', score >= 40 && score < 70);
+      barEl.classList.toggle('profile-strength-bar--low', score < 40);
+    }
+    if (strengthLabel) {
+      strengthLabel.textContent =
+        score >= 90 ? 'Excellent' : score >= 70 ? 'Strong' : score >= 40 ? 'Getting there' : 'Just starting';
+    }
 
     if (hintsEl) {
       if (missing.length) {
-        hintsEl.innerHTML = missing.map((m) =>
-          `<span class="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400"><i class="fas fa-arrow-right text-[#00A89D] text-[9px]"></i> ${m.hint} <span class="text-gray-400">(${m.tools})</span></span>`
-        ).join('');
+        const shown = missing.slice(0, 4);
+        const extra = missing.length - shown.length;
+        hintsEl.innerHTML = shown.map((m) => {
+          const tab = m.tab || 'identity';
+          const focusId = m.focusId || '';
+          const tabCue = PROFILE_TAB_HINT_LABELS[tab] || tab.slice(0, 3);
+          return `<button type="button" class="profile-strength-hint-btn" data-profile-jump-tab="${escapeHtml(tab)}" data-profile-jump-focus="${escapeHtml(focusId)}" title="Jump to ${escapeHtml(PROFILE_TAB_SHORT_LABELS[tab] || tab)}">
+            <span class="profile-strength-hint-tab">${escapeHtml(tabCue)}</span>
+            <span>${escapeHtml(m.hint)}</span>
+            <span class="profile-strength-hint-tools">${escapeHtml(m.tools || '')}</span>
+          </button>`;
+        }).join('') + (extra > 0 ? `<span class="text-[10px] text-gray-400 self-center pl-0.5">+${extra} more</span>` : '');
       } else {
-        hintsEl.innerHTML = '<span class="text-[11px] text-[#00A89D]"><i class="fas fa-check-circle"></i> Profile is strong — tools will personalize well.</span>';
+        hintsEl.innerHTML = '<span class="profile-strength-done"><i class="fas fa-check-circle" aria-hidden="true"></i> Profile is strong — every tool can personalize well.</span>';
       }
     }
 
     updateProfileTabBadges(profile);
     updateLivePreview(profile);
     updateProfileLastUpdated(profile);
-
+    updateHeaderAvatar(profile);
+    updateEmptyWelcome(score);
+    updateWizardMiniScore(score);
+    if (isProfileModalOpen()) refreshIntroHelpers(profile);
     updateHeaderProfileBadge(score);
 
     if (typeof window.refreshCoachOnboarding === 'function') {
       window.refreshCoachOnboarding();
     }
+  }
+
+  function updateWizardMiniScore(score) {
+    const el = document.getElementById('profile-wizard-mini-score');
+    if (!el) return;
+    el.textContent = `${score}% complete`;
+    el.classList.toggle('text-[#00A89D]', score >= 70);
+    el.classList.toggle('text-amber-600', score >= 40 && score < 70);
+    el.classList.toggle('text-gray-500', score < 40);
+  }
+
+  function jumpToProfileField(tab, focusId) {
+    if (wizardActive) {
+      flushWizardSave();
+      localStorage.setItem(WIZARD_DONE_KEY, '1');
+      showView('full');
+    }
+    if (tab) switchProfileTab(tab);
+    setTimeout(() => {
+      const el = focusId ? document.getElementById(focusId) : null;
+      if (el) {
+        try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (e2) {} }
+        try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+        el.classList.add('profile-field-pulse');
+        setTimeout(() => el.classList.remove('profile-field-pulse'), 1200);
+      }
+    }, 80);
   }
 
   function updateHeaderProfileBadge(score) {
@@ -721,9 +1032,24 @@
       const { done, total, label } = getSectionFillCount(tab, p);
       const btn = document.querySelector(`.profile-tab-btn[data-profile-tab="${tab}"]`);
       const badge = btn?.querySelector('.profile-tab-badge');
-      if (badge) badge.textContent = total ? ` ${label}` : '';
-      if (btn) {
-        btn.classList.toggle('opacity-60', total > 0 && done === 0);
+      if (!btn) return;
+      const state =
+        total > 0 && done >= total ? 'complete'
+          : done > 0 ? 'partial'
+            : 'empty';
+      btn.classList.remove('is-tab-empty', 'is-tab-partial', 'is-tab-complete', 'opacity-60');
+      btn.classList.add(`is-tab-${state}`);
+      if (badge) {
+        if (state === 'complete') {
+          badge.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
+          badge.title = `${label} complete`;
+        } else if (state === 'partial') {
+          badge.textContent = label;
+          badge.title = `${label} filled`;
+        } else {
+          badge.textContent = total ? '·' : '';
+          badge.title = total ? 'Not started' : '';
+        }
       }
     });
   }
@@ -779,13 +1105,6 @@
 
   let currentProfileTab = 'identity';
 
-  const PROFILE_TAB_SHORT_LABELS = {
-    identity: 'Identity',
-    business: 'Business',
-    content: 'Voice & Links',
-    prospecting: 'Prospecting',
-    personal: 'Personal'
-  };
 
   function switchProfileTab(tabId) {
     if (!PROFILE_TABS.includes(tabId)) tabId = 'identity';
@@ -846,7 +1165,7 @@
     }
     if (hint) {
       if (isLast) {
-        hint.innerHTML = `You're on the last section (<strong>Personal</strong>). Use <strong>Save Preferences</strong> or <strong>Close</strong> when you're done — or jump with the tabs above.`;
+        hint.innerHTML = `You're on the last section (<strong>Personal</strong>). Use <strong>Save</strong> or <strong>Close</strong> when you're done — or jump with the tabs above.`;
       } else {
         hint.innerHTML = `Section <strong>${idx + 1} of ${PROFILE_TABS.length}</strong> — tap <strong>Next: ${nextLabel}</strong> to continue, or use the tabs above to jump.`;
       }
@@ -902,17 +1221,26 @@
     if (modalEl) modalEl.classList.toggle('profile-modal--wizard', wizardActive);
 
     if (wizardHeader) wizardHeader.classList.toggle('hidden', !wizardActive);
-    if (wizardFooter) wizardFooter.classList.toggle('hidden', !wizardActive);
-    // Guided mode: hide strength meter / tabs so it is not the same as full profile
+    if (wizardFooter) {
+      wizardFooter.classList.toggle('hidden', !wizardActive);
+      wizardFooter.style.display = wizardActive ? '' : 'none';
+    }
     if (fullChrome) fullChrome.classList.toggle('hidden', wizardActive);
     if (tabNav) tabNav.classList.toggle('hidden', wizardActive);
-    if (fullFooter) fullFooter.classList.toggle('hidden', wizardActive);
+    if (fullFooter) {
+      fullFooter.classList.toggle('hidden', wizardActive);
+      fullFooter.style.display = wizardActive ? 'none' : '';
+    }
     if (full) full.classList.remove('hidden');
 
     if (modalTitle) {
-      modalTitle.textContent = wizardActive
-        ? 'Guided Profile Setup'
-        : 'My Profile & Preferences';
+      modalTitle.textContent = wizardActive ? 'Guided setup' : 'My Profile';
+    }
+    const modalSubtitle = document.getElementById('profile-modal-subtitle');
+    if (modalSubtitle) {
+      modalSubtitle.textContent = wizardActive
+        ? 'Five short steps — skip anytime and finish later in full profile.'
+        : 'One profile powers every tool — fill it once, sound like you everywhere.';
     }
 
     const scroll = document.getElementById('profile-form-scroll');
@@ -940,17 +1268,31 @@
     const hint = document.getElementById('profile-wizard-step-hint');
     if (hint) hint.textContent = WIZARD_STEP_HINTS[tabId] || '';
 
+    const pct = Math.round((wizardStep / total) * 100);
+    const bar = document.getElementById('profile-wizard-progress-bar');
+    if (bar) bar.style.width = `${pct}%`;
+
     const dots = document.getElementById('profile-wizard-dots');
     if (dots) {
       dots.innerHTML = PROFILE_TABS.map((tab, idx) => {
         const stepNum = idx + 1;
-        const cls = stepNum === wizardStep
-          ? 'bg-[#00A89D]'
-          : stepNum < wizardStep
-            ? 'bg-[#00A89D]/40'
-            : 'bg-gray-300 dark:bg-gray-600';
-        return `<span class="w-2 h-2 rounded-full ${cls}" title="${PROFILE_TAB_SHORT_LABELS[tab] || tab}"></span>`;
+        const state =
+          stepNum === wizardStep ? 'is-current' : stepNum < wizardStep ? 'is-done' : 'is-todo';
+        const label = PROFILE_TAB_SHORT_LABELS[tab] || tab;
+        return `<button type="button" class="profile-wizard-step-dot ${state}" data-wizard-goto="${stepNum}" title="${escapeHtml(label)}" aria-label="Go to ${escapeHtml(label)}" aria-current="${stepNum === wizardStep ? 'step' : 'false'}">
+          <span class="profile-wizard-step-num">${stepNum < wizardStep ? '<i class="fas fa-check" aria-hidden="true"></i>' : stepNum}</span>
+          <span class="profile-wizard-step-label">${escapeHtml(label)}</span>
+        </button>`;
       }).join('');
+      dots.querySelectorAll('[data-wizard-goto]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const n = parseInt(btn.getAttribute('data-wizard-goto'), 10);
+          if (!Number.isFinite(n) || n < 1 || n > total) return;
+          flushWizardSave();
+          wizardStep = n;
+          renderWizardStep();
+        });
+      });
     }
 
     const back = document.getElementById('profile-wizard-back');
@@ -958,9 +1300,9 @@
     if (back) back.classList.toggle('hidden', wizardStep === 1);
     if (next) {
       if (wizardStep === total) {
-        next.innerHTML = 'Save & finish';
+        next.innerHTML = '<i class="fas fa-check mr-1.5" aria-hidden="true"></i> Save &amp; finish';
       } else {
-        const nextTab = PROFILE_TABS[wizardStep]; // 0-based: next step index
+        const nextTab = PROFILE_TABS[wizardStep];
         const nextLabel = PROFILE_TAB_SHORT_LABELS[nextTab] || WIZARD_STEP_LABELS[nextTab] || 'next section';
         next.innerHTML = `Continue to ${nextLabel} <i class="fas fa-arrow-right ml-1.5 text-xs opacity-90" aria-hidden="true"></i>`;
       }
@@ -975,12 +1317,15 @@
     const merged = normalizeProfile(collectProfileFromForm());
     const oldSetup = JSON.parse(localStorage.getItem('winPlanSetup') || '{}');
     localStorage.setItem('winPlanSetup', JSON.stringify({ ...oldSetup, ...merged }));
-    loadProfileIntoForm();
-    showView('full');
-    switchProfileTab(getFirstIncompleteTab(merged));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
     notifyProfileConsumers(merged);
+    refreshProfileUI();
+    wizardActive = false;
+    const modalEl = modal || document.getElementById('user-profile-modal');
+    if (modalEl) modalEl.classList.remove('profile-modal--wizard');
+    closeModal();
     if (typeof window.showToast === 'function') {
-      window.showToast('Profile setup complete — edit any tab anytime, or re-run Guided setup.', 'success');
+      window.showToast('Profile setup complete — open My Profile anytime to edit or re-run Guided setup.', 'success');
     }
   }
 
@@ -1013,8 +1358,7 @@
     }
 
     showView('full');
-    const p = normalizeProfile(readRawProfile());
-    switchProfileTab(getFirstIncompleteTab(p));
+    switchProfileTab('identity');
     updateProfileSectionNav();
   }
 
@@ -1033,18 +1377,32 @@
     notifyProfileConsumers();
   }
 
+  let saveStatusResetTimer = null;
+
+  function flashSaveStatus(mode) {
+    const statusEl = document.getElementById('profile-save-status');
+    if (!statusEl) return;
+    clearTimeout(saveStatusResetTimer);
+    if (mode === 'saving') {
+      statusEl.classList.remove('is-flash');
+      statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin text-[#00A89D]" aria-hidden="true"></i> <span>Saving…</span>';
+      return;
+    }
+    statusEl.classList.add('is-flash');
+    statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]" aria-hidden="true"></i> <span>Saved · just now</span>';
+    saveStatusResetTimer = setTimeout(() => {
+      statusEl.classList.remove('is-flash');
+      statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]" aria-hidden="true"></i> <span>Auto-saved</span>';
+    }, 2200);
+  }
+
   function autoSaveProfile() {
     clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(() => {
       if (!isProfileModalOpen()) return;
+      flashSaveStatus('saving');
       performSave(false, false);
-      const statusEl = document.getElementById('profile-save-status');
-      if (statusEl) {
-        statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]"></i> <span>Saved just now</span>';
-        setTimeout(() => {
-          if (statusEl) statusEl.innerHTML = '<i class="fas fa-check text-[#00A89D]"></i> <span>All changes saved automatically</span>';
-        }, 2400);
-      }
+      flashSaveStatus('saved');
     }, 450);
   }
 
@@ -1066,13 +1424,28 @@
       const master = e.target.closest('.profile-select-all');
       if (master) {
         const targetSelector = master.getAttribute('data-target');
+        if (targetSelector === '.profile-voice') return;
         if (targetSelector) {
           modal.querySelectorAll(targetSelector).forEach((cb) => { cb.checked = master.checked; });
           autoSaveProfile();
         }
       }
       const t = e.target;
-      if (t.matches('input[type="checkbox"].profile-hobby, input[type="checkbox"].profile-activity, input[type="checkbox"].profile-partner, input[type="checkbox"].profile-niche, input[type="checkbox"].profile-challenge, input[type="checkbox"].profile-voice, input[type="checkbox"].profile-format')) {
+      if (t.matches && t.matches('input[type="checkbox"].profile-voice')) {
+        const checked = Array.from(document.querySelectorAll('.profile-voice:checked'));
+        if (t.checked && checked.length > VOICE_TRAIT_MAX) {
+          t.checked = false;
+          const hint = document.getElementById('profile-voice-cap-hint');
+          if (hint) {
+            hint.classList.remove('hidden');
+            setTimeout(() => hint.classList.add('hidden'), 2800);
+          }
+        }
+        enforceVoiceTraitCap(true);
+        autoSaveProfile();
+        return;
+      }
+      if (t.matches('input[type="checkbox"].profile-hobby, input[type="checkbox"].profile-activity, input[type="checkbox"].profile-partner, input[type="checkbox"].profile-niche, input[type="checkbox"].profile-challenge, input[type="checkbox"].profile-format')) {
         syncSelectAllStates();
       }
     });
@@ -1111,7 +1484,7 @@
       localStorage.setItem(WIZARD_DONE_KEY, '1');
       loadProfileIntoForm();
       showView('full');
-      switchProfileTab(getFirstIncompleteTab());
+      switchProfileTab('identity');
     });
 
     document.getElementById('profile-wizard-back')?.addEventListener('click', () => {
@@ -1133,6 +1506,11 @@
     });
 
     document.getElementById('profile-wizard-save-exit')?.addEventListener('click', () => {
+      // Soft-complete guided setup so reopen goes to full profile (user chose to exit)
+      try { localStorage.setItem(WIZARD_DONE_KEY, '1'); } catch (e) { /* ignore */ }
+      wizardActive = false;
+      const modalEl = modal || document.getElementById('user-profile-modal');
+      if (modalEl) modalEl.classList.remove('profile-modal--wizard');
       performSave(true, true);
     });
 
@@ -1192,11 +1570,38 @@
 
     document.getElementById('save-profile')?.addEventListener('click', () => performSave(true, true));
 
-    modal.addEventListener('input', autoSaveProfile);
-    modal.addEventListener('change', autoSaveProfile);
+    modal.addEventListener('input', (e) => {
+      if (e.target?.id === 'profile-intro' || e.target?.id === 'profile-name' || e.target?.id === 'profile-location' || e.target?.id === 'profile-years' || e.target?.id === 'profile-company-name') {
+        refreshIntroHelpers();
+      }
+      if (e.target?.id === 'profile-headshot-url') {
+        updateHeaderAvatar(normalizeProfile(collectProfileFromForm()));
+      }
+      autoSaveProfile();
+    });
+    modal.addEventListener('change', (e) => {
+      if (e.target?.id === 'profile-focus' || e.target?.id === 'profile-tone') {
+        refreshIntroHelpers();
+      }
+      autoSaveProfile();
+    });
     setupSelectAllToggles();
     setupWizardHandlers();
     setupProfileTabHandlers();
+
+    document.getElementById('profile-strength-hints')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-profile-jump-tab]');
+      if (!btn) return;
+      jumpToProfileField(
+        btn.getAttribute('data-profile-jump-tab'),
+        btn.getAttribute('data-profile-jump-focus') || ''
+      );
+    });
+    document.getElementById('profile-intro-chip-row')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-intro-text]');
+      if (!btn) return;
+      applyIntroSuggestion(btn.getAttribute('data-intro-text') || '');
+    });
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) e.preventDefault();
@@ -1205,7 +1610,7 @@
     loadProfileIntoForm();
     refreshProfileUI();
 
-    console.log('%c[user-profile] Initialized — guided setup distinct, no-backdrop close', 'color:#00A89D');
+    console.log('%c[user-profile] Initialized — realtor profile parity (chrome, intro chips, guided finish/close)', 'color:#00A89D');
   }
 
   window.getUserProfile = function getUserProfile() {
