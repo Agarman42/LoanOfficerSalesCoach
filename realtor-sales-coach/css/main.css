@@ -2891,3 +2891,295 @@ html.dark body.sidebar-collapsed #menu-toggle:hover {
 .header-quote-text.fade {
     opacity: 0;
 }
+
+/* =========================================================
+   MOBILE EXPERIENCE PASS (profile, hubs, home, FAB, taps)
+   Shared patterns for LO + Realtor coaches — ≤640px
+   ========================================================= */
+@media (max-width: 640px) {
+  /* --- Full-bleed app modals (profile shell, newsletter choice) --- */
+  #user-profile-modal {
+    padding: 0 !important;
+    align-items: stretch !important;
+  }
+  #user-profile-modal > .profile-modal-shell,
+  #user-profile-modal > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100dvh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  #user-profile-modal .profile-modal-header {
+    padding: 0.65rem 0.85rem !important;
+  }
+  #user-profile-modal .profile-status-card {
+    margin: 0.5rem 0.75rem 0;
+    padding: 0.6rem 0.75rem;
+  }
+  #profile-form-scroll {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  }
+  #profile-full-footer,
+  #profile-wizard-footer {
+    padding: 0.65rem 0.85rem !important;
+    padding-bottom: max(0.65rem, env(safe-area-inset-bottom)) !important;
+    gap: 0.5rem;
+  }
+  #profile-full-footer button,
+  #profile-wizard-footer button {
+    min-height: 2.75rem;
+    font-size: 0.875rem !important;
+  }
+  #profile-tab-nav {
+    padding: 0.35rem 0.5rem !important;
+  }
+  #profile-tab-nav .profile-tab-btn {
+    min-height: 2.5rem;
+    padding: 0.4rem 0.65rem !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap;
+  }
+  .profile-intro-chip-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.45rem;
+    padding-bottom: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .profile-intro-chip {
+    flex: 0 0 auto;
+    max-width: min(18rem, 85vw);
+    min-height: 2.5rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.72rem;
+    line-height: 1.3;
+  }
+  .profile-wizard-stepper {
+    gap: 0.25rem;
+    padding: 0.35rem 0.25rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .profile-wizard-step-label {
+    font-size: 0.58rem;
+    max-width: 3.5rem;
+  }
+  .profile-section-card {
+    padding: 0.7rem 0.75rem;
+  }
+  .profile-panel-intro {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  /* --- Newsletter / engagement choice modal --- */
+  #newsletter-choice-modal {
+    padding: 0.35rem !important;
+    align-items: flex-end !important;
+  }
+  #newsletter-choice-modal .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: min(94dvh, 94vh) !important;
+    border-radius: 1.1rem 1.1rem 0.5rem 0.5rem !important;
+    margin: 0 !important;
+  }
+  #newsletter-choice-modal #nl-choice-modal-title,
+  #newsletter-choice-modal #modal-title {
+    font-size: 1.15rem !important;
+    line-height: 1.25;
+  }
+  #nl-choice-modal-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+    padding: 0.55rem 0.65rem !important;
+    gap: 0.4rem;
+  }
+  #nl-choice-modal-tabs [data-nl-hub-tab],
+  #nl-choice-modal-tabs button {
+    min-height: 2.4rem;
+    padding: 0.4rem 0.7rem !important;
+    font-size: 0.72rem !important;
+    flex-shrink: 0;
+  }
+  #nl-choice-modal-toolbar {
+    padding: 0.55rem 0.75rem !important;
+  }
+  #nl-choice-modal-toolbar .flex {
+    gap: 0.5rem;
+  }
+  #nl-choice-modal-toolbar button {
+    min-height: 2.4rem;
+  }
+  #modal-choice-body,
+  #newsletter-choice-modal .p-6,
+  #newsletter-choice-modal .md\:p-8 {
+    padding: 0.75rem !important;
+  }
+  #nl-choice-modal-list {
+    max-height: min(52dvh, 52vh) !important;
+  }
+  #modal-tip-toolbar {
+    margin-bottom: 0.65rem;
+  }
+  #modal-tip-group-filters {
+    gap: 0.35rem;
+  }
+  .nl-tip-group-chip {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.7rem;
+  }
+  .nl-tip-cat-scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.35rem;
+  }
+  .nl-tip-cat-chip {
+    min-height: 2rem;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.65rem;
+  }
+  .nl-tip-card-inner {
+    padding: 0.7rem 0.75rem;
+    gap: 0.65rem;
+  }
+  .nl-tip-card-title {
+    font-size: 0.82rem;
+  }
+  .nl-tip-card-body {
+    font-size: 0.72rem;
+    -webkit-line-clamp: 3;
+  }
+  #modal-puzzle-type-bar .grid {
+    gap: 0.35rem !important;
+  }
+  #modal-puzzle-type-bar button {
+    min-height: 2.5rem;
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.35rem !important;
+  }
+  #modal-search {
+    font-size: 16px !important; /* prevent iOS zoom on focus */
+    min-height: 2.75rem;
+  }
+
+  /* --- Engagement section rows (setup form) --- */
+  .nl-curated-section-row label {
+    font-size: 1rem !important;
+  }
+  .nl-curated-section-row .nl-curated-row-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .nl-curated-section-row .nl-curated-row-actions button {
+    min-height: 2.35rem;
+    font-size: 0.72rem !important;
+  }
+  .nl-custom-preview-open {
+    min-height: 3rem !important;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  /* --- Home / cards / titles --- */
+  main {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+    padding-top: 0.75rem !important;
+  }
+  body:not(.sidebar-collapsed) > main {
+    /* overlay sidebar — no forced margin on mobile */
+  }
+  .card h2,
+  section.card h2,
+  .card .text-3xl {
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+    word-break: break-word;
+  }
+  .card h3 {
+    font-size: 1.1rem !important;
+    line-height: 1.3 !important;
+  }
+  /* Tool tiles / long labels */
+  .card button,
+  .card a.rounded-2xl,
+  .card a.rounded-xl {
+    min-height: 2.5rem;
+  }
+  /* Chip rows: allow horizontal scroll instead of crushed wrap */
+  .flex.flex-wrap.gap-2,
+  .flex.flex-wrap.gap-1\.5 {
+    row-gap: 0.4rem;
+  }
+
+  /* --- Floating AI coach --- */
+  .fixed.bottom-4.right-4 {
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    right: max(0.75rem, env(safe-area-inset-right));
+    z-index: 45;
+  }
+  .fixed.bottom-4.right-4 button,
+  .fixed.bottom-4.right-4 a {
+    min-width: 2.85rem;
+    min-height: 2.85rem;
+    box-shadow: 0 8px 24px rgba(0, 43, 92, 0.28);
+  }
+
+  /* --- Generic touch comfort --- */
+  button:not(.header-quote-btn):not(.close-modal),
+  [role="button"],
+  .profile-tab-btn,
+  .nl-tip-group-chip,
+  .nl-tip-cat-chip {
+    touch-action: manipulation;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important; /* iOS focus zoom guard */
+  }
+
+  /* Sidebar overlay full height safe */
+  #sidebar {
+    max-width: min(18rem, 88vw);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Home launchpad / welcome chips — denser, tappable */
+  [data-home-launchpad] button,
+  .home-status-chip,
+  #home .rounded-full {
+    min-height: 2.25rem;
+  }
+  #home h1, #home .text-4xl, #home .text-3xl {
+    font-size: clamp(1.35rem, 6vw, 1.75rem) !important;
+    line-height: 1.2 !important;
+  }
+  /* Coach setup progress row */
+  .coach-mode-bar {
+    margin-bottom: 1.1rem;
+    gap: 0.4rem;
+  }
+  .coach-mode-bar button {
+    min-height: 2.5rem;
+    font-size: 0.8rem !important;
+  }
+}
+
