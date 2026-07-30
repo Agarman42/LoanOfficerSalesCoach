@@ -3809,5 +3809,111 @@ html.dark body.sidebar-collapsed #menu-toggle:hover {
   [data-copy-text] button {
     min-height: 2.25rem;
   }
+
+  /* =========================================================
+     MOBILE READING WIDTH — blog / newsletter / long AI output
+     Stacked px-8 + p-6 + .ai-output padding left ~half the
+     screen empty. Tighten gutters so body text is readable.
+     ========================================================= */
+  main {
+    padding-left: 0.45rem !important;
+    padding-right: 0.45rem !important;
+  }
+  /* Tool shells: kill desktop px-8 / py bulk on phone */
+  section.card,
+  #blog,
+  #newsletter-generator,
+  #social-post,
+  #weekly-win-plan,
+  #listing-description,
+  #bio-creator,
+  #consultation,
+  #open-house,
+  #sales-script,
+  #content-hub,
+  #ai-chat {
+    padding-left: 0.7rem !important;
+    padding-right: 0.7rem !important;
+    padding-top: 1rem !important;
+    border-radius: 1.1rem !important;
+  }
+  /* Generated output hosts — less frame, more text */
+  #blog-output,
+  #newsletter-output,
+  #social-post-output,
+  #listing-output,
+  #bio-output,
+  #wwp-output,
+  #consultation-output,
+  #open-house-output {
+    padding: 0.65rem 0.55rem !important;
+    border-radius: 0.9rem !important;
+  }
+  .ai-output {
+    padding: 0.8rem 0.75rem !important;
+    border-radius: 0.9rem !important;
+  }
+  .ai-output-header {
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.55rem;
+    gap: 0.4rem;
+  }
+  .ai-output-body.prose,
+  #blog .prose,
+  #blog-output .prose,
+  #newsletter-output .prose {
+    max-width: none !important;
+    font-size: 0.95rem !important;
+    line-height: 1.55 !important;
+  }
+  #blog .prose p,
+  #blog-output .prose p,
+  .ai-output-body.prose p {
+    margin-top: 0.65em;
+    margin-bottom: 0.65em;
+  }
+  #blog .prose h1,
+  #blog .prose h2,
+  #blog-output .prose h1,
+  #blog-output .prose h2,
+  .ai-output-body.prose h1,
+  .ai-output-body.prose h2 {
+    font-size: 1.15rem !important;
+    line-height: 1.3 !important;
+    word-break: break-word;
+  }
+  .blog-companion-panel {
+    padding: 0.7rem 0.75rem !important;
+    border-radius: 0.75rem !important;
+  }
+  .blog-caption-text {
+    font-size: 1rem !important;
+    line-height: 1.45 !important;
+  }
+  /* Quality / meta notes shouldn't constrain width */
+  #blog-output .max-w-xl,
+  #blog-output .max-w-md,
+  #newsletter-output .max-w-xl {
+    max-width: none !important;
+  }
+  /* Newsletter preview: use full card width */
+  #nl-preview,
+  #newsletter-output #nl-preview,
+  .nl-preview-iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0.75rem !important;
+  }
+  /* Action button rows under outputs — denser, full width */
+  #blog-output > .flex.flex-wrap,
+  #newsletter-output > .flex.flex-wrap {
+    gap: 0.4rem !important;
+  }
+  #blog-output > .flex.flex-wrap > button,
+  #newsletter-output > .flex.flex-wrap > button {
+    flex: 1 1 auto;
+    min-width: calc(50% - 0.3rem);
+    justify-content: center;
+  }
 }
 
