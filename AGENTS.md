@@ -36,3 +36,15 @@ After push, state clearly: **which branch(es)** and **which version(s)** landed.
 - `docs/ACCESS-AND-BRANDING-NOTES.md` — branding / partner hosts
 
 **Last reinforced:** 2026-07-30 (user: LO = master, Realtor = main — agents must not forget).
+
+---
+
+## Commits when user says “commit” / “push”
+
+When Adam asks to **commit** (or commit + push):
+
+1. Commit **all tool changes since the last commit** for apps we have been working on in this monorepo (LO root, `realtor-sales-coach/`, `smart-savings/`, and any shared host/scripts those need).
+2. **Do not omit** related tool work (e.g. Smart Savings under LO) just to keep a commit “small.”
+3. **Do not** commit: unrelated projects (e.g. recruiter if not in scope), Word docs, screenshots/PNGs, dump HTML copies (`index REALTOR.html`), generated reports (`_sync_report.txt`), or random personal files.
+4. Push with the branch rules above (LO/`smart-savings` → **`master`**, Realtor → **`main`**).
+5. After push, state clearly what was committed, what was left out, and which branch(es) / version(s).
