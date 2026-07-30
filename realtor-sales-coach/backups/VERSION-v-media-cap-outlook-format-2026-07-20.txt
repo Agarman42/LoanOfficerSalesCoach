@@ -1,0 +1,19 @@
+Newsletter Outlook formatting — personal media size cap (2026-07-20)
+
+Status: User confirmed that scaling personal photo/video DOWN fixed Outlook paste
+formatting (misaligned personal note / media). Applied to LO and Realtor.
+
+Rule:
+  NL_MEDIA_SIZE_DEFAULT = 70
+  NL_MEDIA_SIZE_MAX     = 75
+  NL_MEDIA_MAX_PX       = 400
+
+Code:
+  realtor-sales-coach/js/features/newsletter-generator.js
+  (same constants in LO js/features/newsletter-generator.js)
+
+Full write-up:
+  docs/NEWSLETTER-OUTLOOK-PASTE.md
+
+Related (different bug — partial/footer-only paste from signature stripping):
+  VERSION-v312-outlook-paste-good-baseline.txt (2026-07-07)

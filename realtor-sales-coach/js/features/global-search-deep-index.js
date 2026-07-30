@@ -208,6 +208,10 @@
   ];
 
   const SHARED_TOOLS = [
+    g('content-studio-hub', 'Content Studio', 'Hub for strategy, social, blog, newsletter, and brand tools', 'content-hub',
+      { kind: 'section', sectionId: 'content-hub' },
+      ['content studio', 'content hub', 'content suite', 'create content', 'what to post', 'content tools', 'studio'],
+      'fas fa-pen-nib'),
     g('value-vault-popby', 'Value Vault — Gift & Pop-By Ideas', 'Searchable library of touches and pop-bys', 'value-vault',
       { kind: 'section', sectionId: 'value-vault' },
       ['pop by', 'popby', 'pop by ideas', 'gift ideas', 'gift basket', 'basket', 'value vault', 'client gift', 'realtor gift'],

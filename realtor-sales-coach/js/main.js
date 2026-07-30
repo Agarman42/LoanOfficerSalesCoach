@@ -101,49 +101,26 @@
       positionToggleButton(collapsed);
 
       if (save) {
-        try { localStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false'); } catch (e) {}
+        try {
+          localStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false');
+        } catch (e) { /* private mode */ }
       }
     }
 
-    // Click handler
     menuBtn.addEventListener('click', () => {
       if (isDesktop()) {
         const currentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
         applyCollapsedState(!currentlyCollapsed);
       } else {
-        // Mobile overlay
+        // Mobile: isOpen → collapse (close overlay)
         const isOpen = sidebar.classList.contains('left-0');
         applyCollapsedState(isOpen, false);
       }
     });
 
-    // Restore saved desktop preference
-    let startCollapsed = false;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === 'true' && isDesktop()) startCollapsed = true;
-    } catch (e) {}
-
-    // Initial state (default = sidebar visible)
-    if (startCollapsed && isDesktop()) {
-      document.body.classList.add('sidebar-collapsed');
-      sidebar.classList.remove('left-0', 'open');
-      sidebar.classList.add('left-[-300px]');
-      setIcon(true);
-      positionToggleButton(true); // far left
-    } else {
-      if (isDesktop()) {
-        sidebar.classList.add('left-0');
-        setIcon(false);
-        // Small delay so sidebar width is accurate for positioning
-        setTimeout(() => positionToggleButton(false), 30);
-      } else {
-        sidebar.classList.remove('left-0', 'open');
-        sidebar.classList.add('left-[-300px]');
-        setIcon(true);
-        positionToggleButton(true);
-      }
-    }
+    // Always boot with sidebar CLOSED (home-first), matching LO coach.
+    // Do not restore a prior "open" preference across reloads.
+    applyCollapsedState(true, true);
 
     // Clicking outside closes on mobile only
     document.addEventListener('click', (e) => {
@@ -154,29 +131,18 @@
       }
     });
 
-    // Resize handling
+    // Resize handling — keep closed on mobile; on desktop preserve in-session toggle only
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        if (isDesktop()) {
-          const savedPref = localStorage.getItem(STORAGE_KEY) === 'true';
-          if (savedPref && !document.body.classList.contains('sidebar-collapsed')) {
-            applyCollapsedState(true, false);
-          } else if (!savedPref && document.body.classList.contains('sidebar-collapsed')) {
-            applyCollapsedState(false, false);
-          } else {
-            // Re-position in case width changed
-            positionToggleButton(document.body.classList.contains('sidebar-collapsed'));
-          }
+        if (!isDesktop()) {
+          applyCollapsedState(true, false);
         } else {
-          document.body.classList.remove('sidebar-collapsed');
-          positionToggleButton(true);
+          positionToggleButton(document.body.classList.contains('sidebar-collapsed'));
         }
       }, 120);
     });
-
-    console.log('[main.js] Sidebar toggle initialized (hamburger always in sidebar top-right when open, far top-left when closed)');
   }
 
   // =====================================================
@@ -553,7 +519,10 @@
       'social-media-strategy': 'social',
       'referral-partners': 'referrals',
       'prospecting': 'weekly-win-plan',
-      'database-nurturing': 'database'
+      'database-nurturing': 'database',
+      content: 'content-hub',
+      'content-studio': 'content-hub',
+      'content-suite': 'content-hub'
     };
     if (aliases[id]) {
       id = aliases[id];
@@ -578,8 +547,16 @@
       if (typeof window.trackCoachSectionOpen === 'function') {
         try { window.trackCoachSectionOpen(id); } catch (e) { console.warn('[analytics]', e); }
       }
-      // Smooth scroll into view
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Home: full page top so header + LO brand plate stay visible
+      try {
+        if (id === 'home') {
+          window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        } else {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (e) { /* ignore */ }
 
       if (typeof window.onCoachSectionShown === 'function') {
         try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
@@ -836,6 +813,7 @@
     });
 
     // On initial page load, respect a hash if present, otherwise land on Home
+    // Home stays at scrollY=0 so the header (and LO brand plate) remain visible
     if (location.hash) {
       const id = location.hash.replace('#', '');
       setTimeout(() => {
@@ -849,6 +827,11 @@
         if (home) {
           document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
           home.classList.remove('hidden');
+          try {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+          } catch (e) { /* ignore */ }
           if (typeof window.onCoachSectionShown === 'function') {
             try { window.onCoachSectionShown('home'); } catch (e) {}
           }
@@ -997,63 +980,56 @@
     let loadingEl = document.getElementById('global-loading');
 
     if (!loadingEl) {
-      console.warn('[forceShowGlobalLoading] #global-loading element not found in DOM — will create dynamically');
-      console.info('%c[forceShowGlobalLoading] Dynamically injected the loading overlay. Hard-refresh (Ctrl/Cmd+Shift+R) the page for the static version in index.html to take effect. This fallback keeps the 2026 + Weekly progress modals working.', 'color:#F15A29; font-weight:500');
-
-      // Create the outer overlay
       loadingEl = document.createElement('div');
       loadingEl.id = 'global-loading';
-      // Base classes (we will force the important styles below anyway)
-      loadingEl.className = 'fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-md';
+      loadingEl.className = 'coach-loading-overlay';
+      (document.body || document.documentElement).appendChild(loadingEl);
+    }
 
-      // The card (exact structure expected by enrichPlanLoading which does .querySelector('div') for the white card,
-      // and by title/message getters)
+    if (!loadingEl.querySelector('#global-loading-title')) {
       const card = document.createElement('div');
       card.className = 'bg-white dark:bg-gray-900 p-8 md:p-10 rounded-3xl shadow-2xl text-center w-full max-w-3xl mx-4 border border-gray-200 dark:border-gray-700';
       card.innerHTML = GLOBAL_LOADING_CARD_INNER;
-
+      loadingEl.innerHTML = '';
       loadingEl.appendChild(card);
-
-      // Append as high as possible so it is always discoverable and on top
-      const attachTo = document.body || document.documentElement;
-      attachTo.appendChild(loadingEl);
     }
 
     if (typeof window.ensureModalInViewport === 'function') {
       window.ensureModalInViewport(loadingEl);
-    } else if (loadingEl.parentElement !== document.body) {
+    } else if (loadingEl.parentElement !== document.body && document.body) {
       document.body.appendChild(loadingEl);
     }
 
-    console.log('%c[forceShowGlobalLoading] FORCING overlay visible for: ' + title, 'color:#00A89D; font-weight:bold');
-
     loadingEl.classList.remove('hidden');
+    loadingEl.classList.add('is-visible', 'flex', 'items-center', 'justify-center');
     loadingEl.removeAttribute('hidden');
-    loadingEl.classList.add('flex', 'items-center', 'justify-center');
+    loadingEl.setAttribute('aria-hidden', 'false');
 
-    // Set every critical property with !important so no Tailwind class, ancestor, or late stylesheet can hide it
     const forceStyles = {
-      'display': 'flex',
-      'position': 'fixed',
-      'top': '0',
-      'left': '0',
-      'right': '0',
-      'bottom': '0',
-      'inset': '0',
+      display: 'flex',
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      right: '0',
+      bottom: '0',
+      inset: '0',
       'z-index': '99999',
-      'visibility': 'visible',
-      'opacity': '1'
+      visibility: 'visible',
+      opacity: '1',
+      'pointer-events': 'auto',
+      'align-items': 'center',
+      'justify-content': 'center',
+      background: 'rgba(0,0,0,0.6)'
     };
     Object.keys(forceStyles).forEach(function (prop) {
       loadingEl.style.setProperty(prop, forceStyles[prop], 'important');
     });
 
-    // Set title if the standard title element still exists (business plan path keeps original structure)
     const titleEl = document.getElementById('global-loading-title');
     if (titleEl && title) {
       titleEl.textContent = title;
     }
-    return loadingEl;   // always return the element now (never false)
+    return loadingEl;
   };
 
   window.showLoadingWithTips = function showLoadingWithTips(tips = [], title = 'Working on it...') {
@@ -1118,12 +1094,19 @@
   };
 
   window.hideLoading = function hideLoading() {
+    if (typeof window.__hardHideGlobalLoading === 'function') {
+      try { window.__hardHideGlobalLoading(); } catch (e) { /* ignore */ }
+    }
     const loadingEl = document.getElementById('global-loading');
     if (loadingEl) {
       loadingEl.classList.add('hidden');
+      loadingEl.classList.remove('flex', 'is-visible');
+      loadingEl.setAttribute('hidden', '');
+      loadingEl.setAttribute('aria-hidden', 'true');
       loadingEl.style.setProperty('display', 'none', 'important');
       loadingEl.style.setProperty('visibility', 'hidden', 'important');
-      // Clean up any plan-specific enrich panel (clear placeholder if present, don't remove the div from static)
+      loadingEl.style.setProperty('opacity', '0', 'important');
+      loadingEl.style.setProperty('pointer-events', 'none', 'important');
       const enrich = loadingEl.querySelector('#plan-enrich-panel');
       if (enrich) {
         enrich.innerHTML = '';

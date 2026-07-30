@@ -1,5 +1,5 @@
 /**
- * js/features/onboarding-coach.js (Agent Sales Coach)
+ * js/features/onboarding-coach.js
  * Profile nudge, first-run checklist, section micro-guides, profile-aware Start Here,
  * tool-specific profile tips, Weekly Win Plan ↔ Value Vault cross-links.
  */
@@ -58,27 +58,198 @@
   }
 
   function ensureHomeStyles() {
-    if (document.getElementById('coach-home-styles')) return;
+    const existing = document.getElementById('coach-home-styles');
+    if (existing) existing.remove(); // always refresh so layout iterations apply
     const el = document.createElement('style');
     el.id = 'coach-home-styles';
     el.textContent = `
+      /* Home launchpad — denser Daily loop + Jump in */
+      #home.space-y-6 { gap: 1rem; }
+      #home > .home-hero { margin-bottom: 0; }
+
+      .home-loop-rail {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.45rem;
+      }
+      @media (min-width: 640px) {
+        .home-loop-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+      @media (min-width: 1100px) {
+        .home-loop-rail { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.4rem; }
+      }
+
+      #home-start-here .home-day-card {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+        padding: 0.65rem 0.7rem;
+        border-radius: 0.85rem;
+        border: 1px solid rgba(0, 43, 92, 0.1);
+        background: #f8fafc;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+      }
+      .dark #home-start-here .home-day-card {
+        background: rgba(15, 23, 42, 0.65);
+        border-color: rgba(148, 163, 184, 0.18);
+      }
+      #home-start-here .home-day-card:hover {
+        border-color: #00A89D;
+        background: #fff;
+        box-shadow: 0 8px 18px -12px rgba(0, 43, 92, 0.35);
+        transform: translateY(-1px);
+      }
+      .dark #home-start-here .home-day-card:hover {
+        background: rgba(15, 23, 42, 0.95);
+      }
+      #home-start-here .home-day-num {
+        flex-shrink: 0;
+        width: 1.35rem;
+        height: 1.35rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 900;
+        color: #fff;
+        background: var(--step, #00A89D);
+      }
+      #home-start-here .home-day-icon {
+        flex-shrink: 0;
+        width: 2.15rem;
+        height: 2.15rem;
+        border-radius: 0.65rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        color: var(--step, #00A89D);
+        background: color-mix(in srgb, var(--step, #00A89D) 12%, transparent);
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+      #home-start-here .home-day-card:hover .home-day-icon {
+        background: var(--step, #00A89D);
+        color: #fff;
+      }
+      #home-start-here .home-day-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 0.05rem;
+        min-width: 0;
+      }
+      #home-start-here .home-day-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--step, #00A89D);
+        line-height: 1.2;
+      }
+      #home-start-here .home-day-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #002B5C;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+      .dark #home-start-here .home-day-title { color: #f8fafc; }
+
       #home-start-here .home-day-card.is-recommended {
         border-color: #F15A29 !important;
-        box-shadow: 0 12px 28px -14px rgba(241,90,41,0.45), 0 0 0 1px rgba(241,90,41,0.2);
-        background: linear-gradient(165deg, rgba(241,90,41,0.06), #fff 42%);
+        box-shadow: 0 10px 22px -14px rgba(241,90,41,0.5), 0 0 0 1px rgba(241,90,41,0.25);
+        background: linear-gradient(165deg, rgba(241,90,41,0.08), #fff 50%);
       }
       .dark #home-start-here .home-day-card.is-recommended {
-        background: linear-gradient(165deg, rgba(241,90,41,0.12), rgba(17,24,39,0.95) 45%);
+        background: linear-gradient(165deg, rgba(241,90,41,0.14), rgba(17,24,39,0.95) 50%);
       }
       #home-start-here .home-day-card .start-here-badge {
-        display: inline-flex; align-items: center; gap: 0.3rem;
-        font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-        color: #F15A29; margin-bottom: 0.35rem;
+        position: absolute;
+        top: 0.2rem;
+        right: 0.35rem;
+        display: inline-flex;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #F15A29;
       }
-      #home-start-here .home-day-card .start-here-badge::before {
-        content: ''; width: 5px; height: 5px; border-radius: 999px;
-        background: #F15A29; box-shadow: 0 0 8px rgba(241,90,41,0.7);
+      #home-start-here .home-day-card {
+        position: relative;
       }
+
+      /* Jump-in tools — compact list tiles */
+      .home-tool-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+      }
+      @media (min-width: 520px) {
+        .home-tool-grid { grid-template-columns: 1fr 1fr; }
+      }
+      #home .home-tool {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+        padding: 0.55rem 0.7rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(0, 43, 92, 0.1);
+        background: #f8fafc;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      }
+      .dark #home .home-tool {
+        background: rgba(15, 23, 42, 0.55);
+        border-color: rgba(148, 163, 184, 0.16);
+      }
+      #home .home-tool:hover {
+        border-color: #00A89D;
+        background: #fff;
+        box-shadow: 0 6px 14px -10px rgba(0, 43, 92, 0.3);
+      }
+      .dark #home .home-tool:hover { background: rgba(15, 23, 42, 0.95); }
+      #home .home-tool > i:first-child {
+        width: 1.15rem;
+        text-align: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+      #home .home-tool-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.05rem;
+        min-width: 0;
+        flex: 1;
+      }
+      #home .home-tool-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #002B5C;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+      .dark #home .home-tool-title { color: #f8fafc; }
+      #home .home-tool-sub {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        line-height: 1.2;
+      }
+      #home .home-tool-chevron {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        opacity: 0.7;
+        flex-shrink: 0;
+      }
+      #home .home-tool:hover .home-tool-chevron { color: #00A89D; opacity: 1; }
+
       #home-hero-stats .home-stat-pill {
         display: inline-flex; align-items: center; gap: 0.4rem;
         padding: 0.35rem 0.75rem; border-radius: 999px;
@@ -86,16 +257,40 @@
         border: 1px solid rgba(255,255,255,0.14);
         background: rgba(255,255,255,0.06);
         color: rgba(255,255,255,0.78);
+        cursor: pointer;
+        font-family: inherit;
+        line-height: 1.2;
+        transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease, color 0.15s ease;
+      }
+      #home-hero-stats .home-stat-pill:hover {
+        border-color: rgba(255,255,255,0.35);
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        transform: translateY(-1px);
+      }
+      #home-hero-stats .home-stat-pill:focus-visible {
+        outline: 2px solid #00A89D;
+        outline-offset: 2px;
       }
       #home-hero-stats .home-stat-pill.is-ready {
         border-color: rgba(0,168,157,0.45);
         background: rgba(0,168,157,0.15);
         color: #5eead4;
       }
+      #home-hero-stats .home-stat-pill.is-ready:hover {
+        border-color: rgba(0,168,157,0.7);
+        background: rgba(0,168,157,0.28);
+        color: #99f6e4;
+      }
       #home-hero-stats .home-stat-pill.is-warn {
         border-color: rgba(241,90,41,0.4);
         background: rgba(241,90,41,0.12);
         color: #fdba74;
+      }
+      #home-hero-stats .home-stat-pill.is-warn:hover {
+        border-color: rgba(241,90,41,0.65);
+        background: rgba(241,90,41,0.22);
+        color: #fed7aa;
       }
       #home-setup-ready {
         animation: gs-enter 0.45s cubic-bezier(0.22,1,0.36,1) both;
@@ -130,20 +325,65 @@
       const planOk = hasBusinessPlan();
       const weekOk = hasWeeklyPlan();
       const bioOk = !!getProfile().professionalBio;
+      // Clickable chips → profile modal / bio / annual plan / weekly plan
       stats.innerHTML = `
-        <span class="home-stat-pill ${isComplete ? 'is-ready' : 'is-warn'}" title="Profile completeness">
-          <i class="fas fa-user text-[10px] opacity-80"></i> Profile ${score}%
-        </span>
-        <span class="home-stat-pill ${bioOk ? 'is-ready' : ''}" title="Primary bio">
-          <i class="fas fa-id-card text-[10px] opacity-80"></i> ${bioOk ? 'Bio ready' : 'Bio needed'}
-        </span>
-        <span class="home-stat-pill ${planOk ? 'is-ready' : ''}" title="2026 business plan">
-          <i class="fas fa-chart-line text-[10px] opacity-80"></i> ${planOk ? '2026 plan' : 'No annual plan'}
-        </span>
-        <span class="home-stat-pill ${weekOk ? 'is-ready' : ''}" title="Weekly win plan">
-          <i class="fas fa-fire text-[10px] opacity-80"></i> ${weekOk ? 'Week planned' : 'Plan this week'}
-        </span>
+        <button type="button" class="home-stat-pill ${isComplete ? 'is-ready' : 'is-warn'}" data-home-stat="profile"
+          title="Open your profile setup (${score}% complete)">
+          <i class="fas fa-user text-[10px] opacity-80" aria-hidden="true"></i> Profile ${score}%
+        </button>
+        <button type="button" class="home-stat-pill ${bioOk ? 'is-ready' : 'is-warn'}" data-home-stat="bio"
+          title="${bioOk ? 'Open Bio Builder' : 'Build your bio — opens Bio Builder'}">
+          <i class="fas fa-id-card text-[10px] opacity-80" aria-hidden="true"></i> ${bioOk ? 'Bio ready' : 'Bio needed'}
+        </button>
+        <button type="button" class="home-stat-pill ${planOk ? 'is-ready' : 'is-warn'}" data-home-stat="annual"
+          title="${planOk ? 'Open 2026 Business Plan' : 'Create your annual plan — opens 2026 Business Plan'}">
+          <i class="fas fa-chart-line text-[10px] opacity-80" aria-hidden="true"></i> ${planOk ? '2026 plan' : 'No annual plan'}
+        </button>
+        <button type="button" class="home-stat-pill ${weekOk ? 'is-ready' : 'is-warn'}" data-home-stat="weekly"
+          title="${weekOk ? 'Open Weekly Win Plan' : 'Plan this week — opens Weekly Win Plan'}">
+          <i class="fas fa-fire text-[10px] opacity-80" aria-hidden="true"></i> ${weekOk ? 'Week planned' : 'Plan this week'}
+        </button>
       `;
+      if (!stats.__homeStatNavWired) {
+        stats.__homeStatNavWired = true;
+        stats.addEventListener('click', function (e) {
+          const btn = e.target && e.target.closest ? e.target.closest('[data-home-stat]') : null;
+          if (!btn) return;
+          const key = btn.getAttribute('data-home-stat');
+          navigateHomeStatChip(key);
+        });
+      }
+    }
+  }
+
+  /** Home hero status chips → destination tools / profile */
+  function navigateHomeStatChip(key) {
+    if (key === 'profile') {
+      if (typeof window.openUserProfile === 'function') {
+        try {
+          window.openUserProfile(true);
+          return;
+        } catch (err) { /* fall through */ }
+      }
+      // Fallback: scroll setup / focus edit profile if present
+      const editBtn = document.getElementById('edit-setup-btn') || document.getElementById('open-profile-btn');
+      if (editBtn) {
+        editBtn.click();
+        return;
+      }
+      if (typeof window.showSection === 'function') window.showSection('home');
+      return;
+    }
+    if (key === 'bio') {
+      if (typeof window.showSection === 'function') window.showSection('bio-creator');
+      return;
+    }
+    if (key === 'annual') {
+      if (typeof window.showSection === 'function') window.showSection('planning');
+      return;
+    }
+    if (key === 'weekly') {
+      if (typeof window.showSection === 'function') window.showSection('weekly-win-plan');
     }
   }
 
@@ -153,16 +393,16 @@
     const challenges = (Array.isArray(p.challenges) ? p.challenges : []).join(' ').toLowerCase();
     const partners = (p.partnerTypes || p.targetPartners || []).join(' ').toLowerCase();
 
-    if (focus === 'database' || focus.includes('database') || focus.includes('past client') || focus.includes('sphere') || challenges.includes('database') || challenges.includes('sphere') || challenges.includes('past client')) {
+    if (focus === 'database' || focus.includes('database') || focus.includes('past client') || challenges.includes('database') || challenges.includes('sphere') || challenges.includes('past client')) {
       return 'nurture';
     }
     if (focus.includes('social') || focus.includes('content') || challenges.includes('content') || challenges.includes('social')) {
       return 'content';
     }
-    if (focus === 'listings' || focus.includes('listing') || focus.includes('seller') || challenges.includes('listing') || focus === 'buyers' || focus.includes('buyer') || challenges.includes('buyer')) {
+    if (focus === 'equity-refi' || focus.includes('equity') || focus.includes('refi') || challenges.includes('pipeline')) {
       return 'opportunity';
     }
-    if (focus === 'agent-network' || partners.includes('agent') || focus.includes('co-broke') || focus.includes('referral') || focus.includes('partner') || challenges.includes('referral') || challenges.includes('co-broke')) {
+    if (focus === 'referral-partners' || partners.includes('realtor') || focus.includes('referral') || focus.includes('partner') || challenges.includes('referral') || challenges.includes('realtor')) {
       return 'gift';
     }
     return 'plan';
@@ -178,7 +418,24 @@
     root.querySelectorAll('button[data-start-step]').forEach((btn) => {
       btn.classList.remove('is-recommended', 'ring-2', 'ring-[#F15A29]', 'border-[#F15A29]');
       btn.querySelector('.start-here-badge')?.remove();
+      // Ensure Content always opens the studio hub (never jump straight to social-post)
+      if (btn.getAttribute('data-start-step') === 'content') {
+        btn.setAttribute('onclick', "window.showSection('content-hub')");
+        btn.setAttribute('data-section', 'content-hub');
+      }
     });
+
+    // Delegated safety net if inline handlers are stripped by host code
+    if (!root.__contentHubNavWired) {
+      root.__contentHubNavWired = true;
+      root.addEventListener('click', function (e) {
+        const btn = e.target && e.target.closest ? e.target.closest('button[data-start-step="content"]') : null;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.showSection === 'function') window.showSection('content-hub');
+      }, true);
+    }
 
     const target = root.querySelector(`button[data-start-step="${recommended}"]`);
     if (!target) return;
@@ -194,8 +451,8 @@
     'weekly-win-plan': {
       icon: 'fa-fire',
       title: 'Start here this week',
-      body: 'Generate your plan, block 2–3 power hours on your calendar, then execute one partner touch from Value Vault the same day.',
-      action: { label: 'Pick a Pop-By →', section: 'value-vault' },
+      body: 'Set hours and focus below, then generate. Block 2–3 power hours and execute one partner touch the same day. Pop-Bys live in the bottom banner / Value Vault.',
+      action: { label: 'Jump to form →', scroll: 'wwp-hours' },
       needsProfile: ['name', 'location']
     },
     'value-vault': {
@@ -207,8 +464,8 @@
     'referrals': {
       icon: 'fa-handshake',
       title: 'Partner growth mode',
-      body: 'Open your partner playbook, pick a co-broke or lender play, then run the 60-day onboarding on your next new partner.',
-      action: { label: 'Referral partners →', section: 'referrals' }
+      body: 'Open your partner playbook, scan the Ruoff Fact Vault for differentiators, then run the 60-day onboarding on your next new realtor.',
+      action: { label: 'Ruoff facts ↓', section: 'referrals', scroll: 'ruoff-fact-vault-section' }
     },
     'database': {
       icon: 'fa-database',
@@ -216,70 +473,60 @@
       body: 'Rank A/B/C clients, pick one nurture template from Value Vault Pillar 5, and schedule it in a Weekly Win time block.',
       action: { label: 'Nurture templates →', section: 'value-vault', pillar: 5 }
     },
+    'content-hub': {
+      icon: 'fa-pen-nib',
+      title: 'Pick the right content tool',
+      body: 'Strategy for what to post, Social Post & Calendar for this week, Blog for authority, Newsletter for sphere, Bio for your profile — choose what you need now.',
+      action: { label: 'Create this week’s posts →', section: 'social-post' }
+    },
     'social': {
       icon: 'fa-share-alt',
       title: 'Content that compounds',
-      body: 'Open one expanded pillar for copy-ready posts, save 2 winners to My Saved Items, and schedule them in Social Post Creator.',
-      action: { label: 'Weekly Win Plan →', section: 'weekly-win-plan' }
+      body: 'Open one expanded pillar for copy-ready posts, save 2 winners to My Saved Items, then generate a calendar in Social Post Creator.',
+      action: { label: 'Content studio →', section: 'content-hub' }
     },
     'social-post': {
       icon: 'fa-magic',
       title: 'Batch content in minutes',
-      body: 'Generate 3 post options or a full 30-day calendar. Save winners to My Saved Items, then protect posting time in Weekly Win Plan.',
-      action: { label: 'Weekly Win Plan →', section: 'weekly-win-plan' },
+      body: 'Pick an idea (or type your own), generate 3 options or a 30-day calendar, save winners, then protect posting time in Weekly Win Plan.',
+      action: { label: 'Jump to form →', scroll: 'post-type' },
       needsProfile: ['name', 'location', 'tone']
-    },
-    'listing-description': {
-      icon: 'fa-chart-line',
-      title: 'Win more listings',
-      body: 'Write listing copy that sells the lifestyle, then open Open House or Consultation Kit for the live appointment.',
-      action: { label: 'Open House kit →', section: 'open-house' }
     },
     'bio-creator': {
       icon: 'fa-id-card',
       title: 'Your voice starts with one bio',
-      body: 'Save a Primary Bio so Newsletter, Blog, Social, and AI Coach speak like you. Zillow, brokerage sites, and Google each have their own limits.',
-      action: { label: 'Open My Profile →', openProfile: true },
+      body: 'Use Guided setup or Full form below. Save a Primary Bio so Newsletter, Blog, Social, and AI Coach speak like you.',
+      // Land on Guided | Full toggle (not below it into the full form only)
+      action: { label: 'Jump to form →', scroll: 'bio-wizard-entry' },
       needsProfile: ['name', 'location']
-    },
-    'open-house': {
-      icon: 'fa-door-open',
-      title: 'Convert open house traffic',
-      body: 'Build a host plan, scripts, and follow-up so open houses create appointments — not just foot traffic.',
-      action: { label: 'Consultation kit →', section: 'consultation' }
-    },
-    consultation: {
-      icon: 'fa-handshake',
-      title: 'Win the appointment',
-      body: 'Buyer and seller consult frameworks so you walk in with a clear agenda and walk out with a signed relationship.',
-      action: { label: 'Listing copy →', section: 'listing-description' }
     },
     'blog': {
       icon: 'fa-newspaper',
       title: 'Authority content, full package',
-      body: 'One generate = blog + social caption + Google post + Reel. Add your market in the form (auto-saves to profile) for stronger GEO.',
-      action: { label: 'Newsletter next →', section: 'newsletter-generator' },
+      body: 'Set length, tone, and topic below — one generate = blog + social caption + Google post + Reel. Market from the form auto-saves to profile.',
+      action: { label: 'Jump to form →', scroll: 'blog-length' },
       needsProfile: ['location']
     },
     'newsletter-generator': {
       icon: 'fa-envelope-open-text',
       title: 'Stay top of mind monthly',
-      body: 'Write a real Personal Update first, then generate. Review the preview before copy/download — compliance-safe by design.',
-      action: { label: 'Primary bio →', section: 'bio-creator' },
+      body: 'Write a real Personal Update first, then generate. Review the preview before copy/download — compliance-safe by design. Use Guided setup or the form below when you’re ready.',
+      // Land on guided-entry strip (wizard CTA) so it stays in view — not mid-form fields
+      action: { label: 'Jump to form →', scroll: 'nl-wizard-entry' },
       needsProfile: ['name', 'location']
     },
     'sales-script': {
       icon: 'fa-comments',
       title: 'Sound human under pressure',
-      body: 'Pick a scenario, add context, generate 4 scripts. Save keepers to My Saved Items before your next call block.',
-      action: { label: 'Listing descriptions →', section: 'listing-description' },
+      body: 'Pick a category and scenario, add context, then generate 4 scripts. Save keepers to My Saved Items before your next call block.',
+      action: { label: 'Jump to form →', scroll: 'sales-category-cards' },
       needsProfile: ['name', 'tone']
     },
     'planning': {
       icon: 'fa-chart-line',
-      title: 'Annual map → weekly execution',
-      body: 'Build your 2026 plan once, then open Weekly Win Plan to turn pillars into this week’s protected blocks.',
-      action: { label: 'Weekly Win Plan →', section: 'weekly-win-plan' },
+      title: 'Build your year around you',
+      body: 'Use the Guided setup | Full form switch below — same fields either way. Profile loads automatically.',
+      // No action button: avoids a second guided CTA next to the shared mode switch
       needsProfile: ['name', 'location']
     },
     'ai-chat': {
@@ -411,8 +658,8 @@
       {
         id: 'content',
         short: 'Content',
-        label: 'Ship one piece of content',
-        blurb: 'Social, blog, or newsletter — show up in the market with your voice.',
+        label: 'Open Content Studio',
+        blurb: 'Strategy, posts, blog, newsletter, or bio — pick the right tool for this moment.',
         icon: 'fa-sparkles',
         done: (() => {
           try {
@@ -422,7 +669,7 @@
             return false;
           }
         })() || !!localStorage.getItem('lastBlogOutput') || !!localStorage.getItem('lastNewsletterHTML') || !!localStorage.getItem('lastSocialPlanHTML'),
-        run: () => { if (typeof window.showSection === 'function') window.showSection('social-post'); }
+        run: () => { if (typeof window.showSection === 'function') window.showSection('content-hub'); }
       },
       {
         id: 'saved',
@@ -668,7 +915,7 @@
       bio: 'Build my bio',
       annual: 'Build 2026 plan',
       weekly: 'Plan this week',
-      content: 'Create content',
+      content: 'Open Content Studio',
       saved: 'Open library'
     };
     return map[item.id] || 'Continue';
@@ -900,12 +1147,27 @@
         window.openUserProfile(true);
         return;
       }
+      if (guide.action.openPlanWizard && typeof window.openBusinessPlanWizard === 'function') {
+        window.openBusinessPlanWizard();
+        return;
+      }
       if (guide.action.section && typeof window.showSection === 'function') {
         window.showSection(guide.action.section);
       }
       setTimeout(() => {
         if (guide.action.scroll) {
-          document.getElementById(guide.action.scroll)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const node = document.getElementById(guide.action.scroll);
+          if (node) {
+            node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try {
+              if (typeof node.focus === 'function' && !/^(DIV|SECTION|SPAN)$/i.test(node.tagName)) {
+                node.focus({ preventScroll: true });
+              } else {
+                const focusable = node.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])');
+                focusable?.focus({ preventScroll: true });
+              }
+            } catch (e) { /* ignore */ }
+          }
         }
         if (guide.action.pillar && typeof window.openVaultPillar === 'function') {
           window.openVaultPillar(guide.action.pillar);
@@ -1019,32 +1281,65 @@
       localStorage.setItem('coachFirstRunChecklistVersion', CHECKLIST_VERSION);
     }
 
-    // Stagger heavy UI chrome so first paint isn't blocked
+    // Paint home chrome immediately after scripts load (end of body — never mid-page).
+    // Keep light: avoid onCoachSectionShown double-work on first paint.
     const paint = () => {
       try {
+        if (typeof window.__hardHideGlobalLoading === 'function') {
+          window.__hardHideGlobalLoading();
+        }
         renderProfileNudge();
         updateHomeHero();
         renderFirstRunChecklist();
         applyProfileAwareStartHere();
-        const visible = document.querySelector('main section:not(.hidden)');
-        if (visible?.id) window.onCoachSectionShown(visible.id);
       } catch (e) {
         console.warn('[onboarding-coach] paint failed', e);
       }
     };
-    if (typeof requestIdleCallback === 'function') {
-      requestIdleCallback(paint, { timeout: 2500 });
+    // Paint ASAP — one rAF is enough (double-rAF felt like late Coach Setup pop-in).
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(paint);
     } else {
-      setTimeout(paint, 50);
+      paint();
+    }
+    // Re-paint once profile storage is fully readable (user-profile may still be initing)
+    setTimeout(paint, 0);
+    setTimeout(paint, 120);
+    // After full DOM is ready, run section hooks once (safe)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        try {
+          if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
+          const visible = document.querySelector('main section:not(.hidden)');
+          if (visible?.id && typeof window.onCoachSectionShown === 'function') {
+            window.onCoachSectionShown(visible.id);
+          }
+        } catch (e) { /* ignore */ }
+      });
+    } else {
+      setTimeout(() => {
+        try {
+          if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
+          const visible = document.querySelector('main section:not(.hidden)');
+          if (visible?.id && typeof window.onCoachSectionShown === 'function') {
+            window.onCoachSectionShown(visible.id);
+          }
+        } catch (e) { /* ignore */ }
+      }, 0);
     }
 
-    // Bridges only when those sections matter
-    setTimeout(() => {
+    // Cross-tool bridges can wait — not needed for first Home paint
+    const injectBridges = () => {
       try {
         injectVaultWeeklyBridge();
         injectWeeklyVaultBridge();
-      } catch (e) {}
-    }, 800);
+      } catch (e) { /* ignore */ }
+    };
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(injectBridges, { timeout: 2000 });
+    } else {
+      setTimeout(injectBridges, 400);
+    }
 
     window.addEventListener('storage', (e) => {
       if (
@@ -1081,7 +1376,10 @@
     window.renderCoachFirstRunChecklist = renderFirstRunChecklist;
   }
 
-  if (document.readyState === 'loading') {
+  // Prefer immediate run when placed right after #home (parser already has the section).
+  if (document.getElementById('home')) {
+    init();
+  } else if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();

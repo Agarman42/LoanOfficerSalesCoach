@@ -8,7 +8,7 @@
  * - PDF.js document upload + text extraction (processBlogFile)
  * - generateBlog with reference document injection
  * - Blog tips modal (open/close)
- * - Copy with formatting, download as .doc
+ * - Copy with formatting, jump to publisher, download as .doc
  * - All related state (blogUploadedFileText) and listeners
  *
  * Self-initializes. Exposes public API on window.
@@ -17,13 +17,24 @@
 (function () {
   'use strict';
 
+  // LO tool only — Realtors cannot publish on sales.ruoff.com
+  const BLOG_ENABLE_RUOFF_PUBLISH = true;
+
+  function getRuoffPublishButtonHtml() {
+    if (!BLOG_ENABLE_RUOFF_PUBLISH) return '';
+    return `
+        <button id="jump-publish-btn" class="bg-[#00A89D] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#008F85] transition-all flex items-center justify-center gap-2 flex-1">
+            <i class="fas fa-external-link-alt"></i> Publish on Site
+        </button>`;
+  }
+
   function getBlogFeedbackHtml() {
     return `
     <!-- Feedback / Refine (like Newsletter) -->
     <div class="mt-8 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-8">
         <label class="block text-lg font-semibold text-[#00A89D] mb-3">Feedback / Specific Edits (Optional)</label>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Tweak tone, length, examples, or emphasis without starting over. The blog, caption, Google post, and Reel script will all be updated together.</p>
-        <textarea id="blog-feedback" rows="3" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800" placeholder="e.g., Make the intro warmer, shorten by ~200 words, add more local market stats, tone down the humor in the FAQ."></textarea>
+        <textarea id="blog-feedback" rows="3" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800" placeholder="e.g., Make the intro warmer, shorten by ~200 words, add more Fort Wayne local stats, tone down the humor in the FAQ."></textarea>
         <button id="blog-refine-btn" class="mt-4 w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 px-10 rounded-full font-bold text-lg shadow-xl flex items-center justify-center gap-2 mx-auto">
             <i class="fas fa-redo"></i> Refine with Edits
         </button>
@@ -31,8 +42,15 @@
     </div>`;
   }
 
+  /** Patch older persisted blog output missing publish btn or feedback (localStorage restore). */
   function patchRestoredBlogOutput(html) {
     let patched = html || '';
+    if (BLOG_ENABLE_RUOFF_PUBLISH && !patched.includes('id="jump-publish-btn"')) {
+      patched = patched.replace(
+        /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
+        `$1${getRuoffPublishButtonHtml()}`
+      );
+    }
     if (!patched.includes('id="blog-next-steps-btn"')) {
       patched = patched.replace(
         /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
@@ -42,11 +60,42 @@
         </button>`
       );
     }
+    patched = patched.replace(/id="blog-publish-kit-btn"/g, 'id="blog-next-steps-btn"');
+    patched = patched.replace(/Publish Kit/g, 'Next Steps');
+    patched = patched.replace(/fa-rocket/g, 'fa-list-check');
+    patched = patched.replace(/<div id="blog-seo-panel"[\s\S]*?<\/div>\s*(?=<!-- Social Caption Card)/, '');
     if (!patched.includes('id="blog-feedback"')) {
       patched += getBlogFeedbackHtml();
     }
     return patched;
   }
+
+  // =====================================================
+  // BLOG TIPS MODAL (UW-style premium modal)
+  // =====================================================
+  window.openBlogTips = function openBlogTips() {
+    const modal = document.getElementById('blog-tips-modal');
+    if (!modal) return;
+    if (typeof window.openAppModal === 'function') {
+      window.openAppModal(modal);
+    } else {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.style.display = 'flex';
+    }
+  };
+
+  window.closeBlogTips = function closeBlogTips() {
+    const modal = document.getElementById('blog-tips-modal');
+    if (!modal) return;
+    if (typeof window.closeAppModal === 'function') {
+      window.closeAppModal(modal);
+    } else {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  };
 
   // =====================================================
   // CENTRAL PROFILE INTEGRATION (consistent with other tools)
@@ -80,9 +129,12 @@
 
   // Build a rich personalization string for the prompt
   function buildBlogPersonalization(profile) {
-    const eff = getEffectiveSetup();
-    let parts = [];
+    if (typeof window.buildProfileAiContext === 'function') {
+      return window.buildProfileAiContext(profile || getCentralProfile());
+    }
 
+    const eff = getEffectiveSetup();
+    const parts = [];
     if (eff.personality) parts.push(`Your personality: ${eff.personality}`);
     if (eff.voiceTraits && eff.voiceTraits.length) parts.push(`Voice traits: ${eff.voiceTraits.join(', ')}`);
     if (eff.tone) parts.push(`Preferred tone: ${eff.tone}`);
@@ -91,7 +143,7 @@
     if (eff.goals) parts.push(`Current focus/goals: ${eff.goals}`);
     if (eff.challenges) parts.push(`Key challenges you help clients with: ${eff.challenges}`);
 
-    return parts.length ? parts.join('. ') + '.' : 'Write in a helpful, trustworthy, conversational voice for a local real estate professional.';
+    return parts.length ? parts.join('. ') + '.' : 'Write in a helpful, trustworthy, conversational voice for a local mortgage professional.';
   }
 
   function trimBundleSectionEdges(text) {
@@ -101,16 +153,164 @@
       .trim();
   }
 
+  function escapeBlogHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /** Caption: body + hashtag chips (premium, readable) */
+  function formatCaptionHtml(raw) {
+    const text = trimBundleSectionEdges(raw);
+    if (!text) {
+      return '<p class="blog-companion-empty">No caption generated — try regenerating!</p>';
+    }
+    // Split hashtags from body
+    const tags = [];
+    const body = text
+      .replace(/#[\w-]+/g, (m) => {
+        tags.push(m);
+        return ' ';
+      })
+      .replace(/\s+/g, ' ')
+      .trim();
+    let html = '<div class="blog-companion-body">';
+    if (body) html += `<p class="blog-caption-text">${escapeBlogHtml(body)}</p>`;
+    if (tags.length) {
+      html +=
+        '<div class="blog-hashtag-row" aria-label="Hashtags">' +
+        tags
+          .map((t) => `<span class="blog-hashtag">${escapeBlogHtml(t)}</span>`)
+          .join('') +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  /** Google post: clean paragraph(s), preserve light emphasis */
+  function formatGooglePostHtml(raw) {
+    const text = trimBundleSectionEdges(raw);
+    if (!text) {
+      return '<p class="blog-companion-empty">No Google post generated — try a different topic or regenerate.</p>';
+    }
+    // Strip leftover label if model re-echoed it
+    let cleaned = text.replace(/^\*{0,2}(?:Suggested\s+)?Google(?:\s+Business)?(?:\s+Profile)?\s*Post:?\*{0,2}\s*/i, '').trim();
+    // Convert **bold** to <strong>, then escape rest carefully
+    const withBreaks = cleaned
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const escaped = escapeBlogHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        return `<p class="blog-google-p">${escaped}</p>`;
+      })
+      .join('');
+    return `<div class="blog-companion-body">${withBreaks || `<p class="blog-google-p">${escapeBlogHtml(cleaned)}</p>`}</div>`;
+  }
+
+  /**
+   * Reel script: structure Hook / Spoken / Visuals / Audio / CTA into labeled rows.
+   * Handles both multiline and single-line model dumps.
+   */
+  function formatReelScriptHtml(raw) {
+    const text = trimBundleSectionEdges(raw);
+    if (!text) {
+      return '<p class="blog-companion-empty">No Reel script generated — try regenerating!</p>';
+    }
+
+    const labels = [
+      { key: 'hook', re: /Hook\s*(?:\([^)]*\))?\s*:/i, title: 'Hook' },
+      { key: 'spoken', re: /Spoken\s*script\s*(?:\([^)]*\))?\s*:/i, title: 'Spoken script' },
+      { key: 'visuals', re: /Visuals?\s*(?:\/\s*B-?roll)?\s*:/i, title: 'Visuals / B-roll' },
+      { key: 'audio', re: /Audio\s*style\s*:/i, title: 'Audio style' },
+      { key: 'cta', re: /CTA\s*(?:\([^)]*\))?\s*:/i, title: 'CTA' },
+    ];
+
+    // Normalize so each known label starts a line
+    let normalized = text.replace(/\r\n/g, '\n');
+    labels.forEach((l) => {
+      normalized = normalized.replace(l.re, (m) => '\n' + m);
+    });
+    normalized = normalized.replace(/\n{3,}/g, '\n\n').trim();
+
+    const sections = [];
+    const found = [];
+    labels.forEach((l) => {
+      const m = l.re.exec(normalized);
+      if (m) found.push({ key: l.key, title: l.title, index: m.index, end: m.index + m[0].length });
+    });
+    found.sort((a, b) => a.index - b.index);
+
+    if (found.length) {
+      for (let i = 0; i < found.length; i++) {
+        const start = found[i].end;
+        const end = i + 1 < found.length ? found[i + 1].index : normalized.length;
+        let body = normalized.slice(start, end).trim().replace(/^["']|["']$/g, '');
+        // Pull timing from original match if present
+        const labelSlice = normalized.slice(found[i].index, found[i].end);
+        const timing = (labelSlice.match(/\(([^)]+)\)/) || [])[1];
+        sections.push({
+          title: found[i].title,
+          timing: timing || '',
+          body: body,
+        });
+      }
+    } else {
+      // Fallback: paragraph split
+      normalized
+        .split(/\n+/)
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .forEach((line) => {
+          sections.push({ title: '', timing: '', body: line });
+        });
+    }
+
+    if (!sections.length) {
+      return `<div class="blog-companion-body"><p class="blog-google-p">${escapeBlogHtml(text)}</p></div>`;
+    }
+
+    return (
+      '<div class="blog-reel-grid">' +
+      sections
+        .map((s) => {
+          const label = s.title
+            ? `<div class="blog-reel-label">${escapeBlogHtml(s.title)}${
+                s.timing ? ` <span class="blog-reel-timing">(${escapeBlogHtml(s.timing)})</span>` : ''
+              }</div>`
+            : '';
+          const body = escapeBlogHtml(s.body).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+          return `<div class="blog-reel-row">${label}<div class="blog-reel-body">${body}</div></div>`;
+        })
+        .join('') +
+      '</div>'
+    );
+  }
+
   /** Split API response into blog + caption + Google + Reel using section labels (not every ---). */
   function parseBlogBundleFromResponse(fullContent) {
     const content = (fullContent || '').trim();
     const fallback = { blogMarkdown: content, captionText: '', googlePostText: '', reelScriptText: '' };
     if (!content) return fallback;
 
+    // Accept many label variants the model actually produces
     const markerDefs = [
-      { key: 'captionText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Social Media Caption:?\*{0,2}\s*/i },
-      { key: 'googlePostText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}Suggested Google Post:?\*{0,2}\s*/i },
-      { key: 'reelScriptText', regex: /(?:^|\n)\s*(?:---\s*)?\*{0,2}30-45 Second Reel Script(?:\s*&\s*Video Idea)?:?\*{0,2}\s*/i },
+      {
+        key: 'captionText',
+        // Require "Social" or "Suggested … Caption" so we don't match body text containing "caption"
+        regex: /(?:^|\n)\s*(?:---\s*)?(?:#{1,3}\s*)?\*{0,2}(?:Suggested\s+Social\s+Media\s+Caption|Social\s+Media\s+Caption|Suggested\s+Caption):?\*{0,2}\s*/i,
+      },
+      {
+        key: 'googlePostText',
+        regex: /(?:^|\n)\s*(?:---\s*)?(?:#{1,3}\s*)?\*{0,2}(?:Suggested\s+)?Google(?:\s+Business)?(?:\s+Profile)?\s*Post:?\*{0,2}\s*/i,
+      },
+      {
+        key: 'reelScriptText',
+        regex: /(?:^|\n)\s*(?:---\s*)?(?:#{1,3}\s*)?\*{0,2}(?:30-45\s*Second\s+)?Reel(?:\s*\/\s*Short\s+Video)?\s*Script(?:\s*&\s*Video\s*Idea)?:?\*{0,2}\s*/i,
+      },
     ];
 
     const markers = [];
@@ -122,25 +322,15 @@
     }
 
     if (markers.length === 0) {
-      const parts = content.split(/(?:^|\n)---\s*\n?\s*(?=\*{0,2}(?:Suggested Social Media Caption|Suggested Google Post|30-45 Second Reel Script))/i);
-      if (parts.length >= 2) {
-        const result = {
+      // Last-ditch: split on --- and assign trailing parts
+      const parts = content.split(/(?:^|\n)---\s*\n/).map((p) => p.trim()).filter(Boolean);
+      if (parts.length >= 4) {
+        return {
           blogMarkdown: trimBundleSectionEdges(parts[0]),
-          captionText: '',
-          googlePostText: '',
-          reelScriptText: '',
+          captionText: trimBundleSectionEdges(parts[1].replace(/^\*{0,2}.*caption:?\*{0,2}\s*/i, '')),
+          googlePostText: trimBundleSectionEdges(parts[2].replace(/^\*{0,2}.*google.*post:?\*{0,2}\s*/i, '')),
+          reelScriptText: trimBundleSectionEdges(parts[3].replace(/^\*{0,2}.*reel.*:?\*{0,2}\s*/i, '')),
         };
-        if (parts.length >= 4) {
-          result.captionText = trimBundleSectionEdges(parts[1]);
-          result.googlePostText = trimBundleSectionEdges(parts[2]);
-          result.reelScriptText = trimBundleSectionEdges(parts[3]);
-        } else if (parts.length >= 3) {
-          result.captionText = trimBundleSectionEdges(parts[1]);
-          result.googlePostText = trimBundleSectionEdges(parts[2]);
-        } else {
-          result.captionText = trimBundleSectionEdges(parts[1]);
-        }
-        return result;
       }
       return fallback;
     }
@@ -163,6 +353,39 @@
     return result;
   }
 
+  /** When the main call truncates or skips extras, fetch caption + Google + Reel only. */
+  async function generateBlogExtrasFromBlog(blogMarkdown, topicInput) {
+    const excerpt = String(blogMarkdown || '').slice(0, 4500);
+    const prompt = `You write companion assets for a mortgage blog. Return ONLY the three labeled sections below — no blog body, no commentary, no code fences.
+
+**Suggested Social Media Caption:**
+(100–200 characters, engaging, 4–6 hashtags. Clean text only.)
+
+**Suggested Google Post:**
+(Under 1400 characters. Standalone teaser for Google Business Profile. Clean text only.)
+
+**30-45 Second Reel Script & Video Idea:**
+(Hook, spoken script ~30–45s, visuals/B-roll, audio style, CTA. Clean markdown.)
+
+Topic: ${topicInput || 'mortgage'}
+Blog excerpt:
+${excerpt}`;
+
+    try {
+      const raw = await window.callGrokAPI(prompt, { temperature: 0.35, max_tokens: 2500 });
+      if (!raw) return null;
+      return parseBlogBundleFromResponse(raw);
+    } catch (e) {
+      console.warn('[blog-creator] extras pass failed', e);
+      return null;
+    }
+  }
+
+  function bundleExtrasMissing(bundle) {
+    if (!bundle) return true;
+    return !bundle.captionText || !bundle.googlePostText || !bundle.reelScriptText;
+  }
+
   function extractBlogTitle(blogMarkdown) {
     const m = String(blogMarkdown || '').match(/^#\s+(.+)$/m);
     if (!m) return 'Blog Post';
@@ -178,7 +401,7 @@
   // ORIGINAL BLOG CREATOR CODE (moved verbatim)
   // =====================================================
 
-// ==================== AGENT BLOG DOCUMENT UPLOAD ====================
+// ==================== LOAN OFFICER BLOG DOCUMENT UPLOAD ====================
 let blogUploadedFileText = '';
 let lastBlogBundle = null; // { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput }
 
@@ -257,9 +480,14 @@ async function generateBlog(feedback = '') {
             try {
                 const current = getCentralProfile();
                 if (current.localArea !== val || current.market !== val) {
-                    current.localArea = val;
-                    current.market = val;
-                    localStorage.setItem('userProfile', JSON.stringify(current));
+                    if (typeof window.patchUserProfile === 'function') {
+                        window.patchUserProfile({ localArea: val, location: val, market: val }, { silent: true });
+                    } else {
+                        current.localArea = val;
+                        current.market = val;
+                        current.location = val;
+                        localStorage.setItem('userProfile', JSON.stringify(current));
+                    }
                 }
             } catch (e) {}
         }
@@ -295,20 +523,12 @@ async function generateBlog(feedback = '') {
 
     if (!topicInput) {
         _blogGenerating = false;
-        window.notifyUser('Please select or type a blog topic', 'warning', 3200);
+        alert('Please select or type a blog topic');
         return;
     }
 
     const output = document.getElementById('blog-output');
     const loadingEl = document.getElementById('global-loading');
-
-    if (!output) {
-      _blogGenerating = false;
-      console.error('[blog-creator] #blog-output container missing from DOM');
-      window.hideLoading?.();
-      window.notifyUser('Blog output area not found. Please refresh the page.', 'error', 4000);
-      return;
-    }
 
     // Use centralized force for consistent premium progress modal
     const loadingTitle = feedback ? 'Refining Your Blog Post...' : 'Building Your Authority Blog Post...';
@@ -343,8 +563,8 @@ const blogLoadingContent = `
                             <div><strong>Multiplies across channels:</strong> Becomes the foundation for 5–10 social posts, Reels, and newsletter features.</div>
                         </div>
                         <div class="flex gap-3">
-                            <i class="fas fa-user-tie text-[#002B5C] mt-0.5"></i>
-                            <div><strong>Positions you as expert:</strong> Clients and referral partners remember and refer the agent who publishes thoughtful local content.</div>
+                            <i class="fas fa-user-tie text-[#002B5C] dark:text-white mt-0.5"></i>
+                            <div><strong>Positions you as expert:</strong> Clients and realtors remember and refer the LO who publishes thoughtful local content.</div>
                         </div>
                         <div class="flex gap-3">
                             <i class="fas fa-cogs text-[#F15A29] mt-0.5"></i>
@@ -362,11 +582,11 @@ const blogLoadingContent = `
 
 if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
 
-    output.classList.add('hidden');
+    if (output) output.classList.add('hidden');
     if (loadingEl) {
         loadingEl.classList.remove('hidden');
     }
-    output.innerHTML = '';
+    if (output) output.innerHTML = '';
 
     const lengthGuide = lengthSelect === 'long' ? '1,500–2,000 words' : lengthSelect === 'medium' ? '1,000-1,500 words' : '600-1,000 words';
 
@@ -375,12 +595,12 @@ if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
     const richProfile = getEffectiveSetup();
     const personalization = buildBlogPersonalization(richProfile);
 
-    const systemPrompt = `You are an expert real estate content writer creating high-quality, GEO-optimized, authority-building content for real estate agents. Write in the exact voice and style of this specific agent: ${personalization}
+    const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized, authority-building content for loan officers. Write in the exact voice and style of this specific loan officer: ${personalization}
 
 Key Requirements:
 - Length: Exactly aim for the middle of ${lengthGuide} range (e.g., ~1,750 words for 1,500–2,000). Do not generate shorter—expand with more detailed explanations, additional examples, sub-sections, or relevant anecdotes to reach the word count while keeping it engaging and reader-focused. 
 - Tone: ${tone}
-${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-out-loud funny! Use clever wordplay, relatable real estate humor, self-deprecating jokes, exaggerated analogies, and witty observations. Keep it light-hearted and entertaining while still being helpful — never mean-spirited. Sprinkle humor throughout (intro, body, headings, FAQs). Readers should smile or chuckle multiple times.' : ''}
+${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-out-loud funny! Use clever wordplay, relatable mortgage humor, self-deprecating jokes, exaggerated analogies, and witty observations. Keep it light-hearted and entertaining while still being helpful — never mean-spirited. Sprinkle humor throughout (intro, body, headings, FAQs). Readers should smile or chuckle multiple times.' : ''}
 - Write a complete blog post on: ${topicInput}
 - Primary SEO keyword/phrase (use naturally throughout, especially in title if it fits, intro, H2s, and body — aim for 1–2% density with semantic variations): ${keywordInput || 'Optimize naturally for the main topic'}
 - Local Area (incorporate relevant local insights, programs, statistics, or examples if applicable to the topic and it fits naturally; otherwise, keep general/US-wide): ${localArea || 'None provided'}
@@ -395,21 +615,26 @@ ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-ou
   - Dedicated FAQ section near the end (H2: "Frequently Asked Questions") answering the top 4–6 real consumer questions in clear, helpful bullet format (elaborate on answers to add words)
   - Soft CTA at end: "Ready to explore your options? Reach out — I’m here to help."
 - SEO/GEO: Reader-first writing, natural keywords, local relevance where it fits the topic
-- Avoid: Any "trigger terms" that could lead to fair housing or compliance issues
+- Avoid: Any "trigger terms" that could lead to compliance issues
+- Never mention lenders other than Ruoff Mortgage. 
 - Do not start the blog with Imagine this or Picture this. 
-- Voice: Match the agent's personality and voice traits above — helpful, trustworthy, conversational, and authentic — never salesy.
+- Voice: Match the loan officer's personality and voice traits above — helpful, trustworthy, conversational, and authentic — never salesy.
 - Language: Check the "Additional instructions" / additional context field. If the user requests a different language there (e.g. "Prepare the full blog in Spanish", "Generate in French", "in German", "en español"), produce the **entire output** — the blog post, the social media caption, the Google Business post, **and** the Reel script — fully in that requested language. Translate everything naturally and accurately while preserving the exact required structure, headings, SEO intent, and professional tone.
 
-After the blog post, add a clear separator (---) followed by a short, clearly labeled social media caption (e.g., **Suggested Social Media Caption:**). Keep the caption 100–200 characters, engaging, and include 4–6 relevant hashtags. **Do NOT include any character count at the end — output clean caption text only.**
+CRITICAL — after the blog body you MUST output these three companion sections using these EXACT labels on their own lines (bold markdown). Do not skip them even if the blog is long; prefer slightly shorter blog over missing companions.
 
-Add another separator (---) followed by a clearly labeled Google Business Profile post (e.g., **Suggested Google Post:**) optimized for SEO/GEO. This must be under 1400 characters total. Make it a standalone teaser/summary of the blog that can be copied/pasted directly into Google Business Profile. Maximize SEO/GEO by naturally incorporating the primary keyword, local area references (if provided), related terms, and calls-to-action. Use engaging language, emojis if fitting the tone. **Do NOT include any character count at the end — output clean post text only.** Ensure it's formatted in plain text with bold (**text**) where emphasis helps.
+**Suggested Social Media Caption:**
+(100–200 characters, engaging, 4–6 hashtags. Clean caption text only — no character counts.)
 
-Add a final separator (---) followed by a clearly labeled 30–45 second Reel / Short Video Script & Idea (e.g., **30-45 Second Reel Script & Video Idea:**). 
-Provide: strong 3s hook, full spoken script (~30-45s), key visuals/B-roll ideas, suggested audio style, and a natural CTA that drives back to the blog topic. Keep it film-ready and concise.
+**Suggested Google Post:**
+(Under 1400 characters. Standalone Google Business Profile teaser. Clean text only — no character counts.)
+
+**30-45 Second Reel Script & Video Idea:**
+(Hook, spoken script ~30–45s, visuals/B-roll, audio style, CTA. Clean markdown only.)
 
 ABSOLUTE RULE: NEVER include any word count, character count, or length estimate at the end of the blog, caption, Google post, or Reel script — output clean content only.
 
-Output ONLY clean Markdown (standard syntax: # for H1, ## for H2, **bold**, *italic*, - bullets, etc.) followed by the separators and the four sections — no HTML tags, no extra commentary, no code fences, no explanations.`;
+Output ONLY clean Markdown for the blog, then the three labeled companion sections above — no HTML tags, no extra commentary, no code fences. Prefer exact labels over --- separators (blog bodies may contain --- rules).`;
     // === STRONG DOCUMENT INJECTION (this is the fix) ===
 let finalPrompt = systemPrompt;
 
@@ -443,11 +668,11 @@ let finalPrompt = systemPrompt;
     if (feedback) {
         if (!lastBlogBundle) {
             _blogGenerating = false;
-            window.notifyUser('Generate a blog first, then use feedback to refine it.', 'warning', 3200);
+            alert('Generate a blog first, then use feedback to refine it.');
             window.hideLoading?.();
             return;
         }
-        finalPrompt = `You are an expert real estate content editor. The user already has a complete blog bundle (blog + social caption + Google post + Reel script). Apply ONLY the requested edits while keeping the same overall structure and section labels.
+        finalPrompt = `You are an expert mortgage content editor. The user already has a complete blog bundle (blog + social caption + Google post + Reel script). Apply ONLY the requested edits while keeping the same overall structure and section labels.
 
 USER FEEDBACK / REQUESTED EDITS:
 ${feedback}
@@ -478,117 +703,137 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 
         if (!fullContent) throw new Error('Empty response from API');
 
-        const { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
+        let { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
+
+        // Model often truncates before companions when blog is long — second pass for extras only
+        if (bundleExtrasMissing({ captionText, googlePostText, reelScriptText }) && blogMarkdown) {
+          if (typeof window.showLoading === 'function') {
+            try { window.showLoading('Finishing social caption, Google post & Reel…'); } catch (e) { /* ignore */ }
+          }
+          const extras = await generateBlogExtrasFromBlog(blogMarkdown, topicInput);
+          if (extras) {
+            captionText = captionText || extras.captionText || '';
+            googlePostText = googlePostText || extras.googlePostText || '';
+            reelScriptText = reelScriptText || extras.reelScriptText || '';
+            // If parser put the whole extras blob in blogMarkdown of extras, re-parse full raw-like
+            if (!captionText && extras.blogMarkdown && /caption/i.test(extras.blogMarkdown)) {
+              const re = parseBlogBundleFromResponse(extras.blogMarkdown);
+              captionText = re.captionText || captionText;
+              googlePostText = re.googlePostText || googlePostText;
+              reelScriptText = re.reelScriptText || reelScriptText;
+            }
+          }
+        }
 
         lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
         window._blogNextStepsId = `blog_${Date.now().toString(36)}`;
 
         const qualityNote = (typeof window.GenerationRules !== 'undefined' && window.GenerationRules.getQualityNoteText)
           ? window.GenerationRules.getQualityNoteText()
-          : 'Built for fair-housing compliance, credible sources, local relevance, and clear structure.';
+          : 'Built for compliance, credible sources, local relevance, and clear structure.';
 
-        // === Render output - Premium Card Style matching Social section ===
+        // === Render output — clean editorial cards (navy hierarchy, no carnival orange headers) ===
         output.innerHTML = `
-    <!-- Main Blog Content Card - premium match to 2026 Plan / Social Post tools -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/30 rounded-3xl shadow-2xl p-8 md:p-10 mb-8">
-        <!-- Hero header badge like 2026 plan -->
-        <div class="flex items-center justify-between mb-6">
+    <div class="ai-output mb-6">
+        <div class="ai-output-header">
             <div>
-                <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-[#F15A29] text-white text-xs font-bold tracking-[2px] mb-3">
-                    <i class="fas fa-check-circle"></i> YOUR AUTHORITY BLOG POST IS READY
-                </div>
-                <h3 class="text-3xl md:text-4xl font-bold text-[#F15A29]">Your Custom Blog Post</h3>
-                <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm">In your exact voice, with matching social caption, Google post, and Reel script.</p>
+                <div class="ai-output-kicker"><i class="fas fa-check-circle" aria-hidden="true"></i> Ready</div>
+                <h3 class="ai-output-title">Blog post</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mt-1">In your voice, with matching social caption, Google post, and reel script below.</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-2 flex items-start gap-2 leading-relaxed max-w-xl">
                   <i class="fas fa-shield-alt text-[#00A89D] mt-0.5 flex-shrink-0"></i>
                   <span>${qualityNote}</span>
                 </p>
             </div>
-            <span class="text-xs px-3 py-1 bg-[#00A89D]/10 text-[#00A89D] rounded-full font-medium hidden md:block">Ready to publish</span>
+            <span class="text-[11px] px-2.5 py-1 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold shrink-0 hidden sm:inline">Publish-ready</span>
         </div>
-        <div class="prose prose-lg dark:prose-invert max-w-none">
+        <div class="ai-output-body prose dark:prose-invert max-w-none text-[15px] leading-relaxed">
             ${marked.parse(blogMarkdown)}
         </div>
     </div>
 
-    <!-- Blog Actions -->
-    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-        <button id="copy-blog-btn" class="bg-[#F15A29] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#F15A29]/90 transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-copy"></i> Copy Blog
+    <div class="flex flex-wrap gap-2 sm:gap-3 mb-8">
+        <button id="copy-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#002B5C] text-white text-sm font-semibold hover:bg-black transition">
+            <i class="fas fa-copy"></i> Copy blog
         </button>
-        <button id="download-blog-btn" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
+        <button id="download-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition">
             <i class="fas fa-download"></i> Download .doc
         </button>
-        <button type="button" id="blog-next-steps-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#00A89D]/10 transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-list-check"></i> Next Steps
+        ${getRuoffPublishButtonHtml()}
+        <button type="button" id="blog-next-steps-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#00A89D] text-[#00A89D] text-sm font-semibold hover:bg-[#00A89D]/10 transition">
+            <i class="fas fa-list-check"></i> Next steps
         </button>
-        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else window.saveNotReady();" class="bg-[#002B5C] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#001429] transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-bookmark"></i> Save Bundle to Vault
+        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+            <i class="fas fa-bookmark"></i> Save to vault
         </button>
-        <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="bg-red-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-red-600 transition-all flex items-center justify-center gap-2 flex-1">
+        <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
             <i class="fas fa-trash"></i> Clear
         </button>
     </div>
 
-    <!-- Social Caption Card - consistent premium card style (matching 2026 Plan supporting cards) -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 mb-8 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-[#F15A29]">Social Media Caption</h3>
-            <div class="flex items-center gap-2">
-            <button id="copy-caption-btn" class="text-sm px-4 py-2 bg-[#00A89D] text-white rounded-xl hover:bg-[#008F85] flex items-center gap-2">
-                <i class="fas fa-share-alt"></i> Copy
-            </button>
-            <button id="save-caption-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('caption', this)" class="text-sm px-4 py-2 border border-[#00A89D] text-[#00A89D] rounded-xl hover:bg-[#00A89D] hover:text-white flex items-center gap-2">
-                <i class="far fa-bookmark"></i> Save
-            </button>
+    <div class="ai-output blog-companion-card mb-5">
+        <div class="ai-output-header">
+            <div>
+                <div class="ai-output-kicker">Social</div>
+                <h3 class="ai-output-title">Caption</h3>
             </div>
-        </div>
-        <div id="social-caption" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base whitespace-pre-wrap font-medium border border-gray-200 dark:border-gray-700">
-            ${captionText || 'No caption generated — try regenerating!'}
-        </div>
-    </div>
-
-    <!-- Google Post Card -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 mb-8 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-[#F15A29]">Google Business Profile Post</h3>
             <div class="flex items-center gap-2">
-            <button id="copy-google-btn" class="text-sm px-4 py-2 bg-[#F15A29] text-white rounded-xl hover:bg-[#F15A29]/90 flex items-center gap-2">
+            <button id="copy-caption-btn" class="text-sm px-3 py-1.5 rounded-lg bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] inline-flex items-center gap-1.5">
                 <i class="fas fa-copy"></i> Copy
             </button>
-            <button id="save-google-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('google', this)" class="text-sm px-4 py-2 border border-[#F15A29] text-[#F15A29] rounded-xl hover:bg-[#F15A29] hover:text-white flex items-center gap-2">
+            <button id="save-caption-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('caption', this)" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
                 <i class="far fa-bookmark"></i> Save
             </button>
             </div>
         </div>
-        <div id="google-post" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base prose border border-gray-200 dark:border-gray-700">
-            ${googlePostText ? marked.parse(googlePostText) : 'No Google post generated — try a different topic or regenerate.'}
+        <div id="social-caption" class="blog-companion-panel" data-raw-text="${escapeBlogHtml(captionText || '')}">
+            ${formatCaptionHtml(captionText)}
         </div>
     </div>
 
-    <!-- Reel Script Card + cross link to related tools for better UX -->
-    <div class="bg-white dark:bg-gray-900 border-2 border-[#F15A29]/20 rounded-3xl p-8 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-[#F15A29]">30–45 Second Reel / Video Script</h3>
+    <div class="ai-output blog-companion-card mb-5">
+        <div class="ai-output-header">
+            <div>
+                <div class="ai-output-kicker">Google Business</div>
+                <h3 class="ai-output-title">Profile post</h3>
+            </div>
             <div class="flex items-center gap-2">
-            <button id="copy-reel-btn" class="text-sm px-4 py-2 bg-[#00A89D] text-white rounded-xl hover:bg-[#008F85] flex items-center gap-2">
-                <i class="fas fa-video"></i> Copy Script
+            <button id="copy-google-btn" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
+                <i class="fas fa-copy"></i> Copy
             </button>
-            <button id="save-reel-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('reel', this)" class="text-sm px-4 py-2 border border-[#00A89D] text-[#00A89D] rounded-xl hover:bg-[#00A89D] hover:text-white flex items-center gap-2">
+            <button id="save-google-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('google', this)" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
                 <i class="far fa-bookmark"></i> Save
             </button>
             </div>
         </div>
-        <div id="reel-script" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl text-base prose border border-gray-200 dark:border-gray-700">
-            ${reelScriptText ? marked.parse(reelScriptText) : 'No Reel script generated — try regenerating!'}
+        <div id="google-post" class="blog-companion-panel" data-raw-text="${escapeBlogHtml(googlePostText || '')}">
+            ${formatGooglePostHtml(googlePostText)}
         </div>
-        <p class="text-xs text-gray-500 mt-3">Ready to film — hook, script, visuals, and CTA included.</p>
+    </div>
 
-        <!-- Mini cross-link bar to keep user in the ecosystem (consistent with plan execution hubs) -->
-        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
-            <span>Next steps:</span>
-            <a href="#social-post" onclick="if(typeof window.showSection==='function'){window.showSection('social-post');}return false;" class="text-[#00A89D] hover:underline">Turn more ideas into posts in Social Post &amp; Calendar</a>
-            <a href="#social" onclick="if(typeof window.showSection==='function'){window.showSection('social');}return false;" class="text-[#00A89D] hover:underline">Browse full strategy + evergreen ideas</a>
+    <div class="ai-output blog-companion-card mb-2">
+        <div class="ai-output-header">
+            <div>
+                <div class="ai-output-kicker">Video</div>
+                <h3 class="ai-output-title">30–45s reel script</h3>
+            </div>
+            <div class="flex items-center gap-2">
+            <button id="copy-reel-btn" class="text-sm px-3 py-1.5 rounded-lg bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] inline-flex items-center gap-1.5">
+                <i class="fas fa-video"></i> Copy
+            </button>
+            <button id="save-reel-btn" onclick="if(typeof window.saveBlogAsset==='function') window.saveBlogAsset('reel', this)" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1.5">
+                <i class="far fa-bookmark"></i> Save
+            </button>
+            </div>
+        </div>
+        <div id="reel-script" class="blog-companion-panel blog-companion-panel-reel" data-raw-text="${escapeBlogHtml(reelScriptText || '')}">
+            ${formatReelScriptHtml(reelScriptText)}
+        </div>
+        <p class="text-xs text-gray-500 m-0 mt-3">Structured for filming — copy the full block or each section as needed.</p>
+        <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+            <span>Next:</span>
+            <a href="#social-post" onclick="if(typeof window.showSection==='function'){window.showSection('social-post');}return false;" class="text-[#00A89D] hover:underline">Social Post &amp; Calendar</a>
+            <a href="#social" onclick="if(typeof window.showSection==='function'){window.showSection('social');}return false;" class="text-[#00A89D] hover:underline">Evergreen ideas</a>
         </div>
     </div>
 
@@ -608,6 +853,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         document.getElementById('download-blog-btn').onclick = downloadBlogWord;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
         document.getElementById('copy-google-btn').onclick = copyGooglePostWithFormatting;
+        const jumpPublishBtn = document.getElementById('jump-publish-btn');
+        if (jumpPublishBtn) jumpPublishBtn.onclick = copyBlogAndJumpToPublisher;
+
         const copyReelBtn = document.getElementById('copy-reel-btn');
         if (copyReelBtn) {
             copyReelBtn.onclick = () => {
@@ -615,7 +863,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
                 if (!reelEl) return;
                 const text = reelEl.innerText || reelEl.textContent || '';
                 navigator.clipboard.writeText(text.trim()).then(() => {
-                    window.notifyUser('Reel script & video idea copied!', 'success', 3200);
+                    alert('Reel script & video idea copied!');
                 }).catch(() => {
                     // fallback
                     const range = document.createRange();
@@ -625,7 +873,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
                     sel.addRange(range);
                     document.execCommand('copy');
                     sel.removeAllRanges();
-                    window.notifyUser('Reel script & video idea copied!', 'success', 3200);
+                    alert('Reel script & video idea copied!');
                 });
             };
         }
@@ -643,7 +891,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         if (refineBtn) {
             refineBtn.onclick = () => {
                 const fb = document.getElementById('blog-feedback')?.value.trim() || '';
-                if (!fb) { window.notifyUser('Please enter feedback or specific edits first!', 'warning', 3200); return; }
+                if (!fb) { alert('Please enter feedback or specific edits first!'); return; }
                 generateBlog(fb);
             };
         }
@@ -700,7 +948,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 function copyBlogWithFormatting() {
     const blogContent = document.querySelector('#blog-output .prose');
     if (!blogContent) {
-        window.notifyUser('No blog content to copy!', 'warning', 3200);
+        alert('No blog content to copy!');
         return;
     }
     const html = blogContent.innerHTML;
@@ -712,17 +960,26 @@ function copyBlogWithFormatting() {
     });
 
     navigator.clipboard.write([clipboardItem]).then(() => {
-        window.notifyUser('Blog copied with formatting!', 'success', 3200);
+        alert('Blog copied with formatting!');
     }).catch(err => {
         console.error('Rich copy failed:', err);
         navigator.clipboard.writeText(plainText).then(() => {
-            window.notifyUser('Copied as plain text (rich formatting not supported in this browser)', 'success', 3200);
+            alert('Copied as plain text (rich formatting not supported in this browser)');
         });
     });
 }
+function copyBlogAndJumpToPublisher() {
+    copyBlogWithFormatting();   // Runs the exact same rich copy + shows your alert
+
+    // Tiny delay so the clipboard finishes before we open the tab (feels instant)
+    setTimeout(() => {
+        window.open('https://sales.ruoff.com/blog', '_blank');
+    }, 250);
+}
+
 window.saveBlogAsset = function(assetType, btnEl) {
     if (typeof window.toggleSaveIdea !== 'function') {
-        window.notifyUser('Saved Items system not ready yet.', 'success', 3200);
+        alert('Saved Items system not ready yet.');
         return;
     }
     const output = document.getElementById('blog-output');
@@ -737,7 +994,7 @@ window.saveBlogAsset = function(assetType, btnEl) {
     const node = document.getElementById(cfg.el);
     const text = node ? (node.innerText || node.textContent || '').trim() : '';
     if (!text) {
-        window.notifyUser(`No ${cfg.label.toLowerCase()} to save yet.`, 'warning', 3200);
+        alert(`No ${cfg.label.toLowerCase()} to save yet.`);
         return;
     }
     const title = `Blog Asset — ${cfg.label}: ${blogTitle.substring(0, 50)}`;
@@ -749,12 +1006,12 @@ window.saveBlogAsset = function(assetType, btnEl) {
 
 window.saveBlogToVault = function() {
     if (typeof window.toggleSaveIdea !== 'function') {
-        window.notifyUser('Saved Items system not ready yet.', 'success', 3200);
+        alert('Saved Items system not ready yet.');
         return;
     }
     const output = document.getElementById('blog-output');
     if (!output || !output.innerHTML.trim()) {
-        window.notifyUser('Generate a blog first.', 'warning', 3200);
+        alert('Generate a blog first.');
         return;
     }
 
@@ -844,7 +1101,7 @@ window.saveBlogToVault = function() {
     if (window.showToast) {
         window.showToast('Full blog bundle saved to My Saved Items', 'success');
     } else {
-        window.notifyUser('Saved to My Saved Items', 'success', 3200);
+        alert('Saved to My Saved Items');
     }
 };
 
@@ -871,6 +1128,8 @@ function attachBlogOutputListeners() {
   if (capBtn) capBtn.onclick = copySocialCaption;
   const googBtn = document.getElementById('copy-google-btn');
   if (googBtn) googBtn.onclick = copyGooglePostWithFormatting;
+  const jumpBtn = document.getElementById('jump-publish-btn');
+  if (jumpBtn) jumpBtn.onclick = copyBlogAndJumpToPublisher;
 
   const nextStepsBtn = document.getElementById('blog-next-steps-btn');
   if (nextStepsBtn) {
@@ -883,7 +1142,7 @@ function attachBlogOutputListeners() {
   if (refineBtn) {
     refineBtn.onclick = () => {
       const fb = document.getElementById('blog-feedback')?.value.trim() || '';
-      if (!fb) { window.notifyUser('Please enter feedback or specific edits first!', 'warning', 3200); return; }
+      if (!fb) { alert('Please enter feedback or specific edits first!'); return; }
       generateBlog(fb);
     };
   }
@@ -895,7 +1154,7 @@ function attachBlogOutputListeners() {
       if (!reelEl) return;
       const text = reelEl.innerText || reelEl.textContent || '';
       navigator.clipboard.writeText(text.trim()).then(() => {
-        window.notifyUser('Reel script & video idea copied!', 'success', 3200);
+        alert('Reel script & video idea copied!');
       }).catch(() => {
         const range = document.createRange();
         range.selectNodeContents(reelEl);
@@ -904,7 +1163,7 @@ function attachBlogOutputListeners() {
         sel.addRange(range);
         document.execCommand('copy');
         sel.removeAllRanges();
-        window.notifyUser('Reel script & video idea copied!', 'success', 3200);
+        alert('Reel script & video idea copied!');
       });
     };
   }
@@ -914,11 +1173,11 @@ function attachBlogOutputListeners() {
 function downloadBlogWord() {
     const blogEl = document.querySelector('#blog-output .prose');
     if (!blogEl) {
-        window.notifyUser('No blog content to download!', 'warning', 3200);
+        alert('No blog content to download!');
         return;
     }
 
-    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Real Estate Blog Post</title><style>
+    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Mortgage Blog Post</title><style>
         body {font-family: Calibri, Arial, sans-serif; margin: 60px; line-height: 1.6; color: #000; background: white;}
         h1 {color: #002B5C; text-align: center; font-size: 32px; margin-bottom: 40px;}
         h2 {color: #00A89D; border-bottom: 2px solid #00A89D; padding-bottom: 8px; font-size: 24px; margin-top: 40px;}
@@ -940,23 +1199,24 @@ function downloadBlogWord() {
     a.href = url;
 
     const titleEl = blogEl.querySelector('h1');
-    const filename = titleEl ? titleEl.innerText.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_blog.doc' : 'agent_blog.doc';
+    const filename = titleEl ? titleEl.innerText.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_blog.doc' : 'mortgage_blog.doc';
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    window.notifyUser('Blog downloaded as Word doc! Open in Word for best formatting.', 'success', 3200);
+    alert('Blog downloaded as Word doc! Open in Word for best formatting.');
 }
 
 // === Missing helper: Copy the suggested social caption ===
 window.copySocialCaption = function copySocialCaption() {
     const captionEl = document.getElementById('social-caption');
-    if (!captionEl) { window.notifyUser('No social caption to copy!', 'warning', 3200); return; }
+    if (!captionEl) return alert('No social caption to copy!');
 
-    const text = captionEl.innerText || captionEl.textContent || '';
+    // Prefer original raw (with hashtags) over structured DOM text
+    const raw = captionEl.getAttribute('data-raw-text');
+    const text = (raw && raw.trim()) || captionEl.innerText || captionEl.textContent || '';
     navigator.clipboard.writeText(text.trim()).then(() => {
-        window.notifyUser('Social caption copied!', 'success', 3200);
+        alert('Social caption copied!');
     }).catch(() => {
-        // Fallback
         const range = document.createRange();
         range.selectNodeContents(captionEl);
         const sel = window.getSelection();
@@ -964,14 +1224,14 @@ window.copySocialCaption = function copySocialCaption() {
         sel.addRange(range);
         document.execCommand('copy');
         sel.removeAllRanges();
-        window.notifyUser('Social caption copied!', 'success', 3200);
+        alert('Social caption copied!');
     });
 };
 
 // === Missing helper: Copy the suggested Google post with formatting ===
 window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
     const googleEl = document.getElementById('google-post');
-    if (!googleEl) { window.notifyUser('No Google post to copy!', 'warning', 3200); return; }
+    if (!googleEl) return alert('No Google post to copy!');
 
     const html = googleEl.innerHTML;
     const plainText = googleEl.innerText || '';
@@ -983,17 +1243,17 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
             'text/plain': new Blob([plainText], { type: 'text/plain' })
         });
         navigator.clipboard.write([clipboardItem]).then(() => {
-            window.notifyUser('Google post copied with formatting!', 'success', 3200);
+            alert('Google post copied with formatting!');
         }).catch(() => {
             // Fallback to plain text
             navigator.clipboard.writeText(plainText).then(() => {
-                window.notifyUser('Google post copied (plain text).', 'success', 3200);
+                alert('Google post copied (plain text).');
             });
         });
     } catch (e) {
         // Very old browser fallback
         navigator.clipboard.writeText(plainText).then(() => {
-            window.notifyUser('Google post copied.', 'success', 3200);
+            alert('Google post copied.');
         });
     }
 };
@@ -1005,6 +1265,7 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   window.generateBlog = generateBlog;
   window.processBlogFile = processBlogFile;
   window.copyBlogWithFormatting = copyBlogWithFormatting;
+  window.copyBlogAndJumpToPublisher = copyBlogAndJumpToPublisher;
   window.downloadBlogWord = downloadBlogWord;
   window.copySocialCaption = copySocialCaption;
   window.copyGooglePostWithFormatting = copyGooglePostWithFormatting;
@@ -1013,6 +1274,9 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   // INITIALIZATION
   // =====================================================
   function initBlogCreator() {
+    // The original top-level listeners for the upload area
+    // are included in the moved code above.
+
     // === TOPIC DROPDOWN → CUSTOM TOPIC INPUT SYNC ===
     const topicSelect = document.getElementById('blog-topic-select');
     const topicInput = document.getElementById('blog-topic');
@@ -1043,9 +1307,14 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
         try {
             const current = getCentralProfile();
             if (current.localArea !== trimmed || current.market !== trimmed) {
-                current.localArea = trimmed;
-                current.market = trimmed; // for compatibility with other tools
-                localStorage.setItem('userProfile', JSON.stringify(current));
+                if (typeof window.patchUserProfile === 'function') {
+                    window.patchUserProfile({ localArea: trimmed, location: trimmed, market: trimmed }, { silent: true });
+                } else {
+                    current.localArea = trimmed;
+                    current.market = trimmed;
+                    current.location = trimmed;
+                    localStorage.setItem('userProfile', JSON.stringify(current));
+                }
             }
         } catch (e) {
             console.warn('[blog-creator] Failed to persist local area', e);

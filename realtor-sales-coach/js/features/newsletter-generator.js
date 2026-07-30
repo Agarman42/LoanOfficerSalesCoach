@@ -929,17 +929,40 @@ localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
 
 // Update previews (safe version)
 function updatePreviews() {
-    const funFactEl = document.getElementById('fun-fact-preview');
-    const proTipEl = document.getElementById('pro-tip-preview');
-    const quoteEl = document.getElementById('quote-preview');
+    // Keep inline engagement-row previews in sync with lower custom panel
+    const _mirror = (id, text) => {
+        const a = document.getElementById(id);
+        const b = document.getElementById(id + '-inline');
+        const empty = '<span class="text-gray-400 italic">Click to pick — or hit Shuffle</span>';
+        const val = text && String(text).trim() ? String(text) : '';
+        const html = val ? escapeHtmlPreview(val) : empty;
+        if (a) {
+            if (val) a.textContent = val;
+            else a.innerHTML = empty;
+        }
+        if (b) {
+            if (val) b.textContent = val;
+            else b.innerHTML = empty;
+        }
+    };
 
-    if (funFactEl) funFactEl.innerText = selectedFunFact || 'No fun fact selected';
-    if (proTipEl) proTipEl.innerText = selectedProTip || 'No pro tip selected';
-    if (quoteEl) quoteEl.innerText = selectedQuote || 'No quote selected';
+    function escapeHtmlPreview(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    _mirror('fun-fact-preview', selectedFunFact || '');
+    _mirror('pro-tip-preview', selectedProTip || '');
+    _mirror('quote-preview', selectedQuote || '');
     if (window.NlEntertainment && typeof window.NlEntertainment.updatePreviews === 'function') {
         window.NlEntertainment.updatePreviews();
     }
     try {
+        updateCuratedRowStatuses();
+        updateEngagementSectionSummary();
         updatePersonalCharMeter();
         updatePersonalMediaPreviews();
         updateNewsletterPreflightSummary();
@@ -985,7 +1008,11 @@ function getNewsletterSelections() {
 }
 
 function getNewsletterChoiceModal() {
-    return document.getElementById(NL_CHOICE_MODAL_ID);
+    const modal = document.getElementById(NL_CHOICE_MODAL_ID);
+    if (modal && typeof ensureNewsletterChoiceModalScaffold === 'function') {
+        ensureNewsletterChoiceModalScaffold(modal);
+    }
+    return modal;
 }
 
 // ─── Real Estate Tip picker — grouped UX (Home Care vs Real Estate vs Money) ───
@@ -1072,10 +1099,16 @@ function sortProTips(tips) {
 }
 
 function cleanupProTipPickerChrome(modal) {
+    // Wipe tip + entertainment chrome so hub tab switches don't stack dual toolbars
     document.getElementById('modal-tip-toolbar')?.remove();
-    const search = document.getElementById('modal-search');
-    if (search) search.remove();
+    document.getElementById('modal-search')?.remove();
+    document.getElementById('modal-puzzle-filter-bar')?.remove();
+    document.getElementById('modal-puzzle-type-bar')?.remove();
     if (modal) {
+        modal.querySelector('#modal-tip-toolbar')?.remove();
+        modal.querySelector('#modal-search')?.remove();
+        modal.querySelector('#modal-puzzle-filter-bar')?.remove();
+        modal.querySelector('#modal-puzzle-type-bar')?.remove();
         const content = modal.querySelector('.modal-content');
         if (content) content.classList.remove('max-w-4xl');
     }
@@ -1140,21 +1173,27 @@ function createProTipCard(tip, isCurrent, onPick) {
 }
 
 function openProTipChoiceModal(modal, titleEl) {
+    ensureNewsletterChoiceModalScaffold(modal);
     cleanupProTipPickerChrome(modal);
-    const list = modal.querySelector('#modal-list');
+    const list = getNewsletterChoiceListEl(modal) || modal.querySelector('#modal-list');
     const body = document.getElementById('modal-choice-body') || list?.parentElement;
     if (!list || !body) return;
+    const hubMode = !!window._nlHubMode;
 
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) modalContent.classList.add('max-w-4xl');
 
     if (titleEl) {
-        titleEl.textContent = 'Choose a Real Estate Tip';
+        titleEl.textContent = hubMode ? 'Engagement hub · Pro Tip' : 'Choose a Real Estate Tip';
         titleEl.style.color = '#fff';
         titleEl.style.setProperty('color', '#fff', 'important');
     }
 
     showNewsletterChoiceModalShell(modal);
+    if (hubMode) {
+        renderNewsletterEngagementHubTabs('proTip', modal);
+        renderEngagementModalToolbar('proTip', modal, true);
+    }
 
     const index = buildProTipIndex();
     const state = { group: 'all', category: 'all', search: '' };
@@ -1182,7 +1221,11 @@ function openProTipChoiceModal(modal, titleEl) {
     function pickTip(raw) {
         selectedProTip = raw;
         updatePreviews();
-        closeModal();
+        if (hubMode || window._nlHubKeepOpen) {
+            openModal('proTip', { hub: true, keepOpen: true });
+        } else {
+            closeModal();
+        }
     }
 
     function renderGroupFilters() {
@@ -1350,12 +1393,14 @@ function createContentChoiceCard(opts) {
 function openContentChoiceModal(category) {
     const modal = getNewsletterChoiceModal();
     if (!modal) return;
+    ensureNewsletterChoiceModalScaffold(modal);
 
     cleanupProTipPickerChrome(modal);
-    const titleEl = modal.querySelector('#modal-title');
-    const list = modal.querySelector('#modal-list');
+    const titleEl = getNewsletterChoiceTitleEl(modal);
+    const list = getNewsletterChoiceListEl(modal);
     const body = document.getElementById('modal-choice-body') || list?.parentElement;
     if (!list || !body) return;
+    const hubMode = !!window._nlHubMode;
 
     const isQuote = category === 'quote';
     const modalTitleText = isQuote ? 'Choose a Motivational Quote' : 'Choose a Fun Fact';
@@ -1369,6 +1414,15 @@ function openContentChoiceModal(category) {
     }
 
     showNewsletterChoiceModalShell(modal);
+    if (hubMode) {
+        const hubTab = getEngagementHubTabByCategory(category);
+        if (titleEl) {
+            titleEl.textContent = hubTab ? `Engagement hub · ${hubTab.label}` : 'Engagement hub';
+            titleEl.style.setProperty('color', '#fff', 'important');
+        }
+        renderNewsletterEngagementHubTabs(category, modal);
+        renderEngagementModalToolbar(category, modal, true);
+    }
 
     const toolbar = document.createElement('div');
     toolbar.id = 'modal-tip-toolbar';
@@ -1391,7 +1445,11 @@ function openContentChoiceModal(category) {
         if (isQuote) selectedQuote = raw;
         else selectedFunFact = raw;
         updatePreviews();
-        closeModal();
+        if (hubMode || window._nlHubKeepOpen) {
+            openModal(category, { hub: true, keepOpen: true });
+        } else {
+            closeModal();
+        }
     }
 
     function renderList() {
@@ -1459,13 +1517,23 @@ function openContentChoiceModal(category) {
 
 
 
-function openModal(category) {
+function openModal(category, options) {
+    const opts = options || {};
+    const hubMode = opts.hub === true || (opts.hub !== false && typeof isEngagementHubCategory === 'function' && isEngagementHubCategory(category));
+    window._nlHubMode = hubMode;
+    window._nlHubKeepOpen = !!opts.keepOpen || hubMode;
+    // Always clear previous tab chrome before opening (prevents stacked filters)
+    cleanupProTipPickerChrome(getNewsletterChoiceModal());
     if (category === 'dadJoke' || category === 'puzzle') {
         if (window.NlEntertainment && typeof window.NlEntertainment.openChoiceModal === 'function') {
             window.NlEntertainment.openChoiceModal(category, {
                 ensureModal: getNewsletterChoiceModal,
-                getTitleEl: (m) => m && m.querySelector('#modal-title'),
-                getListEl: (m) => m && m.querySelector('#modal-list'),
+                getTitleEl: (m) => getNewsletterChoiceTitleEl(m),
+                getListEl: (m) => getNewsletterChoiceListEl(m),
+                renderHubTabs: renderNewsletterEngagementHubTabs,
+                renderToolbar: renderEngagementModalToolbar,
+                hubMode: window._nlHubMode,
+                shouldKeepOpen: () => !!window._nlHubMode,
                 showModal: (m) => {
                     if (typeof window.openNamedModal === 'function') window.openNamedModal(m);
                     else if (typeof window.openAppModal === 'function') window.openAppModal(m);
@@ -1477,8 +1545,13 @@ function openModal(category) {
                     }
                     m.style.alignItems = 'center';
                     m.style.justifyContent = 'center';
+                    if (window._nlHubMode) {
+                        renderNewsletterEngagementHubTabs(category, m);
+                        renderEngagementModalToolbar(category, m, true);
+                    }
                 },
-                hideModal: () => closeModal()
+                hideModal: () => closeModal(),
+                refreshModal: (cat) => openModal(cat, { hub: true, keepOpen: true })
             });
         }
         return;
@@ -1489,11 +1562,21 @@ function openModal(category) {
 
     cleanupProTipPickerChrome(modal);
 
-    const title = modal.querySelector('#modal-title');
-    const list = modal.querySelector('#modal-list');
+    const title = getNewsletterChoiceTitleEl(modal) || modal.querySelector('#modal-title');
+    const list = getNewsletterChoiceListEl(modal) || modal.querySelector('#modal-list');
 
     if (category === 'proTip') {
-        openProTipChoiceModal(modal, title);
+        openProTipChoiceModal(modal, getNewsletterChoiceTitleEl(modal) || title);
+        if (hubMode) {
+            const hubTab = getEngagementHubTabByCategory(category);
+            const te = getNewsletterChoiceTitleEl(modal);
+            if (te) {
+                te.textContent = hubTab ? `Engagement hub · ${hubTab.label}` : 'Engagement hub';
+                te.style.setProperty('color', '#fff', 'important');
+            }
+            renderNewsletterEngagementHubTabs(category, modal);
+            renderEngagementModalToolbar(category, modal, true);
+        }
         return;
     }
 
@@ -1511,20 +1594,37 @@ function openModal(category) {
 function closeModal() {
     const modal = getNewsletterChoiceModal();
     if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
+        if (typeof window.closeAppModal === 'function') {
+            window.closeAppModal(modal);
+        } else if (typeof window.closeNamedModal === 'function') {
+            window.closeNamedModal(modal);
+        } else {
+            modal.style.display = 'none';
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            if (typeof window.releaseModalScrollLock === 'function') window.releaseModalScrollLock();
+            else document.body.classList.remove('modal-open');
+        }
         modal.onclick = null;
         modal.onmousedown = null;
         modal.onmouseup = null;
+        modal.setAttribute('aria-hidden', 'true');
     }
     cleanupProTipPickerChrome(modal);
+    window._nlHubMode = false;
+    window._nlHubKeepOpen = false;
 }
 
-// Close on Esc key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
-});
+// Close on Esc only when this modal is open (avoid double-close with other handlers)
+if (!window._nlEscListener) {
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const modal = getNewsletterChoiceModal();
+        if (!modal || modal.classList.contains('hidden')) return;
+        closeModal();
+    });
+    window._nlEscListener = true;
+}
 
 // === SOCIAL MEDIA PILLAR MODAL (Improved - Rich Content, No Search Bar) ===
 function openSocialModal(category) {
@@ -2722,6 +2822,29 @@ function applyNewsletterColorBundle(html) {
     return applyFn(html, bundle);
 }
 
+function hideNewsletterEmptyPreview() {
+    const empty = document.getElementById('nl-empty-state');
+    if (empty) {
+        empty.classList.add('hidden');
+        empty.setAttribute('aria-hidden', 'true');
+        empty.style.setProperty('display', 'none', 'important');
+    }
+    try {
+        if (window.CoachPolish && typeof window.CoachPolish.hideEmpty === 'function') {
+            window.CoachPolish.hideEmpty('nl-empty-state');
+        }
+    } catch (e) { /* ignore */ }
+}
+
+function showNewsletterReviewHandoff() {
+    const panel = document.getElementById('nl-review-handoff');
+    if (!panel) return;
+    panel.classList.remove('hidden');
+    try {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) { /* ignore */ }
+}
+
 function refreshNewsletterColorScheme() {
     const rawEl = document.getElementById('nl-html-raw');
     let html = (rawEl?.value || '').trim() || (lastGeneratedHTML || '').trim();
@@ -2795,9 +2918,14 @@ const MODULE_PADDING = 20;      // consistent spacing between modules
 const HEADER_HEIGHT = 60;       // recommended for headers (used if needed)
 
 // === NEWSLETTER UI PARITY (LO) — photo/video sizing, char meter, preflight ===
-const NL_MEDIA_SIZE_DEFAULT = 100;
+// OUTLOOK PASTE (2026-07-20, confirmed): oversized personal photo/video (full ~540px)
+// mis-formats desktop Outlook paste. Caps below fixed it — see docs/NEWSLETTER-OUTLOOK-PASTE.md.
+// Same rule as LO coach. Do NOT raise MAX/MAX_PX without re-testing Outlook desktop paste.
+const NL_MEDIA_SIZE_DEFAULT = 70;
 const NL_MEDIA_SIZE_MIN = 30;
-const NL_MEDIA_SIZE_MAX = 100;
+const NL_MEDIA_SIZE_MAX = 75;
+/** Absolute max rendered width (px) for personal photo / video thumb in email HTML */
+const NL_MEDIA_MAX_PX = 400;
 const NL_PHOTO_SIZE_DEFAULT = NL_MEDIA_SIZE_DEFAULT;
 const NL_PHOTO_SIZE_MIN = NL_MEDIA_SIZE_MIN;
 const NL_PHOTO_SIZE_MAX = NL_MEDIA_SIZE_MAX;
@@ -2859,13 +2987,14 @@ function getPersonalPhotoWidthPercent() {
 }
 
 function getPersonalPhotoWidthPx() {
-    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    const fromPct = Math.round(NL_CARD_CONTENT_WIDTH * getPersonalPhotoWidthPercent() / 100);
+    return Math.min(NL_MEDIA_MAX_PX, Math.max(120, fromPct));
 }
 
 function formatPersonalPhotoSizeLabel() {
     const pct = getPersonalPhotoWidthPercent();
     const px = getPersonalPhotoWidthPx();
-    if (pct >= 100) return `Full width (${px}px)`;
+    if (pct >= NL_PHOTO_SIZE_MAX) return `Max size (${px}px)`;
     return `${pct}% (${px}px)`;
 }
 
@@ -2879,9 +3008,25 @@ function buildPersonalPhotoInsert(photoUrl) {
 </table>`;
 }
 
+function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
+    if (!el) return;
+    el.max = String(maxPct);
+    el.min = String(NL_MEDIA_SIZE_MIN);
+    let v = parseInt(el.value, 10);
+    if (Number.isNaN(v)) v = defaultPct;
+    if (v > maxPct) {
+        el.value = String(maxPct);
+        try { localStorage.setItem(el.id, String(maxPct)); } catch (e) { /* ignore */ }
+    } else if (v < NL_MEDIA_SIZE_MIN) {
+        el.value = String(defaultPct);
+    }
+}
+
 function updatePersonalPhotoSizeUI() {
     const sizeWrap = document.getElementById('nl-personal-photo-size-wrap');
     const labelEl = document.getElementById('nl-personal-photo-size-label');
+    const sizeEl = document.getElementById('nl-personal-photo-size');
+    clampPersonalMediaSizeSlider(sizeEl, NL_PHOTO_SIZE_MAX, NL_PHOTO_SIZE_DEFAULT);
     const photoEnabled = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
     if (sizeWrap) sizeWrap.classList.toggle('hidden', !photoEnabled);
     if (labelEl) labelEl.textContent = formatPersonalPhotoSizeLabel();
@@ -2911,19 +3056,22 @@ function getPersonalVideoWidthPercent() {
 }
 
 function getPersonalVideoWidthPx() {
-    return Math.round(NL_CARD_CONTENT_WIDTH * getPersonalVideoWidthPercent() / 100);
+    const fromPct = Math.round(NL_CARD_CONTENT_WIDTH * getPersonalVideoWidthPercent() / 100);
+    return Math.min(NL_MEDIA_MAX_PX, Math.max(120, fromPct));
 }
 
 function formatPersonalVideoSizeLabel() {
     const pct = getPersonalVideoWidthPercent();
     const px = getPersonalVideoWidthPx();
-    if (pct >= 100) return `Full width (${px}px)`;
+    if (pct >= NL_MEDIA_SIZE_MAX) return `Max size (${px}px)`;
     return `${pct}% (${px}px)`;
 }
 
 function updatePersonalVideoSizeUI() {
     const sizeWrap = document.getElementById('nl-personal-video-size-wrap');
     const labelEl = document.getElementById('nl-personal-video-size-label');
+    const sizeEl = document.getElementById('nl-personal-video-size');
+    clampPersonalMediaSizeSlider(sizeEl, NL_MEDIA_SIZE_MAX, NL_MEDIA_SIZE_DEFAULT);
     const videoEnabled = !!document.getElementById('nl-include-video')?.checked && !!document.getElementById('nl-personal')?.checked;
     if (sizeWrap) sizeWrap.classList.toggle('hidden', !videoEnabled);
     if (labelEl) labelEl.textContent = formatPersonalVideoSizeLabel();
@@ -3057,9 +3205,10 @@ function setNewsletterPreviewHTML(html) {
     if (iframe) {
         applyNewsletterPreviewIframeIsolation(iframe);
         iframe.srcdoc = hardenNewsletterPreviewHtml(html);
-        return;
+    } else {
+        mountNewsletterPreviewIframe(previewEl, html);
     }
-    mountNewsletterPreviewIframe(previewEl, html);
+    hideNewsletterEmptyPreview();
 }
 
 function wireNewsletterFeedbackFocusGuard() {
@@ -3137,12 +3286,303 @@ const NL_CONTENT_SECTIONS = {
 };
 
 const NL_CUSTOM_CONTENT_BLOCKS = {
-    fun: { checkboxId: 'nl-fun', blockId: 'nl-custom-section-fun', shortLabel: 'Fun Facts' },
-    tip: { checkboxId: 'nl-tip', blockId: 'nl-custom-section-tip', shortLabel: 'Pro Tip' },
-    quote: { checkboxId: 'nl-quote', blockId: 'nl-custom-section-quote', shortLabel: 'Quote' },
-    dadjoke: { checkboxId: 'nl-dadjoke', blockId: 'nl-custom-section-dadjoke', shortLabel: 'Dad Joke' },
-    puzzle: { checkboxId: 'nl-puzzle', blockId: 'brain-teaser-panel', shortLabel: 'Brain Teaser' }
+    fun: { checkboxId: 'nl-fun', blockId: 'nl-custom-section-fun', rowId: 'nl-engagement-row-fun', category: 'funFact', previewId: 'fun-fact-preview', shortLabel: 'Fun Facts' },
+    tip: { checkboxId: 'nl-tip', blockId: 'nl-custom-section-tip', rowId: 'nl-engagement-row-tip', category: 'proTip', previewId: 'pro-tip-preview', shortLabel: 'Real Estate Tip' },
+    quote: { checkboxId: 'nl-quote', blockId: 'nl-custom-section-quote', rowId: 'nl-engagement-row-quote', category: 'quote', previewId: 'quote-preview', shortLabel: 'Quote' },
+    dadjoke: { checkboxId: 'nl-dadjoke', blockId: 'nl-custom-section-dadjoke', rowId: 'nl-engagement-row-dadjoke', category: 'dadJoke', previewId: 'dad-joke-preview', shortLabel: 'Dad Joke' },
+    puzzle: { checkboxId: 'nl-puzzle', blockId: 'brain-teaser-panel', rowId: 'nl-engagement-row-puzzle', category: 'puzzle', previewId: 'brain-teaser-preview', shortLabel: 'Brain Teaser' }
 };
+
+const NL_ENGAGEMENT_HUB_TABS = [
+    { key: 'fun', category: 'funFact', label: 'Fun Fact', icon: '🤓' },
+    { key: 'tip', category: 'proTip', label: 'Pro Tip', icon: '🏡' },
+    { key: 'quote', category: 'quote', label: 'Quote', icon: '💪' },
+    { key: 'dadjoke', category: 'dadJoke', label: 'Dad Joke', icon: '😄' },
+    { key: 'puzzle', category: 'puzzle', label: 'Brain Teaser', icon: '🧩' }
+];
+const NL_ENGAGEMENT_HUB_CATEGORIES = new Set(NL_ENGAGEMENT_HUB_TABS.map((tab) => tab.category));
+
+function isEngagementHubCategory(category) {
+    return NL_ENGAGEMENT_HUB_CATEGORIES.has(category);
+}
+function getEngagementHubTabByCategory(category) {
+    return NL_ENGAGEMENT_HUB_TABS.find((tab) => tab.category === category) || null;
+}
+function getCheckedEngagementHubTabs() {
+    return NL_ENGAGEMENT_HUB_TABS.filter((tab) => {
+        const cfg = NL_CUSTOM_CONTENT_BLOCKS[tab.key];
+        if (!cfg) return false;
+        return !!document.getElementById(cfg.checkboxId)?.checked;
+    });
+}
+function shouldKeepEngagementHubOpen(hubMode) {
+    return !!hubMode;
+}
+function getCuratedSelectionText(category) {
+    if (category === 'funFact') return selectedFunFact;
+    if (category === 'proTip') return selectedProTip;
+    if (category === 'quote') return selectedQuote;
+    if (window.NlEntertainment && typeof window.NlEntertainment.getSelectionText === 'function') {
+        return window.NlEntertainment.getSelectionText(category);
+    }
+    return '';
+}
+function getCuratedPoolStats(category) {
+    if (category === 'funFact') return { total: (funFacts || []).length, used: (usedFunFacts || []).length, label: 'fun facts' };
+    if (category === 'proTip') return { total: (proTips || []).length, used: (usedProTips || []).length, label: 'pro tips' };
+    if (category === 'quote') return { total: (motivationalQuotes || []).length, used: (usedQuotes || []).length, label: 'quotes' };
+    if (window.NlEntertainment && typeof window.NlEntertainment.getPoolStats === 'function') {
+        return window.NlEntertainment.getPoolStats(category);
+    }
+    return { total: 0, used: 0, label: 'items' };
+}
+function getCuratedPickStatus(sectionKey) {
+    const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
+    if (!cfg) return 'empty';
+    if (window.NlEntertainment && typeof window.NlEntertainment.getPickStatus === 'function') {
+        const entStatus = window.NlEntertainment.getPickStatus(sectionKey);
+        if (entStatus) return entStatus;
+    }
+    const value = getCuratedSelectionText(cfg.category);
+    if (!value || /not selected/i.test(String(value))) return 'empty';
+    if (typeof isCustomCuratedSelection === 'function' && isCustomCuratedSelection(cfg.category, value)) return 'custom';
+    return 'library';
+}
+function getCuratedStatusLabel(status) {
+    if (status === 'custom') return '✏️ Your custom';
+    if (status === 'library') return '📚 Library pick';
+    if (status === 'random') return '🎲 Shuffled';
+    return 'Pick one';
+}
+function updateCuratedRowStatuses() {
+    Object.keys(NL_CUSTOM_CONTENT_BLOCKS).forEach((key) => {
+        const statusEl = document.querySelector(`[data-nl-status-for="${key}"]`);
+        if (!statusEl) return;
+        const cb = document.getElementById(NL_CUSTOM_CONTENT_BLOCKS[key].checkboxId);
+        if (!cb?.checked) {
+            statusEl.textContent = '';
+            return;
+        }
+        statusEl.textContent = getCuratedStatusLabel(getCuratedPickStatus(key));
+    });
+}
+function updateEngagementSectionSummary() {
+    const textEl = document.getElementById('nl-engagement-summary-text');
+    const shuffleAllBtn = document.getElementById('nl-shuffle-all-engagement');
+    const hubBtn = document.getElementById('nl-open-engagement-hub');
+    if (!textEl) return;
+    const checked = Object.entries(NL_CUSTOM_CONTENT_BLOCKS).filter(([, cfg]) => !!document.getElementById(cfg.checkboxId)?.checked);
+    const ready = checked.filter(([key]) => getCuratedPickStatus(key) !== 'empty');
+    if (!checked.length) {
+        textEl.textContent = 'Check Fun Facts, Tips, Quotes, etc. — then open the engagement hub to choose them all in one place.';
+        if (shuffleAllBtn) shuffleAllBtn.classList.add('hidden');
+        if (hubBtn) hubBtn.classList.remove('hidden');
+        return;
+    }
+    const allReady = ready.length === checked.length;
+    textEl.innerHTML = allReady
+        ? `<strong class="text-[#00A89D]">${ready.length} of ${checked.length} picks ready</strong> — open the hub to review or change any type.`
+        : `<strong>${ready.length} of ${checked.length}</strong> curated sections have picks · open the hub or Shuffle all.`;
+    if (shuffleAllBtn) shuffleAllBtn.classList.toggle('hidden', !checked.length);
+    if (hubBtn) hubBtn.classList.remove('hidden');
+}
+function shuffleAllCheckedEngagement() {
+    let count = 0;
+    Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([, cfg]) => {
+        if (!document.getElementById(cfg.checkboxId)?.checked) return;
+        if (typeof regenerateRandom === 'function') regenerateRandom(cfg.category);
+        count += 1;
+    });
+    if (count && window.showToast) window.showToast(`Shuffled ${count} curated section${count === 1 ? '' : 's'}.`, 'success');
+    try { updatePreviews(); } catch (e) {}
+    try { updateEngagementSectionSummary(); updateCuratedRowStatuses(); } catch (e) {}
+}
+function getCuratedResetKey(category) {
+    const map = { funFact: 'funFacts', proTip: 'proTips', quote: 'quotes', dadJoke: 'dadJokes', puzzle: 'puzzleAll' };
+    return map[category] || category;
+}
+function ensureNewsletterChoiceModalScaffold(modal) {
+    if (!modal) return modal;
+    const content = modal.querySelector('.modal-content') || modal.firstElementChild;
+    if (!content) return modal;
+    let tabs = modal.querySelector('#nl-choice-modal-tabs');
+    let toolbar = modal.querySelector('#nl-choice-modal-toolbar');
+    const list = modal.querySelector('#nl-choice-modal-list') || modal.querySelector('#modal-list');
+    const listWrap = list?.parentElement;
+    if (!tabs) {
+        tabs = document.createElement('div');
+        tabs.id = 'nl-choice-modal-tabs';
+        tabs.className = 'hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50';
+        if (listWrap && listWrap.parentElement === content) content.insertBefore(tabs, listWrap);
+        else content.appendChild(tabs);
+    }
+    if (!toolbar) {
+        toolbar = document.createElement('div');
+        toolbar.id = 'nl-choice-modal-toolbar';
+        toolbar.className = 'hidden px-6 md:px-8 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900';
+        if (tabs.nextSibling) content.insertBefore(toolbar, tabs.nextSibling);
+        else if (listWrap) content.insertBefore(toolbar, listWrap);
+        else content.appendChild(toolbar);
+    }
+    // Title dual-id: ensure nl-choice-modal-title exists (mirror modal-title if needed)
+    let title = modal.querySelector('#nl-choice-modal-title');
+    if (!title) {
+        const legacy = modal.querySelector('#modal-title');
+        if (legacy) legacy.id = 'nl-choice-modal-title';
+    }
+    // List dual: ensure nl-choice-modal-list
+    if (!modal.querySelector('#nl-choice-modal-list')) {
+        const legacyList = modal.querySelector('#modal-list');
+        if (legacyList && legacyList.tagName === 'UL') legacyList.id = 'nl-choice-modal-list';
+        else if (legacyList && legacyList.tagName === 'DIV' && !legacyList.children.length) {
+            const ul = document.createElement('ul');
+            ul.id = 'nl-choice-modal-list';
+            ul.className = legacyList.className || 'space-y-3 max-h-[58vh] overflow-y-auto pr-1 list-none m-0 p-0';
+            legacyList.replaceWith(ul);
+        }
+    }
+    return modal;
+}
+function getNewsletterChoiceTitleEl(modal) {
+    return (modal && (modal.querySelector('#nl-choice-modal-title') || modal.querySelector('#modal-title'))) || null;
+}
+function getNewsletterChoiceListEl(modal) {
+    return (modal && (modal.querySelector('#nl-choice-modal-list') || modal.querySelector('#modal-list'))) || null;
+}
+function renderEngagementModalToolbar(category, modal, hubMode) {
+    const m = modal || getNewsletterChoiceModal();
+    if (!m) return;
+    ensureNewsletterChoiceModalScaffold(m);
+    const toolbar = m.querySelector('#nl-choice-modal-toolbar');
+    if (!toolbar) return;
+    if (!isEngagementHubCategory(category)) {
+        toolbar.classList.add('hidden');
+        toolbar.innerHTML = '';
+        return;
+    }
+    const current = getCuratedSelectionText(category);
+    const stats = getCuratedPoolStats(category);
+    const remaining = Math.max(0, stats.total - stats.used);
+    const currentPreview = current
+        ? (typeof truncateDirectionPreview === 'function' ? truncateDirectionPreview(String(current).replace(/<[^>]+>/g, ''), 110) : String(current).slice(0, 110))
+        : 'Nothing picked yet — shuffle or choose from the list.';
+    toolbar.classList.remove('hidden');
+    toolbar.innerHTML = `
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="flex-1 min-w-[200px]">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 m-0 mb-1">Current pick</p>
+          <p class="text-sm text-gray-700 dark:text-gray-200 italic m-0 leading-snug">${currentPreview}</p>
+          ${stats.total ? `<p class="text-[11px] text-gray-500 m-0 mt-1.5">${stats.total} ${stats.label || 'items'} · ${remaining} fresh before repeats</p>` : ''}
+        </div>
+        <div class="flex flex-wrap gap-1.5 flex-shrink-0">
+          <button type="button" data-nl-modal-shuffle="${category}" class="text-xs px-3 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition"><i class="fas fa-dice mr-1"></i>Shuffle</button>
+          <button type="button" data-nl-modal-reset="${getCuratedResetKey(category)}" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-semibold hover:border-[#00A89D] hover:text-[#00A89D] transition">Start fresh</button>
+        </div>
+      </div>
+      ${hubMode ? '<p class="text-[11px] text-[#00A89D] m-0 mt-2 font-medium"><i class="fas fa-info-circle mr-1"></i>Picks apply instantly — use tabs above to jump between sections without closing.</p>' : ''}`;
+    toolbar.querySelector('[data-nl-modal-shuffle]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof regenerateRandom === 'function') regenerateRandom(category);
+        try { updatePreviews(); } catch (err) {}
+        renderEngagementModalToolbar(category, m, hubMode);
+        if (hubMode) openModal(category, { hub: true, keepOpen: true });
+    });
+    toolbar.querySelector('[data-nl-modal-reset]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const resetKey = e.currentTarget.getAttribute('data-nl-modal-reset');
+        if (resetKey && typeof resetUsed === 'function') resetUsed(resetKey);
+        renderEngagementModalToolbar(category, m, hubMode);
+        if (hubMode) openModal(category, { hub: true, keepOpen: true });
+    });
+}
+function renderNewsletterEngagementHubTabs(activeCategory, modal) {
+    const m = modal || getNewsletterChoiceModal();
+    if (!m) return;
+    ensureNewsletterChoiceModalScaffold(m);
+    const tabsHost = m.querySelector('#nl-choice-modal-tabs');
+    if (!tabsHost) return;
+    if (!isEngagementHubCategory(activeCategory)) {
+        tabsHost.classList.add('hidden');
+        tabsHost.innerHTML = '';
+        return;
+    }
+    const tabs = NL_ENGAGEMENT_HUB_TABS.slice();
+    const readyCount = tabs.filter((tab) => {
+        const cfg = NL_CUSTOM_CONTENT_BLOCKS[tab.key];
+        const on = !!(cfg && document.getElementById(cfg.checkboxId)?.checked);
+        return on && getCuratedPickStatus(tab.key) !== 'empty';
+    }).length;
+    tabsHost.classList.remove('hidden');
+    tabsHost.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 m-0">All engagement types · pick without leaving</p>
+            <p class="text-[11px] text-gray-500 m-0 tabular-nums"><strong class="text-[#00A89D]">${readyCount}</strong> of ${tabs.length} ready</p>
+        </div>
+        <div class="flex flex-wrap gap-1.5" role="tablist" aria-label="Engagement content types">
+            ${tabs.map((tab) => {
+                const cfg = NL_CUSTOM_CONTENT_BLOCKS[tab.key];
+                const included = !!(cfg && document.getElementById(cfg.checkboxId)?.checked);
+                const active = tab.category === activeCategory;
+                const hasPick = included && getCuratedPickStatus(tab.key) !== 'empty';
+                const statusDot = hasPick
+                    ? '<span class="inline-flex w-1.5 h-1.5 rounded-full bg-[#00A89D] ml-0.5"></span>'
+                    : included
+                        ? '<span class="inline-flex w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5"></span>'
+                        : '';
+                const cls = active
+                    ? 'border-[#00A89D] bg-[#00A89D]/15 text-[#002B5C] dark:text-white'
+                    : included
+                        ? 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-[#00A89D]/50'
+                        : 'border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-[#00A89D]/40';
+                return `<button type="button" role="tab" data-nl-hub-tab="${tab.category}" data-nl-hub-key="${tab.key}" class="text-xs sm:text-sm px-3 py-1.5 rounded-full border-2 font-semibold transition whitespace-nowrap inline-flex items-center gap-1 ${cls}">${tab.icon} ${tab.label}${statusDot}</button>`;
+            }).join('')}
+        </div>
+        <p class="text-[11px] text-gray-500 m-0 mt-2">Tabs stay open after you pick — finish every type, then close when done.</p>`;
+    tabsHost.querySelectorAll('[data-nl-hub-tab]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const cat = btn.getAttribute('data-nl-hub-tab');
+            const key = btn.getAttribute('data-nl-hub-key');
+            if (!cat) return;
+            if (key && NL_CUSTOM_CONTENT_BLOCKS[key]) {
+                const cb = document.getElementById(NL_CUSTOM_CONTENT_BLOCKS[key].checkboxId);
+                if (cb && !cb.checked) {
+                    cb.checked = true;
+                    cb.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+            if (cat === activeCategory) return;
+            openModal(cat, { hub: true, keepOpen: true });
+        });
+    });
+}
+function openNewsletterEngagementHub(sectionKey) {
+    const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
+    if (!cfg) return;
+    const cb = document.getElementById(cfg.checkboxId);
+    if (!cb?.checked) {
+        if (cb) {
+            cb.checked = true;
+            cb.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+    openModal(cfg.category, { hub: true });
+}
+function openFirstCheckedEngagementHub() {
+    const first = getCheckedEngagementHubTabs()[0];
+    if (first) {
+        openNewsletterEngagementHub(first.key);
+        return;
+    }
+    const funCb = document.getElementById('nl-fun');
+    if (funCb && !funCb.checked) {
+        funCb.checked = true;
+        funCb.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    openNewsletterEngagementHub('fun');
+}
+
+
 
 const NL_CORE_DIRECTION_SECTIONS = [
     { key: 'market', checkboxId: 'nl-market', inputId: 'nl-direction-market', label: 'Market Updates' },
@@ -3354,42 +3794,12 @@ function updateSpecificTopicsPlaceholder() {
 }
 
 function scrollToNewsletterCustomContent(sectionKey) {
-    const details = document.getElementById('nl-custom-content-details');
-    if (details) details.open = true;
-    updateCustomContentChoicesVisibility();
-
-    let targetId = null;
+    // Primary path: multi-section engagement hub (same as LO)
     if (sectionKey && NL_CUSTOM_CONTENT_BLOCKS[sectionKey]) {
-        const cfg = NL_CUSTOM_CONTENT_BLOCKS[sectionKey];
-        const cb = document.getElementById(cfg.checkboxId);
-        if (cb?.checked) targetId = cfg.blockId;
-    }
-    if (!targetId) {
-        for (const cfg of Object.values(NL_CUSTOM_CONTENT_BLOCKS)) {
-            const cb = document.getElementById(cfg.checkboxId);
-            if (cb?.checked) {
-                targetId = cfg.blockId;
-                break;
-            }
-        }
-    }
-
-    if (!targetId) {
-        if (window.showToast) window.showToast('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser first.', 'info');
-        else window.notifyUser('Check Fun Facts, Pro Tip, Quote, Dad Joke, or Brain Teaser in Sections to Include first.', 'warning', 3200);
+        openNewsletterEngagementHub(sectionKey);
         return;
     }
-
-    const el = document.getElementById(targetId);
-    if (!el) return;
-
-    window.setTimeout(() => {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        el.classList.add('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
-        window.setTimeout(() => {
-            el.classList.remove('ring-2', 'ring-[#00A89D]', 'ring-offset-2', 'rounded-2xl');
-        }, 2200);
-    }, 120);
+    openFirstCheckedEngagementHub();
 }
 
 function wireCustomContentJumpControls() {
@@ -3397,13 +3807,47 @@ function wireCustomContentJumpControls() {
     if (sectionsCard && !sectionsCard._nlInlineCustomizeWired) {
         sectionsCard._nlInlineCustomizeWired = true;
         sectionsCard.addEventListener('click', (e) => {
+            const resetBtn = e.target.closest('[data-nl-reset-used]');
+            if (resetBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const key = resetBtn.getAttribute('data-nl-reset-used');
+                if (key && typeof resetUsed === 'function') resetUsed(key);
+                return;
+            }
+            const shuffleBtn = e.target.closest('[data-nl-shuffle]');
+            if (shuffleBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const cat = shuffleBtn.getAttribute('data-nl-shuffle');
+                if (cat && typeof regenerateRandom === 'function') regenerateRandom(cat);
+                try { updatePreviews(); updateCuratedRowStatuses(); updateEngagementSectionSummary(); } catch (err) {}
+                return;
+            }
+            const previewOpen = e.target.closest('.nl-custom-preview-open, [data-nl-choice]');
+            if (previewOpen && !e.target.closest('button')) {
+                const cat = previewOpen.getAttribute('data-nl-choice');
+                if (cat) {
+                    e.preventDefault();
+                    openModal(cat, { hub: true });
+                    return;
+                }
+            }
             const btn = e.target.closest('.nl-inline-customize-btn');
             if (!btn) return;
             e.preventDefault();
             e.stopPropagation();
-            scrollToNewsletterCustomContent(btn.getAttribute('data-nl-jump-custom'));
+            openNewsletterEngagementHub(btn.getAttribute('data-nl-jump-custom'));
         });
     }
+    document.getElementById('nl-shuffle-all-engagement')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        shuffleAllCheckedEngagement();
+    });
+    document.getElementById('nl-open-engagement-hub')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFirstCheckedEngagementHub();
+    });
 }
 
 function escapeRegex(str) {
@@ -3556,12 +4000,22 @@ function updateCustomContentChoicesVisibility() {
     Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([key, cfg]) => {
         const cb = document.getElementById(cfg.checkboxId);
         const block = cfg.blockId ? document.getElementById(cfg.blockId) : null;
+        const row = cfg.rowId ? document.getElementById(cfg.rowId) : null;
         const show = !!cb?.checked;
         if (block) block.classList.toggle('hidden', !show);
+        if (row) {
+            row.classList.toggle('border-[#00A89D]/50', show);
+            row.classList.toggle('ring-1', show);
+            row.classList.toggle('ring-[#00A89D]/25', show);
+            row.querySelectorAll('.nl-curated-row-actions, .nl-curated-preview-wrap').forEach((el) => {
+                el.classList.toggle('hidden', !show);
+            });
+        }
         const inlineBtn = document.querySelector(`.nl-inline-customize-btn[data-nl-jump-custom="${key}"]`);
-        if (inlineBtn) inlineBtn.classList.toggle('hidden', !show);
+        if (inlineBtn && !row) inlineBtn.classList.toggle('hidden', !show);
         if (show) activeLabels.push(cfg.shortLabel);
     });
+    try { updateCuratedRowStatuses(); updateEngagementSectionSummary(); } catch (e) {}
 
     const anyVisible = activeLabels.length > 0;
     const emptyEl = document.getElementById('nl-custom-content-empty');
@@ -3943,96 +4397,125 @@ function validatePersonalUpdateForGeneration() {
     return false;
 }
 
-// Load saved values on page load
-document.addEventListener('DOMContentLoaded', () => {
-    persistentFields.forEach(id => {
+/**
+ * Restore form field values + section checkboxes.
+ * Must run even when this script loads after DOMContentLoaded (feature-loader).
+ * Matches LO coach behavior so checked sections survive refresh.
+ */
+function restoreNewsletterFormPersistence() {
+    persistentFields.forEach((id) => {
+        if (id === 'nl-personal-text') return;
         const el = document.getElementById(id);
-        if (el) {
-            const saved = localStorage.getItem(id);
-            if (saved !== null) {
-                if (id === 'nl-logo') {
-                    if (saved && saved.trim() !== '') {
-                        el.value = saved;
-                    }
-                } else {
-                    el.value = saved;
-                }
-            }
+        if (!el) return;
+        const saved = localStorage.getItem(id);
+        if (saved === null) return;
+        if (id === 'nl-logo') {
+            if (saved && saved.trim() !== '') el.value = saved;
+        } else if (el.type === 'checkbox') {
+            el.checked = saved === 'true' || saved === '1';
+        } else {
+            el.value = saved;
         }
     });
 
-    const savedSections = JSON.parse(localStorage.getItem('nl-sections') || '[]');
-    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
-        cb.checked = savedSections.includes(cb.id);
-    });
-
-    // Load used items and selections
-    usedFunFacts = JSON.parse(localStorage.getItem('usedFunFacts') || '[]');
-    usedProTips = JSON.parse(localStorage.getItem('usedProTips') || '[]');
-    usedQuotes = JSON.parse(localStorage.getItem('usedQuotes') || '[]');
-
-    selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
-    selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
-    selectedQuote = motivationalQuotes.includes(selectedQuote) ? selectedQuote : getRandomItem(motivationalQuotes, usedQuotes);
-
-    updatePreviews();
-
-    // Ensure profile sync on this legacy load path too (for name/email/market etc)
-    if (typeof syncNewsletterFromProfile === 'function') {
-      setTimeout(() => { try { syncNewsletterFromProfile(true); } catch(e){} }, 60);
+    // Section checkboxes (nl-*) — empty array is a valid "all unchecked" save
+    let savedSections = null;
+    try {
+        const raw = localStorage.getItem('nl-sections');
+        if (raw !== null) savedSections = JSON.parse(raw);
+    } catch (e) {
+        savedSections = null;
     }
-});
-
-// Auto-save on change
-persistentFields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener('input', () => localStorage.setItem(id, el.value));
-        el.addEventListener('change', () => localStorage.setItem(id, el.value));
-    }
-});
-
-// Save checkboxes on change + handle show/hide for Personal and Blog sections
-document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', () => {
-        const checked = Array.from(document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked'))
-                             .map(c => c.id);
-        localStorage.setItem('nl-sections', JSON.stringify(checked));
-
-        // Visual toggles for expandable sections
-        if (cb.id === 'nl-personal') {
-            const fields = document.getElementById('personal-fields');
-            if (fields) fields.classList.toggle('hidden', !cb.checked);
-        }
-        if (cb.id === 'nl-include-blog') {
-            const fields = document.getElementById('blog-fields');
-            if (fields) fields.classList.toggle('hidden', !cb.checked);
-        }
-        if (cb.id === 'nl-include-signature' || cb.id === 'nl-include-social') {
-            updateBrandPreview();
+    const hasSaved = Array.isArray(savedSections);
+    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
+        if (!cb.id || !cb.id.startsWith('nl-')) return;
+        if (hasSaved) {
+            cb.checked = savedSections.includes(cb.id);
+        } else if (cb.id === 'nl-include-referral' || cb.id === 'nl-include-signature') {
+            cb.checked = true;
         }
     });
-});
 
-// Initial state on load (restore visibility if checkboxes were checked before)
-document.addEventListener('DOMContentLoaded', () => {
+    try {
+        usedFunFacts = JSON.parse(localStorage.getItem('usedFunFacts') || '[]');
+        usedProTips = JSON.parse(localStorage.getItem('usedProTips') || '[]');
+        usedQuotes = JSON.parse(localStorage.getItem('usedQuotes') || '[]');
+    } catch (e) { /* ignore */ }
+
+    try {
+        selectedFunFact = funFacts.includes(selectedFunFact) ? selectedFunFact : getRandomItem(funFacts, usedFunFacts);
+        selectedProTip = proTips.includes(selectedProTip) ? selectedProTip : getRandomItem(proTips, usedProTips);
+        selectedQuote = motivationalQuotes.includes(selectedQuote) ? selectedQuote : getRandomItem(motivationalQuotes, usedQuotes);
+    } catch (e) { /* pools may not be ready */ }
+
+    try { updatePreviews(); } catch (e) { /* ignore */ }
+
+    // Expand/collapse personal + blog after restore
     const personalCb = document.getElementById('nl-personal');
     const personalFields = document.getElementById('personal-fields');
     if (personalCb && personalFields) {
         personalFields.classList.toggle('hidden', !personalCb.checked);
     }
-
     const blogCb = document.getElementById('nl-include-blog');
     const blogFields = document.getElementById('blog-fields');
     if (blogCb && blogFields) {
         blogFields.classList.toggle('hidden', !blogCb.checked);
     }
 
-    // Profile sync on this load path too
     if (typeof syncNewsletterFromProfile === 'function') {
-      setTimeout(() => { try { syncNewsletterFromProfile(true); } catch(e){} }, 70);
+        setTimeout(() => {
+            try { syncNewsletterFromProfile(true); } catch (e) {}
+        }, 60);
     }
-});
+}
+
+function persistNewsletterSectionCheckboxes() {
+    const checked = Array.from(
+        document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked')
+    )
+        .map((c) => c.id)
+        .filter((id) => id && id.startsWith('nl-'));
+    try {
+        localStorage.setItem('nl-sections', JSON.stringify(checked));
+    } catch (e) { /* private mode */ }
+}
+
+function wireNewsletterFormPersistence() {
+    if (wireNewsletterFormPersistence._done) return;
+    wireNewsletterFormPersistence._done = true;
+
+    persistentFields.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const save = () => {
+            try {
+                if (el.type === 'checkbox') localStorage.setItem(id, el.checked ? 'true' : 'false');
+                else localStorage.setItem(id, el.value);
+            } catch (e) { /* ignore */ }
+        };
+        el.addEventListener('input', save);
+        el.addEventListener('change', save);
+    });
+
+    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
+        if (cb._nlPersistWired) return;
+        cb._nlPersistWired = true;
+        cb.addEventListener('change', () => {
+            persistNewsletterSectionCheckboxes();
+            if (cb.id === 'nl-personal') {
+                const fields = document.getElementById('personal-fields');
+                if (fields) fields.classList.toggle('hidden', !cb.checked);
+            }
+            if (cb.id === 'nl-include-blog') {
+                const fields = document.getElementById('blog-fields');
+                if (fields) fields.classList.toggle('hidden', !cb.checked);
+            }
+            if (cb.id === 'nl-include-signature' || cb.id === 'nl-include-social') {
+                if (typeof updateBrandPreview === 'function') updateBrandPreview();
+            }
+        });
+    });
+}
 
 document.getElementById('generate-newsletter-btn')?.addEventListener('click', async () => {
     generateNewsletter('');
@@ -4306,13 +4789,13 @@ async function generateNewsletter(feedback = '') {
                 '',
                 '- REQUIRED HERO IMAGE: ' + selectedHero,
                 '',
-                'AGENT PROFILE & VOICE CONTEXT (use this to make the whole newsletter — especially tone, personal note, local flavor, and any storytelling — feel like it was written by *this specific* agent. Blend personality/voice/hobbies/challenges naturally where it fits; do not force it):',
+                'AGENT PROFILE & VOICE CONTEXT (use for overall tone, local flavor, and relatable language — NOT for personal update facts. The personal note uses only user-typed Personal Update text. Blend voice naturally elsewhere; do not force profile hobbies/challenges into the personal section):',
                 '- Name: ' + (p.name || ''),
                 '- Email: ' + (p.email || p.workEmail || ''),
                 '- Personality / lifestyle: ' + (p.personality || ''),
                 '- Voice traits: ' + ((p.voiceTraits && p.voiceTraits.length) ? p.voiceTraits.join(', ') : ''),
                 '- Preferred tone: ' + (p.tone || document.getElementById('nl-tone').value || 'warm and professional'),
-                '- Hobbies & passions (weave naturally for authenticity in personal note or relatable examples): ' + ((p.hobbies && p.hobbies.length) ? p.hobbies.join(', ') : (p.hobbiesOther || p['hobbies-other'] || '')),
+                '- Hobbies & passions (optional seasoning for other sections only — never invent into the personal note): ' + ((p.hobbies && p.hobbies.length) ? p.hobbies.join(', ') : (p.hobbiesOther || p['hobbies-other'] || '')),
                 '- Key challenges they help clients with: ' + ((p.challenges && p.challenges.length) ? p.challenges.join(', ') : ''),
                 '- Primary focus style: ' + (p.focus || ''),
                 '- Years in business / team: ' + (p.years || '') + (p.team ? ' / ' + p.team : ''),
@@ -4326,7 +4809,7 @@ async function generateNewsletter(feedback = '') {
                     ? '- Industry News section (ONLY if included): ALWAYS include 1-2 HYPERLINKED sources in the same Sources paragraph format as Market Updates.'
                     : '- Industry News is EXCLUDED — do not create an Industry section.'),
                 (selections.personal
-                    ? '- PERSONAL UPDATE: Rewrite/polish ONLY the raw personal update input — warm, relatable, newsletter-perfect. Do NOT invent personal details not in the user input.'
+                    ? '- PERSONAL UPDATE: Rewrite/polish ONLY the raw personal update input the user provided — warm, relatable, newsletter-perfect. Do NOT invent personal details, hobbies, family facts, or wins that are not in that input.'
                     : '- PERSONAL UPDATE: User did not check Personal Update — skip the entire personal note block.'),
                 '- PERSONAL NOTE TITLE RULE (only when Personal Update is included): Title exactly "A Note From [Name]" using ONLY THE FIRST NAME from the Name field.',
                 (selections.personal && (selections.includePhoto || selections.includeVideo)
@@ -4692,7 +5175,20 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
         const output = document.getElementById('newsletter-output');
         if (output) {
             output.classList.remove('hidden');
-            output.scrollIntoView({ behavior: 'smooth' });
+            hideNewsletterEmptyPreview();
+            // Unhide "ready" handoff AFTER output is visible, then scroll there
+            if (!feedback) {
+                showNewsletterReviewHandoff();
+            }
+            // Always land on the ready section (wizard and full form)
+            requestAnimationFrame(() => {
+                const ready = document.getElementById('nl-review-handoff') || output;
+                try {
+                    ready.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch (e) {
+                    try { output.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e2) {}
+                }
+            });
             // Add a visible Clear button (premium pill style) so user can discard the persisted last version
             if (!output.querySelector('.nl-clear-btn')) {
               const clr = document.createElement('button');
@@ -4725,15 +5221,25 @@ function downloadNewsletterHTML() {
     window.notifyUser('Newsletter downloaded! Double-click the file to preview.', 'success', 3200);
 }
 
+/**
+ * Simple LO-style Outlook body wrap.
+ * Do NOT stack/split modules or peel/rebuild footers here — those rewrites caused
+ * partial paste (footer-only / referral+disclaimer only). See docs/NEWSLETTER-OUTLOOK-PASTE.md.
+ */
 function wrapBodyForOutlookPaste(html) {
     const bodyMatch = String(html || '').match(/^([\s\S]*?<body[^>]*>)([\s\S]*)(<\/body>[\s\S]*)$/i);
     if (!bodyMatch) return html;
     let inner = bodyMatch[2].trim();
     if (/data-nl-outlook-body\s*=\s*["']1["']/i.test(inner)) return html;
-    inner = stackOutlookBodyModules(inner);
+    inner = `<table role="presentation" data-nl-outlook-body="1" width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;background:#f4f4f4;"><tr><td align="center" style="padding:0;margin:0;">${inner}</td></tr></table>`;
     return bodyMatch[1] + inner + bodyMatch[3];
 }
 
+/**
+ * Copy path aligned with LO coach getCleanOutlookHTML:
+ * light cleanup only (hero, card padding, media caps, module widths, center rows) + simple body wrap.
+ * Intentionally skips hardenNewsletterForOutlookPaste / stackOutlookBodyModules / peelAndRebuildOutlookFooter.
+ */
 function getCleanOutlookHTML() {
     const rawEl = document.getElementById('nl-html-raw');
     if (!rawEl || !rawEl.value) {
@@ -4742,13 +5248,15 @@ function getCleanOutlookHTML() {
 
     let cleanHTML = rawEl.value;
 
-    if (!/data-nl-signature-block/i.test(cleanHTML)) {
+    // Ensure signature/referral/disclaimer exist when generation skipped branding post-process
+    if (!/data-nl-signature-block/i.test(cleanHTML) && !/data-nl-disclaimer-block/i.test(cleanHTML)) {
         try {
             cleanHTML = stripReferralFromBody(cleanHTML);
             cleanHTML = injectAgentBranding(cleanHTML);
         } catch (e) {}
     }
 
+    // === HERO IMAGE - Light gray background on sides + centered (same as LO) ===
     cleanHTML = cleanHTML.replace(
         /<tr>\s*<td[^>]*>\s*<img src="([^"]+)"[^>]*alt=["']Hero[^>]*>[\s\S]*?<\/td>\s*<\/tr>/gi,
         `<tr>
@@ -4757,9 +5265,10 @@ function getCleanOutlookHTML() {
                      style="width:600px; max-width:600px; height:auto; display:block; margin:0 auto; border:0;">
             </td>
         </tr>
-        ${NL_OUTLOOK_SECTION_SPACER_ROW}`
+        <tr><td height="20" align="center"></td></tr>`
     );
 
+    // === UNIFORM PADDING ON EVERY TEAL CARD'S CONTENT TD (same as LO) ===
     cleanHTML = cleanHTML.replace(
         /(<table[^>]*?border-left:\s*8px solid #?[0-9a-fA-F]{6}[^>]*>)([\s\S]*?<td[^>]*?)(style="[^"]*?")/gi,
         (match, tableStart, tdBeforeStyle, styleAttr) => {
@@ -4776,10 +5285,33 @@ function getCleanOutlookHTML() {
 
     cleanHTML = normalizePersonalPhotoBlocks(cleanHTML);
     cleanHTML = normalizePersonalVideoBlocks(cleanHTML);
-    cleanHTML = hardenNewsletterForOutlookPaste(cleanHTML);
+    if (typeof normalizeNewsletterModuleWidths === 'function') {
+        cleanHTML = normalizeNewsletterModuleWidths(cleanHTML);
+    }
+    if (typeof ensureContentRowsCentered === 'function') {
+        cleanHTML = ensureContentRowsCentered(cleanHTML);
+    }
     cleanHTML = wrapBodyForOutlookPaste(cleanHTML);
 
     return cleanHTML;
+}
+
+function copyHtmlToOutlookClipboard(html, onSuccess, onError) {
+    const clean = String(html || '');
+    if (!clean) return Promise.reject(new Error('empty'));
+
+    const done = () => {
+        if (typeof onSuccess === 'function') onSuccess();
+    };
+
+    if (navigator.clipboard && window.ClipboardItem) {
+        const blob = new Blob([clean], { type: 'text/html' });
+        return navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]).then(done);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(clean).then(done);
+    }
+    return Promise.reject(new Error('clipboard unavailable'));
 }
 
 function copyForOutlook() {
@@ -4789,14 +5321,23 @@ function copyForOutlook() {
         return;
     }
 
-    const blob = new Blob([cleanHTML], { type: 'text/html' });
-    const data = [new ClipboardItem({ 'text/html': blob })];
-
-    navigator.clipboard.write(data).then(() => {
+    const onSuccess = () => {
         window.notifyUser('✅ Outlook-optimized HTML copied!\n\nPaste into a NEW email in Outlook.', 'success', 3200);
-    }).catch(err => {
-        console.error(err);
-        window.notifyUser('Clipboard issue — try the regular Copy HTML button instead.', 'error', 5000);
+    };
+
+    copyHtmlToOutlookClipboard(cleanHTML, onSuccess).catch(() => {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = cleanHTML;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            onSuccess();
+        } catch (err) {
+            console.error(err);
+            window.notifyUser('Clipboard issue — try the regular Copy HTML button instead.', 'error', 5000);
+        }
     });
 }
 
@@ -4804,6 +5345,8 @@ function copyForOutlook() {
   // PUBLIC API EXPOSURE (for onclick handlers and cross-feature calls)
   // =====================================================
   window.generateNewsletter = generateNewsletter;
+  window.showNewsletterReviewHandoff = showNewsletterReviewHandoff;
+  window.hideNewsletterEmptyPreview = hideNewsletterEmptyPreview;
   window.downloadNewsletterHTML = downloadNewsletterHTML;
   window.copyForOutlook = copyForOutlook;
   window.getCleanOutlookHTML = getCleanOutlookHTML;
@@ -4881,10 +5424,21 @@ function copyForOutlook() {
   // These helpers are called from HTML onclick in the newsletter section
   if (typeof resetUsed === 'function') window.resetUsed = resetUsed;
   if (typeof updatePreviews === 'function') window.updatePreviews = updatePreviews;
+  if (typeof updateCuratedRowStatuses === 'function') window.updateCuratedRowStatuses = updateCuratedRowStatuses;
+  if (typeof updateEngagementSectionSummary === 'function') window.updateEngagementSectionSummary = updateEngagementSectionSummary;
   // Expose both the generic name (for back-compat) and a dedicated stable name for the custom content choice modals
   // so later inline scripts that redefine window.openModal / closeModal do not break "Choose Specific"
   if (typeof openModal === 'function') {
     window.openNewsletterChoiceModal = openModal;
+    window.openModal = openModal; // stable alias for setup-form / late callers
+    window.openNewsletterEngagementHub = openNewsletterEngagementHub;
+    window.openFirstCheckedEngagementHub = openFirstCheckedEngagementHub;
+    window.renderNewsletterEngagementHubTabs = renderNewsletterEngagementHubTabs;
+    window.getEngagementHubTabByCategory = getEngagementHubTabByCategory;
+    window.ensureNewsletterChoiceModal = getNewsletterChoiceModal;
+  }
+  if (typeof closeModal === 'function') {
+    window.closeNewsletterChoiceModal = closeModal;
   }
   if (typeof closeModal === 'function') window.closeNewsletterChoiceModal = closeModal;
   if (typeof regenerateRandom === 'function') window.regenerateRandom = regenerateRandom;
@@ -4904,10 +5458,10 @@ function copyForOutlook() {
   function parsePersonalMediaWidthPx(imgAttrs, fallbackPx) {
       const s = String(imgAttrs || '');
       const styleW = s.match(/width:\s*(\d+)px/i);
-      if (styleW) return Math.min(parseInt(styleW[1], 10), NL_CARD_CONTENT_WIDTH);
+      if (styleW) return Math.min(parseInt(styleW[1], 10), NL_MEDIA_MAX_PX);
       const attrW = s.match(/\bwidth=["'](\d+)["']/i);
-      if (attrW) return Math.min(parseInt(attrW[1], 10), NL_CARD_CONTENT_WIDTH);
-      return fallbackPx;
+      if (attrW) return Math.min(parseInt(attrW[1], 10), NL_MEDIA_MAX_PX);
+      return Math.min(fallbackPx, NL_MEDIA_MAX_PX);
   }
 
   function normalizePersonalPhotoBlocks(htmlString) {
@@ -5096,6 +5650,10 @@ function copyForOutlook() {
     }
   }
 
+  /**
+   * Starter template only — does NOT invent hobbies/goals from profile.
+   * Personal note should be the user's own words; profile hobbies are never auto-injected.
+   */
   function fillPersonalFromProfile(silent = false) {
     const personalCb = document.getElementById('nl-personal');
     const personalFields = document.getElementById('personal-fields');
@@ -5109,62 +5667,52 @@ function copyForOutlook() {
     const textEl = document.getElementById('nl-personal-text');
     if (!textEl) return;
 
-    // Robust normalizer: profile stores arrays for hobbies/challenges/activities but older data or merges may be strings
-    const safeList = (val) => {
-      if (!val) return [];
-      if (Array.isArray(val)) return val.filter(Boolean);
-      if (typeof val === 'string') return val.split(/[,/&]+/).map(s => s.trim()).filter(Boolean);
-      return [String(val)];
-    };
-    const safeText = (val) => {
-      if (!val) return '';
-      if (Array.isArray(val)) return val.filter(Boolean).join(', ');
-      return String(val);
-    };
-
-    let parts = [];
-    if (p.name) parts.push(`Hi, it's ${p.name.split(' ')[0]}!`);
-
-    const hobbies = safeList(p.hobbies);
-    if (hobbies.length) {
-      parts.push(`Lately I've been enjoying ${hobbies.slice(0, 2).join(' and ')}.`);
+    // Never overwrite a note the user already wrote
+    if (textEl.value && textEl.value.trim().length > 20) {
+      if (!silent && typeof window.showToast === 'function') {
+        window.showToast('Personal note already has text — edit it in place, or clear first to use a blank starter.', 'info');
+      }
+      if (!silent) {
+        textEl.focus();
+        textEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
     }
 
-    if (p.personality) {
-      const pers = String(p.personality).trim();
-      if (pers) parts.push(`As someone who's ${pers.toLowerCase()}, I'm always looking for ways to help families like yours.`);
-    }
-
-    const goals = safeText(p.goals).trim();
-    if (goals) parts.push(goals);
-
-    const challenges = safeList(p.challenges);
-    if (challenges.length) {
-      parts.push(`Helping with things like ${challenges.join(', ').toLowerCase()}.`);
-    } else if (p.challenges && typeof p.challenges === 'string') {
-      const ch = p.challenges.trim();
-      if (ch) parts.push(`Helping with things like ${ch.toLowerCase()}.`);
-    }
-
-    const fill = parts.join(' ') || 'Excited to help more families find the right home — or sell for top dollar — this year!';
+    const first = (p.name || '').trim().split(/\s+/)[0] || 'there';
+    const fill =
+      `Hi, it's ${first}! [Share a short real update — a win, a client story, something local, or a personal moment you're comfortable putting in print. Keep it warm and human — this is your voice, not a profile dump.]`;
     textEl.value = fill;
     if (!silent) {
       textEl.focus();
       textEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // No toast for auto-fill — keeps UI clean
     }
   }
 
   window.fillPersonalFromProfile = fillPersonalFromProfile;
 
   function initNewsletterGenerator() {
-    // The original DOMContentLoaded blocks and auto-save listeners are included
-    // in the code above. They will run when this module executes.
+    // Restore form + section checkboxes even when this script loads after DOMContentLoaded
+    try {
+      if (typeof restoreNewsletterFormPersistence === 'function') {
+        restoreNewsletterFormPersistence();
+      }
+    } catch (e) {
+      console.warn('[newsletter] restoreNewsletterFormPersistence failed', e);
+    }
+    try {
+      if (typeof wireNewsletterFormPersistence === 'function') {
+        wireNewsletterFormPersistence();
+      }
+    } catch (e) {
+      console.warn('[newsletter] wireNewsletterFormPersistence failed', e);
+    }
 
     try { wireNewsletterLiveFeedback(); } catch (e) {}
     try { wireNewsletterFeedbackFocusGuard(); } catch (e) {}
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
+    try { updateCustomContentChoicesVisibility(); } catch (e) {}
     try {
       if (window.NlColorBundles?.wireNewsletterBundlePicker) {
         window.NlColorBundles.wireNewsletterBundlePicker();

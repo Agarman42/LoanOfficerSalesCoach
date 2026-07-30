@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'bioWizardLastStep';
-  const WIZARD_DOM_VERSION = '5';
+  const WIZARD_DOM_VERSION = '6';
   const LOVES_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -147,7 +147,7 @@
     setText('bio-wizard-profile-name', p.name);
     setText('bio-wizard-profile-email', p.email);
     setText('bio-wizard-profile-phone', p.phone);
-    setText('bio-wizard-profile-nmls', p.licenseNumber || p.nmls || p.license || '');
+    setText('bio-wizard-profile-nmls', p.nmls);
     setText('bio-wizard-profile-market', p.location);
     setText(
       'bio-wizard-profile-years',
@@ -372,7 +372,7 @@
     overlay.dataset.bioWizardVersion = WIZARD_DOM_VERSION;
 
     overlay.innerHTML = `
-      <div class="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[92vh] overflow-hidden rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
+      <div class="bg-white dark:bg-gray-900 w-full max-w-3xl max-h-[92vh] overflow-hidden rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
         <div class="shrink-0 border-b border-gray-200 dark:border-gray-700 px-5 sm:px-6 py-4">
           <div class="flex items-start justify-between gap-3 mb-3">
             <div class="min-w-0">
@@ -403,7 +403,7 @@
                 <div><dt class="text-gray-400 text-xs mb-0.5">Market</dt><dd id="bio-wizard-profile-market" class="font-semibold text-[#002B5C] dark:text-white m-0">—</dd></div>
                 <div><dt class="text-gray-400 text-xs mb-0.5">Email</dt><dd id="bio-wizard-profile-email" class="m-0 break-all">—</dd></div>
                 <div><dt class="text-gray-400 text-xs mb-0.5">Phone</dt><dd id="bio-wizard-profile-phone" class="m-0">—</dd></div>
-                <div><dt class="text-gray-400 text-xs mb-0.5">License</dt><dd id="bio-wizard-profile-nmls" class="m-0">—</dd></div>
+                <div><dt class="text-gray-400 text-xs mb-0.5">NMLS</dt><dd id="bio-wizard-profile-nmls" class="m-0">—</dd></div>
                 <div><dt class="text-gray-400 text-xs mb-0.5">Years / experience</dt><dd id="bio-wizard-profile-years" class="m-0">—</dd></div>
                 <div><dt class="text-gray-400 text-xs mb-0.5">Team</dt><dd id="bio-wizard-profile-team" class="m-0">—</dd></div>
                 <div><dt class="text-gray-400 text-xs mb-0.5">Tone</dt><dd id="bio-wizard-profile-tone" class="m-0">—</dd></div>
@@ -422,15 +422,15 @@
           </div>
 
           <div data-bio-wizard-step="2" class="hidden">
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Credibility, who you serve, then your emotional hook — the combo that separates you from generic agent bios.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Credibility, who you serve, then your emotional hook — the combo that separates you from generic LO bios.</p>
             <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-years">Years in the business</label>
             <p class="text-xs text-gray-500 mb-2 m-0">Type <strong>12</strong>, <strong>since 2004</strong>, or <strong>licensed since 2010</strong> — start years auto-update each year.</p>
             <input type="text" id="bio-wizard-years" inputmode="text" autocomplete="off" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 mb-1" placeholder="e.g. 12, since 2004">
             <p id="bio-wizard-years-hint" class="hidden text-xs text-[#00A89D] mb-4 m-0"></p>
             <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-who">Who you help most <span class="text-[#F15A29]">*</span></label>
-            <p class="text-xs text-gray-500 mb-2 m-0">Client type + situation — first-time buyers, move-up, downsizers, investors, etc.</p>
+            <p class="text-xs text-gray-500 mb-2 m-0">Client type + situation — first-time, move-up, refi, VA, etc.</p>
             <textarea id="bio-wizard-who" rows="2" class="w-full p-3 rounded-xl border-2 border-[#F15A29]/35 bg-white dark:bg-gray-800 mb-4" placeholder="First-time buyers in [your market] who want a patient guide, not pressure…"></textarea>
-            <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-loves">What do you love most about helping clients buy and sell? <span class="text-[#F15A29]">*</span></label>
+            <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bio-wizard-loves">What do you love most about helping homeowners? <span class="text-[#F15A29]">*</span></label>
             <textarea id="bio-wizard-loves" rows="4" class="w-full p-4 rounded-xl border-2 border-[#00A89D]/50 bg-white dark:bg-gray-800" placeholder="A client moment, a feeling, or feedback you hear often…"></textarea>
           </div>
 
@@ -439,7 +439,7 @@
             <label class="block text-sm font-semibold mb-1" for="bio-wizard-service">Customer service approach</label>
             <textarea id="bio-wizard-service" rows="2" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 mb-4" placeholder="How you communicate, educate, and show up under pressure…"></textarea>
             <label class="block text-sm font-semibold mb-1" for="bio-wizard-diff">What makes you different</label>
-            <textarea id="bio-wizard-diff" rows="2" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="What would your best past client or co-broke partner say about you?"></textarea>
+            <textarea id="bio-wizard-diff" rows="2" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="What would your best realtor partner say about you?"></textarea>
           </div>
 
           <div data-bio-wizard-step="4" class="hidden">
@@ -475,11 +475,11 @@
         </div>
 
         <div class="shrink-0 px-5 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-3">
-          <button type="button" id="bio-wizard-skip" class="hidden text-xs text-gray-500 hover:text-[#00A89D]">Skip personal details</button>
+          <button type="button" id="bio-wizard-skip" class="hidden text-xs font-semibold text-gray-500 hover:text-[#00A89D] transition">Skip personal details</button>
           <div class="flex gap-2 ml-auto">
-            <button type="button" id="bio-wizard-back" class="px-4 py-2 text-sm rounded-2xl border border-gray-300 dark:border-gray-600">Back</button>
-            <button type="button" id="bio-wizard-next" class="px-6 py-2 text-sm rounded-2xl bg-[#00A89D] text-white font-semibold hover:bg-[#008f85]">Continue</button>
-            <button type="button" id="bio-wizard-generate" class="hidden px-6 py-2 text-sm rounded-2xl bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white font-semibold shadow-md">Generate My Bio</button>
+            <button type="button" id="bio-wizard-back" class="px-4 py-2.5 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">Back</button>
+            <button type="button" id="bio-wizard-next" class="px-5 py-2.5 rounded-full bg-[#00A89D] hover:bg-[#008F85] text-white text-sm font-semibold transition">Continue</button>
+            <button type="button" id="bio-wizard-generate" class="hidden px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white text-sm font-bold shadow-md hover:opacity-95 transition">Generate My Bio</button>
           </div>
         </div>
       </div>`;
@@ -495,6 +495,22 @@
     $('bio-wizard-edit-profile')?.addEventListener('click', () => {
       if (typeof window.openUserProfile === 'function') window.openUserProfile(true);
     });
+
+    if (window.CoachWizardA11y && typeof window.CoachWizardA11y.wireWizardA11y === 'function') {
+      window.CoachWizardA11y.wireWizardA11y(
+        () => wizardEl,
+        () => closeBioWizard(),
+        () => wizardEl && !wizardEl.classList.contains('hidden')
+      );
+    } else {
+      document.addEventListener('keydown', (e) => {
+        if (!wizardEl || wizardEl.classList.contains('hidden')) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeBioWizard();
+        }
+      });
+    }
 
     $('bio-wizard-years')?.addEventListener('input', updateWizardYearsHint);
 
@@ -525,6 +541,7 @@
     wizardEl.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     renderStep();
+    if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('bio', 'guided');
   }
 
   function closeBioWizard() {
@@ -533,10 +550,10 @@
     wizardEl.classList.add('hidden');
     wizardEl.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('bio', 'full');
   }
 
   window.openBioWizard = openBioWizard;
   window.closeBioWizard = closeBioWizard;
 
-  console.log('%c[bio-wizard.js] Guided Bio Builder wizard ready', 'color:#00A89D');
 })();

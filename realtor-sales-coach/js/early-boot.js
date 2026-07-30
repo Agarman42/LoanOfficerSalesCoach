@@ -1,6 +1,9 @@
 /**
  * Minimal sidebar navigation — runs before heavy feature scripts load.
  * Full showSection() from main.js replaces this when ready.
+ *
+ * CRITICAL: Do NOT wait only for DOMContentLoaded. Deferred feature scripts delay
+ * DOMContentLoaded for seconds. Bind nav as soon as #sidebar appears.
  */
 (function () {
   'use strict';
@@ -9,12 +12,31 @@
   var ALIASES = {
     'social-media-strategy': 'social',
     'referral-partners': 'referrals',
-    'prospecting': 'weekly-win-plan'
+    'prospecting': 'weekly-win-plan',
+    'content': 'content-hub',
+    'content-studio': 'content-hub'
   };
+
+  var navReady = false;
 
   function resolveId(id) {
     if (!id) return DEFAULT_SECTION;
     return ALIASES[id] || id;
+  }
+
+  /** Home/load: page top so header + LO brand plate stay visible. */
+  function scrollAfterSectionShow(id, target) {
+    try {
+      if (id === DEFAULT_SECTION || id === 'home') {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        return;
+      }
+      if (target && typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (e) { /* ignore */ }
   }
 
   function showSectionEarly(id) {
@@ -28,9 +50,10 @@
 
     if (target) {
       target.classList.remove('hidden');
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollAfterSectionShow(id, target);
     } else if (id !== DEFAULT_SECTION) {
       showSectionEarly(DEFAULT_SECTION);
+      return;
     }
 
     document.querySelectorAll('#sidebar a[href^="#"]').forEach(function (link) {
@@ -53,22 +76,52 @@
 
   window.showSection = showSectionEarly;
 
+  function onSidebarClick(e) {
+    if (window.__mainNavReady) return;
+    var link = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!link) return;
+    var sidebar = document.getElementById('sidebar');
+    if (sidebar && !sidebar.contains(link) && !link.hasAttribute('data-early-nav')) return;
+
+    var href = link.getAttribute('href') || '';
+    if (link.target === '_blank' || !href.startsWith('#')) return;
+
+    e.preventDefault();
+    showSectionEarly(href.replace('#', ''));
+  }
+
+  function onDocClick(e) {
+    if (window.__mainNavReady) return;
+    hardHideGlobalLoading();
+
+    var profileBtn = e.target.closest && e.target.closest('#open-profile-btn');
+    if (profileBtn) {
+      if (typeof window.openUserProfile === 'function') {
+        try { window.openUserProfile(); } catch (err) { /* ignore */ }
+        return;
+      }
+      var modal = document.getElementById('user-profile-modal') || document.getElementById('profile-modal');
+      if (modal) {
+        e.preventDefault();
+        modal.classList.remove('hidden');
+        modal.style.setProperty('display', 'flex', 'important');
+      }
+    }
+  }
+
   function initEarlyNav() {
+    if (navReady) return;
     var sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
+    navReady = true;
 
-    sidebar.addEventListener('click', function (e) {
-      var link = e.target.closest('a[href^="#"]');
-      if (!link) return;
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    } catch (e) { /* ignore */ }
 
-      var href = link.getAttribute('href') || '';
-      if (link.target === '_blank' || !href.startsWith('#')) return;
-
-      e.preventDefault();
-      showSectionEarly(href.replace('#', ''));
-    });
-
+    sidebar.addEventListener('click', onSidebarClick);
     window.addEventListener('hashchange', function () {
+      if (window.__mainNavReady) return;
       var hashId = location.hash.replace('#', '');
       if (hashId) showSectionEarly(hashId);
     });
@@ -78,23 +131,76 @@
     } else {
       showSectionEarly(DEFAULT_SECTION);
     }
+    try {
+      window.scrollTo(0, 0);
+    } catch (e) { /* ignore */ }
+    hardHideGlobalLoading();
   }
 
-  function onReady() {
+  function hardHideGlobalLoading() {
+    try {
+      document.querySelectorAll('#global-loading').forEach(function (gl) {
+        gl.classList.add('hidden');
+        gl.classList.remove('flex', 'is-visible');
+        gl.setAttribute('hidden', '');
+        gl.setAttribute('aria-hidden', 'true');
+        gl.style.cssText =
+          'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
+      });
+      document.documentElement.classList.remove('coach-boot-stuck');
+      if (document.body) {
+        document.body.classList.remove(
+          'ss-smart-savings-modal-open',
+          'modal-open',
+          'ss-guided-modal-open',
+          'overflow-hidden'
+        );
+      }
+      document.documentElement.classList.remove('ss-guided-modal-open');
+    } catch (e) { /* ignore */ }
+  }
+
+  document.addEventListener('click', onDocClick, true);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hardHideGlobalLoading();
+  });
+
+  hardHideGlobalLoading();
+
+  if (document.getElementById('sidebar')) {
     initEarlyNav();
-    var gl = document.getElementById('global-loading');
-    if (gl) {
-      gl.classList.add('hidden');
-      gl.classList.remove('flex');
-      gl.style.display = 'none';
-      gl.style.pointerEvents = 'none';
-      gl.style.visibility = 'hidden';
-    }
+  } else if (typeof MutationObserver !== 'undefined') {
+    var mo = new MutationObserver(function () {
+      if (document.getElementById('sidebar')) {
+        mo.disconnect();
+        initEarlyNav();
+      }
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () {
+      try { mo.disconnect(); } catch (e) { /* ignore */ }
+      initEarlyNav();
+    }, 15000);
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', onReady);
+    document.addEventListener('DOMContentLoaded', function () {
+      hardHideGlobalLoading();
+      initEarlyNav();
+    });
   } else {
-    onReady();
+    initEarlyNav();
   }
+
+  var ticks = 0;
+  var pulse = setInterval(function () {
+    hardHideGlobalLoading();
+    ticks += 1;
+    if (ticks >= 40 || window.__mainNavReady) clearInterval(pulse);
+  }, 250);
+
+  setTimeout(hardHideGlobalLoading, 90000);
+  window.addEventListener('pageshow', hardHideGlobalLoading);
+  window.addEventListener('load', hardHideGlobalLoading);
+  window.__hardHideGlobalLoading = hardHideGlobalLoading;
 })();
