@@ -310,56 +310,104 @@ body > header {
         gap: 0.45rem;
     }
 
-    /* When LO partner plate is on: reserve right column + compact chip */
+    /*
+      LO partner branding on mobile (does NOT cover title/search):
+      Stack a full-width brand card under the title+search inside the navy band.
+      Phone is tappable; email/NMLS stay in the sticky footer so the header stays clean.
+    */
+    body.has-lo-brand .header-navy-band {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
     body.has-lo-brand .header-center-stack {
-        padding-right: 5.75rem; /* room for compact plate */
-        padding-left: 3.5rem;
-        padding-top: 0.55rem;
-        min-height: 4.75rem;
+        order: 1;
+        padding: 0.55rem 0.75rem 0.45rem;
+        padding-left: 3.5rem; /* hamburger only */
+        padding-right: 0.75rem;
+        min-height: 0;
         justify-content: center;
     }
     body.has-lo-brand .header-actions-cluster {
-        right: 0.4rem;
-        top: 0.45rem;
-        transform: none; /* top-align so plate doesn't swallow search */
-        max-width: 5.25rem;
+        order: 2;
+        position: static !important;
+        transform: none !important;
+        right: auto;
+        top: auto;
+        width: 100%;
+        max-width: none;
+        align-items: stretch;
+        padding: 0 0.65rem 0.65rem;
+        pointer-events: auto;
+        z-index: 5;
     }
     body.has-lo-brand .header-lo-brand-plate,
     body.has-lo-brand #lo-brand-plate.is-populated {
-        max-width: 5.15rem;
-        padding: 0.3rem 0.35rem 0.35rem;
-        border-radius: 0.85rem;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.55rem 0.7rem;
+        border-radius: 0.95rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+        background: #fff;
     }
     body.has-lo-brand .lo-brand-inner {
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 0.2rem;
-        text-align: center;
+        gap: 0.7rem;
+        text-align: left;
     }
     body.has-lo-brand .lo-brand-photo-wrap {
-        width: 2.65rem;
-        height: 2.65rem;
+        width: 3.15rem;
+        height: 3.15rem;
         border-radius: 50%;
+        flex-shrink: 0;
     }
     body.has-lo-brand .lo-brand-text {
-        text-align: center;
-        width: 100%;
+        text-align: left;
+        min-width: 0;
+        flex: 1 1 auto;
     }
-    /* Full contact is in sticky footer — keep header plate to photo + name */
-    body.has-lo-brand .lo-brand-kicker,
-    body.has-lo-brand .lo-brand-meta {
-        display: none !important;
+    body.has-lo-brand .lo-brand-kicker {
+        display: block !important;
+        font-size: 0.58rem;
+        margin-bottom: 0.05rem;
+        letter-spacing: 0.06em;
     }
     body.has-lo-brand .lo-brand-name {
-        font-size: 0.62rem;
+        display: block !important;
+        font-size: 0.95rem;
         font-weight: 700;
-        line-height: 1.15;
-        max-width: 4.75rem;
+        line-height: 1.2;
+        max-width: none;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin: 0 auto;
+        margin: 0;
+        color: #002B5C;
+    }
+    /* Phone only in header card (tap-to-call); email + NMLS stay in sticky footer */
+    body.has-lo-brand .lo-brand-meta {
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.15rem 0.65rem;
+        margin-top: 0.15rem;
+        font-size: 0.78rem;
+    }
+    body.has-lo-brand .lo-brand-meta .lo-brand-email,
+    body.has-lo-brand .lo-brand-meta .lo-brand-nmls {
+        display: none !important;
+    }
+    body.has-lo-brand .lo-brand-meta .lo-brand-phone,
+    body.has-lo-brand .lo-brand-meta .lo-brand-contact.lo-brand-phone {
+        display: inline !important;
+        font-weight: 600;
+        color: #00A89D;
     }
 
     /* Quote band: leave room for theme + profile icons on the right */
@@ -447,25 +495,63 @@ body > header {
     }
 }
 
-/* Slightly larger phones / small tablets in portrait */
+/* Slightly larger phones / small tablets — keep stacked brand bar until ~900px */
 @media (min-width: 641px) and (max-width: 900px) {
+    body.has-lo-brand .header-navy-band {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
     body.has-lo-brand .header-center-stack {
-        padding-right: 11.5rem;
+        order: 1;
+        padding: 0.75rem 1rem 0.5rem;
         padding-left: 1.25rem;
+        padding-right: 1.25rem;
     }
     body.has-lo-brand .header-app-title {
         font-size: clamp(1.25rem, 2.8vw, 1.75rem);
+        white-space: normal;
     }
-    body.has-lo-brand .lo-brand-meta {
-        display: none !important; /* phone/email still in footer */
+    body.has-lo-brand .header-actions-cluster {
+        order: 2;
+        position: static !important;
+        transform: none !important;
+        width: 100%;
+        max-width: none;
+        padding: 0 1rem 0.75rem;
+        pointer-events: auto;
     }
     body.has-lo-brand #lo-brand-plate.is-populated {
-        max-width: 10.5rem;
-        padding: 0.5rem 0.6rem;
+        max-width: 100%;
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+    }
+    body.has-lo-brand .lo-brand-inner {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.85rem;
     }
     body.has-lo-brand .lo-brand-photo-wrap {
-        width: 3rem;
-        height: 3.65rem;
+        width: 3.4rem;
+        height: 3.4rem;
+        border-radius: 50%;
+    }
+    body.has-lo-brand .lo-brand-kicker {
+        display: block !important;
+    }
+    body.has-lo-brand .lo-brand-name {
+        font-size: 1.05rem;
+        max-width: none;
+    }
+    body.has-lo-brand .lo-brand-meta {
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.25rem 0.85rem;
+    }
+    body.has-lo-brand .lo-brand-meta .lo-brand-email,
+    body.has-lo-brand .lo-brand-meta .lo-brand-nmls {
+        display: none !important;
     }
     .header-quote-inner {
         padding-right: 6rem;
