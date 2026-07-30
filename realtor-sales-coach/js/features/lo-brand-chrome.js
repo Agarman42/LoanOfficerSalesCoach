@@ -161,8 +161,26 @@
         <strong class="lo-brand-footer-name">${escapeHtml(card.name)}</strong>
         ${bits ? `<span class="lo-brand-footer-meta">${bits}</span>` : ''}
       </div>
+      <div class="lo-brand-footer-version" aria-label="App version"></div>
     `;
+    // Fill stamp now (or leave empty until app-version.js loads and calls refresh)
+    refreshLoBrandFooterVersion();
   }
+
+  /** Keep build stamp visible inside sticky LO bar (app-version loads late via feature-loader). */
+  function refreshLoBrandFooterVersion() {
+    const slot = document.querySelector('#lo-brand-footer .lo-brand-footer-version');
+    if (!slot) return;
+    if (typeof window.APP_VERSION === 'string' && window.APP_VERSION) {
+      const date = window.APP_BUILD_DATE ? ` · ${window.APP_BUILD_DATE}` : '';
+      slot.textContent = `Agent Sales Coach · v${window.APP_VERSION}${date}`;
+      slot.hidden = false;
+    } else {
+      slot.textContent = '';
+      slot.hidden = true;
+    }
+  }
+  window.refreshLoBrandFooterVersion = refreshLoBrandFooterVersion;
 
   function paintBrandPlate(card) {
     const plate = document.getElementById('lo-brand-plate');

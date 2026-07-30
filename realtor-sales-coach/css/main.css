@@ -341,8 +341,31 @@ body > header {
 body.has-lo-brand-footer main {
     padding-bottom: 5.5rem;
 }
+/* Version fine-print sits after </main> — needs its own clearance under the fixed LO bar */
+body.has-lo-brand-footer #app-version-line {
+    margin-bottom: 5.25rem;
+    padding-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
 body.has-lo-brand-footer .fixed.bottom-4.right-4 {
     bottom: 4.25rem;
+}
+
+/* Always-visible build stamp (not covered by sticky LO brand chrome) */
+#app-version-line {
+    flex-shrink: 0;
+}
+/* Tiny version chip in the LO brand bar when partner mode is on */
+.lo-brand-footer-version {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
 }
 
 .header-actions-row {
