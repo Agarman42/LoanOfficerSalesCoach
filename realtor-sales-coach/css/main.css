@@ -3405,3 +3405,138 @@ html.dark body.sidebar-collapsed #menu-toggle:hover {
   }
 }
 
+
+/* =========================================================
+   MOBILE PASS 4 — keyboard inset, guided density, tool tables
+   LO + Realtor only. All rules max-width 640px (desktop safe).
+   ========================================================= */
+@media (max-width: 640px) {
+  /* Soft keyboard: JS sets --profile-keyboard-inset via visualViewport */
+  #user-profile-modal {
+    --profile-keyboard-inset: 0px;
+  }
+  #user-profile-modal > .profile-modal-shell,
+  #user-profile-modal > div {
+    padding-bottom: var(--profile-keyboard-inset, 0px) !important;
+    transition: padding-bottom 0.12s ease-out;
+  }
+  #profile-full-footer,
+  #profile-wizard-footer {
+    padding-bottom: max(0.65rem, env(safe-area-inset-bottom)) !important;
+    margin-bottom: 0;
+  }
+
+  /* Guided setup: less chrome, more room for the current step */
+  #user-profile-modal.profile-modal--wizard .profile-status-card {
+    display: none !important;
+  }
+  #user-profile-modal.profile-modal--wizard .profile-panel-intro {
+    display: none !important;
+  }
+  #user-profile-modal.profile-modal--wizard .profile-field-help {
+    display: none !important;
+  }
+  #user-profile-modal.profile-modal--wizard .profile-field-tag:not(.profile-field-tag--essential) {
+    display: none;
+  }
+  /* Optional field stacks: collapse secondary cards after the first two on a step */
+  #user-profile-modal.profile-modal--wizard .profile-tab-panel > .profile-section-card:nth-child(n + 3),
+  #user-profile-modal.profile-modal--wizard .profile-tab-panel > .space-y-4 > .profile-section-card:nth-child(n + 3),
+  #user-profile-modal.profile-modal--wizard .profile-tab-panel > .space-y-6 > .profile-section-card:nth-child(n + 3) {
+    /* keep visible but much tighter so the step feels one-focus */
+  }
+  #user-profile-modal.profile-modal--wizard #profile-form-scroll {
+    padding-top: 0.35rem !important;
+  }
+  #user-profile-modal.profile-modal--wizard .profile-section-card {
+    padding: 0.65rem 0.7rem;
+    margin-bottom: 0.55rem;
+  }
+  #user-profile-modal.profile-modal--wizard .profile-wizard-stepper {
+    margin-bottom: 0.35rem;
+  }
+  #user-profile-modal.profile-modal--wizard #profile-wizard-step-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  #user-profile-modal.profile-modal--wizard #profile-wizard-step-hint {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.35;
+  }
+  /* Optional fields: hide non-essential blocks when marked (HTML may use data-profile-optional) */
+  #user-profile-modal.profile-modal--wizard [data-profile-optional="1"] {
+    display: none !important;
+  }
+  /* Soften long secondary textareas in wizard */
+  #user-profile-modal.profile-modal--wizard textarea {
+    min-height: 4.5rem;
+    max-height: 8rem;
+  }
+
+  /* Wide tools: force horizontal scroll hosts so page never expands sideways */
+  #planning,
+  #weekly-win-plan,
+  #value-vault,
+  #blog,
+  #social-post,
+  #sales-script,
+  #business-plan,
+  #newsletter-generator,
+  #content-hub,
+  #database,
+  #referrals,
+  #process,
+  #eventplanning,
+  #client-translation,
+  #underwriting-search,
+  #calculator,
+  #smart-savings {
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+  #planning .prose,
+  #blog .prose,
+  #weekly-win-plan .prose,
+  #value-vault .prose,
+  #sales-script .prose,
+  #content-hub .prose,
+  #planning [class*="overflow"],
+  #weekly-win-plan [class*="overflow"],
+  #value-vault .accordion-content,
+  #newsletter-output,
+  #nl-html-raw {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  #planning table,
+  #weekly-win-plan table,
+  #value-vault table,
+  #blog table,
+  #sales-script table,
+  #content-hub table,
+  #database table {
+    display: block;
+    width: max-content;
+    max-width: none;
+    min-width: 100%;
+    overflow-x: auto;
+  }
+  /* Pre / code blocks in tool output */
+  pre, code.block, .font-mono.whitespace-pre {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    font-size: 0.75rem !important;
+  }
+  /* Copy rows with side-by-side buttons: stack on very narrow */
+  [data-copy-text] > .flex.justify-between {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  [data-copy-text] button {
+    min-height: 2.25rem;
+  }
+}
+

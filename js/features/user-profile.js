@@ -1571,6 +1571,8 @@
     modal = document.getElementById('user-profile-modal');
     if (!modal) return;
 
+    startProfileKeyboardInset();
+
     if (typeof window.openAppModal === 'function') {
       window.openAppModal(modal);
     } else {
@@ -1600,6 +1602,7 @@
     if (!modal) modal = document.getElementById('user-profile-modal');
     if (!modal) return;
     flushWizardSave();
+    stopProfileKeyboardInset();
     if (typeof window.closeAppModal === 'function') {
       window.closeAppModal(modal);
     } else {
@@ -1609,6 +1612,46 @@
     }
 
     notifyProfileConsumers();
+  }
+
+  /**
+   * iOS/Android soft keyboard: lift sticky profile footers so Save/Next stay visible.
+   * Uses visualViewport when available; no-op on desktop. Does not change desktop layout.
+   */
+  let profileKeyboardBound = false;
+  function updateProfileKeyboardInset() {
+    const m = document.getElementById('user-profile-modal');
+    if (!m || m.classList.contains('hidden')) return;
+    const vv = window.visualViewport;
+    if (!vv) {
+      m.style.setProperty('--profile-keyboard-inset', '0px');
+      return;
+    }
+    // Amount of layout viewport covered by keyboard (or browser chrome shrink)
+    const covered = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    // Ignore tiny noise; only apply meaningful keyboard inset
+    const inset = covered > 48 ? Math.round(covered) : 0;
+    m.style.setProperty('--profile-keyboard-inset', inset + 'px');
+  }
+  function startProfileKeyboardInset() {
+    if (profileKeyboardBound) {
+      updateProfileKeyboardInset();
+      return;
+    }
+    profileKeyboardBound = true;
+    const onChange = () => updateProfileKeyboardInset();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', onChange);
+      window.visualViewport.addEventListener('scroll', onChange);
+    }
+    window.addEventListener('resize', onChange);
+    // Focused fields often open the keyboard a beat later
+    document.getElementById('user-profile-modal')?.addEventListener('focusin', onChange);
+    updateProfileKeyboardInset();
+  }
+  function stopProfileKeyboardInset() {
+    const m = document.getElementById('user-profile-modal');
+    if (m) m.style.setProperty('--profile-keyboard-inset', '0px');
   }
 
   let saveStatusResetTimer = null;
