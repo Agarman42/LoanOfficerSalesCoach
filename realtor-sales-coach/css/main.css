@@ -279,6 +279,200 @@ body > header {
     }
 }
 
+/* =========================================================
+   MOBILE HEADER — partner LO plate must not cover title/search
+   Full contact details live in sticky footer; header stays compact.
+   ========================================================= */
+@media (max-width: 640px) {
+    /* Hamburger + title share the navy band */
+    .header-center-stack {
+        padding: 0.65rem 0.75rem 0.75rem;
+        gap: 0.5rem;
+        /* default side room for menu (left) */
+        padding-left: 3.6rem;
+        padding-right: 0.75rem;
+    }
+    .header-app-title {
+        font-size: clamp(1.05rem, 4.6vw, 1.35rem);
+        line-height: 1.2;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 0 0.15rem;
+    }
+    .header-search-wrap {
+        max-width: 100%;
+    }
+    .header-search-btn {
+        padding: 0.5rem 0.85rem;
+        font-size: 0.78rem;
+        gap: 0.45rem;
+    }
+
+    /* When LO partner plate is on: reserve right column + compact chip */
+    body.has-lo-brand .header-center-stack {
+        padding-right: 5.75rem; /* room for compact plate */
+        padding-left: 3.5rem;
+        padding-top: 0.55rem;
+        min-height: 4.75rem;
+        justify-content: center;
+    }
+    body.has-lo-brand .header-actions-cluster {
+        right: 0.4rem;
+        top: 0.45rem;
+        transform: none; /* top-align so plate doesn't swallow search */
+        max-width: 5.25rem;
+    }
+    body.has-lo-brand .header-lo-brand-plate,
+    body.has-lo-brand #lo-brand-plate.is-populated {
+        max-width: 5.15rem;
+        padding: 0.3rem 0.35rem 0.35rem;
+        border-radius: 0.85rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+    }
+    body.has-lo-brand .lo-brand-inner {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        text-align: center;
+    }
+    body.has-lo-brand .lo-brand-photo-wrap {
+        width: 2.65rem;
+        height: 2.65rem;
+        border-radius: 50%;
+    }
+    body.has-lo-brand .lo-brand-text {
+        text-align: center;
+        width: 100%;
+    }
+    /* Full contact is in sticky footer — keep header plate to photo + name */
+    body.has-lo-brand .lo-brand-kicker,
+    body.has-lo-brand .lo-brand-meta {
+        display: none !important;
+    }
+    body.has-lo-brand .lo-brand-name {
+        font-size: 0.62rem;
+        font-weight: 700;
+        line-height: 1.15;
+        max-width: 4.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0 auto;
+    }
+
+    /* Quote band: leave room for theme + profile icons on the right */
+    .header-quote-band {
+        padding-top: 0.45rem;
+        padding-bottom: 0.45rem;
+    }
+    .header-quote-inner {
+        max-width: none;
+        width: 100%;
+        padding-left: 0.35rem;
+        padding-right: 5.25rem; /* theme + profile */
+        gap: 0.35rem;
+        box-sizing: border-box;
+    }
+    .header-quote-text {
+        font-size: 0.8rem;
+        line-height: 1.3;
+        min-height: 1.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .header-quote-btn {
+        flex: 0 0 1.85rem;
+        width: 1.85rem;
+        height: 1.85rem;
+        font-size: 1.05rem;
+    }
+    .header-quote-actions {
+        right: 0.4rem;
+        gap: 0.3rem;
+    }
+    .header-icon-btn,
+    .header-profile-btn {
+        width: 2rem;
+        height: 2rem;
+        min-width: 2rem;
+        padding: 0;
+    }
+    .header-profile-btn {
+        border-radius: 9999px;
+    }
+
+    /* Sticky LO footer: tighter + safe area; AI FAB sits above it */
+    .lo-brand-footer {
+        padding: 0.4rem 0.65rem;
+        padding-bottom: max(0.4rem, env(safe-area-inset-bottom));
+    }
+    .lo-brand-footer-inner {
+        font-size: 0.72rem;
+        gap: 0.2rem 0.45rem;
+    }
+    .lo-brand-footer-label {
+        font-size: 0.55rem;
+        width: 100%;
+    }
+    .lo-brand-footer-name {
+        font-size: 0.85rem;
+    }
+    .lo-brand-footer-meta {
+        font-size: 0.68rem;
+        line-height: 1.3;
+    }
+    .lo-brand-footer-version {
+        font-size: 0.55rem;
+        margin-top: 0.15rem;
+    }
+    body.has-lo-brand-footer main {
+        padding-bottom: 6.25rem;
+    }
+    body.has-lo-brand-footer .fixed.bottom-4.right-4,
+    body.has-lo-brand-footer #ai-coach-fab,
+    body.has-lo-brand-footer [data-ai-coach-fab] {
+        bottom: 5.5rem !important;
+    }
+
+    /* Menu toggle: keep clear of brand plate on the right */
+    #menu-toggle {
+        width: 2.65rem;
+        height: 2.65rem;
+        top: 0.65rem !important;
+        left: 0.65rem !important;
+    }
+}
+
+/* Slightly larger phones / small tablets in portrait */
+@media (min-width: 641px) and (max-width: 900px) {
+    body.has-lo-brand .header-center-stack {
+        padding-right: 11.5rem;
+        padding-left: 1.25rem;
+    }
+    body.has-lo-brand .header-app-title {
+        font-size: clamp(1.25rem, 2.8vw, 1.75rem);
+    }
+    body.has-lo-brand .lo-brand-meta {
+        display: none !important; /* phone/email still in footer */
+    }
+    body.has-lo-brand #lo-brand-plate.is-populated {
+        max-width: 10.5rem;
+        padding: 0.5rem 0.6rem;
+    }
+    body.has-lo-brand .lo-brand-photo-wrap {
+        width: 3rem;
+        height: 3.65rem;
+    }
+    .header-quote-inner {
+        padding-right: 6rem;
+        box-sizing: border-box;
+    }
+}
+
 /* Sticky “Provided by your Loan Officer” under tools (above floating coach button) */
 .lo-brand-footer {
     position: fixed;
