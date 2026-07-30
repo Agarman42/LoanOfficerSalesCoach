@@ -3356,13 +3356,13 @@ html.dark .dark-navy-icon {
     max-width: 100%;
   }
   #nl-preview {
-    padding: 0.5rem !important;
+    padding: 0 !important;
     min-height: 16rem !important;
   }
-  #nl-preview table,
-  #newsletter-output table,
+  /* Keep preview fluid — do NOT force max-width:none (that re-enables 600px clip) */
   #nl-preview iframe {
-    max-width: none;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   /* Business plan / wide tool tables */
   .prose,
@@ -3799,13 +3799,41 @@ html.dark .dark-navy-icon {
   #newsletter-output .max-w-xl {
     max-width: none !important;
   }
-  /* Newsletter preview: use full card width */
+  /* Newsletter shell: reclaim side gutters so the preview can go wide */
+  #newsletter-output {
+    margin-top: 1.25rem !important;
+  }
+  #newsletter-output > div {
+    padding: 0.75rem 0.45rem !important;
+    border-radius: 1rem !important;
+  }
+  #newsletter-output .mt-8.bg-white,
+  #newsletter-output > .mt-8 {
+    padding: 0.85rem 0.55rem !important;
+    border-radius: 1rem !important;
+  }
+  #newsletter-output h3 {
+    font-size: 1.35rem !important;
+  }
+  /* Preview frame: full width, no inner pad, no horizontal clip of fluid email */
   #nl-preview,
-  #newsletter-output #nl-preview,
+  #newsletter-output #nl-preview {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0.75rem !important;
+    overflow-x: hidden !important;
+    border-width: 1px !important;
+  }
+  #nl-preview iframe,
+  #nl-preview .nl-preview-iframe,
   .nl-preview-iframe {
     width: 100% !important;
     max-width: 100% !important;
-    border-radius: 0.75rem !important;
+    display: block !important;
+    border-radius: 0.65rem !important;
+    box-shadow: none !important;
   }
   /* Action button rows under outputs — denser, full width */
   #blog-output > .flex.flex-wrap,

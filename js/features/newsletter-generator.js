@@ -3166,6 +3166,72 @@ function getNewsletterHtmlForFeedbackEdit() {
     return base;
 }
 
+/**
+ * Preview-only fluid CSS. Email HTML stays 600px for Outlook/copy/download;
+ * this inject makes the on-screen iframe use the full phone width so titles
+ * and body text aren't clipped in a narrow column with empty side margins.
+ */
+const NL_PREVIEW_FLUID_HEAD = `
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style id="nl-preview-fluid">
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  table[width="600"],
+  table[width="600px"],
+  table[style*="width:600px"],
+  table[style*="width: 600px"],
+  table[style*="max-width:600px"],
+  table[style*="max-width: 600px"],
+  td[width="600"],
+  td[width="600px"],
+  td[style*="width:600px"],
+  td[style*="width: 600px"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  @media (max-width: 640px) {
+    td[style*="padding:14px 24px"],
+    td[style*="padding:16px 24px"],
+    td[style*="padding:24px 30px"],
+    td[style*="padding:0 20px"] {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+    }
+  }
+</style>
+`;
+
+function injectNewsletterPreviewFluidCss(html) {
+    let out = String(html || '');
+    if (!out.trim() || /id=["']nl-preview-fluid["']/.test(out)) return out;
+    if (/<\/head>/i.test(out)) {
+        return out.replace(/<\/head>/i, NL_PREVIEW_FLUID_HEAD + '</head>');
+    }
+    if (/<head\b[^>]*>/i.test(out)) {
+        return out.replace(/<head\b[^>]*>/i, (m) => m + NL_PREVIEW_FLUID_HEAD);
+    }
+    if (/<html\b[^>]*>/i.test(out)) {
+        return out.replace(/<html\b[^>]*>/i, (m) => m + '<head>' + NL_PREVIEW_FLUID_HEAD + '</head>');
+    }
+    if (/<body\b/i.test(out)) {
+        return out.replace(/<body\b[^>]*>/i, (m) => NL_PREVIEW_FLUID_HEAD + m);
+    }
+    return NL_PREVIEW_FLUID_HEAD + out;
+}
+
 function hardenNewsletterPreviewHtml(html) {
     let out = String(html || '');
     if (!out.trim()) return out;
@@ -3178,16 +3244,18 @@ function hardenNewsletterPreviewHtml(html) {
         .replace(/<script\b[^>]*\/>/gi, '')
         .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
 
+    out = injectNewsletterPreviewFluidCss(out);
+
     if (/<html\b/i.test(out)) {
         out = out.replace(/<html\b([^>]*)>/i, (tag, attrs) => {
             let a = String(attrs);
             if (/style=["']/i.test(a)) {
                 a = a.replace(/style=(["'])([^"']*)\1/i, (m, q, styleVal) => {
                     if (/overflow/i.test(styleVal)) return m;
-                    return `style=${q}${styleVal};height:100%;overflow-y:auto;${q}`;
+                    return `style=${q}${styleVal};height:100%;overflow-x:hidden;overflow-y:auto;${q}`;
                 });
             } else {
-                a += ' style="height:100%;overflow-y:auto;"';
+                a += ' style="height:100%;overflow-x:hidden;overflow-y:auto;"';
             }
             return `<html${a}>`;
         });
@@ -3198,10 +3266,10 @@ function hardenNewsletterPreviewHtml(html) {
         if (/style=["']/i.test(a)) {
             a = a.replace(/style=(["'])([^"']*)\1/i, (m, q, styleVal) => {
                 if (/overflow/i.test(styleVal)) return m;
-                return `style=${q}${styleVal};margin:0;overflow-y:auto;${q}`;
+                return `style=${q}${styleVal};margin:0;overflow-x:hidden;overflow-y:auto;${q}`;
             });
         } else {
-            a += ' style="margin:0;overflow-y:auto;"';
+            a += ' style="margin:0;overflow-x:hidden;overflow-y:auto;"';
         }
         return `<body${a} contenteditable="false">`;
     });
@@ -3309,9 +3377,11 @@ function mountNewsletterPreviewIframe(previewEl, html) {
     iframe.className = 'w-full border-0 rounded-2xl shadow-2xl bg-white nl-preview-iframe';
     // Mobile: shorter fixed viewport so the phone isn't one giant iframe; desktop keeps tall preview
     const mobile = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches;
-    iframe.style.height = mobile ? 'min(70dvh, 70vh)' : 'min(85vh, 900px)';
-    iframe.style.minHeight = mobile ? '280px' : '500px';
+    iframe.style.height = mobile ? 'min(72dvh, 72vh)' : 'min(85vh, 900px)';
+    iframe.style.minHeight = mobile ? '320px' : '500px';
+    iframe.style.width = '100%';
     iframe.style.maxWidth = '100%';
+    iframe.style.border = '0';
     applyNewsletterPreviewIframeIsolation(iframe);
     iframe.srcdoc = hardenNewsletterPreviewHtml(html);
     previewEl.appendChild(iframe);
