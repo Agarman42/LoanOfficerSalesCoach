@@ -459,43 +459,70 @@ body > header {
         color: #00A89D;
     }
 
-    /* Quote band: leave room for theme + profile icons on the right */
+    /*
+      Quote band on mobile: CSS grid so arrows never hide under theme/profile.
+      [‹] [quote text…] [›] [theme][profile]
+    */
     .header-quote-band {
-        padding-top: 0.45rem;
-        padding-bottom: 0.45rem;
-    }
-    .header-quote-inner {
-        max-width: none;
-        width: 100%;
-        padding-left: 0.35rem;
-        padding-right: 5.25rem; /* theme + profile */
-        gap: 0.35rem;
+        display: grid;
+        grid-template-columns: 2.15rem minmax(0, 1fr) 2.15rem auto;
+        align-items: center;
+        column-gap: 0.3rem;
+        row-gap: 0;
+        padding: 0.5rem 0.45rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
         box-sizing: border-box;
     }
+    .header-quote-inner {
+        display: contents; /* prev / text / next become band grid children */
+        max-width: none;
+        width: auto;
+        margin: 0;
+        padding: 0 !important;
+        gap: 0;
+    }
     .header-quote-text {
-        font-size: 0.8rem;
-        line-height: 1.3;
-        min-height: 1.75rem;
+        min-width: 0;
+        width: 100%;
+        font-size: 0.78rem;
+        line-height: 1.35;
+        min-height: 2.1rem;
+        max-height: 3.6rem;
+        margin: 0;
+        padding: 0.1rem 0.15rem;
+        text-align: center;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        align-self: center;
     }
     .header-quote-btn {
-        flex: 0 0 1.85rem;
-        width: 1.85rem;
-        height: 1.85rem;
-        font-size: 1.05rem;
+        flex: none;
+        width: 2.15rem;
+        height: 2.15rem;
+        min-width: 2.15rem;
+        font-size: 1.15rem;
+        z-index: 2;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.2);
     }
     .header-quote-actions {
-        right: 0.4rem;
+        position: static !important;
+        transform: none !important;
+        right: auto;
+        top: auto;
         gap: 0.3rem;
+        z-index: 2;
+        flex-shrink: 0;
+        padding-left: 0.15rem;
     }
     .header-icon-btn,
     .header-profile-btn {
-        width: 2rem;
-        height: 2rem;
-        min-width: 2rem;
+        width: 2.15rem;
+        height: 2.15rem;
+        min-width: 2.15rem;
         padding: 0;
     }
     .header-profile-btn {
@@ -602,9 +629,31 @@ body > header {
     body.has-lo-brand .lo-brand-meta .lo-brand-nmls {
         display: none !important;
     }
-    .header-quote-inner {
-        padding-right: 6rem;
+    /* Quote band: same grid as small phones so › isn't under theme/profile */
+    .header-quote-band {
+        display: grid;
+        grid-template-columns: 2.25rem minmax(0, 1fr) 2.25rem auto;
+        align-items: center;
+        column-gap: 0.4rem;
+        padding: 0.5rem 0.65rem;
         box-sizing: border-box;
+    }
+    .header-quote-inner {
+        display: contents;
+        padding: 0 !important;
+        max-width: none;
+    }
+    .header-quote-actions {
+        position: static !important;
+        transform: none !important;
+    }
+    .header-quote-text {
+        min-width: 0;
+        font-size: 0.9rem;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 }
 
