@@ -19,7 +19,7 @@
   'js/features/section-bottom-banners.js?v=20260720-review',
   'js/features/coach-polish.js?v=20260721-ux-polish',
   'js/features/partner-share.js?v=20260729-no-copy-again',
-  'js/app-version.js?v=20260730-v369',
+  'js/app-version.js?v=20260730-v370',
   'js/features/generation-rules.js?v=20260720-hobby-restraint',
   'js/features/save-ribbon.js',
   'js/features/wizard-a11y.js?v=20260720-polish2',

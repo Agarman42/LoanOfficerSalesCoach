@@ -326,6 +326,9 @@
       let okMsg = copied
         ? 'Published — short link copied. Next: Email to realtor (or paste anywhere).'
         : 'Published. Copy the short link below, then Email to realtor.';
+      // Free Render redeploys wipe the LO server store — re-publish re-binds the same short code.
+      okMsg +=
+        ' Tip: after any LO app redeploy, tap Publish once so partner links keep working.';
       setStatus(statusEl, okMsg, true);
       notify(copied ? 'Link copied — ready to email' : 'Partner link ready', 'success');
       updateHomeShareCard();

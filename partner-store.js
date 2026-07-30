@@ -271,13 +271,13 @@ async function publishCard(body) {
   const now = new Date().toISOString();
   let shortToken = String((body && body.token) || '').trim();
 
-  // Reuse prior short code when re-publishing (ignore legacy long signed tokens)
+  // Reuse prior short code when re-publishing (ignore legacy long signed tokens).
+  // IMPORTANT: after a free Render redeploy the in-memory/file store is empty — still
+  // re-bind the client's saved short code so bookmarks/emails keep working.
   if (!shortToken || isSignedToken(shortToken) || !isShortToken(shortToken)) {
     shortToken = newShortToken();
-  } else if (!loadLocal(shortToken) && !(await upstashGet(`partner:${shortToken}`))) {
-    // Unknown previous token — mint fresh short code
-    shortToken = newShortToken();
   }
+  // else: keep shortToken even if loadLocal/upstash miss (redeploy recovery)
 
   const record = {
     card: cleaned.card,

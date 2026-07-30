@@ -150,6 +150,55 @@ body > header {
 #lo-brand-plate[hidden] {
     display: none !important;
 }
+
+/* Status when ?lo= is present but card fetch fails (e.g. LO free-tier redeploy wiped short codes) */
+.lo-brand-status {
+    margin: 0 0.75rem 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+.lo-brand-status--error {
+    background: rgba(241, 90, 41, 0.12);
+    border: 1px solid rgba(241, 90, 41, 0.45);
+    color: #7c2d12;
+}
+.lo-brand-status--info {
+    background: rgba(0, 168, 157, 0.12);
+    border: 1px solid rgba(0, 168, 157, 0.4);
+    color: #0f3d3a;
+}
+.dark .lo-brand-status--error {
+    color: #fdba74;
+    background: rgba(241, 90, 41, 0.15);
+}
+.dark .lo-brand-status--info {
+    color: #99f6e4;
+    background: rgba(0, 168, 157, 0.15);
+}
+.lo-brand-status-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.lo-brand-status-dismiss {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 0 0.15rem;
+}
+.lo-brand-status-dismiss:hover {
+    opacity: 1;
+}
 .header-lo-brand-plate,
 #lo-brand-plate.is-populated {
     display: block;

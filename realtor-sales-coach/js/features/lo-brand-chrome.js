@@ -255,6 +255,48 @@
     return data.card;
   }
 
+  function readCachedCard() {
+    try {
+      const raw = sessionStorage.getItem(CARD_KEY) || localStorage.getItem(CARD_KEY);
+      if (!raw) return null;
+      const card = JSON.parse(raw);
+      return card && card.name ? card : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeCachedCard(card) {
+    if (!card || !card.name) return;
+    try {
+      sessionStorage.setItem(CARD_KEY, JSON.stringify(card));
+      localStorage.setItem(CARD_KEY, JSON.stringify(card));
+    } catch (e) { /* ignore */ }
+  }
+
+  /** Soft banner when ?lo= is present but LO server no longer has the card (common after LO redeploy). */
+  function showBrandStatus(message, kind) {
+    let el = document.getElementById('lo-brand-status');
+    if (!message) {
+      if (el) el.remove();
+      return;
+    }
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'lo-brand-status';
+      el.setAttribute('role', 'status');
+      const host =
+        document.querySelector('.header-navy-band') ||
+        document.querySelector('header') ||
+        document.body;
+      host.appendChild(el);
+    }
+    el.className = 'lo-brand-status' + (kind === 'error' ? ' lo-brand-status--error' : ' lo-brand-status--info');
+    el.innerHTML = `<span class="lo-brand-status-text">${escapeHtml(message)}</span>
+      <button type="button" class="lo-brand-status-dismiss" aria-label="Dismiss">×</button>`;
+    el.querySelector('.lo-brand-status-dismiss')?.addEventListener('click', () => el.remove());
+  }
+
   async function resolveAndPaint() {
     // Prefer URL so bookmarks/favorites with ?lo= always win
     let token = readTokenFromUrl();
@@ -268,31 +310,38 @@
     }
 
     if (!token) {
+      showBrandStatus(null);
       paintBrandPlate(null);
       return;
     }
 
-    try {
-      const cached = sessionStorage.getItem(CARD_KEY) || localStorage.getItem(CARD_KEY);
-      if (cached) paintBrandPlate(JSON.parse(cached));
-    } catch (e) { /* ignore */ }
+    // Always paint cache first so branding doesn't flash away while network runs
+    const cached = readCachedCard();
+    if (cached) paintBrandPlate(cached);
 
     try {
       const card = await fetchCard(token);
-      try {
-        sessionStorage.setItem(CARD_KEY, JSON.stringify(card));
-        localStorage.setItem(CARD_KEY, JSON.stringify(card));
-      } catch (e) { /* ignore */ }
+      writeCachedCard(card);
       paintBrandPlate(card);
+      showBrandStatus(null);
       // After success, ensure short code remains bookmarkable
       ensureTokenInUrl(token);
     } catch (e) {
       console.warn('[lo-brand] fetch failed', e.message || e);
-      try {
-        const cached = sessionStorage.getItem(CARD_KEY) || localStorage.getItem(CARD_KEY);
-        if (!cached) paintBrandPlate(null);
-      } catch (e2) {
+      const still = readCachedCard();
+      if (still) {
+        // Keep last-known LO plate/footer; explain refresh may be needed
+        paintBrandPlate(still);
+        showBrandStatus(
+          'Showing saved LO branding (couldn’t refresh from server). If this looks outdated, ask your LO to re-publish their partner link once.',
+          'info'
+        );
+      } else {
         paintBrandPlate(null);
+        showBrandStatus(
+          'LO partner link not found on the server (common after a Loan Officer app redeploy). Ask your LO to open My Profile → re-publish partner share once — your same ?lo= link should work again.',
+          'error'
+        );
       }
     }
   }
