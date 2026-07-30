@@ -2033,15 +2033,63 @@ function formatPersonalPhotoSizeLabel() {
     return `${pct}% (${px}px)`;
 }
 
-function buildPersonalPhotoInsert(photoUrl) {
-    const px = getPersonalPhotoWidthPx();
+function buildPersonalPhotoInsert(photoUrl, widthPx) {
+    const px = Math.min(
+        NL_MEDIA_MAX_PX,
+        Math.max(120, parseInt(widthPx, 10) || getPersonalPhotoWidthPx() || NL_CARD_CONTENT_WIDTH)
+    );
     const safeUrl = String(photoUrl || '').trim();
-    // margin:0 auto on the table so preview (and any wide shell) keeps the photo centered
-    return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" align="center" data-nl-personal-photo="1" style="margin:16px auto 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
-  <tr><td align="center" style="padding:0;text-align:center;">
-    <img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">
-  </td></tr>
+    if (!safeUrl) return '';
+    // Content-sized table + margin:auto — reliable center in Outlook AND fluid preview
+    return `<table cellpadding="0" cellspacing="0" role="presentation" align="center" data-nl-personal-photo="1" style="margin:16px auto 0;width:auto;max-width:100%;border-collapse:collapse;">
+  <tr>
+    <td align="center" style="padding:0;text-align:center;">
+      <img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">
+    </td>
+  </tr>
 </table>`;
+}
+
+/** Force every personal-photo variant onto the canonical centered markup. */
+function ensurePersonalPhotoCentered(htmlString, photoUrl) {
+    let out = String(htmlString || '');
+    const url = String(photoUrl || '').trim();
+    if (!out) return out;
+
+    let src = url;
+    if (!src) {
+        const m = out.match(/<img[^>]*alt=["']Personal photo["'][^>]*\bsrc=["']([^"']+)["']/i)
+            || out.match(/<img[^>]*\bsrc=["']([^"']+)["'][^>]*alt=["']Personal photo["']/i);
+        src = m ? m[1] : '';
+    }
+    if (!src) return out;
+
+    const pxMatch = out.match(/alt=["']Personal photo["'][^>]*width=["'](\d+)["']/i)
+        || out.match(/alt=["']Personal photo["'][^>]*width:\s*(\d+)px/i)
+        || out.match(/width=["'](\d+)["'][^>]*alt=["']Personal photo["']/i);
+    const px = pxMatch ? parseInt(pxMatch[1], 10) : getPersonalPhotoWidthPx();
+    const block = buildPersonalPhotoInsert(src, px);
+
+    if (/data-nl-personal-photo=["']1["']/i.test(out)) {
+        return out.replace(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<\/table>/gi, block);
+    }
+    if (/alt=["']Personal photo["']/i.test(out)) {
+        let replaced = out.replace(
+            /<table(?![^>]*data-nl-personal-photo)[^>]*>[\s\S]*?<img[^>]*alt=["']Personal photo["'][^>]*>[\s\S]*?<\/table>/gi,
+            block
+        );
+        if (replaced === out) {
+            replaced = out.replace(/<img[^>]*alt=["']Personal photo["'][^>]*>/gi, block);
+        }
+        return replaced;
+    }
+    if (url && /A Note From/i.test(out) && !/alt=["']Personal photo["']/i.test(out)) {
+        return out.replace(
+            /(A Note From[\s\S]{0,1200}?)(<\/td>\s*<\/tr>\s*<\/table>)/i,
+            `$1${block}$2`
+        );
+    }
+    return out;
 }
 
 function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
@@ -2156,19 +2204,7 @@ function patchPersonalMediaSizesInNewsletter() {
     const before = html;
 
     if (photoEnabled && photoUrl) {
-        const photoBlock = buildPersonalPhotoInsert(photoUrl);
-        if (/data-nl-personal-photo=["']1["']/i.test(html)) {
-            html = html.replace(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<\/table>/gi, photoBlock);
-        } else if (/alt=["']Personal photo["']/i.test(html)) {
-            html = html
-                .replace(/<table[^>]*>[\s\S]*?<img[^>]*alt=["']Personal photo["'][^>]*>[\s\S]*?<\/table>/gi, photoBlock)
-                .replace(/<img[^>]*alt=["']Personal photo["'][^>]*>/gi, (match) => {
-                    const srcMatch = match.match(/\bsrc=["']([^"']+)["']/i);
-                    if (!srcMatch) return match;
-                    const px = getPersonalPhotoWidthPx();
-                    return `<img src="${srcMatch[1]}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">`;
-                });
-        }
+        html = ensurePersonalPhotoCentered(html, photoUrl);
     }
 
     if (videoEnabled && videoUrl) {
@@ -3212,8 +3248,11 @@ const NL_PREVIEW_FLUID_HEAD = `
   table[data-nl-personal-photo="1"] {
     width: auto !important;
     max-width: 100% !important;
+    margin-top: 16px !important;
+    margin-bottom: 0 !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    float: none !important;
   }
   table[data-nl-personal-photo="1"] td {
     text-align: center !important;
@@ -3221,6 +3260,7 @@ const NL_PREVIEW_FLUID_HEAD = `
   table[data-nl-personal-photo="1"] img,
   img[alt="Personal photo"] {
     display: block !important;
+    float: none !important;
     margin-left: auto !important;
     margin-right: auto !important;
     max-width: 100% !important;
@@ -4752,6 +4792,9 @@ async function generateNewsletter(feedback = '') {
 
             // Clean placeholder inside personal note (photo goes here if provided; keeps note + photo together)
             html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, photoInsert);
+            if (includePhoto && personalPhotoUrl) {
+                html = ensurePersonalPhotoCentered(html, personalPhotoUrl);
+            }
 
 // === PERSONAL NOTE HEADLINE - Force ONLY first name when personal section is included ===
 if (postSelections?.personal) {
@@ -5319,18 +5362,10 @@ function copyForOutlook() {
   }
 
   function normalizePersonalPhotoBlocks(htmlString) {
-      if (!htmlString) return htmlString;
-      const photoFrameRe = /<table(?![^>]*data-nl-personal-photo)[^>]*style="[^"]*margin:\s*15px\s*0[^"]*max-width:\s*100%[^"]*"[^>]*>[\s\S]*?<img([^>]*alt=["']Personal photo["'][^>]*)[\s\S]*?<\/table>/gi;
-      let out = htmlString.replace(photoFrameRe, (match, imgAttrs) => {
-          const srcMatch = String(imgAttrs).match(/\bsrc=["']([^"']+)["']/i);
-          if (!srcMatch) return match;
-          return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" data-nl-personal-photo="1" style="margin:16px 0 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
-  <tr><td align="center" style="padding:0;">
-    ${buildPersonalPhotoImgTag(srcMatch[1], imgAttrs)}
-  </td></tr>
-</table>`;
-      });
-      return applyPersonalMediaWidthsInHtml(out);
+      // Always canonicalize to buildPersonalPhotoInsert (centered). Older paths used
+      // margin:16px 0 0 without auto, which left-biased photos intermittently.
+      const formUrl = (document.getElementById('nl-personal-photo')?.value || '').trim();
+      return ensurePersonalPhotoCentered(htmlString, formUrl);
   }
 
   function normalizePersonalVideoBlocks(htmlString) {
