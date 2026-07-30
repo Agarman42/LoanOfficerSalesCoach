@@ -3152,26 +3152,46 @@ const NL_PREVIEW_FLUID_HEAD = `
     max-width: 600px !important;
     min-width: 0 !important;
   }
-  /* Personal media blocks: always centered (Outlook uses align=center; wide preview needs margin:auto) */
-  table[data-nl-personal-photo="1"],
-  table[data-nl-personal-video="1"] {
+  /* Photo insert is a small nested block — center it, don't stretch */
+  table[data-nl-personal-photo="1"] {
     width: auto !important;
     max-width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
   }
-  table[data-nl-personal-photo="1"] td,
-  table[data-nl-personal-video="1"] td {
+  table[data-nl-personal-photo="1"] td {
     text-align: center !important;
   }
   table[data-nl-personal-photo="1"] img,
-  table[data-nl-personal-video="1"] img,
   img[alt="Personal photo"] {
     display: block !important;
     margin-left: auto !important;
     margin-right: auto !important;
     max-width: 100% !important;
     height: auto !important;
+  }
+  /*
+    Video is a FULL section card (like Market Updates), not a small chip.
+    Keep width:100%/max 600 centered — width:auto made the thumb explode full-width.
+  */
+  table[data-nl-personal-video="1"] {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  table[data-nl-personal-video="1"] p,
+  table[data-nl-personal-video="1"] td {
+    text-align: center !important;
+  }
+  table[data-nl-personal-video="1"] img[alt="Watch Personal Video"],
+  img[alt="Watch Personal Video"] {
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    height: auto !important;
+    /* Cap thumb; do not force width:100% (that was blowing it up) */
+    max-width: min(100%, 540px) !important;
   }
   img {
     max-width: 100% !important;
@@ -5691,6 +5711,13 @@ function copyForOutlook() {
           const style = table.getAttribute('style') || '';
           if (!NL_SECTION_LEFT_BORDER_IN_TABLE_RE.test(style)) return;
 
+          // Personal video is a centered media card — do NOT left-align its title/thumb
+          // (that was breaking the preview after color/layout normalize).
+          const isPersonalVideo =
+              table.getAttribute('data-nl-personal-video') === '1' ||
+              !!table.querySelector('img[alt="Watch Personal Video"]') ||
+              /Personal Video Update/i.test(table.textContent || '');
+
           // Force consistent border and collapse
           table.style.borderLeft = `8px solid ${primary}`;
           table.style.borderCollapse = 'separate';
@@ -5700,12 +5727,38 @@ function copyForOutlook() {
           if (firstTd) {
               firstTd.style.padding = '30px 30px 30px 30px';
               firstTd.style.boxSizing = 'border-box';
-              firstTd.style.textAlign = 'left';
+              if (isPersonalVideo) {
+                  firstTd.style.textAlign = 'center';
+              } else {
+                  firstTd.style.textAlign = 'left';
+              }
           }
-          table.querySelectorAll('h2, h3, h4, p, li, ul, ol, div').forEach((el) => {
-              if (el.closest('[data-nl-brand-header]') || el.closest('[data-nl-signature-block]')) return;
-              if (el.style.textAlign === 'center') el.style.textAlign = 'left';
-          });
+          if (!isPersonalVideo) {
+              table.querySelectorAll('h2, h3, h4, p, li, ul, ol, div').forEach((el) => {
+                  if (el.closest('[data-nl-brand-header]') || el.closest('[data-nl-signature-block]')) return;
+                  if (el.style.textAlign === 'center') el.style.textAlign = 'left';
+              });
+          } else {
+              table.querySelectorAll('p, td').forEach((el) => {
+                  if (el.tagName === 'P' || el.querySelector?.('img[alt="Watch Personal Video"]') || el.querySelector?.('a')) {
+                      el.style.textAlign = 'center';
+                  }
+              });
+              const thumb = table.querySelector('img[alt="Watch Personal Video"]');
+              if (thumb) {
+                  thumb.style.display = 'block';
+                  thumb.style.marginLeft = 'auto';
+                  thumb.style.marginRight = 'auto';
+                  thumb.style.height = 'auto';
+                  // Preserve authored width if present; never force full card width
+                  const authored = parseInt(thumb.getAttribute('width') || '0', 10) ||
+                      parseInt((thumb.style.width || '').replace('px', ''), 10) || 0;
+                  if (authored > 0) {
+                      thumb.style.width = `${Math.min(authored, NL_CARD_CONTENT_WIDTH)}px`;
+                      thumb.style.maxWidth = '100%';
+                  }
+              }
+          }
       });
 
       doc.querySelectorAll('img[alt="Watch Personal Video"]').forEach((img) => {

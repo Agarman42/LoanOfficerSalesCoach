@@ -3209,25 +3209,41 @@ const NL_PREVIEW_FLUID_HEAD = `
     max-width: 600px !important;
     min-width: 0 !important;
   }
-  table[data-nl-personal-photo="1"],
-  table[data-nl-personal-video="1"] {
+  table[data-nl-personal-photo="1"] {
     width: auto !important;
     max-width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
   }
-  table[data-nl-personal-photo="1"] td,
-  table[data-nl-personal-video="1"] td {
+  table[data-nl-personal-photo="1"] td {
     text-align: center !important;
   }
   table[data-nl-personal-photo="1"] img,
-  table[data-nl-personal-video="1"] img,
   img[alt="Personal photo"] {
     display: block !important;
     margin-left: auto !important;
     margin-right: auto !important;
     max-width: 100% !important;
     height: auto !important;
+  }
+  /* Video is a full section card — keep 100%/600 centered; width:auto blew up the thumb */
+  table[data-nl-personal-video="1"] {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  table[data-nl-personal-video="1"] p,
+  table[data-nl-personal-video="1"] td {
+    text-align: center !important;
+  }
+  table[data-nl-personal-video="1"] img[alt="Watch Personal Video"],
+  img[alt="Watch Personal Video"] {
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    height: auto !important;
+    max-width: min(100%, 540px) !important;
   }
   img {
     max-width: 100% !important;
@@ -5356,6 +5372,12 @@ function copyForOutlook() {
           const style = table.getAttribute('style') || '';
           if (!NL_SECTION_LEFT_BORDER_IN_TABLE_RE.test(style)) return;
 
+          // Personal video is a centered media card — keep title/thumb centered
+          const isPersonalVideo =
+              table.getAttribute('data-nl-personal-video') === '1' ||
+              !!table.querySelector('img[alt="Watch Personal Video"]') ||
+              /Personal Video Update/i.test(table.textContent || '');
+
           table.style.borderLeft = `8px solid ${primary}`;
           table.style.borderCollapse = 'separate';
 
@@ -5363,6 +5385,25 @@ function copyForOutlook() {
           if (firstTd) {
               firstTd.style.padding = '30px 30px 30px 30px';
               firstTd.style.boxSizing = 'border-box';
+              if (isPersonalVideo) firstTd.style.textAlign = 'center';
+          }
+          if (isPersonalVideo) {
+              table.querySelectorAll('p').forEach((el) => {
+                  el.style.textAlign = 'center';
+              });
+              const thumb = table.querySelector('img[alt="Watch Personal Video"]');
+              if (thumb) {
+                  thumb.style.display = 'block';
+                  thumb.style.marginLeft = 'auto';
+                  thumb.style.marginRight = 'auto';
+                  thumb.style.height = 'auto';
+                  const authored = parseInt(thumb.getAttribute('width') || '0', 10) ||
+                      parseInt((thumb.style.width || '').replace('px', ''), 10) || 0;
+                  if (authored > 0) {
+                      thumb.style.width = `${Math.min(authored, NL_CARD_CONTENT_WIDTH)}px`;
+                      thumb.style.maxWidth = '100%';
+                  }
+              }
           }
       });
 
