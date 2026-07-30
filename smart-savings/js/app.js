@@ -719,21 +719,32 @@
     try { p = window.getUserProfile(); } catch (e) { return; }
     if (!p || typeof p !== 'object') return;
     let changed = false;
-    if (!state.branding.name && p.name) {
-      state.branding.name = String(p.name).trim();
-      changed = true;
+    // Coach My Profile is source of truth for identity (colors stay local to Smart Savings)
+    if (p.name && String(p.name).trim()) {
+      const v = String(p.name).trim();
+      if (state.branding.name !== v) { state.branding.name = v; changed = true; }
     }
-    if (!state.branding.nmls && p.nmls) {
-      state.branding.nmls = String(p.nmls).trim();
-      changed = true;
+    if (p.nmls && String(p.nmls).trim()) {
+      const v = String(p.nmls).trim();
+      if (state.branding.nmls !== v) { state.branding.nmls = v; changed = true; }
     }
-    if (!state.branding.email && p.email) {
-      state.branding.email = String(p.email).trim();
-      changed = true;
+    if (p.email && String(p.email).trim()) {
+      const v = String(p.email).trim();
+      if (state.branding.email !== v) { state.branding.email = v; changed = true; }
     }
-    if (!state.branding.cell && p.phone) {
-      state.branding.cell = String(p.phone).trim();
-      changed = true;
+    if (p.phone && String(p.phone).trim()) {
+      const v = String(p.phone).trim();
+      if (state.branding.cell !== v) { state.branding.cell = v; changed = true; }
+    }
+    // Headshot: pull profile URL unless user uploaded an embedded data: image this session
+    const headshot = String(p.headshotUrl || p.headshot || p['headshot-url'] || '').trim();
+    if (headshot) {
+      const cur = String(state.branding.photo || '').trim();
+      const keepEmbeddedUpload = cur.indexOf('data:image/') === 0;
+      if (!keepEmbeddedUpload && cur !== headshot) {
+        state.branding.photo = headshot;
+        changed = true;
+      }
     }
     if (changed) {
       try { localStorage.setItem(BRANDING_KEY, JSON.stringify(state.branding)); } catch (e) {}
@@ -1017,6 +1028,7 @@
     ta.value = cur ? (cur.replace(/[;\s]*$/, '') + '; ' + chip) : chip;
     saveClient();
     clearStep0SoftHint();
+    try { refreshClientAccordion(); } catch (e) { /* ignore */ }
     toast('Added to goals');
   }
 
@@ -1026,12 +1038,24 @@
     if (!content) return;
     const open = forceOpen === true || (forceOpen !== false && (!content.style.maxHeight || content.style.maxHeight === '0px'));
     if (open) {
-      content.style.maxHeight = content.scrollHeight + 'px';
+      // 'none' so goals textarea / chips never get clipped by a stale max-height
+      content.style.maxHeight = 'none';
+      content.classList.add('ss-accordion-open');
       if (chevron) chevron.style.transform = 'rotate(180deg)';
     } else {
       content.style.maxHeight = '0px';
+      content.classList.remove('ss-accordion-open');
       if (chevron) chevron.style.transform = 'rotate(0deg)';
     }
+  }
+
+  function refreshClientAccordion() {
+    const content = $('client-info-content');
+    if (!content) return;
+    if (content.style.maxHeight === '0px' || !content.style.maxHeight) return;
+    // Already open with none — content can grow freely
+    if (content.style.maxHeight === 'none' || content.classList.contains('ss-accordion-open')) return;
+    content.style.maxHeight = content.scrollHeight + 'px';
   }
 
   // ─── Live update ─────────────────────────────────────────
@@ -2493,30 +2517,50 @@
     return !!String(name).trim();
   }
 
+  /** Embedded in LO coach: hide branding form when My Profile already has identity. */
+  function coachProfileIsSourceOfBranding() {
+    if (!isEmbed() || typeof window.getUserProfile !== 'function') return false;
+    try {
+      const p = window.getUserProfile() || {};
+      return !!(p.name && String(p.name).trim());
+    } catch (e) {
+      return false;
+    }
+  }
+
   function updateGuidedBrandingVisibility() {
     const chip = $('ss-branding-ready-chip');
     const acc = $('ss-branding-accordion');
     const text = $('ss-branding-ready-text');
     const guided = experienceMode === 'guided';
     const ready = brandingLooksReady();
+    const useProfile = coachProfileIsSourceOfBranding();
 
     if (chip) {
-      const showChip = guided && ready;
+      // Show in guided when ready; also in full form when profile is source of truth (keeps meat of tool front)
+      const showChip = ready && (guided || useProfile);
       chip.classList.toggle('hidden', !showChip);
       if (showChip && text) {
         const b = state.branding || {};
-        const parts = [b.name, b.nmls ? 'NMLS ' + b.nmls : ''].filter(Boolean);
+        const parts = [b.name, b.nmls ? 'NMLS ' + b.nmls : '', b.photo ? 'photo' : ''].filter(Boolean);
         text.textContent = parts.length ? '· ' + parts.join(' · ') : '';
       }
     }
     if (acc) {
-      // In guided with branding ready: hide accordion noise. Always show in full form.
-      acc.classList.toggle('hidden', guided && ready && !acc.classList.contains('ss-force-show-branding'));
-      if (!(guided && ready)) acc.classList.remove('ss-force-show-branding');
+      // Hide accordion when profile supplies branding (guided + full). Only show form if no profile name.
+      const hideForm = useProfile || (guided && ready && !acc.classList.contains('ss-force-show-branding'));
+      acc.classList.toggle('hidden', hideForm);
+      if (useProfile) acc.classList.remove('ss-force-show-branding');
+      if (!(guided && ready) && !useProfile) acc.classList.remove('ss-force-show-branding');
     }
   }
 
   function showBrandingInGuided() {
+    // Prefer My Profile — raise above guided portal (profile was opening behind SS modal)
+    if (isEmbed() && typeof window.openUserProfile === 'function') {
+      openCoachProfileOverSmartSavings();
+      return;
+    }
     const acc = $('ss-branding-accordion');
     if (acc) {
       acc.classList.add('ss-force-show-branding');
@@ -2527,6 +2571,54 @@
     } catch (e) { /* ignore */ }
     const chip = $('ss-branding-ready-chip');
     if (chip) chip.classList.add('hidden');
+  }
+
+  /**
+   * Open My Profile above the Smart Savings guided layer and re-sync branding on close.
+   */
+  function openCoachProfileOverSmartSavings() {
+    const layer = document.getElementById('ss-guided-layer');
+    const profileModal = document.getElementById('user-profile-modal');
+    if (layer) {
+      layer.classList.add('ss-guided-under-profile');
+      try { layer.style.setProperty('z-index', '90000', 'important'); } catch (e) { /* ignore */ }
+    }
+    if (profileModal) {
+      profileModal.style.zIndex = '100150';
+    }
+    try {
+      window.openUserProfile(true);
+    } catch (e) { /* ignore */ }
+
+    // Poll until profile is closed, then restore guided stack + re-pull branding
+    if (window.__ssProfileOverSsWatch) {
+      try { clearInterval(window.__ssProfileOverSsWatch); } catch (e) { /* ignore */ }
+    }
+    window.__ssProfileOverSsWatch = setInterval(function () {
+      const pm = document.getElementById('user-profile-modal');
+      const stillOpen = pm && !pm.classList.contains('hidden') &&
+        (pm.classList.contains('flex') || getComputedStyle(pm).display !== 'none');
+      if (stillOpen) return;
+      try { clearInterval(window.__ssProfileOverSsWatch); } catch (e) { /* ignore */ }
+      window.__ssProfileOverSsWatch = null;
+      const lyr = document.getElementById('ss-guided-layer');
+      if (lyr) {
+        lyr.classList.remove('ss-guided-under-profile');
+        try { lyr.style.removeProperty('z-index'); } catch (e) { /* ignore */ }
+      }
+      if (pm) pm.style.zIndex = '';
+      try {
+        prefillBrandingFromCoachProfile();
+        if ($('branding-name')) $('branding-name').value = state.branding.name || '';
+        if ($('branding-nmls')) $('branding-nmls').value = state.branding.nmls || '';
+        if ($('branding-email')) $('branding-email').value = state.branding.email || '';
+        if ($('branding-cell')) $('branding-cell').value = state.branding.cell || '';
+        if ($('branding-photo')) $('branding-photo').value = state.branding.photo || '';
+        updateBrandingPhotoPreview();
+        updateGuidedBrandingVisibility();
+        updateBrandingChip();
+      } catch (e) { /* ignore */ }
+    }, 250);
   }
 
   function updateWizardRecap(scenario) {
@@ -3128,10 +3220,10 @@
     const yrs = Number(state.yearsRemaining) || 27;
     const pay = Number(state.totalPayment) || 2400;
     if (rateSl) {
-      rateSl.min = '2.5';
+      rateSl.min = '1';
       rateSl.max = '12';
       rateSl.step = '0.125';
-      rateSl.value = String(C.clamp(rate, 2.5, 12));
+      rateSl.value = String(C.clamp(rate, 1, 12));
     }
     if (yrsSl) {
       yrsSl.min = '1';
@@ -7164,7 +7256,26 @@
     initTheme();
     loadFromStorage();
     loadClient();
-    if (MODE === 'lo') loadBranding();
+    if (MODE === 'lo') {
+      loadBranding();
+      // Keep headshot/name in sync when LO updates My Profile mid-session
+      if (!window.__ssProfileUpdatedWired) {
+        window.__ssProfileUpdatedWired = true;
+        window.addEventListener('profile-updated', () => {
+          try {
+            prefillBrandingFromCoachProfile();
+            if ($('branding-name')) $('branding-name').value = state.branding.name || '';
+            if ($('branding-nmls')) $('branding-nmls').value = state.branding.nmls || '';
+            if ($('branding-email')) $('branding-email').value = state.branding.email || '';
+            if ($('branding-cell')) $('branding-cell').value = state.branding.cell || '';
+            if ($('branding-photo')) $('branding-photo').value = state.branding.photo || '';
+            updateBrandingPhotoPreview();
+            updateGuidedBrandingVisibility();
+            try { updateBrandingChip(); } catch (e2) { /* ignore */ }
+          } catch (e) { /* ignore */ }
+        });
+      }
+    }
     parseLoFromUrl();
     ensureMortgageDebt();
     hydrateDomFromState();
@@ -7174,13 +7285,16 @@
 
     if (!__ssListenersBound) {
       __ssListenersBound = true;
-      // Accordion maxHeight fix on resize
+      // Accordion maxHeight: keep open panels unclipped on resize
       window.addEventListener('resize', () => {
         ['client-info-content', 'branding-content'].forEach(id => {
           const el = $(id);
-          if (el && el.style.maxHeight && el.style.maxHeight !== '0px') {
-            el.style.maxHeight = el.scrollHeight + 'px';
+          if (!el || !el.style.maxHeight || el.style.maxHeight === '0px') return;
+          if (el.style.maxHeight === 'none' || el.classList.contains('ss-accordion-open')) {
+            el.style.maxHeight = 'none';
+            return;
           }
+          el.style.maxHeight = el.scrollHeight + 'px';
         });
       });
 
@@ -8470,6 +8584,7 @@
     restartWizard,
     dismissResumeBanner,
     showBrandingInGuided,
+    refreshClientAccordion,
     setTerm,
     syncTermSegmented,
     clearAllData,

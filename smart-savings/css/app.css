@@ -3275,6 +3275,40 @@ html.dark .ss-guided-roadmap-item,
    Guided meeting portal (body-level #ss-guided-layer)
    MUST stay global — shell is moved out of #smart-savings-root
    ═══════════════════════════════════════════════════════════ */
+/* Profile branding confirmation card (not ghost glass) */
+.ss-profile-brand-card {
+  background: #ffffff;
+  border: 1.5px solid rgba(0, 168, 157, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 43, 92, 0.07);
+}
+html.dark .ss-profile-brand-card,
+.dark .ss-profile-brand-card,
+.ss-guided-layer.dark .ss-profile-brand-card {
+  background: #1e293b;
+  border-color: rgba(0, 168, 157, 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+.ss-profile-brand-edit {
+  background: rgba(0, 168, 157, 0.08);
+}
+.ss-client-notes-field {
+  min-height: 7rem !important;
+  height: auto !important;
+  line-height: 1.45;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+#client-info-content.ss-accordion-open,
+#client-info-content[style*="max-height: none"] {
+  overflow: visible;
+}
+/* While My Profile is open on top of guided Smart Savings */
+.ss-guided-layer.ss-guided-under-profile {
+  z-index: 90000 !important;
+}
+
 .ss-guided-layer {
   display: none;
   position: fixed;

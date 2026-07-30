@@ -177,8 +177,8 @@
             <label class="block text-xs opacity-70 mb-1">Phone <span class="opacity-50">(optional)</span></label>
             <input id="client-phone" type="tel" class="input-field" onblur="RuoffApp.saveClient()">
           </div>
-          <div class="sm:col-span-2">
-            <label class="block text-xs opacity-70 mb-1">What do they want from this refinance?</label>
+          <div class="sm:col-span-2 ss-client-goals-block">
+            <label class="block text-xs opacity-70 mb-1" for="client-notes">What do they want from this refinance?</label>
             <div class="flex flex-wrap gap-2 mb-3">
               <button type="button" class="goal-chip" onclick="RuoffApp.appendGoalChip('Lower monthly payment')">Lower payment</button>
               <button type="button" class="goal-chip" onclick="RuoffApp.appendGoalChip('Pay off high-interest debt')">Debt payoff</button>
@@ -186,7 +186,7 @@
               <button type="button" class="goal-chip" onclick="RuoffApp.appendGoalChip('Shorten term / pay off faster')">Shorter term</button>
               <button type="button" class="goal-chip" onclick="RuoffApp.appendGoalChip('Remove PMI')">Remove PMI</button>
             </div>
-            <textarea id="client-notes" class="input-field h-24 resize-y text-base font-normal" placeholder="Lower payment, retire debt, $30k for roof…" onblur="RuoffApp.saveClient()"></textarea>
+            <textarea id="client-notes" class="input-field ss-client-notes-field resize-y text-base font-normal" rows="4" placeholder="Lower payment, retire debt, $30k for roof…" oninput="if(window.RuoffApp&amp;&amp;RuoffApp.refreshClientAccordion)RuoffApp.refreshClientAccordion();" onblur="RuoffApp.saveClient()"></textarea>
             <p id="ss-step0-soft-hint" class="hidden text-xs text-amber-700 dark:text-amber-300 mt-2 m-0" role="status"></p>
           </div>
         </div>
@@ -194,22 +194,28 @@
     </div>
   </section>
 
-  <!-- Shown in guided when LO branding already on file (profile / saved) -->
-  <div id="ss-branding-ready-chip" class="wizard-only hidden glass rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-    <div class="text-sm">
-      <span class="font-semibold text-[#00A89D]"><i class="fas fa-check-circle mr-1" aria-hidden="true"></i>Using your branding</span>
-      <span id="ss-branding-ready-text" class="opacity-70 ml-1"></span>
+  <!-- When My Profile is ready: solid card chip — no second branding form -->
+  <div id="ss-branding-ready-chip" class="ss-profile-brand-card hidden rounded-2xl px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+    <div class="text-sm min-w-0 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+      <span class="font-semibold text-[#00A89D] inline-flex items-center gap-1.5">
+        <i class="fas fa-check-circle" aria-hidden="true"></i>
+        Using My Profile branding
+      </span>
+      <span id="ss-branding-ready-text" class="text-zinc-600 dark:text-zinc-300"></span>
     </div>
-    <button type="button" class="text-xs font-semibold text-[#00A89D] hover:underline" onclick="RuoffApp.showBrandingInGuided()">Edit branding</button>
+    <button type="button" class="ss-profile-brand-edit shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition" onclick="RuoffApp.showBrandingInGuided()">
+      <i class="fas fa-user-edit mr-1" aria-hidden="true"></i>Edit in My Profile
+    </button>
   </div>
 
+  <!-- Fallback branding form: only when coach profile has no name (or standalone / expert override) -->
   <section id="ss-branding-accordion" class="glass rounded-[1.75rem] overflow-hidden">
     <button type="button" onclick="RuoffApp.toggleAccordion('branding')" class="w-full px-5 sm:px-6 py-4 flex items-center justify-between text-left hover:bg-black/5 dark:hover:bg-white/5">
       <div class="flex items-center gap-3">
         <i class="fas fa-id-badge text-[#00A89D] text-xl"></i>
         <div>
           <h2 class="text-lg font-bold">My branding</h2>
-          <p class="text-xs opacity-60">Optional now — saved once for plans, emails, and borrower links</p>
+          <p class="text-xs opacity-60">Usually filled from My Profile — only needed if profile is empty</p>
         </div>
       </div>
       <i id="branding-chevron" class="fas fa-chevron-down transition-transform"></i>
@@ -704,10 +710,10 @@
           <label class="block text-xs opacity-70 mb-1" for="current-rate">Current rate (%)</label>
           <input id="current-rate" type="number" step="0.125" class="input-field" value="6.75" aria-label="Current interest rate">
           <div class="ss-mini-slider-wrap">
-            <input type="range" id="current-rate-slider" class="ss-mini-slider ss-range-slider" min="2.5" max="12" step="0.125" value="6.75" aria-label="Current rate slider">
+            <input type="range" id="current-rate-slider" class="ss-mini-slider ss-range-slider" min="1" max="12" step="0.125" value="6.75" aria-label="Current rate slider">
           </div>
           <div class="ss-mini-slider-meta">
-            <span>2.5%</span>
+            <span>1%</span>
             <span id="current-rate-readout" class="ss-mini-slider-value number">6.75%</span>
             <span>12%</span>
           </div>

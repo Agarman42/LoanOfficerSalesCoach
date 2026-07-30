@@ -1,8 +1,19 @@
 # Port Notes: LO Coach → Realtor & Recruiter Tools
 
-**Last updated:** 2026-07-19  
+**Last updated:** 2026-07-30  
 **Source of truth:** Loan Officer Sales Coach (`index.html` + `js/features/*`)  
 **Targets:** `realtor-sales-coach/`, `realtor-push-repo/`, `recruiter-sales-coach/`
+
+---
+
+## Git branches (do not forget)
+
+| App | Branch to push |
+|-----|----------------|
+| **LO Sales Coach** | **`master`** |
+| **Realtor / Agent Sales Coach** | **`main`** |
+
+Pushing only `master` does **not** update the Realtor deploy branch. See root **`AGENTS.md`**.
 
 ---
 
