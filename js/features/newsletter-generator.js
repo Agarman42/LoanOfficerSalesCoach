@@ -2036,8 +2036,9 @@ function formatPersonalPhotoSizeLabel() {
 function buildPersonalPhotoInsert(photoUrl) {
     const px = getPersonalPhotoWidthPx();
     const safeUrl = String(photoUrl || '').trim();
-    return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" data-nl-personal-photo="1" style="margin:16px 0 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
-  <tr><td align="center" style="padding:0;">
+    // margin:0 auto on the table so preview (and any wide shell) keeps the photo centered
+    return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" align="center" data-nl-personal-photo="1" style="margin:16px auto 0;width:100%;max-width:${NL_CARD_CONTENT_WIDTH}px;">
+  <tr><td align="center" style="padding:0;text-align:center;">
     <img src="${safeUrl}" alt="Personal photo" width="${px}" style="display:block;margin:0 auto;max-width:100%;width:${px}px;height:auto;border:0;border-radius:8px;">
   </td></tr>
 </table>`;
@@ -3174,6 +3175,12 @@ function getNewsletterHtmlForFeedbackEdit() {
 const NL_PREVIEW_FLUID_HEAD = `
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style id="nl-preview-fluid">
+  /*
+    Preview-only layout:
+    - Keep a centered email column (max 600px) so desktop preview matches Outlook.
+    - On narrow phones, let that column use full width.
+    - Never left-float personal photo/video tables when the shell is wider than 600px.
+  */
   html, body {
     margin: 0 !important;
     padding: 0 !important;
@@ -3187,22 +3194,52 @@ const NL_PREVIEW_FLUID_HEAD = `
   table[width="600"],
   table[width="600px"],
   table[style*="width:600px"],
-  table[style*="width: 600px"],
-  table[style*="max-width:600px"],
-  table[style*="max-width: 600px"],
+  table[style*="width: 600px"] {
+    width: 100% !important;
+    max-width: 600px !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
   td[width="600"],
   td[width="600px"],
   td[style*="width:600px"],
   td[style*="width: 600px"] {
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: 600px !important;
     min-width: 0 !important;
+  }
+  table[data-nl-personal-photo="1"],
+  table[data-nl-personal-video="1"] {
+    width: auto !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  table[data-nl-personal-photo="1"] td,
+  table[data-nl-personal-video="1"] td {
+    text-align: center !important;
+  }
+  table[data-nl-personal-photo="1"] img,
+  table[data-nl-personal-video="1"] img,
+  img[alt="Personal photo"] {
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
   }
   img {
     max-width: 100% !important;
     height: auto !important;
   }
   @media (max-width: 640px) {
+    table[width="600"],
+    table[width="600px"],
+    table[style*="width:600px"],
+    table[style*="width: 600px"] {
+      max-width: 100% !important;
+    }
     td[style*="padding:14px 24px"],
     td[style*="padding:16px 24px"],
     td[style*="padding:24px 30px"],
