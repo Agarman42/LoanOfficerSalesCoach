@@ -3306,9 +3306,12 @@ function mountNewsletterPreviewIframe(previewEl, html) {
     if (!previewEl) return null;
     previewEl.innerHTML = '';
     const iframe = document.createElement('iframe');
-    iframe.className = 'w-full border-0 rounded-2xl shadow-2xl bg-white';
-    iframe.style.height = 'min(85vh, 900px)';
-    iframe.style.minHeight = '500px';
+    iframe.className = 'w-full border-0 rounded-2xl shadow-2xl bg-white nl-preview-iframe';
+    // Mobile: shorter fixed viewport so the phone isn't one giant iframe; desktop keeps tall preview
+    const mobile = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches;
+    iframe.style.height = mobile ? 'min(70dvh, 70vh)' : 'min(85vh, 900px)';
+    iframe.style.minHeight = mobile ? '280px' : '500px';
+    iframe.style.maxWidth = '100%';
     applyNewsletterPreviewIframeIsolation(iframe);
     iframe.srcdoc = hardenNewsletterPreviewHtml(html);
     previewEl.appendChild(iframe);

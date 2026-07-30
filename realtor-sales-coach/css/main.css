@@ -3287,3 +3287,121 @@ html.dark body.sidebar-collapsed #menu-toggle:hover {
   }
 }
 
+
+/* =========================================================
+   MOBILE PASS 3 — detail modals, home, newsletter iframe, tools
+   LO + Realtor only (no recruiter). Desktop unchanged.
+   ========================================================= */
+@media (max-width: 640px) {
+  /* Generic tool / detail modals → near full-screen sheet */
+  .app-modal-overlay.flex:not(.hidden),
+  .modal.flex:not(.hidden),
+  #detail-modal.flex:not(.hidden) {
+    padding: 0.35rem !important;
+    align-items: flex-end !important;
+  }
+  .app-modal-overlay > .modal-content,
+  .app-modal-overlay > div:not(.hidden),
+  #detail-modal > div,
+  .modal > .modal-content,
+  .modal > div.bg-white,
+  .modal > div.dark\:bg-gray-900 {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: min(94dvh, 94vh) !important;
+    border-radius: 1.1rem 1.1rem 0.65rem 0.65rem !important;
+    margin: 0 !important;
+  }
+  #detail-modal-title,
+  .modal-content h3.text-3xl {
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+  }
+  /* Home hero denser */
+  #home .home-hero {
+    border-radius: 1.25rem !important;
+  }
+  #home .home-hero h2,
+  #home-greeting {
+    font-size: clamp(1.35rem, 5.5vw, 1.65rem) !important;
+  }
+  #home-subline {
+    font-size: 0.85rem !important;
+    line-height: 1.45 !important;
+  }
+  #home-hero-stats {
+    gap: 0.4rem !important;
+  }
+  #home-hero-stats button,
+  #home-hero-stats .home-stat-pill,
+  #home-hero-stats [data-home-stat] {
+    min-height: 2.25rem;
+    font-size: 0.72rem !important;
+    padding: 0.35rem 0.65rem !important;
+  }
+  .home-loop-rail {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.35rem;
+    scrollbar-width: thin;
+  }
+  .home-loop-rail > * {
+    flex: 0 0 auto;
+    min-width: min(11rem, 72vw);
+  }
+  /* Newsletter generator section */
+  #newsletter-generator.card,
+  #newsletter-generator {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
+  #newsletter-generator > h2,
+  #newsletter-generator h2.text-3xl {
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+  }
+  #newsletter-output h3 {
+    font-size: 1.25rem !important;
+  }
+  #nl-preview {
+    min-height: 16rem !important;
+    border-radius: 1rem !important;
+  }
+  #nl-preview iframe,
+  .nl-preview-iframe {
+    min-height: 280px !important;
+    height: min(70dvh, 70vh) !important;
+    border-radius: 0.75rem !important;
+  }
+  /* Output action button rows */
+  #newsletter-output .flex.flex-wrap {
+    gap: 0.45rem;
+  }
+  #newsletter-output button {
+    min-height: 2.5rem;
+  }
+  /* Bio / sales category grids: 2 cols max, denser */
+  #bio-destination-cards,
+  #sales-category-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+  }
+  /* AI chat full width comfort */
+  #ai-chat {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
+  #ai-chat textarea,
+  #ai-chat input[type="text"] {
+    font-size: 16px !important;
+  }
+  /* Global search modal if present */
+  #global-search-modal,
+  [data-global-search-modal] {
+    padding: 0.5rem !important;
+  }
+}
+
