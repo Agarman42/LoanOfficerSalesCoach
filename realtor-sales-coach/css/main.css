@@ -460,69 +460,91 @@ body > header {
     }
 
     /*
-      Quote band on mobile: CSS grid so arrows never hide under theme/profile.
-      [‹] [quote text…] [›] [theme][profile]
+      Quote band on mobile — real flex row (NOT display:contents / grid).
+      iOS WebKit + display:contents collapsed the quote to a 1-char column
+      ("l / a / n" stacked between ‹ ›). Layout:
+      [‹ quote text fills remaining space ›] [theme][profile]
     */
     .header-quote-band {
-        display: grid;
-        grid-template-columns: 2.15rem minmax(0, 1fr) 2.15rem auto;
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
         align-items: center;
-        column-gap: 0.3rem;
-        row-gap: 0;
-        padding: 0.5rem 0.45rem;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+        gap: 0.35rem;
+        padding: 0.55rem 0.5rem;
         box-sizing: border-box;
+        width: 100%;
     }
     .header-quote-inner {
-        display: contents; /* prev / text / next become band grid children */
-        max-width: none;
-        width: auto;
-        margin: 0;
+        /* flex-basis 0% forces the inner to claim leftover band width */
+        display: flex !important;
+        flex: 1 1 0% !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        min-width: 0 !important;
+        max-width: none !important;
+        width: auto !important;
+        margin: 0 !important;
         padding: 0 !important;
-        gap: 0;
+        box-sizing: border-box;
     }
-    .header-quote-text {
-        min-width: 0;
-        width: 100%;
-        font-size: 0.78rem;
-        line-height: 1.35;
-        min-height: 2.1rem;
-        max-height: 3.6rem;
+    .header-quote-text,
+    #quote-display.header-quote-text {
+        /* flex-basis 0% + min-width 0 = text gets real width, not min-content */
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        width: auto !important;
+        font-size: 0.84rem !important;
+        line-height: 1.4 !important;
+        min-height: 2.5rem;
+        max-height: none;
         margin: 0;
-        padding: 0.1rem 0.15rem;
+        padding: 0.2rem 0.25rem !important;
         text-align: center;
-        display: -webkit-box;
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        /* Keep multi-line clamp WITHOUT zero-width stacking */
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical !important;
         -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        line-clamp: 3;
+        overflow: hidden !important;
         align-self: center;
     }
     .header-quote-btn {
-        flex: none;
-        width: 2.15rem;
-        height: 2.15rem;
-        min-width: 2.15rem;
-        font-size: 1.15rem;
+        flex: 0 0 2.4rem !important;
+        width: 2.4rem !important;
+        height: 2.4rem !important;
+        min-width: 2.4rem !important;
+        max-width: 2.4rem !important;
+        font-size: 1.25rem;
         z-index: 2;
-        flex-shrink: 0;
-        background: rgba(255, 255, 255, 0.2);
+        flex-shrink: 0 !important;
+        background: rgba(255, 255, 255, 0.22);
     }
     .header-quote-actions {
         position: static !important;
         transform: none !important;
-        right: auto;
-        top: auto;
-        gap: 0.3rem;
+        right: auto !important;
+        top: auto !important;
+        gap: 0.35rem;
         z-index: 2;
-        flex-shrink: 0;
+        display: flex !important;
+        flex: 0 0 auto !important;
+        flex-shrink: 0 !important;
         padding-left: 0.15rem;
+        align-items: center;
     }
     .header-icon-btn,
     .header-profile-btn {
-        width: 2.15rem;
-        height: 2.15rem;
-        min-width: 2.15rem;
+        width: 2.25rem;
+        height: 2.25rem;
+        min-width: 2.25rem;
         padding: 0;
     }
     .header-profile-btn {
@@ -629,31 +651,51 @@ body > header {
     body.has-lo-brand .lo-brand-meta .lo-brand-nmls {
         display: none !important;
     }
-    /* Quote band: same grid as small phones so › isn't under theme/profile */
+    /* Quote band mid-width phones: same flex row as small phones */
     .header-quote-band {
-        display: grid;
-        grid-template-columns: 2.25rem minmax(0, 1fr) 2.25rem auto;
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
         align-items: center;
-        column-gap: 0.4rem;
-        padding: 0.5rem 0.65rem;
+        gap: 0.4rem;
+        padding: 0.55rem 0.65rem;
         box-sizing: border-box;
+        width: 100%;
     }
     .header-quote-inner {
-        display: contents;
+        display: flex !important;
+        flex: 1 1 0% !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        min-width: 0 !important;
+        max-width: none !important;
         padding: 0 !important;
-        max-width: none;
+        margin: 0 !important;
+        gap: 0.4rem;
     }
     .header-quote-actions {
         position: static !important;
         transform: none !important;
+        flex: 0 0 auto !important;
     }
-    .header-quote-text {
-        min-width: 0;
-        font-size: 0.9rem;
-        -webkit-line-clamp: 2;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+    .header-quote-text,
+    #quote-display.header-quote-text {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        font-size: 0.9rem !important;
+        white-space: normal !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+    .header-quote-btn {
+        flex: 0 0 2.4rem !important;
+        width: 2.4rem !important;
+        height: 2.4rem !important;
+        min-width: 2.4rem !important;
+        max-width: 2.4rem !important;
     }
 }
 
