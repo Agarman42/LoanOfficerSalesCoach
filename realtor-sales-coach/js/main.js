@@ -797,6 +797,19 @@
       return;
     }
 
+    // Retire early-boot listeners so clicks/hash don't fire twice
+    if (typeof window.__earlyNavSidebarClick === 'function') {
+      sidebar.removeEventListener('click', window.__earlyNavSidebarClick);
+      window.__earlyNavSidebarClick = null;
+    }
+    if (typeof window.__earlyNavHashChange === 'function') {
+      window.removeEventListener('hashchange', window.__earlyNavHashChange);
+      window.__earlyNavHashChange = null;
+    }
+    // Stops boot-time kill loops in index.html + early-boot that were
+    // closing the progress modal every 500ms during AI generation.
+    window.__mainNavReady = true;
+
     // Delegate clicks on sidebar links that point to sections
     sidebar.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
@@ -985,6 +998,10 @@
   // Self-healing: if #global-loading does not exist in DOM (e.g. cached/outdated index.html, script order edge case),
   // we create it dynamically and append it so the user still gets the rich progress modal.
   window.forceShowGlobalLoading = function forceShowGlobalLoading(title = 'Working on it...') {
+    // Pin the overlay so boot-time hardHide / feature-loader cleanup cannot
+    // dismiss it while blog, newsletter, plans, etc. are still generating.
+    window.__coachGenerationActive = true;
+
     let loadingEl = document.getElementById('global-loading');
 
     if (!loadingEl) {
@@ -993,6 +1010,10 @@
       loadingEl.className = 'coach-loading-overlay';
       (document.body || document.documentElement).appendChild(loadingEl);
     }
+
+    // Never allow accidental backdrop-click dismiss mid-generation
+    loadingEl.setAttribute('data-no-backdrop-close', '1');
+    loadingEl.dataset.noBackdropClose = '1';
 
     if (!loadingEl.querySelector('#global-loading-title')) {
       const card = document.createElement('div');
@@ -1102,6 +1123,8 @@
   };
 
   window.hideLoading = function hideLoading() {
+    // Clear generation pin first so hardHide is allowed to run
+    window.__coachGenerationActive = false;
     if (typeof window.__hardHideGlobalLoading === 'function') {
       try { window.__hardHideGlobalLoading(); } catch (e) { /* ignore */ }
     }

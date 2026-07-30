@@ -172,6 +172,8 @@
   /** Nuke stuck full-screen loaders that block every click. */
   function hardHideGlobalLoading() {
     try {
+      // Preserve intentional generate overlays (blog, newsletter, plans, etc.)
+      if (window.__coachGenerationActive) return;
       document.querySelectorAll('#global-loading').forEach((gl) => {
         gl.classList.add('hidden');
         gl.classList.remove('flex', 'is-visible');
