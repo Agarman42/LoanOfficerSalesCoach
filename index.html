@@ -106,7 +106,7 @@
     <!-- Static Tailwind (built offline) — no Play CDN -->
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <!-- App-specific styles -->
-    <link rel="stylesheet" href="css/main.css?v=20260730-quote-flex2">
+    <link rel="stylesheet" href="css/main.css?v=20260730-home-tiles">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
@@ -124,7 +124,7 @@
     -->
     <script defer src="js/features/user-profile.js?v=20260730-mobile-pass4"></script>
     <script defer src="js/features/home-favorites.js?v=20260721-home-fast"></script>
-    <script defer src="js/features/onboarding-coach.js?v=20260721-home-fast"></script>
+    <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <script src="js/early-boot.js?v=20260728-scroll-top-home"></script>
 </head>
 <body class="sidebar-collapsed bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -8789,7 +8789,7 @@
 <!-- deferred to feature-loader: js/features/bio-creator.js?v=20260715-lo-v14 -->
 <!-- deferred to feature-loader: js/features/bio-wizard.js?v=20260720-polish2 -->
 <!-- Home setup + favorites: end of body so they never block HTML parse (mid-page scripts froze the tab) -->
-<!-- deferred to feature-loader: js/features/onboarding-coach.js?v=20260721-endbody-paint -->
+<!-- deferred to feature-loader: js/features/onboarding-coach.js?v=20260730-home-tiles
 <!-- deferred to feature-loader: js/features/home-favorites.js?v=20260721-endbody-paint -->
 
 <!-- ===================================================== -->

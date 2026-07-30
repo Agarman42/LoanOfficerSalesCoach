@@ -104,7 +104,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260730-quote-flex2">
+    <link rel="stylesheet" href="css/main.css?v=20260730-home-tiles">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -150,7 +150,7 @@
     -->
     <script defer src="js/features/user-profile.js?v=20260730-mobile-pass4"></script>
     <script defer src="js/features/home-favorites.js?v=20260728-realtor-parity"></script>
-    <script defer src="js/features/onboarding-coach.js?v=20260728-realtor-parity"></script>
+    <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <script src="js/early-boot.js?v=20260728-scroll-top-home"></script>
 </head>
 <body class="sidebar-collapsed bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
@@ -359,109 +359,144 @@
       <!-- Favorites strip shell (filled by home-favorites.js — head-deferred for early paint) -->
       <div id="home-favorites-panel" class="rounded-2xl border border-gray-200/90 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md overflow-hidden" aria-label="Your favorite tools"></div>
 
-      <div class="rounded-[1.75rem] border border-gray-200/80 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl shadow-gray-200/40 dark:shadow-none overflow-hidden">
-        <div class="px-6 sm:px-8 pt-6 sm:pt-7 pb-2">
-          <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-1">
-            <div>
-              <div class="text-[10px] font-bold tracking-[0.18em] uppercase text-[#F15A29] mb-1.5">Daily loop</div>
-              <h3 class="text-xl sm:text-2xl font-bold text-[#002B5C] dark:text-white m-0 tracking-tight">Start here today</h3>
-            </div>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 m-0 max-w-md sm:text-right leading-relaxed">Your production circuit — plan, nurture, content, opportunity. Tap any card.</p>
+      <!-- Daily production loop — compact rail (matches LO structure so densifier CSS fits) -->
+      <div class="home-loop-panel rounded-2xl border border-gray-200/90 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md overflow-hidden">
+        <div class="home-loop-head px-4 sm:px-5 pt-4 pb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <div class="flex items-baseline gap-2.5 min-w-0">
+            <span class="text-[11px] font-extrabold tracking-[0.14em] uppercase text-[#F15A29]">Daily loop</span>
+            <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white m-0 tracking-tight">Start here today</h3>
           </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Plan → nurture → content → opportunity</p>
         </div>
-        <div id="home-start-here" class="px-5 sm:px-7 pb-6 sm:pb-8 pt-4">
-          <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-3.5">
-            <button type="button" data-start-step="plan" onclick="window.showSection('weekly-win-plan')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center mb-3 group-hover:bg-[#00A89D] group-hover:text-white transition"><i class="fas fa-fire"></i></div>
-              <div class="text-[10px] font-bold text-[#00A89D] tracking-wider mb-1">01 · PLAN</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Weekly Win Plan</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Protect power hours</div>
+        <div id="home-start-here" class="px-3 sm:px-4 pb-3 sm:pb-4 pt-1">
+          <div class="home-loop-rail">
+            <button type="button" data-start-step="plan" onclick="window.showSection('weekly-win-plan')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#00A89D">1</span>
+              <span class="home-day-icon" style="--step:#00A89D"><i class="fas fa-fire"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Plan</span>
+                <span class="home-day-title">Weekly Win Plan</span>
+              </span>
             </button>
-            <button type="button" data-start-step="gift" onclick="window.showSection('value-vault')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#F15A29]/12 text-[#F15A29] flex items-center justify-center mb-3 group-hover:bg-[#F15A29] group-hover:text-white transition"><i class="fas fa-gift"></i></div>
-              <div class="text-[10px] font-bold text-[#F15A29] tracking-wider mb-1">02 · GIFT</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Value Vault</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Pop-bys &amp; touches</div>
+            <button type="button" data-start-step="gift" onclick="window.showSection('value-vault')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#F15A29">2</span>
+              <span class="home-day-icon" style="--step:#F15A29"><i class="fas fa-gift"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Gift</span>
+                <span class="home-day-title">Value Vault</span>
+              </span>
             </button>
-            <button type="button" data-start-step="nurture" onclick="window.showSection('database')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#002B5C]/10 text-[#002B5C] dark:text-[#7dd3fc] flex items-center justify-center mb-3 group-hover:bg-[#002B5C] group-hover:text-white transition"><i class="fas fa-database"></i></div>
-              <div class="text-[10px] font-bold text-[#002B5C] dark:text-[#7dd3fc] tracking-wider mb-1">03 · NURTURE</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Database</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Past clients &amp; sphere</div>
+            <button type="button" data-start-step="nurture" onclick="window.showSection('database')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#002B5C">3</span>
+              <span class="home-day-icon" style="--step:#002B5C"><i class="fas fa-database"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Nurture</span>
+                <span class="home-day-title">Database</span>
+              </span>
             </button>
-            <button type="button" data-start-step="content" onclick="window.showSection('content-hub')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div class="w-9 h-9 rounded-xl bg-[#00A89D]/12 text-[#00A89D] flex items-center justify-center mb-3 group-hover:bg-[#00A89D] group-hover:text-white transition"><i class="fas fa-share-alt"></i></div>
-              <div class="text-[10px] font-bold text-[#00A89D] tracking-wider mb-1">04 · CONTENT</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Content studio</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Posts · blog · NL</div>
+            <button type="button" data-start-step="content" onclick="window.showSection('content-hub')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#00A89D">4</span>
+              <span class="home-day-icon" style="--step:#00A89D"><i class="fas fa-share-alt"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Content</span>
+                <span class="home-day-title">Content studio</span>
+              </span>
             </button>
-            <button type="button" data-start-step="opportunity" onclick="window.showSection('listing-description')" class="home-day-card group text-left rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/80 dark:to-gray-900 hover:border-[#00A89D] hover:shadow-lg hover:-translate-y-0.5 transition-all col-span-2 lg:col-span-1">
-              <div class="w-9 h-9 rounded-xl bg-[#F15A29]/12 text-[#F15A29] flex items-center justify-center mb-3 group-hover:bg-[#F15A29] group-hover:text-white transition"><i class="fas fa-pen-fancy"></i></div>
-              <div class="text-[10px] font-bold text-[#F15A29] tracking-wider mb-1">05 · OPPORTUNITY</div>
-              <div class="font-bold text-sm text-[#002B5C] dark:text-white leading-snug">Listing Descriptions</div>
-              <div class="text-[11px] text-gray-500 mt-1.5 leading-snug">Win more listings</div>
+            <button type="button" data-start-step="opportunity" onclick="window.showSection('listing-description')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#F15A29">5</span>
+              <span class="home-day-icon" style="--step:#F15A29"><i class="fas fa-pen-fancy"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Opportunity</span>
+                <span class="home-day-title">Listing Copy</span>
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <div class="lg:col-span-8 rounded-[1.75rem] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 sm:p-7 shadow-lg">
-          <div class="flex items-end justify-between gap-3 mb-5">
-            <div>
-              <div class="text-[10px] font-bold tracking-[0.18em] uppercase text-[#00A89D] mb-1">Jump in</div>
-              <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white m-0">Tools you’ll use most</h3>
+      <!-- Jump in tools + AI Coach — denser strip -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+        <div class="lg:col-span-8 home-jump-panel rounded-2xl border border-gray-200/90 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-5 shadow-md">
+          <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-3">
+            <div class="flex items-baseline gap-2.5 min-w-0">
+              <span class="text-[11px] font-extrabold tracking-[0.14em] uppercase text-[#00A89D]">Jump in</span>
+              <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white m-0 tracking-tight">Tools you'll use most</h3>
             </div>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="home-tool-grid">
-            <button type="button" onclick="window.showSection('bio-creator')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-id-card text-[#00A89D] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Bio Builder</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Zillow &amp; brokerage voice</div>
+          <div class="home-tool-grid" id="home-tool-grid">
+            <button type="button" onclick="window.showSection('bio-creator')" class="home-tool group">
+              <i class="fas fa-id-card text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Bio Builder</span>
+                <span class="home-tool-sub">Zillow &amp; brokerage</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('listing-description')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-pen-fancy text-[#F15A29] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Listing Copy</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">MLS-ready descriptions</div>
+            <button type="button" onclick="window.showSection('listing-description')" class="home-tool group">
+              <i class="fas fa-pen-fancy text-[#F15A29]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Listing Copy</span>
+                <span class="home-tool-sub">MLS-ready</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('open-house')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-door-open text-[#00A89D] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Open House</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Scripts &amp; strategy</div>
+            <button type="button" onclick="window.showSection('open-house')" class="home-tool group">
+              <i class="fas fa-door-open text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Open House</span>
+                <span class="home-tool-sub">Scripts &amp; strategy</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('consultation')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-handshake text-[#F15A29] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Consult Kit</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Buyer &amp; seller</div>
+            <button type="button" onclick="window.showSection('consultation')" class="home-tool group">
+              <i class="fas fa-handshake text-[#F15A29]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Consult Kit</span>
+                <span class="home-tool-sub">Buyer &amp; seller</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('content-hub')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-pen-nib text-[#00A89D] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Content Studio</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">All content tools</div>
+            <button type="button" onclick="window.showSection('content-hub')" class="home-tool group">
+              <i class="fas fa-pen-nib text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Content Studio</span>
+                <span class="home-tool-sub">All content tools</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('newsletter-generator')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-envelope text-[#00A89D] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">Newsletter</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Stay top of mind</div>
+            <button type="button" onclick="window.showSection('newsletter-generator')" class="home-tool group">
+              <i class="fas fa-envelope text-[#00A89D]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Newsletter</span>
+                <span class="home-tool-sub">Top of mind</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="window.showSection('planning')" class="home-tool text-left rounded-2xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#00A89D] hover:shadow-md transition group">
-              <i class="fas fa-chart-line text-[#F15A29] mb-2 group-hover:scale-110 transition-transform"></i>
-              <div class="font-semibold text-sm text-[#002B5C] dark:text-white">2026 Plan</div>
-              <div class="text-[11px] text-gray-500 mt-0.5">Annual map</div>
+            <button type="button" onclick="window.showSection('planning')" class="home-tool group">
+              <i class="fas fa-chart-line text-[#F15A29]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">2026 Plan</span>
+                <span class="home-tool-sub">Annual map</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
           </div>
         </div>
 
-        <div class="lg:col-span-4 relative overflow-hidden rounded-[1.75rem] border border-[#00A89D]/25 bg-gradient-to-br from-[#002B5C] to-[#0a3d4a] p-6 sm:p-7 text-white shadow-xl flex flex-col">
-          <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-[#00A89D]/20 blur-2xl pointer-events-none"></div>
-          <div class="relative z-[1] flex flex-col h-full">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#00A89D] to-[#F15A29] flex items-center justify-center mb-4 shadow-lg">
-              <i class="fas fa-robot text-lg"></i>
+        <div class="lg:col-span-4 relative overflow-hidden rounded-2xl border border-[#00A89D]/25 bg-gradient-to-br from-[#002B5C] to-[#0a3d4a] p-4 sm:p-5 text-white shadow-md flex flex-col min-h-0">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-[#00A89D]/20 blur-2xl pointer-events-none"></div>
+          <div class="relative z-[1] flex flex-col h-full gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00A89D] to-[#F15A29] flex items-center justify-center shadow-md shrink-0">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] font-bold tracking-[0.18em] uppercase text-[#5eead4]">When you need to think</div>
+                <h3 class="text-lg font-bold m-0 tracking-tight">AI Coach</h3>
+              </div>
             </div>
-            <div class="text-[10px] font-bold tracking-[0.18em] uppercase text-[#5eead4] mb-2">When you need to think</div>
-            <h3 class="text-xl font-bold m-0 tracking-tight">AI Coach</h3>
-            <p class="text-sm text-white/55 m-0 mt-2 leading-relaxed flex-1">Scripts, objections, listing angles, mindset — personalized from your profile. Best after setup so answers sound like you.</p>
-            <button type="button" onclick="window.showSection('ai-chat')" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full font-bold text-sm bg-white text-[#002B5C] hover:bg-[#5eead4] transition">
+            <p class="text-sm text-white/55 m-0 leading-relaxed flex-1">Scripts, objections, listing angles, mindset — personalized from your profile.</p>
+            <button type="button" onclick="window.showSection('ai-chat')" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full font-bold text-sm bg-white text-[#002B5C] hover:bg-[#5eead4] transition">
               Start a conversation <i class="fas fa-arrow-right text-xs"></i>
             </button>
           </div>
@@ -8931,7 +8966,7 @@ try {
 
 <!-- deferred to feature-loader: js/features/user-profile.js?v=20260721-unfreeze -->
 <!-- Home setup + favorites AFTER profile so setup CTAs can open My Profile -->
-<!-- deferred to feature-loader: js/features/onboarding-coach.js?v=20260721-endbody-paint -->
+<!-- deferred to feature-loader: js/features/onboarding-coach.js?v=20260730-home-tiles
 <script>window.HOME_FAVORITES_CONFIG={variant:"realtor"};</script>
 <!-- deferred to feature-loader: js/features/home-favorites.js?v=20260721-endbody-paint -->
 

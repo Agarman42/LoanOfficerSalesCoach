@@ -84,6 +84,10 @@
         align-items: center;
         gap: 0.55rem;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
         text-align: left;
         font-family: inherit;
         padding: 0.65rem 0.7rem;
@@ -140,7 +144,9 @@
         display: flex;
         flex-direction: column;
         gap: 0.05rem;
+        flex: 1 1 auto;
         min-width: 0;
+        overflow: hidden;
       }
       #home-start-here .home-day-label {
         font-size: 0.65rem;
@@ -149,13 +155,19 @@
         text-transform: uppercase;
         color: var(--step, #00A89D);
         line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       #home-start-here .home-day-title {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 800;
         color: #002B5C;
-        line-height: 1.2;
+        line-height: 1.25;
         letter-spacing: -0.02em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .dark #home-start-here .home-day-title { color: #f8fafc; }
 
@@ -163,20 +175,27 @@
         border-color: #F15A29 !important;
         box-shadow: 0 10px 22px -14px rgba(241,90,41,0.5), 0 0 0 1px rgba(241,90,41,0.25);
         background: linear-gradient(165deg, rgba(241,90,41,0.08), #fff 50%);
+        padding-top: 1.05rem; /* room for badge */
       }
       .dark #home-start-here .home-day-card.is-recommended {
         background: linear-gradient(165deg, rgba(241,90,41,0.14), rgba(17,24,39,0.95) 50%);
       }
       #home-start-here .home-day-card .start-here-badge {
         position: absolute;
-        top: 0.2rem;
+        top: 0.15rem;
         right: 0.35rem;
-        display: inline-flex;
+        left: auto;
+        max-width: calc(100% - 0.7rem);
+        display: block;
         font-size: 8px;
         font-weight: 800;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         color: #F15A29;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        pointer-events: none;
       }
       #home-start-here .home-day-card {
         position: relative;
@@ -196,6 +215,10 @@
         align-items: center;
         gap: 0.65rem;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
         text-align: left;
         font-family: inherit;
         padding: 0.55rem 0.7rem;
@@ -226,21 +249,46 @@
         flex-direction: column;
         gap: 0.05rem;
         min-width: 0;
-        flex: 1;
+        flex: 1 1 auto;
+        overflow: hidden;
       }
       #home .home-tool-title {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 800;
         color: #002B5C;
         letter-spacing: -0.015em;
         line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .dark #home .home-tool-title { color: #f8fafc; }
       #home .home-tool-sub {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 600;
         color: #64748b;
         line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      /* Favorites tiles — keep titles inside the card */
+      #home-favorites-grid {
+        min-width: 0;
+      }
+      #home-favorites-grid > * {
+        min-width: 0;
+      }
+      #home-favorites-grid button[data-home-fav-go] {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      #home-favorites-grid button[data-home-fav-go] span.block {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       #home .home-tool-chevron {
         font-size: 0.65rem;

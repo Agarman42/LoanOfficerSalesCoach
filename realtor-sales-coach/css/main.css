@@ -3565,18 +3565,63 @@ html.dark body.sidebar-collapsed #menu-toggle:hover {
     font-size: 0.72rem !important;
     padding: 0.35rem 0.65rem !important;
   }
+  /* Daily loop uses 2-col grid (injected coach styles). Never force
+     a wide min-width that pushes title text outside the card. */
   .home-loop-rail {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 0.5rem;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.35rem;
-    scrollbar-width: thin;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    overflow: visible;
+    padding-bottom: 0.15rem;
   }
   .home-loop-rail > * {
-    flex: 0 0 auto;
-    min-width: min(11rem, 72vw);
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+  #home-start-here .home-day-card,
+  #home .home-tool,
+  #home-favorites-grid button[data-home-fav-go] {
+    min-width: 0 !important;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  #home-start-here .home-day-title,
+  #home-start-here .home-day-label,
+  #home .home-tool-title,
+  #home .home-tool-sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Category / hub tiles: keep labels inside */
+  #bio-destination-cards > *,
+  #sales-category-cards > *,
+  #content-hub .grid > a,
+  #content-hub .grid > button,
+  #content-hub [class*="grid"] > a,
+  #content-hub [class*="grid"] > button {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .content-hub-card {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .content-hub-card .flex {
+    min-width: 0;
+  }
+  .content-hub-card .flex > div:last-child {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+  .content-hub-card p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   /* Newsletter generator section */
   #newsletter-generator.card,
