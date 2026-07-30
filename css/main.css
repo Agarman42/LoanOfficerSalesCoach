@@ -3215,3 +3215,107 @@ html.dark .dark-navy-icon {
   }
 }
 
+
+/* =========================================================
+   MOBILE PASS 2 — scroll-lock, dim overlay, wide content
+   Scoped ≤767px so desktop is unchanged
+   ========================================================= */
+@media (max-width: 767px) {
+  /* Background does not scroll under open sidebar overlay */
+  html.sidebar-open-mobile,
+  body.sidebar-open-mobile {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+  body.sidebar-open-mobile {
+    /* Keep layout width stable without jumping to top */
+    position: relative;
+  }
+  /* Dim page behind sidebar (click-outside already closes) */
+  body.sidebar-open-mobile::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: rgba(0, 20, 41, 0.48);
+    pointer-events: auto;
+  }
+  #sidebar {
+    z-index: 55 !important;
+  }
+  #menu-toggle {
+    z-index: 60 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Newsletter + long HTML previews: pan horizontally instead of blowing out the page */
+  #newsletter-output,
+  #nl-preview,
+  #nl-preview-wrap,
+  .nl-preview-frame,
+  [data-nl-preview] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  #nl-preview {
+    padding: 0.5rem !important;
+    min-height: 16rem !important;
+  }
+  #nl-preview table,
+  #newsletter-output table,
+  #nl-preview iframe {
+    max-width: none;
+  }
+  /* Business plan / wide tool tables */
+  .prose,
+  .prose table,
+  #planning,
+  #business-plan,
+  [data-wide-table-host] {
+    max-width: 100%;
+  }
+  .prose {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Profile: keep sticky footers above home indicator; form scrolls under them */
+  #profile-full-footer,
+  #profile-wizard-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
+    background: #fff;
+    box-shadow: 0 -6px 18px rgba(0, 43, 92, 0.08);
+  }
+  .dark #profile-full-footer,
+  .dark #profile-wizard-footer {
+    background: #111827;
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.35);
+  }
+  /* Reduce double-tap zoom jank on controls */
+  a, button, input, select, textarea, label {
+    touch-action: manipulation;
+  }
+  /* Tool section titles that run long */
+  section.card > .flex.items-center h2,
+  section.card h2.text-3xl,
+  section.card h2.text-2xl {
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+  /* Engagement hub tabs: clearer active hit */
+  #nl-choice-modal-tabs [data-nl-hub-tab].is-active,
+  #nl-choice-modal-tabs button.border-\[\#00A89D\] {
+    box-shadow: 0 0 0 1px rgba(0, 168, 157, 0.35);
+  }
+}
+

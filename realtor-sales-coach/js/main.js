@@ -91,10 +91,18 @@
         if (collapsed) {
           sidebar.classList.remove('left-0', 'open');
           sidebar.classList.add('left-[-300px]');
+          document.body.classList.remove('sidebar-open-mobile');
+          document.documentElement.classList.remove('sidebar-open-mobile');
         } else {
           sidebar.classList.add('left-0', 'open');
           sidebar.classList.remove('left-[-300px]');
+          // Lock background scroll while the overlay menu is open (mobile only)
+          document.body.classList.add('sidebar-open-mobile');
+          document.documentElement.classList.add('sidebar-open-mobile');
         }
+      } else {
+        document.body.classList.remove('sidebar-open-mobile');
+        document.documentElement.classList.remove('sidebar-open-mobile');
       }
 
       setIcon(collapsed);
