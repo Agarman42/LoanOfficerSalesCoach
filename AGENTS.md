@@ -1,59 +1,89 @@
 # Agent notes — Loan Officer / Realtor coaches
 
-## Deploy map (MANDATORY — this is why Render can show v3.01 forever)
+> **Adam 2026-07-30:** “Every other time I’ve asked you to deploy you do it correctly… make note of this so you update it correctly in the future.”  
+> Live Agent Render = **`RuoffAgentSalesCoach`**, **not** monorepo `main` alone.
 
-Render does **not** deploy the monorepo `realtor-sales-coach/` folder by itself.
-Each live app has its **own GitHub repo**. Pushing only `LoanOfficerSalesCoach` does **not** update production Realtor.
+---
 
-| App | Source of truth (monorepo) | GitHub repo Render deploys | Branch | Live URL |
-|-----|----------------------------|----------------------------|--------|----------|
-| **LO Sales Coach** | repo root (`index.html`, `js/`, `proxy.js`, `smart-savings/`) | `Agarman42/LoanOfficerSalesCoach` | **`master`** | loanofficersalescoach.onrender.com |
-| **Realtor / Agent Sales Coach** | `realtor-sales-coach/` | **`Agarman42/RuoffAgentSalesCoach`** (flat root) | **`main`** | ruoffagentsalescoach.onrender.com |
-| **Recruiter Sales Coach** | `recruiter-sales-coach/` | `Agarman42/recruitersalescoach` | **`main`** | (recruiter Render service) |
+## Deploy map (MANDATORY — read before any push/deploy)
 
-### After changing Realtor (or Recruiter)
+### What Render actually watches
 
-1. Commit monorepo changes (usually on `master` in `LoanOfficerSalesCoach`).
-2. **Sync deploy repo** so Render sees them:
+| Live app | Render service | **GitHub repo that must receive the code** | Branch | Source in monorepo |
+|----------|----------------|--------------------------------------------|--------|--------------------|
+| **LO Sales Coach** | loan-officer-sales-coach | `Agarman42/LoanOfficerSalesCoach` | **`master`** | Repo root |
+| **Realtor / Agent Sales Coach** | **RuoffAgentSalesCoach** | **`Agarman42/RuoffAgentSalesCoach`** (flat app — `index.html` at root) | **`main`** | `realtor-sales-coach/` |
+| **Recruiter** | (recruiter service) | `Agarman42/recruitersalescoach` | **`main`** | `recruiter-sales-coach/` |
+
+### ❌ Wrong (causes “stuck on v3.01” / old production)
+
+- Pushing monorepo **`LoanOfficerSalesCoach` `main`** only and calling it a “Realtor deploy”
+- Porting `realtor-sales-coach/` onto monorepo `main` and **skipping** the deploy-repo sync
+- Assuming monorepo `master` + `realtor-sales-coach/` folder auto-deploys the Agent tool
+
+### ✅ Correct Realtor production deploy
 
 ```bash
-bash scripts/sync-deploy-repos.sh realtor    # → RuoffAgentSalesCoach main
-# bash scripts/sync-deploy-repos.sh recruiter
-# bash scripts/sync-deploy-repos.sh both
+# 1) Commit monorepo (source of truth) on master as usual
+git push origin master
+
+# 2) REQUIRED for live Agent app — copies realtor-sales-coach/ → RuoffAgentSalesCoach main
+bash scripts/sync-deploy-repos.sh realtor
 ```
 
-3. Confirm Render **RuoffAgentSalesCoach** builds a commit whose message includes the **current** monorepo `realtor-sales-coach` version (not a stale “v3.01” sync).
+Render then builds **`Agarman42/RuoffAgentSalesCoach`** (e.g. commit message  
+`Ship Realtor Sales Coach from monorepo (v3.23)`).
 
-### Monorepo branches (secondary)
+Recruiter:
 
-| Branch on `LoanOfficerSalesCoach` | Role |
-|-----------------------------------|------|
-| **`master`** | LO production + monorepo source of truth |
-| **`main`** | May hold ported Realtor tree for convenience; **Render Agent service does not use this for deploy** — it uses `RuoffAgentSalesCoach` |
+```bash
+bash scripts/sync-deploy-repos.sh recruiter
+# or both:
+bash scripts/sync-deploy-repos.sh both
+```
 
-### Rules
+### When user says “deploy” / “push both” / “push Realtor”
 
-1. **LO only** → commit + push monorepo **`master`**.
-2. **Realtor only** → update `realtor-sales-coach/` in monorepo, commit, then **`bash scripts/sync-deploy-repos.sh realtor`**.
-3. **Both** → monorepo `master` push **and** realtor sync script (two steps).
-4. **Never** assume `git push origin main` on the monorepo updates the live Agent tool.
-5. Bump versions: LO `js/app-version.js`; Realtor `realtor-sales-coach/js/app-version.js`.
+| Ask | Do this |
+|-----|---------|
+| Deploy / push **LO** | `git push origin master` (monorepo) |
+| Deploy / push **Realtor** | monorepo commit if needed + **`bash scripts/sync-deploy-repos.sh realtor`** |
+| Deploy / push **both** | monorepo `master` push **and** `sync-deploy-repos.sh realtor` (and recruiter only if in scope) |
+
+Always report:
+
+1. Monorepo commit SHA (if any)  
+2. **Deploy-repo** SHA on `RuoffAgentSalesCoach` (Realtor)  
+3. Version from `realtor-sales-coach/js/app-version.js` / LO `js/app-version.js`
 
 ### Versions
 
-- LO: `js/app-version.js` → `window.APP_VERSION`
-- Realtor: `realtor-sales-coach/js/app-version.js` → `window.APP_VERSION`
-
-After push/sync, state: monorepo commit, deploy-repo commit (if any), and versions.
+- LO: `js/app-version.js` → `window.APP_VERSION`  
+- Realtor: `realtor-sales-coach/js/app-version.js` → `window.APP_VERSION` (sync script reads this into the deploy commit message)
 
 ---
 
 ## Commits when user says “commit” / “push”
 
-1. Commit **all tool changes** since last commit for apps in scope (LO root, `realtor-sales-coach/`, `smart-savings/`, shared scripts).
-2. **Do not omit** related tool work (e.g. Smart Savings) to keep a commit small.
-3. **Do not** commit: unrelated projects, Word docs, screenshots, dump HTML, generated reports.
-4. Push monorepo correctly, then **run deploy-repo sync** when Realtor/Recruiter production must update.
-5. Report what landed where.
+1. Commit **all tool changes** since last commit for apps in scope (LO root, `realtor-sales-coach/`, `smart-savings/`, related scripts).  
+2. Do **not** omit related tool work (e.g. Smart Savings).  
+3. Do **not** commit: unrelated projects, Word docs, screenshots, dump HTML, generated reports.  
+4. For production: monorepo push **plus** deploy-repo sync when Realtor/Recruiter must go live.  
+5. State clearly what landed where.
 
-**Last reinforced:** 2026-07-30 — Render Agent = `RuoffAgentSalesCoach` main, not monorepo main alone.
+### Monorepo branches (secondary only)
+
+| Branch | Role |
+|--------|------|
+| **`master`** | LO production + monorepo source of truth |
+| **`main`** | Optional/legacy monorepo branch — **does not replace** `RuoffAgentSalesCoach` for Render |
+
+---
+
+## Related docs
+
+- `docs/ACCESS-AND-BRANDING-NOTES.md` — deploy remotes table  
+- `docs/PORT-NOTES-REALTOR-RECRUITER.md` — port LO → Realtor  
+- `scripts/sync-deploy-repos.sh` — **the** Render sync for Realtor/Recruiter  
+
+**Last reinforced:** 2026-07-30 (Render Agent = `RuoffAgentSalesCoach` main via sync script).

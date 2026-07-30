@@ -90,14 +90,16 @@ Correct designs require **proof of control** (code in inbox or real Google login
 
 Smart Savings package, Mortgage Calculator, Equity Scanner, Underwriting, app-bulk.
 
-### Deploy remotes (do not mix up)
+### Deploy remotes (do not mix up) — MANDATORY
 
-| App | GitHub repo | Branch to push |
-|-----|-------------|----------------|
-| **LO Sales Coach** | `Agarman42/LoanOfficerSalesCoach` monorepo | **`master`** |
-| **Realtor / Agent Sales Coach** | `Agarman42/RuoffAgentSalesCoach` (flat app root) | **`main`** |
+| App | GitHub repo | Branch | How to update production |
+|-----|-------------|---------|---------------------------|
+| **LO Sales Coach** | `Agarman42/LoanOfficerSalesCoach` monorepo | **`master`** | `git push origin master` |
+| **Realtor / Agent Sales Coach** | **`Agarman42/RuoffAgentSalesCoach`** (flat app root — **this** is what Render RuoffAgentSalesCoach watches) | **`main`** | `bash scripts/sync-deploy-repos.sh realtor` after monorepo commit |
 
-Monorepo path for Realtor source of truth: `realtor-sales-coach/`. After LO monorepo commits, **also sync** that folder to `RuoffAgentSalesCoach` `main` or production stays on an old version.
+**Source of truth** for Realtor code: monorepo folder `realtor-sales-coach/`.  
+**Not enough:** pushing monorepo `main` only — production will stay on an old sync (e.g. v3.01 forever).  
+See root **`AGENTS.md`**.
 
 ### Personally branded Realtor tool (MVP 2026-07-28+)
 

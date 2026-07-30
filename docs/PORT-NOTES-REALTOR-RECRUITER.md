@@ -6,14 +6,14 @@
 
 ---
 
-## Git branches (do not forget)
+## Deploy (do not forget) — Render uses separate repos
 
-| App | Branch to push |
-|-----|----------------|
-| **LO Sales Coach** | **`master`** |
-| **Realtor / Agent Sales Coach** | **`main`** |
+| App | Production GitHub repo | How to ship |
+|-----|------------------------|-------------|
+| **LO** | `LoanOfficerSalesCoach` **`master`** | monorepo push |
+| **Realtor** | **`RuoffAgentSalesCoach` `main`** (flat) | monorepo commit of `realtor-sales-coach/` then **`bash scripts/sync-deploy-repos.sh realtor`** |
 
-Pushing only `master` does **not** update the Realtor deploy branch. See root **`AGENTS.md`**.
+Pushing monorepo `main` alone does **not** update live Agent/Render. See root **`AGENTS.md`**.
 
 ---
 
