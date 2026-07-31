@@ -161,7 +161,8 @@ function sanitizePublicCard(input) {
   }
   const email = String(src.email || '').trim().slice(0, 120);
   const nmls = String(src.nmls || '').trim().slice(0, 40);
-  const headshotUrl = String(src.headshotUrl || src.headshot || '').trim().slice(0, 500);
+  // Pre-signed S3/avatar URLs can be long; keep room for a full signature.
+  const headshotUrl = String(src.headshotUrl || src.headshot || '').trim().slice(0, 2000);
   const title = String(src.title || 'Your Ruoff Loan Officer').trim().slice(0, 80);
   const location = String(src.location || src.market || '').trim().slice(0, 120);
   const company = String(src.company || 'Ruoff Mortgage').trim().slice(0, 80);
@@ -182,11 +183,40 @@ function sanitizePublicCard(input) {
   if (headshotUrl && !/^https?:\/\//i.test(headshotUrl)) {
     return { ok: false, error: 'Headshot must be an http(s) URL.' };
   }
+  // Ruoff avatar S3 links are often pre-signed with X-Amz-Expires=300 (5 min).
+  // LO tool may still show a cached image; Realtor loads the stored URL later → 403 → gray circle.
+  if (isEphemeralHeadshotUrl(headshotUrl)) {
+    return {
+      ok: false,
+      error:
+        'That headshot link expires in a few minutes (temporary S3/signed URL). Use a permanent public image URL — e.g. HubSpot, company site, or a direct link from 8upload — then re-publish your partner link.'
+    };
+  }
 
   return {
     ok: true,
     card: { name, phone, email, nmls, headshotUrl, title, location, company }
   };
+}
+
+/** Detect short-lived pre-signed object URLs that will break partner branding after expiry. */
+function isEphemeralHeadshotUrl(url) {
+  const u = String(url || '');
+  if (!u) return false;
+  // AWS SigV4 pre-signed GET (common on ruoff-avatar-images-prod.s3…)
+  if (/[?&]X-Amz-Algorithm=/i.test(u) || /[?&]X-Amz-Signature=/i.test(u) || /[?&]X-Amz-Credential=/i.test(u)) {
+    return true;
+  }
+  // Explicit short TTL in query
+  const exp = u.match(/[?&]X-Amz-Expires=(\d+)/i);
+  if (exp && parseInt(exp[1], 10) > 0 && parseInt(exp[1], 10) < 86400) {
+    return true; // less than 24h
+  }
+  // Azure / GCS style signed URLs
+  if (/[?&]X-Goog-Signature=/i.test(u) || /[?&]sig=/i.test(u) && /[?&]se=/i.test(u)) {
+    return true;
+  }
+  return false;
 }
 
 function publicView(card, updatedAt) {

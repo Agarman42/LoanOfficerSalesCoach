@@ -93,13 +93,38 @@
         tab: 'identity',
         label: 'Professional Headshot URL'
       });
+    } else if (isEphemeralHeadshotUrl(card.headshotUrl)) {
+      required.push({
+        id: 'profile-headshot-url',
+        tab: 'identity',
+        label: 'Permanent Headshot URL (not a temporary S3/signed link)'
+      });
     }
     return { required, recommended: [], card };
+  }
+
+  /** Temporary avatar/S3 signed links die in minutes → gray circle on Realtor. */
+  function isEphemeralHeadshotUrl(url) {
+    const u = String(url || '');
+    if (!u) return false;
+    if (/[?&]X-Amz-Algorithm=/i.test(u) || /[?&]X-Amz-Signature=/i.test(u) || /[?&]X-Amz-Credential=/i.test(u)) {
+      return true;
+    }
+    const exp = u.match(/[?&]X-Amz-Expires=(\d+)/i);
+    if (exp && parseInt(exp[1], 10) > 0 && parseInt(exp[1], 10) < 86400) return true;
+    if (/[?&]X-Goog-Signature=/i.test(u) || (/[?&]sig=/i.test(u) && /[?&]se=/i.test(u))) return true;
+    return false;
   }
 
   function validateCard(card) {
     const { required } = getPartnerFieldGaps(card);
     if (!required.length) return '';
+    if (required.some((r) => /Permanent Headshot/i.test(r.label))) {
+      return (
+        'That headshot link expires in a few minutes (temporary S3/signed URL). ' +
+        'Use a permanent public image URL (HubSpot, company site, or 8upload direct link), then publish again.'
+      );
+    }
     return 'Before you can share, complete: ' + required.map((r) => r.label).join(', ') + '.';
   }
 
