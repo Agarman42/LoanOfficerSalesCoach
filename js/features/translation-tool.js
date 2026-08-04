@@ -74,7 +74,29 @@
   }
 
   function langLabel(code) {
+    if (code === 'custom' || code === 'other') {
+      const custom = (el('tr-target-lang-custom')?.value || '').trim();
+      return custom || 'Custom language';
+    }
     return LANGUAGES.find((l) => l.code === code)?.label || code;
+  }
+
+  function getTargetLanguageForPrompt() {
+    const code = el('tr-target-lang')?.value || getDefaultTarget();
+    if (code === 'custom' || code === 'other') {
+      const custom = (el('tr-target-lang-custom')?.value || '').trim();
+      return custom || 'the language specified by the user';
+    }
+    return langLabel(code);
+  }
+
+  function toggleCustomLanguageField() {
+    const wrap = el('tr-target-lang-custom-wrap');
+    const target = el('tr-target-lang');
+    if (!wrap || !target) return;
+    const show = target.value === 'custom';
+    wrap.classList.toggle('hidden', !show);
+    if (show) el('tr-target-lang-custom')?.focus();
   }
 
   function getProfile() {
@@ -266,12 +288,16 @@ WATCH ITEMS:
     ).join('');
 
     source.innerHTML = opts;
-    target.innerHTML = LANGUAGES.filter((l) => l.code !== 'auto').map((l) =>
-      `<option value="${l.code}">${l.label}</option>`
-    ).join('');
+    target.innerHTML =
+      LANGUAGES.filter((l) => l.code !== 'auto').map((l) =>
+        `<option value="${l.code}">${l.label}</option>`
+      ).join('') +
+      `<option value="custom">Other — type language…</option>`;
 
     source.value = 'auto';
     target.value = getDefaultTarget();
+    if (target.value === 'custom') target.value = 'es';
+    toggleCustomLanguageField();
     renderFavoriteChips();
   }
 
@@ -301,6 +327,7 @@ WATCH ITEMS:
         if (code) {
           target.value = code;
           persistTranslationPrefs(code, null);
+          toggleCustomLanguageField();
           renderFavoriteChips();
         }
       });
@@ -338,12 +365,12 @@ WATCH ITEMS:
   }
 
   function buildPrompt(chunk, opts) {
-    const { sourceLang, targetLang, contentType, tone, variantKey } = opts;
+    const { sourceLang, targetLang, contentType, tone, variantKey, targetLabelOverride } = opts;
     const variant = VARIANTS[variantKey] || VARIANTS.lo;
     const typeLabel = variant.contentTypes.find((t) => t.id === contentType)?.label || 'General';
     const profile = getProfile();
     const sourceLabel = sourceLang === 'auto' ? 'auto-detect the source language' : langLabel(sourceLang);
-    const targetLabel = langLabel(targetLang);
+    const targetLabel = targetLabelOverride || langLabel(targetLang);
 
     const toneGuide = tone === 'formal'
       ? 'Use a formal, professional register appropriate for legal-adjacent client communication.'
@@ -550,6 +577,7 @@ ${chunk}
     const sourceText = (el('tr-source-text')?.value || '').trim();
     const sourceLang = el('tr-source-lang')?.value || 'auto';
     const targetLang = el('tr-target-lang')?.value || getDefaultTarget();
+    const targetLabelForPrompt = getTargetLanguageForPrompt();
     const contentType = el('tr-content-type')?.value || 'general';
     const tone = el('tr-tone')?.value || 'conversational';
     const resultEl = el('tr-result-text');
@@ -563,7 +591,12 @@ ${chunk}
       setStatus(`Text is too long. Maximum is ${MAX_CHARS.toLocaleString()} characters.`, 'error');
       return;
     }
-    if (sourceLang !== 'auto' && sourceLang === targetLang) {
+    if (targetLang === 'custom' && !(el('tr-target-lang-custom')?.value || '').trim()) {
+      setStatus('Type the target language name (e.g. Polish, Swahili, German).', 'error');
+      el('tr-target-lang-custom')?.focus();
+      return;
+    }
+    if (sourceLang !== 'auto' && sourceLang === targetLang && targetLang !== 'custom') {
       setStatus('Source and target languages must differ.', 'error');
       return;
     }
@@ -585,18 +618,19 @@ ${chunk}
         targetLang,
         contentType,
         tone,
-        variantKey
+        variantKey,
+        targetLabelOverride: targetLabelForPrompt
       });
 
       if (resultEl) resultEl.value = result;
-      persistTranslationPrefs(targetLang, null);
+      if (targetLang !== 'custom') persistTranslationPrefs(targetLang, null);
 
-      const label = `${langLabel(targetLang)} · ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+      const label = `${targetLabelForPrompt} · ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
       pushSessionHistory({
         label,
         source: sourceText,
         result,
-        target: langLabel(targetLang),
+        target: targetLabelForPrompt,
         savedAt: new Date().toISOString()
       });
 
@@ -1022,10 +1056,16 @@ ${chunk}
 
     el('tr-source-text')?.addEventListener('input', updateCharCount);
     el('tr-target-lang')?.addEventListener('change', () => {
-      persistTranslationPrefs(el('tr-target-lang').value, null);
+      toggleCustomLanguageField();
+      if (el('tr-target-lang').value !== 'custom') {
+        persistTranslationPrefs(el('tr-target-lang').value, null);
+      }
       renderFavoriteChips();
     });
-    el('tr-swap-langs')?.addEventListener('click', swapLanguages);
+    el('tr-swap-langs')?.addEventListener('click', () => {
+      swapLanguages();
+      toggleCustomLanguageField();
+    });
     el('tr-translate-btn')?.addEventListener('click', () => window.runClientTranslation());
     el('tr-load-sample')?.addEventListener('click', () => window.loadTranslationSample());
     el('tr-qa-btn')?.addEventListener('click', () => window.checkTranslationMeaning());

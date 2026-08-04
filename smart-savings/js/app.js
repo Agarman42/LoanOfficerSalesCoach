@@ -3970,39 +3970,68 @@
     }
 
     list.innerHTML = items
-      .map(function (item) {
+      .map(function (item, idx) {
+        const mortIndex = items.filter(function (x, i) { return i <= idx && x.isMortgage; }).length;
         const badge = item.isMortgage
-          ? '<span class="ss-debt-import-badge ss-debt-import-badge-mort">→ Current mortgage</span>'
+          ? '<span class="ss-debt-import-badge ss-debt-import-badge-mort">' +
+            (mortIndex === 1 ? '→ Primary mortgage' : '→ Mortgage #' + mortIndex) +
+            '</span>'
           : '<span class="ss-debt-import-badge">' + escapeHtml(item.type || 'Other') + '</span>';
         const includeHint = item.isMortgage
-          ? 'Updates balance, payment & years remaining'
+          ? (mortIndex === 1
+              ? 'Primary → current mortgage fields'
+              : 'Additional mortgage → rolled into other debts to pay off')
           : item.payOff
             ? 'Include in refi'
             : 'Leave as-is';
-        const monthsTxt = item.months > 0 ? item.months + ' mo' : '— mo';
         return (
-          '<label class="ss-debt-import-row' +
+          '<div class="ss-debt-import-row ss-debt-import-row-edit' +
           (item.selected ? '' : ' is-off') +
           (item.isMortgage ? ' is-mortgage' : '') +
           '" data-import-id="' +
           escapeHtml(item.id) +
           '">' +
-          '<input type="checkbox" class="w-4 h-4 accent-[#00A89D]" data-import-check="' +
+          '<div class="ss-debt-import-row-top">' +
+          '<label class="inline-flex items-center gap-2 min-w-0 cursor-pointer flex-1">' +
+          '<input type="checkbox" class="w-4 h-4 accent-[#00A89D] shrink-0" data-import-check="' +
           escapeHtml(item.id) +
           '" ' +
           (item.selected ? 'checked' : '') +
           '>' +
-          '<div class="min-w-0">' +
-          '<div class="ss-debt-import-row-name truncate">' +
+          '<span class="ss-debt-import-row-name truncate font-bold">' +
           escapeHtml(item.name) +
+          '</span>' +
           badge +
-          '</div>' +
-          '<div class="ss-debt-import-row-meta">' +
-          escapeHtml(item.rawType || item.type) +
-          ' · ' +
-          monthsTxt +
-          ' · ' +
+          '</label>' +
+          '<span class="text-[10px] opacity-50 shrink-0">' +
           escapeHtml(includeHint) +
+          '</span>' +
+          '</div>' +
+          '<div class="ss-debt-import-edit-grid">' +
+          '<label class="ss-debt-import-field"><span>Creditor</span>' +
+          '<input type="text" data-import-field="name" data-import-id="' +
+          escapeHtml(item.id) +
+          '" value="' +
+          escapeHtml(item.name) +
+          '" autocomplete="off"></label>' +
+          '<label class="ss-debt-import-field"><span>Balance $</span>' +
+          '<input type="number" inputmode="decimal" step="0.01" min="0" data-import-field="bal" data-import-id="' +
+          escapeHtml(item.id) +
+          '" value="' +
+          (item.bal || 0) +
+          '"></label>' +
+          '<label class="ss-debt-import-field"><span>Payment $/mo</span>' +
+          '<input type="number" inputmode="decimal" step="0.01" min="0" data-import-field="pay" data-import-id="' +
+          escapeHtml(item.id) +
+          '" value="' +
+          (item.pay || 0) +
+          '"></label>' +
+          '<label class="ss-debt-import-field"><span>Months left</span>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" data-import-field="months" data-import-id="' +
+          escapeHtml(item.id) +
+          '" value="' +
+          (item.months || 0) +
+          '"></label>' +
           '</div>' +
           (!item.isMortgage
             ? '<label class="inline-flex items-center gap-2 mt-2 text-xs font-semibold cursor-pointer">' +
@@ -4010,18 +4039,9 @@
               escapeHtml(item.id) +
               '" ' +
               (item.payOff ? 'checked' : '') +
-              '> Include in refi</label>'
-            : '') +
-          '</div>' +
-          '<div class="ss-debt-import-row-nums">' +
-          '<div class="ss-debt-import-row-bal number">' +
-          money(item.bal) +
-          '</div>' +
-          '<div class="ss-debt-import-row-pay number">' +
-          money(item.pay) +
-          '/mo</div>' +
-          '</div>' +
-          '</label>'
+              '> Include in refi payoff</label>'
+            : '<p class="text-[11px] opacity-55 m-0 mt-2">Edit numbers if the scan misread the screenshot.</p>') +
+          '</div>'
         );
       })
       .join('');
@@ -4039,6 +4059,48 @@
         const id = cb.getAttribute('data-import-payoff');
         const item = debtImport.items.find(function (x) { return x.id === id; });
         if (item) item.payOff = !!cb.checked;
+        renderDebtImportReview();
+      });
+    });
+    list.querySelectorAll('[data-import-field]').forEach(function (inp) {
+      const applyField = function () {
+        const id = inp.getAttribute('data-import-id');
+        const field = inp.getAttribute('data-import-field');
+        const item = debtImport.items.find(function (x) { return x.id === id; });
+        if (!item || !field) return;
+        if (field === 'name') {
+          item.name = String(inp.value || '').trim() || item.name;
+        } else if (field === 'bal' || field === 'pay' || field === 'months') {
+          let n = parseFloat(String(inp.value || '').replace(/[$,\s]/g, ''));
+          if (!isFinite(n) || n < 0) n = 0;
+          if (field === 'months') n = Math.round(n);
+          item[field] = n;
+        }
+        // Live totals without rebuilding inputs (keeps focus while typing)
+        const summaryEl = document.getElementById('debt-import-summary');
+        if (summaryEl) {
+          const all = debtImport.items || [];
+          const mortN = all.filter(function (x) { return x.isMortgage; }).length;
+          const otherN = all.filter(function (x) { return !x.isMortgage; }).length;
+          const sel = all.filter(function (x) { return x.selected; });
+          const selBal = sel.reduce(function (s, x) { return s + (Number(x.bal) || 0); }, 0);
+          const selPay = sel.reduce(function (s, x) { return s + (Number(x.pay) || 0); }, 0);
+          summaryEl.innerHTML =
+            '<span class="ss-debt-chip"><i class="fas fa-layer-group"></i> ' + all.length + ' found</span>' +
+            (mortN
+              ? '<span class="ss-debt-chip ss-debt-chip-mort"><i class="fas fa-house"></i> ' + mortN + ' mortgage</span>'
+              : '') +
+            '<span class="ss-debt-chip"><i class="fas fa-credit-card"></i> ' + otherN + ' other</span>' +
+            '<span class="ss-debt-chip"><i class="fas fa-check"></i> ' + sel.length + ' selected · ' + money(selBal) + '</span>' +
+            (selPay > 0
+              ? '<span class="ss-debt-chip ss-debt-chip-warn"><i class="fas fa-calendar"></i> ' + money(selPay) + '/mo</span>'
+              : '');
+        }
+      };
+      inp.addEventListener('input', applyField);
+      inp.addEventListener('change', function () {
+        applyField();
+        // Full re-render only when leaving the field (safe; focus already moved)
         renderDebtImportReview();
       });
     });
@@ -4079,18 +4141,25 @@
       '  ],\n' +
       '  "notes": "optional short string"\n' +
       '}\n' +
-      'Rules:\n' +
-      '- Read every visible liability row. Use exact creditor names from the image.\n' +
-      '- balance, payment, months are numbers without $ or commas.\n' +
-      '- months may be labeled Months, Term, or Remaining.\n' +
-      '- excludeMonthlyPay true if column like "Exclude Mon. Pay" is Y/Yes/true.\n' +
-      '- isMortgage true for first mortgage / home mortgage rows (not HELOC unless clearly 1st mtg).\n' +
-      '- Skip totals, headers, blank rows, and collection summaries without a balance.\n' +
-      '- If a field is unreadable, use 0 or null — do not invent balances.';
+      'Rules (accuracy critical):\n' +
+      '- Read EVERY visible liability ROW. One row = one liability. Never merge rows.\n' +
+      '- MULTIPLE MORTGAGES: if 2–3 mortgage/1st mtg/2nd mtg/home loan rows appear, return EACH as its own object with isMortgage:true. Do not keep only one.\n' +
+      '- HELOC is NOT a first mortgage: type HELOC, isMortgage:false (unless the label clearly says first mortgage).\n' +
+      '- Use exact creditor names from the image (e.g. "RUOFF MORTGAGE", "Chase", "Capital One").\n' +
+      '- COLUMN ALIGNMENT: match each number to the correct column for THAT row only.\n' +
+      '  Typical columns: Creditor | Type | Balance | Months/Term | Payment (or similar).\n' +
+      '  Do not shift balances left/right into payment or months.\n' +
+      '- Digits: balance and payment are US dollars. Strip $, commas, and spaces. Example "$12,450.33" → 12450.33.\n' +
+      '- If a cell shows "—" or blank, use 0 (or null for rate). Do not invent balances.\n' +
+      '- months may be labeled Months, Term, Remaining, or # of Months.\n' +
+      '- excludeMonthlyPay true only if a column like "Exclude Mon. Pay" is Y/Yes/true for that row.\n' +
+      '- Skip totals, grand totals, headers, blank rows, and collection summaries without a balance.\n' +
+      '- Prefer high-resolution reading: zoom mentally on each row. Double-check the largest balances.';
 
     const userText =
-      'Extract all liabilities from this screenshot into the JSON schema. ' +
-      'This is typically a Creditor / Type / Balance / Months / Payment table.';
+      'Extract ALL liabilities from this screenshot into the JSON schema. ' +
+      'Return every mortgage row separately if more than one appears. ' +
+      'This is typically a Creditor / Type / Balance / Months / Payment table — keep columns aligned per row.';
 
     try {
       // Multimodal chat models (image input). Try fast first; fall back if model id drifts.
@@ -4105,8 +4174,8 @@
         try {
           data = await callGrokAPI({
             model: visionModels[mi],
-            temperature: 0.1,
-            max_tokens: 2500,
+            temperature: 0.05,
+            max_tokens: 4000,
             messages: [
               { role: 'system', content: system },
               {
@@ -4199,14 +4268,31 @@
     const replaceEl = document.getElementById('debt-import-replace');
     const replaceOthers = !replaceEl || replaceEl.checked;
 
-    const mortItem = selected.find(function (x) {
+    const mortItems = selected.filter(function (x) {
       return x.isMortgage;
     });
-    const otherItems = selected.filter(function (x) {
-      return !x.isMortgage;
+    // Primary = largest mortgage balance (subject property payoff); additional mtgs roll into other debts
+    mortItems.sort(function (a, b) {
+      return (b.bal || 0) - (a.bal || 0);
     });
+    const mortItem = mortItems[0] || null;
+    const extraMortgages = mortItems.slice(1);
+    const otherItems = selected
+      .filter(function (x) {
+        return !x.isMortgage;
+      })
+      .concat(
+        extraMortgages.map(function (x) {
+          return Object.assign({}, x, {
+            isMortgage: false,
+            type: 'Mortgage',
+            payOff: true,
+            name: (x.name || 'Mortgage') + (x.name && /mort|mtg/i.test(x.name) ? '' : ' (addl mortgage)')
+          });
+        })
+      );
 
-    // Mortgage → current mortgage fields
+    // Primary mortgage → current mortgage fields
     if (mortItem) {
       state.currentBalance = mortItem.bal || state.currentBalance;
       if (mortItem.pay > 0) {

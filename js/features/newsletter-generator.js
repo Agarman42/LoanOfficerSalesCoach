@@ -1948,9 +1948,31 @@ const persistentFields = [
     'nl-personal-video',
     'nl-personal-video-size',
     'nl-color-bundle',
-    'nl-specific',
-    'nl-direction-market', 'nl-direction-industry', 'nl-direction-local', 'nl-direction-recipes'
+    'nl-specific'
+    // Direction notes (market/industry/local/recipes) intentionally NOT persisted —
+    // cleared after a successful generate so next issue starts blank.
 ];
+const NL_DIRECTION_FIELD_IDS = [
+    'nl-direction-market',
+    'nl-direction-industry',
+    'nl-direction-local',
+    'nl-direction-recipes'
+];
+
+/** Clear one-off section directions after a successful generate (do not keep for next issue). */
+function clearNewsletterDirectionFields() {
+    NL_DIRECTION_FIELD_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+        try { localStorage.removeItem(id); } catch (e) { /* ignore */ }
+    });
+    // Wizard mirrors of the same fields
+    ['nl-wizard-direction-market', 'nl-wizard-direction-industry', 'nl-wizard-direction-local', 'nl-wizard-direction-recipes'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+        try { localStorage.removeItem(id); } catch (e) { /* ignore */ }
+    });
+}
 
 // OUTLOOK PASTE (2026-07-20, confirmed): oversized personal photo/video (full ~540px)
 // mis-formats desktop Outlook paste. Caps below fixed it — see docs/NEWSLETTER-OUTLOOK-PASTE.md.
@@ -2811,15 +2833,70 @@ function getNewsletterAccentColor() {
 
 const NL_SECTION_LEFT_BORDER_IN_TABLE_RE = /border-left:\s*(?:4|8)px\s+solid\s+#?[0-9a-fA-F]{3,6}/i;
 
+/** Instagram post/reel shortcode (no public free thumb API — use branded card). */
+function extractInstagramShortcode(url) {
+    if (!url) return '';
+    try {
+        const parsed = new URL(String(url).trim().startsWith('http') ? String(url).trim() : `https://${url}`);
+        const host = parsed.hostname.replace(/^www\./, '');
+        if (!host.includes('instagram.com')) return '';
+        const parts = parsed.pathname.split('/').filter(Boolean);
+        const kinds = ['p', 'reel', 'reels', 'tv'];
+        for (let i = 0; i < parts.length - 1; i++) {
+            if (kinds.includes(parts[i].toLowerCase()) && parts[i + 1]) {
+                return parts[i + 1].replace(/[^A-Za-z0-9_-]/g, '');
+            }
+        }
+    } catch (e) { /* ignore */ }
+    return '';
+}
+
+function isInstagramVideoUrl(url) {
+    return !!extractInstagramShortcode(url) || /instagram\.com/i.test(String(url || ''));
+}
+
+function resolvePersonalVideoThumb(href) {
+    const yt = extractYouTubeVideoId(href);
+    if (yt) {
+        return { kind: 'youtube', url: `https://img.youtube.com/vi/${yt}/mqdefault.jpg`, label: 'YouTube' };
+    }
+    if (isInstagramVideoUrl(href)) {
+        return { kind: 'instagram', url: null, label: 'Instagram' };
+    }
+    return { kind: 'other', url: null, label: 'Video' };
+}
+
+function buildPersonalVideoThumbCell(href, videoWidthPx, thumbMeta) {
+    const w = videoWidthPx || 320;
+    if (thumbMeta && thumbMeta.url) {
+        return `<a href="${href}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;max-width:100%;">
+              <img src="${thumbMeta.url}" alt="Watch Personal Video" width="${w}" style="display:block;margin:0 auto;width:${w}px;max-width:100%;height:auto;border:3px solid #00A89D;border-radius:8px;">
+            </a>`;
+    }
+    const brand = (thumbMeta && thumbMeta.kind === 'instagram') ? 'Instagram' : 'Video';
+    const sub = brand === 'Instagram'
+        ? 'Tap to open Reel / post on Instagram'
+        : 'Tap to open video';
+    return `<a href="${href}" target="_blank" rel="noopener" style="text-decoration:none;display:block;max-width:${w}px;margin:0 auto;">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;max-width:${w}px;margin:0 auto;border-collapse:separate;border:3px solid #00A89D;border-radius:10px;overflow:hidden;background:linear-gradient(145deg,#833ab4 0%,#fd1d1d 50%,#fcb045 100%);">
+                <tr>
+                  <td align="center" style="padding:36px 20px;text-align:center;">
+                    <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.95);margin:0 auto 12px;line-height:56px;font-size:22px;color:#002B5C;">▶</div>
+                    <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;">Watch on ${brand}</p>
+                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:rgba(255,255,255,0.9);">${sub}</p>
+                  </td>
+                </tr>
+              </table>
+            </a>`;
+}
+
 function buildPersonalVideoTable(personalVideoUrl) {
     const url = String(personalVideoUrl || '').trim();
     if (!url) return '';
     const href = url.startsWith('http') ? url : `https://${url}`;
-    const videoId = extractYouTubeVideoId(href);
     const videoWidthPx = getPersonalVideoWidthPx();
-    const thumbnailUrl = videoId
-        ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-        : 'https://via.placeholder.com/560x315/002B5C/FFFFFF?text=Watch+Video';
+    const thumbMeta = resolvePersonalVideoThumb(href);
+    const thumbCell = buildPersonalVideoThumbCell(href, videoWidthPx, thumbMeta);
 
     return `
 <table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-personal-video="1" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
@@ -2829,9 +2906,7 @@ function buildPersonalVideoTable(personalVideoUrl) {
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
         <tr>
           <td align="center" style="padding:0;">
-            <a href="${href}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;max-width:100%;">
-              <img src="${thumbnailUrl}" alt="Watch Personal Video" width="${videoWidthPx}" style="display:block;margin:0 auto;width:${videoWidthPx}px;max-width:100%;height:auto;border:3px solid #00A89D;border-radius:8px;">
-            </a>
+            ${thumbCell}
           </td>
         </tr>
         <tr>
@@ -4094,17 +4169,20 @@ function updatePersonalMediaPreviews() {
             videoLink.removeAttribute('href');
         } else {
             const href = videoUrl.startsWith('http') ? videoUrl : `https://${videoUrl}`;
-            const videoId = extractYouTubeVideoId(href);
+            const thumbMeta = resolvePersonalVideoThumb(href);
             videoWrap.classList.remove('hidden');
             videoLink.href = href;
-            if (videoId) {
-                videoThumb.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+            if (thumbMeta.kind === 'youtube' && thumbMeta.url) {
+                videoThumb.src = thumbMeta.url.replace('/mqdefault.jpg', '/hqdefault.jpg');
                 videoThumb.alt = 'YouTube video thumbnail';
                 videoThumb.onload = () => applyPersonalVideoPreviewSizing();
                 videoStatus.innerHTML = '<span class="text-[#00A89D] font-medium">✓ YouTube link recognized — thumbnail preview</span>';
+            } else if (thumbMeta.kind === 'instagram') {
+                videoThumb.removeAttribute('src');
+                videoStatus.innerHTML = '<span class="text-[#00A89D] font-medium">✓ Instagram link — email uses a branded “Watch on Instagram” card (Meta does not allow free public thumbs)</span>';
             } else {
-                videoThumb.src = 'https://via.placeholder.com/560x200/002B5C/FFFFFF?text=Video+link';
-                videoStatus.innerHTML = '<span class="text-amber-700 dark:text-amber-300">⚠ Use a YouTube or YouTube Shorts URL for best results</span>';
+                videoThumb.removeAttribute('src');
+                videoStatus.innerHTML = '<span class="text-amber-700 dark:text-amber-300">Link will open in email; YouTube gets a real thumb, Instagram gets a branded card</span>';
             }
             applyPersonalVideoPreviewSizing();
         }
@@ -4931,6 +5009,8 @@ if (postSelections?.includeReferral) {
 
             if (!feedback) {
                 window._nlNextStepsId = `nl_${Date.now().toString(36)}`;
+                // Directions are issue-specific — clear so next newsletter starts blank
+                clearNewsletterDirectionFields();
             }
         }
 
