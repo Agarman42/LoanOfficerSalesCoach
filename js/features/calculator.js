@@ -16,6 +16,11 @@ let selectedDPAPercent = 3.5;
 /** Fixed 3 slots: [A, B, C] — each null or scenario object */
 let calcScenarioBoard = [null, null, null];
 let lastCalcBundle = null; // { inputs, results, valid, error }
+/**
+ * Which purchase field the user last edited — source of truth for price/down/loan link.
+ * Prevents % rounding (e.g. 46.67%) from rewriting a typed $200,000 loan to $199,988.
+ */
+let purchaseLinkDriver = 'down'; // 'price' | 'down' | 'loan'
 
 const CALC_BOARD_KEY =
   (typeof window !== 'undefined' && window.CALC_COACH_VARIANT === 'realtor')
@@ -293,11 +298,25 @@ function isPmiDollarMode() {
   return btn.classList.contains('is-active') || !document.getElementById('pmi-percent-btn')?.classList.contains('is-active');
 }
 
+function setPurchaseLinkDriver(driver) {
+  if (driver === 'price' || driver === 'down' || driver === 'loan') {
+    purchaseLinkDriver = driver;
+  }
+}
+
+/** Pretty % for the down field (display only — loan-driver path never recomputes loan from this). */
+function formatDownPercentDisplay(pct) {
+  if (!Number.isFinite(pct)) return '0';
+  if (Math.abs(pct - Math.round(pct)) < 0.0005) return String(Math.round(pct));
+  // Up to 4 decimals, trim trailing zeros (46.6667 → nicer than 46.67 for reverse-friendly display)
+  return String(parseFloat(pct.toFixed(4)));
+}
+
 /**
  * Keep purchase price / down / loan linked.
+ * - Last-edited field is the source of truth (purchaseLinkDriver)
  * - Edit price or down → loan = price − down
- * - Edit loan → down updates (as % or $ depending on toggle)
- * While the user is typing loan amount, loan is the driver so down % tracks correctly.
+ * - Edit loan → down updates (as % or $); loan amount is never rounded via %
  */
 function syncPurchaseLoanFields() {
   if (!isPurchaseMode()) return;
@@ -307,21 +326,24 @@ function syncPurchaseLoanFields() {
   if (!dpEl || !loanEl) return;
 
   const isPercent = isDownPercentMode();
-  const focusedId = document.activeElement ? document.activeElement.id : '';
   const downPaymentInput = parseFloat(dpEl.value) || 0;
   const loanAmountInput = parseFloat(loanEl.value) || 0;
 
-  // Loan field is driving: update down payment to match price − loan
-  if (focusedId === 'loanAmountManual' && homePrice > 0) {
-    const loanClamped = Math.max(0, Math.min(loanAmountInput || 0, homePrice));
+  // Loan is source of truth: keep typed loan; only derive down (display)
+  if (purchaseLinkDriver === 'loan' && homePrice > 0) {
+    let loanClamped = Math.max(0, loanAmountInput || 0);
+    if (loanClamped > homePrice) {
+      loanClamped = homePrice;
+      loanEl.value = String(Math.round(loanClamped));
+    }
     const downAmount = Math.max(0, homePrice - loanClamped);
     if (isPercent) {
       const pct = (downAmount / homePrice) * 100;
-      if (Math.abs(pct - downPaymentInput) > 0.005) {
-        dpEl.value = Math.abs(pct - Math.round(pct)) < 0.005 ? String(Math.round(pct)) : pct.toFixed(2);
-      }
-    } else if (Math.abs(downAmount - downPaymentInput) > 0.5) {
-      dpEl.value = String(Math.round(downAmount));
+      const next = formatDownPercentDisplay(pct);
+      if (dpEl.value !== next) dpEl.value = next;
+    } else {
+      const next = String(Math.round(downAmount));
+      if (dpEl.value !== next) dpEl.value = next;
     }
     return;
   }
@@ -346,10 +368,9 @@ function readInputsFromDom() {
 
   let downAmount = 0;
   if (isPurchase) {
-    const focusedId = document.activeElement ? document.activeElement.id : '';
-    if (focusedId === 'loanAmountManual' && loanAmount > 0) {
-      // Loan is source of truth while typing it
-      loanAmount = Math.max(0, Math.min(loanAmount, homePrice || loanAmount));
+    if (purchaseLinkDriver === 'loan') {
+      // Typed loan wins — never recompute from rounded down %
+      loanAmount = Math.max(0, Math.min(loanAmount, homePrice > 0 ? homePrice : loanAmount));
       downAmount = Math.max(0, homePrice - loanAmount);
     } else {
       downAmount = isPercent ? (downPayment / 100) * homePrice : downPayment;
@@ -368,6 +389,7 @@ function readInputsFromDom() {
     downIsPercent: isPercent,
     downAmount,
     loanAmount,
+    loanIsDriver: isPurchase && purchaseLinkDriver === 'loan',
     rate: parseFloat(document.getElementById('rate')?.value) || 0,
     termYears: parseFloat(document.getElementById('term')?.value) || 30,
     taxesAnnual: parseFloat(document.getElementById('taxes')?.value) || 0,
@@ -2727,8 +2749,15 @@ function initCalculator() {
   });
 
   document.querySelectorAll('#calculator input').forEach((el) => {
-    el.addEventListener('input', calculateAdvanced);
-    el.addEventListener('change', calculateAdvanced);
+    const onField = () => {
+      const id = el.id;
+      if (id === 'loanAmountManual') setPurchaseLinkDriver('loan');
+      else if (id === 'downPayment') setPurchaseLinkDriver('down');
+      else if (id === 'homePrice') setPurchaseLinkDriver('price');
+      calculateAdvanced();
+    };
+    el.addEventListener('input', onField);
+    el.addEventListener('change', onField);
   });
 
   const hnChk = document.getElementById('homenow-checkbox');
