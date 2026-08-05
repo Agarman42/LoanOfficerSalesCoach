@@ -828,50 +828,130 @@ function autoScenarioLabel(inputs, results) {
   return label;
 }
 
+function scenarioFingerprint(inputs, results) {
+  const r = results || {};
+  const i = inputs || {};
+  return [
+    i.mode,
+    Math.round(r.homePrice || i.homePrice || 0),
+    Math.round(r.baseLoanAmount || 0),
+    Math.round((r.downAmount || 0) * 100) / 100,
+    Number(r.annualRate || i.rate || 0).toFixed(3),
+    r.termYears || i.termYears || 0,
+    r.homeNow ? 1 : 0,
+    r.dpaPercent || 0,
+    Math.round(r.extraMonthly || 0),
+    r.biweekly ? 1 : 0,
+    Math.round(r.monthlyPMI || 0)
+  ].join('|');
+}
+
 function saveCurrentScenario() {
   if (!lastCalcBundle || !lastCalcBundle.valid) {
     calcToast('Enter valid loan details first');
     return;
   }
+  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
+    calcToast('Board full (3/3). Remove one, or Clear board, then add a new option.');
+    scrollToScenarioBoard();
+    return;
+  }
+
   const inputs = lastCalcBundle.inputs;
   const results = lastCalcBundle.results;
-  const label = autoScenarioLabel(inputs, results);
-  let boarded = false;
-
-  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
-    calcToast('Board full (max 3) — still saving to My Saved Items');
-  } else {
-    const scenario = {
-      id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      label: label,
-      createdAt: new Date().toISOString(),
-      inputs: Object.assign({}, inputs),
-      results: Object.assign({}, results)
-    };
-    calcScenarioBoard.push(scenario);
-    persistBoard();
-    renderScenarioBoard();
-    boarded = true;
-  }
-
-  // Always save client-ready summary to My Saved Items vault
-  const vaultOk = saveCalcToVault({
-    silent: true,
-    title: 'Mortgage: ' + label + ' — ' + new Date().toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    })
+  const fp = scenarioFingerprint(inputs, results);
+  const dup = calcScenarioBoard.find(function (s) {
+    return scenarioFingerprint(s.inputs, s.results) === fp;
   });
-
-  if (boarded && vaultOk) {
-    calcToast('Saved “' + label + '” to board + My Saved Items');
-  } else if (vaultOk) {
-    calcToast('Saved “' + label + '” to My Saved Items');
-  } else if (boarded) {
-    calcToast('On board: ' + label + ' (vault save failed)');
+  if (dup) {
+    calcToast(
+      'That’s the same as “' +
+        dup.label +
+        '”. Change down %, rate, HomeNow, or extra — then Add to compare again.'
+    );
+    scrollToScenarioBoard();
+    return;
   }
+
+  const letter = String.fromCharCode(65 + calcScenarioBoard.length);
+  let label = autoScenarioLabel(inputs, results);
+  // Optional short name so A/B/C stay meaningful
+  const custom = window.prompt(
+    'Name for Option ' + letter + ' (optional)',
+    label
+  );
+  if (custom != null && String(custom).trim()) {
+    label = String(custom).trim().slice(0, 48);
+  }
+
+  const scenario = {
+    id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    label: label,
+    createdAt: new Date().toISOString(),
+    inputs: Object.assign({}, inputs),
+    results: Object.assign({}, results)
+  };
+  calcScenarioBoard.push(scenario);
+  persistBoard();
+  renderScenarioBoard();
+  scrollToScenarioBoard();
+
+  const n = calcScenarioBoard.length;
+  if (n < CALC_MAX_SCENARIOS) {
+    const next = String.fromCharCode(65 + n);
+    calcToast(
+      'Option ' +
+        letter +
+        ' added. Now change the numbers (e.g. HomeNow or 5% down), then Add to compare for Option ' +
+        next +
+        '.'
+    );
+  } else {
+    calcToast('Option ' + letter + ' added — board full. Copy, Email, or Print your comparison.');
+  }
+}
+
+function scrollToScenarioBoard() {
+  const el = document.getElementById('calc-scenario-board');
+  if (el && typeof el.scrollIntoView === 'function') {
+    try {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {
+      el.scrollIntoView(true);
+    }
+  }
+}
+
+function clearScenarioBoard() {
+  if (!calcScenarioBoard.length) return;
+  if (!window.confirm('Clear all scenarios from the comparison board?')) return;
+  calcScenarioBoard = [];
+  persistBoard();
+  renderScenarioBoard();
+  calcToast('Comparison board cleared');
+}
+
+function saveBoardComparisonToVault() {
+  if (!calcScenarioBoard.length) {
+    calcToast('Add at least one scenario to the board first');
+    return;
+  }
+  const labels = calcScenarioBoard.map(function (s) { return s.label; }).join(' vs ');
+  saveCalcToVault({
+    title:
+      'Mortgage compare (' +
+      calcScenarioBoard.length +
+      '): ' +
+      labels.slice(0, 60) +
+      ' — ' +
+      new Date().toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      }),
+    feedback: 'Comparison saved to My Saved Items'
+  });
 }
 
 function removeScenario(id) {
@@ -904,15 +984,26 @@ function renderScenarioBoard() {
   const slots = document.getElementById('calc-scenario-slots');
   const empty = document.getElementById('calc-board-empty');
   const count = document.getElementById('calc-board-count');
-  if (count) count.textContent = `${calcScenarioBoard.length} / ${CALC_MAX_SCENARIOS} saved`;
-  if (!slots) return;
+  const saveVaultBtn = document.getElementById('calc-board-save-vault-btn');
+  const clearBtn = document.getElementById('calc-board-clear-btn');
+  const saveHeroBtn = document.getElementById('calc-save-scenario-btn');
+  const n = calcScenarioBoard.length;
 
-  if (!calcScenarioBoard.length) {
-    slots.innerHTML = '';
-    if (empty) empty.classList.remove('hidden');
-    return;
-  }
+  if (count) count.textContent = n + ' / ' + CALC_MAX_SCENARIOS;
   if (empty) empty.classList.add('hidden');
+  if (saveVaultBtn) saveVaultBtn.classList.toggle('hidden', n === 0);
+  if (clearBtn) clearBtn.classList.toggle('hidden', n === 0);
+  if (saveHeroBtn) {
+    const nextLetter = n < CALC_MAX_SCENARIOS ? String.fromCharCode(65 + n) : '—';
+    const span = saveHeroBtn.querySelector('span');
+    if (span) {
+      span.textContent =
+        n >= CALC_MAX_SCENARIOS ? 'Board full' : 'Add to compare (' + nextLetter + ')';
+    }
+    saveHeroBtn.disabled = n >= CALC_MAX_SCENARIOS;
+    saveHeroBtn.classList.toggle('is-disabled', n >= CALC_MAX_SCENARIOS);
+  }
+  if (!slots) return;
 
   let minPay = Infinity;
   let minDown = Infinity;
@@ -923,50 +1014,79 @@ function renderScenarioBoard() {
     if (s.inputs && s.inputs.mode === 'purchase' && typeof d === 'number' && d < minDown) minDown = d;
   });
 
-  slots.innerHTML = calcScenarioBoard
-    .map((s, idx) => {
-      const r = s.results || {};
-      const isLowPay = r.totalMonthly === minPay && calcScenarioBoard.length > 1;
-      const isLowDown =
-        s.inputs &&
-        s.inputs.mode === 'purchase' &&
-        r.downAmount === minDown &&
-        calcScenarioBoard.length > 1 &&
-        minDown < Infinity;
-      const badges = [];
-      if (isLowPay) badges.push('<span class="calc-badge calc-badge-best">Lowest monthly</span>');
-      if (isLowDown) badges.push('<span class="calc-badge">Lowest down</span>');
-      if (r.homeNow) badges.push(`<span class="calc-badge calc-badge-hn">HomeNow ${r.dpaPercent}%</span>`);
-      const letter = String.fromCharCode(65 + idx);
-
-      return `
-        <article class="calc-scenario-card ${isLowPay ? 'is-best' : ''}" data-scenario-id="${escapeHtml(s.id)}">
+  const cards = [];
+  for (let idx = 0; idx < CALC_MAX_SCENARIOS; idx++) {
+    const letter = String.fromCharCode(65 + idx);
+    const s = calcScenarioBoard[idx];
+    if (!s) {
+      const isNext = idx === n;
+      cards.push(`
+        <article class="calc-scenario-card calc-scenario-card--empty ${isNext ? 'is-next' : ''}" data-empty-slot="${letter}">
           <div class="calc-card-top">
             <div class="calc-card-identity">
-              <span class="calc-card-letter">${letter}</span>
+              <span class="calc-card-letter calc-card-letter--ghost">${letter}</span>
               <div class="calc-card-titles">
                 <div class="calc-card-kicker">Option ${letter}</div>
-                <h4 class="calc-card-title" title="${escapeHtml(s.label)}">${escapeHtml(s.label)}</h4>
+                <h4 class="calc-card-title">${isNext ? 'Waiting for you…' : 'Empty slot'}</h4>
               </div>
             </div>
-            ${badges.length ? `<div class="calc-card-badges">${badges.join('')}</div>` : ''}
           </div>
-          <div class="calc-card-pay">${money2(r.totalMonthly)}<span>/mo</span></div>
-          <div class="calc-card-stat-grid">
-            <div class="calc-card-stat"><span>Loan</span><strong>${money0(r.baseLoanAmount)}</strong></div>
-            <div class="calc-card-stat"><span>${s.inputs && s.inputs.mode === 'purchase' ? 'Down' : 'Mode'}</span><strong>${s.inputs && s.inputs.mode === 'purchase' ? money0(r.downAmount) : 'Refi'}</strong></div>
-            <div class="calc-card-stat"><span>Rate</span><strong>${r.annualRate}%</strong></div>
-            <div class="calc-card-stat"><span>Term</span><strong>${r.termYears} yr</strong></div>
+          <div class="calc-empty-body">
+            ${
+              isNext
+                ? `<p><strong>Next step:</strong> set the payment you want to compare, then click <strong>Add to compare (${letter})</strong> above.</p>
+                   <p class="calc-empty-examples">Ideas: HomeNow 3.5% · Conventional 5% · 20% down · +$200 extra</p>`
+                : n === 0 && idx === 0
+                  ? `<p>Start with any payment, then <strong>Add to compare (A)</strong>.</p>`
+                  : `<p>Fill Option ${String.fromCharCode(65 + n)} first.</p>`
+            }
           </div>
-          ${r.homeNow ? `<div class="calc-card-hn">HomeNow ${r.dpaPercent}% · 2nd ${money0(r.dpaAmount)} · ${money2(r.monthlyHomeNowSecond)}/mo</div>` : ''}
-          <div class="calc-card-actions">
-            <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
-            <button type="button" class="calc-card-btn" data-action="rename" data-id="${escapeHtml(s.id)}">Rename</button>
-            <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="remove" data-id="${escapeHtml(s.id)}">Remove</button>
+        </article>`);
+      continue;
+    }
+
+    const r = s.results || {};
+    const isLowPay = r.totalMonthly === minPay && n > 1;
+    const isLowDown =
+      s.inputs &&
+      s.inputs.mode === 'purchase' &&
+      r.downAmount === minDown &&
+      n > 1 &&
+      minDown < Infinity;
+    const badges = [];
+    if (isLowPay) badges.push('<span class="calc-badge calc-badge-best">Lowest monthly</span>');
+    if (isLowDown) badges.push('<span class="calc-badge">Lowest down</span>');
+    if (r.homeNow) badges.push(`<span class="calc-badge calc-badge-hn">HomeNow ${r.dpaPercent}%</span>`);
+
+    cards.push(`
+      <article class="calc-scenario-card ${isLowPay ? 'is-best' : ''}" data-scenario-id="${escapeHtml(s.id)}">
+        <div class="calc-card-top">
+          <div class="calc-card-identity">
+            <span class="calc-card-letter">${letter}</span>
+            <div class="calc-card-titles">
+              <div class="calc-card-kicker">Option ${letter}</div>
+              <h4 class="calc-card-title" title="${escapeHtml(s.label)}">${escapeHtml(s.label)}</h4>
+            </div>
           </div>
-        </article>`;
-    })
-    .join('');
+          ${badges.length ? `<div class="calc-card-badges">${badges.join('')}</div>` : ''}
+        </div>
+        <div class="calc-card-pay">${money2(r.totalMonthly)}<span>/mo</span></div>
+        <div class="calc-card-stat-grid">
+          <div class="calc-card-stat"><span>Loan</span><strong>${money0(r.baseLoanAmount)}</strong></div>
+          <div class="calc-card-stat"><span>${s.inputs && s.inputs.mode === 'purchase' ? 'Down' : 'Mode'}</span><strong>${s.inputs && s.inputs.mode === 'purchase' ? money0(r.downAmount) : 'Refi'}</strong></div>
+          <div class="calc-card-stat"><span>Rate</span><strong>${r.annualRate}%</strong></div>
+          <div class="calc-card-stat"><span>Term</span><strong>${r.termYears} yr</strong></div>
+        </div>
+        ${r.homeNow ? `<div class="calc-card-hn">HomeNow ${r.dpaPercent}% · 2nd ${money0(r.dpaAmount)} · ${money2(r.monthlyHomeNowSecond)}/mo</div>` : ''}
+        <div class="calc-card-actions">
+          <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
+          <button type="button" class="calc-card-btn" data-action="rename" data-id="${escapeHtml(s.id)}">Rename</button>
+          <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="remove" data-id="${escapeHtml(s.id)}">Remove</button>
+        </div>
+      </article>`);
+  }
+
+  slots.innerHTML = cards.join('');
 
   slots.querySelectorAll('[data-action]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -2434,6 +2554,8 @@ if (typeof window !== 'undefined') {
   window.emailForClient = emailForClient;
   window.printCalcScenarios = printCalcScenarios;
   window.saveCurrentScenario = saveCurrentScenario;
+  window.clearScenarioBoard = clearScenarioBoard;
+  window.saveBoardComparisonToVault = saveBoardComparisonToVault;
   window.computeMortgageScenario = computeMortgageScenario;
 }
 
@@ -2466,6 +2588,8 @@ function initCalculator() {
   document.getElementById('calc-copy-client-btn')?.addEventListener('click', copyForClient);
   document.getElementById('calc-email-client-btn')?.addEventListener('click', emailForClient);
   document.getElementById('calc-print-btn')?.addEventListener('click', printCalcScenarios);
+  document.getElementById('calc-board-save-vault-btn')?.addEventListener('click', saveBoardComparisonToVault);
+  document.getElementById('calc-board-clear-btn')?.addEventListener('click', clearScenarioBoard);
 
   // Defaults — PMI in monthly $ (most common for LOs)
   setCalcMode('purchase', { silent: true });
