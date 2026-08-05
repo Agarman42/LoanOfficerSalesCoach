@@ -281,8 +281,10 @@ function isPmiDollarMode() {
 }
 
 /**
- * Purchase loan amount is always derived from home price − down payment.
- * (The old second "Loan amount" field was removed — it fought price/down and confused users.)
+ * Keep purchase price / down / loan linked.
+ * - Edit price or down → loan = price − down
+ * - Edit loan → down updates (as % or $ depending on toggle)
+ * While the user is typing loan amount, loan is the driver so down % tracks correctly.
  */
 function syncPurchaseLoanFields() {
   if (!isPurchaseMode()) return;
@@ -292,7 +294,26 @@ function syncPurchaseLoanFields() {
   if (!dpEl || !loanEl) return;
 
   const isPercent = isDownPercentMode();
+  const focusedId = document.activeElement ? document.activeElement.id : '';
   const downPaymentInput = parseFloat(dpEl.value) || 0;
+  const loanAmountInput = parseFloat(loanEl.value) || 0;
+
+  // Loan field is driving: update down payment to match price − loan
+  if (focusedId === 'loanAmountManual' && homePrice > 0) {
+    const loanClamped = Math.max(0, Math.min(loanAmountInput || 0, homePrice));
+    const downAmount = Math.max(0, homePrice - loanClamped);
+    if (isPercent) {
+      const pct = (downAmount / homePrice) * 100;
+      if (Math.abs(pct - downPaymentInput) > 0.005) {
+        dpEl.value = Math.abs(pct - Math.round(pct)) < 0.005 ? String(Math.round(pct)) : pct.toFixed(2);
+      }
+    } else if (Math.abs(downAmount - downPaymentInput) > 0.5) {
+      dpEl.value = String(Math.round(downAmount));
+    }
+    return;
+  }
+
+  // Price or down is driving: update loan = price − down
   const downAmount = isPercent ? (downPaymentInput / 100) * homePrice : downPaymentInput;
   const loanAmount = Math.max(0, homePrice - downAmount);
   const cur = parseFloat(loanEl.value) || 0;
@@ -312,15 +333,25 @@ function readInputsFromDom() {
 
   let downAmount = 0;
   if (isPurchase) {
-    // Always derive loan from price − down (single source of truth)
-    downAmount = isPercent ? (downPayment / 100) * homePrice : downPayment;
-    loanAmount = Math.max(0, homePrice - downAmount);
+    const focusedId = document.activeElement ? document.activeElement.id : '';
+    if (focusedId === 'loanAmountManual' && loanAmount > 0) {
+      // Loan is source of truth while typing it
+      loanAmount = Math.max(0, Math.min(loanAmount, homePrice || loanAmount));
+      downAmount = Math.max(0, homePrice - loanAmount);
+    } else {
+      downAmount = isPercent ? (downPayment / 100) * homePrice : downPayment;
+      loanAmount = Math.max(0, homePrice - downAmount);
+    }
   }
 
   return {
     mode: isPurchase ? 'purchase' : 'refinance',
     homePrice,
-    downPayment,
+    downPayment: isPurchase
+      ? (isPercent
+          ? (homePrice > 0 ? (downAmount / homePrice) * 100 : downPayment)
+          : downAmount)
+      : downPayment,
     downIsPercent: isPercent,
     downAmount,
     loanAmount,

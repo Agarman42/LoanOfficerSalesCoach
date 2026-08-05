@@ -5954,8 +5954,11 @@
                   <button type="button" id="dp-dollar-btn" class="calc-seg-btn">$</button>
                 </div>
               </div>
-              <!-- Loan amount is derived from home price − down payment (hidden for calc engine) -->
-              <input type="hidden" id="loanAmountManual" value="300000">
+              <div class="calc-field">
+                <label for="loanAmountManual">Loan amount</label>
+                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="loanAmountManual" min="0" value="300000" class="calc-input"></div>
+                <p class="calc-hint">Linked with price &amp; down — edit any one and the others update</p>
+              </div>
             </div>
             <div id="refinance-inputs" class="calc-fields hidden">
               <div class="calc-field">
