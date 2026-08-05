@@ -982,61 +982,192 @@ function calculateAdvanced() {
   return computed;
 }
 
+function getClientScenarioSources() {
+  if (calcScenarioBoard.length > 0) {
+    return calcScenarioBoard.map((s, i) => ({
+      label: s.label || 'Option ' + String.fromCharCode(65 + i),
+      results: s.results,
+      inputs: s.inputs
+    }));
+  }
+  if (lastCalcBundle && lastCalcBundle.valid) {
+    return [
+      {
+        label: autoScenarioLabel(lastCalcBundle.inputs, lastCalcBundle.results),
+        results: lastCalcBundle.results,
+        inputs: lastCalcBundle.inputs
+      }
+    ];
+  }
+  return [];
+}
+
+/** Left-align label, right-align value in plain text (works in most mail clients). */
+function emailRow(label, value, width) {
+  const w = width || 22;
+  const l = String(label || '');
+  const v = String(value || '');
+  const pad = Math.max(1, w - l.length);
+  return '  ' + l + ' '.repeat(pad) + v;
+}
+
+/**
+ * Polished plain-text client summary for Copy + Email.
+ * mailto: only supports plain text — structure, spacing, and hierarchy do the work.
+ */
 function getClientCopyText() {
-  const lines = [];
-  lines.push('Hi — payment options to review:');
-  lines.push('');
-
-  const sources =
-    calcScenarioBoard.length > 0
-      ? calcScenarioBoard.map((s, i) => ({
-          label: s.label || 'Option ' + String.fromCharCode(65 + i),
-          results: s.results,
-          inputs: s.inputs
-        }))
-      : lastCalcBundle && lastCalcBundle.valid
-        ? [
-            {
-              label: autoScenarioLabel(lastCalcBundle.inputs, lastCalcBundle.results),
-              results: lastCalcBundle.results,
-              inputs: lastCalcBundle.inputs
-            }
-          ]
-        : [];
-
+  const sources = getClientScenarioSources();
   if (!sources.length) return '';
 
+  const r0 = sources[0].results || {};
   const price =
-    sources[0].results && sources[0].results.homePrice
-      ? sources[0].results.homePrice
-      : sources[0].inputs && sources[0].inputs.homePrice;
-  if (price) {
-    lines[0] = `Hi — payment options for a ${money0(price)} home:`;
+    (r0.homePrice > 0 && r0.homePrice) ||
+    (sources[0].inputs && sources[0].inputs.homePrice) ||
+    0;
+  const isRefi = r0.mode === 'refinance';
+  const hasHomeNow = sources.some((s) => s.results && s.results.homeNow);
+  const multi = sources.length > 1;
+
+  const lines = [];
+  lines.push('Hi there —');
+  lines.push('');
+  if (price && !isRefi) {
+    lines.push(
+      multi
+        ? `I put together ${sources.length} payment options for a ${money0(price)} home so you can compare them side by side.`
+        : `Here is a clear payment snapshot for a ${money0(price)} home.`
+    );
+  } else if (isRefi) {
+    lines.push(
+      multi
+        ? `I put together ${sources.length} refinance payment options for you to compare.`
+        : 'Here is a clear refinance payment snapshot for you to review.'
+    );
+  } else {
+    lines.push(
+      multi
+        ? `I put together ${sources.length} payment options for you to compare side by side.`
+        : 'Here is a clear payment snapshot for you to review.'
+    );
+  }
+  lines.push('All figures are estimates for discussion — happy to walk through any of them.');
+  lines.push('');
+
+  // Quick compare strip when 2–3 options
+  if (multi) {
+    lines.push('┌─────────────────────────────────────────────');
+    lines.push('│  QUICK COMPARE');
+    lines.push('├─────────────────────────────────────────────');
+    sources.forEach((s, i) => {
+      const r = s.results || {};
+      const letter = String.fromCharCode(65 + i);
+      const downBit =
+        r.mode === 'purchase'
+          ? money0(r.downAmount) + ' down'
+          : 'refi';
+      const prog = r.homeNow ? `HomeNow ${r.dpaPercent}%` : r.mode === 'purchase' ? 'Purchase' : 'Refinance';
+      lines.push(
+        `│  ${letter}.  ${money2(r.totalMonthly)}/mo   ·   ${downBit}   ·   ${prog}`
+      );
+      lines.push(`│      ${s.label}`);
+    });
+    lines.push('└─────────────────────────────────────────────');
+    lines.push('');
   }
 
   sources.forEach((s, i) => {
-    const r = s.results;
+    const r = s.results || {};
     const letter = String.fromCharCode(65 + i);
-    lines.push(`Option ${letter} — ${s.label}`);
-    let moLine = `  Monthly housing ≈ ${money2(r.totalMonthly)}`;
-    if (r.homeNow) moLine += '  (1st + HomeNow 2nd)';
-    lines.push(moLine);
-    if (s.inputs && s.inputs.mode === 'purchase') {
-      let downLine = `  Down ≈ ${money0(r.downAmount)}`;
-      if (r.homeNow && r.downAmount < 1) downLine += ' *';
-      lines.push(downLine);
-    }
-    lines.push(`  Rate ${r.annualRate}% · ${r.termYears}-year · loan ${money0(r.baseLoanAmount)}`);
+    const accelerated = (r.extraMonthly > 0) || r.biweekly;
+    const rule = '────────────────────────────────────────';
+
+    lines.push(rule);
+    lines.push(`  OPTION ${letter}  ·  ${s.label}`);
+    lines.push(rule);
+    lines.push('');
+    lines.push(emailRow('Monthly housing', money2(r.totalMonthly) + ' /mo'));
     if (r.homeNow) {
-      lines.push(`  HomeNow DPA ${r.dpaPercent}% ≈ ${money0(r.dpaAmount)} 2nd @ ${r.secondRate.toFixed(3)}%`);
+      lines.push(emailRow('', '(includes 1st + HomeNow 2nd)'));
+    }
+    lines.push('');
+    if (r.mode === 'purchase') {
+      lines.push(
+        emailRow(
+          'Down payment',
+          money0(r.downAmount) + (r.homeNow && r.downAmount < 1 ? ' *' : '')
+        )
+      );
+      if (r.homePrice > 0) lines.push(emailRow('Home price', money0(r.homePrice)));
+    }
+    lines.push(emailRow('Base loan', money0(r.baseLoanAmount)));
+    if (r.homeNow) lines.push(emailRow('1st w/ UFMIP', money0(r.firstLoanWithUfmip)));
+    lines.push(emailRow('Rate / term', `${r.annualRate}%  ·  ${r.termYears}-year`));
+    lines.push(emailRow('Principal & interest', money2(r.monthlyPI) + ' /mo'));
+    lines.push(
+      emailRow('Taxes + insurance', money2((r.monthlyTaxes || 0) + (r.monthlyInsurance || 0)) + ' /mo')
+    );
+    lines.push(emailRow(r.homeNow ? 'MIP' : 'PMI', money2(r.monthlyPMI) + ' /mo'));
+    if (r.homeNow) {
+      lines.push(
+        emailRow(
+          `HomeNow 2nd (${r.dpaPercent}%)`,
+          money2(r.monthlyHomeNowSecond) + ' /mo'
+        )
+      );
+      lines.push(
+        emailRow(
+          '  DPA amount / rate',
+          `${money0(r.dpaAmount)}  @  ${Number(r.secondRate).toFixed(3)}% · 10 yr`
+        )
+      );
+    }
+
+    // Standard vs accelerated (always useful)
+    lines.push('');
+    lines.push('  Standard vs accelerated');
+    lines.push(emailRow('  Standard monthly', money2(r.standardTotalMonthly) + ' /mo'));
+    if (accelerated) {
+      const accelBits = [];
+      if (r.extraMonthly > 0) accelBits.push('+' + money0(r.extraMonthly) + '/mo extra');
+      if (r.biweekly) accelBits.push('biweekly');
+      lines.push(emailRow('  Accelerated monthly', money2(r.totalMonthly) + ' /mo'));
+      lines.push(emailRow('  Accelerate with', accelBits.join(' · ') || '—'));
+      lines.push(
+        emailRow(
+          '  Payoff time',
+          `${r.yearsToPayoff} yrs` + (r.remainingMonths ? ` + ${r.remainingMonths} mo` : '')
+        )
+      );
+      if (r.interestSavings > 0) {
+        lines.push(
+          emailRow(
+            '  Interest savings',
+            money0(r.interestSavings) + (r.homeNow ? ' (1st mtg only)' : '')
+          )
+        );
+      }
+    } else {
+      lines.push(emailRow('  Accelerated', 'Not applied (same as standard)'));
+      lines.push(emailRow('  Full-term interest', money0(r.totalInterestStandard)));
     }
     lines.push('');
   });
 
-  if (sources.some((s) => s.results && s.results.homeNow)) {
-    lines.push('* HomeNow: program eligibility applies; DPA is a second mortgage.');
+  lines.push('────────────────────────────────────────');
+  lines.push('');
+  lines.push('Happy to hop on a quick call and walk through which path fits best.');
+  lines.push('');
+
+  if (hasHomeNow) {
+    lines.push(
+      '* HomeNow: $0 traditional down may apply; the DPA is a second mortgage (not a gift). Program eligibility required.'
+    );
+    lines.push('');
   }
-  lines.push('Estimates only — not a commitment to lend.');
+  lines.push(
+    'These figures are estimates for conversation only — not a commitment to lend or a final Closing Disclosure. Rates, payments, and program details are subject to underwriting and can change.'
+  );
+
   return lines.join('\n').trim();
 }
 
@@ -1075,30 +1206,63 @@ function getClientEmailSubject() {
  * User only needs to enter the recipient and send.
  * mailto: has no "To" so the address field stays empty for them to fill.
  */
-function emailForClient() {
+function buildClientEmailSignOff() {
+  const profile = getCalcProfileForPrint();
+  const lines = [];
+  lines.push('Warm regards,');
+  lines.push('');
+  if (profile.name) {
+    lines.push(profile.name);
+    if (profile.title) lines.push(profile.title);
+    if (profile.nmls) {
+      lines.push((profile.isRealtor ? 'License # ' : 'NMLS# ') + profile.nmls);
+    }
+    if (profile.phone) lines.push(profile.phone);
+    if (profile.email) lines.push(profile.email);
+    if (profile.location) lines.push(profile.location);
+  } else {
+    lines.push('[Your name]');
+  }
+  return lines.join('\n');
+}
+
+/**
+ * Full email body: polished summary + professional sign-off.
+ * Kept as plain text (mailto limitation) but structured for readability.
+ */
+function getClientEmailBody() {
   const body = getClientCopyText();
-  if (!body) {
+  if (!body) return '';
+  return body + '\n\n' + buildClientEmailSignOff();
+}
+
+function emailForClient() {
+  const fullBody = getClientEmailBody();
+  if (!fullBody) {
     calcToast('Save a scenario or run a calculation first');
     return;
   }
-  const profile = getCalcProfileForPrint();
-  const signOff = [];
-  if (profile.name) {
-    signOff.push('', '—', profile.name);
-    if (profile.title) signOff.push(profile.title);
-    if (profile.phone) signOff.push(profile.phone);
-    if (profile.email) signOff.push(profile.email);
-  }
-  const fullBody = body + (signOff.length ? '\n' + signOff.join('\n') : '');
   const subject = getClientEmailSubject();
 
-  // Prefer short enough mailto for Outlook/desktop limits (~1800–2000 safe)
+  // mailto URL length limits vary (esp. Outlook desktop). Stay under ~2000 chars
+  // of encoded payload when possible; always copy full body so nothing is lost.
   let useBody = fullBody;
-  if (useBody.length > 1600) {
-    useBody = body;
-    if (useBody.length > 1600) {
-      useBody = useBody.slice(0, 1550) + '\n\n…(full details available on request)';
+  const encodedProbe = encodeURIComponent(useBody);
+  if (encodedProbe.length > 1800) {
+    // Prefer full summary without sign-off, then hard trim only if needed
+    const core = getClientCopyText();
+    useBody = core + '\n\n' + buildClientEmailSignOff().split('\n').slice(0, 4).join('\n');
+    if (encodeURIComponent(useBody).length > 1800) {
+      useBody =
+        core.slice(0, 1200).trim() +
+        '\n\n…\n(Full breakdown was copied to your clipboard — paste below if anything is cut off.)\n\n' +
+        buildClientEmailSignOff();
     }
+  }
+
+  // Always copy the full polished body so user can paste if the client truncates
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fullBody).catch(function () { /* ignore */ });
   }
 
   const mailto =
@@ -1115,11 +1279,10 @@ function emailForClient() {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    calcToast('Email client opening — add the address and send');
+    calcToast('Email opening with formatted summary — add address & send');
   } catch (e) {
-    // Fallback: copy body so they can paste
     navigator.clipboard.writeText(fullBody).then(
-      () => calcToast('Could not open mail — body copied. Paste into a new email.'),
+      () => calcToast('Could not open mail — full message copied. Paste into a new email.'),
       () => window.prompt('Paste this into your email body:', fullBody)
     );
   }
