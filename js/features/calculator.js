@@ -74,7 +74,7 @@ function computeMortgageScenario(inputs) {
     inputs.pmiIsDollar === 'percent' ||
     inputs.pmiInputMode === 'percent';
   let pmiInput = Number(inputs.pmiInput != null ? inputs.pmiInput : inputs.pmiRate) || 0;
-  const extraMonthly = Number(inputs.extraMonthly) || 0;
+  const extraMonthly = Math.max(0, Number(inputs.extraMonthly) || 0);
   const biweekly = !!inputs.biweekly;
   const homeNow = isPurchase && !!inputs.homeNow;
   const dpaPercent = Number(inputs.dpaPercent) === 5 ? 5 : 3.5;
@@ -91,6 +91,10 @@ function computeMortgageScenario(inputs) {
     // Prefer explicit loanAmount when provided as the source of truth after DOM sync
     if (inputs.loanAmount != null && inputs.loanAmount !== '' && Number(inputs.loanAmount) > 0 && !inputs._forceFromDown) {
       baseLoanAmount = Number(inputs.loanAmount);
+      // Purchase loans above price are clamped (cash-out is refinance territory)
+      if (homePrice > 0 && baseLoanAmount > homePrice) {
+        baseLoanAmount = homePrice;
+      }
       downAmount = Math.max(0, homePrice - baseLoanAmount);
     } else {
       baseLoanAmount = Math.max(0, homePrice - downAmount);
@@ -119,10 +123,9 @@ function computeMortgageScenario(inputs) {
   }
 
   const monthlyRate = annualRate / 100 / 12;
-  const totalPayments = termYears * 12;
-  const standardPI =
-    firstLoan * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
-      (Math.pow(1 + monthlyRate, totalPayments) - 1) || 0;
+  const totalPayments = Math.round(termYears * 12);
+  // Prefer closed-form helper (handles edge cases); termYears may be non-integer from free type
+  const standardPI = calculateMonthlyPayment(firstLoan, annualRate, termYears) || 0;
 
   const monthlyTaxes = annualTaxes / 12;
   const monthlyInsurance = annualInsurance / 12;
@@ -190,13 +193,17 @@ function computeMortgageScenario(inputs) {
     secondInterest = secondPmtCalc * 120 - dpaAmount;
   }
 
-  const standardInterest = standardPI * totalPayments - baseLoanAmount + secondInterest;
-  const customInterest = principalPayment * monthsToPayoff - baseLoanAmount + secondInterest;
+  // Interest is paid on the amortized principal (includes financed UFMIP when HomeNow).
+  // Using baseLoanAmount here used to overstate total interest by exactly the UFMIP amount.
+  const amortPrincipal = firstLoan;
+  const standardInterest = standardPI * totalPayments - amortPrincipal + secondInterest;
+  const customInterest = principalPayment * monthsToPayoff - amortPrincipal + secondInterest;
 
   let interestSavings = standardInterest - customInterest;
   if (homeNow) {
-    const firstStd = standardPI * totalPayments - baseLoanAmount;
-    const firstCustom = principalPayment * monthsToPayoff - baseLoanAmount;
+    // 2nd mortgage is not accelerated by extra/biweekly — savings is 1st only
+    const firstStd = standardPI * totalPayments - amortPrincipal;
+    const firstCustom = principalPayment * monthsToPayoff - amortPrincipal;
     interestSavings = firstStd - firstCustom;
   }
 
@@ -409,13 +416,13 @@ function writeInputsToDom(inputs) {
   setCalcMode(isPurchase ? 'purchase' : 'refinance', { silent: true });
 
   if (inputs.downIsPercent !== false) {
-    setDownMode('percent', { silent: true });
+    setDownMode('percent', { silent: true, skipConvert: true });
   } else {
-    setDownMode('dollar', { silent: true });
+    setDownMode('dollar', { silent: true, skipConvert: true });
   }
 
   const pmiDollar = inputs.pmiIsDollar !== false && inputs.pmiInputMode !== 'percent';
-  setPmiMode(pmiDollar ? 'dollar' : 'percent', { silent: true });
+  setPmiMode(pmiDollar ? 'dollar' : 'percent', { silent: true, skipConvert: true });
 
   const setVal = (id, v) => {
     const el = document.getElementById(id);
@@ -424,8 +431,19 @@ function writeInputsToDom(inputs) {
 
   setVal('homePrice', inputs.homePrice);
   setVal('downPayment', inputs.downPayment);
-  setVal('loanAmountManual', Math.round(inputs.loanAmount || 0));
-  setVal('loanAmountDirect', Math.round(inputs.loanAmount || 0));
+  // Prefer exact stored loan — do not re-derive from rounded down %
+  const loanExact =
+    inputs.loanAmount != null && Number(inputs.loanAmount) > 0
+      ? Number(inputs.loanAmount)
+      : inputs.downAmount != null && inputs.homePrice
+        ? Math.max(0, Number(inputs.homePrice) - Number(inputs.downAmount))
+        : 0;
+  setVal('loanAmountManual', Math.round(loanExact));
+  setVal('loanAmountDirect', Math.round(loanExact));
+  // After Load / restore, loan is source of truth so % rounding cannot rewrite it
+  if (isPurchase && loanExact > 0) {
+    purchaseLinkDriver = 'loan';
+  }
   setVal('rate', inputs.rate);
   setVal('term', inputs.termYears);
   setVal('taxes', inputs.taxesAnnual);
@@ -479,13 +497,32 @@ function setCalcMode(mode, opts) {
 
 function setDownMode(mode, opts) {
   const silent = opts && opts.silent;
+  // Convert displayed value on user toggle only (not silent restore from Load)
+  const convert = !(opts && opts.skipConvert) && !silent;
   const pctBtn = document.getElementById('dp-percent-btn');
   const dolBtn = document.getElementById('dp-dollar-btn');
   const dp = document.getElementById('downPayment');
   const isPct = mode === 'percent';
+  const wasPct = isDownPercentMode();
+  const homePrice = parseFloat(document.getElementById('homePrice')?.value) || 0;
+  const cur = dp ? parseFloat(dp.value) || 0 : 0;
+
   if (pctBtn) pctBtn.classList.toggle('is-active', isPct);
   if (dolBtn) dolBtn.classList.toggle('is-active', !isPct);
   if (dp) dp.placeholder = isPct ? 'e.g., 20 for 20%' : 'e.g., 75000';
+
+  // Bugfix: switching % ↔ $ used to leave "20" in the box, so 20% became $20 down
+  if (convert && dp && homePrice > 0 && wasPct !== isPct) {
+    if (isPct) {
+      // $ → %
+      dp.value = formatDownPercentDisplay((cur / homePrice) * 100);
+    } else {
+      // % → $
+      dp.value = String(Math.round((cur / 100) * homePrice));
+    }
+    setPurchaseLinkDriver('down');
+  }
+
   if (!silent) calculateAdvanced();
 }
 

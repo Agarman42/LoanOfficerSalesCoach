@@ -220,9 +220,14 @@ section('5. HomeNow 3.5% DPA + UFMIP + 2nd mortgage');
   almostEqual(r.standardTotalMonthly, stack, 0.02, 'standard total includes 2nd');
   // 2nd interest full term
   const secondInt = r.monthlyHomeNowSecond * 120 - r.dpaAmount;
-  // Production rule: first interest uses baseLoanAmount (not firstLoan) — preserved from original
-  const firstIntProd = r.monthlyPI * 360 - base;
-  almostEqual(r.totalInterestStandard, firstIntProd + secondInt, 1, 'std interest = (PI*n - base) + 2nd interest');
+  // Correct interest: amortize firstLoan (base + UFMIP). Using base only overstated interest by UFMIP $.
+  const firstIntCorrect = r.monthlyPI * 360 - firstLoan;
+  almostEqual(
+    r.totalInterestStandard,
+    firstIntCorrect + secondInt,
+    1,
+    'std interest = (PI*n − firstLoan w/ UFMIP) + 2nd interest'
+  );
   assert(r.downAmount === 0 || r.downAmount < 1, '0 down for HomeNow 0%');
 }
 
@@ -428,12 +433,13 @@ section('11. HomeNow + extra: 2nd stays full term; savings on 1st only');
     0.02,
     '2nd payment unchanged by extra'
   );
-  // Savings only on first: should be less than if we compared full standardInterest - customInterest without HN split
+  // Savings only on first mortgage (2nd not accelerated); principal is firstLoan with UFMIP
   assert(acc.results.interestSavings > 0, '1st mortgage savings positive');
-  const firstStd = acc.results.monthlyPI * 360 - 350000;
+  const firstLoanHn = 350000 * 1.0175;
+  const firstStd = acc.results.monthlyPI * 360 - firstLoanHn;
   const p = acc.results.monthlyPI + 300;
-  const customFirst = p * acc.results.monthsToPayoff - 350000;
-  almostEqual(acc.results.interestSavings, firstStd - customFirst, 2, 'savings = first-only delta');
+  const customFirst = p * acc.results.monthsToPayoff - firstLoanHn;
+  almostEqual(acc.results.interestSavings, firstStd - customFirst, 2, 'savings = first-only delta (UFMIP principal)');
 }
 
 // ─── 12. Refinance ────────────────────────────────────────────
@@ -654,6 +660,67 @@ section('17. PMI monthly $ mode');
   almostEqual(forceAt20.results.monthlyPMI, 80, 0.01, 'explicit $ at ≥20% down still honored');
 }
 
+// ─── 18. Loan amount preferred + purchase clamp ───────────────
+section('18. Loan driver integrity (no 199988-style rewrite)');
+{
+  const out = computeMortgageScenario({
+    mode: 'purchase',
+    homePrice: 375000,
+    downPayment: 46.67, // rounded % that previously rewrote loan to 199988
+    downIsPercent: true,
+    loanAmount: 200000,
+    rate: 6.5,
+    termYears: 30,
+    taxesAnnual: 0,
+    insuranceAnnual: 0,
+    pmiInput: 0,
+    pmiIsDollar: true,
+    homeNow: false,
+    dpaPercent: 3.5
+  });
+  almostEqual(out.results.baseLoanAmount, 200000, 0.01, 'typed $200k loan wins over rounded 46.67%');
+  almostEqual(out.results.downAmount, 175000, 0.01, 'down = price − loan');
+
+  const over = computeMortgageScenario({
+    mode: 'purchase',
+    homePrice: 200000,
+    downPayment: 0,
+    downIsPercent: true,
+    loanAmount: 250000,
+    rate: 6,
+    termYears: 30,
+    taxesAnnual: 0,
+    insuranceAnnual: 0,
+    pmiInput: 0,
+    pmiIsDollar: true,
+    homeNow: false,
+    dpaPercent: 3.5
+  });
+  almostEqual(over.results.baseLoanAmount, 200000, 0.5, 'purchase loan clamped to price');
+  almostEqual(over.results.downAmount, 0, 0.5, 'down 0 when loan was above price');
+}
+
+// ─── 19. Negative extra ignored ───────────────────────────────
+section('19. Extra payment floor at 0');
+{
+  const out = computeMortgageScenario({
+    mode: 'refinance',
+    loanAmount: 200000,
+    rate: 6,
+    termYears: 30,
+    taxesAnnual: 0,
+    insuranceAnnual: 0,
+    pmiInput: 0,
+    pmiIsDollar: true,
+    extraMonthly: -500,
+    biweekly: false,
+    homeNow: false,
+    dpaPercent: 3.5
+  });
+  almostEqual(out.results.extraMonthly, 0, 0.001, 'negative extra clamped to 0');
+  almostEqual(out.results.totalMonthly, out.results.standardTotalMonthly, 0.02, 'no negative acceleration');
+}
+
 // ─── Summary ──────────────────────────────────────────────────
 console.log('\n========================================');
 console.log(`Audit complete: ${passed} passed, ${failed} failed`);
@@ -664,7 +731,8 @@ if (failed) {
 console.log('\nAll hard-check calculations PASSED.');
 console.log('\nNotes (documented production rules, not bugs):');
 console.log(' • Biweekly multiplies full PITI (not only P&I) by 13/12 for display payment.');
-console.log(' • HomeNow interest uses (PI*n - baseLoan) + 2nd interest; UFMIP sits in amortized principal.');
+console.log(' • HomeNow interest = (PI*n − firstLoan w/ UFMIP) + 2nd interest.');
 console.log(' • PMI: $/mo mode (default) uses entered dollars; % mode applies <20% LTV gate on purchase.');
 console.log(' • PMI on purchase % mode only when down < 20%; always applied on refi if rate entered.');
 console.log(' • HomeNow 2nd is never accelerated by extra/biweekly.');
+console.log(' • Purchase loan amount is clamped to home price; refinance has no price cap.');
