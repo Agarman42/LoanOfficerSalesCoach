@@ -1,285 +1,1860 @@
 /**
  * js/features/calculator.js
  *
- * Advanced Payment Calculator + Mortgage Math Helpers
- * Extracted from monolithic index.html (Phase 1)
+ * Mortgage Calculator — Scenario Studio
+ * - Pure compute (HomeNow DPA math preserved)
+ * - Sticky hero + payment stack
+ * - Up to 3 parked scenarios (localStorage)
+ * - Copy for client + Print/PDF
  *
- * Includes:
- * - calculateAdvanced() - main bidirectional calculator
- * - calculateMonthlyPayment()
- * - toggleHomeNow(), setDPA(), autoSelectDPA()
- * - updatePMIRate(), autoSetFHA_MIP()
- * - All input listeners, mode switching, DPA buttons, slider sync
- * - Initial state setup
- *
- * Self-initializes. Exposes public functions on window.
+ * Self-initializes. Exposes public API on window.
  */
 
-// === GLOBAL STATE (hoisted at top to avoid TDZ errors) ===
+// === GLOBAL STATE ===
 let homeNowEnabled = false;
 let selectedDPAPercent = 3.5;
+let calcScenarioBoard = [];
+let lastCalcBundle = null; // { inputs, results, valid, error }
 
+const CALC_BOARD_KEY = 'loCalcScenarioBoard_v1';
+const CALC_MAX_SCENARIOS = 3;
 
+// ─────────────────────────────────────────────────────────────
+// Pure math
+// ─────────────────────────────────────────────────────────────
 
-// === IMPROVED CALCULATOR WITH FULL BIDIRECTIONAL SYNC ===
+function calculateMonthlyPayment(principal, annualRate, years) {
+  const r = annualRate / 100 / 12;
+  const n = years * 12;
+  if (!principal || principal <= 0 || !years || years <= 0) return 0;
+  if (!r) return principal / n;
+  return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+}
+
+function fhaMipRatePercent(downPercent) {
+  const ltv = 1 - (Number(downPercent) || 0) / 100;
+  return ltv > 0.95 ? 0.55 : 0.5;
+}
+
+/**
+ * @param {object} inputs
+ * @returns {{ valid: boolean, error?: string, results?: object }}
+ */
+function computeMortgageScenario(inputs) {
+  const isPurchase = inputs.mode === 'purchase';
+  const homePrice = Number(inputs.homePrice) || 0;
+  const annualRate = Number(inputs.rate) || 0;
+  const termYears = Number(inputs.termYears) || 0;
+  const annualTaxes = Number(inputs.taxesAnnual) || 0;
+  const annualInsurance = Number(inputs.insuranceAnnual) || 0;
+  // PMI input: default monthly $; optional annual % of base loan
+  const pmiIsPercent =
+    inputs.pmiIsDollar === false ||
+    inputs.pmiIsDollar === 'percent' ||
+    inputs.pmiInputMode === 'percent';
+  let pmiInput = Number(inputs.pmiInput != null ? inputs.pmiInput : inputs.pmiRate) || 0;
+  const extraMonthly = Number(inputs.extraMonthly) || 0;
+  const biweekly = !!inputs.biweekly;
+  const homeNow = isPurchase && !!inputs.homeNow;
+  const dpaPercent = Number(inputs.dpaPercent) === 5 ? 5 : 3.5;
+
+  let baseLoanAmount = Number(inputs.loanAmount) || 0;
+  let downAmount = Number(inputs.downAmount) || 0;
+
+  if (isPurchase) {
+    if (inputs.downIsPercent) {
+      downAmount = (Number(inputs.downPayment) / 100) * homePrice;
+    } else {
+      downAmount = Number(inputs.downPayment) || 0;
+    }
+    // Prefer explicit loanAmount when provided as the source of truth after DOM sync
+    if (inputs.loanAmount != null && inputs.loanAmount !== '' && Number(inputs.loanAmount) > 0 && !inputs._forceFromDown) {
+      baseLoanAmount = Number(inputs.loanAmount);
+      downAmount = Math.max(0, homePrice - baseLoanAmount);
+    } else {
+      baseLoanAmount = Math.max(0, homePrice - downAmount);
+    }
+  }
+
+  if (baseLoanAmount <= 0 || annualRate <= 0 || termYears <= 0) {
+    return { valid: false, error: 'Please enter valid loan amount, rate, and term.' };
+  }
+
+  // HomeNow: finance UFMIP into first mortgage
+  let firstLoan = baseLoanAmount;
+  if (homeNow) {
+    firstLoan = baseLoanAmount + baseLoanAmount * 0.0175;
+  }
+
+  const downPctForMip = homePrice > 0 ? (downAmount / homePrice) * 100 : 0;
+  // Auto MIP when HomeNow and field empty
+  if (homeNow && !pmiInput) {
+    const mipPct = fhaMipRatePercent(downPctForMip);
+    if (pmiIsPercent) {
+      pmiInput = mipPct;
+    } else {
+      pmiInput = (baseLoanAmount * mipPct) / 100 / 12;
+    }
+  }
+
+  const monthlyRate = annualRate / 100 / 12;
+  const totalPayments = termYears * 12;
+  const standardPI =
+    firstLoan * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
+      (Math.pow(1 + monthlyRate, totalPayments) - 1) || 0;
+
+  const monthlyTaxes = annualTaxes / 12;
+  const monthlyInsurance = annualInsurance / 12;
+
+  let monthlyPMI = 0;
+  let pmiRateUsed = 0;
+  if (pmiIsPercent) {
+    pmiRateUsed = pmiInput;
+    if (isPurchase) {
+      const downPercent = homePrice > 0 ? ((homePrice - baseLoanAmount) / homePrice) * 100 : 0;
+      if (homeNow) {
+        monthlyPMI = (baseLoanAmount * pmiRateUsed) / 100 / 12;
+      } else {
+        monthlyPMI = downPercent < 20 ? (baseLoanAmount * pmiRateUsed) / 100 / 12 : 0;
+      }
+    } else {
+      monthlyPMI = (baseLoanAmount * pmiRateUsed) / 100 / 12;
+    }
+  } else {
+    // Dollar mode: LO enters monthly PMI/MIP $ (most common)
+    monthlyPMI = Math.max(0, pmiInput);
+    if (isPurchase && !homeNow) {
+      const downPercent = homePrice > 0 ? ((homePrice - baseLoanAmount) / homePrice) * 100 : 0;
+      // If down ≥ 20% and they left $0, stay 0; if they typed a $ amount, honor it
+      if (downPercent >= 20 && pmiInput === 0) monthlyPMI = 0;
+    }
+    pmiRateUsed = baseLoanAmount > 0 ? ((monthlyPMI * 12) / baseLoanAmount) * 100 : 0;
+  }
+
+  let monthlyHomeNowSecond = 0;
+  let dpaAmount = 0;
+  let secondRate = 0;
+  if (homeNow) {
+    dpaAmount = Math.ceil(homePrice * (dpaPercent / 100));
+    secondRate = annualRate + 2;
+    monthlyHomeNowSecond = calculateMonthlyPayment(dpaAmount, secondRate, 10);
+  }
+
+  const basePITI = standardPI + monthlyTaxes + monthlyInsurance + monthlyPMI;
+  let displayPayment = basePITI + extraMonthly;
+  let principalPayment = standardPI + extraMonthly;
+
+  if (biweekly) {
+    displayPayment = ((basePITI + extraMonthly) * 13) / 12;
+    principalPayment = ((standardPI + extraMonthly) * 13) / 12;
+  }
+  if (homeNow) displayPayment += monthlyHomeNowSecond;
+
+  let standardTotalMonthly = basePITI;
+  if (homeNow) standardTotalMonthly += monthlyHomeNowSecond;
+
+  let monthsToPayoff = totalPayments;
+  if (extraMonthly > 0 || biweekly) {
+    const r = monthlyRate;
+    const p = principalPayment;
+    const logArg = p / (p - firstLoan * r);
+    if (logArg > 1) {
+      monthsToPayoff = Math.ceil(Math.log(logArg) / Math.log(1 + r));
+    }
+  }
+
+  let secondInterest = 0;
+  if (homeNow) {
+    const secondPmtCalc = calculateMonthlyPayment(dpaAmount, secondRate, 10);
+    secondInterest = secondPmtCalc * 120 - dpaAmount;
+  }
+
+  const standardInterest = standardPI * totalPayments - baseLoanAmount + secondInterest;
+  const customInterest = principalPayment * monthsToPayoff - baseLoanAmount + secondInterest;
+
+  let interestSavings = standardInterest - customInterest;
+  if (homeNow) {
+    const firstStd = standardPI * totalPayments - baseLoanAmount;
+    const firstCustom = principalPayment * monthsToPayoff - baseLoanAmount;
+    interestSavings = firstStd - firstCustom;
+  }
+
+  return {
+    valid: true,
+    results: {
+      baseLoanAmount,
+      firstLoanWithUfmip: firstLoan,
+      monthlyPI: standardPI,
+      monthlyTaxes,
+      monthlyInsurance,
+      monthlyPMI,
+      monthlyHomeNowSecond,
+      totalMonthly: displayPayment,
+      standardTotalMonthly,
+      totalInterestStandard: standardInterest,
+      totalInterestCustom: customInterest,
+      interestSavings,
+      monthsToPayoff,
+      yearsToPayoff: Math.floor(monthsToPayoff / 12),
+      remainingMonths: monthsToPayoff % 12,
+      dpaAmount,
+      secondRate,
+      downAmount,
+      homePrice,
+      termYears,
+      annualRate,
+      extraMonthly,
+      biweekly,
+      homeNow,
+      dpaPercent,
+      mode: isPurchase ? 'purchase' : 'refinance',
+      pmiRateUsed,
+      pmiIsDollar: !pmiIsPercent,
+      pmiInput
+    }
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Formatting helpers
+// ─────────────────────────────────────────────────────────────
+
+function money0(n) {
+  return '$' + Math.round(Number(n) || 0).toLocaleString();
+}
+
+function money2(n) {
+  return (
+    '$' +
+    (Number(n) || 0).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  );
+}
+
+function escapeHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function calcToast(msg) {
+  const toast = document.createElement('div');
+  toast.className =
+    'fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#002B5C] text-white px-5 py-2.5 rounded-2xl text-sm shadow-xl z-[999]';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+
+// ─────────────────────────────────────────────────────────────
+// DOM ↔ inputs
+// ─────────────────────────────────────────────────────────────
+
+function isPurchaseMode() {
+  const btn = document.getElementById('mode-purchase');
+  if (!btn) return true;
+  return btn.classList.contains('is-active') || btn.classList.contains('bg-gradient-to-r');
+}
+
+function isDownPercentMode() {
+  const btn = document.getElementById('dp-percent-btn');
+  if (!btn) return true;
+  return btn.classList.contains('is-active') || btn.classList.contains('bg-gradient-to-r');
+}
+
+/** PMI unit: default dollar/month (more common for LOs). */
+function isPmiDollarMode() {
+  const btn = document.getElementById('pmi-dollar-btn');
+  if (!btn) return true;
+  // If neither marked, default dollar
+  if (!btn.classList.contains('is-active') && document.getElementById('pmi-percent-btn')?.classList.contains('is-active')) {
+    return false;
+  }
+  return btn.classList.contains('is-active') || !document.getElementById('pmi-percent-btn')?.classList.contains('is-active');
+}
+
+function syncPurchaseLoanFields() {
+  if (!isPurchaseMode()) return;
+  const homePrice = parseFloat(document.getElementById('homePrice')?.value) || 0;
+  const dpEl = document.getElementById('downPayment');
+  const loanEl = document.getElementById('loanAmountManual');
+  if (!dpEl || !loanEl) return;
+
+  const focusedId = document.activeElement ? document.activeElement.id : '';
+  const isPercent = isDownPercentMode();
+  const downPaymentInput = parseFloat(dpEl.value) || 0;
+  const loanAmountInput = parseFloat(loanEl.value) || 0;
+
+  if (focusedId === 'loanAmountManual' && loanAmountInput > 0) {
+    const downAmount = Math.max(0, homePrice - loanAmountInput);
+    const newDown = isPercent ? (homePrice > 0 ? (downAmount / homePrice) * 100 : 0) : downAmount;
+    if (Math.abs(newDown - downPaymentInput) > 0.01) {
+      dpEl.value = isPercent ? newDown.toFixed(2) : String(Math.round(newDown));
+    }
+  } else {
+    const downAmount = isPercent ? (downPaymentInput / 100) * homePrice : downPaymentInput;
+    const loanAmount = Math.max(0, homePrice - downAmount);
+    if (focusedId !== 'loanAmountManual' && Math.abs(loanAmount - loanAmountInput) > 0.5) {
+      loanEl.value = String(Math.round(loanAmount));
+    }
+  }
+}
+
+function readInputsFromDom() {
+  const isPurchase = isPurchaseMode();
+  const isPercent = isDownPercentMode();
+  const homePrice = parseFloat(document.getElementById('homePrice')?.value) || 0;
+  const downPayment = parseFloat(document.getElementById('downPayment')?.value) || 0;
+  let loanAmount = isPurchase
+    ? parseFloat(document.getElementById('loanAmountManual')?.value) || 0
+    : parseFloat(document.getElementById('loanAmountDirect')?.value) || 0;
+
+  let downAmount = 0;
+  if (isPurchase) {
+    downAmount = isPercent ? (downPayment / 100) * homePrice : downPayment;
+    if (!(loanAmount > 0)) loanAmount = Math.max(0, homePrice - downAmount);
+  }
+
+  return {
+    mode: isPurchase ? 'purchase' : 'refinance',
+    homePrice,
+    downPayment,
+    downIsPercent: isPercent,
+    downAmount,
+    loanAmount,
+    rate: parseFloat(document.getElementById('rate')?.value) || 0,
+    termYears: parseFloat(document.getElementById('term')?.value) || 30,
+    taxesAnnual: parseFloat(document.getElementById('taxes')?.value) || 0,
+    insuranceAnnual: parseFloat(document.getElementById('insurance')?.value) || 0,
+    pmiRate: parseFloat(document.getElementById('pmi')?.value) || 0,
+    pmiInput: parseFloat(document.getElementById('pmi')?.value) || 0,
+    pmiIsDollar: isPmiDollarMode(),
+    extraMonthly: parseFloat(document.getElementById('extraMonthly')?.value) || 0,
+    biweekly: !!(document.getElementById('biweekly')?.checked),
+    homeNow: homeNowEnabled && isPurchase,
+    dpaPercent: selectedDPAPercent
+  };
+}
+
+function writeInputsToDom(inputs) {
+  const isPurchase = inputs.mode === 'purchase';
+  setCalcMode(isPurchase ? 'purchase' : 'refinance', { silent: true });
+
+  if (inputs.downIsPercent !== false) {
+    setDownMode('percent', { silent: true });
+  } else {
+    setDownMode('dollar', { silent: true });
+  }
+
+  const pmiDollar = inputs.pmiIsDollar !== false && inputs.pmiInputMode !== 'percent';
+  setPmiMode(pmiDollar ? 'dollar' : 'percent', { silent: true });
+
+  const setVal = (id, v) => {
+    const el = document.getElementById(id);
+    if (el && v != null && v !== '') el.value = v;
+  };
+
+  setVal('homePrice', inputs.homePrice);
+  setVal('downPayment', inputs.downPayment);
+  setVal('loanAmountManual', Math.round(inputs.loanAmount || 0));
+  setVal('loanAmountDirect', Math.round(inputs.loanAmount || 0));
+  setVal('rate', inputs.rate);
+  setVal('term', inputs.termYears);
+  setVal('taxes', inputs.taxesAnnual);
+  setVal('insurance', inputs.insuranceAnnual);
+  // Prefer raw pmiInput; fall back to rate or monthly from results path
+  const pmiVal =
+    inputs.pmiInput != null
+      ? inputs.pmiInput
+      : pmiDollar
+        ? inputs.pmiMonthly != null
+          ? inputs.pmiMonthly
+          : inputs.pmiRate
+        : inputs.pmiRate;
+  setVal('pmi', pmiVal);
+  setVal('extraMonthly', inputs.extraMonthly || 0);
+
+  const bi = document.getElementById('biweekly');
+  if (bi) bi.checked = !!inputs.biweekly;
+
+  homeNowEnabled = isPurchase && !!inputs.homeNow;
+  selectedDPAPercent = Number(inputs.dpaPercent) === 5 ? 5 : 3.5;
+  const hn = document.getElementById('homenow-checkbox');
+  if (hn) hn.checked = homeNowEnabled;
+  updateHomeNowUi();
+  styleDpaButtons();
+}
+
+function setCalcMode(mode, opts) {
+  const silent = opts && opts.silent;
+  const purchaseBtn = document.getElementById('mode-purchase');
+  const refiBtn = document.getElementById('mode-refinance');
+  const purch = document.getElementById('purchase-inputs');
+  const refi = document.getElementById('refinance-inputs');
+  const homenowW = document.getElementById('homenow-wrapper');
+  const isPurchase = mode === 'purchase';
+
+  if (purchaseBtn) purchaseBtn.classList.toggle('is-active', isPurchase);
+  if (refiBtn) refiBtn.classList.toggle('is-active', !isPurchase);
+  if (purch) purch.classList.toggle('hidden', !isPurchase);
+  if (refi) refi.classList.toggle('hidden', isPurchase);
+  if (homenowW) homenowW.classList.toggle('hidden', !isPurchase);
+
+  if (!isPurchase) {
+    homeNowEnabled = false;
+    const chk = document.getElementById('homenow-checkbox');
+    if (chk) chk.checked = false;
+    updateHomeNowUi();
+  }
+  if (!silent) calculateAdvanced();
+}
+
+function setDownMode(mode, opts) {
+  const silent = opts && opts.silent;
+  const pctBtn = document.getElementById('dp-percent-btn');
+  const dolBtn = document.getElementById('dp-dollar-btn');
+  const dp = document.getElementById('downPayment');
+  const isPct = mode === 'percent';
+  if (pctBtn) pctBtn.classList.toggle('is-active', isPct);
+  if (dolBtn) dolBtn.classList.toggle('is-active', !isPct);
+  if (dp) dp.placeholder = isPct ? 'e.g., 20 for 20%' : 'e.g., 75000';
+  if (!silent) calculateAdvanced();
+}
+
+function setPmiMode(mode, opts) {
+  const silent = opts && opts.silent;
+  const convert = !(opts && opts.skipConvert);
+  const dolBtn = document.getElementById('pmi-dollar-btn');
+  const pctBtn = document.getElementById('pmi-percent-btn');
+  const pmiEl = document.getElementById('pmi');
+  const label = document.getElementById('pmi-label');
+  const hint = document.getElementById('pmi-hint');
+  const affixStart = document.getElementById('pmi-affix-start');
+  const affixEnd = document.getElementById('pmi-affix-end');
+  const wrap = document.getElementById('pmi-input-wrap');
+  const toDollar = mode === 'dollar';
+
+  const wasDollar = isPmiDollarMode();
+  if (dolBtn) dolBtn.classList.toggle('is-active', toDollar);
+  if (pctBtn) pctBtn.classList.toggle('is-active', !toDollar);
+
+  if (label) label.textContent = toDollar ? 'PMI / MIP (monthly $)' : 'PMI / MIP (% of loan)';
+  if (hint) {
+    hint.textContent = toDollar
+      ? 'Enter monthly PMI/MIP dollars (most common). Or switch to % of loan. Auto-filled for HomeNow FHA MIP.'
+      : 'Annual PMI/MIP as % of base loan (e.g. 0.55). Auto for HomeNow; otherwise when down < 20%.';
+  }
+  if (affixStart) affixStart.classList.toggle('hidden', !toDollar);
+  if (affixEnd) affixEnd.classList.toggle('hidden', toDollar);
+  if (wrap) wrap.classList.toggle('calc-input-wrap--pct', !toDollar);
+  if (pmiEl) {
+    pmiEl.step = toDollar ? '1' : '0.01';
+    pmiEl.placeholder = toDollar ? 'e.g. 125' : 'e.g. 0.55';
+  }
+
+  // Convert displayed value when switching units (once, not on silent restore without convert)
+  if (convert && pmiEl && wasDollar !== toDollar) {
+    const loan =
+      parseFloat(
+        document.getElementById(isPurchaseMode() ? 'loanAmountManual' : 'loanAmountDirect')?.value
+      ) || 0;
+    const cur = parseFloat(pmiEl.value) || 0;
+    if (toDollar) {
+      // % → monthly $
+      pmiEl.value = loan > 0 ? ((loan * cur) / 100 / 12).toFixed(0) : '0';
+    } else {
+      // monthly $ → %
+      pmiEl.value = loan > 0 ? (((cur * 12) / loan) * 100).toFixed(2) : '0';
+    }
+  }
+
+  if (!silent) calculateAdvanced();
+}
+
+// ─────────────────────────────────────────────────────────────
+// HomeNow UI helpers
+// ─────────────────────────────────────────────────────────────
+
+function updateHomeNowUi() {
+  const dpaOpts = document.getElementById('dpa-options');
+  const breakdown = document.getElementById('homenow-breakdown');
+  if (dpaOpts) dpaOpts.classList.toggle('hidden', !homeNowEnabled);
+  if (breakdown) breakdown.classList.toggle('hidden', !homeNowEnabled);
+}
+
+function styleDpaButtons() {
+  const b35 = document.getElementById('dpa35-btn');
+  const b5 = document.getElementById('dpa5-btn');
+  if (b35) b35.classList.toggle('is-active', selectedDPAPercent === 3.5);
+  if (b5) b5.classList.toggle('is-active', selectedDPAPercent === 5);
+}
+
+function toggleHomeNow() {
+  const chk = document.getElementById('homenow-checkbox');
+  homeNowEnabled = !!(chk && chk.checked);
+  updateHomeNowUi();
+
+  if (homeNowEnabled) {
+    const dp = document.getElementById('downPayment');
+    if (dp) dp.value = '0';
+    selectedDPAPercent = 3.5;
+    styleDpaButtons();
+    autoSetFHA_MIP();
+  } else {
+    const pmi = document.getElementById('pmi');
+    if (pmi) pmi.value = '0';
+  }
+  calculateAdvanced();
+}
+
+function setDPA(pct) {
+  selectedDPAPercent = pct === 5 ? 5 : 3.5;
+  styleDpaButtons();
+  if (homeNowEnabled) autoSetFHA_MIP();
+  calculateAdvanced();
+}
+
+function autoSelectDPA() {
+  const price = parseFloat(document.getElementById('homePrice')?.value) || 0;
+  const loan = parseFloat(document.getElementById('loanAmountManual')?.value) || 0;
+  if (price > 0 && loan > 0) {
+    const ltv = loan / price;
+    if (ltv >= 0.965) setDPA(3.5);
+    else if (ltv >= 0.95) setDPA(5);
+  }
+}
+
+function updatePMIRate() {
+  const pmiEl = document.getElementById('pmi');
+  if (!pmiEl) return;
+  if (homeNowEnabled) {
+    autoSetFHA_MIP();
+  }
+  // Spec note: original zeroed PMI when HomeNow off on every calc — that wiped user PMI.
+  // Scenario Studio only auto-clears when toggling HomeNow off (toggleHomeNow).
+}
+
+function autoSetFHA_MIP() {
+  const pmiEl = document.getElementById('pmi');
+  if (!pmiEl) return;
+  const homePrice = parseFloat(document.getElementById('homePrice')?.value) || 0;
+  const downPaymentInput = parseFloat(document.getElementById('downPayment')?.value) || 0;
+  if (homePrice <= 0) return;
+  const downPercent = isDownPercentMode()
+    ? downPaymentInput
+    : (downPaymentInput / homePrice) * 100;
+  const mipPct = fhaMipRatePercent(downPercent);
+  if (isPmiDollarMode()) {
+    const loan =
+      parseFloat(
+        document.getElementById(isPurchaseMode() ? 'loanAmountManual' : 'loanAmountDirect')?.value
+      ) || Math.max(0, homePrice - (isDownPercentMode() ? (downPaymentInput / 100) * homePrice : downPaymentInput));
+    pmiEl.value = loan > 0 ? ((loan * mipPct) / 100 / 12).toFixed(0) : '0';
+  } else {
+    pmiEl.value = mipPct.toFixed(2);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Render: stack, hero, results
+// ─────────────────────────────────────────────────────────────
+
+function buildPaymentStackHtml(r, compact) {
+  const parts = [
+    { key: 'pi', label: 'P&I', value: r.monthlyPI, color: '#002B5C' },
+    { key: 'tax', label: 'Taxes', value: r.monthlyTaxes, color: '#0ea5e9' },
+    { key: 'ins', label: 'Ins', value: r.monthlyInsurance, color: '#6366f1' },
+    { key: 'pmi', label: r.homeNow ? 'MIP' : 'PMI', value: r.monthlyPMI, color: '#a855f7' }
+  ];
+  if (r.homeNow && r.monthlyHomeNowSecond > 0) {
+    parts.push({ key: 'hn', label: 'HomeNow 2nd', value: r.monthlyHomeNowSecond, color: '#00A89D' });
+  }
+  if (r.extraMonthly > 0 && !r.biweekly) {
+    parts.push({ key: 'ex', label: 'Extra', value: r.extraMonthly, color: '#F15A29' });
+  }
+  const total = parts.reduce((s, p) => s + (p.value || 0), 0) || 1;
+  const segs = parts
+    .filter((p) => p.value > 0.5)
+    .map(
+      (p) =>
+        `<span class="calc-stack-seg" style="width:${Math.max(3, (p.value / total) * 100)}%;background:${p.color}" title="${escapeHtml(p.label)}: ${money2(p.value)}"></span>`
+    )
+    .join('');
+  const legend = parts
+    .filter((p) => p.value > 0.5)
+    .map(
+      (p) =>
+        `<span class="calc-stack-legend-item"><i style="background:${p.color}"></i>${escapeHtml(p.label)} ${compact ? '' : money0(p.value)}</span>`
+    )
+    .join('');
+  return `<div class="calc-stack-bar">${segs}</div><div class="calc-stack-legend">${legend}</div>`;
+}
+
+function renderHero(results, valid, error) {
+  const payEl = document.getElementById('calc-hero-payment');
+  const subEl = document.getElementById('calc-hero-sub');
+  const stackEl = document.getElementById('calc-hero-stack');
+  const chipsEl = document.getElementById('calc-hero-chips');
+  const metricsEl = document.getElementById('calc-hero-metrics');
+  if (!payEl) return;
+
+  if (!valid || !results) {
+    payEl.textContent = '—';
+    if (subEl) subEl.textContent = error || 'Enter loan details';
+    if (stackEl) stackEl.innerHTML = '';
+    if (chipsEl) chipsEl.innerHTML = '';
+    if (metricsEl) metricsEl.innerHTML = '';
+    return;
+  }
+
+  const nextPay = money2(results.totalMonthly);
+  if (payEl.textContent !== nextPay) {
+    payEl.textContent = nextPay;
+    payEl.classList.remove('is-pulse');
+    // force reflow for pulse
+    void payEl.offsetWidth;
+    payEl.classList.add('is-pulse');
+    setTimeout(() => payEl.classList.remove('is-pulse'), 280);
+  } else {
+    payEl.textContent = nextPay;
+  }
+
+  if (subEl) {
+    subEl.textContent = results.homeNow
+      ? 'Includes 1st + HomeNow 2nd · estimates only'
+      : results.biweekly || results.extraMonthly > 0
+        ? 'Includes accelerate options · estimates only'
+        : 'PITI housing payment · estimates only';
+  }
+  if (stackEl) stackEl.innerHTML = buildPaymentStackHtml(results, true);
+  if (chipsEl) {
+    const chips = [];
+    chips.push(
+      `<span class="calc-chip">${results.mode === 'purchase' ? 'Purchase' : 'Refinance'}</span>`
+    );
+    if (results.homeNow) {
+      chips.push(`<span class="calc-chip calc-chip-hn">HomeNow ${results.dpaPercent}%</span>`);
+    }
+    if (results.extraMonthly > 0) {
+      chips.push(`<span class="calc-chip calc-chip-extra">+${money0(results.extraMonthly)}/mo</span>`);
+    }
+    if (results.biweekly) chips.push(`<span class="calc-chip">Biweekly</span>`);
+    chipsEl.innerHTML = chips.join('');
+  }
+  if (metricsEl) {
+    const m1 =
+      results.mode === 'purchase'
+        ? { label: 'Down', val: money0(results.downAmount) }
+        : { label: 'Loan', val: money0(results.baseLoanAmount) };
+    const m2 = { label: 'Rate', val: results.annualRate + '%' };
+    const m3 = results.homeNow
+      ? { label: 'HomeNow 2nd', val: money0(results.monthlyHomeNowSecond) + '/mo' }
+      : { label: 'Interest (term)', val: money0(results.totalInterestStandard) };
+    metricsEl.innerHTML = [m1, m2, m3]
+      .map(
+        (m) =>
+          `<div class="calc-metric"><div class="calc-metric-label">${escapeHtml(m.label)}</div><div class="calc-metric-val">${escapeHtml(m.val)}</div></div>`
+      )
+      .join('');
+  }
+}
+
+function renderResults(results, valid, error) {
+  const out = document.getElementById('calc-output');
+  if (!out) return;
+
+  if (!valid || !results) {
+    out.innerHTML = `<div class="rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 p-6 text-center text-red-600 dark:text-red-300 font-semibold">${escapeHtml(error || 'Invalid inputs')}</div>`;
+    return;
+  }
+
+  const r = results;
+  const accelerated = r.extraMonthly > 0 || r.biweekly;
+
+  // Update HomeNow mini breakdown if present
+  if (r.homeNow) {
+    const da = document.getElementById('dpa-amt');
+    const sr = document.getElementById('second-rate');
+    const sp = document.getElementById('second-pmt');
+    if (da) da.textContent = money0(r.dpaAmount);
+    if (sr) sr.textContent = r.secondRate.toFixed(3) + '%';
+    if (sp) sp.textContent = money0(r.monthlyHomeNowSecond);
+  }
+
+  let hnBlock = '';
+  if (r.homeNow) {
+    hnBlock = `
+      <div class="calc-result-card calc-result-card--hn">
+        <div class="calc-result-card-head">
+          <h4><i class="fas fa-home" style="color:#00A89D;margin-right:0.35rem"></i>HomeNow story</h4>
+        </div>
+        <p class="calc-hint" style="margin:0 0 0.75rem">Zero traditional down. DPA is a <strong>second mortgage</strong>. 1.75% UFMIP is financed into the 1st.</p>
+        <div class="calc-hn-stats" style="margin-top:0">
+          <div class="calc-hn-stat"><div class="calc-hn-stat-label">DPA 2nd</div><div class="calc-hn-stat-val calc-hn-stat-val--orange">${money0(r.dpaAmount)}</div></div>
+          <div class="calc-hn-stat"><div class="calc-hn-stat-label">2nd rate</div><div class="calc-hn-stat-val">${r.secondRate.toFixed(3)}%</div></div>
+          <div class="calc-hn-stat"><div class="calc-hn-stat-label">2nd pmt</div><div class="calc-hn-stat-val calc-hn-stat-val--teal">${money0(r.monthlyHomeNowSecond)}/mo</div></div>
+        </div>
+      </div>`;
+  }
+
+  // Always show the classic dual boxes: Standard vs Accelerated
+  const saveWarn = r.interestSavings < 0;
+  const saveLabel =
+    r.interestSavings > 0 ? 'Interest savings' : r.interestSavings < 0 ? 'Extra interest' : 'Interest impact';
+  const payoffTxt = `${r.yearsToPayoff} yrs${r.remainingMonths ? ' + ' + r.remainingMonths + ' mo' : ''}`;
+  const fullTermTxt = `${r.termYears} years`;
+
+  const standardCard = `
+    <div class="calc-result-card calc-result-card--standard">
+      <div class="calc-result-card-head">
+        <h4><i class="fas fa-balance-scale" style="margin-right:0.4rem;opacity:0.85"></i>Standard ${r.termYears}-year loan</h4>
+        <span class="calc-result-meta">${r.annualRate}%</span>
+      </div>
+      <div class="calc-rows">
+        <div class="calc-row"><span>Base loan</span><span>${money0(r.baseLoanAmount)}</span></div>
+        ${r.homeNow ? `<div class="calc-row"><span>1st w/ UFMIP</span><span>${money0(r.firstLoanWithUfmip)}</span></div>` : ''}
+        <div class="calc-row"><span>P&amp;I</span><span>${money2(r.monthlyPI)}</span></div>
+        <div class="calc-row"><span>Taxes + insurance</span><span>${money2(r.monthlyTaxes + r.monthlyInsurance)}</span></div>
+        <div class="calc-row"><span>${r.homeNow ? 'MIP' : 'PMI'}</span><span>${money2(r.monthlyPMI)}</span></div>
+        ${r.homeNow ? `<div class="calc-row calc-row--accent"><span>HomeNow 2nd</span><span>${money2(r.monthlyHomeNowSecond)}</span></div>` : ''}
+        ${r.homeNow ? `<div class="calc-row"><span style="font-size:0.72rem">Includes 1.75% UFMIP in 1st</span><span></span></div>` : ''}
+        <div class="calc-row calc-row--total">
+          <span>Total monthly</span>
+          <span>${money2(r.standardTotalMonthly)}</span>
+        </div>
+        <div class="calc-row"><span>Total interest (full term)</span><span>${money0(r.totalInterestStandard)}</span></div>
+        <div class="calc-row"><span>Payoff time</span><span>${fullTermTxt}</span></div>
+      </div>
+    </div>`;
+
+  const accelCard = accelerated
+    ? `
+    <div class="calc-result-card calc-result-card--accel">
+      <div class="calc-result-card-head">
+        <h4 style="color:#F15A29"><i class="fas fa-rocket" style="margin-right:0.4rem"></i>Your accelerated plan</h4>
+        <span class="calc-result-meta calc-result-meta--orange">Active</span>
+      </div>
+      <div class="calc-rows">
+        <div class="calc-row"><span>Extra payments</span><span>${money2(r.extraMonthly)}${r.extraMonthly > 0 ? '/mo' : ''}${r.biweekly ? ' · biweekly' : ''}</span></div>
+        <div class="calc-row"><span>Your monthly payment</span><span>${money2(r.totalMonthly)}</span></div>
+        <div class="calc-row"><span>Payoff time</span><span>${payoffTxt}</span></div>
+        <div class="calc-row calc-row--total calc-row--total-orange">
+          <span>Total interest paid</span>
+          <span>${money0(r.totalInterestCustom)}</span>
+        </div>
+      </div>
+      <div class="calc-save-pill${saveWarn ? ' is-warn' : ''}">
+        <div class="calc-save-pill-label">${saveLabel}${r.homeNow ? ' (1st mortgage only)' : ''}</div>
+        <div class="calc-save-pill-val">${r.interestSavings > 0 ? 'Save ' : r.interestSavings < 0 ? 'Extra ' : ''}${money0(Math.abs(r.interestSavings))}</div>
+      </div>
+    </div>`
+    : `
+    <div class="calc-result-card calc-result-card--accel calc-result-card--idle">
+      <div class="calc-result-card-head">
+        <h4 style="color:#F15A29"><i class="fas fa-rocket" style="margin-right:0.4rem"></i>Your accelerated plan</h4>
+        <span class="calc-result-meta">Optional</span>
+      </div>
+      <div class="calc-accel-idle">
+        <p>Add <strong>extra monthly</strong> or turn on <strong>biweekly</strong> to see payoff time and interest savings vs the standard loan.</p>
+        <div class="calc-accel-idle-hint">
+          <span><i class="fas fa-plus-circle"></i> Extra payment</span>
+          <span><i class="fas fa-calendar-week"></i> Biweekly</span>
+        </div>
+        <div class="calc-rows" style="margin-top:0.75rem;opacity:0.75">
+          <div class="calc-row"><span>Same as standard for now</span><span>${money2(r.standardTotalMonthly)}</span></div>
+          <div class="calc-row"><span>Interest (full term)</span><span>${money0(r.totalInterestStandard)}</span></div>
+        </div>
+      </div>
+    </div>`;
+
+  out.innerHTML = `
+    <div class="calc-result-card calc-result-card--stack">
+      <div class="calc-result-card-head">
+        <h4>Payment mix</h4>
+        <span class="calc-result-meta">${r.termYears}-year · ${r.annualRate}%</span>
+      </div>
+      ${buildPaymentStackHtml(r, false)}
+      ${r.mode === 'purchase' ? `<div class="calc-rows" style="margin-top:0.65rem"><div class="calc-row"><span>Down payment</span><span>${money0(r.downAmount)}${r.homeNow && r.downAmount < 1 ? ' *' : ''}</span></div></div>` : ''}
+    </div>
+    <div class="calc-compare-grid">
+      ${standardCard}
+      ${accelCard}
+    </div>
+    ${hnBlock}
+  `;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Scenario board
+// ─────────────────────────────────────────────────────────────
+
+function loadBoardFromStorage() {
+  try {
+    const raw = localStorage.getItem(CALC_BOARD_KEY);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) calcScenarioBoard = arr.slice(0, CALC_MAX_SCENARIOS);
+  } catch (e) {
+    calcScenarioBoard = [];
+  }
+}
+
+function persistBoard() {
+  try {
+    localStorage.setItem(CALC_BOARD_KEY, JSON.stringify(calcScenarioBoard));
+  } catch (e) {
+    /* private mode */
+  }
+}
+
+function autoScenarioLabel(inputs, results) {
+  let label;
+  if (results.homeNow) label = `HomeNow ${results.dpaPercent}%`;
+  else if (inputs.mode === 'refinance') label = `Refi ${inputs.termYears || 30}yr`;
+  else if (inputs.downIsPercent) label = `${Number(inputs.downPayment).toFixed(inputs.downPayment % 1 ? 1 : 0)}% down`;
+  else label = `${money0(results.downAmount)} down`;
+
+  if (inputs.extraMonthly > 0) label += ' +extra';
+  if (inputs.biweekly) label += ' +biweekly';
+
+  const base = label;
+  let n = 2;
+  while (calcScenarioBoard.some((s) => s.label === label)) {
+    label = `${base} (${n})`;
+    n += 1;
+  }
+  return label;
+}
+
+function saveCurrentScenario() {
+  if (!lastCalcBundle || !lastCalcBundle.valid) {
+    calcToast('Enter valid loan details first');
+    return;
+  }
+  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
+    calcToast('Board full — remove a scenario first (max 3)');
+    return;
+  }
+  const inputs = lastCalcBundle.inputs;
+  const results = lastCalcBundle.results;
+  const scenario = {
+    id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    label: autoScenarioLabel(inputs, results),
+    createdAt: new Date().toISOString(),
+    inputs: Object.assign({}, inputs),
+    results: Object.assign({}, results)
+  };
+  calcScenarioBoard.push(scenario);
+  persistBoard();
+  renderScenarioBoard();
+  calcToast('Scenario saved: ' + scenario.label);
+}
+
+function removeScenario(id) {
+  calcScenarioBoard = calcScenarioBoard.filter((s) => s.id !== id);
+  persistBoard();
+  renderScenarioBoard();
+}
+
+function loadScenario(id) {
+  const s = calcScenarioBoard.find((x) => x.id === id);
+  if (!s) return;
+  writeInputsToDom(s.inputs);
+  calculateAdvanced();
+  calcToast('Loaded: ' + s.label);
+}
+
+function renameScenario(id) {
+  const s = calcScenarioBoard.find((x) => x.id === id);
+  if (!s) return;
+  const next = window.prompt('Scenario name', s.label);
+  if (next == null) return;
+  const trimmed = String(next).trim().slice(0, 48);
+  if (!trimmed) return;
+  s.label = trimmed;
+  persistBoard();
+  renderScenarioBoard();
+}
+
+function renderScenarioBoard() {
+  const slots = document.getElementById('calc-scenario-slots');
+  const empty = document.getElementById('calc-board-empty');
+  const count = document.getElementById('calc-board-count');
+  if (count) count.textContent = `${calcScenarioBoard.length} / ${CALC_MAX_SCENARIOS} saved`;
+  if (!slots) return;
+
+  if (!calcScenarioBoard.length) {
+    slots.innerHTML = '';
+    if (empty) empty.classList.remove('hidden');
+    return;
+  }
+  if (empty) empty.classList.add('hidden');
+
+  let minPay = Infinity;
+  let minDown = Infinity;
+  calcScenarioBoard.forEach((s) => {
+    const p = s.results && s.results.totalMonthly;
+    const d = s.results && s.results.downAmount;
+    if (typeof p === 'number' && p < minPay) minPay = p;
+    if (s.inputs && s.inputs.mode === 'purchase' && typeof d === 'number' && d < minDown) minDown = d;
+  });
+
+  slots.innerHTML = calcScenarioBoard
+    .map((s, idx) => {
+      const r = s.results || {};
+      const isLowPay = r.totalMonthly === minPay && calcScenarioBoard.length > 1;
+      const isLowDown =
+        s.inputs &&
+        s.inputs.mode === 'purchase' &&
+        r.downAmount === minDown &&
+        calcScenarioBoard.length > 1 &&
+        minDown < Infinity;
+      const badges = [];
+      if (isLowPay) badges.push('<span class="calc-badge calc-badge-best">Lowest monthly</span>');
+      if (isLowDown) badges.push('<span class="calc-badge">Lowest down</span>');
+      if (r.homeNow) badges.push(`<span class="calc-badge calc-badge-hn">HomeNow ${r.dpaPercent}%</span>`);
+      const letter = String.fromCharCode(65 + idx);
+
+      return `
+        <article class="calc-scenario-card ${isLowPay ? 'is-best' : ''}" data-scenario-id="${escapeHtml(s.id)}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.35rem">
+            <div style="display:flex;align-items:center;gap:0.45rem;min-width:0">
+              <span class="calc-card-letter">${letter}</span>
+              <h4 style="margin:0;font-size:0.98rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(s.label)}">${escapeHtml(s.label)}</h4>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.25rem;justify-content:flex-end">${badges.join('')}</div>
+          </div>
+          <div class="calc-card-pay">${money2(r.totalMonthly)}<span>/mo</span></div>
+          <div class="calc-card-facts">
+            Loan ${money0(r.baseLoanAmount)}${r.homeNow ? ' · DPA ' + money0(r.dpaAmount) : ''}<br>
+            ${s.inputs && s.inputs.mode === 'purchase' ? 'Down ' + money0(r.downAmount) : 'Refinance'}
+            · ${r.annualRate}% · ${r.termYears} yr
+          </div>
+          <div class="calc-card-actions">
+            <button type="button" class="calc-card-btn" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
+            <button type="button" class="calc-card-btn" data-action="rename" data-id="${escapeHtml(s.id)}">Rename</button>
+            <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="remove" data-id="${escapeHtml(s.id)}">Remove</button>
+          </div>
+        </article>`;
+    })
+    .join('');
+
+  slots.querySelectorAll('[data-action]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      const action = btn.getAttribute('data-action');
+      if (action === 'load') loadScenario(id);
+      else if (action === 'rename') renameScenario(id);
+      else if (action === 'remove') removeScenario(id);
+    });
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Main calculate + client send
+// ─────────────────────────────────────────────────────────────
+
 function calculateAdvanced() {
-    updatePMIRate();
+  if (homeNowEnabled) updatePMIRate();
+  syncPurchaseLoanFields();
 
-    const isPurchase = document.getElementById('mode-purchase').classList.contains('bg-gradient-to-r');
+  const inputs = readInputsFromDom();
+  const computed = computeMortgageScenario(inputs);
+  lastCalcBundle = {
+    inputs,
+    results: computed.results || null,
+    valid: computed.valid,
+    error: computed.error
+  };
 
-    let homePrice = 0;
-    let downPaymentInput = 0;
-    let isPercent = true;
-    let loanAmountInput = 0;
-    let loanAmount = 0;
-    let downAmount = 0;
+  renderHero(computed.results, computed.valid, computed.error);
+  renderResults(computed.results, computed.valid, computed.error);
+  return computed;
+}
 
-    if (isPurchase) {
-        homePrice = parseFloat(document.getElementById('homePrice').value) || 0;
-        downPaymentInput = parseFloat(document.getElementById('downPayment').value) || 0;
-        isPercent = document.getElementById('dp-percent-btn').classList.contains('bg-gradient-to-r');
-        loanAmountInput = parseFloat(document.getElementById('loanAmountManual').value) || 0;
+function getClientCopyText() {
+  const lines = [];
+  lines.push('Hi — payment options to review:');
+  lines.push('');
 
-        const focusedId = document.activeElement ? document.activeElement.id : '';
-
-        if (focusedId === 'loanAmountManual' && loanAmountInput > 0) {
-            loanAmount = loanAmountInput;
-            downAmount = Math.max(0, homePrice - loanAmount);
-            const newDown = isPercent ? (homePrice > 0 ? (downAmount / homePrice * 100) : 0) : downAmount;
-            if (Math.abs(newDown - downPaymentInput) > 1) {
-                document.getElementById('downPayment').value = isPercent ? newDown.toFixed(2) : newDown.toFixed(0);
+  const sources =
+    calcScenarioBoard.length > 0
+      ? calcScenarioBoard.map((s, i) => ({
+          label: s.label || 'Option ' + String.fromCharCode(65 + i),
+          results: s.results,
+          inputs: s.inputs
+        }))
+      : lastCalcBundle && lastCalcBundle.valid
+        ? [
+            {
+              label: autoScenarioLabel(lastCalcBundle.inputs, lastCalcBundle.results),
+              results: lastCalcBundle.results,
+              inputs: lastCalcBundle.inputs
             }
-        } else {
-            downAmount = isPercent ? (downPaymentInput / 100 * homePrice) : downPaymentInput;
-            loanAmount = Math.max(0, homePrice - downAmount);
-            if (focusedId !== 'loanAmountManual' && Math.abs(loanAmount - loanAmountInput) > 1) {
-                document.getElementById('loanAmountManual').value = loanAmount.toFixed(0);
-            }
-        }
-    } else {
-        loanAmount = parseFloat(document.getElementById('loanAmountDirect').value) || 0;
+          ]
+        : [];
+
+  if (!sources.length) return '';
+
+  const price =
+    sources[0].results && sources[0].results.homePrice
+      ? sources[0].results.homePrice
+      : sources[0].inputs && sources[0].inputs.homePrice;
+  if (price) {
+    lines[0] = `Hi — payment options for a ${money0(price)} home:`;
+  }
+
+  sources.forEach((s, i) => {
+    const r = s.results;
+    const letter = String.fromCharCode(65 + i);
+    lines.push(`Option ${letter} — ${s.label}`);
+    let moLine = `  Monthly housing ≈ ${money2(r.totalMonthly)}`;
+    if (r.homeNow) moLine += '  (1st + HomeNow 2nd)';
+    lines.push(moLine);
+    if (s.inputs && s.inputs.mode === 'purchase') {
+      let downLine = `  Down ≈ ${money0(r.downAmount)}`;
+      if (r.homeNow && r.downAmount < 1) downLine += ' *';
+      lines.push(downLine);
     }
-
-    // ==================== UFMIP FOR HOMENOW ====================
-    const baseLoanAmount = loanAmount;
-    if (isPurchase && homeNowEnabled) {
-        const ufmip = baseLoanAmount * 0.0175;
-        loanAmount = baseLoanAmount + ufmip;
+    lines.push(`  Rate ${r.annualRate}% · ${r.termYears}-year · loan ${money0(r.baseLoanAmount)}`);
+    if (r.homeNow) {
+      lines.push(`  HomeNow DPA ${r.dpaPercent}% ≈ ${money0(r.dpaAmount)} 2nd @ ${r.secondRate.toFixed(3)}%`);
     }
+    lines.push('');
+  });
 
-    const annualRate = parseFloat(document.getElementById('rate').value) || 0;
-    const termYears = parseFloat(document.getElementById('term').value) || 30;
-    const annualTaxes = parseFloat(document.getElementById('taxes').value) || 0;
-    const annualInsurance = parseFloat(document.getElementById('insurance').value) || 0;
-    const pmiRateInput = parseFloat(document.getElementById('pmi').value) || 0;
-    const extraMonthly = parseFloat(document.getElementById('extraMonthly').value) || 0;
-    const biweekly = document.getElementById('biweekly').checked;
-
-    if (loanAmount <= 0 || annualRate <= 0 || termYears <= 0) {
-        document.getElementById('calc-output').innerHTML = '<p class="text-red-600 font-bold text-center text-2xl">Please enter valid values.</p>';
-        return;
-    }
-
-    const monthlyRate = annualRate / 100 / 12;
-    const totalPayments = termYears * 12;
-
-    const standardPI = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
-                      (Math.pow(1 + monthlyRate, totalPayments) - 1) || 0;
-
-    const monthlyTaxes = annualTaxes / 12;
-    const monthlyInsurance = annualInsurance / 12;
-
-    // ==================== PMI CALCULATION ====================
-    let monthlyPMI = 0;
-    if (isPurchase) {
-        const downPercent = homePrice > 0 ? ((homePrice - baseLoanAmount) / homePrice * 100) : 0;
-        if (homeNowEnabled) {
-            monthlyPMI = (baseLoanAmount * pmiRateInput / 100 / 12);
-        } else {
-            monthlyPMI = downPercent < 20 ? (baseLoanAmount * pmiRateInput / 100 / 12) : 0;
-        }
-    } else {
-        monthlyPMI = baseLoanAmount * pmiRateInput / 100 / 12;
-    }
-
-    // ==================== HOMENOW SECOND MORTGAGE (ALWAYS MONTHLY) ====================
-    let secondPmt = 0;
-    let homenowHTML = '';
-    if (isPurchase && homeNowEnabled) {
-        const dpaAmount = Math.ceil(homePrice * (selectedDPAPercent / 100));
-        const secondRate = annualRate + 2;
-        secondPmt = calculateMonthlyPayment(dpaAmount, secondRate, 10);
-
-        document.getElementById('dpa-amt').textContent = '$' + dpaAmount.toLocaleString();
-        document.getElementById('second-rate').textContent = secondRate.toFixed(3) + '%';
-        document.getElementById('second-pmt').textContent = '$' + Math.round(secondPmt).toLocaleString();
-
-        homenowHTML = `
-            <div class="mt-4 p-3 bg-[#00A89D]/5 border border-[#00A89D]/30 rounded-2xl text-sm">
-                <span class="font-semibold text-[#00A89D]">+ HomeNow 2nd:</span> $${Math.round(secondPmt).toLocaleString()}/mo @ ${secondRate.toFixed(3)}% (10yr term)
-            </div>`;
-    }
-
-    // === PAYMENT LOGIC - Biweekly ONLY accelerates FIRST mortgage ===
-    let basePITI = standardPI + monthlyTaxes + monthlyInsurance + monthlyPMI;
-    let displayPayment = basePITI + extraMonthly;
-    let principalPayment = standardPI + extraMonthly;
-
-    if (biweekly) {
-        displayPayment = (basePITI + extraMonthly) * 13 / 12;
-        principalPayment = (standardPI + extraMonthly) * 13 / 12;
-    }
-
-    if (isPurchase && homeNowEnabled) {
-        displayPayment += secondPmt;
-    }
-
-    // === STANDARD TOTAL PAYMENT (includes HomeNow 2nd mortgage) ===
-    let standardTotalPayment = basePITI;
-    if (isPurchase && homeNowEnabled) {
-        standardTotalPayment += secondPmt;
-    }
-
-    // Payoff calculation (only on first mortgage)
-    let monthsToPayoff = totalPayments;
-    if (extraMonthly > 0 || biweekly) {
-        const r = monthlyRate;
-        const p = principalPayment;
-        const logArg = p / (p - loanAmount * r);
-        if (logArg > 1) {
-            monthsToPayoff = Math.log(logArg) / Math.log(1 + r);
-            monthsToPayoff = Math.ceil(monthsToPayoff);
-        }
-    }
-
-    const yearsToPayoff = Math.floor(monthsToPayoff / 12);
-    const remainingMonths = monthsToPayoff % 12;
-
-    // Second mortgage interest (always full 10-year term)
-    let secondInterest = 0;
-    if (isPurchase && homeNowEnabled) {
-        const dpaAmount = Math.ceil(homePrice * (selectedDPAPercent / 100));
-        const secondPmtCalc = calculateMonthlyPayment(dpaAmount, annualRate + 2, 10);
-        secondInterest = (secondPmtCalc * 120) - dpaAmount;
-    }
-
-    // Standard scenario = first mortgage normal + second mortgage full interest
-    const standardInterest = (standardPI * totalPayments - baseLoanAmount) + secondInterest;
-
-    // Custom scenario = first mortgage accelerated + second mortgage full interest
-    const customInterest = (principalPayment * monthsToPayoff - baseLoanAmount) + secondInterest;
-
-    // SAVINGS CALCULATION — ONLY on the FIRST mortgage when HomeNow is checked
-    let interestDiff = standardInterest - customInterest;
-    if (homeNowEnabled) {
-        const firstMortgageStandardInterest = standardPI * totalPayments - baseLoanAmount;
-        const firstMortgageCustomInterest = principalPayment * monthsToPayoff - baseLoanAmount;
-        interestDiff = firstMortgageStandardInterest - firstMortgageCustomInterest;
-    }
-
-    // ==================== OUTPUT ====================
-    document.getElementById('calc-output').innerHTML = `
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-xl border-2 border-[#002B5C] dark:border-[#00A89D]/60">
-            <div class="flex items-center gap-3 mb-6">
-                <i class="fas fa-balance-scale text-2xl text-[#002B5C] dark:text-[#00A89D]"></i>
-                <h4 class="text-2xl font-bold text-[#002B5C] dark:text-[#00A89D]">Standard ${termYears}-Year Loan</h4>
-            </div>
-            <div class="space-y-4 text-[15px]">
-                <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">Base Loan Amount</span> <span class="font-semibold">$${baseLoanAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span></div>
-                <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">P&I</span> <span class="font-semibold">$${standardPI.toFixed(2)}/mo</span></div>
-                <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">Taxes + Insurance</span> <span class="font-semibold">$${(monthlyTaxes + monthlyInsurance).toFixed(2)}/mo</span></div>
-                <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">PMI / MIP</span> <span class="font-semibold">$${monthlyPMI.toFixed(2)}/mo</span></div>
-                ${homeNowEnabled ? `<div class="text-xs text-[#00A89D]">Includes 1.75% UFMIP financed into 1st mortgage</div>` : ''}
-                ${homenowHTML}
-                <div class="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-baseline">
-                    <span class="font-semibold text-lg">Total Monthly Payment</span>
-                    <span class="text-3xl font-extrabold text-[#002B5C] dark:text-[#00A89D]">$${standardTotalPayment.toFixed(2)}</span>
-                </div>
-                <div class="pt-2 flex justify-between items-baseline">
-                    <span class="text-sm text-gray-500">Total Interest (full term)</span>
-                    <span class="text-2xl font-bold text-[#002B5C] dark:text-[#00A89D]">$${standardInterest.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-xl border-2 border-[#F15A29]">
-            <div class="flex items-center gap-3 mb-6">
-                <i class="fas fa-rocket text-2xl text-[#F15A29]"></i>
-                <h4 class="text-2xl font-bold text-[#F15A29]">Your Accelerated Plan</h4>
-            </div>
-            <div class="space-y-4 text-[15px]">
-                <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">Extra Payments</span> <span class="font-semibold">$${extraMonthly.toFixed(2)}${extraMonthly > 0 ? '/mo' : ''} ${biweekly ? ' (biweekly mode)' : ''}</span></div>
-                <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">Your Monthly Payment</span> <span class="font-semibold">$${displayPayment.toFixed(2)}</span></div>
-                <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">Payoff Time</span> <span class="font-semibold">${yearsToPayoff} yrs${remainingMonths ? ` + ${remainingMonths} mo` : ''}</span></div>
-                <div class="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-baseline">
-                    <span class="font-semibold text-lg">Total Interest Paid</span>
-                    <span class="text-3xl font-extrabold text-[#F15A29]">$${customInterest.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
-                </div>
-                <div class="pt-4">
-                  <div class="text-sm text-gray-500">Interest ${interestDiff > 0 ? 'Savings' : interestDiff < 0 ? 'Difference' : 'Impact'}</div>
-                  <div class="text-4xl font-black ${interestDiff > 0 ? 'text-green-600' : interestDiff < 0 ? 'text-red-600' : 'text-gray-500'}">
-                    ${interestDiff > 0 ? 'Save' : interestDiff < 0 ? 'Extra' : 'No change'}: $${Math.abs(interestDiff).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                  </div>
-                </div>
-                <p class="text-xs text-gray-500 mt-4 italic">* Estimates only. Confirm with your lender for exact figures, rounding rules, and program eligibility (especially HomeNow DPA).</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-6 flex flex-wrap justify-center gap-3">
-      <button onclick="copyCalcResults()" class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white transition">
-        <i class="fas fa-copy"></i>
-        <span>Copy Full Breakdown</span>
-      </button>
-      <button onclick="saveCalcResults()" class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-2xl border border-[#002B5C] text-[#002B5C] hover:bg-[#002B5C] hover:text-white transition">
-        <i class="far fa-bookmark"></i>
-        <span>Save to My Saved Items</span>
-      </button>
-    </div>
-`;
+  if (sources.some((s) => s.results && s.results.homeNow)) {
+    lines.push('* HomeNow: program eligibility applies; DPA is a second mortgage.');
+  }
+  lines.push('Estimates only — not a commitment to lend.');
+  return lines.join('\n').trim();
 }
 
 function getCalcResultsText() {
-  const output = document.getElementById('calc-output');
-  if (!output || !output.textContent.trim()) return '';
-  return (output.innerText || output.textContent).trim();
+  const client = getClientCopyText();
+  if (!client) return '';
+  // Prefer structured client text; append board labels for vault richness
+  return client;
+}
+
+function copyForClient() {
+  const text = getClientCopyText();
+  if (!text) {
+    calcToast('Nothing to copy yet');
+    return;
+  }
+  navigator.clipboard.writeText(text).then(
+    () => calcToast('Client summary copied'),
+    () => {
+      window.prompt('Copy the text below:', text);
+    }
+  );
+}
+
+function copyCalcResults() {
+  copyForClient();
 }
 
 function saveCalcResults() {
   const text = getCalcResultsText();
   if (!text) {
-    alert('No results to save yet. Run a calculation first.');
+    calcToast('No results to save yet');
     return;
   }
-  const btn = typeof event !== 'undefined' && event.currentTarget ? event.currentTarget : null;
-  const title = 'Mortgage Calculator Results — ' + new Date().toLocaleDateString();
+  const btn =
+    typeof event !== 'undefined' && event.currentTarget ? event.currentTarget : null;
+  const title = 'Mortgage scenarios — ' + new Date().toLocaleDateString();
   if (typeof window.toggleSaveIdea === 'function') {
     window.toggleSaveIdea(title, text, btn, 'calculator');
-    if (typeof window.showSavedFeedback === 'function') window.showSavedFeedback('Saved to My Saved Items');
+    if (typeof window.showSavedFeedback === 'function') {
+      window.showSavedFeedback('Saved to My Saved Items');
+    } else {
+      calcToast('Saved to My Saved Items');
+    }
+  } else {
+    calcToast('Saved Items unavailable');
   }
 }
 
-function copyCalcResults() {
-  const text = getCalcResultsText();
-  if (!text) {
-    alert('No results to copy yet. Run a calculation first.');
+function getCalcProfileForPrint() {
+  let profile = {};
+  try {
+    if (typeof window.getUserProfile === 'function') profile = window.getUserProfile() || {};
+    else profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+  } catch (e) {
+    profile = {};
+  }
+  const name =
+    (profile.name || '').trim() ||
+    [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
+  return {
+    name,
+    nmls: String(profile.nmls || profile.nmlsNumber || '').trim(),
+    phone: String(profile.phone || '').trim(),
+    email: String(profile.email || '').trim(),
+    location: String(profile.location || '').trim(),
+    title: String(profile.title || profile.role || 'Loan Officer').trim() || 'Loan Officer'
+  };
+}
+
+function getPrintSources() {
+  if (calcScenarioBoard.length > 0) return calcScenarioBoard.slice();
+  if (lastCalcBundle && lastCalcBundle.valid) {
+    return [
+      {
+        label: autoScenarioLabel(lastCalcBundle.inputs, lastCalcBundle.results),
+        results: lastCalcBundle.results,
+        inputs: lastCalcBundle.inputs
+      }
+    ];
+  }
+  return [];
+}
+
+/** Self-contained client PDF HTML (opened in print window — not app chrome). */
+function buildClientPdfDocument(sources, profile) {
+  const dateStr = new Date().toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  let minPay = Infinity;
+  let minDown = Infinity;
+  sources.forEach((s) => {
+    const r = s.results || {};
+    if (typeof r.totalMonthly === 'number' && r.totalMonthly < minPay) minPay = r.totalMonthly;
+    if (s.inputs && s.inputs.mode === 'purchase' && typeof r.downAmount === 'number' && r.downAmount < minDown) {
+      minDown = r.downAmount;
+    }
+  });
+
+  const priceHint = (() => {
+    const r0 = sources[0] && sources[0].results;
+    if (r0 && r0.mode === 'purchase' && r0.homePrice > 0) {
+      return `Home price context: <strong>${money0(r0.homePrice)}</strong>`;
+    }
+    if (r0 && r0.mode === 'refinance') return 'Refinance payment comparison';
+    return 'Payment scenario comparison';
+  })();
+
+  function buildStdVsAccelBoxes(r) {
+    const accelerated = (r.extraMonthly > 0) || r.biweekly;
+    const payoffTxt = `${r.yearsToPayoff || r.termYears} yrs${r.remainingMonths ? ' + ' + r.remainingMonths + ' mo' : ''}`;
+    const saveAmt = Math.abs(Number(r.interestSavings) || 0);
+    const saveLine =
+      !accelerated
+        ? '<div class="vs-save vs-save-idle">Add extra or biweekly to unlock savings</div>'
+        : r.interestSavings > 0
+          ? `<div class="vs-save">Interest savings${r.homeNow ? ' (1st only)' : ''}: <strong>Save ${money0(saveAmt)}</strong></div>`
+          : r.interestSavings < 0
+            ? `<div class="vs-save vs-save-warn">Interest impact: <strong>Extra ${money0(saveAmt)}</strong></div>`
+            : '<div class="vs-save vs-save-idle">No interest change</div>';
+
+    return `
+      <div class="vs-wrap">
+        <div class="vs-title">Standard vs accelerated</div>
+        <div class="vs-grid">
+          <div class="vs-box vs-box-std">
+            <div class="vs-box-head">Standard ${r.termYears || 30}-year</div>
+            <div class="vs-pay">${money2(r.standardTotalMonthly)}<span>/mo</span></div>
+            <div class="vs-row"><span>P&amp;I</span><span>${money2(r.monthlyPI)}</span></div>
+            <div class="vs-row"><span>Taxes + insurance</span><span>${money2((r.monthlyTaxes || 0) + (r.monthlyInsurance || 0))}</span></div>
+            <div class="vs-row"><span>${r.homeNow ? 'MIP' : 'PMI'}</span><span>${money2(r.monthlyPMI)}</span></div>
+            ${r.homeNow ? `<div class="vs-row"><span>HomeNow 2nd</span><span>${money2(r.monthlyHomeNowSecond)}</span></div>` : ''}
+            <div class="vs-row vs-row-em"><span>Total interest</span><span>${money0(r.totalInterestStandard)}</span></div>
+            <div class="vs-row"><span>Payoff time</span><span>${r.termYears || 30} years</span></div>
+          </div>
+          <div class="vs-box vs-box-acc${accelerated ? ' is-active' : ''}">
+            <div class="vs-box-head">Accelerated plan${accelerated ? '' : ' <em>(not applied)</em>'}</div>
+            <div class="vs-pay vs-pay-acc">${money2(accelerated ? r.totalMonthly : r.standardTotalMonthly)}<span>/mo</span></div>
+            <div class="vs-row"><span>Extra / biweekly</span><span>${
+              accelerated
+                ? `${r.extraMonthly > 0 ? money0(r.extraMonthly) + '/mo' : '—'}${r.biweekly ? (r.extraMonthly > 0 ? ' · ' : '') + 'biweekly' : ''}`
+                : 'None'
+            }</span></div>
+            <div class="vs-row vs-row-em"><span>Total interest</span><span>${money0(accelerated ? r.totalInterestCustom : r.totalInterestStandard)}</span></div>
+            <div class="vs-row"><span>Payoff time</span><span>${accelerated ? payoffTxt : (r.termYears || 30) + ' years'}</span></div>
+            ${saveLine}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const n = Math.min(3, sources.length);
+  const cards = sources
+    .slice(0, 3)
+    .map((s, i) => {
+      const r = s.results || {};
+      const letter = String.fromCharCode(65 + i);
+      const isBestPay = sources.length > 1 && r.totalMonthly === minPay;
+      const isBestDown =
+        sources.length > 1 &&
+        s.inputs &&
+        s.inputs.mode === 'purchase' &&
+        r.downAmount === minDown &&
+        minDown < Infinity;
+      const badges = [];
+      if (isBestPay) badges.push('<span class="badge badge-best">Lowest monthly</span>');
+      if (isBestDown) badges.push('<span class="badge">Lowest down</span>');
+      if (r.homeNow) badges.push(`<span class="badge badge-hn">HomeNow ${r.dpaPercent}%</span>`);
+      if (r.extraMonthly > 0 || r.biweekly) badges.push('<span class="badge badge-acc">Accelerated</span>');
+
+      const rows = [];
+      rows.push(['Loan type', r.mode === 'purchase' ? 'Purchase' : 'Refinance']);
+      if (r.mode === 'purchase') {
+        rows.push(['Home price', money0(r.homePrice)]);
+        rows.push(['Down payment', money0(r.downAmount) + (r.homeNow && r.downAmount < 1 ? ' *' : '')]);
+      }
+      rows.push(['Base loan amount', money0(r.baseLoanAmount)]);
+      if (r.homeNow) rows.push(['1st loan (w/ UFMIP)', money0(r.firstLoanWithUfmip)]);
+      rows.push(['Interest rate', `${r.annualRate}%`]);
+      rows.push(['Term', `${r.termYears} years`]);
+      rows.push(['Principal & interest', money2(r.monthlyPI)]);
+      rows.push(['Taxes + insurance', money2((r.monthlyTaxes || 0) + (r.monthlyInsurance || 0))]);
+      rows.push([r.homeNow ? 'MIP (monthly)' : 'PMI (monthly)', money2(r.monthlyPMI)]);
+      if (r.homeNow) {
+        rows.push([
+          `HomeNow 2nd (${r.dpaPercent}% DPA)`,
+          `${money2(r.monthlyHomeNowSecond)} · ${money0(r.dpaAmount)} @ ${Number(r.secondRate).toFixed(3)}%`
+        ]);
+      }
+
+      const rowHtml = rows
+        .map(
+          ([k, v], ri) =>
+            `<tr class="${ri % 2 ? 'alt' : ''}"><td>${escapeHtml(k)}</td><td>${escapeHtml(String(v))}</td></tr>`
+        )
+        .join('');
+
+      // Hero payment: show standard as primary when not accelerated, else accelerated with note
+      const heroPay = money2(r.totalMonthly);
+      const heroNote = r.homeNow
+        ? 'Includes 1st mortgage + HomeNow 2nd'
+        : r.extraMonthly > 0 || r.biweekly
+          ? 'Includes accelerate options (see Standard vs Accelerated below)'
+          : 'P&amp;I + taxes + insurance + PMI/MIP';
+
+      return `
+        <section class="card${isBestPay ? ' card-best' : ''}">
+          <div class="card-top">
+            <div class="letter">${letter}</div>
+            <div class="card-top-text">
+              <div class="card-label">Option ${letter}</div>
+              <h2>${escapeHtml(s.label || 'Scenario')}</h2>
+            </div>
+          </div>
+          ${badges.length ? `<div class="badges">${badges.join('')}</div>` : ''}
+          <div class="pay-block">
+            <div class="pay-label">Estimated monthly housing</div>
+            <div class="pay">${heroPay}<span>/mo</span></div>
+            <div class="pay-note">${heroNote}</div>
+          </div>
+          <table class="detail">${rowHtml}</table>
+          ${buildStdVsAccelBoxes(r)}
+        </section>`;
+    })
+    .join('');
+
+  // Compact comparison strip (includes standard vs accelerated monthly)
+  const compareRows = sources
+    .slice(0, 3)
+    .map((s, i) => {
+      const r = s.results || {};
+      const letter = String.fromCharCode(65 + i);
+      const accelerated = (r.extraMonthly > 0) || r.biweekly;
+      const best = sources.length > 1 && r.totalMonthly === minPay;
+      return `<tr class="${best ? 'best-row' : ''}">
+        <td><strong>${letter}.</strong> ${escapeHtml(s.label || 'Scenario')}</td>
+        <td class="num">${money2(r.standardTotalMonthly)}</td>
+        <td class="num">${money2(r.totalMonthly)}${accelerated ? ' *' : ''}</td>
+        <td class="num">${r.mode === 'purchase' ? money0(r.downAmount) : '—'}</td>
+        <td class="num">${r.annualRate}%</td>
+        <td>${r.homeNow ? 'HomeNow ' + r.dpaPercent + '%' : r.mode === 'purchase' ? 'Purchase' : 'Refi'}${accelerated ? ' · Accel' : ''}</td>
+      </tr>`;
+    })
+    .join('');
+
+  const loBits = [];
+  if (profile.name) loBits.push(`<div class="lo-name">${escapeHtml(profile.name)}</div>`);
+  loBits.push(`<div class="lo-title">${escapeHtml(profile.title || 'Loan Officer')}</div>`);
+  if (profile.nmls) loBits.push(`<div>NMLS# ${escapeHtml(profile.nmls)}</div>`);
+  if (profile.phone) loBits.push(`<div>${escapeHtml(profile.phone)}</div>`);
+  if (profile.email) loBits.push(`<div>${escapeHtml(profile.email)}</div>`);
+  if (profile.location) loBits.push(`<div>${escapeHtml(profile.location)}</div>`);
+
+  const css = `
+    @page { size: letter; margin: 0.45in 0.5in 0.5in 0.5in; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #fff;
+      color: #0f172a;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .page { max-width: 8in; margin: 0 auto; }
+    .masthead {
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      gap: 16px;
+      border-bottom: 3px solid #00A89D;
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+    .brand-mark {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #00A89D;
+      margin-bottom: 4px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #002B5C;
+      line-height: 1.15;
+    }
+    .subtitle {
+      margin: 6px 0 0;
+      color: #64748b;
+      font-size: 11px;
+    }
+    .date-line {
+      margin-top: 4px;
+      color: #94a3b8;
+      font-size: 10px;
+    }
+    .lo-card {
+      min-width: 2.4in;
+      max-width: 2.8in;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      text-align: right;
+      font-size: 10px;
+      color: #475569;
+      line-height: 1.45;
+    }
+    .lo-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: #002B5C;
+      margin-bottom: 1px;
+    }
+    .lo-title {
+      font-weight: 700;
+      color: #00A89D;
+      margin-bottom: 4px;
+    }
+    .intro {
+      margin: 0 0 14px;
+      color: #475569;
+      font-size: 11px;
+    }
+    .grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: start;
+    }
+    .grid.cols-1 { grid-template-columns: 1fr; }
+    .grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      page-break-inside: avoid;
+    }
+    .card-best {
+      border-color: #00A89D;
+      box-shadow: 0 0 0 1px rgba(0,168,157,0.25);
+    }
+    .card-top {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 12px 8px;
+      background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .card-best .card-top {
+      background: linear-gradient(180deg, rgba(0,168,157,0.1) 0%, #fff 100%);
+    }
+    .letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #002B5C;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-best .letter { background: #00A89D; }
+    .card-label {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    .card-top h2 {
+      margin: 1px 0 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: #002B5C;
+      line-height: 1.2;
+    }
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 0 12px 8px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+    .badge-best {
+      background: rgba(0,168,157,0.14);
+      color: #0f766e;
+    }
+    .badge-hn {
+      background: rgba(0,43,92,0.08);
+      color: #002B5C;
+    }
+    .pay-block {
+      padding: 4px 12px 12px;
+      text-align: left;
+    }
+    .pay-label {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    .pay {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #00A89D;
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+    .pay span {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-left: 2px;
+    }
+    .pay-note {
+      font-size: 9px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+    table.detail {
+      width: 100%;
+      border-collapse: collapse;
+      border-top: 1px solid #e2e8f0;
+    }
+    table.detail td {
+      padding: 5px 12px;
+      font-size: 10px;
+      vertical-align: top;
+    }
+    table.detail td:first-child {
+      color: #64748b;
+      font-weight: 600;
+      width: 46%;
+    }
+    table.detail td:last-child {
+      text-align: right;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    table.detail tr.alt td { background: #f8fafc; }
+
+    /* Standard vs Accelerated dual boxes (matches on-screen calculator) */
+    .vs-wrap {
+      border-top: 1px solid #e2e8f0;
+      padding: 10px 10px 12px;
+      background: #fafbfc;
+    }
+    .vs-title {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin: 0 0 8px 2px;
+    }
+    .vs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .vs-box {
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      padding: 10px 10px 8px;
+      page-break-inside: avoid;
+    }
+    .vs-box-std {
+      border-color: rgba(0, 43, 92, 0.22);
+    }
+    .vs-box-acc {
+      border-color: rgba(241, 90, 41, 0.28);
+      border-style: dashed;
+    }
+    .vs-box-acc.is-active {
+      border-style: solid;
+      border-color: rgba(241, 90, 41, 0.45);
+      background: linear-gradient(180deg, rgba(241, 90, 41, 0.06) 0%, #fff 55%);
+    }
+    .vs-box-head {
+      font-size: 10px;
+      font-weight: 800;
+      color: #002B5C;
+      margin-bottom: 4px;
+      line-height: 1.25;
+    }
+    .vs-box-acc .vs-box-head { color: #F15A29; }
+    .vs-box-head em {
+      font-style: normal;
+      font-weight: 700;
+      font-size: 8px;
+      color: #94a3b8;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .vs-pay {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #002B5C;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .vs-pay-acc { color: #F15A29; }
+    .vs-pay span {
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-left: 1px;
+    }
+    .vs-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 9px;
+      padding: 3px 0;
+      border-top: 1px dashed #f1f5f9;
+      color: #64748b;
+    }
+    .vs-row span:last-child {
+      font-weight: 700;
+      color: #0f172a;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .vs-row-em span:last-child { font-weight: 800; }
+    .vs-save {
+      margin-top: 7px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      font-size: 9px;
+      color: #047857;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .vs-save strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 900;
+      color: #059669;
+      margin-top: 1px;
+    }
+    .vs-save-warn {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.22);
+      color: #b91c1c;
+    }
+    .vs-save-warn strong { color: #dc2626; }
+    .vs-save-idle {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .badge-acc {
+      background: rgba(241, 90, 41, 0.12);
+      color: #c2410c;
+    }
+
+    .compare-wrap {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      page-break-inside: avoid;
+    }
+    .compare-head {
+      background: #002B5C;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+    }
+    table.compare {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.compare th {
+      text-align: left;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 7px 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    table.compare th.num, table.compare td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    table.compare td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 10.5px;
+    }
+    table.compare tr:last-child td { border-bottom: 0; }
+    table.compare tr.best-row td {
+      background: rgba(0,168,157,0.08);
+      font-weight: 700;
+    }
+
+    .disclaimer {
+      border: 1px solid #fde68a;
+      background: #fffbeb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 9px;
+      color: #78716c;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .disclaimer strong { color: #92400e; }
+    .footnote {
+      font-size: 8.5px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    .footnote em { color: #64748b; }
+    @media print {
+      .no-print { display: none !important; }
+      a { color: inherit; text-decoration: none; }
+    }
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .toolbar button {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #002B5C;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .toolbar button.primary {
+      background: #00A89D;
+      border-color: #00A89D;
+      color: #fff;
+    }
+  `;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Scenarios — ${escapeHtml(profile.name || 'Ruoff Mortgage')}</title>
+  <style>${css}</style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar no-print">
+      <button type="button" onclick="window.close()">Close</button>
+      <button type="button" class="primary" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <header class="masthead">
+      <div>
+        <div class="brand-mark">Ruoff Mortgage</div>
+        <h1>Payment Scenario Comparison</h1>
+        <p class="subtitle">${priceHint}</p>
+        <div class="date-line">Prepared ${escapeHtml(dateStr)}</div>
+      </div>
+      <aside class="lo-card">
+        <div style="font-size:8px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;margin-bottom:4px">Prepared by</div>
+        ${loBits.join('') || '<div class="lo-name">Your Loan Officer</div>'}
+      </aside>
+    </header>
+
+    <p class="intro">Below are estimated housing payment options for discussion. Figures include principal &amp; interest plus taxes, insurance, and PMI/MIP when applicable${sources.some((s) => s.results && s.results.homeNow) ? ', and HomeNow second-mortgage payment when selected' : ''}.</p>
+
+    <div class="grid cols-${n}">
+      ${cards}
+    </div>
+
+    ${
+      sources.length > 1
+        ? `<div class="compare-wrap">
+      <div class="compare-head">Side-by-side summary</div>
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th class="num">Standard /mo</th>
+            <th class="num">Accelerated /mo</th>
+            <th class="num">Down</th>
+            <th class="num">Rate</th>
+            <th>Program</th>
+          </tr>
+        </thead>
+        <tbody>${compareRows}</tbody>
+      </table>
+      <div style="padding:6px 10px 8px;font-size:8.5px;color:#94a3b8">* Accelerated monthly differs from standard when extra payments or biweekly are applied.</div>
+    </div>`
+        : ''
+    }
+
+    <div class="disclaimer">
+      <strong>Important:</strong> These figures are estimates for educational and conversation purposes only.
+      They are <em>not</em> a commitment to lend, a pre-approval, or a final Closing Disclosure.
+      Actual rates, payments, taxes, insurance, PMI/MIP, and program eligibility (including Ruoff HomeNow DPA) are subject to underwriting, credit, property, and investor guidelines and may change.
+      Confirm all numbers with your loan officer before making decisions.
+    </div>
+    <div class="footnote">
+      ${sources.some((s) => s.results && s.results.homeNow) ? '* HomeNow options may show $0 traditional down; the DPA amount is a second mortgage, not a gift. ' : ''}
+      Equal Housing Opportunity. NMLS Consumer Access: nmlsconsumeraccess.org.
+      Document generated from Ruoff Loan Officer Sales Coach · Scenario Studio.
+    </div>
+  </div>
+  <script>
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        try { window.focus(); window.print(); } catch (e) {}
+      }, 200);
+    });
+  <\/script>
+</body>
+</html>`;
+}
+
+function buildPrintSheet() {
+  // Keep a minimal on-page mirror for accessibility / fallback
+  const root = document.getElementById('calc-print-sheet');
+  if (!root) return;
+  const sources = getPrintSources();
+  if (!sources.length) {
+    root.innerHTML = '';
     return;
   }
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = event.currentTarget ? event.currentTarget.innerHTML : '';
-    // simple toast
-    const toast = document.createElement('div');
-    toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#002B5C] text-white px-5 py-2 rounded-2xl text-sm shadow-xl z-[999]';
-    toast.textContent = 'Calculator results copied!';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 1800);
-  }).catch(() => {
-    prompt('Copy the results below:', text.trim());
-  });
+  root.innerHTML = buildClientPdfDocument(sources, getCalcProfileForPrint());
 }
 
-// Quick presets for common scenarios (world-class UX - instant "what if")
+function printCalcScenarios() {
+  const sources = getPrintSources();
+  if (!sources.length) {
+    calcToast('Save a scenario (or run a calculation) first');
+    return;
+  }
+  const profile = getCalcProfileForPrint();
+  const html = buildClientPdfDocument(sources, profile);
+
+  // Preferred: dedicated print window (clean PDF, no app chrome)
+  let win = null;
+  try {
+    // Do not use noopener here — we need to write the document, then auto-print.
+    win = window.open('about:blank', '_blank', 'width=920,height=1100');
+  } catch (e) {
+    win = null;
+  }
+
+  if (win && win.document) {
+    try {
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+      try { win.focus(); } catch (e2) { /* ignore */ }
+      calcToast('Client PDF ready — Print → Save as PDF');
+      return;
+    } catch (writeErr) {
+      try { win.close(); } catch (e3) { /* ignore */ }
+      win = null;
+    }
+  }
+
+  // Popup blocked: inject full document styles into on-page print root
+  const root = document.getElementById('calc-print-sheet');
+  if (root) {
+    root.innerHTML = html;
+    // Extract body content for on-page print CSS path
+    const match = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    if (match) {
+      // Use a clean print-only wrapper with embedded style from the document
+      const styleMatch = html.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      root.innerHTML =
+        (styleMatch ? `<style id="calc-print-inline-style">${styleMatch[1]}</style>` : '') +
+        `<div class="calc-print-fallback">${match[1].replace(/<script[\s\S]*?<\/script>/gi, '')}</div>`;
+    }
+  }
+  setTimeout(() => window.print(), 100);
+  calcToast('Print dialog opening — choose Save as PDF');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Presets
+// ─────────────────────────────────────────────────────────────
+
 function applyCalcPreset(type) {
   const hp = document.getElementById('homePrice');
   const dp = document.getElementById('downPayment');
@@ -290,23 +1865,51 @@ function applyCalcPreset(type) {
   const extra = document.getElementById('extraMonthly');
   const bi = document.getElementById('biweekly');
   const hn = document.getElementById('homenow-checkbox');
+  const pmi = document.getElementById('pmi');
 
   if (!hp || !dp) return;
-
   if (bi) bi.checked = false;
   if (extra) extra.value = '0';
 
   if (type === 'firsttime') {
+    setCalcMode('purchase', { silent: true });
+    setDownMode('percent', { silent: true });
+    setPmiMode('dollar', { silent: true, skipConvert: true });
     hp.value = '350000';
-    dp.value = '3.5';
+    dp.value = '0';
     if (rate) rate.value = '6.75';
     if (term) term.value = '30';
     if (taxes) taxes.value = '3200';
     if (ins) ins.value = '1400';
-    if (hn) { hn.checked = true; homeNowEnabled = true; }
-    const pct = document.getElementById('dp-percent-btn');
-    if (pct) pct.click();
+    if (hn) {
+      hn.checked = true;
+      homeNowEnabled = true;
+    }
+    selectedDPAPercent = 3.5;
+    styleDpaButtons();
+    updateHomeNowUi();
+    autoSetFHA_MIP();
+  } else if (type === 'conventional5') {
+    setCalcMode('purchase', { silent: true });
+    setDownMode('percent', { silent: true });
+    setPmiMode('dollar', { silent: true, skipConvert: true });
+    hp.value = '375000';
+    dp.value = '5';
+    if (rate) rate.value = '6.625';
+    if (term) term.value = '30';
+    if (taxes) taxes.value = '3600';
+    if (ins) ins.value = '1500';
+    // ~0.55% of $356,250 loan ≈ $163/mo
+    if (pmi) pmi.value = '163';
+    if (hn) {
+      hn.checked = false;
+      homeNowEnabled = false;
+    }
+    updateHomeNowUi();
   } else if (type === 'investor') {
+    setCalcMode('purchase', { silent: true });
+    setDownMode('percent', { silent: true });
+    setPmiMode('dollar', { silent: true, skipConvert: true });
     hp.value = '425000';
     dp.value = '25';
     if (rate) rate.value = '7.25';
@@ -314,12 +1917,15 @@ function applyCalcPreset(type) {
     if (taxes) taxes.value = '5100';
     if (ins) ins.value = '1650';
     if (extra) extra.value = '250';
-    if (hn) hn.checked = false;
-    const pct = document.getElementById('dp-percent-btn');
-    if (pct) pct.click();
+    if (pmi) pmi.value = '0';
+    if (hn) {
+      hn.checked = false;
+      homeNowEnabled = false;
+    }
+    updateHomeNowUi();
   } else if (type === 'refi') {
-    const refiBtn = document.getElementById('mode-refinance');
-    if (refiBtn) refiBtn.click();
+    setCalcMode('refinance', { silent: true });
+    setPmiMode('dollar', { silent: true, skipConvert: true });
     const la = document.getElementById('loanAmountDirect');
     if (la) la.value = '285000';
     if (rate) rate.value = '6.125';
@@ -327,118 +1933,17 @@ function applyCalcPreset(type) {
     if (taxes) taxes.value = '2900';
     if (ins) ins.value = '1250';
     if (extra) extra.value = '200';
+    if (pmi) pmi.value = '0';
   }
 
   calculateAdvanced();
 }
 
+// ─────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────
 
-
-
-
-
-
-// ====================== HOMENOW SUPPORT ======================
-
-function toggleHomeNow() {
-  homeNowEnabled = document.getElementById('homenow-checkbox').checked;
-  const dpaOpts = document.getElementById('dpa-options');
-  const breakdown = document.getElementById('homenow-breakdown');
-  if (dpaOpts) dpaOpts.classList.toggle('hidden', !homeNowEnabled);
-  if (breakdown) breakdown.classList.toggle('hidden', !homeNowEnabled);
-
-  if (homeNowEnabled) {
-    // For 100% financing programs, default down payment to 0 (DPA covers it as 2nd)
-    const dp = document.getElementById('downPayment');
-    if (dp) {
-      dp.value = '0';
-    }
-    setDPA(3.5);
-    autoSetFHA_MIP();
-  }
-
-  calculateAdvanced();
-
-  // Force the clear AFTER the entire calculation finishes
-  if (!homeNowEnabled) {
-    const pmi = document.getElementById('pmi');
-    if (pmi) pmi.value = '';
-  }
-}
-
-function setDPA(pct) {
-  selectedDPAPercent = pct;
-
-  // Style the buttons only — no longer auto-fills down payment
-  document.getElementById('dpa35-btn').classList.toggle('bg-[#00A89D]', pct === 3.5);
-  document.getElementById('dpa35-btn').classList.toggle('text-white', pct === 3.5);
-  document.getElementById('dpa5-btn').classList.toggle('bg-[#00A89D]', pct === 5);
-  document.getElementById('dpa5-btn').classList.toggle('text-white', pct === 5);
-
-  calculateAdvanced();
-}
-
-function autoSelectDPA() {
-  const price = parseFloat(document.getElementById('homePrice').value) || 0;
-  const loan = parseFloat(document.getElementById('loanAmountManual').value) || 0;
-  if (price > 0 && loan > 0) {
-    const ltv = loan / price;
-    if (ltv >= 0.965) setDPA(3.5);
-    else if (ltv >= 0.95) setDPA(5);
-  }
-}
-function updatePMIRate() {
-    const pmiEl = document.getElementById('pmi');
-    if (!pmiEl) return;
-
-    if (homeNowEnabled) {
-        autoSetFHA_MIP();   // Only runs when HomeNow is checked
-    } else {
-        pmiEl.value = '0.00';   // Always zero out when HomeNow is unchecked
-    }
-}
-
-function calculateMonthlyPayment(principal, annualRate, years) {
-  const r = annualRate / 100 / 12;
-  const n = years * 12;
-  if (r === 0) return principal / n;
-  return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
-}
-
-
-// Auto-set correct FHA MIP rate when HomeNow is checked
-function autoSetFHA_MIP() {
-    const pmiEl = document.getElementById('pmi');
-    if (!pmiEl) return;
-
-    const homePrice = parseFloat(document.getElementById('homePrice').value) || 0;
-    const downPaymentInput = parseFloat(document.getElementById('downPayment').value) || 0;
-    const isPercentMode = document.getElementById('dp-percent-btn').classList.contains('bg-gradient-to-r');
-
-    if (homePrice <= 0) return;
-
-    // Calculate LTV from whatever the user actually entered in the down payment box
-    let downPercent = isPercentMode 
-        ? downPaymentInput 
-        : (downPaymentInput / homePrice * 100);
-
-    const ltv = 1 - (downPercent / 100);
-
-    let mipBps = 55;   // default
-
-    if (ltv > 0.95) {
-        mipBps = 55;   // >95% LTV = 0.55
-    } else {
-        mipBps = 50;   // ≤95% LTV = 0.50
-    }
-
-    pmiEl.value = (mipBps / 100).toFixed(2);
-}
-
-
-  // =====================================================
-  // PUBLIC API EXPOSURE
-  // =====================================================
+if (typeof window !== 'undefined') {
   window.calculateAdvanced = calculateAdvanced;
   window.toggleHomeNow = toggleHomeNow;
   window.setDPA = setDPA;
@@ -447,167 +1952,76 @@ function autoSetFHA_MIP() {
   window.calculateMonthlyPayment = calculateMonthlyPayment;
   window.autoSetFHA_MIP = autoSetFHA_MIP;
   window.applyCalcPreset = applyCalcPreset;
+  window.setPmiMode = setPmiMode;
+  window.copyCalcResults = copyCalcResults;
+  window.saveCalcResults = saveCalcResults;
+  window.copyForClient = copyForClient;
+  window.printCalcScenarios = printCalcScenarios;
+  window.saveCurrentScenario = saveCurrentScenario;
+  window.computeMortgageScenario = computeMortgageScenario;
+}
 
-  // =====================================================
-  // INITIALIZATION (all listeners and startup inside ready to avoid race conditions)
-  // =====================================================
-  function initCalculator() {
-    // Mode toggle listeners (purchase/refi)
-    const purchaseBtn = document.getElementById('mode-purchase');
-    const refiBtn = document.getElementById('mode-refinance');
-    if (purchaseBtn) {
-      purchaseBtn.addEventListener('click', () => {
-        purchaseBtn.classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
-        purchaseBtn.classList.remove('text-gray-700', 'dark:text-gray-300');
-        if (refiBtn) {
-          refiBtn.classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
-          refiBtn.classList.add('text-gray-700', 'dark:text-gray-300');
-        }
-        const purch = document.getElementById('purchase-inputs');
-        const refi = document.getElementById('refinance-inputs');
-        if (purch) purch.classList.remove('hidden');
-        if (refi) refi.classList.add('hidden');
-        const homenowW = document.getElementById('homenow-wrapper');
-        if (homenowW) homenowW.classList.remove('hidden');
-        calculateAdvanced();
-      });
-    }
-    if (refiBtn) {
-      refiBtn.addEventListener('click', () => {
-        refiBtn.classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
-        refiBtn.classList.remove('text-gray-700', 'dark:text-gray-300');
-        if (purchaseBtn) {
-          purchaseBtn.classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
-          purchaseBtn.classList.add('text-gray-700', 'dark:text-gray-300');
-        }
-        const purch = document.getElementById('purchase-inputs');
-        const refi = document.getElementById('refinance-inputs');
-        if (purch) purch.classList.add('hidden');
-        if (refi) refi.classList.remove('hidden');
-        const homenowW = document.getElementById('homenow-wrapper');
-        if (homenowW) {
-          homenowW.classList.add('hidden');
-          const chk = document.getElementById('homenow-checkbox');
-          if (chk) chk.checked = false;
-        }
-        calculateAdvanced();
-      });
-    }
+function initCalculator() {
+  if (typeof document === 'undefined') return;
+  const section = document.getElementById('calculator');
+  if (!section) return;
 
-    // DP % / $ toggle
-    const pctBtn = document.getElementById('dp-percent-btn');
-    const dolBtn = document.getElementById('dp-dollar-btn');
-    if (pctBtn) {
-      pctBtn.addEventListener('click', () => {
-        pctBtn.classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white');
-        pctBtn.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-        if (dolBtn) {
-          dolBtn.classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white');
-          dolBtn.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-        }
-        const dp = document.getElementById('downPayment');
-        if (dp) dp.placeholder = 'e.g., 20 for 20%';
-        calculateAdvanced();
-      });
-    }
-    if (dolBtn) {
-      dolBtn.addEventListener('click', () => {
-        dolBtn.classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white');
-        dolBtn.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-        if (pctBtn) {
-          pctBtn.classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white');
-          pctBtn.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-        }
-        const dp = document.getElementById('downPayment');
-        if (dp) dp.placeholder = 'e.g., 75000';
-        calculateAdvanced();
-      });
-    }
+  loadBoardFromStorage();
 
-    // Auto-calc on inputs
-    document.querySelectorAll('#calculator input, #calculator input[type="checkbox"]').forEach(el => {
-      el.addEventListener('input', calculateAdvanced);
-      el.addEventListener('change', calculateAdvanced);
-    });
+  document.getElementById('mode-purchase')?.addEventListener('click', () => setCalcMode('purchase'));
+  document.getElementById('mode-refinance')?.addEventListener('click', () => setCalcMode('refinance'));
+  document.getElementById('dp-percent-btn')?.addEventListener('click', () => setDownMode('percent'));
+  document.getElementById('dp-dollar-btn')?.addEventListener('click', () => setDownMode('dollar'));
+  document.getElementById('pmi-dollar-btn')?.addEventListener('click', () => setPmiMode('dollar'));
+  document.getElementById('pmi-percent-btn')?.addEventListener('click', () => setPmiMode('percent'));
 
-    // HomeNow checkbox (defensive)
-    const hnChk = document.getElementById('homenow-checkbox');
-    if (hnChk) {
-      hnChk.addEventListener('change', toggleHomeNow);
-    }
+  document.querySelectorAll('#calculator input').forEach((el) => {
+    el.addEventListener('input', calculateAdvanced);
+    el.addEventListener('change', calculateAdvanced);
+  });
 
-    // DPA buttons (defensive rebind)
-    const d35 = document.getElementById('dpa35-btn');
-    const d5 = document.getElementById('dpa5-btn');
-    if (d35) d35.addEventListener('click', () => setDPA(3.5));
-    if (d5) d5.addEventListener('click', () => setDPA(5));
+  const hnChk = document.getElementById('homenow-checkbox');
+  if (hnChk) hnChk.addEventListener('change', toggleHomeNow);
 
-    // Mode listeners for HomeNow wrapper visibility (already above but safe)
-    if (purchaseBtn) {
-      // already bound above
-    }
-    if (refiBtn) {
-      refiBtn.addEventListener('click', () => {
-        const hnW = document.getElementById('homenow-wrapper');
-        if (hnW) hnW.classList.add('hidden');
-        const chk = document.getElementById('homenow-checkbox');
-        if (chk) {
-          chk.checked = false;
-          homeNowEnabled = false;
-        }
-        calculateAdvanced();
-      });
-    }
+  document.getElementById('dpa35-btn')?.addEventListener('click', () => setDPA(3.5));
+  document.getElementById('dpa5-btn')?.addEventListener('click', () => setDPA(5));
 
-    // Initial state for calculator (safe defaults)
-    // Default to Purchase + Percent mode
-    if (purchaseBtn) {
-      purchaseBtn.classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
-      purchaseBtn.classList.remove('text-gray-700', 'dark:text-gray-300');
-    }
-    if (refiBtn) {
-      refiBtn.classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white', 'shadow-md');
-      refiBtn.classList.add('text-gray-700', 'dark:text-gray-300');
-    }
-    const purchIn = document.getElementById('purchase-inputs');
-    const refiIn = document.getElementById('refinance-inputs');
-    if (purchIn) purchIn.classList.remove('hidden');
-    if (refiIn) refiIn.classList.add('hidden');
+  document.getElementById('calc-save-scenario-btn')?.addEventListener('click', saveCurrentScenario);
+  document.getElementById('calc-copy-client-btn')?.addEventListener('click', copyForClient);
+  document.getElementById('calc-print-btn')?.addEventListener('click', printCalcScenarios);
 
-    const pctB = document.getElementById('dp-percent-btn');
-    const dolB = document.getElementById('dp-dollar-btn');
-    if (pctB) {
-      pctB.classList.add('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white');
-      pctB.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-    }
-    if (dolB) {
-      dolB.classList.remove('bg-gradient-to-r', 'from-[#00A89D]', 'to-[#00A89D]/80', 'text-white');
-      dolB.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-    }
-    const dpIn = document.getElementById('downPayment');
-    if (dpIn) dpIn.placeholder = 'e.g., 20 for 20%';
+  // Defaults — PMI in monthly $ (most common for LOs)
+  setCalcMode('purchase', { silent: true });
+  setDownMode('percent', { silent: true });
+  setPmiMode('dollar', { silent: true, skipConvert: true });
+  styleDpaButtons();
+  updateHomeNowUi();
+  renderScenarioBoard();
+  calculateAdvanced();
 
-    // Hide HomeNow by default (will show on purchase click, but since default purchase, show it)
-    const hnW = document.getElementById('homenow-wrapper');
-    if (hnW) hnW.classList.remove('hidden');
+  console.log('%c[calculator.js] Scenario Studio ready', 'color:#00A89D');
+}
 
-    // Initial calc
-    calculateAdvanced();
-
-    console.log('%c[calculator.js] Advanced Payment Calculator initialized (v2 polished)', 'color:#00A89D');
-  }
-
+if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCalculator);
   } else {
     initCalculator();
   }
 
-  // Safety: re-calc if section becomes visible later (e.g. via showSection)
   setTimeout(() => {
     const calcSection = document.getElementById('calculator');
     if (calcSection && !calcSection.classList.contains('hidden') && typeof calculateAdvanced === 'function') {
       calculateAdvanced();
     }
   }, 300);
+}
 
+// Node / test export (after init guards so requiring this file is safe)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    calculateMonthlyPayment,
+    computeMortgageScenario,
+    fhaMipRatePercent
+  };
+}
