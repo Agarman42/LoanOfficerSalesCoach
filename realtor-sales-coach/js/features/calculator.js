@@ -283,6 +283,10 @@ function isPmiDollarMode() {
   return btn.classList.contains('is-active') || !document.getElementById('pmi-percent-btn')?.classList.contains('is-active');
 }
 
+/**
+ * Purchase loan amount is always derived from home price − down payment.
+ * (The old second "Loan amount" field was removed — it fought price/down and confused users.)
+ */
 function syncPurchaseLoanFields() {
   if (!isPurchaseMode()) return;
   const homePrice = parseFloat(document.getElementById('homePrice')?.value) || 0;
@@ -290,23 +294,13 @@ function syncPurchaseLoanFields() {
   const loanEl = document.getElementById('loanAmountManual');
   if (!dpEl || !loanEl) return;
 
-  const focusedId = document.activeElement ? document.activeElement.id : '';
   const isPercent = isDownPercentMode();
   const downPaymentInput = parseFloat(dpEl.value) || 0;
-  const loanAmountInput = parseFloat(loanEl.value) || 0;
-
-  if (focusedId === 'loanAmountManual' && loanAmountInput > 0) {
-    const downAmount = Math.max(0, homePrice - loanAmountInput);
-    const newDown = isPercent ? (homePrice > 0 ? (downAmount / homePrice) * 100 : 0) : downAmount;
-    if (Math.abs(newDown - downPaymentInput) > 0.01) {
-      dpEl.value = isPercent ? newDown.toFixed(2) : String(Math.round(newDown));
-    }
-  } else {
-    const downAmount = isPercent ? (downPaymentInput / 100) * homePrice : downPaymentInput;
-    const loanAmount = Math.max(0, homePrice - downAmount);
-    if (focusedId !== 'loanAmountManual' && Math.abs(loanAmount - loanAmountInput) > 0.5) {
-      loanEl.value = String(Math.round(loanAmount));
-    }
+  const downAmount = isPercent ? (downPaymentInput / 100) * homePrice : downPaymentInput;
+  const loanAmount = Math.max(0, homePrice - downAmount);
+  const cur = parseFloat(loanEl.value) || 0;
+  if (Math.abs(loanAmount - cur) > 0.5) {
+    loanEl.value = String(Math.round(loanAmount));
   }
 }
 
@@ -321,8 +315,9 @@ function readInputsFromDom() {
 
   let downAmount = 0;
   if (isPurchase) {
+    // Always derive loan from price − down (single source of truth)
     downAmount = isPercent ? (downPayment / 100) * homePrice : downPayment;
-    if (!(loanAmount > 0)) loanAmount = Math.max(0, homePrice - downAmount);
+    loanAmount = Math.max(0, homePrice - downAmount);
   }
 
   return {

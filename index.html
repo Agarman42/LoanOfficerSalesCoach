@@ -5685,16 +5685,14 @@
                   <button type="button" id="dp-dollar-btn" class="calc-seg-btn">$</button>
                 </div>
               </div>
-              <div class="calc-field">
-                <label for="loanAmountManual">Loan amount</label>
-                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="loanAmountManual" min="0" value="300000" class="calc-input"></div>
-                <p class="calc-hint">Synced with price &amp; down — or type to drive the down payment</p>
-              </div>
+              <!-- Loan amount is derived from home price − down payment (hidden for calc engine) -->
+              <input type="hidden" id="loanAmountManual" value="300000">
             </div>
             <div id="refinance-inputs" class="calc-fields hidden">
               <div class="calc-field">
                 <label for="loanAmountDirect">Loan amount</label>
                 <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="loanAmountDirect" min="0" value="300000" class="calc-input"></div>
+                <p class="calc-hint">Refinance payoff / new loan amount</p>
               </div>
             </div>
             <div class="calc-fields calc-fields--2">
@@ -8221,7 +8219,7 @@
 <!-- deferred to feature-loader: js/features/smart-savings-host.js?v=20260720-review -->
 <!-- deferred to feature-loader: js/features/smart-savings-polish.js?v=20260719-ss-bal-white -->
 
-<!-- deferred to feature-loader: js/features/calculator.js?v=20260806-vault-ui -->
+<!-- deferred to feature-loader: js/features/calculator.js?v=20260806-one-loan -->
 <!-- deferred to feature-loader: js/features/sales-scripts.js?v=20260715-lo-v225 -->
 <!-- deferred to feature-loader: js/features/social-post.js?v=20260720-empty-posts -->
 <!-- deferred to feature-loader: js/features/mindset-lab.js -->
