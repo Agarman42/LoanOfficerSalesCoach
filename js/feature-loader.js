@@ -11,7 +11,7 @@
   var SCRIPTS = [
   'js/features/bio-creator.js?v=20260729-nmls-only',
   'js/features/bio-wizard.js?v=20260729-no-backdrop',
-  'js/features/saved-items-library.js?v=20260715-lo-v290',
+  'js/features/saved-items-library.js?v=20260806-vault-ui',
   'js/features/global-search-deep-index.js?v=20260721-ux-polish',
   'js/features/global-search-dynamic-index.js?v=20260709-lo-v292',
   'js/features/global-search-config.js?v=20260721-ux-polish',
@@ -65,7 +65,7 @@
   'js/features/smart-savings-scope-css.js?v=20260721-v334',
   'js/features/smart-savings-host.js?v=20260729-profile-stack',
   'js/features/smart-savings-polish.js?v=20260721-v334',
-  'js/features/calculator.js?v=20260806-hero-save'
+  'js/features/calculator.js?v=20260806-vault-ui'
   ];
   var i = 0;
   function next() {

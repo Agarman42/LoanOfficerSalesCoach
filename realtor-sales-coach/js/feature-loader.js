@@ -11,7 +11,7 @@
   var SCRIPTS = [
   'js/features/bio-creator.js?v=20260717-realtor-home',
   'js/features/bio-wizard.js?v=20260720-polish2',
-  'js/features/saved-items-library.js?v=20260709-realtor-v287',
+  'js/features/saved-items-library.js?v=20260806-vault-ui',
   'js/features/global-search-deep-index.js?v=20260719-content-hub',
   'js/features/global-search-dynamic-index.js?v=20260717-realtor-search',
   'js/features/global-search-config.js?v=20260719-content-hub',
@@ -54,7 +54,7 @@
   'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
   'js/features/newsletter-wizard.js?v=20260720-last-issue-chip',
   'js/features/ai-chat.js?v=20260720-ai-chat',
-  'js/features/calculator.js?v=20260806-hero-save',
+  'js/features/calculator.js?v=20260806-vault-ui',
   'js/features/translation-tool.js?v=20260804-tr-custom-lang',
   'js/features/value-vault.js?v=20260706-realtor-v273',
   'js/features/vault-rich-modals.js?v=20260706-realtor-v273',

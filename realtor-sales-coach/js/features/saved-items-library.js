@@ -87,7 +87,7 @@
     return filtered;
   }
 
-  const RICH_HTML_TYPES = ['listings', 'open-house', 'consultation', 'blog', 'plan', 'newsletter', 'translation'];
+  const RICH_HTML_TYPES = ['listings', 'open-house', 'consultation', 'blog', 'plan', 'newsletter', 'translation', 'calculator'];
 
   function plainTextContent(item) {
     let text = (typeof item === 'string' ? item : item?.content) || '';
@@ -116,7 +116,7 @@
       return {
         wrapperClass: 'p-4 overflow-hidden flex-1 bg-gray-100 dark:bg-gray-800',
         html: `<iframe style="width:100%;height:100%;min-height:500px;border:1px solid #ccc;border-radius:8px;background:white;" srcdoc="${safeSrcdoc}"></iframe>`,
-        copyText: plainTextContent(item)
+        copyText: item.plainText || plainTextContent(item)
       };
     }
 
@@ -170,7 +170,7 @@
       };
     }
 
-    if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing', 'nurture', 'process', 'translation', 'listings', 'open-house', 'consultation'].includes(item.type)) {
+    if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing', 'nurture', 'process', 'translation', 'listings', 'open-house', 'consultation', 'calculator'].includes(item.type)) {
       const escaped = (item.content || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')

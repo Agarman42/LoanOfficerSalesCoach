@@ -90,7 +90,7 @@
     return filtered;
   }
 
-  const RICH_HTML_TYPES = ['listings', 'open-house', 'consultation', 'blog', 'plan', 'newsletter', 'translation'];
+  const RICH_HTML_TYPES = ['listings', 'open-house', 'consultation', 'blog', 'plan', 'newsletter', 'translation', 'calculator'];
 
   function plainTextContent(item) {
     let text = (typeof item === 'string' ? item : item?.content) || '';
@@ -160,19 +160,21 @@
       return {
         wrapperClass: 'p-5 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 saved-rich-viewer custom-modal-scroll',
         html: `<div class="saved-rich-content space-y-4 max-w-none">${item.content}</div>`,
-        copyText: plainTextContent(item)
+        // Prefer stored plainText for calculator copy (email-friendly)
+        copyText: item.plainText || plainTextContent(item)
       };
     }
 
-    if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing', 'nurture', 'process', 'translation', 'listings', 'open-house', 'consultation'].includes(item.type)) {
+    if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing', 'nurture', 'process', 'translation', 'listings', 'open-house', 'consultation', 'calculator'].includes(item.type)) {
+      // Plain-text calculator saves (older) — preserve line breaks; new saves are rich HTML via isRichHtmlItem
       const escaped = (item.content || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
       return {
-        wrapperClass: 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900 whitespace-pre-wrap leading-relaxed',
+        wrapperClass: 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900 whitespace-pre-wrap leading-relaxed font-mono',
         html: escaped,
-        copyText: item.content || ''
+        copyText: item.plainText || item.content || ''
       };
     }
 

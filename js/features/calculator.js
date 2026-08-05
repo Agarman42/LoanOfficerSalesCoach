@@ -946,21 +946,26 @@ function renderScenarioBoard() {
 
       return `
         <article class="calc-scenario-card ${isLowPay ? 'is-best' : ''}" data-scenario-id="${escapeHtml(s.id)}">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.35rem">
-            <div style="display:flex;align-items:center;gap:0.45rem;min-width:0">
+          <div class="calc-card-top">
+            <div class="calc-card-identity">
               <span class="calc-card-letter">${letter}</span>
-              <h4 style="margin:0;font-size:0.98rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(s.label)}">${escapeHtml(s.label)}</h4>
+              <div class="calc-card-titles">
+                <div class="calc-card-kicker">Option ${letter}</div>
+                <h4 class="calc-card-title" title="${escapeHtml(s.label)}">${escapeHtml(s.label)}</h4>
+              </div>
             </div>
-            <div style="display:flex;flex-wrap:wrap;gap:0.25rem;justify-content:flex-end">${badges.join('')}</div>
+            ${badges.length ? `<div class="calc-card-badges">${badges.join('')}</div>` : ''}
           </div>
           <div class="calc-card-pay">${money2(r.totalMonthly)}<span>/mo</span></div>
-          <div class="calc-card-facts">
-            Loan ${money0(r.baseLoanAmount)}${r.homeNow ? ' · DPA ' + money0(r.dpaAmount) : ''}<br>
-            ${s.inputs && s.inputs.mode === 'purchase' ? 'Down ' + money0(r.downAmount) : 'Refinance'}
-            · ${r.annualRate}% · ${r.termYears} yr
+          <div class="calc-card-stat-grid">
+            <div class="calc-card-stat"><span>Loan</span><strong>${money0(r.baseLoanAmount)}</strong></div>
+            <div class="calc-card-stat"><span>${s.inputs && s.inputs.mode === 'purchase' ? 'Down' : 'Mode'}</span><strong>${s.inputs && s.inputs.mode === 'purchase' ? money0(r.downAmount) : 'Refi'}</strong></div>
+            <div class="calc-card-stat"><span>Rate</span><strong>${r.annualRate}%</strong></div>
+            <div class="calc-card-stat"><span>Term</span><strong>${r.termYears} yr</strong></div>
           </div>
+          ${r.homeNow ? `<div class="calc-card-hn">HomeNow ${r.dpaPercent}% · 2nd ${money0(r.dpaAmount)} · ${money2(r.monthlyHomeNowSecond)}/mo</div>` : ''}
           <div class="calc-card-actions">
-            <button type="button" class="calc-card-btn" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
+            <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
             <button type="button" class="calc-card-btn" data-action="rename" data-id="${escapeHtml(s.id)}">Rename</button>
             <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="remove" data-id="${escapeHtml(s.id)}">Remove</button>
           </div>
@@ -1312,12 +1317,176 @@ function copyCalcResults() {
 }
 
 /**
+ * Rich HTML for My Saved Items viewer (email/copy stay plain text).
+ * Inline styles so the vault modal always looks polished.
+ */
+function getClientVaultHtml() {
+  const sources = getClientScenarioSources();
+  if (!sources.length) return '';
+
+  const r0 = sources[0].results || {};
+  const price =
+    (r0.homePrice > 0 && r0.homePrice) ||
+    (sources[0].inputs && sources[0].inputs.homePrice) ||
+    0;
+  const isRefi = r0.mode === 'refinance';
+  const hasHomeNow = sources.some((s) => s.results && s.results.homeNow);
+  const multi = sources.length > 1;
+
+  let intro = '';
+  if (price && !isRefi) {
+    intro = multi
+      ? `I put together <strong>${sources.length} payment options</strong> for a <strong>${money0(price)}</strong> home so you can compare them side by side.`
+      : `Here is a clear payment snapshot for a <strong>${money0(price)}</strong> home.`;
+  } else if (isRefi) {
+    intro = multi
+      ? `I put together <strong>${sources.length} refinance options</strong> for you to compare.`
+      : 'Here is a clear refinance payment snapshot for you to review.';
+  } else {
+    intro = multi
+      ? `I put together <strong>${sources.length} payment options</strong> for you to compare.`
+      : 'Here is a clear payment snapshot for you to review.';
+  }
+
+  let compareHtml = '';
+  if (multi) {
+    const rows = sources
+      .map((s, i) => {
+        const r = s.results || {};
+        const letter = String.fromCharCode(65 + i);
+        const downBit = r.mode === 'purchase' ? money0(r.downAmount) + ' down' : 'Refi';
+        const prog = r.homeNow
+          ? 'HomeNow ' + r.dpaPercent + '%'
+          : r.mode === 'purchase'
+            ? 'Purchase'
+            : 'Refinance';
+        return `<tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-weight:800;color:#002B5C;width:36px">${letter}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0">
+            <div style="font-weight:800;color:#0f172a;font-size:14px">${escapeHtml(s.label)}</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(prog)} · ${escapeHtml(downBit)}</div>
+          </td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:right;white-space:nowrap">
+            <div style="font-size:18px;font-weight:900;color:#00A89D;letter-spacing:-0.02em">${money2(r.totalMonthly)}</div>
+            <div style="font-size:11px;color:#94a3b8;font-weight:700">/mo</div>
+          </td>
+        </tr>`;
+      })
+      .join('');
+    compareHtml = `
+      <div style="margin:0 0 18px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#fff">
+        <div style="background:linear-gradient(90deg,#002B5C,#00A89D);color:#fff;font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;padding:10px 14px">Quick compare</div>
+        <table style="width:100%;border-collapse:collapse">${rows}</table>
+      </div>`;
+  }
+
+  const optionCards = sources
+    .map((s, i) => {
+      const r = s.results || {};
+      const letter = String.fromCharCode(65 + i);
+      const accelerated = (r.extraMonthly > 0) || r.biweekly;
+      const rows = [];
+      if (r.mode === 'purchase') {
+        rows.push(['Down payment', money0(r.downAmount) + (r.homeNow && r.downAmount < 1 ? ' *' : '')]);
+        if (r.homePrice > 0) rows.push(['Home price', money0(r.homePrice)]);
+      }
+      rows.push(['Base loan', money0(r.baseLoanAmount)]);
+      if (r.homeNow) rows.push(['1st w/ UFMIP', money0(r.firstLoanWithUfmip)]);
+      rows.push(['Rate / term', `${r.annualRate}% · ${r.termYears}-year`]);
+      rows.push(['Principal & interest', money2(r.monthlyPI) + '/mo']);
+      rows.push(['Taxes + insurance', money2((r.monthlyTaxes || 0) + (r.monthlyInsurance || 0)) + '/mo']);
+      rows.push([r.homeNow ? 'MIP' : 'PMI', money2(r.monthlyPMI) + '/mo']);
+      if (r.homeNow) {
+        rows.push([
+          `HomeNow 2nd (${r.dpaPercent}%)`,
+          `${money2(r.monthlyHomeNowSecond)}/mo · ${money0(r.dpaAmount)} @ ${Number(r.secondRate).toFixed(3)}%`
+        ]);
+      }
+
+      const detailRows = rows
+        .map(
+          ([k, v], ri) =>
+            `<tr style="background:${ri % 2 ? '#f8fafc' : '#fff'}">
+              <td style="padding:8px 12px;font-size:12px;color:#64748b;font-weight:600;width:42%">${escapeHtml(k)}</td>
+              <td style="padding:8px 12px;font-size:13px;font-weight:800;color:#0f172a;text-align:right;font-variant-numeric:tabular-nums">${escapeHtml(v)}</td>
+            </tr>`
+        )
+        .join('');
+
+      let vsHtml = '';
+      if (accelerated) {
+        const accelBits = [];
+        if (r.extraMonthly > 0) accelBits.push('+' + money0(r.extraMonthly) + '/mo extra');
+        if (r.biweekly) accelBits.push('biweekly');
+        vsHtml = `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;background:#f8fafc;border-top:1px solid #e2e8f0">
+            <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;background:#fff">
+              <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#64748b">Standard</div>
+              <div style="font-size:18px;font-weight:900;color:#002B5C;margin-top:4px">${money2(r.standardTotalMonthly)}<span style="font-size:11px;color:#94a3b8;font-weight:700">/mo</span></div>
+              <div style="font-size:11px;color:#64748b;margin-top:4px">Interest ${money0(r.totalInterestStandard)}</div>
+            </div>
+            <div style="border:1px solid rgba(241,90,41,0.35);border-radius:10px;padding:10px;background:linear-gradient(180deg,rgba(241,90,41,0.06),#fff)">
+              <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#F15A29">Accelerated</div>
+              <div style="font-size:18px;font-weight:900;color:#F15A29;margin-top:4px">${money2(r.totalMonthly)}<span style="font-size:11px;color:#94a3b8;font-weight:700">/mo</span></div>
+              <div style="font-size:11px;color:#64748b;margin-top:4px">${escapeHtml(accelBits.join(' · '))}</div>
+              ${r.interestSavings > 0 ? `<div style="margin-top:6px;font-size:12px;font-weight:800;color:#059669">Save ${money0(r.interestSavings)}</div>` : ''}
+            </div>
+          </div>`;
+      } else {
+        vsHtml = `
+          <div style="padding:10px 12px;border-top:1px solid #e2e8f0;background:#f8fafc;font-size:12px;color:#64748b">
+            Full-term interest <strong style="color:#0f172a">${money0(r.totalInterestStandard)}</strong>
+            <span style="color:#94a3b8"> · </span>
+            Accelerated plan not applied
+          </div>`;
+      }
+
+      return `
+        <div style="margin:0 0 14px;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 8px 24px -16px rgba(0,43,92,0.25)">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(180deg,#f8fafc,#fff);border-bottom:1px solid #f1f5f9">
+            <div style="width:28px;height:28px;border-radius:8px;background:#002B5C;color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center">${letter}</div>
+            <div style="min-width:0;flex:1">
+              <div style="font-size:10px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8">Option ${letter}</div>
+              <div style="font-size:15px;font-weight:800;color:#002B5C;line-height:1.2">${escapeHtml(s.label)}</div>
+            </div>
+            ${r.homeNow ? `<span style="font-size:10px;font-weight:800;padding:4px 8px;border-radius:999px;background:rgba(0,168,157,0.12);color:#0f766e">HomeNow ${r.dpaPercent}%</span>` : ''}
+          </div>
+          <div style="padding:12px 14px 8px">
+            <div style="font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8">Monthly housing</div>
+            <div style="font-size:28px;font-weight:900;letter-spacing:-0.03em;color:#00A89D;line-height:1.1">${money2(r.totalMonthly)}<span style="font-size:13px;font-weight:700;color:#94a3b8">/mo</span></div>
+            ${r.homeNow ? '<div style="font-size:11px;color:#64748b;margin-top:2px">Includes 1st mortgage + HomeNow 2nd</div>' : ''}
+          </div>
+          <table style="width:100%;border-collapse:collapse;border-top:1px solid #e2e8f0">${detailRows}</table>
+          ${vsHtml}
+        </div>`;
+    })
+    .join('');
+
+  return `
+    <div class="calc-vault-doc" style="font-family:Segoe UI,system-ui,-apple-system,sans-serif;color:#0f172a;line-height:1.45;max-width:720px;margin:0 auto">
+      <div style="margin:0 0 16px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(0,168,157,0.08),rgba(0,43,92,0.04));border:1px solid rgba(0,168,157,0.2)">
+        <div style="font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#00A89D;margin-bottom:6px">Client payment summary</div>
+        <p style="margin:0;font-size:14px;color:#334155">${intro} All figures are estimates for discussion.</p>
+      </div>
+      ${compareHtml}
+      ${optionCards}
+      <div style="margin-top:4px;padding:12px 14px;border-radius:12px;background:#fffbeb;border:1px solid #fde68a;font-size:11px;color:#78716c;line-height:1.45">
+        <strong style="color:#92400e">Important:</strong> Estimates only — not a commitment to lend or a final Closing Disclosure.
+        Rates, payments, and program eligibility (including HomeNow DPA) are subject to underwriting and may change.
+        ${hasHomeNow ? ' HomeNow DPA is a second mortgage, not a gift.' : ''}
+      </div>
+    </div>`.trim();
+}
+
+/**
  * Always APPEND to My Saved Items (toggleSaveIdea removes on second click with same title).
+ * Saves polished HTML for the vault viewer; plain text remains available via getClientCopyText().
  */
 function saveCalcToVault(opts) {
   opts = opts || {};
-  const text = opts.text || getCalcResultsText();
-  if (!text) {
+  const plain = opts.text || getCalcResultsText();
+  const html = opts.html || getClientVaultHtml();
+  if (!plain && !html) {
     if (!opts.silent) calcToast('Nothing to save yet — run a calculation first');
     return false;
   }
@@ -1341,10 +1510,11 @@ function saveCalcToVault(opts) {
     if (!Array.isArray(saved)) saved = [];
     saved.push({
       title: title,
-      content: text,
+      content: html || plain,
+      plainText: plain || '',
       savedAt: now.toISOString(),
       type: 'calculator',
-      format: 'text'
+      format: html ? 'html' : 'text'
     });
     localStorage.setItem(key, JSON.stringify(saved));
     if (typeof window.updateSavedCount === 'function') window.updateSavedCount();
@@ -1364,7 +1534,9 @@ function saveCalcToVault(opts) {
   } catch (err) {
     // Fallback to toggleSaveIdea API
     if (typeof window.toggleSaveIdea === 'function') {
-      window.toggleSaveIdea(title, text, opts.btn || null, 'calculator');
+      window.toggleSaveIdea(title, html || plain, opts.btn || null, 'calculator', {
+        format: html ? 'html' : 'text'
+      });
       if (!opts.silent) {
         if (typeof window.showSavedFeedback === 'function') {
           window.showSavedFeedback(opts.feedback || 'Saved to My Saved Items');
