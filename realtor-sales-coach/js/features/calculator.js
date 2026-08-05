@@ -1,3 +1,6 @@
+/** Realtor Sales Coach — Mortgage Calculator Scenario Studio */
+window.CALC_COACH_VARIANT = 'realtor';
+
 /**
  * js/features/calculator.js
  *

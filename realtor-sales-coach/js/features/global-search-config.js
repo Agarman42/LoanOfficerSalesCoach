@@ -137,6 +137,15 @@
       group: 'Quick Actions',
     },
     {
+      id: 'action-mortgage-calculator',
+      title: 'Mortgage Calculator',
+      subtitle: 'Payments, HomeNow, scenario compare & client PDF',
+      icon: 'fas fa-calculator',
+      keywords: ['mortgage calculator', 'payment calculator', 'pmi', 'homenow', 'scenarios', 'amortization', 'biweekly'],
+      sectionId: 'calculator',
+      group: 'Quick Actions',
+    },
+    {
       id: 'action-profile',
       title: 'My Profile & Preferences',
       subtitle: 'Database size, branding, contact info',

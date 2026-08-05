@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260730-nl-fluid">
+    <link rel="stylesheet" href="css/main.css?v=20260805-realtor-calc">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -304,6 +304,7 @@
                 <li><a href="#mindset-motivation" class="sidebar-link"><i class="fas fa-brain" aria-hidden="true"></i><span>Mindset Lab</span></a></li>
                 <li><a href="#books" class="sidebar-link"><i class="fas fa-book" aria-hidden="true"></i><span>Book Vault</span></a></li>
                 <li><a href="#client-translation" class="sidebar-link"><i class="fas fa-language" aria-hidden="true"></i><span>Client translation</span></a></li>
+                <li><a href="#calculator" class="sidebar-link"><i class="fas fa-calculator" aria-hidden="true"></i><span>Mortgage calculator</span></a></li>
                 <li><a href="#saved-items" data-home-fav="saved-items" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link"><i class="fas fa-bookmark" aria-hidden="true"></i><span class="flex-1">My Saved Items</span><span id="global-saved-count" class="hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#00A89D] text-white rounded-full items-center justify-center shrink-0">0</span></a></li>
             </ul>
 
@@ -458,6 +459,16 @@
               </span>
               <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
+
+            <button type="button" onclick="window.showSection('calculator')" class="home-tool group">
+              <span class="home-tool-icon" style="background:rgba(0,168,157,0.12);color:#00A89D"><i class="fas fa-calculator" aria-hidden="true"></i></span>
+              <span class="home-tool-text">
+                <span class="home-tool-title">Mortgage Calculator</span>
+                <span class="home-tool-sub">Payments &amp; scenarios</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
+            </button>
+
             <button type="button" onclick="window.showSection('content-hub')" class="home-tool group">
               <i class="fas fa-pen-nib text-[#00A89D]"></i>
               <span class="home-tool-text">
@@ -5853,7 +5864,242 @@
 </section>
                        
 
-                <section id="value-vault" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+                    <section id="calculator" class="card calc-studio animate-fade-in hidden">
+  <div class="calc-studio-shell">
+    <!-- Header band -->
+    <header class="calc-header">
+      <div class="calc-header-copy">
+        <span class="calc-kicker"><i class="fas fa-star"></i> Scenario Studio</span>
+        <h2 class="calc-title">Mortgage Calculator</h2>
+        <p class="calc-lead">Show clients clear payment options in seconds. Park up to three scenarios and send a polished comparison — including Ruoff HomeNow DPA.</p>
+      </div>
+      <div class="calc-header-steps" aria-hidden="true">
+        <div class="calc-step"><span>1</span> Calculate</div>
+        <div class="calc-step-line"></div>
+        <div class="calc-step"><span>2</span> Compare</div>
+        <div class="calc-step-line"></div>
+        <div class="calc-step"><span>3</span> Send</div>
+      </div>
+    </header>
+
+    <!-- Sticky command bar / hero -->
+    <div id="calc-hero" class="calc-hero">
+      <div class="calc-hero-glow" aria-hidden="true"></div>
+      <div class="calc-hero-inner">
+        <div class="calc-hero-main">
+          <div class="calc-hero-label">Total monthly housing</div>
+          <div class="calc-hero-pay-row">
+            <span id="calc-hero-payment" class="calc-hero-payment">$0</span>
+            <span id="calc-hero-sub" class="calc-hero-sub">PITI · working scenario</span>
+          </div>
+          <div id="calc-hero-stack" class="calc-stack calc-stack--hero" aria-hidden="true"></div>
+          <div id="calc-hero-chips" class="calc-hero-chips"></div>
+        </div>
+        <div class="calc-hero-metrics" id="calc-hero-metrics"></div>
+        <div class="calc-hero-actions">
+          <button type="button" id="calc-save-scenario-btn" class="calc-btn calc-btn-primary">
+            <i class="fas fa-layer-group"></i><span>Save scenario</span>
+          </button>
+          <button type="button" id="calc-copy-client-btn" class="calc-btn calc-btn-secondary">
+            <i class="fas fa-paper-plane"></i><span>Copy for client</span>
+          </button>
+          <button type="button" id="calc-print-btn" class="calc-btn calc-btn-ghost">
+            <i class="fas fa-file-pdf"></i><span>Print / PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode + presets -->
+    <div class="calc-toolbar">
+      <div class="calc-mode-toggle" role="group" aria-label="Loan mode">
+        <button type="button" id="mode-purchase" class="calc-mode-btn is-active">Purchase</button>
+        <button type="button" id="mode-refinance" class="calc-mode-btn">Refinance</button>
+      </div>
+      <div class="calc-presets" role="group" aria-label="Quick presets">
+        <span class="calc-presets-label">Quick start</span>
+        <button type="button" onclick="applyCalcPreset('firsttime')" class="calc-preset-chip calc-preset-chip--accent">HomeNow 3.5%</button>
+        <button type="button" onclick="applyCalcPreset('conventional5')" class="calc-preset-chip">Conventional 5%</button>
+        <button type="button" onclick="applyCalcPreset('investor')" class="calc-preset-chip">Investor 25%</button>
+        <button type="button" onclick="applyCalcPreset('refi')" class="calc-preset-chip">Refi + $200</button>
+      </div>
+    </div>
+
+    <div class="calc-workspace">
+      <!-- Inputs -->
+      <div class="calc-inputs-col">
+        <form id="calc-form" class="calc-form" onsubmit="return false;">
+          <div class="calc-panel">
+            <div class="calc-panel-head">
+              <span class="calc-panel-icon"><i class="fas fa-home"></i></span>
+              <div>
+                <div class="calc-panel-title">Loan</div>
+                <div class="calc-panel-sub">Price, down payment, rate &amp; term</div>
+              </div>
+            </div>
+            <div id="purchase-inputs" class="calc-fields">
+              <div class="calc-field">
+                <label for="homePrice">Home price</label>
+                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="homePrice" min="0" value="375000" class="calc-input"></div>
+              </div>
+              <div class="calc-field">
+                <label for="downPayment">Down payment</label>
+                <div class="calc-input-wrap"><input type="number" id="downPayment" min="0" step="0.01" value="20" class="calc-input"></div>
+                <div class="calc-seg" role="group" aria-label="Down payment unit">
+                  <button type="button" id="dp-percent-btn" class="calc-seg-btn is-active">%</button>
+                  <button type="button" id="dp-dollar-btn" class="calc-seg-btn">$</button>
+                </div>
+              </div>
+              <div class="calc-field">
+                <label for="loanAmountManual">Loan amount</label>
+                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="loanAmountManual" min="0" value="300000" class="calc-input"></div>
+                <p class="calc-hint">Synced with price &amp; down — or type to drive the down payment</p>
+              </div>
+            </div>
+            <div id="refinance-inputs" class="calc-fields hidden">
+              <div class="calc-field">
+                <label for="loanAmountDirect">Loan amount</label>
+                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="loanAmountDirect" min="0" value="300000" class="calc-input"></div>
+              </div>
+            </div>
+            <div class="calc-fields calc-fields--2">
+              <div class="calc-field">
+                <label for="rate">Interest rate</label>
+                <div class="calc-input-wrap"><input type="number" id="rate" min="0" step="0.001" value="6.5" class="calc-input"><span class="calc-affix calc-affix--end">%</span></div>
+              </div>
+              <div class="calc-field">
+                <label for="term">Term</label>
+                <div class="calc-input-wrap"><input type="number" id="term" min="1" max="40" value="30" class="calc-input"><span class="calc-affix calc-affix--end">yrs</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-panel">
+            <div class="calc-panel-head">
+              <span class="calc-panel-icon"><i class="fas fa-receipt"></i></span>
+              <div>
+                <div class="calc-panel-title">Housing costs</div>
+                <div class="calc-panel-sub">Taxes, insurance &amp; PMI / MIP</div>
+              </div>
+            </div>
+            <div class="calc-fields calc-fields--2">
+              <div class="calc-field">
+                <label for="taxes">Annual taxes</label>
+                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="taxes" min="0" value="3600" class="calc-input"></div>
+              </div>
+              <div class="calc-field">
+                <label for="insurance">Annual insurance</label>
+                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="insurance" min="0" value="1500" class="calc-input"></div>
+              </div>
+              <div class="calc-field calc-field--span2">
+                <label for="pmi" id="pmi-label">PMI / MIP (monthly $)</label>
+                <div class="calc-input-wrap" id="pmi-input-wrap">
+                  <span class="calc-affix" id="pmi-affix-start">$</span>
+                  <input type="number" id="pmi" min="0" step="1" value="0" class="calc-input">
+                  <span class="calc-affix calc-affix--end hidden" id="pmi-affix-end">%</span>
+                </div>
+                <div class="calc-seg" role="group" aria-label="PMI input unit">
+                  <button type="button" id="pmi-dollar-btn" class="calc-seg-btn is-active">$/mo</button>
+                  <button type="button" id="pmi-percent-btn" class="calc-seg-btn">%</button>
+                </div>
+                <p class="calc-hint" id="pmi-hint">Enter monthly PMI/MIP dollars (most common). Or switch to % of loan. Auto-filled for HomeNow FHA MIP.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-panel">
+            <div class="calc-panel-head">
+              <span class="calc-panel-icon calc-panel-icon--orange"><i class="fas fa-tachometer-alt"></i></span>
+              <div>
+                <div class="calc-panel-title">Accelerate</div>
+                <div class="calc-panel-sub">Extra principal &amp; biweekly</div>
+              </div>
+            </div>
+            <div class="calc-fields calc-fields--2 calc-fields--align-end">
+              <div class="calc-field">
+                <label for="extraMonthly">Extra monthly</label>
+                <div class="calc-input-wrap"><span class="calc-affix">$</span><input type="number" id="extraMonthly" min="0" value="0" class="calc-input"></div>
+              </div>
+              <label class="calc-switch">
+                <input type="checkbox" id="biweekly">
+                <span class="calc-switch-ui"></span>
+                <span class="calc-switch-label">Biweekly payments</span>
+              </label>
+            </div>
+            <p class="calc-hint">Accelerates the <strong>first</strong> mortgage only. HomeNow 2nd stays monthly.</p>
+          </div>
+
+          <div id="homenow-wrapper" class="calc-panel calc-panel--homenow">
+            <div class="calc-hn-top">
+              <label class="calc-switch calc-switch--hn">
+                <input type="checkbox" id="homenow-checkbox" onchange="toggleHomeNow()">
+                <span class="calc-switch-ui"></span>
+              </label>
+              <div class="calc-hn-copy">
+                <div class="calc-panel-title"><i class="fas fa-home text-[#00A89D]"></i> Ruoff HomeNow DPA</div>
+                <p class="calc-panel-sub m-0">100% financing style — zero traditional down + DPA second mortgage. FHA 1st with financed UFMIP.</p>
+              </div>
+            </div>
+            <div id="dpa-options" class="hidden calc-hn-opts">
+              <div class="calc-hn-opts-label">DPA percentage</div>
+              <div class="calc-seg calc-seg--wide">
+                <button type="button" onclick="setDPA(3.5)" id="dpa35-btn" class="calc-seg-btn is-active">3.5% DPA</button>
+                <button type="button" onclick="setDPA(5)" id="dpa5-btn" class="calc-seg-btn">5% DPA</button>
+              </div>
+              <p class="calc-hint">Down defaults to 0. DPA becomes the 2nd mortgage.</p>
+            </div>
+            <div id="homenow-breakdown" class="hidden calc-hn-stats">
+              <div class="calc-hn-stat">
+                <div class="calc-hn-stat-label">DPA 2nd loan</div>
+                <div id="dpa-amt" class="calc-hn-stat-val calc-hn-stat-val--orange">$0</div>
+              </div>
+              <div class="calc-hn-stat">
+                <div class="calc-hn-stat-label">2nd rate</div>
+                <div id="second-rate" class="calc-hn-stat-val">—</div>
+              </div>
+              <div class="calc-hn-stat">
+                <div class="calc-hn-stat-label">2nd payment</div>
+                <div id="second-pmt" class="calc-hn-stat-val calc-hn-stat-val--teal">$0</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Results -->
+      <div class="calc-results-col">
+        <div id="calc-output" class="calc-results"></div>
+        <div class="calc-results-footer">
+          <button type="button" id="calc-copy-breakdown-btn" onclick="copyCalcResults()" class="calc-link-btn"><i class="fas fa-align-left"></i> Copy full breakdown</button>
+          <button type="button" id="calc-save-vault-btn" onclick="saveCalcResults()" class="calc-link-btn"><i class="far fa-bookmark"></i> Save to My Saved Items</button>
+          <p class="calc-disclaimer">* Estimates only. Confirm with your lender for exact figures, rounding, and program eligibility (especially HomeNow DPA).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scenario board -->
+    <section id="calc-scenario-board" class="calc-board" aria-labelledby="calc-board-heading">
+      <div class="calc-board-head">
+        <div>
+          <h3 id="calc-board-heading" class="calc-board-title">Scenario board</h3>
+          <p class="calc-board-sub">Park up to 3 options side by side — then copy or print for the client.</p>
+        </div>
+        <span id="calc-board-count" class="calc-board-count">0 / 3</span>
+      </div>
+      <div id="calc-scenario-slots" class="calc-board-grid"></div>
+      <div id="calc-board-empty" class="calc-board-empty">
+        <div class="calc-board-empty-icon"><i class="fas fa-layer-group"></i></div>
+        <div class="calc-board-empty-title">No scenarios yet</div>
+        <p>Dial in a payment, then hit <strong>Save scenario</strong> — e.g. Conventional vs HomeNow vs +$200 extra.</p>
+      </div>
+    </section>
+
+    <div id="calc-print-sheet" class="calc-print-sheet" aria-hidden="true"></div>
+  </div>
+</section>
+
+
+<section id="value-vault" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Value Vault – Your Ultimate Resource Library</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Strategic tools, scripts, and ideas to help you give massive value first. Organized into six focused pillars covering pop-bys, client gifts, post-closing systems, objections, content, and nurture templates.</p>

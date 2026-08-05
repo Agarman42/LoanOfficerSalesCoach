@@ -44,6 +44,7 @@
     { sectionId: 'listing-description', title: 'Listing Copy', icon: 'fa-pen-fancy', sub: 'MLS-ready', accent: '#F15A29' },
     { sectionId: 'open-house', title: 'Open House', icon: 'fa-door-open', sub: 'Scripts & strategy', accent: '#00A89D' },
     { sectionId: 'consultation', title: 'Consult Kit', icon: 'fa-handshake', sub: 'Buyer & seller', accent: '#F15A29' },
+    { sectionId: 'calculator', title: 'Mortgage Calculator', icon: 'fa-calculator', sub: 'Payments & scenarios', accent: '#00A89D' },
     { sectionId: 'ai-chat', title: 'AI Coach', icon: 'fa-robot', sub: 'Think with me', accent: '#00A89D' },
     { sectionId: 'value-vault', title: 'Value Vault', icon: 'fa-gem', sub: 'Gifts & pop-bys', accent: '#F15A29' },
     { sectionId: 'database', title: 'Database Nurturing', icon: 'fa-database', sub: 'Sphere', accent: '#002B5C' },
