@@ -1061,6 +1061,70 @@ function copyForClient() {
   );
 }
 
+function getClientEmailSubject() {
+  const sources = getPrintSources();
+  const r0 = sources[0] && sources[0].results;
+  const price = r0 && r0.homePrice > 0 ? r0.homePrice : 0;
+  if (price) return `Payment options for a ${money0(price)} home`;
+  if (r0 && r0.mode === 'refinance') return 'Refinance payment options to review';
+  return 'Payment options to review';
+}
+
+/**
+ * Open the OS/default email client with subject + body pre-filled.
+ * User only needs to enter the recipient and send.
+ * mailto: has no "To" so the address field stays empty for them to fill.
+ */
+function emailForClient() {
+  const body = getClientCopyText();
+  if (!body) {
+    calcToast('Save a scenario or run a calculation first');
+    return;
+  }
+  const profile = getCalcProfileForPrint();
+  const signOff = [];
+  if (profile.name) {
+    signOff.push('', '—', profile.name);
+    if (profile.title) signOff.push(profile.title);
+    if (profile.phone) signOff.push(profile.phone);
+    if (profile.email) signOff.push(profile.email);
+  }
+  const fullBody = body + (signOff.length ? '\n' + signOff.join('\n') : '');
+  const subject = getClientEmailSubject();
+
+  // Prefer short enough mailto for Outlook/desktop limits (~1800–2000 safe)
+  let useBody = fullBody;
+  if (useBody.length > 1600) {
+    useBody = body;
+    if (useBody.length > 1600) {
+      useBody = useBody.slice(0, 1550) + '\n\n…(full details available on request)';
+    }
+  }
+
+  const mailto =
+    'mailto:?' +
+    'subject=' +
+    encodeURIComponent(subject) +
+    '&body=' +
+    encodeURIComponent(useBody);
+
+  try {
+    const a = document.createElement('a');
+    a.href = mailto;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    calcToast('Email client opening — add the address and send');
+  } catch (e) {
+    // Fallback: copy body so they can paste
+    navigator.clipboard.writeText(fullBody).then(
+      () => calcToast('Could not open mail — body copied. Paste into a new email.'),
+      () => window.prompt('Paste this into your email body:', fullBody)
+    );
+  }
+}
+
 function copyCalcResults() {
   copyForClient();
 }
@@ -1965,6 +2029,7 @@ if (typeof window !== 'undefined') {
   window.copyCalcResults = copyCalcResults;
   window.saveCalcResults = saveCalcResults;
   window.copyForClient = copyForClient;
+  window.emailForClient = emailForClient;
   window.printCalcScenarios = printCalcScenarios;
   window.saveCurrentScenario = saveCurrentScenario;
   window.computeMortgageScenario = computeMortgageScenario;
@@ -1997,6 +2062,7 @@ function initCalculator() {
 
   document.getElementById('calc-save-scenario-btn')?.addEventListener('click', saveCurrentScenario);
   document.getElementById('calc-copy-client-btn')?.addEventListener('click', copyForClient);
+  document.getElementById('calc-email-client-btn')?.addEventListener('click', emailForClient);
   document.getElementById('calc-print-btn')?.addEventListener('click', printCalcScenarios);
 
   // Defaults — PMI in monthly $ (most common for LOs)
