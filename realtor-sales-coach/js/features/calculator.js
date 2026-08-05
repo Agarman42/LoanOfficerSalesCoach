@@ -13,7 +13,8 @@
 // === GLOBAL STATE ===
 let homeNowEnabled = false;
 let selectedDPAPercent = 3.5;
-let calcScenarioBoard = [];
+/** Fixed 3 slots: [A, B, C] — each null or scenario object */
+let calcScenarioBoard = [null, null, null];
 let lastCalcBundle = null; // { inputs, results, valid, error }
 
 const CALC_BOARD_KEY =
@@ -21,6 +22,18 @@ const CALC_BOARD_KEY =
     ? 'reCalcScenarioBoard_v1'
     : 'loCalcScenarioBoard_v1';
 const CALC_MAX_SCENARIOS = 3;
+
+function emptyBoardSlots() {
+  return [null, null, null];
+}
+
+function filledScenarios() {
+  return calcScenarioBoard.filter(Boolean);
+}
+
+function boardFilledCount() {
+  return filledScenarios().length;
+}
 
 // ─────────────────────────────────────────────────────────────
 // Pure math
@@ -843,14 +856,46 @@ function renderResults(results, valid, error) {
 // Scenario board
 // ─────────────────────────────────────────────────────────────
 
+function normalizeBoardSlots(arr) {
+  const slots = emptyBoardSlots();
+  if (!Array.isArray(arr)) return slots;
+  // New format: fixed [A,B,C] with nulls, or legacy dense list
+  let write = 0;
+  for (let i = 0; i < arr.length && write < CALC_MAX_SCENARIOS; i++) {
+    const item = arr[i];
+    if (item && typeof item === 'object' && item.results) {
+      // Prefer explicit slotIndex if present
+      const want =
+        typeof item.slotIndex === 'number' && item.slotIndex >= 0 && item.slotIndex < CALC_MAX_SCENARIOS
+          ? item.slotIndex
+          : write;
+      // Avoid overwriting if that slot already taken
+      let idx = want;
+      if (slots[idx]) {
+        idx = write;
+        while (idx < CALC_MAX_SCENARIOS && slots[idx]) idx += 1;
+      }
+      if (idx < CALC_MAX_SCENARIOS) {
+        slots[idx] = item;
+        write = Math.max(write, idx + 1);
+      }
+    } else if (item == null) {
+      write += 1;
+    }
+  }
+  return slots;
+}
+
 function loadBoardFromStorage() {
   try {
     const raw = localStorage.getItem(CALC_BOARD_KEY);
-    if (!raw) return;
-    const arr = JSON.parse(raw);
-    if (Array.isArray(arr)) calcScenarioBoard = arr.slice(0, CALC_MAX_SCENARIOS);
+    if (!raw) {
+      calcScenarioBoard = emptyBoardSlots();
+      return;
+    }
+    calcScenarioBoard = normalizeBoardSlots(JSON.parse(raw));
   } catch (e) {
-    calcScenarioBoard = [];
+    calcScenarioBoard = emptyBoardSlots();
   }
 }
 
@@ -874,7 +919,7 @@ function autoScenarioLabel(inputs, results) {
 
   const base = label;
   let n = 2;
-  while (calcScenarioBoard.some((s) => s.label === label)) {
+  while (filledScenarios().some((s) => s.label === label)) {
     label = `${base} (${n})`;
     n += 1;
   }
@@ -899,12 +944,13 @@ function scenarioFingerprint(inputs, results) {
   ].join('|');
 }
 
-function makeScenarioFromCurrent() {
+function makeScenarioFromCurrent(slotIndex) {
   if (!lastCalcBundle || !lastCalcBundle.valid) return null;
   const inputs = lastCalcBundle.inputs;
   const results = lastCalcBundle.results;
   return {
     id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    slotIndex: typeof slotIndex === 'number' ? slotIndex : 0,
     label: autoScenarioLabel(inputs, results),
     createdAt: new Date().toISOString(),
     inputs: Object.assign({}, inputs),
@@ -912,115 +958,66 @@ function makeScenarioFromCurrent() {
   };
 }
 
-function findDuplicateOnBoard(inputs, results) {
+function findDuplicateSlot(inputs, results, exceptIdx) {
   const fp = scenarioFingerprint(inputs, results);
-  return calcScenarioBoard.find(function (s) {
-    return scenarioFingerprint(s.inputs, s.results) === fp;
-  });
+  for (let i = 0; i < CALC_MAX_SCENARIOS; i++) {
+    if (i === exceptIdx) continue;
+    const s = calcScenarioBoard[i];
+    if (!s) continue;
+    if (scenarioFingerprint(s.inputs, s.results) === fp) return i;
+  }
+  return -1;
 }
 
 /**
- * Add current payment as Option A, then B, then C.
- * If the board already has 3, offer to replace A/B/C instead of blocking.
+ * Save current form numbers into Option A (0), B (1), or C (2).
+ * Overwrites that slot. This is the primary UX — no sequential push.
  */
-function saveCurrentScenario() {
-  if (!lastCalcBundle || !lastCalcBundle.valid) {
-    calcToast('Enter valid loan details first');
-    return;
-  }
-
-  const inputs = lastCalcBundle.inputs;
-  const results = lastCalcBundle.results;
-  const dup = findDuplicateOnBoard(inputs, results);
-  if (dup) {
-    calcToast(
-      'Already on the board as “' +
-        dup.label +
-        '”. Change something first (down %, rate, HomeNow, term, extra…), then add again.'
-    );
-    scrollToScenarioBoard();
-    return;
-  }
-
-  // Board full → replace a slot (never a dead end)
-  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
-    scrollToScenarioBoard();
-    const choice = window.prompt(
-      'Board is full (A, B, and C).\n\n' +
-        'Type A, B, or C to replace that option with your CURRENT numbers.\n\n' +
-        'Tip: use “Clear board” below the cards to wipe all three and start over.',
-      'A'
-    );
-    if (choice == null) return;
-    const letter = String(choice).trim().toUpperCase().charAt(0);
-    const idx = letter.charCodeAt(0) - 65;
-    if (idx < 0 || idx >= CALC_MAX_SCENARIOS) {
-      calcToast('Type A, B, or C — or click Clear board to wipe the tray.');
-      return;
-    }
-    replaceScenarioAt(idx);
-    return;
-  }
-
-  const scenario = makeScenarioFromCurrent();
-  if (!scenario) return;
-  const letter = String.fromCharCode(65 + calcScenarioBoard.length);
-  calcScenarioBoard.push(scenario);
-  persistBoard();
-  renderScenarioBoard();
-  scrollToScenarioBoard();
-
-  const n = calcScenarioBoard.length;
-  if (n < CALC_MAX_SCENARIOS) {
-    const next = String.fromCharCode(65 + n);
-    calcToast(
-      'Option ' +
-        letter +
-        ' saved. Now CHANGE the numbers, then click Add to compare for Option ' +
-        next +
-        '.'
-    );
-  } else {
-    calcToast(
-      'Option ' +
-        letter +
-        ' saved — board full (3/3). Copy / Email / Print, or Save comparison. Clear board to start over.'
-    );
-  }
-}
-
-function replaceScenarioAt(idx) {
+function saveScenarioToSlot(idx) {
   if (!lastCalcBundle || !lastCalcBundle.valid) {
     calcToast('Enter valid loan details first');
     return;
   }
   if (idx < 0 || idx >= CALC_MAX_SCENARIOS) return;
 
+  const letter = String.fromCharCode(65 + idx);
   const inputs = lastCalcBundle.inputs;
   const results = lastCalcBundle.results;
-  const dup = findDuplicateOnBoard(inputs, results);
-  // Allow replace of the same slot with itself (no-op message); block only if another slot matches
-  if (dup) {
-    const dupIdx = calcScenarioBoard.indexOf(dup);
-    if (dupIdx !== idx) {
-      calcToast(
-        'Those numbers are already Option ' +
-          String.fromCharCode(65 + dupIdx) +
-          '. Change something first, then replace.'
-      );
-      return;
-    }
+  const dupIdx = findDuplicateSlot(inputs, results, idx);
+  if (dupIdx >= 0) {
+    calcToast(
+      'Those exact numbers are already Option ' +
+        String.fromCharCode(65 + dupIdx) +
+        '. Change something (down %, rate, HomeNow…), then save as ' +
+        letter +
+        '.'
+    );
+    return;
   }
 
-  const scenario = makeScenarioFromCurrent();
+  const wasFilled = !!calcScenarioBoard[idx];
+  const scenario = makeScenarioFromCurrent(idx);
   if (!scenario) return;
-  const letter = String.fromCharCode(65 + idx);
-  const prevLabel = calcScenarioBoard[idx] ? calcScenarioBoard[idx].label : letter;
   calcScenarioBoard[idx] = scenario;
   persistBoard();
   renderScenarioBoard();
   scrollToScenarioBoard();
-  calcToast('Option ' + letter + ' replaced (“' + prevLabel + '” → “' + scenario.label + '”)');
+  calcToast(
+    wasFilled
+      ? 'Option ' + letter + ' updated — “' + scenario.label + '”'
+      : 'Saved as Option ' + letter + ' — “' + scenario.label + '”'
+  );
+}
+
+/** Legacy alias — save into first empty slot, else A */
+function saveCurrentScenario() {
+  let idx = calcScenarioBoard.findIndex((s) => !s);
+  if (idx < 0) idx = 0;
+  saveScenarioToSlot(idx);
+}
+
+function replaceScenarioAt(idx) {
+  saveScenarioToSlot(idx);
 }
 
 function scrollToScenarioBoard() {
@@ -1035,29 +1032,37 @@ function scrollToScenarioBoard() {
 }
 
 function clearScenarioBoard() {
-  if (!calcScenarioBoard.length) {
-    calcToast('Board is already empty');
+  if (!boardFilledCount()) {
+    calcToast('A, B, and C are already empty');
     return;
   }
-  if (!window.confirm('Clear Options A, B, and C from the comparison board?\n\n(This does not delete My Saved Items.)')) {
-    return;
-  }
-  calcScenarioBoard = [];
+  calcScenarioBoard = emptyBoardSlots();
   persistBoard();
   renderScenarioBoard();
-  calcToast('Board cleared — ready for a new Option A');
+  calcToast('Cleared A, B, and C');
+}
+
+function clearScenarioSlot(idx) {
+  if (idx < 0 || idx >= CALC_MAX_SCENARIOS) return;
+  if (!calcScenarioBoard[idx]) return;
+  const letter = String.fromCharCode(65 + idx);
+  calcScenarioBoard[idx] = null;
+  persistBoard();
+  renderScenarioBoard();
+  calcToast('Option ' + letter + ' cleared');
 }
 
 function saveBoardComparisonToVault() {
-  if (!calcScenarioBoard.length) {
-    calcToast('Add at least one option to the board first');
+  const filled = filledScenarios();
+  if (!filled.length) {
+    calcToast('Save at least one option (A, B, or C) first');
     return;
   }
-  const labels = calcScenarioBoard.map(function (s) { return s.label; }).join(' vs ');
+  const labels = filled.map(function (s) { return s.label; }).join(' vs ');
   saveCalcToVault({
     title:
       'Mortgage compare (' +
-      calcScenarioBoard.length +
+      filled.length +
       '): ' +
       labels.slice(0, 60) +
       ' — ' +
@@ -1067,27 +1072,32 @@ function saveBoardComparisonToVault() {
         hour: 'numeric',
         minute: '2-digit'
       }),
-    feedback: 'Full A/B/C comparison saved to My Saved Items'
+    feedback: 'Comparison saved to My Saved Items'
   });
 }
 
 function removeScenario(id) {
-  calcScenarioBoard = calcScenarioBoard.filter((s) => s.id !== id);
-  persistBoard();
-  renderScenarioBoard();
-  calcToast('Option removed — free slot ready');
+  const idx = calcScenarioBoard.findIndex((s) => s && s.id === id);
+  if (idx < 0) return;
+  clearScenarioSlot(idx);
 }
 
 function loadScenario(id) {
-  const s = calcScenarioBoard.find((x) => x.id === id);
+  const s = calcScenarioBoard.find((x) => x && x.id === id);
   if (!s) return;
   writeInputsToDom(s.inputs);
   calculateAdvanced();
   calcToast('Loaded: ' + s.label);
 }
 
+function loadScenarioAt(idx) {
+  const s = calcScenarioBoard[idx];
+  if (!s) return;
+  loadScenario(s.id);
+}
+
 function renameScenario(id) {
-  const s = calcScenarioBoard.find((x) => x.id === id);
+  const s = calcScenarioBoard.find((x) => x && x.id === id);
   if (!s) return;
   const next = window.prompt('Name this option', s.label);
   if (next == null) return;
@@ -1098,46 +1108,47 @@ function renameScenario(id) {
   renderScenarioBoard();
 }
 
+function updateSlotSaveButtons() {
+  for (let i = 0; i < CALC_MAX_SCENARIOS; i++) {
+    const letter = String.fromCharCode(65 + i);
+    const btn = document.getElementById('calc-save-slot-' + letter.toLowerCase());
+    if (!btn) continue;
+    const filled = !!calcScenarioBoard[i];
+    const span = btn.querySelector('span');
+    if (span) {
+      span.textContent = filled ? 'Update ' + letter : 'Save as ' + letter;
+    }
+    btn.classList.toggle('is-filled', filled);
+    btn.title = filled
+      ? 'Overwrite Option ' + letter + ' with the numbers currently in the form'
+      : 'Park current numbers as Option ' + letter;
+  }
+  const clearBtn = document.getElementById('calc-board-clear-btn');
+  const clearHero = document.getElementById('calc-clear-all-btn');
+  const n = boardFilledCount();
+  [clearBtn, clearHero].forEach(function (el) {
+    if (!el) return;
+    el.disabled = n === 0;
+    el.classList.toggle('is-disabled', n === 0);
+  });
+  const count = document.getElementById('calc-board-count');
+  if (count) count.textContent = n + ' / ' + CALC_MAX_SCENARIOS;
+  const saveVaultBtn = document.getElementById('calc-board-save-vault-btn');
+  if (saveVaultBtn) {
+    saveVaultBtn.disabled = n === 0;
+    saveVaultBtn.classList.toggle('is-disabled', n === 0);
+  }
+}
+
 function renderScenarioBoard() {
   const slots = document.getElementById('calc-scenario-slots');
-  const empty = document.getElementById('calc-board-empty');
-  const count = document.getElementById('calc-board-count');
-  const saveVaultBtn = document.getElementById('calc-board-save-vault-btn');
-  const clearBtn = document.getElementById('calc-board-clear-btn');
-  const saveHeroBtn = document.getElementById('calc-save-scenario-btn');
-  const fullHint = document.getElementById('calc-board-full-hint');
-  const n = calcScenarioBoard.length;
-  const full = n >= CALC_MAX_SCENARIOS;
-
-  if (count) count.textContent = n + ' / ' + CALC_MAX_SCENARIOS;
-  if (empty) empty.classList.add('hidden');
-  if (saveVaultBtn) saveVaultBtn.classList.toggle('hidden', n === 0);
-  // Always show Clear when anything is on the board (this was the missing escape hatch)
-  if (clearBtn) {
-    clearBtn.classList.toggle('hidden', n === 0);
-    clearBtn.disabled = false;
-  }
-  if (fullHint) fullHint.classList.toggle('hidden', !full);
-  if (saveHeroBtn) {
-    const nextLetter = n < CALC_MAX_SCENARIOS ? String.fromCharCode(65 + n) : null;
-    const span = saveHeroBtn.querySelector('span');
-    if (span) {
-      span.textContent = full
-        ? 'Replace option…'
-        : 'Add to compare (' + nextLetter + ')';
-    }
-    // Never disable — when full, click = replace A/B/C
-    saveHeroBtn.disabled = false;
-    saveHeroBtn.classList.remove('is-disabled');
-    saveHeroBtn.title = full
-      ? 'Board is full. Click to replace Option A, B, or C with the current numbers — or Clear board below.'
-      : 'Pin this payment as Option ' + nextLetter + ' on the comparison board';
-  }
+  updateSlotSaveButtons();
   if (!slots) return;
 
+  const n = boardFilledCount();
   let minPay = Infinity;
   let minDown = Infinity;
-  calcScenarioBoard.forEach((s) => {
+  filledScenarios().forEach((s) => {
     const p = s.results && s.results.totalMonthly;
     const d = s.results && s.results.downAmount;
     if (typeof p === 'number' && p < minPay) minPay = p;
@@ -1149,27 +1160,22 @@ function renderScenarioBoard() {
     const letter = String.fromCharCode(65 + idx);
     const s = calcScenarioBoard[idx];
     if (!s) {
-      const isNext = idx === n;
       cards.push(`
-        <article class="calc-scenario-card calc-scenario-card--empty ${isNext ? 'is-next' : ''}" data-empty-slot="${letter}">
+        <article class="calc-scenario-card calc-scenario-card--empty" data-empty-slot="${letter}">
           <div class="calc-card-top">
             <div class="calc-card-identity">
               <span class="calc-card-letter calc-card-letter--ghost">${letter}</span>
               <div class="calc-card-titles">
                 <div class="calc-card-kicker">Option ${letter}</div>
-                <h4 class="calc-card-title">${isNext ? 'Waiting for you…' : 'Empty slot'}</h4>
+                <h4 class="calc-card-title">Empty</h4>
               </div>
             </div>
           </div>
           <div class="calc-empty-body">
-            ${
-              isNext
-                ? `<p><strong>Next:</strong> set this payment above, then click <strong>Add to compare (${letter})</strong>.</p>
-                   <p class="calc-empty-examples">Ideas: HomeNow 3.5% · Conventional 5% · 20% down · +$200 extra</p>`
-                : n === 0 && idx === 0
-                  ? `<p>Start with any payment, then <strong>Add to compare (A)</strong>.</p>`
-                  : `<p>Fill Option ${String.fromCharCode(65 + n)} first.</p>`
-            }
+            <p>Set numbers above, then park them here.</p>
+            <button type="button" class="calc-slot-fill-btn" data-action="save-slot" data-idx="${idx}">
+              Save as ${letter}
+            </button>
           </div>
         </article>`);
       continue;
@@ -1209,10 +1215,10 @@ function renderScenarioBoard() {
         </div>
         ${r.homeNow ? `<div class="calc-card-hn">HomeNow ${r.dpaPercent}% · 2nd ${money0(r.dpaAmount)} · ${money2(r.monthlyHomeNowSecond)}/mo</div>` : ''}
         <div class="calc-card-actions">
-          <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="replace" data-idx="${idx}" title="Overwrite Option ${letter} with the numbers currently in the form">Replace</button>
-          <button type="button" class="calc-card-btn" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
+          <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="save-slot" data-idx="${idx}" title="Overwrite with current form numbers">Update ${letter}</button>
+          <button type="button" class="calc-card-btn" data-action="load" data-id="${escapeHtml(s.id)}">Load</button>
           <button type="button" class="calc-card-btn" data-action="rename" data-id="${escapeHtml(s.id)}">Rename</button>
-          <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="remove" data-id="${escapeHtml(s.id)}">Remove</button>
+          <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="clear-slot" data-idx="${idx}">Clear</button>
         </div>
       </article>`);
   }
@@ -1223,13 +1229,11 @@ function renderScenarioBoard() {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-id');
       const action = btn.getAttribute('data-action');
+      const idx = parseInt(btn.getAttribute('data-idx'), 10);
       if (action === 'load') loadScenario(id);
       else if (action === 'rename') renameScenario(id);
-      else if (action === 'remove') removeScenario(id);
-      else if (action === 'replace') {
-        const idx = parseInt(btn.getAttribute('data-idx'), 10);
-        if (!Number.isNaN(idx)) replaceScenarioAt(idx);
-      }
+      else if (action === 'clear-slot' && !Number.isNaN(idx)) clearScenarioSlot(idx);
+      else if (action === 'save-slot' && !Number.isNaN(idx)) saveScenarioToSlot(idx);
     });
   });
 }
@@ -1258,13 +1262,17 @@ function calculateAdvanced() {
 }
 
 function getClientScenarioSources() {
-  if (calcScenarioBoard.length > 0) {
-    return calcScenarioBoard.map((s, i) => ({
+  const filled = [];
+  for (let i = 0; i < CALC_MAX_SCENARIOS; i++) {
+    const s = calcScenarioBoard[i];
+    if (!s) continue;
+    filled.push({
       label: s.label || 'Option ' + String.fromCharCode(65 + i),
       results: s.results,
       inputs: s.inputs
-    }));
+    });
   }
+  if (filled.length) return filled;
   if (lastCalcBundle && lastCalcBundle.valid) {
     return [
       {
@@ -1833,7 +1841,8 @@ function getCalcProfileForPrint() {
 }
 
 function getPrintSources() {
-  if (calcScenarioBoard.length > 0) return calcScenarioBoard.slice();
+  const filled = filledScenarios();
+  if (filled.length) return filled.slice();
   if (lastCalcBundle && lastCalcBundle.valid) {
     return [
       {
@@ -2691,7 +2700,9 @@ if (typeof window !== 'undefined') {
   window.emailForClient = emailForClient;
   window.printCalcScenarios = printCalcScenarios;
   window.saveCurrentScenario = saveCurrentScenario;
+  window.saveScenarioToSlot = saveScenarioToSlot;
   window.clearScenarioBoard = clearScenarioBoard;
+  window.clearScenarioSlot = clearScenarioSlot;
   window.saveBoardComparisonToVault = saveBoardComparisonToVault;
   window.computeMortgageScenario = computeMortgageScenario;
 }
@@ -2728,7 +2739,12 @@ function initCalculator() {
   document.getElementById('dpa35-btn')?.addEventListener('click', () => setDPA(3.5));
   document.getElementById('dpa5-btn')?.addEventListener('click', () => setDPA(5));
 
-  document.getElementById('calc-save-scenario-btn')?.addEventListener('click', saveCurrentScenario);
+  ['a', 'b', 'c'].forEach(function (letter, idx) {
+    document.getElementById('calc-save-slot-' + letter)?.addEventListener('click', function () {
+      saveScenarioToSlot(idx);
+    });
+  });
+  document.getElementById('calc-clear-all-btn')?.addEventListener('click', clearScenarioBoard);
   document.getElementById('calc-copy-client-btn')?.addEventListener('click', copyForClient);
   document.getElementById('calc-email-client-btn')?.addEventListener('click', emailForClient);
   document.getElementById('calc-print-btn')?.addEventListener('click', printCalcScenarios);

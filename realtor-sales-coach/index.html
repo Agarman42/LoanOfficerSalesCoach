@@ -5897,10 +5897,24 @@
         </div>
         <!-- Metrics full-width ABOVE actions so Down / Rate / Interest never clip -->
         <div class="calc-hero-metrics" id="calc-hero-metrics"></div>
+        <div class="calc-slot-save-bar" role="group" aria-label="Save current scenario to a compare slot">
+          <span class="calc-slot-save-label">Park current numbers as:</span>
+          <div class="calc-slot-save-btns">
+            <button type="button" id="calc-save-slot-a" class="calc-btn calc-btn-slot" title="Save current numbers as Option A">
+              <span class="calc-slot-letter">A</span><span>Save as A</span>
+            </button>
+            <button type="button" id="calc-save-slot-b" class="calc-btn calc-btn-slot" title="Save current numbers as Option B">
+              <span class="calc-slot-letter">B</span><span>Save as B</span>
+            </button>
+            <button type="button" id="calc-save-slot-c" class="calc-btn calc-btn-slot" title="Save current numbers as Option C">
+              <span class="calc-slot-letter">C</span><span>Save as C</span>
+            </button>
+            <button type="button" id="calc-clear-all-btn" class="calc-btn calc-btn-danger-outline" title="Clear Options A, B, and C">
+              <i class="fas fa-trash-alt"></i><span>Clear all</span>
+            </button>
+          </div>
+        </div>
         <div class="calc-hero-actions">
-          <button type="button" id="calc-save-scenario-btn" class="calc-btn calc-btn-primary" title="Add this payment to the comparison board (A / B / C)">
-            <i class="fas fa-plus"></i><span>Add to compare</span>
-          </button>
           <button type="button" id="calc-copy-client-btn" class="calc-btn calc-btn-secondary">
             <i class="fas fa-copy"></i><span>Copy for client</span>
           </button>
@@ -6090,42 +6104,27 @@
       </div>
     </div>
 
-    <!-- Scenario board — temporary A/B/C tray (separate from My Saved Items) -->
+    <!-- Scenario board — fixed A / B / C slots -->
     <section id="calc-scenario-board" class="calc-board" aria-labelledby="calc-board-heading">
       <div class="calc-board-head">
         <div>
-          <h3 id="calc-board-heading" class="calc-board-title">Compare tray — Options A · B · C</h3>
+          <h3 id="calc-board-heading" class="calc-board-title">Side-by-side compare</h3>
           <p class="calc-board-sub">
-            Temporary working space (max 3). <strong>Not</strong> the same as My Saved Items.
+            Use <strong>Save as A / B / C</strong> above. Change the form between saves. Then Copy, Email, or Print.
           </p>
         </div>
         <div class="calc-board-head-actions">
           <span id="calc-board-count" class="calc-board-count">0 / 3</span>
-          <button type="button" id="calc-board-save-vault-btn" class="calc-btn calc-btn-secondary calc-btn-sm hidden" title="Save all options on this board into My Saved Items as one card">
-            <i class="fas fa-bookmark"></i><span>Save comparison</span>
+          <button type="button" id="calc-board-save-vault-btn" class="calc-btn calc-btn-secondary calc-btn-sm" title="Save A/B/C into My Saved Items">
+            <i class="fas fa-bookmark"></i><span>Save to My Saved Items</span>
           </button>
-          <button type="button" id="calc-board-clear-btn" class="calc-btn calc-btn-danger-outline calc-btn-sm hidden" title="Wipe A, B, and C so you can build a new set">
-            <i class="fas fa-trash-alt"></i><span>Clear board</span>
+          <button type="button" id="calc-board-clear-btn" class="calc-btn calc-btn-danger-outline calc-btn-sm" title="Clear Options A, B, and C">
+            <i class="fas fa-trash-alt"></i><span>Clear all</span>
           </button>
         </div>
       </div>
 
-      <ol class="calc-board-howto">
-        <li><strong>Option A:</strong> set price / down / rate → click <strong>Add to compare (A)</strong></li>
-        <li><strong>Option B:</strong> <em>change</em> something (HomeNow, 5% down, rate…) → <strong>Add to compare (B)</strong></li>
-        <li><strong>Option C:</strong> change again → <strong>Add to compare (C)</strong></li>
-        <li>Then <strong>Copy / Email / Print</strong>, or <strong>Save comparison</strong> to My Saved Items. Stuck at 3/3? Hit <strong>Clear board</strong> or <strong>Replace</strong> on a card.</li>
-      </ol>
-
-      <div id="calc-board-full-hint" class="calc-board-full-hint hidden" role="status">
-        <strong>Board full (3/3).</strong>
-        Click <em>Replace</em> on a card to overwrite it with your current numbers,
-        or <strong>Clear board</strong> to wipe A/B/C and start a new set.
-        (Your My Saved Items library is untouched.)
-      </div>
-
       <div id="calc-scenario-slots" class="calc-board-grid"></div>
-      <!-- Empty slots are rendered as ghost cards by JS -->
     </section>
 
     <div id="calc-print-sheet" class="calc-print-sheet" aria-hidden="true"></div>
