@@ -899,51 +899,72 @@ function scenarioFingerprint(inputs, results) {
   ].join('|');
 }
 
+function makeScenarioFromCurrent() {
+  if (!lastCalcBundle || !lastCalcBundle.valid) return null;
+  const inputs = lastCalcBundle.inputs;
+  const results = lastCalcBundle.results;
+  return {
+    id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    label: autoScenarioLabel(inputs, results),
+    createdAt: new Date().toISOString(),
+    inputs: Object.assign({}, inputs),
+    results: Object.assign({}, results)
+  };
+}
+
+function findDuplicateOnBoard(inputs, results) {
+  const fp = scenarioFingerprint(inputs, results);
+  return calcScenarioBoard.find(function (s) {
+    return scenarioFingerprint(s.inputs, s.results) === fp;
+  });
+}
+
+/**
+ * Add current payment as Option A, then B, then C.
+ * If the board already has 3, offer to replace A/B/C instead of blocking.
+ */
 function saveCurrentScenario() {
   if (!lastCalcBundle || !lastCalcBundle.valid) {
     calcToast('Enter valid loan details first');
     return;
   }
-  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
-    calcToast('Board full (3/3). Remove one, or Clear board, then add a new option.');
-    scrollToScenarioBoard();
-    return;
-  }
 
   const inputs = lastCalcBundle.inputs;
   const results = lastCalcBundle.results;
-  const fp = scenarioFingerprint(inputs, results);
-  const dup = calcScenarioBoard.find(function (s) {
-    return scenarioFingerprint(s.inputs, s.results) === fp;
-  });
+  const dup = findDuplicateOnBoard(inputs, results);
   if (dup) {
     calcToast(
-      'That’s the same as “' +
+      'Already on the board as “' +
         dup.label +
-        '”. Change down %, rate, HomeNow, or extra — then Add to compare again.'
+        '”. Change something first (down %, rate, HomeNow, term, extra…), then add again.'
     );
     scrollToScenarioBoard();
     return;
   }
 
-  const letter = String.fromCharCode(65 + calcScenarioBoard.length);
-  let label = autoScenarioLabel(inputs, results);
-  // Optional short name so A/B/C stay meaningful
-  const custom = window.prompt(
-    'Name for Option ' + letter + ' (optional)',
-    label
-  );
-  if (custom != null && String(custom).trim()) {
-    label = String(custom).trim().slice(0, 48);
+  // Board full → replace a slot (never a dead end)
+  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
+    scrollToScenarioBoard();
+    const choice = window.prompt(
+      'Board is full (A, B, and C).\n\n' +
+        'Type A, B, or C to replace that option with your CURRENT numbers.\n\n' +
+        'Tip: use “Clear board” below the cards to wipe all three and start over.',
+      'A'
+    );
+    if (choice == null) return;
+    const letter = String(choice).trim().toUpperCase().charAt(0);
+    const idx = letter.charCodeAt(0) - 65;
+    if (idx < 0 || idx >= CALC_MAX_SCENARIOS) {
+      calcToast('Type A, B, or C — or click Clear board to wipe the tray.');
+      return;
+    }
+    replaceScenarioAt(idx);
+    return;
   }
 
-  const scenario = {
-    id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    label: label,
-    createdAt: new Date().toISOString(),
-    inputs: Object.assign({}, inputs),
-    results: Object.assign({}, results)
-  };
+  const scenario = makeScenarioFromCurrent();
+  if (!scenario) return;
+  const letter = String.fromCharCode(65 + calcScenarioBoard.length);
   calcScenarioBoard.push(scenario);
   persistBoard();
   renderScenarioBoard();
@@ -955,13 +976,51 @@ function saveCurrentScenario() {
     calcToast(
       'Option ' +
         letter +
-        ' added. Now change the numbers (e.g. HomeNow or 5% down), then Add to compare for Option ' +
+        ' saved. Now CHANGE the numbers, then click Add to compare for Option ' +
         next +
         '.'
     );
   } else {
-    calcToast('Option ' + letter + ' added — board full. Copy, Email, or Print your comparison.');
+    calcToast(
+      'Option ' +
+        letter +
+        ' saved — board full (3/3). Copy / Email / Print, or Save comparison. Clear board to start over.'
+    );
   }
+}
+
+function replaceScenarioAt(idx) {
+  if (!lastCalcBundle || !lastCalcBundle.valid) {
+    calcToast('Enter valid loan details first');
+    return;
+  }
+  if (idx < 0 || idx >= CALC_MAX_SCENARIOS) return;
+
+  const inputs = lastCalcBundle.inputs;
+  const results = lastCalcBundle.results;
+  const dup = findDuplicateOnBoard(inputs, results);
+  // Allow replace of the same slot with itself (no-op message); block only if another slot matches
+  if (dup) {
+    const dupIdx = calcScenarioBoard.indexOf(dup);
+    if (dupIdx !== idx) {
+      calcToast(
+        'Those numbers are already Option ' +
+          String.fromCharCode(65 + dupIdx) +
+          '. Change something first, then replace.'
+      );
+      return;
+    }
+  }
+
+  const scenario = makeScenarioFromCurrent();
+  if (!scenario) return;
+  const letter = String.fromCharCode(65 + idx);
+  const prevLabel = calcScenarioBoard[idx] ? calcScenarioBoard[idx].label : letter;
+  calcScenarioBoard[idx] = scenario;
+  persistBoard();
+  renderScenarioBoard();
+  scrollToScenarioBoard();
+  calcToast('Option ' + letter + ' replaced (“' + prevLabel + '” → “' + scenario.label + '”)');
 }
 
 function scrollToScenarioBoard() {
@@ -976,17 +1035,22 @@ function scrollToScenarioBoard() {
 }
 
 function clearScenarioBoard() {
-  if (!calcScenarioBoard.length) return;
-  if (!window.confirm('Clear all scenarios from the comparison board?')) return;
+  if (!calcScenarioBoard.length) {
+    calcToast('Board is already empty');
+    return;
+  }
+  if (!window.confirm('Clear Options A, B, and C from the comparison board?\n\n(This does not delete My Saved Items.)')) {
+    return;
+  }
   calcScenarioBoard = [];
   persistBoard();
   renderScenarioBoard();
-  calcToast('Comparison board cleared');
+  calcToast('Board cleared — ready for a new Option A');
 }
 
 function saveBoardComparisonToVault() {
   if (!calcScenarioBoard.length) {
-    calcToast('Add at least one scenario to the board first');
+    calcToast('Add at least one option to the board first');
     return;
   }
   const labels = calcScenarioBoard.map(function (s) { return s.label; }).join(' vs ');
@@ -1003,7 +1067,7 @@ function saveBoardComparisonToVault() {
         hour: 'numeric',
         minute: '2-digit'
       }),
-    feedback: 'Comparison saved to My Saved Items'
+    feedback: 'Full A/B/C comparison saved to My Saved Items'
   });
 }
 
@@ -1011,6 +1075,7 @@ function removeScenario(id) {
   calcScenarioBoard = calcScenarioBoard.filter((s) => s.id !== id);
   persistBoard();
   renderScenarioBoard();
+  calcToast('Option removed — free slot ready');
 }
 
 function loadScenario(id) {
@@ -1024,7 +1089,7 @@ function loadScenario(id) {
 function renameScenario(id) {
   const s = calcScenarioBoard.find((x) => x.id === id);
   if (!s) return;
-  const next = window.prompt('Scenario name', s.label);
+  const next = window.prompt('Name this option', s.label);
   if (next == null) return;
   const trimmed = String(next).trim().slice(0, 48);
   if (!trimmed) return;
@@ -1040,21 +1105,33 @@ function renderScenarioBoard() {
   const saveVaultBtn = document.getElementById('calc-board-save-vault-btn');
   const clearBtn = document.getElementById('calc-board-clear-btn');
   const saveHeroBtn = document.getElementById('calc-save-scenario-btn');
+  const fullHint = document.getElementById('calc-board-full-hint');
   const n = calcScenarioBoard.length;
+  const full = n >= CALC_MAX_SCENARIOS;
 
   if (count) count.textContent = n + ' / ' + CALC_MAX_SCENARIOS;
   if (empty) empty.classList.add('hidden');
   if (saveVaultBtn) saveVaultBtn.classList.toggle('hidden', n === 0);
-  if (clearBtn) clearBtn.classList.toggle('hidden', n === 0);
+  // Always show Clear when anything is on the board (this was the missing escape hatch)
+  if (clearBtn) {
+    clearBtn.classList.toggle('hidden', n === 0);
+    clearBtn.disabled = false;
+  }
+  if (fullHint) fullHint.classList.toggle('hidden', !full);
   if (saveHeroBtn) {
-    const nextLetter = n < CALC_MAX_SCENARIOS ? String.fromCharCode(65 + n) : '—';
+    const nextLetter = n < CALC_MAX_SCENARIOS ? String.fromCharCode(65 + n) : null;
     const span = saveHeroBtn.querySelector('span');
     if (span) {
-      span.textContent =
-        n >= CALC_MAX_SCENARIOS ? 'Board full' : 'Add to compare (' + nextLetter + ')';
+      span.textContent = full
+        ? 'Replace option…'
+        : 'Add to compare (' + nextLetter + ')';
     }
-    saveHeroBtn.disabled = n >= CALC_MAX_SCENARIOS;
-    saveHeroBtn.classList.toggle('is-disabled', n >= CALC_MAX_SCENARIOS);
+    // Never disable — when full, click = replace A/B/C
+    saveHeroBtn.disabled = false;
+    saveHeroBtn.classList.remove('is-disabled');
+    saveHeroBtn.title = full
+      ? 'Board is full. Click to replace Option A, B, or C with the current numbers — or Clear board below.'
+      : 'Pin this payment as Option ' + nextLetter + ' on the comparison board';
   }
   if (!slots) return;
 
@@ -1087,7 +1164,7 @@ function renderScenarioBoard() {
           <div class="calc-empty-body">
             ${
               isNext
-                ? `<p><strong>Next step:</strong> set the payment you want to compare, then click <strong>Add to compare (${letter})</strong> above.</p>
+                ? `<p><strong>Next:</strong> set this payment above, then click <strong>Add to compare (${letter})</strong>.</p>
                    <p class="calc-empty-examples">Ideas: HomeNow 3.5% · Conventional 5% · 20% down · +$200 extra</p>`
                 : n === 0 && idx === 0
                   ? `<p>Start with any payment, then <strong>Add to compare (A)</strong>.</p>`
@@ -1132,7 +1209,8 @@ function renderScenarioBoard() {
         </div>
         ${r.homeNow ? `<div class="calc-card-hn">HomeNow ${r.dpaPercent}% · 2nd ${money0(r.dpaAmount)} · ${money2(r.monthlyHomeNowSecond)}/mo</div>` : ''}
         <div class="calc-card-actions">
-          <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
+          <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="replace" data-idx="${idx}" title="Overwrite Option ${letter} with the numbers currently in the form">Replace</button>
+          <button type="button" class="calc-card-btn" data-action="load" data-id="${escapeHtml(s.id)}" aria-label="Load ${escapeHtml(s.label)}">Load</button>
           <button type="button" class="calc-card-btn" data-action="rename" data-id="${escapeHtml(s.id)}">Rename</button>
           <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="remove" data-id="${escapeHtml(s.id)}">Remove</button>
         </div>
@@ -1148,6 +1226,10 @@ function renderScenarioBoard() {
       if (action === 'load') loadScenario(id);
       else if (action === 'rename') renameScenario(id);
       else if (action === 'remove') removeScenario(id);
+      else if (action === 'replace') {
+        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+        if (!Number.isNaN(idx)) replaceScenarioAt(idx);
+      }
     });
   });
 }

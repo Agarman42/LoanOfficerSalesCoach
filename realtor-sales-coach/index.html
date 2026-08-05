@@ -6090,30 +6090,42 @@
       </div>
     </div>
 
-    <!-- Scenario board -->
+    <!-- Scenario board — temporary A/B/C tray (separate from My Saved Items) -->
     <section id="calc-scenario-board" class="calc-board" aria-labelledby="calc-board-heading">
       <div class="calc-board-head">
         <div>
-          <h3 id="calc-board-heading" class="calc-board-title">Compare up to 3 scenarios</h3>
+          <h3 id="calc-board-heading" class="calc-board-title">Compare tray — Options A · B · C</h3>
           <p class="calc-board-sub">
-            <strong>1)</strong> Set numbers &amp; hit <strong>Add to compare</strong>
-            → <strong>2)</strong> Change something (down %, HomeNow, rate…)
-            → <strong>3)</strong> Add again for Option B / C
-            → then Copy, Email, or Print the set.
+            Temporary working space (max 3). <strong>Not</strong> the same as My Saved Items.
           </p>
         </div>
         <div class="calc-board-head-actions">
           <span id="calc-board-count" class="calc-board-count">0 / 3</span>
-          <button type="button" id="calc-board-save-vault-btn" class="calc-btn calc-btn-secondary calc-btn-sm hidden">
+          <button type="button" id="calc-board-save-vault-btn" class="calc-btn calc-btn-secondary calc-btn-sm hidden" title="Save all options on this board into My Saved Items as one card">
             <i class="fas fa-bookmark"></i><span>Save comparison</span>
           </button>
-          <button type="button" id="calc-board-clear-btn" class="calc-btn calc-btn-ghost calc-btn-sm hidden">
-            Clear board
+          <button type="button" id="calc-board-clear-btn" class="calc-btn calc-btn-danger-outline calc-btn-sm hidden" title="Wipe A, B, and C so you can build a new set">
+            <i class="fas fa-trash-alt"></i><span>Clear board</span>
           </button>
         </div>
       </div>
+
+      <ol class="calc-board-howto">
+        <li><strong>Option A:</strong> set price / down / rate → click <strong>Add to compare (A)</strong></li>
+        <li><strong>Option B:</strong> <em>change</em> something (HomeNow, 5% down, rate…) → <strong>Add to compare (B)</strong></li>
+        <li><strong>Option C:</strong> change again → <strong>Add to compare (C)</strong></li>
+        <li>Then <strong>Copy / Email / Print</strong>, or <strong>Save comparison</strong> to My Saved Items. Stuck at 3/3? Hit <strong>Clear board</strong> or <strong>Replace</strong> on a card.</li>
+      </ol>
+
+      <div id="calc-board-full-hint" class="calc-board-full-hint hidden" role="status">
+        <strong>Board full (3/3).</strong>
+        Click <em>Replace</em> on a card to overwrite it with your current numbers,
+        or <strong>Clear board</strong> to wipe A/B/C and start a new set.
+        (Your My Saved Items library is untouched.)
+      </div>
+
       <div id="calc-scenario-slots" class="calc-board-grid"></div>
-      <!-- Empty state is rendered as ghost slots inside the grid by JS -->
+      <!-- Empty slots are rendered as ghost cards by JS -->
     </section>
 
     <div id="calc-print-sheet" class="calc-print-sheet" aria-hidden="true"></div>
@@ -8658,6 +8670,7 @@ try {
 <!-- deferred to feature-loader: js/features/newsletter-wizard.js?v=20260720-last-issue-chip -->
 <!-- deferred to feature-loader: js/features/ai-chat.js?v=20260720-ai-chat -->
 <script>window.TRANSLATION_COACH_VARIANT = 'realtor';</script>
+<script>window.CALC_COACH_VARIANT = 'realtor';</script>
 <!-- deferred to feature-loader: js/features/translation-tool.js?v=20260804-tr-custom-lang -->
 <!-- deferred to feature-loader: js/features/value-vault.js?v=20260706-realtor-v273 -->
 
