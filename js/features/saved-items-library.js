@@ -221,7 +221,8 @@
       recruiting: 'Recruiting',
       social: 'Social',
       'value-vault': 'Value Vault Idea',
-      event: 'Event Planning'
+      event: 'Event Planning',
+      calculator: 'Mortgage Calculator'
     };
     return map[t] || 'Saved Item';
   }

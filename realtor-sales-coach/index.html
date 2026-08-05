@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260805-realtor-calc">
+    <link rel="stylesheet" href="css/main.css?v=20260806-hero-save">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -5895,10 +5895,11 @@
           <div id="calc-hero-stack" class="calc-stack calc-stack--hero" aria-hidden="true"></div>
           <div id="calc-hero-chips" class="calc-hero-chips"></div>
         </div>
+        <!-- Metrics full-width ABOVE actions so Down / Rate / Interest never clip -->
         <div class="calc-hero-metrics" id="calc-hero-metrics"></div>
         <div class="calc-hero-actions">
-          <button type="button" id="calc-save-scenario-btn" class="calc-btn calc-btn-primary">
-            <i class="fas fa-layer-group"></i><span>Save scenario</span>
+          <button type="button" id="calc-save-scenario-btn" class="calc-btn calc-btn-primary" title="Park on scenario board and save to My Saved Items">
+            <i class="fas fa-bookmark"></i><span>Save</span>
           </button>
           <button type="button" id="calc-copy-client-btn" class="calc-btn calc-btn-secondary">
             <i class="fas fa-copy"></i><span>Copy for client</span>

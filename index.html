@@ -108,7 +108,7 @@
     <!-- Static Tailwind (built offline) — no Play CDN -->
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <!-- App-specific styles -->
-    <link rel="stylesheet" href="css/main.css?v=20260806-calc-email">
+    <link rel="stylesheet" href="css/main.css?v=20260806-hero-save">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260714-lo-v4"></script>
@@ -5626,10 +5626,11 @@
           <div id="calc-hero-stack" class="calc-stack calc-stack--hero" aria-hidden="true"></div>
           <div id="calc-hero-chips" class="calc-hero-chips"></div>
         </div>
+        <!-- Metrics full-width ABOVE actions so Down / Rate / Interest never clip -->
         <div class="calc-hero-metrics" id="calc-hero-metrics"></div>
         <div class="calc-hero-actions">
-          <button type="button" id="calc-save-scenario-btn" class="calc-btn calc-btn-primary">
-            <i class="fas fa-layer-group"></i><span>Save scenario</span>
+          <button type="button" id="calc-save-scenario-btn" class="calc-btn calc-btn-primary" title="Park on scenario board and save to My Saved Items">
+            <i class="fas fa-bookmark"></i><span>Save</span>
           </button>
           <button type="button" id="calc-copy-client-btn" class="calc-btn calc-btn-secondary">
             <i class="fas fa-copy"></i><span>Copy for client</span>
@@ -8220,7 +8221,7 @@
 <!-- deferred to feature-loader: js/features/smart-savings-host.js?v=20260720-review -->
 <!-- deferred to feature-loader: js/features/smart-savings-polish.js?v=20260719-ss-bal-white -->
 
-<!-- deferred to feature-loader: js/features/calculator.js?v=20260806-email-fmt -->
+<!-- deferred to feature-loader: js/features/calculator.js?v=20260806-hero-save -->
 <!-- deferred to feature-loader: js/features/sales-scripts.js?v=20260715-lo-v225 -->
 <!-- deferred to feature-loader: js/features/social-post.js?v=20260720-empty-posts -->
 <!-- deferred to feature-loader: js/features/mindset-lab.js -->

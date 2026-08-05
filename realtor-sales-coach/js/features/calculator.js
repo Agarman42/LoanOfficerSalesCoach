@@ -654,16 +654,16 @@ function renderHero(results, valid, error) {
   if (metricsEl) {
     const m1 =
       results.mode === 'purchase'
-        ? { label: 'Down', val: money0(results.downAmount) }
-        : { label: 'Loan', val: money0(results.baseLoanAmount) };
-    const m2 = { label: 'Rate', val: results.annualRate + '%' };
+        ? { label: 'Down payment', val: money0(results.downAmount) }
+        : { label: 'Loan amount', val: money0(results.baseLoanAmount) };
+    const m2 = { label: 'Interest rate', val: results.annualRate + '%' };
     const m3 = results.homeNow
-      ? { label: 'HomeNow 2nd', val: money0(results.monthlyHomeNowSecond) + '/mo' }
-      : { label: 'Interest (term)', val: money0(results.totalInterestStandard) };
+      ? { label: 'HomeNow 2nd', val: money2(results.monthlyHomeNowSecond) + '/mo' }
+      : { label: 'Interest (full term)', val: money0(results.totalInterestStandard) };
     metricsEl.innerHTML = [m1, m2, m3]
       .map(
         (m) =>
-          `<div class="calc-metric"><div class="calc-metric-label">${escapeHtml(m.label)}</div><div class="calc-metric-val">${escapeHtml(m.val)}</div></div>`
+          `<div class="calc-metric" title="${escapeHtml(m.label + ': ' + m.val)}"><div class="calc-metric-label">${escapeHtml(m.label)}</div><div class="calc-metric-val">${escapeHtml(m.val)}</div></div>`
       )
       .join('');
   }
@@ -841,23 +841,45 @@ function saveCurrentScenario() {
     calcToast('Enter valid loan details first');
     return;
   }
-  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
-    calcToast('Board full — remove a scenario first (max 3)');
-    return;
-  }
   const inputs = lastCalcBundle.inputs;
   const results = lastCalcBundle.results;
-  const scenario = {
-    id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    label: autoScenarioLabel(inputs, results),
-    createdAt: new Date().toISOString(),
-    inputs: Object.assign({}, inputs),
-    results: Object.assign({}, results)
-  };
-  calcScenarioBoard.push(scenario);
-  persistBoard();
-  renderScenarioBoard();
-  calcToast('Scenario saved: ' + scenario.label);
+  const label = autoScenarioLabel(inputs, results);
+  let boarded = false;
+
+  if (calcScenarioBoard.length >= CALC_MAX_SCENARIOS) {
+    calcToast('Board full (max 3) — still saving to My Saved Items');
+  } else {
+    const scenario = {
+      id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      label: label,
+      createdAt: new Date().toISOString(),
+      inputs: Object.assign({}, inputs),
+      results: Object.assign({}, results)
+    };
+    calcScenarioBoard.push(scenario);
+    persistBoard();
+    renderScenarioBoard();
+    boarded = true;
+  }
+
+  // Always save client-ready summary to My Saved Items vault
+  const vaultOk = saveCalcToVault({
+    silent: true,
+    title: 'Mortgage: ' + label + ' — ' + new Date().toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+  });
+
+  if (boarded && vaultOk) {
+    calcToast('Saved “' + label + '” to board + My Saved Items');
+  } else if (vaultOk) {
+    calcToast('Saved “' + label + '” to My Saved Items');
+  } else if (boarded) {
+    calcToast('On board: ' + label + ' (vault save failed)');
+  }
 }
 
 function removeScenario(id) {
@@ -1292,25 +1314,78 @@ function copyCalcResults() {
   copyForClient();
 }
 
-function saveCalcResults() {
-  const text = getCalcResultsText();
+/**
+ * Always APPEND to My Saved Items (toggleSaveIdea removes on second click with same title).
+ */
+function saveCalcToVault(opts) {
+  opts = opts || {};
+  const text = opts.text || getCalcResultsText();
   if (!text) {
-    calcToast('No results to save yet');
-    return;
+    if (!opts.silent) calcToast('Nothing to save yet — run a calculation first');
+    return false;
   }
+  const now = new Date();
+  const title =
+    opts.title ||
+    'Mortgage calc — ' +
+      now.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+      ' ' +
+      now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
+  // Prefer direct vault write so we never accidentally toggle-remove
+  try {
+    const key = 'socialSavedIdeas';
+    let saved = [];
+    try {
+      saved = JSON.parse(localStorage.getItem(key) || '[]');
+    } catch (e) {
+      saved = [];
+    }
+    if (!Array.isArray(saved)) saved = [];
+    saved.push({
+      title: title,
+      content: text,
+      savedAt: now.toISOString(),
+      type: 'calculator',
+      format: 'text'
+    });
+    localStorage.setItem(key, JSON.stringify(saved));
+    if (typeof window.updateSavedCount === 'function') window.updateSavedCount();
+    if (typeof window.refreshGeneratorSavedIdeas === 'function') {
+      try {
+        window.refreshGeneratorSavedIdeas();
+      } catch (e2) { /* ignore */ }
+    }
+    if (!opts.silent) {
+      if (typeof window.showSavedFeedback === 'function') {
+        window.showSavedFeedback(opts.feedback || 'Saved to My Saved Items');
+      } else {
+        calcToast(opts.feedback || 'Saved to My Saved Items');
+      }
+    }
+    return true;
+  } catch (err) {
+    // Fallback to toggleSaveIdea API
+    if (typeof window.toggleSaveIdea === 'function') {
+      window.toggleSaveIdea(title, text, opts.btn || null, 'calculator');
+      if (!opts.silent) {
+        if (typeof window.showSavedFeedback === 'function') {
+          window.showSavedFeedback(opts.feedback || 'Saved to My Saved Items');
+        } else {
+          calcToast(opts.feedback || 'Saved to My Saved Items');
+        }
+      }
+      return true;
+    }
+    if (!opts.silent) calcToast('Saved Items unavailable');
+    return false;
+  }
+}
+
+function saveCalcResults() {
   const btn =
     typeof event !== 'undefined' && event.currentTarget ? event.currentTarget : null;
-  const title = 'Mortgage scenarios — ' + new Date().toLocaleDateString();
-  if (typeof window.toggleSaveIdea === 'function') {
-    window.toggleSaveIdea(title, text, btn, 'calculator');
-    if (typeof window.showSavedFeedback === 'function') {
-      window.showSavedFeedback('Saved to My Saved Items');
-    } else {
-      calcToast('Saved to My Saved Items');
-    }
-  } else {
-    calcToast('Saved Items unavailable');
-  }
+  saveCalcToVault({ btn: btn });
 }
 
 function getCalcProfileForPrint() {
