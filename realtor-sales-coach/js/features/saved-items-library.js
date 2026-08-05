@@ -230,7 +230,8 @@
       recruiting: 'Recruiting',
       social: 'Social',
       'value-vault': 'Value Vault Idea',
-      event: 'Event Planning'
+      event: 'Event Planning',
+      calculator: 'Mortgage Calculator'
     };
     return map[t] || 'Saved Item';
   }
@@ -251,6 +252,7 @@
       listings: 'bg-[#002B5C]/10 text-[#002B5C]',
       'open-house': 'bg-[#002B5C]/10 text-[#002B5C]',
       consultation: 'bg-[#002B5C]/10 text-[#002B5C]',
+      calculator: 'bg-[#00A89D]/10 text-[#00A89D]',
       'equity-opportunity': 'bg-green-100 text-green-700',
       'equity-scan': 'bg-emerald-100 text-emerald-700',
       underwriting: 'bg-violet-100 text-violet-700',
