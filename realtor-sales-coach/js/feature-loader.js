@@ -54,7 +54,7 @@
   'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
   'js/features/newsletter-wizard.js?v=20260720-last-issue-chip',
   'js/features/ai-chat.js?v=20260720-ai-chat',
-  'js/features/calculator.js?v=20260806-loan-link',
+  'js/features/calculator.js?v=20260806-term-presets',
   'js/features/translation-tool.js?v=20260804-tr-custom-lang',
   'js/features/value-vault.js?v=20260706-realtor-v273',
   'js/features/vault-rich-modals.js?v=20260706-realtor-v273',

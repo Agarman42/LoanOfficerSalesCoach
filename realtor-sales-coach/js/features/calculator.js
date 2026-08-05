@@ -457,6 +457,28 @@ function setDownMode(mode, opts) {
   if (!silent) calculateAdvanced();
 }
 
+const TERM_PRESETS = [30, 25, 20, 15, 10];
+
+function syncTermPresetChips() {
+  const termEl = document.getElementById('term');
+  const years = termEl ? Math.round(parseFloat(termEl.value) || 0) : 0;
+  document.querySelectorAll('.calc-term-chip').forEach((chip) => {
+    const t = parseInt(chip.getAttribute('data-term'), 10);
+    chip.classList.toggle('is-active', t === years);
+  });
+}
+
+function setTermYears(years, opts) {
+  const silent = opts && opts.silent;
+  const termEl = document.getElementById('term');
+  let y = Math.round(Number(years) || 0);
+  if (y < 1) y = 1;
+  if (y > 50) y = 50;
+  if (termEl) termEl.value = String(y);
+  syncTermPresetChips();
+  if (!silent) calculateAdvanced();
+}
+
 function setPmiMode(mode, opts) {
   const silent = opts && opts.silent;
   const convert = !(opts && opts.skipConvert);
@@ -1140,6 +1162,7 @@ function renderScenarioBoard() {
 function calculateAdvanced() {
   if (homeNowEnabled) updatePMIRate();
   syncPurchaseLoanFields();
+  syncTermPresetChips();
 
   const inputs = readInputsFromDom();
   const computed = computeMortgageScenario(inputs);
@@ -2582,6 +2605,7 @@ if (typeof window !== 'undefined') {
   window.autoSetFHA_MIP = autoSetFHA_MIP;
   window.applyCalcPreset = applyCalcPreset;
   window.setPmiMode = setPmiMode;
+  window.setTermYears = setTermYears;
   window.copyCalcResults = copyCalcResults;
   window.saveCalcResults = saveCalcResults;
   window.copyForClient = copyForClient;
@@ -2606,6 +2630,13 @@ function initCalculator() {
   document.getElementById('dp-dollar-btn')?.addEventListener('click', () => setDownMode('dollar'));
   document.getElementById('pmi-dollar-btn')?.addEventListener('click', () => setPmiMode('dollar'));
   document.getElementById('pmi-percent-btn')?.addEventListener('click', () => setPmiMode('percent'));
+
+  document.querySelectorAll('.calc-term-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const y = parseInt(chip.getAttribute('data-term'), 10);
+      if (y) setTermYears(y);
+    });
+  });
 
   document.querySelectorAll('#calculator input').forEach((el) => {
     el.addEventListener('input', calculateAdvanced);

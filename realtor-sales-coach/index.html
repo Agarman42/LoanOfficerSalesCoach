@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260806-compare-ux">
+    <link rel="stylesheet" href="css/main.css?v=20260806-term-presets">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -5973,8 +5973,16 @@
                 <div class="calc-input-wrap"><input type="number" id="rate" min="0" step="0.001" value="6.5" class="calc-input"><span class="calc-affix calc-affix--end">%</span></div>
               </div>
               <div class="calc-field">
-                <label for="term">Term</label>
-                <div class="calc-input-wrap"><input type="number" id="term" min="1" max="40" value="30" class="calc-input"><span class="calc-affix calc-affix--end">yrs</span></div>
+                <label for="term">Term (years)</label>
+                <div class="calc-input-wrap"><input type="number" id="term" min="1" max="50" step="1" value="30" class="calc-input" inputmode="numeric" placeholder="e.g. 30"><span class="calc-affix calc-affix--end">yrs</span></div>
+                <div class="calc-term-presets" role="group" aria-label="Common loan terms">
+                  <button type="button" class="calc-term-chip is-active" data-term="30">30</button>
+                  <button type="button" class="calc-term-chip" data-term="25">25</button>
+                  <button type="button" class="calc-term-chip" data-term="20">20</button>
+                  <button type="button" class="calc-term-chip" data-term="15">15</button>
+                  <button type="button" class="calc-term-chip" data-term="10">10</button>
+                </div>
+                <p class="calc-hint">Tap a preset or type any term (1–50 years)</p>
               </div>
             </div>
           </div>
