@@ -166,11 +166,16 @@ function computeMortgageScenario(inputs) {
 
   const basePITI = standardPI + monthlyTaxes + monthlyInsurance + monthlyPMI;
   let displayPayment = basePITI + extraMonthly;
+  // Effective monthly principal applied to the 1st mortgage (for payoff / interest savings)
   let principalPayment = standardPI + extraMonthly;
 
   if (biweekly) {
-    displayPayment = ((basePITI + extraMonthly) * 13) / 12;
+    // True biweekly: half of (P&I + extra) every 2 weeks → 26 halves/year = 13 full monthly
+    // principal payments. That is (P&I+extra) × 13/12 as a monthly equivalent for amortization.
+    // Taxes / insurance / PMI stay annual÷12 — you do NOT pay a 13th month of escrow.
     principalPayment = ((standardPI + extraMonthly) * 13) / 12;
+    displayPayment =
+      principalPayment + monthlyTaxes + monthlyInsurance + monthlyPMI;
   }
   if (homeNow) displayPayment += monthlyHomeNowSecond;
 

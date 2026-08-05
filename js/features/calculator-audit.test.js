@@ -325,7 +325,7 @@ section('8. Extra monthly (no biweekly)');
 }
 
 // ─── 9. Biweekly only ─────────────────────────────────────────
-section('9. Biweekly (13/12 production rule)');
+section('9. Biweekly (P&I × 13/12; escrow stays monthly)');
 {
   const out = computeMortgageScenario({
     mode: 'purchase',
@@ -346,8 +346,14 @@ section('9. Biweekly (13/12 production rule)');
   });
   const r = out.results;
   const basePITI = r.monthlyPI + r.monthlyTaxes + r.monthlyInsurance + r.monthlyPMI;
-  // Production: scales full PITI+extra by 13/12 for display
-  almostEqual(r.totalMonthly, (basePITI * 13) / 12, 0.02, 'biweekly display = PITI * 13/12');
+  // Correct: only P&I gets 13/12; taxes/ins/PMI stay annual÷12
+  const expectedDisplay =
+    (r.monthlyPI * 13) / 12 + r.monthlyTaxes + r.monthlyInsurance + r.monthlyPMI;
+  almostEqual(r.totalMonthly, expectedDisplay, 0.02, 'biweekly display = PI×13/12 + T+I+PMI');
+  assert(
+    r.totalMonthly < (basePITI * 13) / 12 - 0.01,
+    'biweekly does not inflate full PITI by 13/12'
+  );
   almostEqual(r.standardTotalMonthly, basePITI, 0.02, 'standard stays calendar monthly');
   const principalPayment = (r.monthlyPI * 13) / 12;
   const L = 300000;
@@ -378,8 +384,9 @@ section('10. Biweekly + extra combined');
     pmiIsDollar: false
   });
   const r = out.results;
-  const basePITI = r.monthlyPI + 3600 / 12 + 1500 / 12;
-  almostEqual(r.totalMonthly, ((basePITI + 200) * 13) / 12, 0.05, 'biweekly+extra display');
+  const expectedDisplay =
+    ((r.monthlyPI + 200) * 13) / 12 + 3600 / 12 + 1500 / 12;
+  almostEqual(r.totalMonthly, expectedDisplay, 0.05, 'biweekly+extra = (PI+extra)×13/12 + escrow');
   assert(r.monthsToPayoff < 300, 'payoff much shorter');
   assert(r.interestSavings > 50000, 'substantial savings');
 }
@@ -730,7 +737,7 @@ if (failed) {
 }
 console.log('\nAll hard-check calculations PASSED.');
 console.log('\nNotes (documented production rules, not bugs):');
-console.log(' • Biweekly multiplies full PITI (not only P&I) by 13/12 for display payment.');
+console.log(' • Biweekly: (P&I+extra)×13/12 for principal; taxes/insurance/PMI stay monthly.');
 console.log(' • HomeNow interest = (PI*n − firstLoan w/ UFMIP) + 2nd interest.');
 console.log(' • PMI: $/mo mode (default) uses entered dollars; % mode applies <20% LTV gate on purchase.');
 console.log(' • PMI on purchase % mode only when down < 20%; always applied on refi if rate entered.');
