@@ -1115,9 +1115,7 @@ function updateSlotSaveButtons() {
     if (!btn) continue;
     const filled = !!calcScenarioBoard[i];
     const span = btn.querySelector('span');
-    if (span) {
-      span.textContent = filled ? 'Update ' + letter : 'Save as ' + letter;
-    }
+    if (span) span.textContent = 'Save as ' + letter;
     btn.classList.toggle('is-filled', filled);
     btn.title = filled
       ? 'Overwrite Option ' + letter + ' with the numbers currently in the form'
@@ -1215,7 +1213,7 @@ function renderScenarioBoard() {
         </div>
         ${r.homeNow ? `<div class="calc-card-hn">HomeNow ${r.dpaPercent}% · 2nd ${money0(r.dpaAmount)} · ${money2(r.monthlyHomeNowSecond)}/mo</div>` : ''}
         <div class="calc-card-actions">
-          <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="save-slot" data-idx="${idx}" title="Overwrite with current form numbers">Update ${letter}</button>
+          <button type="button" class="calc-card-btn calc-card-btn-primary" data-action="save-slot" data-idx="${idx}" title="Overwrite with current form numbers">Save as ${letter}</button>
           <button type="button" class="calc-card-btn" data-action="load" data-id="${escapeHtml(s.id)}">Load</button>
           <button type="button" class="calc-card-btn" data-action="rename" data-id="${escapeHtml(s.id)}">Rename</button>
           <button type="button" class="calc-card-btn calc-card-btn-danger" data-action="clear-slot" data-idx="${idx}">Clear</button>

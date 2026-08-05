@@ -4263,23 +4263,7 @@ html.dark .calc-slot-save-label { color: #e2e8f0; }
   border-color: transparent !important;
   color: #fff !important;
 }
-.calc-slot-letter {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.35rem;
-  height: 1.35rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 900;
-  background: rgba(0, 168, 157, 0.15);
-  color: #0f766e;
-}
-.calc-btn-slot.is-filled .calc-slot-letter {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-}
-.calc-slot-fill-btn {
+.calc-btn-slot.is-filled .calc-slot-fill-btn {
   margin-top: 0.35rem;
   display: inline-flex;
   align-items: center;
