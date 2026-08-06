@@ -185,6 +185,10 @@
   let teleprompterRaf = null;
   let helpOpen = false;
   let firstRunOpen = false;
+  /** True after user has entered #my-pitch at least once this session (lazy UI boot). */
+  let pitchUiBooted = false;
+  /** Prevent first-run open/close thrash. */
+  let firstRunHandledThisVisit = false;
 
   // ─── Storage ───────────────────────────────────────────────
 
@@ -631,14 +635,29 @@
     return document.getElementById('mp-root');
   }
 
+  function isMyPitchVisible() {
+    const sec = document.getElementById('my-pitch');
+    return !!(sec && !sec.classList.contains('hidden'));
+  }
+
   function render() {
     const el = root();
     if (!el) return;
+    // Never inject fixed overlays (first-run modal / help) while section is hidden —
+    // that was causing full-page flash when the user was still on Home.
+    if (!isMyPitchVisible() && !pitchUiBooted) {
+      el.innerHTML =
+        '<div class="text-center py-16 text-gray-500">' +
+        '<i class="fas fa-microphone-alt text-3xl text-[#00A89D] mb-3"></i>' +
+        '<p class="font-semibold m-0">My Pitch</p>' +
+        '<p class="text-sm m-0 mt-1">Open this tool from the sidebar or Home to get started.</p>' +
+        '</div>';
+      return;
+    }
     if (view === 'builder') el.innerHTML = renderBuilder();
     else if (view === 'detail') el.innerHTML = renderDetail();
     else el.innerHTML = renderHome();
     bindUi();
-    maybeShowFirstRun();
   }
 
   function renderHome() {
@@ -1247,11 +1266,13 @@
   }
 
   function renderFirstRunModal() {
-    if (!firstRunOpen) return '';
+    // Only while My Pitch is the active section — never paint a fixed overlay over Home
+    if (!firstRunOpen || !isMyPitchVisible()) return '';
     return (
-      '<div class="mp-modal" role="dialog" aria-modal="true">' +
-      '<div class="mp-modal-card">' +
-      '<h3>Create your pitch in ~5 minutes</h3>' +
+      '<div class="mp-modal" role="dialog" aria-modal="true" aria-labelledby="mp-first-run-title">' +
+      '<div class="mp-modal-backdrop" data-dismiss-first tabindex="-1" aria-hidden="true"></div>' +
+      '<div class="mp-modal-card" role="document">' +
+      '<h3 id="mp-first-run-title">Create your pitch in ~5 minutes</h3>' +
       '<ol class="mp-first-steps">' +
       '<li>Pick consumer or realtor</li>' +
       '<li>Answer five questions</li>' +
@@ -1295,14 +1316,18 @@
       });
     });
     el.querySelectorAll('[data-dismiss-first]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        firstRunOpen = false;
-        try {
-          localStorage.setItem(FIRST_RUN_KEY, '1');
-        } catch (e) {
-          /* ignore */
+      btn.addEventListener('click', function (ev) {
+        if (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
         }
-        render();
+        dismissFirstRun();
+      });
+    });
+    // Modal card should not close when clicking inside the card
+    el.querySelectorAll('.mp-modal-card').forEach(function (card) {
+      card.addEventListener('click', function (ev) {
+        ev.stopPropagation();
       });
     });
     el.querySelectorAll('[data-open-pitch]').forEach(function (btn) {
@@ -1543,21 +1568,43 @@
     }
   }
 
-  function maybeShowFirstRun() {
-    if (view !== 'home') return;
+  function hasSeenFirstRun() {
     try {
-      if (localStorage.getItem(FIRST_RUN_KEY)) return;
+      return !!localStorage.getItem(FIRST_RUN_KEY);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function dismissFirstRun() {
+    firstRunOpen = false;
+    firstRunHandledThisVisit = true;
+    try {
+      localStorage.setItem(FIRST_RUN_KEY, '1');
     } catch (e) {
       /* ignore */
     }
-    if (!firstRunOpen && pitches.length === 0) {
-      firstRunOpen = true;
-      // re-render once with modal
-      const el = root();
-      if (el && !el.querySelector('.mp-modal')) {
-        render();
-      }
+    render();
+  }
+
+  /**
+   * First-run modal: ONLY when user explicitly opens My Pitch (click / showSection).
+   * Never on hover, never while another section is active, never recursively from render().
+   */
+  function maybeOpenFirstRunOnEnter() {
+    if (firstRunHandledThisVisit) return;
+    if (view !== 'home') return;
+    if (!isMyPitchVisible()) return;
+    if (hasSeenFirstRun()) {
+      firstRunHandledThisVisit = true;
+      return;
     }
+    if (pitches.length > 0) {
+      firstRunHandledThisVisit = true;
+      return;
+    }
+    firstRunOpen = true;
+    firstRunHandledThisVisit = true;
   }
 
   // ─── Flow actions ──────────────────────────────────────────
@@ -2249,22 +2296,94 @@
 
   // ─── Init ──────────────────────────────────────────────────
 
+  function onEnterMyPitch(opts) {
+    opts = opts || {};
+    pitchUiBooted = true;
+    loadPitches();
+    const d = loadDraft();
+    if (d && (d.script || d.type)) draft = d;
+
+    if (opts.start) {
+      firstRunOpen = false;
+      firstRunHandledThisVisit = true;
+      startBuilder(opts.start);
+      return;
+    }
+
+    // Fresh enter → pitch home; offer first-run once (click-to-open only, not hover)
+    if (view !== 'builder' && view !== 'detail') view = 'home';
+    maybeOpenFirstRunOnEnter();
+    render();
+  }
+
   function init() {
     const section = document.getElementById('my-pitch');
     if (!section) return;
     loadPitches();
     const d = loadDraft();
     if (d && (d.script || d.type)) draft = d;
-    render();
-    console.log('%c[my-pitch] Sales Coach Pitch ready', 'color:#00A89D');
+
+    // Lazy: do not mount full UI / fixed modals while user is on Home
+    if (isMyPitchVisible() || (location.hash || '').replace(/^#/, '') === 'my-pitch') {
+      onEnterMyPitch();
+    } else {
+      // Lightweight placeholder only — no overlays
+      const el = root();
+      if (el && !el.querySelector('.mp-shell')) {
+        el.innerHTML =
+          '<div class="text-center py-16 text-gray-500" aria-hidden="true">' +
+          '<i class="fas fa-microphone-alt text-3xl text-[#00A89D] mb-3"></i>' +
+          '<p class="font-semibold m-0">My Pitch</p>' +
+          '</div>';
+      }
+    }
+
+    // Chain showSection hook — enter only when section is actually shown
+    const prevHook = window.onCoachSectionShown;
+    window.onCoachSectionShown = function (id) {
+      if (typeof prevHook === 'function') {
+        try {
+          prevHook(id);
+        } catch (e) {
+          /* ignore */
+        }
+      }
+      if (id === 'my-pitch') {
+        if (window.__mpPendingStart) {
+          const t = window.__mpPendingStart;
+          window.__mpPendingStart = null;
+          onEnterMyPitch({ start: t });
+        } else {
+          onEnterMyPitch();
+        }
+      } else if (firstRunOpen) {
+        // Leaving My Pitch: close first-run overlay so it cannot cover other tools
+        firstRunOpen = false;
+        const el = root();
+        if (el) {
+          const modal = el.querySelector('.mp-modal');
+          if (modal) modal.remove();
+        }
+      }
+    };
+
+    console.log('%c[my-pitch] Sales Coach Pitch ready (lazy enter)', 'color:#00A89D');
   }
 
   window.openMyPitch = function openMyPitch(opts) {
+    opts = opts || {};
+    // Skip first-run if jumping straight into a type wizard
+    if (opts.start) {
+      firstRunOpen = false;
+      firstRunHandledThisVisit = true;
+      window.__mpPendingStart = opts.start;
+    }
     if (typeof window.showSection === 'function') window.showSection('my-pitch');
-    if (opts && opts.start) startBuilder(opts.start);
-    else {
-      view = 'home';
-      render();
+    // onCoachSectionShown may have run already; apply pending start if any
+    if (window.__mpPendingStart) {
+      const t = window.__mpPendingStart;
+      window.__mpPendingStart = null;
+      onEnterMyPitch({ start: t });
     }
   };
 
@@ -2272,21 +2391,13 @@
     window.openMyPitch({ start: type || 'consumer' });
   };
 
-  // Re-render when user navigates here (section was hidden at init)
-  window.addEventListener('hashchange', function () {
-    if ((location.hash || '').replace(/^#/, '') === 'my-pitch') {
-      loadPitches();
-      render();
-    }
-  });
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
   document.addEventListener('coach-features-loaded', function () {
-    const r = root();
-    if (r && (!r.querySelector('.mp-shell') || r.textContent.indexOf('Loading My Pitch') !== -1)) init();
+    if (!document.getElementById('my-pitch')) return;
+    if (!pitchUiBooted) init();
   });
 })();

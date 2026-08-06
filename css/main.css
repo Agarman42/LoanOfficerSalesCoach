@@ -5804,14 +5804,29 @@ html.dark .calc-result-card--standard .calc-row--total span:last-child {
 .dark .mp-help-body li, html.dark .mp-help-body li { color: #94a3b8; }
 .mp-help-body ol, .mp-help-body ul { padding-left: 1.15rem; margin: 0.35rem 0; }
 .mp-do { list-style: disc; }
+/* Never paint My Pitch overlays while the tool section is hidden (Home must stay stable) */
+#my-pitch.hidden .mp-modal,
+#my-pitch.hidden .mp-help {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
 .mp-modal {
   position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
-  background: rgba(15,23,42,0.55); padding: 1rem;
+  padding: 1rem; pointer-events: auto;
+}
+.mp-modal-backdrop {
+  position: absolute; inset: 0; background: rgba(15,23,42,0.55);
+  /* Clicks only dismiss — do not bubble to page tiles */
+  pointer-events: auto;
 }
 .mp-modal-card {
+  position: relative; z-index: 1;
   max-width: 420px; width: 100%; background: #fff; border-radius: 1.25rem;
   padding: 1.5rem 1.35rem; text-align: center;
   box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  pointer-events: auto;
 }
 .dark .mp-modal-card, html.dark .mp-modal-card { background: #0f172a; color: #e2e8f0; }
 .mp-modal-card h3 { margin: 0 0 0.75rem; font-weight: 900; color: #002B5C; }
