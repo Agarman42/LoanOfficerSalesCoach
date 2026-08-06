@@ -59,7 +59,8 @@
   'js/features/value-vault.js?v=20260706-realtor-v273',
   'js/features/vault-rich-modals.js?v=20260706-realtor-v273',
   'js/inline-extracted/re-block-1.js?v=20260721-static-tw',
-  'js/inline-extracted/re-block-2.js?v=20260721-static-tw'
+  'js/inline-extracted/re-block-2.js?v=20260721-static-tw',
+  'js/features/admin-usage.js?v=20260806-auth-v1'
   ];
   var i = 0;
   function next() {

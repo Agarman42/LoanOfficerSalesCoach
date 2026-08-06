@@ -9,6 +9,11 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# Auth / account data (never commit passwords or sessions)
+data/auth-store.json
+data/auth-store.json.tmp
+data/*.tmp
+
 # Logs
 logs
 *.log

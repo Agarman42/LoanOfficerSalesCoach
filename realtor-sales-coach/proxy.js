@@ -1,4 +1,4 @@
-// proxy.js — Agent Sales Coach static host + Grok API proxy (local + Render)
+// proxy.js — Agent Sales Coach static host + Grok API proxy + invite-gated auth
 try {
   require('dotenv').config();
 } catch (e) {
@@ -16,7 +16,7 @@ const ROOT = path.resolve(__dirname);
 
 /**
  * CORS: never pass Error to the cors callback — that becomes Express 500.
- * Use callback(null, false) to deny, callback(null, true) to allow.
+ * Credentials: true so session cookie works when CORS_ORIGINS is set.
  */
 function buildCorsOptions() {
   const envList = (process.env.CORS_ORIGINS || '')
@@ -27,27 +27,25 @@ function buildCorsOptions() {
   return {
     origin(origin, callback) {
       try {
-        // Same-origin, curl, health checks, server-to-server
         if (!origin) return callback(null, true);
 
         if (envList.length) {
           if (envList.includes('*') || envList.includes(origin)) {
             return callback(null, true);
           }
-          // Deny without throwing (avoids Internal Server Error pages)
           console.warn('[cors] blocked origin:', origin);
           return callback(null, false);
         }
 
-        // Default: allow (local dev + Render same-origin + custom domains)
         return callback(null, true);
       } catch (e) {
         console.warn('[cors] handler error — allowing request', e.message);
         return callback(null, true);
       }
     },
-    methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
+    methods: ['GET', 'POST', 'PATCH', 'OPTIONS', 'HEAD'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
     optionsSuccessStatus: 204
   };
 }
@@ -58,21 +56,50 @@ app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Health first (Render / monitors) — never blocked by static
+// ── Auth (Realtor only) ──────────────────────────────────────
+let authApi = null;
+try {
+  const { mountAuthRoutes } = require('./server/auth-routes');
+  const { seedAdminIfNeeded, STORE_PATH } = require('./server/auth-store');
+  authApi = mountAuthRoutes(app);
+  seedAdminIfNeeded()
+    .then((r) => {
+      if (r && r.seeded) {
+        console.log('[auth] Seeded admin account:', r.email);
+        if (r.generated && r.password) {
+          console.log(
+            '[auth] Generated ADMIN password (copy now — not shown again):',
+            r.password
+          );
+        } else {
+          console.log('[auth] Admin password from ADMIN_PASSWORD env');
+        }
+      } else {
+        console.log('[auth] Admin already present — store:', STORE_PATH);
+      }
+    })
+    .catch((e) => console.warn('[auth] seed failed', e.message));
+  console.log('[auth] Invite-gated auth enabled for Agent Sales Coach');
+} catch (e) {
+  console.warn('[auth] failed to mount', e && e.message ? e.message : e);
+}
+
+// Health first (Render / monitors) — never blocked by auth
 app.get('/api/health', (_req, res) => {
   res.status(200).json({
     ok: true,
     service: 'agent-sales-coach-proxy',
     hasServerKey: !!(process.env.XAI_API_KEY || process.env.GROK_API_KEY),
+    auth: process.env.AUTH_DISABLED === '1' ? 'disabled' : 'enabled',
     node: process.version,
     time: new Date().toISOString()
   });
 });
 
-// Static app files — do not expose node_modules / .git / env
+// Static app files — do not expose node_modules / .git / env / data store
 app.use(
   express.static(ROOT, {
-    index: 'index.html',
+    index: false, // auth gate handles index; SPA fallback below
     dotfiles: 'ignore',
     setHeaders(res, filePath) {
       if (
@@ -84,12 +111,26 @@ app.use(
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
       }
+      // Never serve auth data via static
+      if (filePath.includes(`${path.sep}data${path.sep}`)) {
+        res.statusCode = 404;
+      }
     }
   })
 );
 
-// Grok / xAI chat completions proxy
-app.post('/api/v1/chat/completions', async (req, res) => {
+// Block direct data path
+app.use('/data', (_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// Grok / xAI chat completions proxy — requires signed-in active user
+app.post('/api/v1/chat/completions', (req, res, next) => {
+  if (authApi && typeof authApi.requireAuthForApi === 'function') {
+    return authApi.requireAuthForApi(req, res, next);
+  }
+  next();
+}, async (req, res) => {
   try {
     let apiKey = req.headers.authorization?.replace(/^Bearer\s+/i, '').trim();
 
@@ -147,7 +188,7 @@ app.use((req, res, next) => {
   });
 });
 
-// Final error handler — always JSON for API, plain text otherwise (never uncaught crash)
+// Final error handler
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
   console.error('[server] unhandled error:', err && err.message ? err.message : err);
@@ -158,13 +199,18 @@ app.use((err, req, res, _next) => {
 });
 
 // Dual-stack: browsers often resolve "localhost" to IPv6 ::1 first.
-// Binding only 0.0.0.0 made http://127.0.0.1:PORT work and http://localhost:PORT fail.
 const server = app.listen({ port: PORT, host: '::', ipv6Only: false }, () => {
-  console.log(`✅ Grok Proxy running on http://localhost:${PORT} (IPv4+IPv6)`);
+  console.log(`✅ Agent Sales Coach on http://localhost:${PORT} (IPv4+IPv6)`);
   console.log(`✅ Health: /api/health`);
+  console.log(`✅ Auth: /api/auth/*  Admin: /api/admin/*`);
   console.log(`✅ Static root: ${ROOT}`);
   if (!process.env.XAI_API_KEY && !process.env.GROK_API_KEY) {
     console.log('⚠️  XAI_API_KEY / GROK_API_KEY not set — AI calls need a browser key or env var');
+  }
+  if (!process.env.AUTH_SESSION_SECRET && !process.env.SESSION_SECRET) {
+    console.log(
+      '⚠️  AUTH_SESSION_SECRET not set — using fallback. Set a long random secret on Render.'
+    );
   }
 });
 

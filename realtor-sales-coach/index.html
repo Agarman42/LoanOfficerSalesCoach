@@ -153,7 +153,24 @@
     <script defer src="js/features/user-profile.js?v=20260730-mobile-pass4"></script>
     <script defer src="js/features/home-favorites.js?v=20260728-realtor-parity"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
+    <!-- Invite-gated auth: lock UI until /api/auth/me succeeds (Realtor only) -->
+    <script defer src="js/features/auth-gate.js?v=20260806-auth-v1"></script>
+    <script defer src="js/features/admin-usage.js?v=20260806-auth-v1"></script>
     <script src="js/early-boot.js?v=20260730-gen-modal"></script>
+    <style id="asc-auth-boot-lock">
+      /* Prevent coach chrome flash before auth-gate decides */
+      html.asc-awaiting-auth body > :not(#asc-auth-gate):not(script):not(style) { visibility: hidden !important; }
+    </style>
+    <script>
+      document.documentElement.classList.add('asc-awaiting-auth');
+      window.addEventListener('asc-auth-ready', function () {
+        document.documentElement.classList.remove('asc-awaiting-auth');
+      });
+      // If auth-gate never loads, unlock after 8s so page is not permanently blank
+      setTimeout(function () {
+        document.documentElement.classList.remove('asc-awaiting-auth');
+      }, 8000);
+    </script>
 </head>
 <body class="sidebar-collapsed bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -306,6 +323,7 @@
                 <li><a href="#client-translation" class="sidebar-link"><i class="fas fa-language" aria-hidden="true"></i><span>Client translation</span></a></li>
                 <li><a href="#calculator" class="sidebar-link"><i class="fas fa-calculator" aria-hidden="true"></i><span>Mortgage calculator</span></a></li>
                 <li><a href="#saved-items" data-home-fav="saved-items" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link"><i class="fas fa-bookmark" aria-hidden="true"></i><span class="flex-1">My Saved Items</span><span id="global-saved-count" class="hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#00A89D] text-white rounded-full items-center justify-center shrink-0">0</span></a></li>
+                <li><a href="#admin-usage" class="sidebar-link" style="display:none"><i class="fas fa-shield-halved" aria-hidden="true"></i><span>Admin · usage</span></a></li>
             </ul>
 
             <div class="sidebar-footer px-1">
@@ -8563,6 +8581,16 @@
 <!-- deferred to feature-loader: js/inline-extracted/re-block-1.js?v=20260721-static-tw -->
 <!-- deferred to feature-loader: js/features/rich-modals-restore.js?v=20260706-realtor-v273 -->
 <!-- deferred to feature-loader: js/features/popby-seasonal.js?v=20260706-realtor-v273 -->
+
+                <section id="admin-usage" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-4 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden" aria-label="Admin accounts and usage">
+  <div id="admin-usage-root">
+    <div class="text-center py-16 text-gray-500">
+      <i class="fas fa-shield-halved text-3xl text-[#00A89D] mb-3"></i>
+      <p class="font-semibold">Admin · usage</p>
+      <p class="text-sm mt-1">Sign in as admin to manage invites and accounts.</p>
+    </div>
+  </div>
+</section>
 
 </main>
     <script>
