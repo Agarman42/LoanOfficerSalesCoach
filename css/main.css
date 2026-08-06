@@ -5879,3 +5879,258 @@ html.dark .mp-help-body li {
 .mp-do {
   list-style: disc;
 }
+
+/* ─── Primary badges & strip ─── */
+.mp-primary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.mp-primary-badge--consumer {
+  background: linear-gradient(135deg, rgba(241, 90, 41, 0.18), rgba(241, 90, 41, 0.08));
+  color: #c2410c;
+  border: 1px solid rgba(241, 90, 41, 0.4);
+}
+.mp-primary-badge--realtor {
+  background: linear-gradient(135deg, rgba(0, 168, 157, 0.2), rgba(0, 168, 157, 0.08));
+  color: #0f766e;
+  border: 1px solid rgba(0, 168, 157, 0.4);
+}
+.dark .mp-primary-badge--consumer,
+html.dark .mp-primary-badge--consumer {
+  color: #fdba74;
+}
+.dark .mp-primary-badge--realtor,
+html.dark .mp-primary-badge--realtor {
+  color: #5eead4;
+}
+.mp-type-card-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+.mp-type-card.is-primary {
+  border-color: rgba(241, 90, 41, 0.45);
+  box-shadow: 0 0 0 3px rgba(241, 90, 41, 0.12), 0 12px 32px -16px rgba(0, 43, 92, 0.35);
+}
+.mp-lib-row.is-primary {
+  border-color: rgba(241, 90, 41, 0.4);
+  background: linear-gradient(90deg, rgba(241, 90, 41, 0.06), transparent 55%);
+}
+.dark .mp-lib-row.is-primary,
+html.dark .mp-lib-row.is-primary {
+  background: linear-gradient(90deg, rgba(241, 90, 41, 0.1), transparent 55%);
+}
+.mp-lib-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+}
+.mp-lib-main { min-width: 0; flex: 1; }
+.mp-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+.mp-primary-strip {
+  margin-bottom: 1.35rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(241, 90, 41, 0.28);
+  background: linear-gradient(135deg, rgba(241, 90, 41, 0.08), rgba(0, 168, 157, 0.06));
+}
+.mp-primary-strip-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #002B5C;
+}
+.dark .mp-primary-strip-title,
+html.dark .mp-primary-strip-title { color: #f1f5f9; }
+.mp-primary-strip-grid {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .mp-primary-strip-grid { grid-template-columns: 1fr 1fr; }
+}
+.mp-primary-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.85rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+}
+.dark .mp-primary-chip,
+html.dark .mp-primary-chip {
+  background: #0f172a;
+  border-color: #334155;
+}
+.mp-primary-chip.is-set {
+  border-color: rgba(0, 168, 157, 0.4);
+}
+.mp-primary-chip-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+.mp-primary-chip-name {
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #00A89D;
+  cursor: pointer;
+}
+.mp-primary-chip-name:hover { text-decoration: underline; }
+.mp-primary-chip-empty {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* ─── Empty / first-use ─── */
+.mp-empty-hero {
+  text-align: center;
+  margin: 0 0 1.5rem;
+  padding: 1.75rem 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px dashed rgba(0, 168, 157, 0.4);
+  background: linear-gradient(180deg, rgba(0, 168, 157, 0.08), rgba(0, 43, 92, 0.03));
+}
+.mp-empty-hero-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto 0.85rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 168, 157, 0.15);
+  color: #00A89D;
+  font-size: 1.35rem;
+}
+.mp-empty-hero h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #002B5C;
+}
+.dark .mp-empty-hero h3,
+html.dark .mp-empty-hero h3 { color: #f1f5f9; }
+.mp-empty-hero > p {
+  margin: 0 auto 1.1rem;
+  max-width: 28rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+.mp-empty-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+.mp-empty-hint {
+  margin: 0 !important;
+  font-size: 0.75rem !important;
+  color: #94a3b8 !important;
+}
+
+/* ─── Practice mode ─── */
+.mp-shell--practice {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.mp-practice-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.dark .mp-practice-bar,
+html.dark .mp-practice-bar { border-color: #334155; }
+.mp-practice-timer-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+}
+.mp-practice-timer-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+.mp-practice-timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #002B5C;
+  min-width: 3.2rem;
+}
+.dark .mp-practice-timer,
+html.dark .mp-practice-timer { color: #f1f5f9; }
+.mp-practice-timer.is-low { color: #F15A29; }
+.mp-practice-stage {
+  text-align: center;
+  padding: 0.5rem 0 2rem;
+}
+.mp-practice-kicker {
+  margin: 0 0 1.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #00A89D;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mp-practice-script {
+  margin: 0 auto 1.5rem;
+  max-width: 36rem;
+  font-size: clamp(1.2rem, 2.8vw, 1.55rem);
+  font-weight: 600;
+  line-height: 1.65;
+  color: #0f172a;
+  text-align: left;
+  padding: 1.35rem 1.4rem;
+  border-radius: 1.15rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  white-space: pre-wrap;
+}
+.dark .mp-practice-script,
+html.dark .mp-practice-script {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+.mp-practice-foot {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}

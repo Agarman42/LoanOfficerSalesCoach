@@ -186,6 +186,11 @@
   /** True after user has entered #my-pitch at least once this session (lazy UI boot). */
   let pitchUiBooted = false;
   let helpEscBound = false;
+  /** Practice mode: pitch id when rehearsing, null when not */
+  let practicePitchId = null;
+  let practiceTimerId = null;
+  let practiceSecondsLeft = 60;
+  let practiceTimerRunning = false;
 
   // ─── Storage ───────────────────────────────────────────────
 
@@ -651,10 +656,28 @@
         '</div>';
       return;
     }
-    if (view === 'builder') el.innerHTML = renderBuilder();
+    if (view === 'practice') el.innerHTML = renderPractice();
+    else if (view === 'builder') el.innerHTML = renderBuilder();
     else if (view === 'detail') el.innerHTML = renderDetail();
     else el.innerHTML = renderHome();
     bindUi();
+  }
+
+  function primaryBadgesHtml(p) {
+    const bits = [];
+    if (p.primaryConsumer) {
+      bits.push('<span class="mp-primary-badge mp-primary-badge--consumer"><i class="fas fa-star"></i> Primary · Consumer</span>');
+    }
+    if (p.primaryRealtor) {
+      bits.push('<span class="mp-primary-badge mp-primary-badge--realtor"><i class="fas fa-star"></i> Primary · Realtor</span>');
+    }
+    return bits.join(' ');
+  }
+
+  function findPrimary(kind) {
+    return pitches.find(function (p) {
+      return kind === 'realtor' ? p.primaryRealtor : p.primaryConsumer;
+    });
   }
 
   function renderHome() {
@@ -670,25 +693,37 @@
         return (b.updatedAt || '').localeCompare(a.updatedAt || '');
       });
 
+    const empty = list.length === 0;
+    const primC = findPrimary('consumer');
+    const primR = findPrimary('realtor');
+
     const typeCards = ['consumer', 'realtor', 'short']
       .map(function (tid) {
         const meta = PITCH_TYPES[tid];
         const p = byType[tid];
         const st = p ? statusOf(p) : 'empty';
+        const isPrim =
+          p &&
+          ((tid === 'consumer' && p.primaryConsumer) ||
+            (tid === 'realtor' && p.primaryRealtor) ||
+            (tid === 'short' && p.primaryConsumer));
         return (
-          '<article class="mp-type-card" data-type="' +
+          '<article class="mp-type-card' +
+          (isPrim ? ' is-primary' : '') +
+          '" data-type="' +
           tid +
           '">' +
           '<div class="mp-type-card-top">' +
           '<span class="mp-type-icon"><i class="fas ' +
           meta.icon +
           '"></i></span>' +
+          '<div class="mp-type-card-flags">' +
+          (p ? primaryBadgesHtml(p) : '') +
           '<span class="mp-status ' +
           statusClass(st) +
           '">' +
           escapeHtml(statusLabel(st)) +
-          '</span>' +
-          '</div>' +
+          '</span></div></div>' +
           '<h3>' +
           escapeHtml(meta.label) +
           '</h3>' +
@@ -718,48 +753,93 @@
       })
       .join('');
 
-    const library =
-      list.length === 0
-        ? '<div class="mp-empty-lib">' +
-          '<p>No saved pitches yet. Create a consumer pitch first — most LOs use it for clients <em>and</em> as the base for a 30-second short.</p>' +
-          '<button type="button" class="mp-btn mp-btn-primary" data-start-type="consumer">Create consumer pitch</button>' +
-          '</div>'
-        : '<div class="mp-lib-table">' +
-          list
-            .map(function (p) {
-              const st = statusOf(p);
-              const meta = PITCH_TYPES[p.type] || PITCH_TYPES.consumer;
-              const badges = [];
-              if (p.primaryConsumer) badges.push('Primary consumer');
-              if (p.primaryRealtor) badges.push('Primary realtor');
-              return (
-                '<div class="mp-lib-row" data-open-pitch="' +
-                escapeHtml(p.id) +
-                '">' +
-                '<div><strong>' +
-                escapeHtml(p.name || meta.label) +
-                '</strong>' +
-                '<div class="mp-lib-meta">' +
-                escapeHtml(meta.shortLabel) +
-                ' · ' +
-                escapeHtml(statusLabel(st)) +
-                (badges.length ? ' · ' + badges.join(' · ') : '') +
-                '</div></div>' +
-                '<div class="mp-lib-actions" onclick="event.stopPropagation()">' +
-                '<button type="button" class="mp-btn mp-btn-sm" data-open-pitch="' +
-                escapeHtml(p.id) +
-                '">Open</button>' +
-                '<button type="button" class="mp-btn mp-btn-sm mp-btn-ghost" data-dup-pitch="' +
-                escapeHtml(p.id) +
-                '">Duplicate</button>' +
-                '<button type="button" class="mp-btn mp-btn-sm mp-btn-danger" data-del-pitch="' +
-                escapeHtml(p.id) +
-                '">Delete</button>' +
-                '</div></div>'
-              );
-            })
-            .join('') +
-          '</div>';
+    const primaryStrip =
+      !empty && (primC || primR)
+        ? '<section class="mp-primary-strip" aria-label="Primary pitches">' +
+          '<h3 class="mp-primary-strip-title"><i class="fas fa-star text-[#F15A29]"></i> Your primaries</h3>' +
+          '<div class="mp-primary-strip-grid">' +
+          '<div class="mp-primary-chip' +
+          (primC ? ' is-set' : '') +
+          '">' +
+          '<span class="mp-primary-chip-label">Consumer</span>' +
+          (primC
+            ? '<button type="button" class="mp-primary-chip-name" data-open-pitch="' +
+              escapeHtml(primC.id) +
+              '">' +
+              escapeHtml(primC.name || 'Primary consumer') +
+              '</button>'
+            : '<span class="mp-primary-chip-empty">Not set yet</span>') +
+          '</div>' +
+          '<div class="mp-primary-chip' +
+          (primR ? ' is-set' : '') +
+          '">' +
+          '<span class="mp-primary-chip-label">Realtor partner</span>' +
+          (primR
+            ? '<button type="button" class="mp-primary-chip-name" data-open-pitch="' +
+              escapeHtml(primR.id) +
+              '">' +
+              escapeHtml(primR.name || 'Primary realtor') +
+              '</button>'
+            : '<span class="mp-primary-chip-empty">Not set yet</span>') +
+          '</div></div></section>'
+        : '';
+
+    const emptyBlock = empty
+      ? '<section class="mp-empty-hero">' +
+        '<div class="mp-empty-hero-icon"><i class="fas fa-microphone-alt"></i></div>' +
+        '<h3>Your elevator pitch starts here</h3>' +
+        '<p>In about five minutes you’ll have a clear script, optional video, and a share-ready intro clients and agents can trust.</p>' +
+        '<div class="mp-empty-hero-actions">' +
+        '<button type="button" class="mp-btn mp-btn-primary mp-btn-lg" data-start-type="consumer"><i class="fas fa-home"></i> Start with Consumer pitch</button>' +
+        '<button type="button" class="mp-btn mp-btn-ghost" data-start-type="realtor"><i class="fas fa-handshake"></i> Realtor partner pitch</button>' +
+        '</div>' +
+        '<p class="mp-empty-hint">Most LOs start with Consumer — it also feeds a 30-second short later.</p>' +
+        '</section>'
+      : '';
+
+    const library = empty
+      ? ''
+      : '<section class="mp-section">' +
+        '<div class="mp-section-head"><h3>Your library</h3></div>' +
+        '<div class="mp-lib-table">' +
+        list
+          .map(function (p) {
+            const st = statusOf(p);
+            const meta = PITCH_TYPES[p.type] || PITCH_TYPES.consumer;
+            const isPrim = !!(p.primaryConsumer || p.primaryRealtor);
+            return (
+              '<div class="mp-lib-row' +
+              (isPrim ? ' is-primary' : '') +
+              '" data-open-pitch="' +
+              escapeHtml(p.id) +
+              '">' +
+              '<div class="mp-lib-main">' +
+              '<div class="mp-lib-title-row">' +
+              '<strong>' +
+              escapeHtml(p.name || meta.label) +
+              '</strong>' +
+              primaryBadgesHtml(p) +
+              '</div>' +
+              '<div class="mp-lib-meta">' +
+              escapeHtml(meta.shortLabel) +
+              ' · ' +
+              escapeHtml(statusLabel(st)) +
+              '</div></div>' +
+              '<div class="mp-lib-actions" onclick="event.stopPropagation()">' +
+              '<button type="button" class="mp-btn mp-btn-sm" data-open-pitch="' +
+              escapeHtml(p.id) +
+              '">Open</button>' +
+              '<button type="button" class="mp-btn mp-btn-sm mp-btn-ghost" data-dup-pitch="' +
+              escapeHtml(p.id) +
+              '">Duplicate</button>' +
+              '<button type="button" class="mp-btn mp-btn-sm mp-btn-danger" data-del-pitch="' +
+              escapeHtml(p.id) +
+              '">Delete</button>' +
+              '</div></div>'
+            );
+          })
+          .join('') +
+        '</div></section>';
 
     return (
       '<div class="mp-shell">' +
@@ -772,23 +852,24 @@
       '<button type="button" class="mp-btn mp-btn-primary mp-btn-lg" data-start-type="consumer"><i class="fas fa-microphone-alt"></i> Create your pitch</button>' +
       '<button type="button" class="mp-btn mp-btn-ghost" data-open-help><i class="fas fa-lightbulb"></i> How it works</button>' +
       '</div></header>' +
-      '<section class="mp-why">' +
-      '<h3>Why this works</h3>' +
-      '<div class="mp-why-grid">' +
-      '<div><strong>Know · like · trust</strong><p>In under a minute — before a rate conversation.</p></div>' +
-      '<div><strong>Realtor intros</strong><p>A partner pitch agents can repeat at the kitchen table.</p></div>' +
-      '<div><strong>Referrals</strong><p>Past clients finally have words for “why you.”</p></div>' +
-      '</div></section>' +
+      emptyBlock +
+      primaryStrip +
+      (empty
+        ? ''
+        : '<section class="mp-why">' +
+          '<h3>Why this works</h3>' +
+          '<div class="mp-why-grid">' +
+          '<div><strong>Know · like · trust</strong><p>In under a minute — before a rate conversation.</p></div>' +
+          '<div><strong>Realtor intros</strong><p>A partner pitch agents can repeat at the kitchen table.</p></div>' +
+          '<div><strong>Referrals</strong><p>Past clients finally have words for “why you.”</p></div>' +
+          '</div></section>') +
       '<section class="mp-section">' +
       '<div class="mp-section-head"><h3>Pitch types</h3>' +
       '<button type="button" class="mp-btn mp-btn-ghost mp-btn-sm" data-open-help>Tips</button></div>' +
       '<div class="mp-type-grid">' +
       typeCards +
       '</div></section>' +
-      '<section class="mp-section">' +
-      '<div class="mp-section-head"><h3>Your library</h3></div>' +
       library +
-      '</section>' +
       '</div>'
     );
   }
@@ -1152,15 +1233,20 @@
     const meta = PITCH_TYPES[p.type] || PITCH_TYPES.consumer;
     const st = statusOf(p);
     const coach = coachScript(p.script || '', p.type);
+    const hasScript = !!(p.script && p.script.trim());
     return (
       '<div class="mp-shell">' +
       renderHeaderBar(true) +
       '<header class="mp-detail-head">' +
-      '<div><span class="mp-status ' +
+      '<div>' +
+      '<div class="mp-detail-badges">' +
+      '<span class="mp-status ' +
       statusClass(st) +
       '">' +
       escapeHtml(statusLabel(st)) +
       '</span>' +
+      primaryBadgesHtml(p) +
+      '</div>' +
       '<h2 class="mp-title mp-title--sm">' +
       escapeHtml(p.name || meta.label) +
       '</h2>' +
@@ -1170,7 +1256,12 @@
       escapeHtml(new Date(p.updatedAt || Date.now()).toLocaleString()) +
       '</p></div>' +
       '<div class="mp-detail-actions">' +
-      '<button type="button" class="mp-btn mp-btn-primary" data-edit-pitch="' +
+      (hasScript
+        ? '<button type="button" class="mp-btn mp-btn-primary" data-practice-pitch="' +
+          escapeHtml(p.id) +
+          '"><i class="fas fa-book-open"></i> Practice</button>'
+        : '') +
+      '<button type="button" class="mp-btn mp-btn-ghost" data-edit-pitch="' +
       escapeHtml(p.id) +
       '">Edit</button>' +
       '<button type="button" class="mp-btn mp-btn-ghost" data-set-primary="' +
@@ -1203,6 +1294,11 @@
       coach.seconds +
       's</span></div>' +
       '<div class="mp-share-actions">' +
+      (hasScript
+        ? '<button type="button" class="mp-btn mp-btn-primary" data-practice-pitch="' +
+          escapeHtml(p.id) +
+          '"><i class="fas fa-book-open"></i> Practice out loud</button>'
+        : '') +
       '<button type="button" class="mp-btn mp-btn-ghost" data-copy-script-id="' +
       escapeHtml(p.id) +
       '">Copy script</button>' +
@@ -1222,6 +1318,46 @@
       '<div id="mp-qr-box" class="mp-qr-box hidden"></div>' +
       '</div></div>' +
       '</div>'
+    );
+  }
+
+  function renderPractice() {
+    const p = pitches.find(function (x) {
+      return x.id === practicePitchId;
+    });
+    if (!p || !p.script) {
+      view = 'detail';
+      return renderDetail();
+    }
+    const meta = PITCH_TYPES[p.type] || PITCH_TYPES.consumer;
+    const mm = Math.floor(practiceSecondsLeft / 60);
+    const ss = practiceSecondsLeft % 60;
+    const timeStr = mm + ':' + String(ss).padStart(2, '0');
+    return (
+      '<div class="mp-shell mp-shell--practice">' +
+      '<div class="mp-practice-bar">' +
+      '<button type="button" class="mp-btn mp-btn-ghost" data-exit-practice><i class="fas fa-arrow-left"></i> Back to pitch</button>' +
+      '<div class="mp-practice-timer-wrap">' +
+      '<span class="mp-practice-timer-label">Optional timer</span>' +
+      '<span id="mp-practice-timer" class="mp-practice-timer' +
+      (practiceSecondsLeft <= 10 && practiceTimerRunning ? ' is-low' : '') +
+      '">' +
+      timeStr +
+      '</span>' +
+      '<button type="button" class="mp-btn mp-btn-sm mp-btn-primary" data-practice-timer-toggle>' +
+      (practiceTimerRunning ? 'Pause' : 'Start 60s') +
+      '</button>' +
+      '<button type="button" class="mp-btn mp-btn-sm mp-btn-ghost" data-practice-timer-reset>Reset</button>' +
+      '</div></div>' +
+      '<div class="mp-practice-stage">' +
+      '<p class="mp-practice-kicker">' +
+      escapeHtml(meta.shortLabel) +
+      ' · practice standing up · speak naturally</p>' +
+      '<div class="mp-practice-script">' +
+      escapeHtml(p.script) +
+      '</div>' +
+      '<p class="mp-practice-foot">Tip: look at the lens (or a friend), smile in the first second, land a soft CTA.</p>' +
+      '</div></div>'
     );
   }
 
@@ -1270,18 +1406,42 @@
       '</div></aside>';
     document.body.appendChild(host);
 
+    // Backdrop + panel share one host; X lives inside the panel so handle close there.
     host.addEventListener('click', function (ev) {
       const t = ev.target;
-      if (t && t.closest && t.closest('[data-close-help]')) {
+      if (!t || !t.closest) return;
+      // Backdrop only (not panel children)
+      if (t.classList && t.classList.contains('mp-help-backdrop')) {
+        setHelpOpen(false);
+        return;
+      }
+      if (t.closest('[data-close-help]')) {
         ev.preventDefault();
+        ev.stopPropagation();
         setHelpOpen(false);
       }
     });
-    // Clicks on the panel content should not close the drawer
     const panel = host.querySelector('.mp-help-panel');
     if (panel) {
       panel.addEventListener('click', function (ev) {
+        // X / any [data-close-help] inside the panel
+        if (ev.target && ev.target.closest && ev.target.closest('[data-close-help]')) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          setHelpOpen(false);
+          return;
+        }
+        // Keep other panel clicks from hitting the backdrop path
         ev.stopPropagation();
+      });
+    }
+    // Direct wire on X so nothing can swallow it
+    const xBtn = host.querySelector('.mp-help-head [data-close-help]');
+    if (xBtn) {
+      xBtn.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        setHelpOpen(false);
       });
     }
     return host;
@@ -1336,6 +1496,8 @@
     el.querySelectorAll('[data-go-home]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         stopMedia();
+        stopPracticeTimer();
+        practicePitchId = null;
         view = 'home';
         render();
       });
@@ -1352,6 +1514,27 @@
     el.querySelectorAll('[data-open-pitch]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         openDetail(btn.getAttribute('data-open-pitch'));
+      });
+    });
+    el.querySelectorAll('[data-practice-pitch]').forEach(function (btn) {
+      btn.addEventListener('click', function (ev) {
+        if (ev) ev.stopPropagation();
+        openPractice(btn.getAttribute('data-practice-pitch'));
+      });
+    });
+    el.querySelectorAll('[data-exit-practice]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        exitPractice();
+      });
+    });
+    el.querySelectorAll('[data-practice-timer-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        togglePracticeTimer();
+      });
+    });
+    el.querySelectorAll('[data-practice-timer-reset]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        resetPracticeTimer();
       });
     });
     el.querySelectorAll('[data-edit-pitch]').forEach(function (btn) {
@@ -1974,8 +2157,83 @@
 
   function openDetail(id) {
     stopMedia();
+    stopPracticeTimer();
+    practicePitchId = null;
     activePitchId = id;
     view = 'detail';
+    render();
+  }
+
+  function openPractice(id) {
+    const p = pitches.find(function (x) {
+      return x.id === id;
+    });
+    if (!p || !String(p.script || '').trim()) {
+      toast('Add a script before practicing', 'error');
+      return;
+    }
+    setHelpOpen(false);
+    stopPracticeTimer();
+    practicePitchId = id;
+    activePitchId = id;
+    practiceSecondsLeft = 60;
+    practiceTimerRunning = false;
+    view = 'practice';
+    render();
+  }
+
+  function exitPractice() {
+    stopPracticeTimer();
+    practicePitchId = null;
+    view = 'detail';
+    render();
+    loadDetailVideo();
+  }
+
+  function stopPracticeTimer() {
+    if (practiceTimerId) {
+      clearInterval(practiceTimerId);
+      practiceTimerId = null;
+    }
+    practiceTimerRunning = false;
+  }
+
+  function togglePracticeTimer() {
+    if (practiceTimerRunning) {
+      stopPracticeTimer();
+      render();
+      return;
+    }
+    if (practiceSecondsLeft <= 0) practiceSecondsLeft = 60;
+    practiceTimerRunning = true;
+    render();
+    practiceTimerId = setInterval(function () {
+      practiceSecondsLeft -= 1;
+      if (practiceSecondsLeft <= 0) {
+        practiceSecondsLeft = 0;
+        stopPracticeTimer();
+        toast('Time — nice work. Try once more if you want it tighter.');
+      }
+      const el = document.getElementById('mp-practice-timer');
+      if (el) {
+        const mm = Math.floor(practiceSecondsLeft / 60);
+        const ss = practiceSecondsLeft % 60;
+        el.textContent = mm + ':' + String(ss).padStart(2, '0');
+        el.classList.toggle('is-low', practiceSecondsLeft <= 10 && practiceTimerRunning);
+      }
+      const toggleBtn = document.querySelector('[data-practice-timer-toggle]');
+      if (toggleBtn) {
+        toggleBtn.textContent = practiceTimerRunning ? 'Pause' : practiceSecondsLeft <= 0 ? 'Start 60s' : 'Start 60s';
+      }
+      if (!practiceTimerRunning && practiceSecondsLeft <= 0) {
+        if (toggleBtn) toggleBtn.textContent = 'Start 60s';
+      }
+    }, 1000);
+  }
+
+  function resetPracticeTimer() {
+    stopPracticeTimer();
+    practiceSecondsLeft = 60;
     render();
   }
 
@@ -2284,15 +2542,22 @@
     if (d && (d.script || d.type)) draft = d;
     ensureHelpDrawer();
     bindHelpEsc();
-    // Always start clean — no first-run popup
+    // Always start clean — no first-run popup, no leftover help dim
     setHelpOpen(false);
+    stopPracticeTimer();
 
     if (opts.start) {
+      practicePitchId = null;
       startBuilder(opts.start);
       return;
     }
 
-    if (view !== 'builder' && view !== 'detail') view = 'home';
+    if (view === 'practice' && practicePitchId) {
+      /* keep practice if re-entering same session */
+    } else if (view !== 'builder' && view !== 'detail') {
+      view = 'home';
+      practicePitchId = null;
+    }
     render();
   }
 
@@ -2335,8 +2600,9 @@
           onEnterMyPitch();
         }
       } else {
-        // Leaving My Pitch: close help drawer so no residual dim layer
+        // Leaving My Pitch: close help + practice timer so no residual dim / intervals
         setHelpOpen(false);
+        stopPracticeTimer();
       }
     };
 
