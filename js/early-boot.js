@@ -60,7 +60,8 @@
     id = resolveId(id);
     const target = document.getElementById(id);
 
-    document.querySelectorAll('main section').forEach((sec) => {
+    // Top-level tools only — nested <section> inside a tool must not get .hidden
+    document.querySelectorAll('main > section').forEach((sec) => {
       if (isSmartSavingsNested(sec)) return;
       sec.classList.add('hidden');
     });

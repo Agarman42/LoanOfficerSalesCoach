@@ -761,12 +761,13 @@
         '</span></button>'
       );
     }).join('');
+    // Use <div>, not <section> — showSection hides every main section (incl. nested).
     return (
-      '<section class="lox-picker">' +
+      '<div class="lox-picker">' +
       '<h3 class="lox-section-title">1. Select the situation</h3>' +
       '<div class="lox-sit-grid">' +
       cards +
-      '</div></section>'
+      '</div></div>'
     );
   }
 
@@ -956,20 +957,59 @@
     });
   }
 
+  function ensureMounted() {
+    const el = root();
+    if (!el) return;
+    // Recover if nav accidentally hid nested LOX nodes, or first paint was a placeholder
+    if (!el.querySelector('.lox-shell') || el.querySelector('.lox-picker.hidden, .lox-workspace.hidden')) {
+      render();
+      return;
+    }
+    // Strip residual .hidden on LOX chrome (legacy nested <section> bug)
+    el.querySelectorAll('.hidden').forEach(function (node) {
+      if (node.id === 'letter-of-explanation') return;
+      if (node.classList.contains('lox-picker') || node.classList.contains('lox-workspace') || node.classList.contains('lox-shell')) {
+        node.classList.remove('hidden');
+      }
+    });
+  }
+
   function init() {
     if (!document.getElementById('letter-of-explanation')) return;
     loadState();
     if (!state.dateStr) state.dateStr = todayLong();
     render();
+
+    // Re-mount when user opens this tool (sidebar / search / hash) — same pattern as My Pitch
+    if (!window.__loxSectionHooked) {
+      window.__loxSectionHooked = true;
+      const prevHook = window.onCoachSectionShown;
+      window.onCoachSectionShown = function (id) {
+        if (typeof prevHook === 'function') {
+          try {
+            prevHook(id);
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        if (id === 'letter-of-explanation') ensureMounted();
+      };
+    }
+
+    // If already on this hash when script loads late, ensure UI is live
+    if ((location.hash || '').replace(/^#/, '') === 'letter-of-explanation') {
+      ensureMounted();
+    }
+
     console.log('%c[lox-generator] Letter of Explanation ready', 'color:#00A89D');
   }
 
   window.openLoxGenerator = function (situationId) {
-    if (typeof window.showSection === 'function') window.showSection('letter-of-explanation');
     if (situationId && SITUATIONS[situationId]) {
       state.situationId = situationId;
       saveState();
     }
+    if (typeof window.showSection === 'function') window.showSection('letter-of-explanation');
     render();
   };
 
@@ -979,6 +1019,8 @@
     init();
   }
   document.addEventListener('coach-features-loaded', function () {
-    if (document.getElementById('lox-root') && !document.querySelector('.lox-shell')) init();
+    if (!document.getElementById('letter-of-explanation')) return;
+    if (!document.querySelector('#lox-root .lox-shell')) init();
+    else if ((location.hash || '').replace(/^#/, '') === 'letter-of-explanation') ensureMounted();
   });
 })();

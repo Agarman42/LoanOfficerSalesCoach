@@ -179,9 +179,10 @@
     let searchTimeout = null;
     let originalDisplayStates = new Map(); // sectionId -> was hidden?
 
-    // Store initial hidden state of all main sections
+    // Store initial hidden state of top-level tool sections only
     function cacheSectionStates() {
-      document.querySelectorAll('main section').forEach(sec => {
+      document.querySelectorAll('main > section').forEach(sec => {
+        if (!sec.id) return;
         if (!originalDisplayStates.has(sec.id)) {
           originalDisplayStates.set(sec.id, sec.classList.contains('hidden'));
         }
@@ -247,7 +248,8 @@
 
       const vaultHits = searchVaultItems(q, 8);
       let matchCount = 0;
-      const sections = document.querySelectorAll('main section');
+      // Top-level tools only — never toggle nested <section> chrome inside a tool
+      const sections = document.querySelectorAll('main > section');
 
       sections.forEach(section => {
         const text = section.innerText.toLowerCase();
@@ -395,7 +397,8 @@
         window.applyVaultSearch('');
       }
 
-      document.querySelectorAll('main section').forEach(sec => {
+      document.querySelectorAll('main > section').forEach(sec => {
+        if (!sec.id) return;
         const wasHidden = originalDisplayStates.get(sec.id);
         if (wasHidden) {
           sec.classList.add('hidden');

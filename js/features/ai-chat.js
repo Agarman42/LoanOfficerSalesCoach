@@ -209,7 +209,7 @@ function smartRouteChat(message) {
         if (typeof window.showSection === 'function') {
           window.showSection('underwriting-search');
         } else {
-          document.querySelectorAll('main section').forEach(sec => {
+          document.querySelectorAll('main > section').forEach(sec => {
             if (sec.closest && (sec.closest('#smart-savings-root') || sec.closest('#ss-guided-layer'))) return;
             sec.classList.add('hidden');
           });

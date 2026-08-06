@@ -543,9 +543,10 @@
       id = SECTION_ALIASES[id];
     }
 
-    // Hide top-level tool sections only — never nest-hide Smart Savings panels
-    // (wizard panels live in #smart-savings-root or the guided modal #ss-guided-layer)
-    document.querySelectorAll('main section').forEach(sec => {
+    // Hide top-level tool sections only — never nest-hide inner tool chrome
+    // (LOX picker, calc scenario board, Smart Savings wizard panels, etc.)
+    // `main section` matches ALL descendants; nested <section> must not get .hidden.
+    document.querySelectorAll('main > section').forEach(sec => {
       if (sec.closest('#smart-savings-root')) return;
       if (sec.closest('#ss-guided-layer') || sec.closest('#ss-guided-scroll')) return;
       sec.classList.add('hidden');
@@ -808,7 +809,7 @@
       window.showSection(targetId);
     } else {
       // Fallback if showSection not yet available
-      document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+      document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');
@@ -878,7 +879,7 @@
       setTimeout(() => {
         const home = document.getElementById('home');
         if (home) {
-          document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+          document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
           home.classList.remove('hidden');
           try {
             window.scrollTo(0, 0);

@@ -418,8 +418,8 @@ function saveGeneratedPost(index, btnEl) {
     }
 }
 function showSocialPostCreator() {
-    // Hide all sections
-    document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+    // Hide top-level tool sections only (never nest-hide inner chrome)
+    document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
    
     // Show the AI post creator
     const target = document.getElementById('social-post');
