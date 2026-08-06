@@ -356,6 +356,9 @@
 
   function profileBits() {
     const p = getProfile();
+    const website =
+      String(p.companyWebsite || p.website || '').trim() ||
+      String(p.blogPageUrl || p.blogUrl || '').trim();
     return {
       name: String(p.name || '').trim() || 'Your name',
       title: String(p.title || p.role || 'Loan Officer').trim(),
@@ -363,10 +366,74 @@
       phone: String(p.phone || '').trim(),
       email: String(p.email || '').trim(),
       location: String(p.location || p.market || p.localArea || '').trim(),
-      company: 'Ruoff Mortgage',
+      company: String(p.company || p.companyName || '').trim() || 'Ruoff Mortgage',
       intro: String(p.intro || '').trim(),
-      headshotUrl: String(p.headshotUrl || '').trim()
+      headshotUrl: String(p.headshotUrl || '').trim(),
+      website: website
     };
+  }
+
+  /** Escape a value for vCard (escape commas, semicolons, backslashes, newlines). */
+  function vcardEscape(s) {
+    return String(s || '')
+      .replace(/\\/g, '\\\\')
+      .replace(/\n/g, '\\n')
+      .replace(/,/g, '\\,')
+      .replace(/;/g, '\\;');
+  }
+
+  /**
+   * Build a valid vCard 3.0 for iOS/Android contact import.
+   * Uses LO profile fields only — never invents phone/email.
+   */
+  function buildVCard(prof) {
+    prof = prof || profileBits();
+    const name = prof.name || 'Loan Officer';
+    const parts = name.trim().split(/\s+/);
+    const last = parts.length > 1 ? parts[parts.length - 1] : '';
+    const first = parts.length > 1 ? parts.slice(0, -1).join(' ') : name;
+    const lines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      'N:' + vcardEscape(last) + ';' + vcardEscape(first) + ';;;',
+      'FN:' + vcardEscape(name)
+    ];
+    if (prof.title) lines.push('TITLE:' + vcardEscape(prof.title));
+    if (prof.company) lines.push('ORG:' + vcardEscape(prof.company));
+    if (prof.phone) {
+      const tel = prof.phone.replace(/[^\d+]/g, '');
+      lines.push('TEL;TYPE=CELL,VOICE:' + vcardEscape(tel || prof.phone));
+    }
+    if (prof.email) lines.push('EMAIL;TYPE=INTERNET,PREF:' + vcardEscape(prof.email));
+    if (prof.website) lines.push('URL:' + vcardEscape(prof.website));
+    if (prof.location) lines.push('ADR;TYPE=WORK:;;' + vcardEscape(prof.location) + ';;;;');
+    const noteBits = [];
+    if (prof.title || prof.company) {
+      noteBits.push(
+        (prof.title || 'Loan Officer') +
+          (prof.company ? ' – ' + prof.company : '')
+      );
+    }
+    if (prof.nmls) noteBits.push('NMLS ' + prof.nmls);
+    if (prof.intro) noteBits.push(prof.intro);
+    if (noteBits.length) lines.push('NOTE:' + vcardEscape(noteBits.join(' · ')));
+    lines.push('END:VCARD');
+    // CRLF required by many mobile parsers
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  function vcardDataUri(prof) {
+    const vcf = buildVCard(prof);
+    // encodeURIComponent keeps unicode safe for data: URLs on mobile
+    return 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcf);
+  }
+
+  function vcardFileName(prof) {
+    const base = String((prof && prof.name) || 'contact')
+      .replace(/[^\w\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+    return (base || 'contact') + '.vcf';
   }
 
   function statusOf(pitch) {
@@ -2753,9 +2820,7 @@
     let videoHtml = '';
     if (pitch.hasVideo && pitch.videoId) {
       try {
-        const blob =
-          pitch._pendingBlob ||
-          (await idbGet(pitch.videoId));
+        const blob = pitch._pendingBlob || (await idbGet(pitch.videoId));
         if (blob) {
           const url = URL.createObjectURL(blob);
           videoHtml =
@@ -2769,20 +2834,83 @@
     }
     if (!videoHtml) {
       videoHtml =
-        '<div style="padding:48px;text-align:center;background:#f1f5f9;border-radius:16px;color:#64748b">Video not attached on this device</div>';
+        '<div class="novid">Video not attached on this device — the intro below still says who I am.</div>';
     }
+
+    const telHref = prof.phone
+      ? 'tel:' + encodeURIComponent(prof.phone.replace(/[^\d+]/g, '') || prof.phone)
+      : '';
+    const smsHref = prof.phone
+      ? 'sms:' + encodeURIComponent(prof.phone.replace(/[^\d+]/g, '') || prof.phone)
+      : '';
+    const mailHref = prof.email
+      ? 'mailto:' +
+        encodeURIComponent(prof.email) +
+        '?subject=' +
+        encodeURIComponent('Following up — ' + (prof.name || 'your loan officer'))
+      : '';
+    const vcfHref = vcardDataUri(prof);
+    const vcfName = vcardFileName(prof);
+    const hasAnyContact = !!(prof.phone || prof.email);
+
+    const contactBlock =
+      '<section class="contact" aria-label="Contact">' +
+      '<p class="contact-kicker">Let’s connect</p>' +
+      (hasAnyContact
+        ? '<p class="contact-lead">Save my info or reach out however is easiest for you.</p>'
+        : '<p class="contact-lead">Ask me for my direct number or email — add them in My Profile so they appear here.</p>') +
+      '<div class="contact-actions">' +
+      '<a class="btn btn-save" href="' +
+      vcfHref +
+      '" download="' +
+      escapeHtml(vcfName) +
+      '">Save Contact</a>' +
+      (telHref
+        ? '<a class="btn btn-sec" href="' + telHref + '">Call</a>'
+        : '') +
+      (smsHref
+        ? '<a class="btn btn-sec" href="' + smsHref + '">Text</a>'
+        : '') +
+      (mailHref
+        ? '<a class="btn btn-sec" href="' + mailHref + '">Email</a>'
+        : '') +
+      '</div>' +
+      (prof.phone || prof.email
+        ? '<p class="contact-detail">' +
+          (prof.phone ? escapeHtml(prof.phone) : '') +
+          (prof.phone && prof.email ? ' · ' : '') +
+          (prof.email ? escapeHtml(prof.email) : '') +
+          '</p>'
+        : '') +
+      '</section>';
+
     const html =
-      '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+      '<meta name="theme-color" content="#002B5C">' +
       '<title>' +
       escapeHtml(prof.name) +
       ' — Pitch</title>' +
-      '<style>body{font-family:system-ui,sans-serif;margin:0;background:#0f172a;color:#e2e8f0}' +
-      '.wrap{max-width:560px;margin:0 auto;padding:24px}' +
-      'h1{font-size:1.5rem;margin:0 0 4px;color:#fff}' +
-      '.meta{color:#94a3b8;font-size:.9rem;margin-bottom:20px}' +
-      '.script{background:#1e293b;padding:20px;border-radius:16px;line-height:1.55;margin:20px 0}' +
-      '.cta a{display:inline-block;margin:6px 8px 6px 0;padding:12px 18px;border-radius:999px;background:#00A89D;color:#fff;text-decoration:none;font-weight:700}' +
-      '.foot{margin-top:28px;font-size:12px;color:#64748b}</style></head><body><div class="wrap">' +
+      '<style>' +
+      '*{box-sizing:border-box}' +
+      'body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#0f172a;color:#e2e8f0;-webkit-text-size-adjust:100%}' +
+      '.wrap{max-width:560px;margin:0 auto;padding:20px 18px 40px}' +
+      'h1{font-size:1.55rem;margin:0 0 4px;color:#fff;letter-spacing:-.02em;line-height:1.2}' +
+      '.meta{color:#94a3b8;font-size:.9rem;margin:0 0 16px;line-height:1.45}' +
+      '.novid{padding:36px 16px;text-align:center;background:#1e293b;border-radius:16px;color:#94a3b8;font-size:.9rem}' +
+      '.script{background:#1e293b;padding:18px 18px;border-radius:16px;line-height:1.55;margin:18px 0;font-size:1.02rem;white-space:pre-wrap}' +
+      '.contact{margin:16px 0 8px;padding:16px;border-radius:16px;background:linear-gradient(145deg,rgba(0,168,157,.14),rgba(0,43,92,.35));border:1px solid rgba(0,168,157,.35)}' +
+      '.contact-kicker{margin:0 0 4px;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5eead4}' +
+      '.contact-lead{margin:0 0 12px;font-size:.88rem;color:#cbd5e1;line-height:1.4}' +
+      '.contact-actions{display:flex;flex-wrap:wrap;gap:10px}' +
+      '.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border-radius:999px;font-weight:800;font-size:.95rem;text-decoration:none;text-align:center;flex:1 1 auto;min-width:120px}' +
+      '.btn-save{background:linear-gradient(135deg,#00A89D,#0d9488);color:#fff;box-shadow:0 8px 20px -8px rgba(0,168,157,.7);flex:1 1 100%}' +
+      '.btn-sec{background:rgba(255,255,255,.08);color:#e2e8f0;border:1px solid rgba(148,163,184,.35)}' +
+      '.btn-sec:active,.btn-save:active{opacity:.9}' +
+      '.contact-detail{margin:12px 0 0;font-size:.8rem;color:#94a3b8;word-break:break-word}' +
+      '.foot{margin-top:28px;font-size:12px;color:#64748b;line-height:1.4}' +
+      '@media(min-width:420px){.btn-save{flex:1 1 auto}}' +
+      '</style></head><body><div class="wrap">' +
       '<h1>' +
       escapeHtml(prof.name) +
       '</h1>' +
@@ -2793,21 +2921,12 @@
       (prof.nmls ? ' · NMLS ' + escapeHtml(prof.nmls) : '') +
       (prof.location ? '<br>' + escapeHtml(prof.location) : '') +
       '</div>' +
+      contactBlock +
       videoHtml +
       '<div class="script">' +
       escapeHtml(pitch.script || '') +
       '</div>' +
-      '<div class="cta">' +
-      (prof.phone
-        ? '<a href="tel:' + escapeHtml(prof.phone) + '">Call</a>'
-        : '') +
-      (prof.phone
-        ? '<a href="sms:' + escapeHtml(prof.phone) + '">Text</a>'
-        : '') +
-      (prof.email
-        ? '<a href="mailto:' + escapeHtml(prof.email) + '">Email</a>'
-        : '') +
-      '</div>' +
+      contactBlock +
       '<div class="foot">Shared from Ruoff Loan Officer Sales Coach · My Pitch</div>' +
       '</div></body></html>';
     const blob = new Blob([html], { type: 'text/html' });
