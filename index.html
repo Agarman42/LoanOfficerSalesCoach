@@ -7758,8 +7758,8 @@
             <button type="button" onclick="downloadNewsletterHTML()" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition">
               <i class="fas fa-download"></i> Download .html
             </button>
-            <button type="button" onclick="if(typeof window.downloadNewsletterTxt==='function')window.downloadNewsletterTxt();" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition" title="Same full HTML as .html download, saved as .txt for Ruoff marketing website upload">
-              <i class="fas fa-file-alt"></i> Download as .txt (HTML source)
+            <button type="button" onclick="if(typeof window.downloadNewsletterDocx==='function')window.downloadNewsletterDocx(); else if(typeof window.downloadNewsletterTxt==='function')window.downloadNewsletterTxt();" class="bg-[#F15A29] hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition" title="Full HTML source packaged in a Word document for Ruoff marketing website submission">
+              <i class="fas fa-file-word"></i> Download as Word Doc (.docx)
             </button>
             <button type="button" onclick="if(typeof window.copyFullNewsletterHtmlSource==='function')window.copyFullNewsletterHtmlSource();" class="bg-white dark:bg-gray-900 border-2 border-[#F15A29] text-[#F15A29] px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition hover:bg-[#F15A29]/10" title="Copy the complete raw HTML source to clipboard">
               <i class="fas fa-code"></i> Copy full HTML source
@@ -7775,7 +7775,7 @@
             </button>
           </div>
           <p class="text-center text-[12px] text-gray-500 dark:text-gray-400 mb-6 max-w-2xl mx-auto leading-relaxed">
-            For Ruoff marketing website submission: use <strong class="font-semibold text-gray-600 dark:text-gray-300">Download as .txt</strong> or copy the HTML source into a Word document. IT cannot accept .html file uploads.
+            For Ruoff marketing website submission: download the <strong class="font-semibold text-gray-600 dark:text-gray-300">Word doc</strong> and submit it — the complete HTML source is inside the document. You can also use <strong class="font-semibold text-gray-600 dark:text-gray-300">Copy full HTML source</strong>. IT cannot accept .html file uploads.
           </p>
 
           <!-- Preview -->

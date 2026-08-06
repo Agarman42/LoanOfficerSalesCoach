@@ -5047,7 +5047,7 @@ if (postSelections?.includeReferral) {
     }
     }  // additional close for if (html && ...) to fix brace count after personal media insertion refactor (old block had extra closes)
 
-/** Full raw HTML used for .html / .txt download and “Copy full HTML source” (not the Outlook-cleaned variant). */
+/** Full raw HTML used for .html / .docx download and “Copy full HTML source” (not the Outlook-cleaned variant). */
 function getNewsletterRawHtmlForDownload() {
     const rawEl = document.getElementById('nl-html-raw');
     return rawEl && rawEl.value ? String(rawEl.value) : '';
@@ -5084,26 +5084,228 @@ function downloadNewsletterHTML() {
     alert('Newsletter downloaded! Double-click the file to preview.');
 }
 
-/** Same full HTML as .html download, saved as .txt for Ruoff marketing website submission. */
-function downloadNewsletterTxt() {
+// ─── Minimal DOCX (OOXML) builder — no external deps ─────────
+// Produces a real .docx ZIP with the HTML source as plain text paragraphs.
+
+function nlEscapeXml(s) {
+    return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function nlUtf8Bytes(str) {
+    if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(str);
+    const out = [];
+    for (let i = 0; i < str.length; i++) {
+        let c = str.charCodeAt(i);
+        if (c < 0x80) out.push(c);
+        else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+        else if (c >= 0xd800 && c <= 0xdbff) {
+            i++;
+            const c2 = str.charCodeAt(i);
+            const u = 0x10000 + (((c & 0x3ff) << 10) | (c2 & 0x3ff));
+            out.push(
+                0xf0 | (u >> 18),
+                0x80 | ((u >> 12) & 0x3f),
+                0x80 | ((u >> 6) & 0x3f),
+                0x80 | (u & 0x3f)
+            );
+        } else out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+    }
+    return new Uint8Array(out);
+}
+
+function nlCrc32(bytes) {
+    let c = ~0;
+    for (let i = 0; i < bytes.length; i++) {
+        c ^= bytes[i];
+        for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+    }
+    return ~c >>> 0;
+}
+
+function nlU16(n) {
+    return [n & 0xff, (n >>> 8) & 0xff];
+}
+function nlU32(n) {
+    return [n & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff];
+}
+
+/** Build an uncompressed ZIP from { path: Uint8Array|string } map. */
+function nlBuildZipStore(files) {
+    const parts = [];
+    const central = [];
+    let offset = 0;
+    const names = Object.keys(files);
+    names.forEach(function (name) {
+        const data =
+            typeof files[name] === 'string' ? nlUtf8Bytes(files[name]) : files[name];
+        const nameBytes = nlUtf8Bytes(name);
+        const crc = nlCrc32(data);
+        const local = []
+            .concat([0x50, 0x4b, 0x03, 0x04])
+            .concat(nlU16(20))
+            .concat(nlU16(0))
+            .concat(nlU16(0)) // store
+            .concat(nlU16(0), nlU16(0))
+            .concat(nlU32(crc))
+            .concat(nlU32(data.length))
+            .concat(nlU32(data.length))
+            .concat(nlU16(nameBytes.length))
+            .concat(nlU16(0));
+        parts.push(new Uint8Array(local));
+        parts.push(nameBytes);
+        parts.push(data);
+        const cen = []
+            .concat([0x50, 0x4b, 0x01, 0x02])
+            .concat(nlU16(20), nlU16(20))
+            .concat(nlU16(0), nlU16(0))
+            .concat(nlU16(0), nlU16(0))
+            .concat(nlU32(crc))
+            .concat(nlU32(data.length), nlU32(data.length))
+            .concat(nlU16(nameBytes.length), nlU16(0), nlU16(0))
+            .concat(nlU16(0), nlU16(0))
+            .concat(nlU32(0))
+            .concat(nlU32(offset));
+        central.push(new Uint8Array(cen));
+        central.push(nameBytes);
+        offset += local.length + nameBytes.length + data.length;
+    });
+    let centralSize = 0;
+    central.forEach(function (p) {
+        centralSize += p.length;
+    });
+    const end = []
+        .concat([0x50, 0x4b, 0x05, 0x06])
+        .concat(nlU16(0), nlU16(0))
+        .concat(nlU16(names.length), nlU16(names.length))
+        .concat(nlU32(centralSize))
+        .concat(nlU32(offset))
+        .concat(nlU16(0));
+    const all = parts.concat(central).concat([new Uint8Array(end)]);
+    let total = 0;
+    all.forEach(function (p) {
+        total += p.length;
+    });
+    const out = new Uint8Array(total);
+    let o = 0;
+    all.forEach(function (p) {
+        out.set(p, o);
+        o += p.length;
+    });
+    return out;
+}
+
+/**
+ * Build a real .docx whose body is the plain-text HTML source (for marketing site upload).
+ */
+function buildNewsletterHtmlSourceDocx(htmlSource) {
+    const text = String(htmlSource || '');
+    const lines = text.split(/\r?\n/);
+    // Word prefers short <w:t> runs; chunk long lines
+    function lineToRuns(line) {
+        if (!line) return '<w:r><w:rPr><w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>';
+        const chunks = [];
+        const size = 2000;
+        for (let i = 0; i < line.length; i += size) chunks.push(line.slice(i, i + size));
+        return chunks
+            .map(function (chunk) {
+                const spacePreserve = /^\s|\s$/.test(chunk) ? ' xml:space="preserve"' : '';
+                return (
+                    '<w:r><w:rPr><w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t' +
+                    spacePreserve +
+                    '>' +
+                    nlEscapeXml(chunk) +
+                    '</w:t></w:r>'
+                );
+            })
+            .join('');
+    }
+    const bodyParas = lines
+        .map(function (line) {
+            return '<w:p><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr>' + lineToRuns(line) + '</w:p>';
+        })
+        .join('');
+
+    const intro =
+        '<w:p><w:r><w:rPr><w:b/><w:sz w:val="24"/></w:rPr><w:t>Newsletter HTML source (for Ruoff marketing website submission)</w:t></w:r></w:p>' +
+        '<w:p><w:r><w:rPr><w:sz w:val="20"/></w:rPr><w:t>Paste or deliver this document as required. The complete HTML is below as plain text.</w:t></w:r></w:p>' +
+        '<w:p><w:r><w:t></w:t></w:r></w:p>';
+
+    const documentXml =
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+        '<w:body>' +
+        intro +
+        bodyParas +
+        '<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/></w:sectPr>' +
+        '</w:body></w:document>';
+
+    const contentTypes =
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+        '</Types>';
+
+    const rels =
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+        '</Relationships>';
+
+    const docRels =
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+
+    const zipBytes = nlBuildZipStore({
+        '[Content_Types].xml': contentTypes,
+        '_rels/.rels': rels,
+        'word/document.xml': documentXml,
+        'word/_rels/document.xml.rels': docRels
+    });
+    return new Blob([zipBytes], {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+}
+
+/**
+ * Same full HTML as .html download, packaged as a real Word .docx
+ * (HTML source as plain text inside the document) for Ruoff marketing website submission.
+ */
+function downloadNewsletterDocx() {
     const html = getNewsletterRawHtmlForDownload();
     if (!html) {
         if (window.showToast) window.showToast('Generate the newsletter first.', 'error');
         else alert('Generate the newsletter first!');
         return;
     }
-    const blob = new Blob([html], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = newsletterDownloadBaseName() + '.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-    if (window.showToast) {
-        window.showToast('Downloaded as .txt (full HTML source)', 'success');
-    } else {
-        alert('Downloaded as .txt (full HTML source)');
+    try {
+        const blob = buildNewsletterHtmlSourceDocx(html);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = newsletterDownloadBaseName() + '.docx';
+        a.click();
+        URL.revokeObjectURL(url);
+        if (window.showToast) {
+            window.showToast('Downloaded Word doc with full HTML source', 'success');
+        } else {
+            alert('Downloaded Word doc with full HTML source');
+        }
+    } catch (e) {
+        console.error('[newsletter] docx build failed', e);
+        if (window.showToast) window.showToast('Could not build Word doc — try Copy full HTML source.', 'error');
+        else alert('Could not build Word doc — try Copy full HTML source.');
     }
+}
+
+/** @deprecated alias — old button name; forwards to docx download */
+function downloadNewsletterTxt() {
+    downloadNewsletterDocx();
 }
 
 /** Copy complete raw HTML source (same string as downloads) to clipboard. */
@@ -5143,8 +5345,8 @@ function fallbackCopyNewsletterHtml(html, done) {
         document.body.removeChild(ta);
         if (typeof done === 'function') done();
     } catch (e) {
-        if (window.showToast) window.showToast('Could not copy — try Download as .txt instead.', 'error');
-        else alert('Could not copy — try Download as .txt instead.');
+        if (window.showToast) window.showToast('Could not copy — try Download as Word Doc instead.', 'error');
+        else alert('Could not copy — try Download as Word Doc instead.');
     }
 }
 
@@ -5353,9 +5555,11 @@ function copyForOutlook() {
   window.NL_PERSISTENT_FIELD_IDS = persistentFields.slice();
   window.refreshNewsletterColorScheme = refreshNewsletterColorScheme;
   window.downloadNewsletterHTML = downloadNewsletterHTML;
-  window.downloadNewsletterTxt = downloadNewsletterTxt;
+  window.downloadNewsletterDocx = downloadNewsletterDocx;
+  window.downloadNewsletterTxt = downloadNewsletterTxt; // legacy alias → docx
   window.copyFullNewsletterHtmlSource = copyFullNewsletterHtmlSource;
   window.getNewsletterRawHtmlForDownload = getNewsletterRawHtmlForDownload;
+  window.buildNewsletterHtmlSourceDocx = buildNewsletterHtmlSourceDocx;
   window.copyForOutlook = copyForOutlook;
   window.getCleanOutlookHTML = getCleanOutlookHTML;
 
