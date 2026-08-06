@@ -631,6 +631,167 @@
     }
   }
 
+  /** Local fallback: compress a long script to ~30 seconds without AI. */
+  function compressToShortFallback(sourceScript, prof, sourceType) {
+    const raw = String(sourceScript || '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const sentences = raw.split(/(?<=[.!?])\s+/).filter(Boolean);
+    let core = sentences.slice(0, 2).join(' ');
+    if (wordCount(core) > 55) {
+      core = raw.split(/\s+/).slice(0, 48).join(' ') + '…';
+    }
+    const cta =
+      sourceType === 'realtor'
+        ? ' Text me if you want a lender who protects your timeline' +
+          (prof.phone ? ' — ' + prof.phone : '') +
+          '.'
+        : ' Text me and we’ll map next steps in 10 minutes' +
+          (prof.phone ? ' — ' + prof.phone : '') +
+          '.';
+    let out = core;
+    if (!/\b(call|text|reach|email|connect|talk|chat)\b/i.test(out)) {
+      out = out.replace(/[.!?]?$/, '') + '.' + cta;
+    }
+    return out.trim();
+  }
+
+  async function generateShortFromScript(sourceScript, sourceType, prof) {
+    const system =
+      'You compress mortgage loan officer elevator pitches into a tight 30-second version. ' +
+      'Output ONLY the spoken/textable pitch — no title, bullets, or quotes. ' +
+      'Target 45–70 words (speakable in ~25–35 seconds). Natural, textable SMS/story tone. ' +
+      'Midwest professional. Soft CTA. Never invent rates, guarantees, approvals, or licenses.';
+    const user =
+      'Source pitch type: ' +
+      (sourceType || 'consumer') +
+      '\nLO: ' +
+      prof.name +
+      (prof.phone ? ' · ' + prof.phone : '') +
+      '\n\nFull pitch:\n' +
+      sourceScript +
+      '\n\nWrite the 30-second short now.';
+
+    if (typeof window.callGrokAPI !== 'function') {
+      return compressToShortFallback(sourceScript, prof, sourceType);
+    }
+    try {
+      const text = await window.callGrokAPI(null, {
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user }
+        ],
+        temperature: 0.55,
+        max_tokens: 280
+      });
+      const cleaned = String(text || '')
+        .replace(/^["“]|["”]$/g, '')
+        .trim();
+      if (wordCount(cleaned) < 18) return compressToShortFallback(sourceScript, prof, sourceType);
+      return cleaned;
+    } catch (e) {
+      console.warn('[My Pitch] short generate failed', e);
+      return compressToShortFallback(sourceScript, prof, sourceType);
+    }
+  }
+
+  function primaryLabelForPitch(p) {
+    if (!p) return 'consumer';
+    if (p.type === 'realtor') return 'realtor';
+    return 'consumer'; // consumer + short map to consumer primary
+  }
+
+  function isPrimaryPitch(p) {
+    if (!p) return false;
+    if (p.type === 'realtor') return !!p.primaryRealtor;
+    return !!p.primaryConsumer;
+  }
+
+  function primaryActionHtml(p) {
+    if (!p) return '';
+    const kind = primaryLabelForPitch(p);
+    const isP = isPrimaryPitch(p);
+    const label =
+      kind === 'realtor'
+        ? isP
+          ? '★ Primary realtor'
+          : 'Set as Primary · Realtor'
+        : isP
+          ? '★ Primary consumer'
+          : 'Set as Primary · Consumer';
+    return (
+      '<button type="button" class="mp-btn ' +
+      (isP ? 'mp-btn-primary-set' : 'mp-btn-primary-action') +
+      '" data-set-primary="' +
+      escapeHtml(p.id) +
+      '" title="' +
+      (isP ? 'This is your primary ' + kind + ' pitch' : 'Make this your one-click primary ' + kind + ' pitch') +
+      '"><i class="fas fa-star"></i> ' +
+      escapeHtml(label) +
+      '</button>'
+    );
+  }
+
+  function shareActionsHtml(p, opts) {
+    opts = opts || {};
+    const id = p && p.id;
+    const isRealtor = p && p.type === 'realtor';
+    const hasScript = p && p.script && p.script.trim();
+    const canShort = hasScript && p.type !== 'short' && (p.type === 'consumer' || p.type === 'realtor');
+    // Featured row for agent-friendly actions
+    let html = '<div class="mp-share-featured' + (isRealtor ? ' is-realtor' : '') + '">';
+    if (isRealtor) {
+      html +=
+        '<p class="mp-share-featured-label"><i class="fas fa-paper-plane"></i> Send to agents — start here</p>';
+    } else {
+      html +=
+        '<p class="mp-share-featured-label"><i class="fas fa-share-alt"></i> Quick share</p>';
+    }
+    html += '<div class="mp-share-featured-btns">';
+    html +=
+      '<button type="button" class="mp-btn mp-btn-primary mp-btn-lg" data-copy-sms-id="' +
+      escapeHtml(id) +
+      '"><i class="fas fa-sms"></i> Copy text message</button>';
+    html +=
+      '<button type="button" class="mp-btn mp-btn-primary mp-btn-lg mp-btn-qr" data-qr-id="' +
+      escapeHtml(id) +
+      '"><i class="fas fa-qrcode"></i> QR code</button>';
+    html += '</div></div>';
+    html += '<div class="mp-share-actions mp-share-actions--more">';
+    if (opts.includePractice && hasScript) {
+      html +=
+        '<button type="button" class="mp-btn mp-btn-ghost" data-practice-pitch="' +
+        escapeHtml(id) +
+        '"><i class="fas fa-book-open"></i> Practice out loud</button>';
+    }
+    if (canShort) {
+      html +=
+        '<button type="button" class="mp-btn mp-btn-ghost" data-create-short="' +
+        escapeHtml(id) +
+        '"><i class="fas fa-bolt"></i> Create 30-sec version</button>';
+    }
+    html +=
+      '<button type="button" class="mp-btn mp-btn-ghost" data-copy-script-id="' +
+      escapeHtml(id) +
+      '">Copy script</button>';
+    html +=
+      '<button type="button" class="mp-btn mp-btn-ghost" data-email-id="' +
+      escapeHtml(id) +
+      '">Email</button>';
+    html +=
+      '<button type="button" class="mp-btn mp-btn-ghost" data-share-page-id="' +
+      escapeHtml(id) +
+      '">Pitch page</button>';
+    if (p.hasVideo) {
+      html +=
+        '<button type="button" class="mp-btn mp-btn-ghost" data-dl-video-id="' +
+        escapeHtml(id) +
+        '">Download video</button>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   // ─── Render ────────────────────────────────────────────────
 
   function root() {
@@ -742,6 +903,12 @@
             ? '<button type="button" class="mp-btn mp-btn-primary" data-open-pitch="' +
               escapeHtml(p.id) +
               '">Open</button>' +
+              primaryActionHtml(p) +
+              (p.script && p.type !== 'short'
+                ? '<button type="button" class="mp-btn mp-btn-ghost mp-btn-sm" data-create-short="' +
+                  escapeHtml(p.id) +
+                  '"><i class="fas fa-bolt"></i> 30-sec</button>'
+                : '') +
               '<button type="button" class="mp-btn mp-btn-ghost" data-edit-pitch="' +
               escapeHtml(p.id) +
               '">Edit</button>'
@@ -829,6 +996,7 @@
               '<button type="button" class="mp-btn mp-btn-sm" data-open-pitch="' +
               escapeHtml(p.id) +
               '">Open</button>' +
+              primaryActionHtml(p) +
               '<button type="button" class="mp-btn mp-btn-sm mp-btn-ghost" data-dup-pitch="' +
               escapeHtml(p.id) +
               '">Duplicate</button>' +
@@ -1183,11 +1351,20 @@
       '</div>' +
       '<div class="mp-share-actions">' +
       '<button type="button" class="mp-btn mp-btn-primary" data-save-pitch><i class="fas fa-save"></i> Save pitch</button>' +
+      '</div>' +
+      (draft.type === 'realtor'
+        ? '<div class="mp-share-featured is-realtor"><p class="mp-share-featured-label"><i class="fas fa-paper-plane"></i> For agents — text + QR</p><div class="mp-share-featured-btns">' +
+          '<button type="button" class="mp-btn mp-btn-primary mp-btn-lg" data-copy-sms><i class="fas fa-sms"></i> Copy text message</button>' +
+          '<button type="button" class="mp-btn mp-btn-primary mp-btn-lg mp-btn-qr" data-qr-pitch><i class="fas fa-qrcode"></i> QR code</button>' +
+          '</div></div>'
+        : '<div class="mp-share-featured"><p class="mp-share-featured-label"><i class="fas fa-share-alt"></i> Quick share</p><div class="mp-share-featured-btns">' +
+          '<button type="button" class="mp-btn mp-btn-primary" data-copy-sms><i class="fas fa-sms"></i> Copy text message</button>' +
+          '<button type="button" class="mp-btn mp-btn-primary mp-btn-qr" data-qr-pitch><i class="fas fa-qrcode"></i> QR code</button>' +
+          '</div></div>') +
+      '<div class="mp-share-actions mp-share-actions--more">' +
       '<button type="button" class="mp-btn mp-btn-ghost" data-copy-script>Copy script</button>' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-copy-sms>Copy text message</button>' +
       '<button type="button" class="mp-btn mp-btn-ghost" data-email-pitch>Email</button>' +
       '<button type="button" class="mp-btn mp-btn-ghost" data-open-share-page>Open pitch page</button>' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-qr-pitch>QR code</button>' +
       (draft.hasVideo
         ? '<button type="button" class="mp-btn mp-btn-ghost" data-dl-video>Download video</button>'
         : '') +
@@ -1261,12 +1438,15 @@
           escapeHtml(p.id) +
           '"><i class="fas fa-book-open"></i> Practice</button>'
         : '') +
+      primaryActionHtml(p) +
+      (hasScript && p.type !== 'short'
+        ? '<button type="button" class="mp-btn mp-btn-ghost" data-create-short="' +
+          escapeHtml(p.id) +
+          '"><i class="fas fa-bolt"></i> Create 30-sec version</button>'
+        : '') +
       '<button type="button" class="mp-btn mp-btn-ghost" data-edit-pitch="' +
       escapeHtml(p.id) +
       '">Edit</button>' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-set-primary="' +
-      escapeHtml(p.id) +
-      '">Set primary</button>' +
       '<button type="button" class="mp-btn mp-btn-ghost" data-dup-pitch="' +
       escapeHtml(p.id) +
       '">Duplicate</button>' +
@@ -1293,28 +1473,7 @@
       ' words · ~' +
       coach.seconds +
       's</span></div>' +
-      '<div class="mp-share-actions">' +
-      (hasScript
-        ? '<button type="button" class="mp-btn mp-btn-primary" data-practice-pitch="' +
-          escapeHtml(p.id) +
-          '"><i class="fas fa-book-open"></i> Practice out loud</button>'
-        : '') +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-copy-script-id="' +
-      escapeHtml(p.id) +
-      '">Copy script</button>' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-copy-sms-id="' +
-      escapeHtml(p.id) +
-      '">Copy text message</button>' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-email-id="' +
-      escapeHtml(p.id) +
-      '">Email</button>' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-share-page-id="' +
-      escapeHtml(p.id) +
-      '">Pitch page</button>' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-qr-id="' +
-      escapeHtml(p.id) +
-      '">QR</button>' +
-      '</div>' +
+      shareActionsHtml(p, { includePractice: true }) +
       '<div id="mp-qr-box" class="mp-qr-box hidden"></div>' +
       '</div></div>' +
       '</div>'
@@ -1336,7 +1495,7 @@
     return (
       '<div class="mp-shell mp-shell--practice">' +
       '<div class="mp-practice-bar">' +
-      '<button type="button" class="mp-btn mp-btn-ghost" data-exit-practice><i class="fas fa-arrow-left"></i> Back to pitch</button>' +
+      '<button type="button" class="mp-btn mp-btn-ghost mp-btn-lg" data-exit-practice><i class="fas fa-arrow-left"></i> Back to pitch</button>' +
       '<div class="mp-practice-timer-wrap">' +
       '<span class="mp-practice-timer-label">Optional timer</span>' +
       '<span id="mp-practice-timer" class="mp-practice-timer' +
@@ -1355,6 +1514,12 @@
       ' · practice standing up · speak naturally</p>' +
       '<div class="mp-practice-script">' +
       escapeHtml(p.script) +
+      '</div>' +
+      '<div class="mp-practice-actions">' +
+      '<button type="button" class="mp-btn mp-btn-primary" data-copy-script-id="' +
+      escapeHtml(p.id) +
+      '"><i class="fas fa-copy"></i> Copy script</button>' +
+      '<button type="button" class="mp-btn mp-btn-ghost" data-exit-practice>Done practicing</button>' +
       '</div>' +
       '<p class="mp-practice-foot">Tip: look at the lens (or a friend), smile in the first second, land a soft CTA.</p>' +
       '</div></div>'
@@ -1553,8 +1718,23 @@
       });
     });
     el.querySelectorAll('[data-set-primary]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      btn.addEventListener('click', function (ev) {
+        if (ev) ev.stopPropagation();
         setPrimary(btn.getAttribute('data-set-primary'));
+      });
+    });
+    el.querySelectorAll('[data-create-short]').forEach(function (btn) {
+      btn.addEventListener('click', function (ev) {
+        if (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+        createShortFromPitch(btn.getAttribute('data-create-short'), btn);
+      });
+    });
+    el.querySelectorAll('[data-dl-video-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        downloadPitchVideo(btn.getAttribute('data-dl-video-id'));
       });
     });
     el.querySelectorAll('[data-pick-type]').forEach(function (btn) {
@@ -2294,19 +2474,106 @@
       return x.id === id;
     });
     if (!p) return;
-    if (p.type === 'realtor') {
+    const kind = primaryLabelForPitch(p);
+    if (kind === 'realtor') {
       pitches.forEach(function (x) {
         x.primaryRealtor = x.id === id;
       });
-      toast('Primary realtor pitch set');
+      toast('★ Primary realtor pitch updated');
     } else {
       pitches.forEach(function (x) {
         x.primaryConsumer = x.id === id;
       });
-      toast('Primary consumer pitch set');
+      toast('★ Primary consumer pitch updated');
     }
     savePitches();
+    // Stay on current view so badges / strip refresh immediately
     render();
+    if (view === 'detail') loadDetailVideo();
+  }
+
+  async function createShortFromPitch(id, btnEl) {
+    const source = pitches.find(function (x) {
+      return x.id === id;
+    });
+    if (!source || !String(source.script || '').trim()) {
+      toast('Need a script first', 'error');
+      return;
+    }
+    if (source.type === 'short') {
+      toast('This is already a 30-second short');
+      return;
+    }
+    if (btnEl) {
+      btnEl.disabled = true;
+      btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating…';
+    }
+    if (typeof window.showLoadingWithTips === 'function') {
+      window.showLoadingWithTips(
+        ['Tightening to ~30 seconds', 'Keeping your voice', 'SMS-friendly'],
+        'Creating 30-sec version…'
+      );
+    }
+    const prof = profileBits();
+    try {
+      const shortScript = await generateShortFromScript(source.script, source.type, prof);
+      const short = emptyDraft('short');
+      short.script = shortScript;
+      short.name =
+        '30-sec from ' +
+        (source.name || (PITCH_TYPES[source.type] || {}).shortLabel || 'pitch');
+      short.answers = Object.assign({}, source.answers || {}, {
+        who: source.answers && source.answers.who,
+        promise: source.answers && source.answers.promise,
+        cta: source.answers && (source.answers.cta || source.answers.intro)
+      });
+      short.sourcePitchId = source.id;
+      short.hasVideo = false;
+      short.videoId = null;
+      short.primaryConsumer = false;
+      short.primaryRealtor = false;
+      short.createdAt = new Date().toISOString();
+      short.updatedAt = short.createdAt;
+      pitches.unshift(short);
+      savePitches();
+      toast('30-sec short created');
+      activePitchId = short.id;
+      view = 'detail';
+      practicePitchId = null;
+      render();
+    } catch (e) {
+      console.warn(e);
+      toast('Could not create short — try again', 'error');
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = '<i class="fas fa-bolt"></i> Create 30-sec version';
+      }
+    } finally {
+      if (typeof window.hideLoading === 'function') window.hideLoading();
+    }
+  }
+
+  async function downloadPitchVideo(id) {
+    const p = pitches.find(function (x) {
+      return x.id === id;
+    });
+    if (!p || !p.videoId) {
+      toast('No video on this pitch', 'error');
+      return;
+    }
+    try {
+      const blob = await idbGet(p.videoId);
+      if (!blob) {
+        toast('Video not found on this device', 'error');
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (p.name || 'my-pitch').replace(/\s+/g, '-').toLowerCase() + '.webm';
+      a.click();
+    } catch (e) {
+      toast('Could not download video', 'error');
+    }
   }
 
   async function persistDraftToLibrary() {

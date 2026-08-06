@@ -6110,18 +6110,19 @@ html.dark .mp-practice-timer { color: #f1f5f9; }
   letter-spacing: 0.06em;
 }
 .mp-practice-script {
-  margin: 0 auto 1.5rem;
-  max-width: 36rem;
-  font-size: clamp(1.2rem, 2.8vw, 1.55rem);
+  margin: 0 auto 1.25rem;
+  max-width: 38rem;
+  font-size: clamp(1.28rem, 3.4vw, 1.75rem);
   font-weight: 600;
-  line-height: 1.65;
+  line-height: 1.7;
   color: #0f172a;
   text-align: left;
-  padding: 1.35rem 1.4rem;
+  padding: 1.45rem 1.5rem;
   border-radius: 1.15rem;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 .dark .mp-practice-script,
 html.dark .mp-practice-script {
@@ -6129,8 +6130,94 @@ html.dark .mp-practice-script {
   border-color: #334155;
   color: #e2e8f0;
 }
+.mp-practice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
 .mp-practice-foot {
   margin: 0;
   font-size: 0.82rem;
   color: #64748b;
+}
+
+/* ─── Primary set button + share featured ─── */
+.mp-btn-primary-action {
+  border: 1px solid rgba(241, 90, 41, 0.5) !important;
+  color: #c2410c !important;
+  background: rgba(241, 90, 41, 0.08) !important;
+  font-size: 0.78rem !important;
+  padding: 0.45rem 0.85rem !important;
+}
+.mp-btn-primary-action:hover {
+  background: rgba(241, 90, 41, 0.16) !important;
+}
+.mp-btn-primary-set {
+  background: linear-gradient(135deg, #F15A29, #ea580c) !important;
+  color: #fff !important;
+  border: none !important;
+  font-size: 0.78rem !important;
+  padding: 0.45rem 0.85rem !important;
+  box-shadow: 0 6px 16px -8px rgba(241, 90, 41, 0.7);
+}
+.dark .mp-btn-primary-action,
+html.dark .mp-btn-primary-action {
+  color: #fdba74 !important;
+}
+.mp-share-featured {
+  margin: 0.85rem 0 0.65rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 168, 157, 0.28);
+  background: linear-gradient(135deg, rgba(0, 168, 157, 0.1), rgba(0, 43, 92, 0.04));
+}
+.mp-share-featured.is-realtor {
+  border-color: rgba(0, 168, 157, 0.45);
+  background: linear-gradient(135deg, rgba(0, 168, 157, 0.14), rgba(241, 90, 41, 0.06));
+}
+.mp-share-featured-label {
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0f766e;
+}
+.mp-share-featured-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.mp-share-actions--more {
+  margin-top: 0.35rem;
+  opacity: 0.98;
+}
+.mp-btn-qr {
+  background: linear-gradient(135deg, #002B5C, #0f766e) !important;
+}
+.mp-type-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.mp-lib-actions .mp-btn-primary-action,
+.mp-lib-actions .mp-btn-primary-set {
+  font-size: 0.68rem !important;
+  padding: 0.35rem 0.6rem !important;
+}
+@media (max-width: 640px) {
+  .mp-practice-script {
+    font-size: 1.22rem;
+    padding: 1.15rem 1.1rem;
+  }
+  .mp-detail-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .mp-share-featured-btns .mp-btn-lg {
+    width: 100%;
+  }
 }
