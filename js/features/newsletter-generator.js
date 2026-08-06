@@ -5047,16 +5047,105 @@ if (postSelections?.includeReferral) {
     }
     }  // additional close for if (html && ...) to fix brace count after personal media insertion refactor (old block had extra closes)
 
+/** Full raw HTML used for .html / .txt download and “Copy full HTML source” (not the Outlook-cleaned variant). */
+function getNewsletterRawHtmlForDownload() {
+    const rawEl = document.getElementById('nl-html-raw');
+    return rawEl && rawEl.value ? String(rawEl.value) : '';
+}
+
+function newsletterDownloadBaseName() {
+    const titleEl = document.getElementById('nl-title');
+    const title = titleEl && String(titleEl.value || '').trim();
+    if (title) {
+        const slug = title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 48);
+        if (slug) return 'newsletter_' + slug;
+    }
+    return 'newsletter_' + new Date().toISOString().slice(0, 10);
+}
+
 function downloadNewsletterHTML() {
-    const html = document.getElementById('nl-html-raw').value;
+    const html = getNewsletterRawHtmlForDownload();
+    if (!html) {
+        if (window.showToast) window.showToast('Generate the newsletter first.', 'error');
+        else alert('Generate the newsletter first!');
+        return;
+    }
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'newsletter_' + new Date().toISOString().slice(0,10) + '.html';
+    a.download = newsletterDownloadBaseName() + '.html';
     a.click();
     URL.revokeObjectURL(url);
     alert('Newsletter downloaded! Double-click the file to preview.');
+}
+
+/** Same full HTML as .html download, saved as .txt for Ruoff marketing website submission. */
+function downloadNewsletterTxt() {
+    const html = getNewsletterRawHtmlForDownload();
+    if (!html) {
+        if (window.showToast) window.showToast('Generate the newsletter first.', 'error');
+        else alert('Generate the newsletter first!');
+        return;
+    }
+    const blob = new Blob([html], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = newsletterDownloadBaseName() + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    if (window.showToast) {
+        window.showToast('Downloaded as .txt (full HTML source)', 'success');
+    } else {
+        alert('Downloaded as .txt (full HTML source)');
+    }
+}
+
+/** Copy complete raw HTML source (same string as downloads) to clipboard. */
+function copyFullNewsletterHtmlSource() {
+    const html = getNewsletterRawHtmlForDownload();
+    if (!html) {
+        if (window.showToast) window.showToast('Generate the newsletter first.', 'error');
+        else alert('Generate the newsletter first!');
+        return;
+    }
+    const done = function () {
+        if (window.showToast) {
+            window.showToast('Full HTML source copied to clipboard', 'success');
+        } else {
+            alert('Full HTML source copied to clipboard');
+        }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(html).then(done).catch(function () {
+            fallbackCopyNewsletterHtml(html, done);
+        });
+    } else {
+        fallbackCopyNewsletterHtml(html, done);
+    }
+}
+
+function fallbackCopyNewsletterHtml(html, done) {
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = html;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (typeof done === 'function') done();
+    } catch (e) {
+        if (window.showToast) window.showToast('Could not copy — try Download as .txt instead.', 'error');
+        else alert('Could not copy — try Download as .txt instead.');
+    }
 }
 
 function ensureTdOutlookCentered(tdAttrs) {
@@ -5264,6 +5353,9 @@ function copyForOutlook() {
   window.NL_PERSISTENT_FIELD_IDS = persistentFields.slice();
   window.refreshNewsletterColorScheme = refreshNewsletterColorScheme;
   window.downloadNewsletterHTML = downloadNewsletterHTML;
+  window.downloadNewsletterTxt = downloadNewsletterTxt;
+  window.copyFullNewsletterHtmlSource = copyFullNewsletterHtmlSource;
+  window.getNewsletterRawHtmlForDownload = getNewsletterRawHtmlForDownload;
   window.copyForOutlook = copyForOutlook;
   window.getCleanOutlookHTML = getCleanOutlookHTML;
 

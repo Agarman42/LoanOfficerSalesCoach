@@ -48,7 +48,7 @@
   'js/data/newsletter-brain-teasers.js?v=20260625-lo-v233',
   'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
   'js/features/newsletter-color-bundles.js?v=20260710-lo-v286',
-  'js/features/newsletter-generator.js?v=20260804-nl-ig-dirs',
+  'js/features/newsletter-generator.js?v=20260806-nl-txt-source',
   'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
   'js/features/newsletter-wizard.js?v=20260721-ux-polish',
   'js/features/business-plan-wizard.js?v=20260729-plan-sync',
