@@ -224,7 +224,8 @@
       social: 'Social',
       'value-vault': 'Value Vault Idea',
       event: 'Event Planning',
-      calculator: 'Mortgage Calculator'
+      calculator: 'Mortgage Calculator',
+      pitch: 'My Pitch'
     };
     return map[t] || 'Saved Item';
   }
@@ -252,7 +253,9 @@
       recruiting: 'bg-[#F15A29]/10 text-[#F15A29]',
       social: 'bg-teal-100 text-teal-700',
       'value-vault': 'bg-amber-100 text-amber-700',
-      event: 'bg-purple-100 text-purple-700'
+      event: 'bg-purple-100 text-purple-700',
+      pitch: 'bg-[#00A89D]/10 text-[#00A89D]',
+      calculator: 'bg-sky-100 text-sky-700'
     };
     return colors[t] || 'bg-teal-100 text-teal-700';
   }

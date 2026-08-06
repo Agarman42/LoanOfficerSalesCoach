@@ -80,6 +80,24 @@
       group: 'Quick Actions',
     },
     {
+      id: 'action-my-pitch',
+      title: 'My Pitch',
+      subtitle: 'Elevator pitch · video · share & QR',
+      icon: 'fas fa-microphone-alt',
+      keywords: [
+        'pitch',
+        'my pitch',
+        'elevator',
+        'video pitch',
+        'teleprompter',
+        '59 second',
+        'sales coach pitch',
+        'realtor intro'
+      ],
+      sectionId: 'my-pitch',
+      group: 'Quick Actions',
+    },
+    {
       id: 'action-profile',
       title: 'My Profile & Preferences',
       subtitle: 'Database size, colors, contact info',

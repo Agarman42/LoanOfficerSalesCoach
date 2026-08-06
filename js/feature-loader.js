@@ -65,7 +65,8 @@
   'js/features/smart-savings-scope-css.js?v=20260721-v334',
   'js/features/smart-savings-host.js?v=20260729-profile-stack',
   'js/features/smart-savings-polish.js?v=20260721-v334',
-  'js/features/calculator.js?v=20260806-biweekly-fix'
+  'js/features/calculator.js?v=20260806-biweekly-fix',
+  'js/features/my-pitch.js?v=20260806-v1'
   ];
   var i = 0;
   function next() {

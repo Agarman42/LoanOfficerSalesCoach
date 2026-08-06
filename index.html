@@ -266,6 +266,7 @@
                 <li><a href="#planning" class="sidebar-link px-4 py-2.5"><i class="fas fa-chart-line w-5"></i> 2026 Business Plan</a></li>
                 <li><a href="#ai-chat" class="sidebar-link px-4 py-2.5"><i class="fas fa-robot w-5"></i> AI Coach</a></li>
                 <li><a href="#bio-creator" class="sidebar-link px-4 py-2.5"><i class="fas fa-id-card w-5"></i> Bio Builder</a></li>
+                <li><a href="#my-pitch" class="sidebar-link px-4 py-2.5"><i class="fas fa-microphone-alt w-5"></i> My Pitch</a></li>
                 <li><a href="#sales-script" class="sidebar-link px-4 py-2.5"><i class="fas fa-comment-dots w-5"></i> Sales Script Generator</a></li>
             </ul>
 
@@ -429,6 +430,14 @@
               <span class="home-tool-text">
                 <span class="home-tool-title">Bio Builder</span>
                 <span class="home-tool-sub">Company voice</span>
+              </span>
+              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
+            </button>
+            <button type="button" onclick="window.showSection('my-pitch')" class="home-tool group">
+              <i class="fas fa-microphone-alt text-[#F15A29]"></i>
+              <span class="home-tool-text">
+                <span class="home-tool-title">My Pitch</span>
+                <span class="home-tool-sub">Video elevator pitch</span>
               </span>
               <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
@@ -3666,6 +3675,15 @@
     </div>
 </section>
                     
+                <section id="my-pitch" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-4 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+  <div id="mp-root" class="mp-root" aria-live="polite">
+    <div class="text-center py-16 text-gray-500">
+      <i class="fas fa-microphone-alt text-3xl text-[#00A89D] mb-3"></i>
+      <p class="font-semibold">Loading My Pitch…</p>
+    </div>
+  </div>
+</section>
+
                 <section id="bio-creator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <style>
       #bio-creator .bio-field-block { border-width: 2px; border-style: solid; border-color: rgb(229 231 235); border-radius: 1rem; padding: 1.25rem; transition: border-color .2s, box-shadow .2s; }
