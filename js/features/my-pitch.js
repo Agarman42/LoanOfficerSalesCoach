@@ -377,55 +377,106 @@
   function vcardEscape(s) {
     return String(s || '')
       .replace(/\\/g, '\\\\')
-      .replace(/\n/g, '\\n')
+      .replace(/\r\n|\r|\n/g, '\\n')
       .replace(/,/g, '\\,')
       .replace(/;/g, '\\;');
   }
 
   /**
-   * Build a valid vCard 3.0 for iOS/Android contact import.
+   * Normalize fancy punctuation so vCards don't show mojibake (â€“, Â·) on some phones.
+   * Prefer plain ASCII separators; keep apostrophe as straight quote.
+   */
+  function vcardPlainText(s) {
+    return String(s || '')
+      .replace(/[\u2013\u2014\u2212]/g, '-') // en/em/minus → hyphen
+      .replace(/[\u00B7\u2022\u2023\u2043]/g, '|') // middle dot / bullets
+      .replace(/[\u2018\u2019\u2032]/g, "'") // curly single quotes
+      .replace(/[\u201C\u201D\u2033]/g, '"') // curly double quotes
+      .replace(/\u00A0/g, ' ') // nbsp
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function vcardProp(name, value, params) {
+    const v = vcardPlainText(value);
+    if (!v) return null;
+    const p = params ? ';' + params : '';
+    // CHARSET=UTF-8 helps Outlook/Android when any non-ASCII remains
+    return name + p + ';CHARSET=UTF-8:' + vcardEscape(v);
+  }
+
+  /**
+   * Build a valid vCard 3.0 for iOS/Android contact import (UTF-8 safe).
    * Uses LO profile fields only — never invents phone/email.
    */
   function buildVCard(prof) {
     prof = prof || profileBits();
-    const name = prof.name || 'Loan Officer';
-    const parts = name.trim().split(/\s+/);
+    const name = vcardPlainText(prof.name || 'Loan Officer');
+    const parts = name.split(/\s+/).filter(Boolean);
     const last = parts.length > 1 ? parts[parts.length - 1] : '';
     const first = parts.length > 1 ? parts.slice(0, -1).join(' ') : name;
-    const lines = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      'N:' + vcardEscape(last) + ';' + vcardEscape(first) + ';;;',
-      'FN:' + vcardEscape(name)
-    ];
-    if (prof.title) lines.push('TITLE:' + vcardEscape(prof.title));
-    if (prof.company) lines.push('ORG:' + vcardEscape(prof.company));
+    const lines = ['BEGIN:VCARD', 'VERSION:3.0'];
+    lines.push(
+      'N;CHARSET=UTF-8:' +
+        vcardEscape(last) +
+        ';' +
+        vcardEscape(first) +
+        ';;;'
+    );
+    lines.push('FN;CHARSET=UTF-8:' + vcardEscape(name));
+    const title = vcardProp('TITLE', prof.title);
+    if (title) lines.push(title);
+    const org = vcardProp('ORG', prof.company);
+    if (org) lines.push(org);
     if (prof.phone) {
-      const tel = prof.phone.replace(/[^\d+]/g, '');
-      lines.push('TEL;TYPE=CELL,VOICE:' + vcardEscape(tel || prof.phone));
+      const tel = String(prof.phone).replace(/[^\d+]/g, '') || prof.phone;
+      lines.push('TEL;TYPE=CELL,VOICE:' + vcardEscape(tel));
     }
-    if (prof.email) lines.push('EMAIL;TYPE=INTERNET,PREF:' + vcardEscape(prof.email));
-    if (prof.website) lines.push('URL:' + vcardEscape(prof.website));
-    if (prof.location) lines.push('ADR;TYPE=WORK:;;' + vcardEscape(prof.location) + ';;;;');
+    if (prof.email) {
+      lines.push('EMAIL;TYPE=INTERNET,PREF:' + vcardEscape(String(prof.email).trim()));
+    }
+    if (prof.website) {
+      lines.push('URL:' + vcardEscape(String(prof.website).trim()));
+    }
+    if (prof.location) {
+      lines.push(
+        'ADR;TYPE=WORK;CHARSET=UTF-8:;;' + vcardEscape(vcardPlainText(prof.location)) + ';;;;'
+      );
+    }
     const noteBits = [];
     if (prof.title || prof.company) {
       noteBits.push(
-        (prof.title || 'Loan Officer') +
-          (prof.company ? ' – ' + prof.company : '')
+        vcardPlainText(prof.title || 'Loan Officer') +
+          (prof.company ? ' - ' + vcardPlainText(prof.company) : '')
       );
     }
-    if (prof.nmls) noteBits.push('NMLS ' + prof.nmls);
-    if (prof.intro) noteBits.push(prof.intro);
-    if (noteBits.length) lines.push('NOTE:' + vcardEscape(noteBits.join(' · ')));
+    if (prof.nmls) noteBits.push('NMLS ' + vcardPlainText(prof.nmls));
+    if (prof.intro) noteBits.push(vcardPlainText(prof.intro));
+    if (noteBits.length) {
+      lines.push('NOTE;CHARSET=UTF-8:' + vcardEscape(noteBits.join(' | ')));
+    }
     lines.push('END:VCARD');
-    // CRLF required by many mobile parsers
+    // CRLF line endings required by many mobile parsers
     return lines.join('\r\n') + '\r\n';
+  }
+
+  /** UTF-8 base64 for reliable .vcf download on iOS/Android (avoids Latin-1 mojibake). */
+  function vcardToBase64Utf8(vcf) {
+    const str = String(vcf || '');
+    try {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    } catch (e) {
+      // Fallback for very old engines
+      return btoa(unescape(encodeURIComponent(str)));
+    }
   }
 
   function vcardDataUri(prof) {
     const vcf = buildVCard(prof);
-    // encodeURIComponent keeps unicode safe for data: URLs on mobile
-    return 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcf);
+    return 'data:text/vcard;charset=utf-8;base64,' + vcardToBase64Utf8(vcf);
   }
 
   function vcardFileName(prof) {
@@ -2926,7 +2977,6 @@
       '<div class="script">' +
       escapeHtml(pitch.script || '') +
       '</div>' +
-      contactBlock +
       '<div class="foot">Shared from Ruoff Loan Officer Sales Coach · My Pitch</div>' +
       '</div></body></html>';
     const blob = new Blob([html], { type: 'text/html' });
