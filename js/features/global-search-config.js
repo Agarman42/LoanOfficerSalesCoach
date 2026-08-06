@@ -142,6 +142,25 @@
       sectionId: 'calculator',
       group: 'Quick Actions',
     },
+    {
+      id: 'action-lox',
+      title: 'Letter of Explanation',
+      subtitle: 'LOX / LOE for underwriting — large deposit, gifts, inquiries…',
+      icon: 'fas fa-file-signature',
+      keywords: [
+        'lox',
+        'loe',
+        'letter of explanation',
+        'explanation letter',
+        'large deposit',
+        'gift funds',
+        'credit inquiry',
+        'employment gap',
+        'underwriting letter'
+      ],
+      sectionId: 'letter-of-explanation',
+      group: 'Quick Actions',
+    },
 
   ];
 

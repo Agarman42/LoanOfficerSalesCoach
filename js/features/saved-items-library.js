@@ -225,7 +225,9 @@
       'value-vault': 'Value Vault Idea',
       event: 'Event Planning',
       calculator: 'Mortgage Calculator',
-      pitch: 'My Pitch'
+      pitch: 'My Pitch',
+      lox: 'Letter of Explanation',
+      letter: 'Letter of Explanation'
     };
     return map[t] || 'Saved Item';
   }
@@ -255,7 +257,9 @@
       'value-vault': 'bg-amber-100 text-amber-700',
       event: 'bg-purple-100 text-purple-700',
       pitch: 'bg-[#00A89D]/10 text-[#00A89D]',
-      calculator: 'bg-sky-100 text-sky-700'
+      calculator: 'bg-sky-100 text-sky-700',
+      lox: 'bg-indigo-100 text-indigo-700',
+      letter: 'bg-indigo-100 text-indigo-700'
     };
     return colors[t] || 'bg-teal-100 text-teal-700';
   }
