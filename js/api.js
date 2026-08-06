@@ -80,20 +80,20 @@
   }
 
   /**
-   * Dynamic proxy URL. Prefer CUSTOM_PROXY_URL; hosted uses same-origin relative path.
+   * Dynamic proxy URL.
+   * Prefer CUSTOM_PROXY_URL; otherwise same-origin `/api/v1/chat/completions`
+   * so local PORT=3080 (or any port) works — never hardcode :3000 (other apps use that).
    */
   function getProxyUrl() {
     if (typeof window !== 'undefined' && window.CUSTOM_PROXY_URL) {
       return window.CUSTOM_PROXY_URL;
     }
-    if (typeof window !== 'undefined' && isProductionHosted()) {
+    // Same origin as the page (proxy.js serves static + API on one port)
+    if (typeof window !== 'undefined' && window.location && /^https?:$/.test(window.location.protocol)) {
       return '/api/v1/chat/completions';
     }
-    const hn =
-      typeof window !== 'undefined'
-        ? window.location.hostname || 'localhost'
-        : 'localhost';
-    return `http://${hn}:3000/api/v1/chat/completions`;
+    // file:// or non-browser fallback
+    return 'http://localhost:3080/api/v1/chat/completions';
   }
 
   function isValidGrokApiKey(key) {
