@@ -1831,6 +1831,13 @@ async function generateWeeklyPlan(options = {}) {
             });
         }
 
+        // High-signal push (only if user opted in via CoachPwa prefs)
+        try {
+          if (window.CoachPwa && typeof window.CoachPwa.onWeeklyWinPlanGenerated === 'function') {
+            window.CoachPwa.onWeeklyWinPlanGenerated();
+          }
+        } catch (e) { /* ignore */ }
+
     } catch (error) {
         console.error('[weekly-win-plan] generateWeeklyPlan failed:', error);
         const friendly = typeof window.formatFriendlyApiError === 'function'

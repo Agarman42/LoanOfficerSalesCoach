@@ -44,3 +44,7 @@ temp/
 # Partner card store (runtime; not source of truth for code)
 data/partner-cards.json
 data/partner-cards.json.tmp
+# Push keys & local subscription store (do not commit private VAPID)
+data/vapid-keys.json
+data/push-subscriptions.json
+data/*.tmp

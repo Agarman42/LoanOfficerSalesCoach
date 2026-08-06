@@ -153,6 +153,15 @@ app.use(
   })
 );
 
+// Web Push (VAPID + subscriptions) — LO Sales Coach PWA
+try {
+  const { mountPushRoutes } = require('./server/push-routes');
+  mountPushRoutes(app);
+} catch (e) {
+  console.warn('[push] routes not mounted:', e.message);
+  console.warn('[push] run: npm install web-push');
+}
+
 // Grok / xAI chat completions proxy
 app.post('/api/v1/chat/completions', async (req, res) => {
   try {

@@ -2360,6 +2360,13 @@
     practiceTimerRunning = false;
     view = 'practice';
     render();
+    try {
+      if (window.CoachPwa && typeof window.CoachPwa.markPitchPracticed === 'function') {
+        window.CoachPwa.markPitchPracticed(id);
+      }
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   function exitPractice() {
@@ -2605,6 +2612,15 @@
     if (idx >= 0) pitches[idx] = clean;
     else pitches.unshift(clean);
     savePitches();
+
+    // Pitch practice reminder (opt-in push only)
+    try {
+      if (window.CoachPwa && typeof window.CoachPwa.onPitchSaved === 'function') {
+        window.CoachPwa.onPitchSaved({ id: clean.id, type: clean.type, name: clean.name });
+      }
+    } catch (e) {
+      /* ignore */
+    }
 
     // Vault a text copy for My Saved Items (unique title so re-save does not un-toggle)
     if (typeof window.toggleSaveIdea === 'function' && clean.script) {

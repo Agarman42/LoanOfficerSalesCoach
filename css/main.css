@@ -6221,3 +6221,180 @@ html.dark .mp-btn-primary-action {
     width: 100%;
   }
 }
+
+/* ─── PWA install + push soft-ask + prefs ─── */
+.lo-pwa-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 16px;
+  z-index: 120;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.lo-pwa-banner.hidden { display: none !important; }
+.lo-pwa-banner-inner {
+  pointer-events: auto;
+  width: min(520px, 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  background: #002B5C;
+  color: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+.lo-pwa-banner-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+.lo-pwa-banner-copy strong { font-size: 0.9rem; }
+.lo-pwa-banner-sub { font-size: 0.75rem; opacity: 0.88; line-height: 1.35; }
+.lo-pwa-banner-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.lo-pwa-btn {
+  border: 0;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+.lo-pwa-btn-primary { background: #00A89D; color: #fff; }
+.lo-pwa-btn-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.35);
+}
+.lo-pwa-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+}
+.lo-pwa-modal.hidden { display: none !important; }
+.lo-pwa-modal-card {
+  width: min(420px, 100%);
+  background: #fff;
+  color: #0f172a;
+  border-radius: 1.15rem;
+  padding: 1.35rem 1.25rem;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+}
+.dark .lo-pwa-modal-card,
+html.dark .lo-pwa-modal-card {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+.lo-pwa-modal-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #002B5C;
+}
+.dark .lo-pwa-modal-card h3,
+html.dark .lo-pwa-modal-card h3 { color: #f1f5f9; }
+.lo-pwa-modal-card p {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #475569;
+}
+.dark .lo-pwa-modal-card p,
+html.dark .lo-pwa-modal-card p { color: #94a3b8; }
+.lo-pwa-soft-list {
+  margin: 0 0 0.85rem;
+  padding-left: 1.15rem;
+  font-size: 0.85rem;
+  color: #0f766e;
+  font-weight: 700;
+}
+.lo-pwa-ios-hint {
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(0,168,157,0.1);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #0f766e;
+}
+.lo-pwa-ios-hint.hidden { display: none !important; }
+.lo-pwa-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.lo-pwa-modal-actions .lo-pwa-btn-ghost {
+  color: #002B5C;
+  border-color: #cbd5e1;
+}
+.dark .lo-pwa-modal-actions .lo-pwa-btn-ghost,
+html.dark .lo-pwa-modal-actions .lo-pwa-btn-ghost {
+  color: #e2e8f0;
+  border-color: #334155;
+}
+.lo-push-prefs {
+  padding: 0.85rem 0;
+}
+.lo-push-prefs-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #002B5C;
+}
+.dark .lo-push-prefs-title,
+html.dark .lo-push-prefs-title { color: #f1f5f9; }
+.lo-push-prefs-lead {
+  margin: 0 0 0.55rem;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+.lo-push-prefs-status {
+  font-size: 0.75rem;
+  margin-bottom: 0.55rem;
+  color: #475569;
+}
+.lo-push-prefs-denied {
+  font-size: 0.78rem;
+  color: #c2410c;
+  background: rgba(241,90,41,0.08);
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.65rem;
+  margin-bottom: 0.55rem;
+}
+.lo-push-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0.4rem 0;
+  cursor: pointer;
+  color: #334155;
+}
+.dark .lo-push-toggle,
+html.dark .lo-push-toggle { color: #e2e8f0; }
+.lo-push-prefs-actions { margin-top: 0.65rem; }
+.lo-push-prefs-host--floating {
+  position: fixed;
+  right: 12px;
+  bottom: 80px;
+  z-index: 90;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  display: none; /* only used if profile panel missing */
+}
