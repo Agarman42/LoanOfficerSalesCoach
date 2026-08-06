@@ -12,7 +12,6 @@
 
   const META_KEY = 'loMyPitches_v1';
   const DRAFT_KEY = 'loMyPitchDraft_v1';
-  const FIRST_RUN_KEY = 'loMyPitchFirstRunSeen_v1';
   const IDB_NAME = 'loMyPitchMedia';
   const IDB_STORE = 'videos';
   const TARGET_WORDS_MIN = 90;
@@ -184,11 +183,9 @@
   let recordSeconds = 0;
   let teleprompterRaf = null;
   let helpOpen = false;
-  let firstRunOpen = false;
   /** True after user has entered #my-pitch at least once this session (lazy UI boot). */
   let pitchUiBooted = false;
-  /** Prevent first-run open/close thrash. */
-  let firstRunHandledThisVisit = false;
+  let helpEscBound = false;
 
   // ─── Storage ───────────────────────────────────────────────
 
@@ -792,8 +789,6 @@
       '<div class="mp-section-head"><h3>Your library</h3></div>' +
       library +
       '</section>' +
-      renderHelpDrawer() +
-      renderFirstRunModal() +
       '</div>'
     );
   }
@@ -851,8 +846,6 @@
       '<div class="mp-builder-body">' +
       body +
       '</div>' +
-      renderHelpDrawer() +
-      renderFirstRunModal() +
       '</div>'
     );
   }
@@ -1228,19 +1221,33 @@
       '</div>' +
       '<div id="mp-qr-box" class="mp-qr-box hidden"></div>' +
       '</div></div>' +
-      renderHelpDrawer() +
       '</div>'
     );
   }
 
-  function renderHelpDrawer() {
-    return (
-      '<div id="mp-help" class="mp-help ' +
-      (helpOpen ? 'is-open' : '') +
-      '" role="dialog" aria-label="Pitch help">' +
-      '<div class="mp-help-panel">' +
-      '<div class="mp-help-head"><h3>Pitch coach</h3>' +
-      '<button type="button" class="mp-btn mp-btn-ghost mp-btn-sm" data-close-help aria-label="Close">✕</button></div>' +
+  /**
+   * Help drawer lives on document.body (not inside re-rendered #mp-root) so:
+   * - fixed positioning is never clipped by .card overflow/stacking
+   * - open/close does not rebuild the whole page (no flash)
+   * - single backdrop, no competing first-run modal
+   */
+  function ensureHelpDrawer() {
+    let host = document.getElementById('mp-help');
+    if (host) return host;
+    host = document.createElement('div');
+    host.id = 'mp-help';
+    host.className = 'mp-help';
+    host.setAttribute('role', 'dialog');
+    host.setAttribute('aria-modal', 'true');
+    host.setAttribute('aria-label', 'Pitch coach help');
+    host.setAttribute('aria-hidden', 'true');
+    host.innerHTML =
+      '<div class="mp-help-backdrop" data-close-help tabindex="-1" aria-hidden="true"></div>' +
+      '<aside class="mp-help-panel" role="document">' +
+      '<div class="mp-help-head">' +
+      '<h3 id="mp-help-title">Pitch coach</h3>' +
+      '<button type="button" class="mp-btn mp-btn-ghost mp-btn-sm" data-close-help aria-label="Close help">✕</button>' +
+      '</div>' +
       '<div class="mp-help-body">' +
       '<h4>5 steps</h4>' +
       '<ol><li><strong>Type</strong> — consumer, realtor, or short</li>' +
@@ -1260,29 +1267,59 @@
       '<p><strong>Multiple pitches?</strong> Yes. Set a primary consumer and primary realtor.</p>' +
       '<p><strong>How do realtors use this?</strong> You text the partner pitch; they introduce you with your one-liner.</p>' +
       '<p><strong>Practice?</strong> Read the script aloud once standing up before you record.</p>' +
-      '</div></div>' +
-      '<div class="mp-help-backdrop" data-close-help></div></div>'
-    );
+      '</div></aside>';
+    document.body.appendChild(host);
+
+    host.addEventListener('click', function (ev) {
+      const t = ev.target;
+      if (t && t.closest && t.closest('[data-close-help]')) {
+        ev.preventDefault();
+        setHelpOpen(false);
+      }
+    });
+    // Clicks on the panel content should not close the drawer
+    const panel = host.querySelector('.mp-help-panel');
+    if (panel) {
+      panel.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+      });
+    }
+    return host;
   }
 
-  function renderFirstRunModal() {
-    // Only while My Pitch is the active section — never paint a fixed overlay over Home
-    if (!firstRunOpen || !isMyPitchVisible()) return '';
-    return (
-      '<div class="mp-modal" role="dialog" aria-modal="true" aria-labelledby="mp-first-run-title">' +
-      '<div class="mp-modal-backdrop" data-dismiss-first tabindex="-1" aria-hidden="true"></div>' +
-      '<div class="mp-modal-card" role="document">' +
-      '<h3 id="mp-first-run-title">Create your pitch in ~5 minutes</h3>' +
-      '<ol class="mp-first-steps">' +
-      '<li>Pick consumer or realtor</li>' +
-      '<li>Answer five questions</li>' +
-      '<li>Generate &amp; tweak the script</li>' +
-      '<li>Record or upload video</li>' +
-      '<li>Share with agents &amp; clients</li></ol>' +
-      '<p class="mp-hint">This is Sales Coach Pitch — mortgage-native, coached, and built for Ruoff LOs. Not a generic video card.</p>' +
-      '<button type="button" class="mp-btn mp-btn-primary mp-btn-lg" data-dismiss-first>Let’s go</button>' +
-      '</div></div>'
-    );
+  function setHelpOpen(open) {
+    helpOpen = !!open;
+    if (!open) {
+      const existing = document.getElementById('mp-help');
+      if (existing) {
+        existing.classList.remove('is-open');
+        existing.setAttribute('aria-hidden', 'true');
+      }
+      document.body.classList.remove('mp-help-open');
+      return;
+    }
+    const host = ensureHelpDrawer();
+    host.classList.add('is-open');
+    host.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('mp-help-open');
+    const closeBtn = host.querySelector('[data-close-help].mp-btn');
+    if (closeBtn && typeof closeBtn.focus === 'function') {
+      try {
+        closeBtn.focus();
+      } catch (e) {
+        /* ignore */
+      }
+    }
+  }
+
+  function bindHelpEsc() {
+    if (helpEscBound) return;
+    helpEscBound = true;
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && helpOpen) {
+        setHelpOpen(false);
+      }
+    });
   }
 
   // ─── Bind / actions ────────────────────────────────────────
@@ -1304,30 +1341,12 @@
       });
     });
     el.querySelectorAll('[data-open-help]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        helpOpen = true;
-        render();
-      });
-    });
-    el.querySelectorAll('[data-close-help]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        helpOpen = false;
-        render();
-      });
-    });
-    el.querySelectorAll('[data-dismiss-first]').forEach(function (btn) {
       btn.addEventListener('click', function (ev) {
         if (ev) {
           ev.preventDefault();
           ev.stopPropagation();
         }
-        dismissFirstRun();
-      });
-    });
-    // Modal card should not close when clicking inside the card
-    el.querySelectorAll('.mp-modal-card').forEach(function (card) {
-      card.addEventListener('click', function (ev) {
-        ev.stopPropagation();
+        setHelpOpen(true);
       });
     });
     el.querySelectorAll('[data-open-pitch]').forEach(function (btn) {
@@ -1566,45 +1585,6 @@
       pill.className = 'mp-len-pill mp-len-' + coach.length;
       pill.textContent = lengthLabel(coach.length);
     }
-  }
-
-  function hasSeenFirstRun() {
-    try {
-      return !!localStorage.getItem(FIRST_RUN_KEY);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function dismissFirstRun() {
-    firstRunOpen = false;
-    firstRunHandledThisVisit = true;
-    try {
-      localStorage.setItem(FIRST_RUN_KEY, '1');
-    } catch (e) {
-      /* ignore */
-    }
-    render();
-  }
-
-  /**
-   * First-run modal: ONLY when user explicitly opens My Pitch (click / showSection).
-   * Never on hover, never while another section is active, never recursively from render().
-   */
-  function maybeOpenFirstRunOnEnter() {
-    if (firstRunHandledThisVisit) return;
-    if (view !== 'home') return;
-    if (!isMyPitchVisible()) return;
-    if (hasSeenFirstRun()) {
-      firstRunHandledThisVisit = true;
-      return;
-    }
-    if (pitches.length > 0) {
-      firstRunHandledThisVisit = true;
-      return;
-    }
-    firstRunOpen = true;
-    firstRunHandledThisVisit = true;
   }
 
   // ─── Flow actions ──────────────────────────────────────────
@@ -2302,17 +2282,17 @@
     loadPitches();
     const d = loadDraft();
     if (d && (d.script || d.type)) draft = d;
+    ensureHelpDrawer();
+    bindHelpEsc();
+    // Always start clean — no first-run popup
+    setHelpOpen(false);
 
     if (opts.start) {
-      firstRunOpen = false;
-      firstRunHandledThisVisit = true;
       startBuilder(opts.start);
       return;
     }
 
-    // Fresh enter → pitch home; offer first-run once (click-to-open only, not hover)
     if (view !== 'builder' && view !== 'detail') view = 'home';
-    maybeOpenFirstRunOnEnter();
     render();
   }
 
@@ -2323,11 +2303,10 @@
     const d = loadDraft();
     if (d && (d.script || d.type)) draft = d;
 
-    // Lazy: do not mount full UI / fixed modals while user is on Home
+    // Lazy: do not mount full UI while user is on Home
     if (isMyPitchVisible() || (location.hash || '').replace(/^#/, '') === 'my-pitch') {
       onEnterMyPitch();
     } else {
-      // Lightweight placeholder only — no overlays
       const el = root();
       if (el && !el.querySelector('.mp-shell')) {
         el.innerHTML =
@@ -2338,7 +2317,6 @@
       }
     }
 
-    // Chain showSection hook — enter only when section is actually shown
     const prevHook = window.onCoachSectionShown;
     window.onCoachSectionShown = function (id) {
       if (typeof prevHook === 'function') {
@@ -2356,30 +2334,19 @@
         } else {
           onEnterMyPitch();
         }
-      } else if (firstRunOpen) {
-        // Leaving My Pitch: close first-run overlay so it cannot cover other tools
-        firstRunOpen = false;
-        const el = root();
-        if (el) {
-          const modal = el.querySelector('.mp-modal');
-          if (modal) modal.remove();
-        }
+      } else {
+        // Leaving My Pitch: close help drawer so no residual dim layer
+        setHelpOpen(false);
       }
     };
 
-    console.log('%c[my-pitch] Sales Coach Pitch ready (lazy enter)', 'color:#00A89D');
+    console.log('%c[my-pitch] Sales Coach Pitch ready (no first-run modal)', 'color:#00A89D');
   }
 
   window.openMyPitch = function openMyPitch(opts) {
     opts = opts || {};
-    // Skip first-run if jumping straight into a type wizard
-    if (opts.start) {
-      firstRunOpen = false;
-      firstRunHandledThisVisit = true;
-      window.__mpPendingStart = opts.start;
-    }
+    if (opts.start) window.__mpPendingStart = opts.start;
     if (typeof window.showSection === 'function') window.showSection('my-pitch');
-    // onCoachSectionShown may have run already; apply pending start if any
     if (window.__mpPendingStart) {
       const t = window.__mpPendingStart;
       window.__mpPendingStart = null;
