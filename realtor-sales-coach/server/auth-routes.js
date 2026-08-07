@@ -199,8 +199,21 @@ function requireAdmin(req, res, next) {
   if (!req.authUser) {
     return res.status(401).json({ error: 'Authentication required' });
   }
-  if (req.authUser.role !== 'admin') {
+  if (!store.isAdmin(req.authUser)) {
     return res.status(403).json({ error: 'Admin only' });
+  }
+  next();
+}
+
+/** Admin, role=lo, or any @ruoff.com account — create invites + reset realtor passwords */
+function requireInviteManager(req, res, next) {
+  if (!req.authUser) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  if (!store.canInvite(req.authUser)) {
+    return res.status(403).json({
+      error: 'Only Ruoff loan officers and admins can manage invites'
+    });
   }
   next();
 }
@@ -211,6 +224,55 @@ function genInviteCode() {
 
 function genTempPassword() {
   return crypto.randomBytes(8).toString('base64url');
+}
+
+function appBaseUrl(req) {
+  return String(
+    process.env.REALTOR_APP_URL ||
+      process.env.PUBLIC_APP_URL ||
+      `${req.protocol}://${req.get('host')}`
+  ).replace(/\/$/, '');
+}
+
+function inviteLinkFor(req, code) {
+  return `${appBaseUrl(req)}/#invite=${encodeURIComponent(code)}`;
+}
+
+function buildInviteMailto({ link, code, toEmail, fromName }) {
+  const subject = "You're invited to the Ruoff Agent Sales Coach";
+  const who = fromName || 'your Ruoff loan officer';
+  const body =
+    'Hi,\n\n' +
+    "You've been invited to the Ruoff Agent Sales Coach — practical tools for realtors who partner with Ruoff Mortgage.\n\n" +
+    'Create your free account here (one-time link):\n' +
+    link +
+    '\n\n' +
+    'Or open the app and enter invite code: ' +
+    code +
+    '\n\n' +
+    'It only takes a minute — set your password and you are in.\n\n' +
+    'Questions? Just reply to this email.\n\n' +
+    'Thanks,\n' +
+    who +
+    '\n';
+  const addr = toEmail ? encodeURIComponent(toEmail) : '';
+  return (
+    'mailto:' +
+    addr +
+    '?subject=' +
+    encodeURIComponent(subject) +
+    '&body=' +
+    encodeURIComponent(body)
+  );
+}
+
+/** LOs may only reset active/pending realtor (partner) accounts — not admin/LO. */
+function loMayResetTarget(actor, target) {
+  if (!target) return false;
+  if (store.isAdmin(actor)) return true;
+  if (target.role === 'admin' || target.role === 'lo') return false;
+  if (store.isRuoffEmail(target.email)) return false;
+  return target.role === 'realtor' || target.role === 'pending' || !target.role;
 }
 
 function mountAuthRoutes(app) {
@@ -254,7 +316,14 @@ function mountAuthRoutes(app) {
     } catch (e) {
       /* ignore */
     }
-    return res.json({ authenticated: true, user: req.authUser });
+    return res.json({
+      authenticated: true,
+      user: req.authUser,
+      capabilities: {
+        invite: store.canInvite(req.authUser),
+        admin: store.isAdmin(req.authUser)
+      }
+    });
   });
 
   app.post('/api/auth/login', async (req, res) => {
@@ -284,6 +353,10 @@ function mountAuthRoutes(app) {
         }
         if (u.status !== 'active') {
           return { ok: false, code: 403, error: 'Account not active.' };
+        }
+        // Promote legacy @ruoff.com accounts to LO role so invites work
+        if (store.isRuoffEmail(u.email) && u.role === 'realtor') {
+          u.role = 'lo';
         }
         u.last_login_at = new Date().toISOString();
         u.login_count = (u.login_count || 0) + 1;
@@ -362,14 +435,15 @@ function mountAuthRoutes(app) {
         }
         const id = store.newId('usr');
         const now = new Date().toISOString();
+        const emailNorm = store.normalizeEmail(finalEmail);
         s.users[id] = {
           id,
-          email: store.normalizeEmail(finalEmail),
+          email: emailNorm,
           password_hash: store.hashPassword(password),
           name,
           company,
           phone,
-          role: 'realtor',
+          role: store.resolveRole(emailNorm, null),
           status: 'active',
           invite_code: code,
           invited_by: inv.created_by || null,
@@ -550,7 +624,7 @@ function mountAuthRoutes(app) {
     res.json({ ok: true });
   });
 
-  // ── Admin ──────────────────────────────────────────────────
+  // ── Admin + LO invite managers ─────────────────────────────
 
   app.get('/api/admin/stats', requireAdmin, async (req, res) => {
     try {
@@ -588,14 +662,22 @@ function mountAuthRoutes(app) {
     }
   });
 
-  app.get('/api/admin/users', requireAdmin, async (req, res) => {
+  app.get('/api/admin/users', requireInviteManager, async (req, res) => {
     try {
-      const list = await store.withStore((s) =>
-        Object.values(s.users)
-          .map((u) => store.publicUser(u))
-          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
-      );
-      res.json({ ok: true, users: list });
+      const isAdm = store.isAdmin(req.authUser);
+      const list = await store.withStore((s) => {
+        let users = Object.values(s.users).map((u) => store.publicUser(u));
+        if (!isAdm) {
+          // LOs: realtor partners only (for password reset)
+          users = users.filter(
+            (u) =>
+              u.role === 'realtor' ||
+              (u.status === 'pending' && !store.isRuoffEmail(u.email) && u.role !== 'lo' && u.role !== 'admin')
+          );
+        }
+        return users.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+      });
+      res.json({ ok: true, users: list, scope: isAdm ? 'all' : 'realtors' });
     } catch (e) {
       res.status(500).json({ error: 'List failed' });
     }
@@ -606,7 +688,9 @@ function mountAuthRoutes(app) {
     const name = String(req.body?.name || '').trim();
     const company = String(req.body?.company || '').trim();
     const phone = String(req.body?.phone || '').trim();
-    const role = req.body?.role === 'admin' ? 'admin' : 'realtor';
+    let roleReq = req.body?.role;
+    if (roleReq !== 'admin' && roleReq !== 'lo' && roleReq !== 'realtor') roleReq = null;
+    const role = store.resolveRole(email, roleReq === 'admin' ? 'admin' : roleReq);
     let tempPassword = String(req.body?.password || '').trim();
 
     if (!email || !name) {
@@ -646,7 +730,7 @@ function mountAuthRoutes(app) {
         ok: true,
         user: result.user,
         tempPassword: result.tempPassword,
-        note: 'Share the temp password securely. User can change it later via admin reset.'
+        note: 'Share the temp password securely. User can change it later via reset.'
       });
     } catch (e) {
       res.status(500).json({ error: 'Create failed' });
@@ -671,7 +755,7 @@ function mountAuthRoutes(app) {
         if (typeof req.body?.name === 'string') u.name = req.body.name.trim();
         if (typeof req.body?.company === 'string') u.company = req.body.company.trim();
         if (typeof req.body?.phone === 'string') u.phone = req.body.phone.trim();
-        if (req.body?.role === 'admin' || req.body?.role === 'realtor') {
+        if (req.body?.role === 'admin' || req.body?.role === 'realtor' || req.body?.role === 'lo') {
           if (u.id === req.authUser.id && req.body.role !== 'admin') {
             return { ok: false, code: 400, error: 'Cannot demote yourself' };
           }
@@ -686,7 +770,7 @@ function mountAuthRoutes(app) {
     }
   });
 
-  app.post('/api/admin/users/:id/reset-password', requireAdmin, async (req, res) => {
+  app.post('/api/admin/users/:id/reset-password', requireInviteManager, async (req, res) => {
     const id = req.params.id;
     let tempPassword = String(req.body?.password || '').trim();
     if (!tempPassword || tempPassword.length < 8) tempPassword = genTempPassword();
@@ -694,6 +778,13 @@ function mountAuthRoutes(app) {
       const result = await store.withStore((s) => {
         const u = store.findUserById(s, id);
         if (!u) return { ok: false, code: 404, error: 'User not found' };
+        if (!loMayResetTarget(req.authUser, u)) {
+          return {
+            ok: false,
+            code: 403,
+            error: 'You can only reset passwords for realtor partner accounts'
+          };
+        }
         u.password_hash = store.hashPassword(tempPassword);
         return { ok: true, user: store.publicUser(u), tempPassword };
       });
@@ -702,27 +793,30 @@ function mountAuthRoutes(app) {
         ok: true,
         user: result.user,
         tempPassword: result.tempPassword,
-        note: 'Copy now — it will not be shown again.'
+        note: 'Copy now — it will not be shown again. Send to the realtor securely.'
       });
     } catch (e) {
       res.status(500).json({ error: 'Reset failed' });
     }
   });
 
-  app.get('/api/admin/invites', requireAdmin, async (req, res) => {
+  app.get('/api/admin/invites', requireInviteManager, async (req, res) => {
     try {
-      const list = await store.withStore((s) =>
-        Object.values(s.invites).sort((a, b) =>
-          String(b.created_at).localeCompare(String(a.created_at))
-        )
-      );
-      res.json({ ok: true, invites: list });
+      const isAdm = store.isAdmin(req.authUser);
+      const list = await store.withStore((s) => {
+        let inv = Object.values(s.invites);
+        if (!isAdm) {
+          inv = inv.filter((i) => i.created_by === req.authUser.id);
+        }
+        return inv.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+      });
+      res.json({ ok: true, invites: list, scope: isAdm ? 'all' : 'mine' });
     } catch (e) {
       res.status(500).json({ error: 'List failed' });
     }
   });
 
-  app.post('/api/admin/invites', requireAdmin, async (req, res) => {
+  app.post('/api/admin/invites', requireInviteManager, async (req, res) => {
     const emailOptional = req.body?.email
       ? store.normalizeEmail(req.body.email)
       : null;
@@ -741,25 +835,33 @@ function mountAuthRoutes(app) {
           code,
           email_optional: emailOptional,
           created_by: req.authUser.id,
+          created_by_name: req.authUser.name || '',
+          created_by_email: req.authUser.email || '',
           created_at: new Date().toISOString(),
           expires_at: new Date(Date.now() + days * 864e5).toISOString(),
           used_at: null,
           used_by_user_id: null
         };
         s.invites[code] = inv;
+        store.recordUsage(s, req.authUser.id, 'invite_create', code, {
+          email_lock: emailOptional || null
+        });
         return { ok: true, invite: inv };
       });
       if (!result.ok) return res.status(result.code).json({ error: result.error });
-      const base =
-        process.env.REALTOR_APP_URL ||
-        process.env.PUBLIC_APP_URL ||
-        `${req.protocol}://${req.get('host')}`;
-      const link = `${String(base).replace(/\/$/, '')}/#invite=${encodeURIComponent(code)}`;
+      const link = inviteLinkFor(req, code);
+      const mailto = buildInviteMailto({
+        link,
+        code,
+        toEmail: emailOptional,
+        fromName: req.authUser.name || 'Your Ruoff loan officer'
+      });
       res.json({
         ok: true,
         invite: result.invite,
         link,
-        message: 'Share the code or link with the realtor. Single-use.'
+        mailto,
+        message: 'Invite ready — send the email or share the link. Single-use.'
       });
     } catch (e) {
       res.status(500).json({ error: 'Create invite failed' });
@@ -798,6 +900,7 @@ function mountAuthRoutes(app) {
   return {
     requireAuth,
     requireAdmin,
+    requireInviteManager,
     requireAuthForApi,
     sessionMiddleware
   };

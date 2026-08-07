@@ -12,7 +12,17 @@
 | **Request access** | Public form creates `pending` user; Adam activates + resets password |
 | **No public open signup** | Unauthenticated visitors only see login / invite / request |
 
-Roles: `realtor` | `admin` (Adam). Status: `active` | `pending` | `deactivated`.
+Roles: `realtor` | `lo` | `admin`. Status: `active` | `pending` | `deactivated`.
+
+### Who can invite
+
+| Actor | Create invites | Reset realtor password | Deactivate / stats / create user |
+|-------|----------------|------------------------|----------------------------------|
+| **Admin** | Yes | Yes (any user) | Yes |
+| **Ruoff LO** (`role=lo` or `@ruoff.com` email) | Yes | Yes (realtor partners only) | No |
+| **Realtor** | No | No | No |
+
+LOs get **Invite partners** in the sidebar / account menu. After creating an invite, use **Send Invite via Email** (`mailto:`) with a pre-filled message + link.
 
 ## Session
 
@@ -49,23 +59,29 @@ PORT=3001 node proxy.js
 
 Open `http://localhost:3001` → sign in with admin email/password from env (or generated password in server log).
 
-## Invite first 3 test realtors
+## Invite realtors (any Ruoff LO)
 
-1. Sign in as admin.
-2. Open **Admin · usage** (sidebar Resources, or account menu).
-3. **Create invite** (optional email lock, expires 14 days).
-4. Copy **code** or **link** (`https://…/#invite=CODE`).
-5. Realtor opens link → Accept invite → name + password → in the app.
-6. Repeat for realtor 2 and 3.
+1. Sign in with a **@ruoff.com** account (or admin).
+2. Open **Invite partners** (sidebar Resources, or account menu).
+3. **Generate invite** (optional email lock, default 14 days).
+4. Click **Send Invite via Email** (opens Outlook/Mail with link + instructions) — or Copy link/code.
+5. Realtor opens link → Accept invite → set password → in the app.
 
-**Or** use **Create user directly** → share email + temp password securely.
+Admin can still **Create user directly** with a temp password.
 
-## Admin actions
+## Admin / LO actions
 
-- Activate / deactivate (blocks login + clears session on next hit)
-- Reset password → temp password (clipboard)
-- Stats: active / pending / deactivated, logins last 7d
-- Recent usage events (`login`, `session_resume`, `tool_open`)
+**LO + Admin**
+
+- Create invite + **Send Invite via Email**
+- Reset password for realtor partners → temp password (copy / email)
+
+**Admin only**
+
+- Activate / deactivate
+- Create user with temp password
+- Stats + usage events
+- Full user list (includes LOs and admins)
 
 ## API (server-enforced)
 

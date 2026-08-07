@@ -122,20 +122,51 @@ function verifyPassword(password, stored) {
   }
 }
 
+function isRuoffEmail(email) {
+  return /@ruoff\.com$/i.test(String(email || '').trim());
+}
+
+/** admin | lo | realtor — @ruoff.com (non-admin) defaults to lo */
+function resolveRole(email, requestedRole) {
+  if (requestedRole === 'admin') return 'admin';
+  if (requestedRole === 'lo') return 'lo';
+  if (requestedRole === 'realtor') {
+    // Explicit realtor only when not a Ruoff domain
+    return isRuoffEmail(email) ? 'lo' : 'realtor';
+  }
+  if (isRuoffEmail(email)) return 'lo';
+  return 'realtor';
+}
+
+function canInvite(userOrPublic) {
+  if (!userOrPublic) return false;
+  if (userOrPublic.role === 'admin' || userOrPublic.role === 'lo') return true;
+  return isRuoffEmail(userOrPublic.email);
+}
+
+function isAdmin(userOrPublic) {
+  return !!(userOrPublic && userOrPublic.role === 'admin');
+}
+
 function publicUser(u) {
   if (!u) return null;
+  const role = u.role || 'realtor';
+  const email = u.email || '';
+  const inviter = role === 'admin' || role === 'lo' || isRuoffEmail(email);
   return {
     id: u.id,
-    email: u.email,
+    email: email,
     name: u.name || '',
     company: u.company || '',
     phone: u.phone || '',
-    role: u.role,
+    role: role,
     status: u.status,
     referred_by_lo_name: u.referred_by_lo_name || '',
     created_at: u.created_at,
     last_login_at: u.last_login_at || null,
-    login_count: u.login_count || 0
+    login_count: u.login_count || 0,
+    can_invite: inviter,
+    is_admin: role === 'admin'
   };
 }
 
@@ -220,5 +251,9 @@ module.exports = {
   findUserByEmail,
   findUserById,
   recordUsage,
-  seedAdminIfNeeded
+  seedAdminIfNeeded,
+  isRuoffEmail,
+  resolveRole,
+  canInvite,
+  isAdmin
 };

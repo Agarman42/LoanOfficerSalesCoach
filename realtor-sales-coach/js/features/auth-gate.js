@@ -128,7 +128,8 @@ body.asc-auth-locked{overflow:hidden}
 .asc-account-drop button:hover{background:#f1f5f9}
 .asc-account-drop button.danger{color:#b91c1c}
 #sidebar a[href="#admin-usage"]{display:none}
-body.asc-is-admin #sidebar a[href="#admin-usage"]{display:flex}
+body.asc-is-admin #sidebar a[href="#admin-usage"],
+body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
 `;
     document.head.appendChild(s);
   }
@@ -375,14 +376,28 @@ body.asc-is-admin #sidebar a[href="#admin-usage"]{display:flex}
     setBodyLocked(false);
   }
 
+  function userCanInvite(u) {
+    if (!u) return false;
+    if (u.can_invite === true || u.is_admin === true) return true;
+    if (u.role === 'admin' || u.role === 'lo') return true;
+    return /@ruoff\.com$/i.test(String(u.email || ''));
+  }
+
   function onAuthenticated() {
     removeGate();
     document.documentElement.classList.remove('asc-awaiting-auth');
-    document.body.classList.toggle('asc-is-admin', currentUser && currentUser.role === 'admin');
-    // Show admin sidebar link (inline style was display:none for realtors)
+    const isAdm = !!(currentUser && (currentUser.role === 'admin' || currentUser.is_admin));
+    const inviter = userCanInvite(currentUser);
+    document.body.classList.toggle('asc-is-admin', isAdm);
+    document.body.classList.toggle('asc-can-invite', inviter);
+    // Show invite/admin sidebar link for Ruoff LOs + admin
     try {
       document.querySelectorAll('#sidebar a[href="#admin-usage"]').forEach(function (a) {
-        a.style.display = currentUser && currentUser.role === 'admin' ? '' : 'none';
+        a.style.display = inviter ? '' : 'none';
+        const span = a.querySelector('span');
+        if (span) {
+          span.textContent = isAdm ? 'Admin · usage' : 'Invite partners';
+        }
       });
     } catch (e) {
       /* ignore */
@@ -423,8 +438,12 @@ body.asc-is-admin #sidebar a[href="#admin-usage"]{display:flex}
       '</strong><span>' +
       escapeAttr(currentUser.email) +
       '</span></div>' +
-      (currentUser.role === 'admin'
-        ? '<button type="button" data-asc-admin>Admin · usage</button>'
+      (userCanInvite(currentUser)
+        ? '<button type="button" data-asc-admin>' +
+          (currentUser.role === 'admin' || currentUser.is_admin
+            ? 'Admin · usage'
+            : 'Invite partners') +
+          '</button>'
         : '') +
       '<button type="button" class="danger" data-asc-logout>Sign out</button>' +
       '</div>';
@@ -452,6 +471,7 @@ body.asc-is-admin #sidebar a[href="#admin-usage"]{display:flex}
         currentUser = null;
         window.__ascUser = null;
         document.body.classList.remove('asc-is-admin');
+        document.body.classList.remove('asc-can-invite');
         wrap.remove();
         renderGate('login');
       });
