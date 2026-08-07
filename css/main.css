@@ -6400,112 +6400,291 @@ html.dark .lo-push-toggle { color: #e2e8f0; }
 }
 
 /* ─── Letter of Explanation (LOX) Generator ─── */
-.lox-root { max-width: 1040px; margin: 0 auto; }
-.lox-hero { text-align: center; margin-bottom: 1.5rem; }
+.lox-root { max-width: 1080px; margin: 0 auto; }
+.lox-shell { padding-bottom: 0.5rem; }
+.lox-hero {
+  text-align: center;
+  margin: 0 0 1.15rem;
+  padding: 0.15rem 0 0.25rem;
+}
 .lox-kicker {
-  display: inline-block; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.14em;
-  color: #00A89D; background: rgba(0,168,157,0.1); padding: 0.25rem 0.7rem; border-radius: 999px;
-  margin-bottom: 0.55rem;
+  display: inline-block; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.14em;
+  color: #00A89D; background: rgba(0,168,157,0.12); padding: 0.28rem 0.75rem; border-radius: 999px;
+  margin-bottom: 0.5rem;
 }
 .lox-title {
-  margin: 0 0 0.4rem; font-size: clamp(1.55rem, 3vw, 2rem); font-weight: 900;
-  color: #F15A29; letter-spacing: -0.02em;
+  margin: 0 0 0.35rem; font-size: clamp(1.6rem, 3vw, 2.05rem); font-weight: 900;
+  color: #F15A29; letter-spacing: -0.025em; line-height: 1.15;
 }
 .lox-lead {
-  margin: 0 auto; max-width: 36rem; font-size: 0.95rem; line-height: 1.5; color: #64748b;
+  margin: 0 auto 0.95rem; max-width: 34rem; font-size: 0.92rem; line-height: 1.45; color: #64748b;
 }
+.dark .lox-lead, html.dark .lox-lead { color: #94a3b8; }
+
+/* Step rail (My Pitch–style) */
+.lox-steps {
+  list-style: none; margin: 0 auto; padding: 0;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.35rem 0.15rem;
+  max-width: 32rem;
+}
+.lox-step {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.78rem; font-weight: 700; color: #94a3b8;
+}
+.lox-step-num {
+  width: 1.55rem; height: 1.55rem; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 800;
+  background: #e2e8f0; color: #64748b;
+}
+.dark .lox-step-num, html.dark .lox-step-num { background: #334155; color: #94a3b8; }
+.lox-step.is-active { color: #002B5C; }
+.dark .lox-step.is-active, html.dark .lox-step.is-active { color: #f1f5f9; }
+.lox-step.is-active .lox-step-num { background: #F15A29; color: #fff; }
+.lox-step.is-done { color: #0f766e; }
+.lox-step.is-done .lox-step-num { background: #00A89D; color: #fff; }
+.lox-step-sep {
+  width: 1.25rem; height: 2px; margin: 0 0.15rem;
+  background: #e2e8f0; border-radius: 2px; list-style: none;
+}
+.dark .lox-step-sep, html.dark .lox-step-sep { background: #334155; }
+@media (max-width: 480px) {
+  .lox-step-label { display: none; }
+  .lox-step-sep { width: 0.65rem; }
+}
+
+/* How-to strip */
+.lox-howto {
+  display: grid; gap: 0.55rem;
+  grid-template-columns: 1fr;
+  margin-bottom: 0.9rem;
+}
+@media (min-width: 720px) {
+  .lox-howto { grid-template-columns: repeat(3, 1fr); }
+}
+.lox-howto-item {
+  display: flex; gap: 0.65rem; align-items: flex-start;
+  padding: 0.75rem 0.85rem; border-radius: 1rem;
+  border: 1px solid rgba(0,168,157,0.18);
+  background: linear-gradient(145deg, rgba(0,168,157,0.07), rgba(0,43,92,0.03));
+}
+.dark .lox-howto-item, html.dark .lox-howto-item {
+  border-color: rgba(0,168,157,0.25); background: rgba(15,23,42,0.55);
+}
+.lox-howto-ico {
+  width: 2rem; height: 2rem; border-radius: 0.65rem; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(0,168,157,0.15); color: #00A89D; font-size: 0.85rem;
+}
+.lox-howto-item strong {
+  display: block; font-size: 0.8rem; color: #002B5C; margin-bottom: 0.1rem;
+}
+.dark .lox-howto-item strong, html.dark .lox-howto-item strong { color: #e2e8f0; }
+.lox-howto-item p {
+  margin: 0; font-size: 0.72rem; line-height: 1.35; color: #64748b;
+}
+
+/* Panels */
+.lox-panel {
+  border-radius: 1.25rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 1rem 1.05rem 1.1rem;
+  box-shadow: 0 8px 24px -18px rgba(15, 23, 42, 0.35);
+}
+.dark .lox-panel, html.dark .lox-panel {
+  background: #0f172a; border-color: #334155;
+  box-shadow: none;
+}
+.lox-panel-head { margin-bottom: 0.85rem; }
+.lox-panel-head--compact { margin-bottom: 0.65rem; }
 .lox-section-title {
-  margin: 0 0 0.75rem; font-size: 1.05rem; font-weight: 900; color: #002B5C;
+  margin: 0 0 0.2rem; font-size: 1.05rem; font-weight: 900; color: #002B5C; letter-spacing: -0.01em;
 }
 .dark .lox-section-title, html.dark .lox-section-title { color: #f1f5f9; }
-.lox-sit-grid {
-  display: grid; gap: 0.65rem;
-  grid-template-columns: 1fr;
+.lox-panel-sub {
+  margin: 0; font-size: 0.78rem; line-height: 1.4; color: #64748b;
 }
-@media (min-width: 640px) {
+
+/* Situation cards */
+.lox-sit-grid {
+  display: grid; gap: 0.55rem;
+  grid-template-columns: 1fr;
+  margin-top: 0.65rem;
+}
+@media (min-width: 560px) {
   .lox-sit-grid { grid-template-columns: repeat(2, 1fr); }
 }
-@media (min-width: 960px) {
+@media (min-width: 900px) {
   .lox-sit-grid { grid-template-columns: repeat(4, 1fr); }
 }
 .lox-sit-card {
-  text-align: left; border-radius: 1rem; padding: 1rem 0.95rem;
+  text-align: left; border-radius: 1rem; padding: 0.85rem 0.9rem;
   border: 1px solid #e2e8f0; background: #fff; cursor: pointer;
-  display: flex; flex-direction: column; gap: 0.35rem;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  display: flex; flex-direction: row; align-items: flex-start; gap: 0.65rem;
+  transition: border-color 0.12s, box-shadow 0.12s, transform 0.12s;
+  width: 100%;
+  font: inherit; color: inherit;
 }
 .dark .lox-sit-card, html.dark .lox-sit-card {
-  background: #0f172a; border-color: #334155; color: #e2e8f0;
+  background: #0b1220; border-color: #334155; color: #e2e8f0;
 }
 .lox-sit-card:hover {
   border-color: #00A89D;
-  box-shadow: 0 0 0 3px rgba(0,168,157,0.15);
+  box-shadow: 0 0 0 3px rgba(0,168,157,0.14);
+  transform: translateY(-1px);
+}
+.lox-sit-card:focus-visible {
+  outline: none; border-color: #00A89D;
+  box-shadow: 0 0 0 3px rgba(0,168,157,0.25);
 }
 .lox-sit-icon {
-  width: 2.25rem; height: 2.25rem; border-radius: 0.7rem;
+  width: 2.35rem; height: 2.35rem; border-radius: 0.75rem; flex-shrink: 0;
   display: inline-flex; align-items: center; justify-content: center;
   background: rgba(0,168,157,0.12); color: #00A89D; font-size: 0.95rem;
 }
-.lox-sit-card strong { font-size: 0.9rem; color: #002B5C; }
+.lox-sit-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.lox-sit-card strong {
+  font-size: 0.88rem; font-weight: 800; color: #002B5C; line-height: 1.25;
+}
 .dark .lox-sit-card strong, html.dark .lox-sit-card strong { color: #f1f5f9; }
-.lox-sit-blurb { font-size: 0.75rem; color: #64748b; line-height: 1.35; }
+.lox-sit-blurb { font-size: 0.72rem; color: #64748b; line-height: 1.35; }
+.lox-sit-go {
+  flex-shrink: 0; align-self: center; color: #cbd5e1; font-size: 0.7rem;
+  transition: color 0.12s, transform 0.12s;
+}
+.lox-sit-card:hover .lox-sit-go { color: #00A89D; transform: translateX(2px); }
+
+.lox-sit-card--featured {
+  border-color: rgba(241, 90, 41, 0.4);
+  background: linear-gradient(120deg, #fff8f4 0%, #fff 55%, rgba(0,168,157,0.04) 100%);
+  margin-bottom: 0.15rem;
+  padding: 1rem 1.05rem;
+  align-items: center;
+}
+.dark .lox-sit-card--featured, html.dark .lox-sit-card--featured {
+  background: linear-gradient(120deg, #1c1410 0%, #0f172a 60%);
+  border-color: rgba(241, 90, 41, 0.45);
+}
+.lox-sit-card--featured .lox-sit-icon {
+  width: 2.65rem; height: 2.65rem; border-radius: 0.85rem;
+  background: rgba(241, 90, 41, 0.14); color: #F15A29; font-size: 1.05rem;
+}
+.lox-sit-card--featured strong { font-size: 1rem; }
+.lox-sit-badge {
+  display: inline-block; align-self: flex-start;
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #F15A29; background: rgba(241,90,41,0.12);
+  padding: 0.15rem 0.45rem; border-radius: 999px; margin-bottom: 0.15rem;
+}
+
+/* Workspace */
 .lox-toolbar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem;
-  margin-bottom: 1rem;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.65rem;
+  margin-bottom: 0.75rem;
 }
 .lox-current-sit {
+  display: inline-flex; align-items: center; gap: 0.4rem;
   font-size: 0.85rem; font-weight: 800; color: #0f766e;
 }
+.lox-current-sit-ico {
+  width: 1.65rem; height: 1.65rem; border-radius: 0.5rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(0,168,157,0.12); color: #00A89D; font-size: 0.75rem;
+}
+.lox-status-pill {
+  margin-left: auto;
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em;
+  padding: 0.28rem 0.65rem; border-radius: 999px;
+  background: #f1f5f9; color: #64748b;
+}
+.dark .lox-status-pill, html.dark .lox-status-pill { background: #1e293b; color: #94a3b8; }
+.lox-status-pill.is-ready {
+  background: rgba(0,168,157,0.12); color: #0f766e;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+}
+
 .lox-grid {
-  display: grid; gap: 1.15rem;
+  display: grid; gap: 0.85rem;
   grid-template-columns: 1fr;
+  align-items: start;
 }
 @media (min-width: 900px) {
-  .lox-grid { grid-template-columns: 1fr 1.05fr; align-items: start; }
+  .lox-grid { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); }
 }
+.lox-form-col.lox-panel,
+.lox-preview-col.lox-panel { margin: 0; }
+.lox-panel--preview {
+  background: linear-gradient(180deg, #fff 0%, #fafaf9 100%);
+}
+.dark .lox-panel--preview, html.dark .lox-panel--preview {
+  background: #0f172a;
+}
+
 .lox-lo-chip {
-  font-size: 0.78rem; color: #475569; margin-bottom: 0.85rem;
-  padding: 0.55rem 0.75rem; border-radius: 0.75rem;
+  font-size: 0.75rem; color: #475569; margin-bottom: 0.75rem;
+  padding: 0.5rem 0.7rem; border-radius: 0.75rem;
   background: rgba(0,168,157,0.08); border: 1px solid rgba(0,168,157,0.2);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem;
 }
-.lox-field { margin-bottom: 0.85rem; }
+.lox-lo-chip i { color: #00A89D; }
+.lox-fields { display: flex; flex-direction: column; gap: 0.55rem; }
+.lox-field { margin-bottom: 0; }
 .lox-label {
-  display: block; font-size: 0.8rem; font-weight: 800; margin-bottom: 0.3rem; color: #002B5C;
+  display: block; font-size: 0.76rem; font-weight: 800; margin-bottom: 0.25rem; color: #002B5C;
 }
 .dark .lox-label, html.dark .lox-label { color: #e2e8f0; }
 .lox-req { color: #F15A29; }
-.lox-helper { margin: 0 0 0.3rem; font-size: 0.72rem; color: #64748b; }
+.lox-helper { margin: 0 0 0.25rem; font-size: 0.7rem; color: #64748b; line-height: 1.35; }
 .lox-input {
   width: 100%; border-radius: 0.75rem; border: 2px solid #e2e8f0;
-  padding: 0.6rem 0.75rem; font-size: 0.9rem; background: #fff; color: inherit;
-  font-family: inherit;
+  padding: 0.55rem 0.7rem; font-size: 0.88rem; background: #fff; color: inherit;
+  font-family: inherit; box-sizing: border-box;
 }
 .dark .lox-input, html.dark .lox-input {
-  background: #0f172a; border-color: #334155; color: #e2e8f0;
+  background: #0b1220; border-color: #334155; color: #e2e8f0;
 }
 .lox-input:focus {
   outline: none; border-color: #00A89D; box-shadow: 0 0 0 3px rgba(0,168,157,0.15);
 }
+
 .lox-preview {
-  min-height: 280px; max-height: min(70vh, 560px); overflow: auto;
-  padding: 1.15rem 1.2rem; border-radius: 1rem;
+  min-height: 240px; max-height: min(62vh, 520px); overflow: auto;
+  padding: 1.05rem 1.1rem; border-radius: 0.9rem;
   background: #fffef8; border: 1px solid #e7e5e4;
-  font-family: "Times New Roman", Times, serif; font-size: 0.95rem; line-height: 1.45;
+  font-family: "Times New Roman", Times, serif; font-size: 0.92rem; line-height: 1.45;
   color: #1c1917;
 }
 .dark .lox-preview, html.dark .lox-preview {
   background: #1c1917; border-color: #44403c; color: #fafaf9;
 }
-.lox-preview-empty { color: #a8a29e; font-family: system-ui, sans-serif; font-size: 0.85rem; }
-.lox-actions {
-  display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.85rem;
+.lox-preview-empty {
+  color: #a8a29e; font-family: system-ui, sans-serif; font-size: 0.85rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 0.35rem; min-height: 200px; padding: 1.25rem;
 }
+.lox-preview-empty i { font-size: 1.6rem; color: #00A89D; opacity: 0.7; margin-bottom: 0.25rem; }
+.lox-preview-empty p { margin: 0; max-width: 16rem; line-height: 1.4; }
+.lox-preview-empty strong { color: #57534e; font-family: system-ui, sans-serif; }
+.dark .lox-preview-empty strong, html.dark .lox-preview-empty strong { color: #d6d3d1; }
+
+.lox-actions {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem;
+}
+.lox-actions--bar {
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 0.85rem;
+}
+.dark .lox-actions--bar, html.dark .lox-actions--bar { border-top-color: #1e293b; }
+
 .lox-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
   border-radius: 999px; font-size: 0.8rem; font-weight: 800; padding: 0.55rem 0.95rem;
   border: 1px solid transparent; cursor: pointer; transition: 0.12s ease;
-  background: transparent; color: inherit;
+  background: transparent; color: inherit; font-family: inherit;
 }
+.lox-btn:hover:not(:disabled) { filter: brightness(1.03); }
 .lox-btn-primary {
   background: linear-gradient(135deg, #00A89D, #0d9488); color: #fff;
   box-shadow: 0 8px 18px -8px rgba(0,168,157,0.7);
@@ -6517,64 +6696,63 @@ html.dark .lo-push-toggle { color: #e2e8f0; }
   border-color: rgba(0,168,157,0.4); color: #0f766e; background: rgba(0,168,157,0.06);
 }
 .dark .lox-btn-ghost, html.dark .lox-btn-ghost { color: #5eead4; }
-.lox-hint { margin: 0.55rem 0 0; font-size: 0.72rem; color: #64748b; }
-.lox-sit-card--featured {
-  border-color: rgba(241, 90, 41, 0.45);
-  background: linear-gradient(145deg, #fff7f3, #fff);
-  grid-column: 1 / -1;
-}
-@media (min-width: 960px) {
-  .lox-sit-card--featured { grid-column: span 2; }
-}
-.dark .lox-sit-card--featured, html.dark .lox-sit-card--featured {
-  background: linear-gradient(145deg, #1c1917, #0f172a);
-  border-color: rgba(241, 90, 41, 0.5);
-}
-.lox-sit-card--featured .lox-sit-icon {
-  background: rgba(241, 90, 41, 0.12);
-  color: #F15A29;
-}
+.lox-hint { margin: 0.45rem 0 0; font-size: 0.7rem; color: #94a3b8; line-height: 1.35; }
 .lox-btn-generate {
   width: 100%;
-  margin-top: 0.35rem;
-  padding: 0.75rem 1rem;
+  margin-top: 0.65rem;
+  padding: 0.8rem 1rem;
   font-size: 0.92rem;
 }
 .lox-btn-sm {
   font-size: 0.72rem;
-  padding: 0.4rem 0.7rem;
+  padding: 0.38rem 0.65rem;
 }
 .lox-improve {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  margin-bottom: 0.65rem;
+  gap: 0.3rem;
+  margin-bottom: 0.55rem;
+  padding: 0.4rem 0.45rem;
+  border-radius: 0.75rem;
+  background: rgba(0,43,92,0.04);
+  border: 1px solid #e2e8f0;
+}
+.dark .lox-improve, html.dark .lox-improve {
+  background: rgba(15,23,42,0.6); border-color: #334155;
 }
 .lox-improve-label {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: #64748b;
-  margin-right: 0.15rem;
+  margin-right: 0.2rem;
+  padding-left: 0.2rem;
 }
 .lox-advanced {
-  margin: 0.5rem 0 0.85rem;
+  margin: 0.65rem 0 0.15rem;
   border-radius: 0.75rem;
   border: 1px dashed #cbd5e1;
-  padding: 0.45rem 0.75rem;
+  padding: 0.4rem 0.7rem;
   font-size: 0.85rem;
 }
+.dark .lox-advanced, html.dark .lox-advanced { border-color: #475569; }
 .lox-advanced summary {
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: #64748b;
   list-style: none;
+  display: flex; align-items: center; gap: 0.4rem;
 }
 .lox-advanced summary::-webkit-details-marker { display: none; }
-.lox-advanced[open] { padding-bottom: 0.65rem; }
+.lox-advanced[open] { padding-bottom: 0.55rem; }
 .lox-preview--busy { opacity: 0.55; pointer-events: none; }
-.lox-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.lox-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none !important; }
+
+@media (max-width: 640px) {
+  .lox-status-pill { margin-left: 0; width: 100%; text-align: center; justify-content: center; }
+  .lox-actions--bar .lox-btn { flex: 1 1 calc(50% - 0.4rem); }
+}
 

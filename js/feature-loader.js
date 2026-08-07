@@ -67,7 +67,7 @@
   'js/features/smart-savings-polish.js?v=20260721-v334',
   'js/features/calculator.js?v=20260806-biweekly-fix',
   'js/features/my-pitch.js?v=20260806-pitch-vcf2',
-  'js/features/lox-generator.js?v=20260806-lox-ai1',
+  'js/features/lox-generator.js?v=20260807-lox-ui',
   'js/features/pwa-push.js?v=20260806-pwa'
   ];
   var i = 0;

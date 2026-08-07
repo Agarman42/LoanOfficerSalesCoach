@@ -540,15 +540,13 @@
       if (!letter || letter.length < 40) throw new Error('Empty AI response');
       state.draftLetter = letter;
       saveState();
-      refreshPreviewOnly();
-      setImproveEnabled(true);
+      render();
       toast('Draft ready — review, then download');
     } catch (e) {
       console.warn('[lox] AI generate failed, using template', e);
       state.draftLetter = wrapLetter(templateBody(sit), sit);
       saveState();
-      refreshPreviewOnly();
-      setImproveEnabled(true);
+      render();
       toast(
         e && e.message && /API|proxy|key|AI/i.test(e.message)
           ? 'AI unavailable — template draft used. Check proxy/API key.'
@@ -886,55 +884,121 @@
     const el = root();
     if (!el) return;
     const sit = currentSituation();
+    const step = sit
+      ? state.draftLetter && String(state.draftLetter).trim()
+        ? 3
+        : 2
+      : 1;
     el.innerHTML =
       '<div class="lox-shell">' +
-      renderHero() +
-      (sit ? renderWorkspace(sit) : renderPicker()) +
+      renderHero(step) +
+      (sit ? renderWorkspace(sit, step) : renderPicker()) +
       '</div>';
     bindUi();
   }
 
-  function renderHero() {
+  function renderSteps(activeStep) {
+    const steps = [
+      { n: 1, label: 'Situation' },
+      { n: 2, label: 'Details' },
+      { n: 3, label: 'Preview & export' }
+    ];
+    return (
+      '<ol class="lox-steps" aria-label="Progress">' +
+      steps
+        .map(function (s) {
+          let cls = 'lox-step';
+          if (s.n === activeStep) cls += ' is-active';
+          else if (s.n < activeStep) cls += ' is-done';
+          return (
+            '<li class="' +
+            cls +
+            '"><span class="lox-step-num">' +
+            s.n +
+            '</span><span class="lox-step-label">' +
+            s.label +
+            '</span></li>'
+          );
+        })
+        .join('<li class="lox-step-sep" aria-hidden="true"></li>') +
+      '</ol>'
+    );
+  }
+
+  function renderHero(activeStep) {
     return (
       '<header class="lox-hero">' +
-      '<span class="lox-kicker">UNDERWRITING SUPPORT · AI DRAFT</span>' +
+      '<span class="lox-kicker">UNDERWRITING · AI DRAFT</span>' +
       '<h2 class="lox-title">Letter of Explanation</h2>' +
-      '<p class="lox-lead">Pick a situation (or Custom), enter a few facts, generate a professional LOX — usually under a minute.</p>' +
+      '<p class="lox-lead">Pick a situation, enter a few facts, and generate a clean LOX for the file — usually under a minute.</p>' +
+      renderSteps(activeStep || 1) +
       '</header>'
     );
   }
 
   function renderPicker() {
-    const cards = SITUATION_ORDER.map(function (id) {
-      const s = SITUATIONS[id];
-      const feat = s.featured ? ' lox-sit-card--featured' : '';
-      return (
-        '<button type="button" class="lox-sit-card' +
-        feat +
-        '" data-pick-sit="' +
-        s.id +
-        '">' +
-        '<span class="lox-sit-icon"><i class="fas ' +
-        s.icon +
-        '"></i></span>' +
-        '<strong>' +
-        escapeHtml(s.label) +
-        '</strong>' +
-        '<span class="lox-sit-blurb">' +
-        escapeHtml(s.blurb) +
-        '</span></button>'
-      );
-    }).join('');
+    const custom = SITUATIONS.custom;
+    const rest = SITUATION_ORDER.filter(function (id) {
+      return id !== 'custom';
+    });
+    const cards = rest
+      .map(function (id) {
+        const s = SITUATIONS[id];
+        return (
+          '<button type="button" class="lox-sit-card" data-pick-sit="' +
+          s.id +
+          '">' +
+          '<span class="lox-sit-icon"><i class="fas ' +
+          s.icon +
+          '" aria-hidden="true"></i></span>' +
+          '<span class="lox-sit-text">' +
+          '<strong>' +
+          escapeHtml(s.label) +
+          '</strong>' +
+          '<span class="lox-sit-blurb">' +
+          escapeHtml(s.blurb) +
+          '</span></span>' +
+          '<span class="lox-sit-go" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>' +
+          '</button>'
+        );
+      })
+      .join('');
+
     return (
       '<div class="lox-picker">' +
-      '<h3 class="lox-section-title">1. Select the situation</h3>' +
+      '<div class="lox-howto">' +
+      '<div class="lox-howto-item"><span class="lox-howto-ico"><i class="fas fa-hand-pointer"></i></span><div><strong>1 · Situation</strong><p>Common underwriting case or free-form Custom</p></div></div>' +
+      '<div class="lox-howto-item"><span class="lox-howto-ico"><i class="fas fa-list-check"></i></span><div><strong>2 · Few facts</strong><p>Only the minimum fields — AI writes the letter</p></div></div>' +
+      '<div class="lox-howto-item"><span class="lox-howto-ico"><i class="fas fa-file-export"></i></span><div><strong>3 · Export</strong><p>Polish, then Word / PDF / copy / save</p></div></div>' +
+      '</div>' +
+      '<div class="lox-panel">' +
+      '<div class="lox-panel-head">' +
+      '<h3 class="lox-section-title">Choose a situation</h3>' +
+      '<p class="lox-panel-sub">Common cases load a short form. Custom lets you describe anything in plain English.</p>' +
+      '</div>' +
+      '<button type="button" class="lox-sit-card lox-sit-card--featured" data-pick-sit="' +
+      custom.id +
+      '">' +
+      '<span class="lox-sit-icon"><i class="fas ' +
+      custom.icon +
+      '" aria-hidden="true"></i></span>' +
+      '<span class="lox-sit-text">' +
+      '<span class="lox-sit-badge">Most flexible</span>' +
+      '<strong>' +
+      escapeHtml(custom.label) +
+      '</strong>' +
+      '<span class="lox-sit-blurb">' +
+      escapeHtml(custom.blurb) +
+      '</span></span>' +
+      '<span class="lox-sit-go" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>' +
+      '</button>' +
       '<div class="lox-sit-grid">' +
       cards +
-      '</div></div>'
+      '</div></div></div>'
     );
   }
 
-  function renderWorkspace(sit) {
+  function renderWorkspace(sit, step) {
     const lo = getLoProfile();
     const isCustom = sit.id === 'custom';
     const fields = sit.fields
@@ -979,40 +1043,52 @@
     const hasDraft = !!(state.draftLetter && String(state.draftLetter).trim());
     const previewHtml = hasDraft
       ? escapeHtml(letter).replace(/\n/g, '<br>')
-      : '<span class="lox-preview-empty">' +
+      : '<div class="lox-preview-empty">' +
+        '<i class="fas fa-file-signature" aria-hidden="true"></i>' +
+        '<p><strong>Your letter will appear here</strong></p>' +
+        '<p>' +
         (isCustom
-          ? 'Describe the situation, then hit Generate with AI.'
-          : 'Enter the few required details, then Generate with AI.') +
-        '</span>';
+          ? 'Describe the situation on the left, then Generate with AI.'
+          : 'Fill the fields on the left, then Generate with AI.') +
+        '</p></div>';
 
     return (
       '<div class="lox-workspace">' +
       '<div class="lox-toolbar">' +
       '<button type="button" class="lox-btn lox-btn-ghost" data-lox-back><i class="fas fa-arrow-left"></i> All situations</button>' +
-      '<span class="lox-current-sit"><i class="fas ' +
+      '<span class="lox-current-sit"><span class="lox-current-sit-ico"><i class="fas ' +
       sit.icon +
-      '"></i> ' +
+      '"></i></span> ' +
       escapeHtml(sit.label) +
-      '</span></div>' +
+      '</span>' +
+      (hasDraft
+        ? '<span class="lox-status-pill is-ready"><i class="fas fa-check"></i> Draft ready</span>'
+        : '<span class="lox-status-pill">Awaiting generate</span>') +
+      '</div>' +
       '<div class="lox-grid">' +
-      '<div class="lox-form-col">' +
-      '<h3 class="lox-section-title">2. Quick details</h3>' +
-      '<div class="lox-lo-chip">Signature from profile: <strong>' +
+      '<div class="lox-form-col lox-panel">' +
+      '<div class="lox-panel-head lox-panel-head--compact">' +
+      '<h3 class="lox-section-title">2 · Details</h3>' +
+      '<p class="lox-panel-sub">Only what underwriting needs — AI handles wording and structure.</p>' +
+      '</div>' +
+      '<div class="lox-lo-chip"><i class="fas fa-id-badge" aria-hidden="true"></i> Signature: <strong>' +
       escapeHtml(lo.name) +
       '</strong>' +
       (lo.nmls ? ' · NMLS ' + escapeHtml(lo.nmls) : '') +
       ' · ' +
       escapeHtml(lo.company) +
       '</div>' +
-      '<div class="lox-field lox-field-inline">' +
+      '<div class="lox-fields">' +
+      '<div class="lox-field">' +
       '<label class="lox-label">Letter date</label>' +
       '<input type="text" class="lox-input" data-meta="dateStr" value="' +
       escapeHtml(state.dateStr || todayLong()) +
       '">' +
       '</div>' +
       fields +
+      '</div>' +
       '<details class="lox-advanced">' +
-      '<summary>Optional: recipient &amp; Re: line</summary>' +
+      '<summary><i class="fas fa-sliders-h" aria-hidden="true"></i> Optional recipient &amp; Re: line</summary>' +
       '<div class="lox-field">' +
       '<label class="lox-label">Recipient</label>' +
       '<input type="text" class="lox-input" data-meta="recipient" value="' +
@@ -1029,10 +1105,13 @@
       '<i class="fas fa-wand-magic-sparkles"></i> ' +
       (hasDraft ? 'Regenerate with AI' : 'Generate with AI') +
       '</button>' +
-      '<p class="lox-hint">AI writes the full letter from your facts. Offline fallback uses a solid template if AI is down.</p>' +
+      '<p class="lox-hint">If AI is unavailable, a solid template draft is used instead.</p>' +
       '</div>' +
-      '<div class="lox-preview-col">' +
-      '<h3 class="lox-section-title">3. Preview</h3>' +
+      '<div class="lox-preview-col lox-panel lox-panel--preview">' +
+      '<div class="lox-panel-head lox-panel-head--compact lox-preview-head">' +
+      '<div><h3 class="lox-section-title">3 · Preview</h3>' +
+      '<p class="lox-panel-sub">Review, polish, then download.</p></div>' +
+      '</div>' +
       '<div class="lox-improve" id="lox-improve"' +
       (hasDraft ? '' : ' hidden') +
       '>' +
@@ -1045,13 +1124,21 @@
       '<div class="lox-preview" id="lox-preview">' +
       previewHtml +
       '</div>' +
-      '<div class="lox-actions">' +
-      '<button type="button" class="lox-btn lox-btn-primary" data-lox-docx><i class="fas fa-file-word"></i> Word</button>' +
-      '<button type="button" class="lox-btn lox-btn-primary lox-btn-navy" data-lox-pdf><i class="fas fa-file-pdf"></i> PDF</button>' +
-      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-copy><i class="fas fa-copy"></i> Copy</button>' +
-      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-vault><i class="far fa-bookmark"></i> Save</button>' +
+      '<div class="lox-actions lox-actions--bar">' +
+      '<button type="button" class="lox-btn lox-btn-primary" data-lox-docx' +
+      (hasDraft ? '' : ' disabled') +
+      '><i class="fas fa-file-word"></i> Word</button>' +
+      '<button type="button" class="lox-btn lox-btn-primary lox-btn-navy" data-lox-pdf' +
+      (hasDraft ? '' : ' disabled') +
+      '><i class="fas fa-file-pdf"></i> PDF</button>' +
+      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-copy' +
+      (hasDraft ? '' : ' disabled') +
+      '><i class="fas fa-copy"></i> Copy</button>' +
+      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-vault' +
+      (hasDraft ? '' : ' disabled') +
+      '><i class="far fa-bookmark"></i> Save</button>' +
       '</div>' +
-      '<p class="lox-hint">PDF: Print → Save as PDF. Word file is fully editable.</p>' +
+      '<p class="lox-hint">PDF opens Print → Save as PDF. Word is fully editable.</p>' +
       '</div></div></div>'
     );
   }
@@ -1065,14 +1152,31 @@
       box.innerHTML = escapeHtml(letter).replace(/\n/g, '<br>');
     } else {
       box.innerHTML =
-        '<span class="lox-preview-empty">Enter details, then Generate with AI.</span>';
+        '<div class="lox-preview-empty"><i class="fas fa-file-signature" aria-hidden="true"></i>' +
+        '<p><strong>Your letter will appear here</strong></p>' +
+        '<p>Fill the details, then Generate with AI.</p></div>';
     }
     setImproveEnabled(hasDraft);
+    document.querySelectorAll('[data-lox-docx],[data-lox-pdf],[data-lox-copy],[data-lox-vault]').forEach(
+      function (b) {
+        b.disabled = !hasDraft || state.generating;
+      }
+    );
     const genBtn = document.getElementById('lox-generate-btn');
     if (genBtn && !state.generating) {
       genBtn.innerHTML =
         '<i class="fas fa-wand-magic-sparkles"></i> ' +
         (hasDraft ? 'Regenerate with AI' : 'Generate with AI');
+    }
+    const shell = document.querySelector('.lox-status-pill');
+    if (shell) {
+      if (hasDraft) {
+        shell.className = 'lox-status-pill is-ready';
+        shell.innerHTML = '<i class="fas fa-check"></i> Draft ready';
+      } else {
+        shell.className = 'lox-status-pill';
+        shell.textContent = 'Awaiting generate';
+      }
     }
   }
 
