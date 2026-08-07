@@ -145,13 +145,14 @@
     {
       id: 'action-lox',
       title: 'Letter of Explanation',
-      subtitle: 'LOX / LOE for underwriting — large deposit, gifts, inquiries…',
+      subtitle: 'AI LOX / LOE — minimal facts or custom free-form',
       icon: 'fas fa-file-signature',
       keywords: [
         'lox',
         'loe',
         'letter of explanation',
         'explanation letter',
+        'custom letter',
         'large deposit',
         'gift funds',
         'credit inquiry',

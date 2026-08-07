@@ -1,322 +1,270 @@
 /**
  * js/features/lox-generator.js
  * Letter of Explanation (LOX / LOE) Generator — LO Sales Coach
+ * AI-assisted drafts, minimal fields, custom free-form, improve controls.
  */
 (function () {
   'use strict';
 
-  const STATE_KEY = 'loLoxDraft_v1';
+  const STATE_KEY = 'loLoxDraft_v2';
 
-  /** @type {Record<string, { id: string, label: string, blurb: string, icon: string, fields: Array, build: Function }>} */
+  /**
+   * Minimal fields only — AI writes professional language.
+   * `build` remains offline fallback if AI unavailable.
+   */
   const SITUATIONS = {
     large_deposit: {
       id: 'large_deposit',
       label: 'Large Deposit',
-      blurb: 'Explain a deposit above typical payroll that underwriting flagged.',
+      blurb: 'Deposit above typical payroll underwriting flagged.',
       icon: 'fa-money-bill-wave',
+      aiHint: 'large deposit on bank statements — source of funds, not borrowed',
       fields: [
-        { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true, helper: 'As shown on the application' },
+        { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true, placeholder: 'As on the application' },
         { key: 'depositDate', label: 'Deposit date', type: 'text', required: true, placeholder: 'e.g. March 12, 2026' },
-        { key: 'amount', label: 'Deposit amount', type: 'text', required: true, placeholder: 'e.g. $8,500' },
-        { key: 'account', label: 'Account (bank / last 4)', type: 'text', required: false, placeholder: 'e.g. Chase checking …1234' },
-        { key: 'source', label: 'Source of funds', type: 'text', required: true, helper: 'Where the money came from', placeholder: 'e.g. sale of vehicle, tax refund, bonus' },
-        { key: 'details', label: 'Additional details', type: 'textarea', required: false, helper: 'Any proof you will attach (bill of sale, award letter, etc.)' }
+        { key: 'amount', label: 'Amount', type: 'text', required: true, placeholder: 'e.g. $8,500' },
+        { key: 'source', label: 'Source of funds', type: 'text', required: true, placeholder: 'e.g. sold truck, tax refund, bonus' }
       ],
-      build: function (d, lo) {
+      build: function (d) {
         return [
-          para(
-            'I am writing to explain a large deposit of ' +
-              val(d.amount) +
-              ' posted on ' +
-              val(d.depositDate) +
-              (d.account ? ' to the ' + val(d.account) + ' account' : '') +
-              ' for ' +
-              val(d.borrowerName) +
-              '.'
-          ),
-          para(
-            'This deposit represents funds from ' +
-              val(d.source) +
-              '. These funds are not borrowed and will remain available for the transaction as required.'
-          ),
-          d.details
-            ? para(val(d.details))
-            : para(
-                'Supporting documentation for the source of funds is available upon request and can be provided with this letter.'
-              ),
-          para(
-            'Please contact me if you need any additional information regarding this deposit.'
-          )
+          'I am writing to explain a large deposit of ' +
+            val(d.amount) +
+            ' posted on ' +
+            val(d.depositDate) +
+            ' for ' +
+            val(d.borrowerName) +
+            '.',
+          'This deposit represents funds from ' +
+            val(d.source) +
+            '. These funds are not borrowed and will remain available for the transaction as required.',
+          'Supporting documentation for the source of funds can be provided upon request.',
+          'Please contact me if you need any additional information regarding this deposit.'
         ].join('\n\n');
       }
     },
     credit_inquiry: {
       id: 'credit_inquiry',
       label: 'Credit Inquiry',
-      blurb: 'Clarify recent hard inquiries that did not result in new debt.',
+      blurb: 'Hard inquiries that did not create new debt.',
       icon: 'fa-search-dollar',
+      aiHint: 'credit inquiry explanation — typically no new debt unless user says otherwise',
       fields: [
         { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true },
         { key: 'inquiryDate', label: 'Inquiry date(s)', type: 'text', required: true, placeholder: 'e.g. February 2026' },
-        { key: 'creditor', label: 'Creditor / company that pulled credit', type: 'text', required: true },
-        { key: 'reason', label: 'Why credit was pulled', type: 'text', required: true, placeholder: 'e.g. rate shopping for this mortgage, auto quote only' },
-        { key: 'newDebt', label: 'Did it result in new debt?', type: 'select', required: true, options: ['No new accounts or debt', 'Yes — explain in details'] },
-        { key: 'details', label: 'Additional details', type: 'textarea', required: false }
+        { key: 'creditor', label: 'Who pulled credit', type: 'text', required: true, placeholder: 'Creditor / company' },
+        { key: 'reason', label: 'Why credit was pulled', type: 'text', required: true, placeholder: 'e.g. mortgage rate shopping' }
       ],
       build: function (d) {
-        const noDebt = String(d.newDebt || '').toLowerCase().indexOf('no new') === 0;
         return [
-          para(
-            'I am writing regarding credit inquiry activity for ' +
-              val(d.borrowerName) +
-              ' related to ' +
-              val(d.creditor) +
-              ' on or about ' +
-              val(d.inquiryDate) +
-              '.'
-          ),
-          para(
-            'This inquiry was made because ' +
-              val(d.reason) +
-              '.'
-          ),
-          para(
-            noDebt
-              ? 'This inquiry did not result in any new credit accounts or additional debt obligations. The borrower has not opened new revolving or installment accounts as a result of this inquiry.'
-              : 'Regarding new debt related to this inquiry: ' +
-                val(d.details || 'please see the notes provided with this file.')
-          ),
-          d.details && noDebt ? para(val(d.details)) : '',
-          para('Please let me know if you need anything further on this inquiry.')
-        ]
-          .filter(Boolean)
-          .join('\n\n');
+          'I am writing regarding credit inquiry activity for ' +
+            val(d.borrowerName) +
+            ' related to ' +
+            val(d.creditor) +
+            ' on or about ' +
+            val(d.inquiryDate) +
+            '.',
+          'This inquiry was made because ' + val(d.reason) + '.',
+          'This inquiry did not result in any new credit accounts or additional debt obligations.',
+          'Please let me know if you need anything further on this inquiry.'
+        ].join('\n\n');
       }
     },
     employment_gap: {
       id: 'employment_gap',
       label: 'Employment Gap',
-      blurb: 'Explain a period without employment or between jobs.',
+      blurb: 'Period without employment or between jobs.',
       icon: 'fa-briefcase',
+      aiHint: 'employment gap with return to stable work',
       fields: [
         { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true },
         { key: 'gapStart', label: 'Gap start', type: 'text', required: true, placeholder: 'e.g. June 2024' },
-        { key: 'gapEnd', label: 'Gap end / return to work', type: 'text', required: true, placeholder: 'e.g. September 2024' },
-        { key: 'reason', label: 'Reason for the gap', type: 'textarea', required: true, placeholder: 'e.g. caregiving, medical leave, education, job search' },
-        { key: 'currentEmployer', label: 'Current employer', type: 'text', required: false },
-        { key: 'stability', label: 'Current employment stability', type: 'textarea', required: false, helper: 'How long in current role / hours / status' }
+        { key: 'gapEnd', label: 'Gap end', type: 'text', required: true, placeholder: 'e.g. September 2024' },
+        { key: 'reason', label: 'Reason (brief)', type: 'text', required: true, placeholder: 'e.g. caregiving, medical leave, job search' }
       ],
       build: function (d) {
         return [
-          para(
-            'I am writing to explain an employment gap for ' +
-              val(d.borrowerName) +
-              ' from approximately ' +
-              val(d.gapStart) +
-              ' through ' +
-              val(d.gapEnd) +
-              '.'
-          ),
-          para('During this period, ' + val(d.reason) + '.'),
-          d.currentEmployer
-            ? para(
-                'The borrower is currently employed with ' +
-                  val(d.currentEmployer) +
-                  (d.stability ? '. ' + val(d.stability) : '.')
-              )
-            : d.stability
-              ? para(val(d.stability))
-              : para(
-                  'The borrower has returned to stable employment and is able to support the proposed housing obligation.'
-                ),
-          para('Please contact me with any questions regarding this employment history.')
+          'I am writing to explain an employment gap for ' +
+            val(d.borrowerName) +
+            ' from approximately ' +
+            val(d.gapStart) +
+            ' through ' +
+            val(d.gapEnd) +
+            '.',
+          'During this period, ' + val(d.reason) + '.',
+          'The borrower has returned to stable employment and is able to support the proposed housing obligation.',
+          'Please contact me with any questions regarding this employment history.'
         ].join('\n\n');
       }
     },
     address_history: {
       id: 'address_history',
-      label: 'Address History / Residency',
-      blurb: 'Clarify residency, gaps, or multiple addresses on credit or application.',
+      label: 'Address History',
+      blurb: 'Residency, gaps, or multiple addresses.',
       icon: 'fa-map-marker-alt',
+      aiHint: 'address / residency history clarification',
       fields: [
         { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true },
-        { key: 'addressList', label: 'Address history (most recent first)', type: 'textarea', required: true, helper: 'Street, city, state, dates at each address', placeholder: '123 Main St, Fort Wayne, IN — Jan 2022–Present\n…' },
-        { key: 'reason', label: 'Why addresses differ / need explanation', type: 'textarea', required: true, placeholder: 'e.g. temporary stay with family, military, credit report lag' },
-        { key: 'currentAddress', label: 'Current primary residence', type: 'text', required: true }
+        { key: 'currentAddress', label: 'Current address', type: 'text', required: true },
+        {
+          key: 'history',
+          label: 'History / what to explain',
+          type: 'textarea',
+          required: true,
+          rows: 3,
+          placeholder: 'e.g. Lived with parents 2023–2024; credit still shows old apartment…'
+        }
       ],
       build: function (d) {
         return [
-          para(
-            'I am writing to clarify the address / residency history for ' +
-              val(d.borrowerName) +
-              '.'
-          ),
-          para(
-            'The borrower currently resides at ' +
-              val(d.currentAddress) +
-              '. Relevant address history is as follows:'
-          ),
-          para(val(d.addressList)),
-          para(
-            'The reason additional explanation is needed: ' +
-              val(d.reason) +
-              '.'
-          ),
-          para(
-            'The addresses listed are accurate to the best of the borrower\'s knowledge. Please advise if you need leases, utility bills, or other residency documentation.'
-          )
+          'I am writing to clarify the address / residency history for ' + val(d.borrowerName) + '.',
+          'The borrower currently resides at ' + val(d.currentAddress) + '.',
+          val(d.history),
+          'Please advise if you need leases, utility bills, or other residency documentation.'
         ].join('\n\n');
       }
     },
     derogatory_credit: {
       id: 'derogatory_credit',
-      label: 'Derogatory Credit / Late Payments',
-      blurb: 'Explain lates, collections, or other derogatory items with a recovery story.',
+      label: 'Derogatory / Lates',
+      blurb: 'Lates, collections, or other credit issues.',
       icon: 'fa-exclamation-circle',
+      aiHint: 'derogatory credit or late payment with recovery',
       fields: [
         { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true },
-        { key: 'itemType', label: 'What needs explanation', type: 'text', required: true, placeholder: 'e.g. 30-day late on auto loan, medical collection' },
-        { key: 'when', label: 'When it occurred', type: 'text', required: true },
-        { key: 'cause', label: 'What caused it', type: 'textarea', required: true },
-        { key: 'resolution', label: 'How it was resolved / current status', type: 'textarea', required: true },
-        { key: 'reestablished', label: 'How credit was re-established', type: 'textarea', required: false }
+        { key: 'what', label: 'What & when', type: 'text', required: true, placeholder: 'e.g. 30-day late auto loan, March 2023' },
+        {
+          key: 'story',
+          label: 'Cause + how resolved',
+          type: 'textarea',
+          required: true,
+          rows: 3,
+          placeholder: 'Brief: what happened and current status'
+        }
       ],
       build: function (d) {
         return [
-          para(
-            'I am writing on behalf of ' +
-              val(d.borrowerName) +
-              ' to explain the following credit item: ' +
-              val(d.itemType) +
-              ', which occurred around ' +
-              val(d.when) +
-              '.'
-          ),
-          para('At that time, ' + val(d.cause) + '.'),
-          para('Since then, ' + val(d.resolution) + '.'),
-          d.reestablished
-            ? para(val(d.reestablished))
-            : para(
-                'The borrower has taken steps to re-establish a stable payment history and is committed to maintaining timely payments going forward.'
-              ),
-          para('Please let me know if you need supporting documentation for this explanation.')
+          'I am writing on behalf of ' +
+            val(d.borrowerName) +
+            ' to explain the following credit item: ' +
+            val(d.what) +
+            '.',
+          val(d.story),
+          'The borrower has taken steps to re-establish a stable payment history and is committed to maintaining timely payments going forward.',
+          'Please let me know if you need supporting documentation for this explanation.'
         ].join('\n\n');
       }
     },
     gift_funds: {
       id: 'gift_funds',
       label: 'Gift Funds',
-      blurb: 'Document gift money for down payment or closing costs.',
+      blurb: 'Gift for down payment or closing costs.',
       icon: 'fa-gift',
+      aiHint: 'gift funds — not a loan, donor relationship, purpose',
       fields: [
         { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true },
         { key: 'donorName', label: 'Donor name', type: 'text', required: true },
-        { key: 'relationship', label: 'Relationship to borrower', type: 'text', required: true, placeholder: 'e.g. parent, grandparent' },
-        { key: 'amount', label: 'Gift amount', type: 'text', required: true },
-        { key: 'transferDate', label: 'Transfer / receipt date', type: 'text', required: false },
-        { key: 'purpose', label: 'Purpose of gift', type: 'select', required: true, options: ['Down payment', 'Closing costs', 'Down payment and closing costs', 'Other'] },
-        { key: 'details', label: 'Additional notes', type: 'textarea', required: false, helper: 'Gift letter and bank trail will be provided separately if required' }
+        { key: 'relationship', label: 'Relationship', type: 'text', required: true, placeholder: 'e.g. parent' },
+        { key: 'amount', label: 'Gift amount', type: 'text', required: true, placeholder: 'e.g. $15,000' }
       ],
       build: function (d) {
         return [
-          para(
-            'I am writing to explain gift funds for ' +
-              val(d.borrowerName) +
-              ' in the amount of ' +
-              val(d.amount) +
-              '.'
-          ),
-          para(
-            'These funds are a gift from ' +
-              val(d.donorName) +
-              ', who is the borrower\'s ' +
-              val(d.relationship) +
-              '. The gift is intended for ' +
-              val(d.purpose).toLowerCase() +
-              (d.transferDate ? ' and was transferred on or about ' + val(d.transferDate) : '') +
-              '.'
-          ),
-          para(
-            'The donor is not expecting repayment, and these funds are not a loan. A gift letter and supporting bank documentation can be provided as required by the loan program.'
-          ),
-          d.details ? para(val(d.details)) : '',
-          para('Please contact me if you need anything further regarding these gift funds.')
-        ]
-          .filter(Boolean)
-          .join('\n\n');
+          'I am writing to explain gift funds for ' +
+            val(d.borrowerName) +
+            ' in the amount of ' +
+            val(d.amount) +
+            '.',
+          'These funds are a gift from ' +
+            val(d.donorName) +
+            ', who is the borrower\'s ' +
+            val(d.relationship) +
+            '. The gift is intended for down payment and/or closing costs.',
+          'The donor is not expecting repayment, and these funds are not a loan. A gift letter and supporting bank documentation can be provided as required.',
+          'Please contact me if you need anything further regarding these gift funds.'
+        ].join('\n\n');
       }
     },
     high_utilization: {
       id: 'high_utilization',
-      label: 'High Credit Utilization',
-      blurb: 'Explain elevated revolving balances and the plan to manage them.',
+      label: 'High Utilization',
+      blurb: 'Elevated revolving balances.',
       icon: 'fa-credit-card',
+      aiHint: 'high revolving credit utilization with payoff/plan',
       fields: [
         { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: true },
-        { key: 'situation', label: 'Why utilization was high', type: 'textarea', required: true },
-        { key: 'actions', label: 'What has been done / will be done', type: 'textarea', required: true, placeholder: 'e.g. paid down cards, closed account after payoff, budget plan' },
-        { key: 'currentStatus', label: 'Current status', type: 'text', required: false }
+        {
+          key: 'story',
+          label: 'Why high + what\'s been done',
+          type: 'textarea',
+          required: true,
+          rows: 3,
+          placeholder: 'e.g. Temporary balances for home repairs; paid down $4k last month…'
+        }
       ],
       build: function (d) {
         return [
-          para(
-            'I am writing to address elevated revolving credit utilization for ' +
-              val(d.borrowerName) +
-              '.'
-          ),
-          para(val(d.situation)),
-          para(
-            'To improve this profile, ' +
-              val(d.actions) +
-              '.'
-          ),
-          d.currentStatus
-            ? para('Current status: ' + val(d.currentStatus) + '.')
-            : para(
-                'The borrower understands the importance of managing revolving balances and is committed to keeping utilization at a sustainable level.'
-              ),
-          para('Please advise if you need statements or other documentation to support this explanation.')
+          'I am writing to address elevated revolving credit utilization for ' + val(d.borrowerName) + '.',
+          val(d.story),
+          'The borrower understands the importance of managing revolving balances and is committed to keeping utilization at a sustainable level.',
+          'Please advise if you need statements or other documentation to support this explanation.'
         ].join('\n\n');
       }
     },
     name_variation: {
       id: 'name_variation',
-      label: 'Name Variation / AKA',
-      blurb: 'Explain different name spellings, maiden names, or AKA on credit.',
+      label: 'Name / AKA',
+      blurb: 'Maiden names, spellings, or AKA on credit.',
       icon: 'fa-id-card',
+      aiHint: 'name variation / AKA — same person identity',
       fields: [
         { key: 'borrowerName', label: 'Legal name (application)', type: 'text', required: true },
-        { key: 'otherNames', label: 'Other names / AKA on file', type: 'textarea', required: true, placeholder: 'List each variation' },
-        { key: 'reason', label: 'Why names differ', type: 'textarea', required: true, placeholder: 'e.g. marriage, hyphenation, prior legal name, typo on account' },
-        { key: 'samePerson', label: 'Confirmation', type: 'select', required: true, options: ['All names refer to the same person', 'See details'] }
+        { key: 'otherNames', label: 'Other names on file', type: 'text', required: true, placeholder: 'List AKA / prior names' },
+        { key: 'reason', label: 'Why they differ', type: 'text', required: true, placeholder: 'e.g. marriage, hyphenation' }
       ],
       build: function (d) {
         return [
-          para(
-            'I am writing to clarify name variations for the borrower whose legal name on the loan application is ' +
-              val(d.borrowerName) +
-              '.'
-          ),
-          para(
-            'Credit or file documents may also show the following name(s): ' +
-              val(d.otherNames) +
-              '.'
-          ),
-          para('These variations exist because ' + val(d.reason) + '.'),
-          para(
-            String(d.samePerson || '').indexOf('same person') >= 0
-              ? 'All of these names refer to one and the same individual. There is no identity concern; this is solely a name variation matter.'
-              : val(d.samePerson || '')
-          ),
-          para(
-            'Government ID and other supporting identity documentation can be provided as needed.'
-          )
+          'I am writing to clarify name variations for the borrower whose legal name on the loan application is ' +
+            val(d.borrowerName) +
+            '.',
+          'Credit or file documents may also show: ' + val(d.otherNames) + '.',
+          'These variations exist because ' + val(d.reason) + '.',
+          'All of these names refer to one and the same individual. Government ID can be provided as needed.'
+        ].join('\n\n');
+      }
+    },
+    custom: {
+      id: 'custom',
+      label: 'Custom / Other',
+      blurb: 'Describe any situation in plain English — AI drafts the letter.',
+      icon: 'fa-pen-fancy',
+      featured: true,
+      aiHint: 'custom letter of explanation for mortgage underwriting',
+      fields: [
+        { key: 'borrowerName', label: 'Borrower name(s)', type: 'text', required: false, placeholder: 'Optional but recommended' },
+        {
+          key: 'description',
+          label: 'Describe the situation',
+          type: 'textarea',
+          required: true,
+          rows: 5,
+          helper: 'Plain English is fine — facts only. AI will write the professional letter.',
+          placeholder:
+            'e.g. Borrower received a $12k inheritance in January that hit checking after the bank statements were ordered. Not a loan. We have the estate check copy…'
+        }
+      ],
+      build: function (d) {
+        return [
+          d.borrowerName
+            ? 'I am writing on behalf of ' + val(d.borrowerName) + ' to provide the following explanation.'
+            : 'I am writing to provide the following explanation for underwriting.',
+          val(d.description),
+          'Supporting documentation can be provided upon request. Please contact me with any questions.'
         ].join('\n\n');
       }
     }
   };
 
   const SITUATION_ORDER = [
+    'custom',
     'large_deposit',
     'credit_inquiry',
     'employment_gap',
@@ -330,19 +278,16 @@
   let state = {
     situationId: null,
     values: {},
-    letterBody: '',
     recipient: 'To Whom It May Concern',
     reLine: '',
-    dateStr: ''
+    dateStr: '',
+    draftLetter: '',
+    generating: false
   };
 
   function val(s) {
     const t = String(s == null ? '' : s).trim();
     return t || '[to be completed]';
-  }
-
-  function para(s) {
-    return String(s || '').trim();
   }
 
   function escapeHtml(s) {
@@ -393,7 +338,7 @@
     try {
       const raw = JSON.parse(localStorage.getItem(STATE_KEY) || 'null');
       if (raw && typeof raw === 'object') {
-        state = Object.assign(state, raw);
+        state = Object.assign(state, raw, { generating: false });
       }
     } catch (e) {
       /* ignore */
@@ -409,7 +354,8 @@
           values: state.values,
           recipient: state.recipient,
           reLine: state.reLine,
-          dateStr: state.dateStr
+          dateStr: state.dateStr,
+          draftLetter: state.draftLetter || ''
         })
       );
     } catch (e) {
@@ -421,29 +367,35 @@
     return state.situationId ? SITUATIONS[state.situationId] : null;
   }
 
-  function buildFullLetter() {
-    const sit = currentSituation();
+  function requiredMissing(sit) {
+    if (!sit) return ['situation'];
+    const miss = [];
+    (sit.fields || []).forEach(function (f) {
+      if (!f.required) return;
+      if (!String((state.values && state.values[f.key]) || '').trim()) miss.push(f.label);
+    });
+    return miss;
+  }
+
+  function signatureBlock(lo) {
+    return [lo.name, lo.title, lo.company, lo.nmls ? 'NMLS ' + lo.nmls : '', lo.phone || '', lo.email || '']
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  function wrapLetter(body, sit) {
     const lo = getLoProfile();
-    if (!sit) return '';
     const d = state.values || {};
     const dateStr = state.dateStr || todayLong();
     const recipient = state.recipient || 'To Whom It May Concern';
     const reDefault =
-      'Letter of Explanation — ' + sit.label + (d.borrowerName ? ' — ' + d.borrowerName : '');
+      'Letter of Explanation — ' +
+      (sit ? sit.label : 'Explanation') +
+      (d.borrowerName ? ' — ' + d.borrowerName : '');
     const re = state.reLine || reDefault;
-    const body = sit.build(d, lo);
-
-    const sig = [
-      lo.name,
-      lo.title,
-      lo.company,
-      lo.nmls ? 'NMLS ' + lo.nmls : '',
-      lo.phone || '',
-      lo.email || ''
-    ]
-      .filter(Boolean)
-      .join('\n');
-
+    const cleaned = String(body || '')
+      .replace(/\r\n/g, '\n')
+      .trim();
     return (
       dateStr +
       '\n\n' +
@@ -452,11 +404,220 @@
       'Re: ' +
       re +
       '\n\n' +
-      body +
+      cleaned +
       '\n\n' +
       'Sincerely,\n\n' +
-      sig
+      signatureBlock(lo)
     );
+  }
+
+  function templateBody(sit) {
+    if (!sit || typeof sit.build !== 'function') return '';
+    return sit.build(state.values || {}, getLoProfile());
+  }
+
+  /** Prefer AI draft; else template fallback. */
+  function buildFullLetter() {
+    if (state.draftLetter && String(state.draftLetter).trim()) {
+      return String(state.draftLetter).trim();
+    }
+    const sit = currentSituation();
+    if (!sit) return '';
+    return wrapLetter(templateBody(sit), sit);
+  }
+
+  function factsBlock(sit) {
+    const lines = [];
+    lines.push('Situation type: ' + (sit ? sit.label : 'Custom'));
+    if (sit && sit.aiHint) lines.push('Focus: ' + sit.aiHint);
+    (sit.fields || []).forEach(function (f) {
+      const v = String((state.values && state.values[f.key]) || '').trim();
+      if (v) lines.push(f.label + ': ' + v);
+    });
+    return lines.join('\n');
+  }
+
+  function stripCodeFences(text) {
+    let t = String(text || '').trim();
+    if (t.indexOf('```') === 0) {
+      t = t.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '');
+    }
+    return t.trim();
+  }
+
+  function extractLetterOnly(raw) {
+    let t = stripCodeFences(raw);
+    // Drop leading assistant chatter if model adds it
+    const markers = [/\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/i, /^\d{1,2}\//];
+    for (let i = 0; i < markers.length; i++) {
+      const m = t.search(markers[i]);
+      if (m > 0 && m < 200) {
+        t = t.slice(m);
+        break;
+      }
+    }
+    return t.trim();
+  }
+
+  async function callAi(messages, opts) {
+    opts = opts || {};
+    if (typeof window.callGrokAPI !== 'function') {
+      throw new Error('AI not available — start the proxy or try again.');
+    }
+    const text = await window.callGrokAPI(null, {
+      messages: messages,
+      temperature: opts.temperature != null ? opts.temperature : 0.45,
+      max_tokens: opts.max_tokens || 1400,
+      skipKeyPrompt: false
+    });
+    return extractLetterOnly(text);
+  }
+
+  function systemPromptBase() {
+    return (
+      'You are an experienced mortgage loan officer writing Letters of Explanation (LOX/LOE) for residential underwriting.\n' +
+      'Write clear, confident, human professional letters — not robotic templates.\n' +
+      'Rules:\n' +
+      '- Business letter format with date, recipient greeting, Re: line, body paragraphs, Sincerely, and LO signature block.\n' +
+      '- Use ONLY the facts provided. Do not invent account numbers, dates, employers, or dollar amounts.\n' +
+      '- If a detail is missing, use natural language that does not fabricate (or omit that detail).\n' +
+      '- Do not claim funds are "seasoned" unless stated. Do not overpromise.\n' +
+      '- 3–5 short body paragraphs max. No bullet lists unless the user provided a list.\n' +
+      '- Output ONLY the letter text. No markdown, no preamble, no quotes around the letter.'
+    );
+  }
+
+  async function generateDraft() {
+    const sit = currentSituation();
+    if (!sit) {
+      toast('Select a situation first', 'error');
+      return;
+    }
+    const miss = requiredMissing(sit);
+    if (miss.length) {
+      toast('Need: ' + miss.join(', '), 'error');
+      return;
+    }
+
+    state.generating = true;
+    updateGeneratingUi(true);
+    const lo = getLoProfile();
+    const dateStr = state.dateStr || todayLong();
+    const recipient = state.recipient || 'To Whom It May Concern';
+    const d = state.values || {};
+    const reDefault =
+      'Letter of Explanation — ' + sit.label + (d.borrowerName ? ' — ' + d.borrowerName : '');
+    const re = state.reLine || reDefault;
+
+    const userPrompt =
+      'Write a complete Letter of Explanation for mortgage underwriting.\n\n' +
+      'Letter metadata:\n' +
+      '- Date line: ' +
+      dateStr +
+      '\n- Recipient: ' +
+      recipient +
+      '\n- Re: ' +
+      re +
+      '\n\n' +
+      'Loan officer signature (use exactly):\n' +
+      signatureBlock(lo) +
+      '\n\n' +
+      'Facts from the LO:\n' +
+      factsBlock(sit) +
+      '\n\n' +
+      (sit.id === 'custom'
+        ? 'This is a free-form situation. Turn the description into a polished LOE body while keeping every stated fact.'
+        : 'Expand the minimal facts into a natural, underwriter-ready letter. Do not invent extra drama.');
+
+    try {
+      const letter = await callAi(
+        [
+          { role: 'system', content: systemPromptBase() },
+          { role: 'user', content: userPrompt }
+        ],
+        { temperature: 0.5, max_tokens: 1200 }
+      );
+      if (!letter || letter.length < 40) throw new Error('Empty AI response');
+      state.draftLetter = letter;
+      saveState();
+      refreshPreviewOnly();
+      setImproveEnabled(true);
+      toast('Draft ready — review, then download');
+    } catch (e) {
+      console.warn('[lox] AI generate failed, using template', e);
+      state.draftLetter = wrapLetter(templateBody(sit), sit);
+      saveState();
+      refreshPreviewOnly();
+      setImproveEnabled(true);
+      toast(
+        e && e.message && /API|proxy|key|AI/i.test(e.message)
+          ? 'AI unavailable — template draft used. Check proxy/API key.'
+          : 'AI failed — template draft used.',
+        'error'
+      );
+    } finally {
+      state.generating = false;
+      updateGeneratingUi(false);
+    }
+  }
+
+  async function improveDraft(mode) {
+    if (!state.draftLetter || !String(state.draftLetter).trim()) {
+      toast('Generate a draft first', 'error');
+      return;
+    }
+    const sit = currentSituation();
+    state.generating = true;
+    updateGeneratingUi(true);
+
+    let instruction = '';
+    if (mode === 'stronger') {
+      instruction =
+        'Rewrite to be clearer and more confident for underwriting. Keep all facts. Slightly stronger language without sounding aggressive.';
+    } else if (mode === 'formal') {
+      instruction =
+        'Rewrite in a more formal, traditional underwriting tone. Keep all facts. No slang.';
+    } else if (mode === 'concise') {
+      instruction =
+        'Rewrite more concise — tighten wording, fewer sentences, same facts and complete letter structure.';
+    } else if (mode === 'regenerate') {
+      instruction =
+        'Regenerate a fresh version of this letter with different wording but the same facts and structure.';
+    } else {
+      instruction = 'Improve clarity and professionalism while keeping all facts.';
+    }
+
+    try {
+      const letter = await callAi(
+        [
+          { role: 'system', content: systemPromptBase() },
+          {
+            role: 'user',
+            content:
+              instruction +
+              '\n\nSituation: ' +
+              (sit ? sit.label : 'Custom') +
+              '\nFacts for reference:\n' +
+              factsBlock(sit || SITUATIONS.custom) +
+              '\n\nCurrent letter:\n---\n' +
+              state.draftLetter +
+              '\n---\n\nOutput ONLY the full revised letter.'
+          }
+        ],
+        { temperature: mode === 'regenerate' ? 0.65 : 0.4, max_tokens: 1200 }
+      );
+      if (!letter || letter.length < 40) throw new Error('Empty AI response');
+      state.draftLetter = letter;
+      saveState();
+      refreshPreviewOnly();
+      toast('Letter updated');
+    } catch (e) {
+      console.warn('[lox] improve failed', e);
+      toast((e && e.message) || 'Could not improve letter', 'error');
+    } finally {
+      state.generating = false;
+      updateGeneratingUi(false);
+    }
   }
 
   function slugFilePart(s) {
@@ -479,7 +640,7 @@
     );
   }
 
-  // ─── Minimal DOCX (plain paragraphs) ───────────────────────
+  // ─── Minimal DOCX ──────────────────────────────────────────
 
   function loxEscapeXml(s) {
     return String(s || '')
@@ -613,12 +774,18 @@
     URL.revokeObjectURL(url);
   }
 
-  function downloadDocx() {
+  function ensureDraftForExport() {
     const letter = buildFullLetter();
     if (!letter || !state.situationId) {
-      toast('Select a situation and complete the form first.', 'error');
-      return;
+      toast('Generate a letter first', 'error');
+      return null;
     }
+    return letter;
+  }
+
+  function downloadDocx() {
+    const letter = ensureDraftForExport();
+    if (!letter) return;
     try {
       downloadBlob(letterToDocxBlob(letter), fileBaseName() + '.docx');
       toast('Word document downloaded');
@@ -629,11 +796,8 @@
   }
 
   function downloadPdf() {
-    const letter = buildFullLetter();
-    if (!letter || !state.situationId) {
-      toast('Select a situation and complete the form first.', 'error');
-      return;
-    }
+    const letter = ensureDraftForExport();
+    if (!letter) return;
     const html =
       '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' +
       escapeHtml(fileBaseName()) +
@@ -695,11 +859,8 @@
   }
 
   function saveToVault() {
-    const letter = buildFullLetter();
-    if (!letter || !state.situationId) {
-      toast('Generate a letter first', 'error');
-      return;
-    }
+    const letter = ensureDraftForExport();
+    if (!letter) return;
     if (typeof window.toggleSaveIdea !== 'function') {
       toast('Saved Items not ready', 'error');
       return;
@@ -736,9 +897,9 @@
   function renderHero() {
     return (
       '<header class="lox-hero">' +
-      '<span class="lox-kicker">UNDERWRITING SUPPORT</span>' +
+      '<span class="lox-kicker">UNDERWRITING SUPPORT · AI DRAFT</span>' +
       '<h2 class="lox-title">Letter of Explanation</h2>' +
-      '<p class="lox-lead">Pick a common situation, answer a few questions, and download a clean LOX for the file — usually in under two minutes.</p>' +
+      '<p class="lox-lead">Pick a situation (or Custom), enter a few facts, generate a professional LOX — usually under a minute.</p>' +
       '</header>'
     );
   }
@@ -746,8 +907,11 @@
   function renderPicker() {
     const cards = SITUATION_ORDER.map(function (id) {
       const s = SITUATIONS[id];
+      const feat = s.featured ? ' lox-sit-card--featured' : '';
       return (
-        '<button type="button" class="lox-sit-card" data-pick-sit="' +
+        '<button type="button" class="lox-sit-card' +
+        feat +
+        '" data-pick-sit="' +
         s.id +
         '">' +
         '<span class="lox-sit-icon"><i class="fas ' +
@@ -761,7 +925,6 @@
         '</span></button>'
       );
     }).join('');
-    // Use <div>, not <section> — showSection hides every main section (incl. nested).
     return (
       '<div class="lox-picker">' +
       '<h3 class="lox-section-title">1. Select the situation</h3>' +
@@ -773,38 +936,22 @@
 
   function renderWorkspace(sit) {
     const lo = getLoProfile();
+    const isCustom = sit.id === 'custom';
     const fields = sit.fields
       .map(function (f) {
         const v = state.values[f.key] != null ? state.values[f.key] : '';
         let control = '';
         if (f.type === 'textarea') {
           control =
-            '<textarea class="lox-input" rows="3" data-field="' +
+            '<textarea class="lox-input" rows="' +
+            (f.rows || 3) +
+            '" data-field="' +
             f.key +
             '" placeholder="' +
             escapeHtml(f.placeholder || '') +
             '">' +
             escapeHtml(v) +
             '</textarea>';
-        } else if (f.type === 'select') {
-          control =
-            '<select class="lox-input" data-field="' +
-            f.key +
-            '">' +
-            (f.options || [])
-              .map(function (opt) {
-                return (
-                  '<option value="' +
-                  escapeHtml(opt) +
-                  '"' +
-                  (v === opt ? ' selected' : '') +
-                  '>' +
-                  escapeHtml(opt) +
-                  '</option>'
-                );
-              })
-              .join('') +
-            '</select>';
         } else {
           control =
             '<input type="text" class="lox-input" data-field="' +
@@ -829,9 +976,14 @@
       .join('');
 
     const letter = buildFullLetter();
-    const previewHtml = letter
+    const hasDraft = !!(state.draftLetter && String(state.draftLetter).trim());
+    const previewHtml = hasDraft
       ? escapeHtml(letter).replace(/\n/g, '<br>')
-      : '<span class="lox-preview-empty">Complete the fields to preview your letter.</span>';
+      : '<span class="lox-preview-empty">' +
+        (isCustom
+          ? 'Describe the situation, then hit Generate with AI.'
+          : 'Enter the few required details, then Generate with AI.') +
+        '</span>';
 
     return (
       '<div class="lox-workspace">' +
@@ -844,46 +996,62 @@
       '</span></div>' +
       '<div class="lox-grid">' +
       '<div class="lox-form-col">' +
-      '<h3 class="lox-section-title">2. Details</h3>' +
-      '<div class="lox-lo-chip">From profile: <strong>' +
+      '<h3 class="lox-section-title">2. Quick details</h3>' +
+      '<div class="lox-lo-chip">Signature from profile: <strong>' +
       escapeHtml(lo.name) +
       '</strong>' +
       (lo.nmls ? ' · NMLS ' + escapeHtml(lo.nmls) : '') +
       ' · ' +
       escapeHtml(lo.company) +
       '</div>' +
-      '<div class="lox-field">' +
+      '<div class="lox-field lox-field-inline">' +
       '<label class="lox-label">Letter date</label>' +
       '<input type="text" class="lox-input" data-meta="dateStr" value="' +
       escapeHtml(state.dateStr || todayLong()) +
       '">' +
       '</div>' +
+      fields +
+      '<details class="lox-advanced">' +
+      '<summary>Optional: recipient &amp; Re: line</summary>' +
       '<div class="lox-field">' +
-      '<label class="lox-label">Recipient line</label>' +
+      '<label class="lox-label">Recipient</label>' +
       '<input type="text" class="lox-input" data-meta="recipient" value="' +
       escapeHtml(state.recipient || 'To Whom It May Concern') +
-      '" placeholder="To Whom It May Concern">' +
+      '">' +
       '</div>' +
       '<div class="lox-field">' +
-      '<label class="lox-label">Re: line (optional)</label>' +
+      '<label class="lox-label">Re: line</label>' +
       '<input type="text" class="lox-input" data-meta="reLine" value="' +
       escapeHtml(state.reLine || '') +
-      '" placeholder="Leave blank for auto">' +
-      '</div>' +
-      fields +
+      '" placeholder="Auto from situation + borrower">' +
+      '</div></details>' +
+      '<button type="button" class="lox-btn lox-btn-primary lox-btn-generate" data-lox-generate id="lox-generate-btn">' +
+      '<i class="fas fa-wand-magic-sparkles"></i> ' +
+      (hasDraft ? 'Regenerate with AI' : 'Generate with AI') +
+      '</button>' +
+      '<p class="lox-hint">AI writes the full letter from your facts. Offline fallback uses a solid template if AI is down.</p>' +
       '</div>' +
       '<div class="lox-preview-col">' +
       '<h3 class="lox-section-title">3. Preview</h3>' +
+      '<div class="lox-improve" id="lox-improve"' +
+      (hasDraft ? '' : ' hidden') +
+      '>' +
+      '<span class="lox-improve-label">Polish</span>' +
+      '<button type="button" class="lox-btn lox-btn-ghost lox-btn-sm" data-lox-improve="stronger">Make stronger</button>' +
+      '<button type="button" class="lox-btn lox-btn-ghost lox-btn-sm" data-lox-improve="formal">More formal</button>' +
+      '<button type="button" class="lox-btn lox-btn-ghost lox-btn-sm" data-lox-improve="concise">More concise</button>' +
+      '<button type="button" class="lox-btn lox-btn-ghost lox-btn-sm" data-lox-improve="regenerate">Regenerate</button>' +
+      '</div>' +
       '<div class="lox-preview" id="lox-preview">' +
       previewHtml +
       '</div>' +
       '<div class="lox-actions">' +
-      '<button type="button" class="lox-btn lox-btn-primary" data-lox-docx><i class="fas fa-file-word"></i> Download Word</button>' +
-      '<button type="button" class="lox-btn lox-btn-primary lox-btn-navy" data-lox-pdf><i class="fas fa-file-pdf"></i> Download PDF</button>' +
-      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-copy><i class="fas fa-copy"></i> Copy text</button>' +
-      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-vault><i class="far fa-bookmark"></i> Save to My Saved Items</button>' +
+      '<button type="button" class="lox-btn lox-btn-primary" data-lox-docx><i class="fas fa-file-word"></i> Word</button>' +
+      '<button type="button" class="lox-btn lox-btn-primary lox-btn-navy" data-lox-pdf><i class="fas fa-file-pdf"></i> PDF</button>' +
+      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-copy><i class="fas fa-copy"></i> Copy</button>' +
+      '<button type="button" class="lox-btn lox-btn-ghost" data-lox-vault><i class="far fa-bookmark"></i> Save</button>' +
       '</div>' +
-      '<p class="lox-hint">PDF opens the print dialog — choose “Save as PDF”. Word file is fully editable.</p>' +
+      '<p class="lox-hint">PDF: Print → Save as PDF. Word file is fully editable.</p>' +
       '</div></div></div>'
     );
   }
@@ -892,9 +1060,51 @@
     const box = document.getElementById('lox-preview');
     if (!box) return;
     const letter = buildFullLetter();
-    box.innerHTML = letter
-      ? escapeHtml(letter).replace(/\n/g, '<br>')
-      : '<span class="lox-preview-empty">Complete the fields to preview your letter.</span>';
+    const hasDraft = !!(state.draftLetter && String(state.draftLetter).trim());
+    if (hasDraft && letter) {
+      box.innerHTML = escapeHtml(letter).replace(/\n/g, '<br>');
+    } else {
+      box.innerHTML =
+        '<span class="lox-preview-empty">Enter details, then Generate with AI.</span>';
+    }
+    setImproveEnabled(hasDraft);
+    const genBtn = document.getElementById('lox-generate-btn');
+    if (genBtn && !state.generating) {
+      genBtn.innerHTML =
+        '<i class="fas fa-wand-magic-sparkles"></i> ' +
+        (hasDraft ? 'Regenerate with AI' : 'Generate with AI');
+    }
+  }
+
+  function setImproveEnabled(on) {
+    const bar = document.getElementById('lox-improve');
+    if (!bar) return;
+    if (on) bar.removeAttribute('hidden');
+    else bar.setAttribute('hidden', '');
+  }
+
+  function updateGeneratingUi(on) {
+    const btn = document.getElementById('lox-generate-btn');
+    if (btn) {
+      btn.disabled = !!on;
+      if (on) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Drafting…';
+      } else {
+        const hasDraft = !!(state.draftLetter && String(state.draftLetter).trim());
+        btn.innerHTML =
+          '<i class="fas fa-wand-magic-sparkles"></i> ' +
+          (hasDraft ? 'Regenerate with AI' : 'Generate with AI');
+      }
+    }
+    document.querySelectorAll('[data-lox-improve]').forEach(function (b) {
+      b.disabled = !!on;
+    });
+    const box = document.getElementById('lox-preview');
+    if (box && on) {
+      box.classList.add('lox-preview--busy');
+    } else if (box) {
+      box.classList.remove('lox-preview--busy');
+    }
   }
 
   function bindUi() {
@@ -904,8 +1114,8 @@
     el.querySelectorAll('[data-pick-sit]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         state.situationId = btn.getAttribute('data-pick-sit');
-        state.values = state.values || {};
-        // seed borrower blank; keep other values if same keys
+        state.values = {};
+        state.draftLetter = '';
         if (!state.dateStr) state.dateStr = todayLong();
         if (!state.recipient) state.recipient = 'To Whom It May Concern';
         saveState();
@@ -925,8 +1135,9 @@
       const key = input.getAttribute('data-field');
       const handler = function () {
         state.values[key] = input.value;
+        // Changing facts invalidates AI draft so user re-generates intentionally
+        // Keep draft until they click regenerate — less jarring
         saveState();
-        refreshPreviewOnly();
       };
       input.addEventListener('input', handler);
       input.addEventListener('change', handler);
@@ -937,10 +1148,21 @@
       const handler = function () {
         state[key] = input.value;
         saveState();
-        refreshPreviewOnly();
       };
       input.addEventListener('input', handler);
       input.addEventListener('change', handler);
+    });
+
+    el.querySelectorAll('[data-lox-generate]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        generateDraft();
+      });
+    });
+
+    el.querySelectorAll('[data-lox-improve]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        improveDraft(btn.getAttribute('data-lox-improve'));
+      });
     });
 
     el.querySelectorAll('[data-lox-docx]').forEach(function (btn) {
@@ -960,15 +1182,17 @@
   function ensureMounted() {
     const el = root();
     if (!el) return;
-    // Recover if nav accidentally hid nested LOX nodes, or first paint was a placeholder
     if (!el.querySelector('.lox-shell') || el.querySelector('.lox-picker.hidden, .lox-workspace.hidden')) {
       render();
       return;
     }
-    // Strip residual .hidden on LOX chrome (legacy nested <section> bug)
     el.querySelectorAll('.hidden').forEach(function (node) {
       if (node.id === 'letter-of-explanation') return;
-      if (node.classList.contains('lox-picker') || node.classList.contains('lox-workspace') || node.classList.contains('lox-shell')) {
+      if (
+        node.classList.contains('lox-picker') ||
+        node.classList.contains('lox-workspace') ||
+        node.classList.contains('lox-shell')
+      ) {
         node.classList.remove('hidden');
       }
     });
@@ -978,9 +1202,13 @@
     if (!document.getElementById('letter-of-explanation')) return;
     loadState();
     if (!state.dateStr) state.dateStr = todayLong();
+    // Drop unknown situation ids from older drafts
+    if (state.situationId && !SITUATIONS[state.situationId]) {
+      state.situationId = null;
+      state.draftLetter = '';
+    }
     render();
 
-    // Re-mount when user opens this tool (sidebar / search / hash) — same pattern as My Pitch
     if (!window.__loxSectionHooked) {
       window.__loxSectionHooked = true;
       const prevHook = window.onCoachSectionShown;
@@ -996,12 +1224,11 @@
       };
     }
 
-    // If already on this hash when script loads late, ensure UI is live
     if ((location.hash || '').replace(/^#/, '') === 'letter-of-explanation') {
       ensureMounted();
     }
 
-    console.log('%c[lox-generator] Letter of Explanation ready', 'color:#00A89D');
+    console.log('%c[lox-generator] LOX AI draft ready', 'color:#00A89D');
   }
 
   window.openLoxGenerator = function (situationId) {

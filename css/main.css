@@ -6518,3 +6518,63 @@ html.dark .lo-push-toggle { color: #e2e8f0; }
 }
 .dark .lox-btn-ghost, html.dark .lox-btn-ghost { color: #5eead4; }
 .lox-hint { margin: 0.55rem 0 0; font-size: 0.72rem; color: #64748b; }
+.lox-sit-card--featured {
+  border-color: rgba(241, 90, 41, 0.45);
+  background: linear-gradient(145deg, #fff7f3, #fff);
+  grid-column: 1 / -1;
+}
+@media (min-width: 960px) {
+  .lox-sit-card--featured { grid-column: span 2; }
+}
+.dark .lox-sit-card--featured, html.dark .lox-sit-card--featured {
+  background: linear-gradient(145deg, #1c1917, #0f172a);
+  border-color: rgba(241, 90, 41, 0.5);
+}
+.lox-sit-card--featured .lox-sit-icon {
+  background: rgba(241, 90, 41, 0.12);
+  color: #F15A29;
+}
+.lox-btn-generate {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+}
+.lox-btn-sm {
+  font-size: 0.72rem;
+  padding: 0.4rem 0.7rem;
+}
+.lox-improve {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+.lox-improve-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-right: 0.15rem;
+}
+.lox-advanced {
+  margin: 0.5rem 0 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px dashed #cbd5e1;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+}
+.lox-advanced summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #64748b;
+  list-style: none;
+}
+.lox-advanced summary::-webkit-details-marker { display: none; }
+.lox-advanced[open] { padding-bottom: 0.65rem; }
+.lox-preview--busy { opacity: 0.55; pointer-events: none; }
+.lox-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
