@@ -79,6 +79,16 @@
   padding:.6rem .75rem;font-size:.9rem;font-family:inherit;
 }
 #${GATE_ID} input:focus{outline:none;border-color:#00A89D;box-shadow:0 0 0 3px rgba(0,168,157,.15)}
+#${GATE_ID} .asc-pass-wrap{position:relative;display:block}
+#${GATE_ID} .asc-pass-wrap input{padding-right:2.75rem}
+#${GATE_ID} .asc-pass-toggle{
+  position:absolute;right:.35rem;top:50%;transform:translateY(-50%);
+  border:0;background:transparent;color:#64748b;width:2.25rem;height:2.25rem;
+  border-radius:.55rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  font-size:.95rem;padding:0;
+}
+#${GATE_ID} .asc-pass-toggle:hover{color:#0f766e;background:rgba(0,168,157,.08)}
+#${GATE_ID} .asc-pass-toggle:focus-visible{outline:2px solid #00A89D;outline-offset:1px}
 #${GATE_ID} .asc-row{display:flex;align-items:center;gap:.45rem;margin:.65rem 0;font-size:.8rem;color:#475569}
 #${GATE_ID} .asc-row input{width:auto}
 #${GATE_ID} .asc-btn{
@@ -212,11 +222,16 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
         '<label for="asc-email">Email</label>' +
         '<input id="asc-email" name="email" type="email" autocomplete="username" required placeholder="you@example.com">' +
         '<label for="asc-pass">Password</label>' +
-        '<input id="asc-pass" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">' +
+        passwordFieldHtml('asc-pass', {
+          name: 'password',
+          autocomplete: 'current-password',
+          placeholder: '••••••••'
+        }) +
         '<div class="asc-row"><input type="checkbox" id="asc-remember" checked> <label for="asc-remember" style="margin:0;font-weight:600">Remember this device (30 days)</label></div>' +
         '<button type="submit" class="asc-btn" id="asc-login-btn">Sign in</button>' +
         '<button type="button" class="asc-btn asc-btn-ghost" id="asc-forgot-btn">Forgot password?</button>' +
         '</form>';
+      bindPasswordToggles(panel);
       panel.querySelector('#asc-login-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         showError(errEl, '');
@@ -278,10 +293,15 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
         '<label for="asc-ilo">Ruoff LO you work with (optional)</label>' +
         '<input id="asc-ilo" type="text" placeholder="LO name">' +
         '<label for="asc-ipass">Create password (min 8)</label>' +
-        '<input id="asc-ipass" type="password" required minlength="8" autocomplete="new-password">' +
+        passwordFieldHtml('asc-ipass', {
+          name: 'password',
+          minlength: 8,
+          autocomplete: 'new-password'
+        }) +
         '<div class="asc-row"><input type="checkbox" id="asc-iremember" checked> <label for="asc-iremember" style="margin:0;font-weight:600">Remember this device</label></div>' +
         '<button type="submit" class="asc-btn">Create account &amp; enter</button>' +
         '</form>';
+      bindPasswordToggles(panel);
       panel.querySelector('#asc-invite-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         showError(errEl, '');
@@ -371,6 +391,46 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
       .replace(/</g, '&lt;');
+  }
+
+  function passwordFieldHtml(id, opts) {
+    opts = opts || {};
+    return (
+      '<div class="asc-pass-wrap">' +
+      '<input id="' +
+      id +
+      '" name="' +
+      (opts.name || id) +
+      '" type="password" required' +
+      (opts.minlength ? ' minlength="' + opts.minlength + '"' : '') +
+      (opts.autocomplete ? ' autocomplete="' + opts.autocomplete + '"' : '') +
+      (opts.placeholder ? ' placeholder="' + escapeAttr(opts.placeholder) + '"' : '') +
+      '>' +
+      '<button type="button" class="asc-pass-toggle" data-pass-toggle="' +
+      id +
+      '" aria-label="Show password" title="Show password">' +
+      '<i class="fas fa-eye" aria-hidden="true"></i></button></div>'
+    );
+  }
+
+  function bindPasswordToggles(rootEl) {
+    if (!rootEl) return;
+    rootEl.querySelectorAll('[data-pass-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-pass-toggle');
+        const input = document.getElementById(id);
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.setAttribute('title', show ? 'Hide password' : 'Show password');
+        const icon = btn.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-eye', !show);
+          icon.classList.toggle('fa-eye-slash', show);
+        }
+      });
+    });
   }
 
   function removeGate() {

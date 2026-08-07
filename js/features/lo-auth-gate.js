@@ -48,6 +48,11 @@ background:linear-gradient(145deg,#001429 0%,#002B5C 48%,#0f766e 100%);font-fami
 #${GATE_ID} label{display:block;font-size:.72rem;font-weight:800;color:#002B5C;margin:.55rem 0 .25rem}
 #${GATE_ID} input[type=text],#${GATE_ID} input[type=email],#${GATE_ID} input[type=password]{width:100%;box-sizing:border-box;border:2px solid #e2e8f0;border-radius:.75rem;padding:.6rem .75rem;font-size:.9rem;font-family:inherit}
 #${GATE_ID} input:focus{outline:none;border-color:#00A89D;box-shadow:0 0 0 3px rgba(0,168,157,.15)}
+#${GATE_ID} .lo-pass-wrap{position:relative;display:block}
+#${GATE_ID} .lo-pass-wrap input{padding-right:2.75rem}
+#${GATE_ID} .lo-pass-toggle{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#64748b;width:2.25rem;height:2.25rem;border-radius:.55rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:.95rem;padding:0}
+#${GATE_ID} .lo-pass-toggle:hover{color:#0f766e;background:rgba(0,168,157,.08)}
+#${GATE_ID} .lo-pass-toggle:focus-visible{outline:2px solid #00A89D;outline-offset:1px}
 #${GATE_ID} .lo-row{display:flex;align-items:center;gap:.45rem;margin:.65rem 0;font-size:.8rem;color:#475569}
 #${GATE_ID} .lo-row input{width:auto}
 #${GATE_ID} .lo-btn{width:100%;margin-top:.75rem;border:0;border-radius:999px;padding:.7rem 1rem;font-weight:800;font-size:.9rem;cursor:pointer;background:linear-gradient(135deg,#00A89D,#0d9488);color:#fff}
@@ -102,6 +107,44 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
       .replace(/</g, '&lt;');
   }
 
+  function passwordFieldHtml(id, opts) {
+    opts = opts || {};
+    return (
+      '<div class="lo-pass-wrap">' +
+      '<input id="' +
+      id +
+      '" type="password" required' +
+      (opts.minlength ? ' minlength="' + opts.minlength + '"' : '') +
+      (opts.autocomplete ? ' autocomplete="' + opts.autocomplete + '"' : '') +
+      (opts.placeholder ? ' placeholder="' + escapeAttr(opts.placeholder) + '"' : '') +
+      '>' +
+      '<button type="button" class="lo-pass-toggle" data-pass-toggle="' +
+      id +
+      '" aria-label="Show password" title="Show password">' +
+      '<i class="fas fa-eye" aria-hidden="true"></i></button></div>'
+    );
+  }
+
+  function bindPasswordToggles(rootEl) {
+    if (!rootEl) return;
+    rootEl.querySelectorAll('[data-pass-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-pass-toggle');
+        const input = document.getElementById(id);
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.setAttribute('title', show ? 'Hide password' : 'Show password');
+        const icon = btn.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-eye', !show);
+          icon.classList.toggle('fa-eye-slash', show);
+        }
+      });
+    });
+  }
+
   function renderGate(mode) {
     injectStyles();
     document.documentElement.classList.remove('lo-awaiting-auth');
@@ -148,10 +191,11 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
         '<label for="lo-email">Ruoff email</label>' +
         '<input id="lo-email" type="email" required autocomplete="username" placeholder="you@ruoff.com">' +
         '<label for="lo-pass">Password</label>' +
-        '<input id="lo-pass" type="password" required autocomplete="current-password">' +
+        passwordFieldHtml('lo-pass', { autocomplete: 'current-password' }) +
         '<div class="lo-row"><input type="checkbox" id="lo-remember" checked> <label for="lo-remember" style="margin:0;font-weight:600">Remember this device (30 days)</label></div>' +
         '<button type="submit" class="lo-btn" id="lo-login-btn">Sign in</button>' +
         '<button type="button" class="lo-btn lo-btn-ghost" id="lo-forgot">Forgot password?</button></form>';
+      bindPasswordToggles(panel);
       panel.querySelector('#lo-login-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         showErr(errEl, '');
@@ -200,9 +244,10 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
         '<label for="lo-remail">Ruoff email</label>' +
         '<input id="lo-remail" type="email" required autocomplete="email" placeholder="you@ruoff.com">' +
         '<label for="lo-rpass">Password (min 8)</label>' +
-        '<input id="lo-rpass" type="password" required minlength="8" autocomplete="new-password">' +
+        passwordFieldHtml('lo-rpass', { minlength: 8, autocomplete: 'new-password' }) +
         '<div class="lo-row"><input type="checkbox" id="lo-rremember" checked> <label for="lo-rremember" style="margin:0;font-weight:600">Remember this device</label></div>' +
         '<button type="submit" class="lo-btn">Create account &amp; enter</button></form>';
+      bindPasswordToggles(panel);
       panel.querySelector('#lo-reg-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         showErr(errEl, '');
