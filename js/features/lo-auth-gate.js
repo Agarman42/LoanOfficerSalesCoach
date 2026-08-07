@@ -69,9 +69,8 @@ body.lo-auth-locked{overflow:hidden}
 #sidebar a[href="#invite-realtors"]{display:none}
 body.lo-is-admin #sidebar a[href="#lo-admin"]{display:flex}
 body.lo-can-invite #sidebar a[href="#invite-realtors"],
-body.lo-can-invite #sidebar-invite-realtor,
-body.lo-can-invite .lo-invite-home-cta{display:flex!important}
-.lo-invite-home-cta{display:none}
+body.lo-can-invite #sidebar-invite-realtor{display:flex!important}
+#sidebar-invite-realtor{display:none}
 html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibility:hidden!important}
 .lo-profile-account-bar{border-top:1px solid #e5e7eb;margin-top:.5rem;padding-top:.75rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem}
 .dark .lo-profile-account-bar{border-top-color:#374151}

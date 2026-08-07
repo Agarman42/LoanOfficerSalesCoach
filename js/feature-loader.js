@@ -18,7 +18,7 @@
   'js/features/global-search.js?v=20260719-content-hub',
   'js/features/section-bottom-banners.js?v=20260720-review',
   'js/features/coach-polish.js?v=20260721-ux-polish',
-  'js/features/partner-share.js?v=20260731-headshot-ttl',
+  'js/features/partner-share.js?v=20260807-partners-invite-order',
   'js/app-version.js?v=20260731-v381',
   'js/features/generation-rules.js?v=20260720-hobby-restraint',
   'js/features/save-ribbon.js',

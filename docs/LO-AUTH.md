@@ -31,7 +31,7 @@ Must set the **same** `AUTH_BRIDGE_SECRET` on both Render services.
 | Action | Where |
 |--------|--------|
 | Sign in / create account | Full-screen gate when logged out |
-| Invite a realtor partner | **Home hero + strip**, top of sidebar, and `#invite-realtors` page (not in avatar menu) |
+| Invite a realtor partner | **Home → Partners card (step 1)**, sidebar “Invite a realtor partner”, `#invite-realtors` page |
 | My Profile / Sign out | Header **My Profile** opens profile modal — Sign out is in the profile account bar |
 | Admin LO users | Sidebar **Admin · LO users** (admin only) |
 
