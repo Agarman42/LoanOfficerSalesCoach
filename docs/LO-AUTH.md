@@ -31,8 +31,15 @@ Must set the **same** `AUTH_BRIDGE_SECRET` on both Render services.
 | Action | Where |
 |--------|--------|
 | Sign in / create account | Full-screen gate when logged out |
-| Invite realtor | Sidebar **Invite realtor** · account menu |
+| Invite a realtor partner | **Home hero + strip**, top of sidebar, and `#invite-realtors` page (not in avatar menu) |
+| My Profile / Sign out | Header **My Profile** opens profile modal — Sign out is in the profile account bar |
 | Admin LO users | Sidebar **Admin · LO users** (admin only) |
+
+### Branding on invite (bridge)
+
+Invite payload includes `inviter_brand`: name, email, phone, NMLS, headshotUrl, title, company, location, optional partner_token / partner_share_url (from LO partner publish).  
+Agent stores it on the invite and copies to `user.linked_lo_brand` on accept.  
+Agent UI applies it via header LO plate + sticky footer (`lo-brand-chrome.js` / `applyLinkedLoBrand`).
 
 ## Env (LO Render)
 

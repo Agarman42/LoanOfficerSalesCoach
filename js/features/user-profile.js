@@ -1583,6 +1583,8 @@
     }
 
     loadProfileIntoForm();
+    refreshProfileAccountBar();
+    bindProfileSignOut();
 
     // Incomplete profiles open Guided setup (distinct step-by-step UI).
     // forceFull (partner share, deep links, explicit full edit) always uses tabs.
@@ -1932,13 +1934,60 @@
   window.resolveExperienceYears = resolveExperienceYears;
   window.formatExperienceYearsDisplay = formatExperienceYearsDisplay;
 
+  function refreshProfileAccountBar() {
+    const bar = document.getElementById('profile-account-bar');
+    if (!bar) return;
+    const authUser =
+      (typeof window.loAuth === 'object' && window.loAuth.getUser && window.loAuth.getUser()) ||
+      window.__loUser ||
+      null;
+    if (!authUser || !authUser.email) {
+      bar.classList.add('hidden');
+      return;
+    }
+    bar.classList.remove('hidden');
+    const nameEl = document.getElementById('profile-account-name');
+    const emailEl = document.getElementById('profile-account-email');
+    if (nameEl) nameEl.textContent = authUser.name || 'Signed in';
+    if (emailEl) emailEl.textContent = authUser.email || '';
+  }
+
+  function bindProfileSignOut() {
+    const btn = document.getElementById('profile-sign-out-btn');
+    if (!btn || btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', async () => {
+      if (!confirm('Sign out of Loan Officer Sales Coach on this device?')) return;
+      try {
+        if (window.loAuth && typeof window.loAuth.logout === 'function') {
+          await window.loAuth.logout();
+        } else {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+          location.reload();
+        }
+      } catch (e) {
+        location.reload();
+      }
+      closeModal();
+    });
+  }
+
   window.openUserProfile = function openUserProfile(forceFull) {
     openModal(!!forceFull);
+    refreshProfileAccountBar();
+    bindProfileSignOut();
   };
 
   window.closeUserProfile = function closeUserProfile() {
     closeModal();
   };
+
+  window.refreshProfileAccountBar = refreshProfileAccountBar;
+
+  document.addEventListener('lo-auth-ready', () => {
+    refreshProfileAccountBar();
+    bindProfileSignOut();
+  });
 
   window.applyRuoffBlogPreset = applyRuoffBlogPreset;
   window.applyRuoffWebsitePreset = applyRuoffWebsitePreset;

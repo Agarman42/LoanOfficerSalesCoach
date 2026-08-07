@@ -346,7 +346,53 @@
     }
   }
 
+  /**
+   * Apply LO branding from invite accept / session (no ?lo= token required).
+   * Snapshot fields match LO partner plate: name, phone, email, nmls, headshotUrl, title, company.
+   */
+  function applyLinkedLoBrand(brand, opts) {
+    opts = opts || {};
+    if (!brand || !brand.name) return false;
+    const card = {
+      name: String(brand.name || '').trim(),
+      phone: String(brand.phone || '').trim(),
+      email: String(brand.email || '').trim(),
+      nmls: String(brand.nmls || '').trim(),
+      headshotUrl: String(brand.headshotUrl || '').trim(),
+      title: String(brand.title || 'Your Ruoff Loan Officer').trim() || 'Your Ruoff Loan Officer',
+      company: String(brand.company || 'Ruoff Mortgage').trim(),
+      location: String(brand.location || '').trim()
+    };
+    if (!card.name) return false;
+    writeCachedCard(card);
+    paintBrandPlate(card);
+    // Prefer durable partner short code when LO published one
+    const tok = String(brand.partner_token || '').trim();
+    if (tok && !/^s1\./.test(tok)) {
+      persistToken(tok);
+      if (opts.putInUrl !== false) ensureTokenInUrl(tok);
+      // Best-effort refresh from LO partner API (same as ?lo= flow)
+      fetchCard(tok)
+        .then((fresh) => {
+          if (fresh && fresh.name) {
+            writeCachedCard(fresh);
+            paintBrandPlate(fresh);
+          }
+        })
+        .catch(() => {
+          /* keep snapshot */
+        });
+    }
+    try {
+      localStorage.setItem('loLinkedBrandFromInvite', JSON.stringify(card));
+    } catch (e) {
+      /* ignore */
+    }
+    return true;
+  }
+
   window.refreshLoBrandChrome = resolveAndPaint;
+  window.applyLinkedLoBrand = applyLinkedLoBrand;
   window.getLoPartnerCard = function () {
     return window.__loPartnerCard || null;
   };
@@ -358,6 +404,15 @@
   } else {
     resolveAndPaint();
   }
+
+  // After auth: if no URL token, use brand attached to realtor account from LO invite
+  document.addEventListener('asc-auth-ready', function (ev) {
+    const u = (ev && ev.detail && ev.detail.user) || window.__ascUser;
+    const brand = u && u.linked_lo_brand;
+    if (brand && brand.name && !readTokenFromUrl()) {
+      applyLinkedLoBrand(brand, { putInUrl: !!brand.partner_token });
+    }
+  });
 
   // If in-app nav changes the URL without ?lo=, re-attach short code from storage
   window.addEventListener('hashchange', () => {

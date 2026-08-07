@@ -153,6 +153,7 @@ function publicUser(u) {
   const role = u.role || 'realtor';
   const email = u.email || '';
   const inviter = role === 'admin' || role === 'lo' || isRuoffEmail(email);
+  const brand = u.linked_lo_brand && typeof u.linked_lo_brand === 'object' ? u.linked_lo_brand : null;
   return {
     id: u.id,
     email: email,
@@ -161,7 +162,9 @@ function publicUser(u) {
     phone: u.phone || '',
     role: role,
     status: u.status,
-    referred_by_lo_name: u.referred_by_lo_name || '',
+    referred_by_lo_name: u.referred_by_lo_name || (brand && brand.name) || '',
+    invited_by: u.invited_by || null,
+    linked_lo_brand: brand,
     created_at: u.created_at,
     last_login_at: u.last_login_at || null,
     login_count: u.login_count || 0,

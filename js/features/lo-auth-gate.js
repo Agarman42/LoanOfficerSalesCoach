@@ -60,20 +60,21 @@ background:linear-gradient(145deg,#001429 0%,#002B5C 48%,#0f766e 100%);font-fami
 #${GATE_ID} .lo-hint{margin-top:.85rem;font-size:.72rem;color:#94a3b8;line-height:1.4;text-align:center}
 body.lo-auth-locked > :not(#${GATE_ID}){visibility:hidden!important;pointer-events:none!important}
 body.lo-auth-locked{overflow:hidden}
-.lo-account-menu{position:relative;display:inline-flex;align-items:center}
-.lo-account-btn{display:inline-flex;align-items:center;gap:.4rem;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:999px;padding:.35rem .7rem;font-size:.75rem;font-weight:700;cursor:pointer}
-.lo-account-drop{display:none;position:absolute;right:0;top:calc(100% + .35rem);min-width:210px;background:#fff;color:#0f172a;border-radius:.85rem;box-shadow:0 12px 30px -12px rgba(0,0,0,.35);padding:.45rem;z-index:80;border:1px solid #e2e8f0}
-.lo-account-drop.is-open{display:block}
-.lo-account-drop .lo-who{padding:.45rem .55rem;font-size:.78rem;border-bottom:1px solid #f1f5f9;margin-bottom:.25rem}
-.lo-account-drop .lo-who strong{display:block;color:#002B5C}
-.lo-account-drop .lo-who span{color:#64748b;font-size:.72rem;word-break:break-all}
-.lo-account-drop button{width:100%;text-align:left;border:0;background:transparent;padding:.45rem .55rem;border-radius:.55rem;font-size:.8rem;font-weight:700;color:#0f172a;cursor:pointer}
-.lo-account-drop button:hover{background:#f1f5f9}
-.lo-account-drop button.danger{color:#b91c1c}
-#sidebar a[href="#lo-admin"],#sidebar a[href="#invite-realtors"]{display:none}
+#sidebar a[href="#lo-admin"]{display:none}
+#sidebar a[href="#invite-realtors"]{display:none}
 body.lo-is-admin #sidebar a[href="#lo-admin"]{display:flex}
-body.lo-can-invite #sidebar a[href="#invite-realtors"]{display:flex}
+body.lo-can-invite #sidebar a[href="#invite-realtors"],
+body.lo-can-invite #sidebar-invite-realtor,
+body.lo-can-invite .lo-invite-home-cta{display:flex!important}
+.lo-invite-home-cta{display:none}
 html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibility:hidden!important}
+.lo-profile-account-bar{border-top:1px solid #e5e7eb;margin-top:.5rem;padding-top:.75rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem}
+.dark .lo-profile-account-bar{border-top-color:#374151}
+.lo-profile-account-meta{font-size:.75rem;color:#64748b;min-width:0}
+.lo-profile-account-meta strong{display:block;color:#002B5C;font-size:.8rem}
+.dark .lo-profile-account-meta strong{color:#e2e8f0}
+.lo-profile-signout{border:1px solid #fecaca;color:#b91c1c;background:#fef2f2;border-radius:999px;padding:.45rem .9rem;font-size:.75rem;font-weight:800;cursor:pointer}
+.lo-profile-signout:hover{background:#fee2e2}
 `;
     document.head.appendChild(s);
   }
@@ -265,62 +266,31 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
 
   function paintAccountMenu() {
     injectStyles();
-    const cluster = document.querySelector('.header-quote-actions');
-    if (!cluster || !currentUser) return;
-    let wrap = document.getElementById('lo-account-wrap');
-    if (!wrap) {
-      wrap = document.createElement('div');
-      wrap.id = 'lo-account-wrap';
-      wrap.className = 'lo-account-menu';
-      cluster.insertBefore(wrap, cluster.firstChild);
+    // Top chip: open My Profile only (invite lives on Home / sidebar; Sign out is in Profile)
+    const profileBtn = document.getElementById('open-profile-btn');
+    if (profileBtn && currentUser) {
+      const shortName = (currentUser.name || currentUser.email || 'My Profile').split(' ')[0];
+      const label = profileBtn.querySelector('span.hidden, span.sm\\:inline, span');
+      // Prefer existing "My Profile" span — update to first name when known
+      const spans = profileBtn.querySelectorAll('span');
+      spans.forEach(function (sp) {
+        if (sp.classList.contains('hidden') || /My Profile|Profile/i.test(sp.textContent || '')) {
+          sp.textContent = shortName || 'My Profile';
+        }
+      });
+      profileBtn.title = (currentUser.name || 'My Profile') + ' · open to edit or sign out';
+      profileBtn.setAttribute(
+        'aria-label',
+        'My Profile' + (currentUser.email ? ' (' + currentUser.email + ')' : '')
+      );
+      profileBtn.onclick = function (e) {
+        e.preventDefault();
+        if (typeof window.openUserProfile === 'function') window.openUserProfile(true);
+      };
     }
-    const shortName = (currentUser.name || currentUser.email || 'Account').split(' ')[0];
-    const canInvite =
-      currentUser.can_invite_realtors || currentUser.role === 'admin' || currentUser.role === 'loan_officer';
-    wrap.innerHTML =
-      '<button type="button" class="lo-account-btn" id="lo-account-btn">' +
-      '<i class="fas fa-user-circle"></i> <span class="hidden sm:inline">' +
-      escapeAttr(shortName) +
-      '</span></button>' +
-      '<div class="lo-account-drop" id="lo-account-drop">' +
-      '<div class="lo-who"><strong>' +
-      escapeAttr(currentUser.name || 'Account') +
-      '</strong><span>' +
-      escapeAttr(currentUser.email) +
-      '</span></div>' +
-      (canInvite
-        ? '<button type="button" data-lo-invite>Invite realtor</button>'
-        : '') +
-      (currentUser.role === 'admin'
-        ? '<button type="button" data-lo-admin>Admin · LO users</button>'
-        : '') +
-      '<button type="button" class="danger" data-lo-logout>Sign out</button></div>';
-
-    const btn = wrap.querySelector('#lo-account-btn');
-    const drop = wrap.querySelector('#lo-account-drop');
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      drop.classList.toggle('is-open');
-    });
-    document.addEventListener('click', function () {
-      drop.classList.remove('is-open');
-    });
-    wrap.querySelector('[data-lo-logout]')?.addEventListener('click', async function () {
-      await api('/api/auth/logout', { method: 'POST' });
-      currentUser = null;
-      window.__loUser = null;
-      document.body.classList.remove('lo-is-admin', 'lo-can-invite');
-      wrap.remove();
-      renderGate('login');
-    });
-    wrap.querySelector('[data-lo-invite]')?.addEventListener('click', function () {
-      if (typeof window.showSection === 'function') window.showSection('invite-realtors');
-      else location.hash = 'invite-realtors';
-    });
-    wrap.querySelector('[data-lo-admin]')?.addEventListener('click', function () {
-      if (typeof window.showSection === 'function') window.showSection('lo-admin');
-      else location.hash = 'lo-admin';
-    });
+    // Remove legacy dropdown if present
+    const old = document.getElementById('lo-account-wrap');
+    if (old) old.remove();
   }
 
   async function bootstrap() {

@@ -305,7 +305,10 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
             return;
           }
           currentUser = data.user;
-          // Clean invite from hash
+          if (data.linked_lo_brand && currentUser) {
+            currentUser.linked_lo_brand = data.linked_lo_brand;
+          }
+          // Clean invite from hash (keep ?lo= if present)
           if (location.hash && /invite=/i.test(location.hash)) {
             history.replaceState(null, '', location.pathname + location.search);
           }
@@ -399,6 +402,19 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
           span.textContent = isAdm ? 'Admin · usage' : 'Invite partners';
         }
       });
+    } catch (e) {
+      /* ignore */
+    }
+    // Apply inviting LO brand from session (invite accept) when no ?lo= in URL
+    try {
+      if (
+        currentUser &&
+        currentUser.linked_lo_brand &&
+        currentUser.linked_lo_brand.name &&
+        typeof window.applyLinkedLoBrand === 'function'
+      ) {
+        window.applyLinkedLoBrand(currentUser.linked_lo_brand);
+      }
     } catch (e) {
       /* ignore */
     }

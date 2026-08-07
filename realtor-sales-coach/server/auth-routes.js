@@ -437,6 +437,12 @@ function mountAuthRoutes(app) {
         const id = store.newId('usr');
         const now = new Date().toISOString();
         const emailNorm = store.normalizeEmail(finalEmail);
+        const brand = inv.inviter_brand && typeof inv.inviter_brand === 'object' ? inv.inviter_brand : null;
+        const loName =
+          referred ||
+          (brand && brand.name) ||
+          inv.created_by_name ||
+          '';
         s.users[id] = {
           id,
           email: emailNorm,
@@ -448,7 +454,8 @@ function mountAuthRoutes(app) {
           status: 'active',
           invite_code: code,
           invited_by: inv.created_by || null,
-          referred_by_lo_name: referred,
+          referred_by_lo_name: loName,
+          linked_lo_brand: brand,
           created_at: now,
           last_login_at: now,
           login_count: 1
@@ -456,7 +463,7 @@ function mountAuthRoutes(app) {
         inv.used_at = now;
         inv.used_by_user_id = id;
         store.recordUsage(s, id, 'login', '/accept-invite', { invite: code });
-        return { ok: true, user: store.publicUser(s.users[id]) };
+        return { ok: true, user: store.publicUser(s.users[id]), brand: brand };
       });
 
       if (!result.ok) {
@@ -464,7 +471,11 @@ function mountAuthRoutes(app) {
       }
       const sess = createSessionToken(result.user.id, remember);
       setSessionCookie(res, req, sess.token, sess.maxAgeSec);
-      return res.json({ ok: true, user: result.user });
+      return res.json({
+        ok: true,
+        user: result.user,
+        linked_lo_brand: result.brand || (result.user && result.user.linked_lo_brand) || null
+      });
     } catch (e) {
       console.error('[auth] accept-invite', e.message);
       return res.status(500).json({ error: 'Could not accept invite' });
@@ -933,20 +944,49 @@ function mountAuthRoutes(app) {
           existing.created_by_email = req.body?.created_by_email || existing.created_by_email;
           existing.source = req.body?.source || existing.source || 'lo_sales_coach';
           existing.revoked_at = null;
+          if (req.body?.inviter_brand && typeof req.body.inviter_brand === 'object') {
+            existing.inviter_brand = req.body.inviter_brand;
+            if (req.body.inviter_brand.name) existing.created_by_name = req.body.inviter_brand.name;
+            if (req.body.inviter_brand.email) existing.created_by_email = req.body.inviter_brand.email;
+          }
           return { ok: true, invite: existing, updated: true };
         }
+        const brandRaw = req.body?.inviter_brand && typeof req.body.inviter_brand === 'object'
+          ? req.body.inviter_brand
+          : null;
+        const inviterBrand = brandRaw
+          ? {
+              invited_by_user_id: String(brandRaw.invited_by_user_id || req.body?.created_by || '').slice(0, 80) || null,
+              email: String(brandRaw.email || req.body?.created_by_email || '').trim().slice(0, 200),
+              name: String(brandRaw.name || req.body?.created_by_name || '').trim().slice(0, 120),
+              phone: String(brandRaw.phone || '').trim().slice(0, 40),
+              nmls: String(brandRaw.nmls || '').trim().slice(0, 40),
+              title: String(brandRaw.title || 'Your Ruoff Loan Officer').trim().slice(0, 80),
+              company: String(brandRaw.company || 'Ruoff Mortgage').trim().slice(0, 80),
+              location: String(brandRaw.location || '').trim().slice(0, 120),
+              headshotUrl: String(brandRaw.headshotUrl || '').trim().slice(0, 2000),
+              blogUrl: String(brandRaw.blogUrl || '').trim().slice(0, 500),
+              companyWebsite: String(brandRaw.companyWebsite || '').trim().slice(0, 500),
+              newsletterColorBundle: String(brandRaw.newsletterColorBundle || '').trim().slice(0, 80),
+              partner_token: brandRaw.partner_token ? String(brandRaw.partner_token).slice(0, 120) : null,
+              partner_share_url: brandRaw.partner_share_url
+                ? String(brandRaw.partner_share_url).slice(0, 500)
+                : null
+            }
+          : null;
         const inv = {
           code,
           email_optional: emailOptional,
           created_by: req.body?.created_by || 'lo_bridge',
-          created_by_name: req.body?.created_by_name || '',
-          created_by_email: req.body?.created_by_email || '',
+          created_by_name: (inviterBrand && inviterBrand.name) || req.body?.created_by_name || '',
+          created_by_email: (inviterBrand && inviterBrand.email) || req.body?.created_by_email || '',
           created_at: new Date().toISOString(),
           expires_at: expiresAt,
           used_at: null,
           used_by_user_id: null,
           revoked_at: null,
-          source: req.body?.source || 'lo_sales_coach'
+          source: req.body?.source || 'lo_sales_coach',
+          inviter_brand: inviterBrand
         };
         s.invites[code] = inv;
         return { ok: true, invite: inv, updated: false };

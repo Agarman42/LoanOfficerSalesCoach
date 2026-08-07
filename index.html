@@ -132,12 +132,12 @@
       Home Coach Setup: must not wait for sequential feature-loader (50+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
-    <script defer src="js/features/user-profile.js?v=20260730-mobile-pass4"></script>
+    <script defer src="js/features/user-profile.js?v=20260807-signout"></script>
     <script defer src="js/features/home-favorites.js?v=20260721-home-fast"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <!-- LO auth gate (@ruoff.com) + invite realtors / admin -->
-    <script defer src="js/features/lo-auth-gate.js?v=20260807-lo-auth"></script>
-    <script defer src="js/features/lo-invite-admin.js?v=20260807-lo-auth"></script>
+    <script defer src="js/features/lo-auth-gate.js?v=20260807-lo-invite-ui"></script>
+    <script defer src="js/features/lo-invite-admin.js?v=20260807-lo-invite-ui"></script>
     <script src="js/early-boot.js?v=20260730-gen-modal"></script>
     <style id="lo-auth-boot-lock">
       html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style) { visibility: hidden !important; }
@@ -261,9 +261,16 @@
             <ul class="space-y-0.5 px-2 text-sm mb-1">
                 <li><a href="#home" class="sidebar-link px-4 py-2.5"><i class="fas fa-home w-5"></i> Home</a></li>
                 <li>
+                  <a href="#invite-realtors" id="sidebar-invite-realtor" class="sidebar-link px-4 py-2.5 lo-invite-home-cta"
+                     style="display:none"
+                     onclick="if(typeof window.showSection==='function'){window.showSection('invite-realtors');} return true;">
+                    <i class="fas fa-user-plus w-5"></i> Invite a realtor partner
+                  </a>
+                </li>
+                <li>
                   <a href="#" id="sidebar-share-partners" class="sidebar-link px-4 py-2.5"
                      onclick="if(typeof window.openShareWithPartners==='function'){window.openShareWithPartners();} return false;">
-                    <i class="fas fa-handshake w-5"></i> Share with Partners
+                    <i class="fas fa-handshake w-5"></i> Share branded link
                   </a>
                 </li>
             </ul>
@@ -317,7 +324,6 @@
                 <li><a href="#books" class="sidebar-link px-4 py-2.5"><i class="fas fa-book w-5"></i> Book Vault</a></li>
                 <li><a href="#client-translation" class="sidebar-link px-4 py-2.5"><i class="fas fa-language w-5"></i> Client Translation</a></li>
                 <li><a href="#saved-items" data-home-fav="saved-items" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link px-4 py-2.5 flex items-center gap-2"><i class="fas fa-bookmark w-5 shrink-0"></i><span class="flex-1">My Saved Items</span><span id="global-saved-count" class="hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#00A89D] text-white rounded-full items-center justify-center shrink-0">0</span></a></li>
-                <li><a href="#invite-realtors" class="sidebar-link px-4 py-2.5" style="display:none"><i class="fas fa-user-plus w-5"></i> Invite realtor</a></li>
                 <li><a href="#lo-admin" class="sidebar-link px-4 py-2.5" style="display:none"><i class="fas fa-shield-halved w-5"></i> Admin · LO users</a></li>
             </ul>
 
@@ -359,6 +365,10 @@
               <div id="home-hero-stats" class="flex flex-wrap gap-2 mt-4" aria-label="Your setup status"></div>
             </div>
             <div class="flex flex-wrap gap-2.5 shrink-0">
+              <button type="button" id="home-invite-realtor-btn" class="lo-invite-home-cta inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm text-[#001429] bg-white shadow-lg hover:brightness-105 hover:-translate-y-0.5 transition" style="display:none"
+                onclick="if(typeof window.showSection==='function')window.showSection('invite-realtors')">
+                <i class="fas fa-user-plus text-[#00A89D]"></i> Invite a realtor partner
+              </button>
               <button type="button" onclick="window.showSection && window.showSection('ai-chat')" class="inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm text-white bg-gradient-to-r from-[#00A89D] to-[#F15A29] shadow-lg shadow-[#00A89D]/30 hover:brightness-105 hover:-translate-y-0.5 transition">
                 <i class="fas fa-robot"></i> Open AI Coach
               </button>
@@ -367,6 +377,23 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Primary partner invite strip (visible when LO is signed in) -->
+      <div id="home-invite-strip" class="lo-invite-home-cta rounded-2xl border border-[#00A89D]/35 bg-gradient-to-r from-[#00A89D]/10 via-white to-[#F15A29]/8 dark:from-[#00A89D]/15 dark:via-gray-900 dark:to-gray-900 shadow-md overflow-hidden" style="display:none">
+        <div class="px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div class="flex items-start gap-3 min-w-0 flex-1">
+            <span class="w-10 h-10 rounded-2xl bg-[#00A89D]/15 text-[#00A89D] flex items-center justify-center flex-shrink-0"><i class="fas fa-handshake"></i></span>
+            <div class="min-w-0">
+              <div class="text-[10px] font-extrabold tracking-[0.14em] uppercase text-[#00A89D]">Share with partners</div>
+              <h3 class="text-base sm:text-lg font-bold text-[#002B5C] dark:text-white m-0 mt-0.5">Invite a realtor to Agent Sales Coach</h3>
+              <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">One-time link · they set a password · your branding rides along when you invite from here.</p>
+            </div>
+          </div>
+          <button type="button" onclick="if(typeof window.showSection==='function')window.showSection('invite-realtors')" class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-bold text-sm text-white bg-[#00A89D] hover:bg-[#008f85] shadow-md transition">
+            <i class="fas fa-user-plus"></i> Invite a realtor partner
+          </button>
         </div>
       </div>
 
@@ -8950,6 +8977,17 @@
                     <button type="button" id="profile-wizard-next" class="px-5 py-2 text-sm rounded-xl bg-[#00A89D] text-white font-semibold hover:bg-[#008f85] shadow-sm">Continue</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Account bar: signed-in email + Sign out (not in top avatar menu) -->
+        <div id="profile-account-bar" class="lo-profile-account-bar flex-shrink-0 px-4 sm:px-6 md:px-8 py-2.5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 hidden">
+            <div class="lo-profile-account-meta">
+                <strong id="profile-account-name">Account</strong>
+                <span id="profile-account-email" class="break-all"></span>
+            </div>
+            <button type="button" id="profile-sign-out-btn" class="lo-profile-signout">
+                <i class="fas fa-sign-out-alt mr-1"></i> Sign out
+            </button>
         </div>
 
         <!-- Modal Footer — segmented: utility left · navigate/save right -->

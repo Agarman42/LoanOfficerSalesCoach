@@ -72,9 +72,9 @@
 
     el.innerHTML =
       '<div class="text-center mb-6">' +
-      '<span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">AGENT TOOL ACCESS</span>' +
-      '<h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Invite a realtor</h2>' +
-      '<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Create a one-time invite for the <strong>Agent Sales Coach</strong>. They get realtor access there — not this LO tool.</p></div>' +
+      '<span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">SHARE WITH PARTNERS</span>' +
+      '<h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Invite a realtor partner</h2>' +
+      '<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">One-time link to the <strong>Agent Sales Coach</strong>. Your name and branding from My Profile travel with the invite so they see <em>you</em> as their LO.</p></div>' +
       '<div class="grid grid-cols-1 lg:grid-cols-5 gap-5 max-w-5xl mx-auto">' +
       '<div class="lg:col-span-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 bg-white dark:bg-gray-900">' +
       '<h3 class="font-bold text-[#002B5C] dark:text-white mb-1">New invite</h3>' +
@@ -147,15 +147,53 @@
     });
   }
 
+  /** Snapshot of LO public branding for Agent chrome after invite accept */
+  function buildInviterBrand() {
+    let p = {};
+    try {
+      if (typeof window.getUserProfile === 'function') p = window.getUserProfile() || {};
+      else p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    } catch (e) {
+      p = {};
+    }
+    const auth = user() || {};
+    const partnerToken =
+      localStorage.getItem('loPartnerShareToken') ||
+      localStorage.getItem('loPartnerToken') ||
+      '';
+    const partnerUrl = localStorage.getItem('loPartnerShareUrl') || '';
+    return {
+      invited_by_user_id: auth.id || null,
+      email: (auth.email || p.email || '').trim(),
+      name: (p.name || auth.name || '').trim(),
+      phone: (p.phone || '').trim(),
+      nmls: (p.nmls || '').trim(),
+      title: (p.title || 'Your Ruoff Loan Officer').trim() || 'Your Ruoff Loan Officer',
+      company: (p.company || 'Ruoff Mortgage').trim() || 'Ruoff Mortgage',
+      location: (p.location || p.localArea || p.market || '').trim(),
+      headshotUrl: (p.headshotUrl || p['headshot-url'] || '').trim(),
+      blogUrl: (p.blogUrl || p['blog-url'] || '').trim(),
+      companyWebsite: (p.companyWebsite || p['company-website'] || '').trim(),
+      newsletterColorBundle: (p.newsletterColorBundle || p['newsletter-color-bundle'] || '').trim(),
+      partner_token: partnerToken || null,
+      partner_share_url: partnerUrl || null
+    };
+  }
+
   async function createInvite() {
     const btn = document.getElementById('lo-inv-btn');
     const email = document.getElementById('lo-inv-email')?.value;
     const days = document.getElementById('lo-inv-days')?.value;
     if (btn) btn.disabled = true;
     try {
+      const brand = buildInviterBrand();
       const { res, data } = await api('/api/lo/agent-invites', {
         method: 'POST',
-        body: { email: email || undefined, expires_days: Number(days) || 14 }
+        body: {
+          email: email || undefined,
+          expires_days: Number(days) || 14,
+          inviter_brand: brand
+        }
       });
       if (!res.ok) {
         toast((data && data.error) || 'Invite failed', 'error');

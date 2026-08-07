@@ -254,7 +254,8 @@ async function pushInviteToAgent(inv) {
         created_by_name: inv.created_by_name,
         created_by_email: inv.created_by_email,
         created_by: inv.created_by,
-        source: 'lo_sales_coach'
+        source: 'lo_sales_coach',
+        inviter_brand: inv.inviter_brand || null
       },
       {
         headers: {
@@ -503,6 +504,27 @@ function mountLoAuthRoutes(app) {
     }
   });
 
+  function sanitizeInviterBrand(raw, authUser) {
+    const b = raw && typeof raw === 'object' ? raw : {};
+    const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n);
+    return {
+      invited_by_user_id: str(b.invited_by_user_id || (authUser && authUser.id), 80) || null,
+      email: str(b.email || (authUser && authUser.email), 200),
+      name: str(b.name || (authUser && authUser.name), 120),
+      phone: str(b.phone, 40),
+      nmls: str(b.nmls, 40),
+      title: str(b.title || 'Your Ruoff Loan Officer', 80) || 'Your Ruoff Loan Officer',
+      company: str(b.company || 'Ruoff Mortgage', 80) || 'Ruoff Mortgage',
+      location: str(b.location, 120),
+      headshotUrl: str(b.headshotUrl, 2000),
+      blogUrl: str(b.blogUrl, 500),
+      companyWebsite: str(b.companyWebsite, 500),
+      newsletterColorBundle: str(b.newsletterColorBundle, 80),
+      partner_token: str(b.partner_token, 120) || null,
+      partner_share_url: str(b.partner_share_url, 500) || null
+    };
+  }
+
   app.post('/api/lo/agent-invites', requireLo, async (req, res) => {
     const emailOptional = req.body?.email ? store.normalizeEmail(req.body.email) : null;
     const days = Math.min(90, Math.max(1, Number(req.body?.expires_days) || 14));
@@ -510,20 +532,22 @@ function mountLoAuthRoutes(app) {
       .trim()
       .toUpperCase();
     if (!code) code = genInviteCode();
+    const inviterBrand = sanitizeInviterBrand(req.body?.inviter_brand, req.authUser);
 
     const inv = {
       code,
       email_optional: emailOptional,
       created_by: req.authUser.id,
-      created_by_name: req.authUser.name || '',
-      created_by_email: req.authUser.email || '',
+      created_by_name: inviterBrand.name || req.authUser.name || '',
+      created_by_email: inviterBrand.email || req.authUser.email || '',
       created_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + days * 864e5).toISOString(),
       used_at: null,
       used_by_user_id: null,
       revoked_at: null,
       bridge_synced: false,
-      source: 'lo_sales_coach'
+      source: 'lo_sales_coach',
+      inviter_brand: inviterBrand
     };
 
     try {
