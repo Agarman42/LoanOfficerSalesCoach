@@ -53,8 +53,9 @@ function buildCorsOptions() {
         return callback(null, true);
       }
     },
-    methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PATCH', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Bridge-Secret'],
+    credentials: true,
     optionsSuccessStatus: 204
   };
 }
@@ -65,7 +66,30 @@ app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Health first (Render / monitors) — never blocked by static
+// ── LO auth (Ruoff LOs) ──────────────────────────────────────
+let loAuthApi = null;
+try {
+  const { mountLoAuthRoutes } = require('./server/lo-auth-routes');
+  const { seedAdminIfNeeded, STORE_PATH } = require('./server/lo-auth-store');
+  loAuthApi = mountLoAuthRoutes(app);
+  seedAdminIfNeeded()
+    .then((r) => {
+      if (r && r.seeded) {
+        console.log('[lo-auth] Seeded admin:', r.email);
+        if (r.generated && r.password) {
+          console.log('[lo-auth] Generated ADMIN password (copy now):', r.password);
+        }
+      } else {
+        console.log('[lo-auth] Admin present — store:', STORE_PATH);
+      }
+    })
+    .catch((e) => console.warn('[lo-auth] seed failed', e.message));
+  console.log('[lo-auth] Invite-gated auth enabled for LO Sales Coach');
+} catch (e) {
+  console.warn('[lo-auth] failed to mount', e && e.message ? e.message : e);
+}
+
+// Health first (Render / monitors) — never blocked by auth
 app.get('/api/health', (_req, res) => {
   const rawKey = String(process.env.XAI_API_KEY || process.env.GROK_API_KEY || '').trim();
   // Real xAI keys are long (xai-…); short/placeholder values make AI calls fail with 400
@@ -80,6 +104,7 @@ app.get('/api/health', (_req, res) => {
       : keyLooksValid
         ? 'Server key present and looks like a real xai- key'
         : 'Server key is set but looks like a placeholder (too short). Put a real key from https://console.x.ai in .env and restart proxy.js',
+    auth: process.env.AUTH_DISABLED === '1' ? 'disabled' : 'enabled',
     node: process.version,
     time: new Date().toISOString(),
     partnerCards: true,
@@ -134,10 +159,10 @@ for (const candidate of REFI_SRC_CANDIDATES) {
   }
 }
 
-// Static app files — do not expose node_modules / .git / env
+// Static app files — do not expose node_modules / .git / env / auth data
 app.use(
   express.static(ROOT, {
-    index: 'index.html',
+    index: false,
     dotfiles: 'ignore',
     setHeaders(res, filePath) {
       if (
@@ -153,6 +178,10 @@ app.use(
   })
 );
 
+app.use('/data', (_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 // Web Push (VAPID + subscriptions) — LO Sales Coach PWA
 try {
   const { mountPushRoutes } = require('./server/push-routes');
@@ -162,8 +191,13 @@ try {
   console.warn('[push] run: npm install web-push');
 }
 
-// Grok / xAI chat completions proxy
-app.post('/api/v1/chat/completions', async (req, res) => {
+// Grok / xAI chat completions proxy — requires signed-in LO
+app.post('/api/v1/chat/completions', (req, res, next) => {
+  if (loAuthApi && typeof loAuthApi.requireAuthForApi === 'function') {
+    return loAuthApi.requireAuthForApi(req, res, next);
+  }
+  next();
+}, async (req, res) => {
   try {
     let apiKey = req.headers.authorization?.replace(/^Bearer\s+/i, '').trim();
 
@@ -235,11 +269,15 @@ app.use((err, req, res, _next) => {
 // Binding only 0.0.0.0 made http://127.0.0.1:PORT work and http://localhost:PORT fail.
 // host '::' + ipv6Only:false accepts IPv6 and IPv4-mapped connections (Render/Docker fine).
 const server = app.listen({ port: PORT, host: '::', ipv6Only: false }, () => {
-  console.log(`✅ Grok Proxy running on http://localhost:${PORT} (IPv4+IPv6)`);
+  console.log(`✅ LO Sales Coach on http://localhost:${PORT} (IPv4+IPv6)`);
   console.log(`✅ Health: /api/health`);
+  console.log(`✅ Auth: /api/auth/*  Admin: /api/admin/*  Invite: /api/lo/agent-invites`);
   console.log(`✅ Static root: ${ROOT}`);
   if (!process.env.XAI_API_KEY && !process.env.GROK_API_KEY) {
     console.log('⚠️  XAI_API_KEY / GROK_API_KEY not set — AI calls need a browser key or env var');
+  }
+  if (!process.env.AUTH_SESSION_SECRET && !process.env.LO_AUTH_SESSION_SECRET) {
+    console.log('⚠️  AUTH_SESSION_SECRET not set — set a long random secret on Render');
   }
 });
 

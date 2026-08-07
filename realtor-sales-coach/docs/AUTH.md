@@ -115,3 +115,7 @@ With SMTP (future): `POST /api/auth/forgot-password` + email link.
 ## Confirm LO Coach untouched
 
 This feature lives only under `realtor-sales-coach/`. Root LO `proxy.js` / LO `js/` were not modified for auth.
+
+## Bridge from LO Sales Coach
+
+`POST /api/auth/bridge/invite` and `POST /api/auth/bridge/invite/revoke` with header `X-Auth-Bridge-Secret` (same `AUTH_BRIDGE_SECRET` as LO app). Used when LOs create realtor invites from LO Sales Coach.

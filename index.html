@@ -135,7 +135,20 @@
     <script defer src="js/features/user-profile.js?v=20260730-mobile-pass4"></script>
     <script defer src="js/features/home-favorites.js?v=20260721-home-fast"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
+    <!-- LO auth gate (@ruoff.com) + invite realtors / admin -->
+    <script defer src="js/features/lo-auth-gate.js?v=20260807-lo-auth"></script>
+    <script defer src="js/features/lo-invite-admin.js?v=20260807-lo-auth"></script>
     <script src="js/early-boot.js?v=20260730-gen-modal"></script>
+    <style id="lo-auth-boot-lock">
+      html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style) { visibility: hidden !important; }
+    </style>
+    <script>
+      document.documentElement.classList.add('lo-awaiting-auth');
+      window.addEventListener('lo-auth-ready', function () {
+        document.documentElement.classList.remove('lo-awaiting-auth');
+      });
+      setTimeout(function () { document.documentElement.classList.remove('lo-awaiting-auth'); }, 8000);
+    </script>
 </head>
 <body class="sidebar-collapsed bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
 
@@ -304,6 +317,8 @@
                 <li><a href="#books" class="sidebar-link px-4 py-2.5"><i class="fas fa-book w-5"></i> Book Vault</a></li>
                 <li><a href="#client-translation" class="sidebar-link px-4 py-2.5"><i class="fas fa-language w-5"></i> Client Translation</a></li>
                 <li><a href="#saved-items" data-home-fav="saved-items" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link px-4 py-2.5 flex items-center gap-2"><i class="fas fa-bookmark w-5 shrink-0"></i><span class="flex-1">My Saved Items</span><span id="global-saved-count" class="hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#00A89D] text-white rounded-full items-center justify-center shrink-0">0</span></a></li>
+                <li><a href="#invite-realtors" class="sidebar-link px-4 py-2.5" style="display:none"><i class="fas fa-user-plus w-5"></i> Invite realtor</a></li>
+                <li><a href="#lo-admin" class="sidebar-link px-4 py-2.5" style="display:none"><i class="fas fa-shield-halved w-5"></i> Admin · LO users</a></li>
             </ul>
 
             <div class="sidebar-footer px-2">
@@ -8096,6 +8111,25 @@
 
     </div>
    </section>
+
+                <section id="invite-realtors" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-4 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden" aria-label="Invite realtor to Agent Sales Coach">
+  <div id="invite-realtors-root">
+    <div class="text-center py-16 text-gray-500">
+      <i class="fas fa-user-plus text-3xl text-[#00A89D] mb-3"></i>
+      <p class="font-semibold">Invite realtor</p>
+      <p class="text-sm mt-1">Sign in as a Ruoff LO to create Agent Sales Coach invites.</p>
+    </div>
+  </div>
+</section>
+
+                <section id="lo-admin" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-4 sm:px-8 rounded-3xl shadow-xl animate-fade-in hidden" aria-label="Admin LO users">
+  <div id="lo-admin-root">
+    <div class="text-center py-16 text-gray-500">
+      <i class="fas fa-shield-halved text-3xl text-[#00A89D] mb-3"></i>
+      <p class="font-semibold">Admin · LO users</p>
+    </div>
+  </div>
+</section>
 
 </main>
 

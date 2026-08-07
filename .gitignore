@@ -9,6 +9,11 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# Auth data (never commit)
+data/lo-auth-store.json
+data/lo-auth-store.json.tmp
+data/*.tmp
+
 # Logs
 logs
 *.log

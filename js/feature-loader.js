@@ -68,6 +68,7 @@
   'js/features/calculator.js?v=20260806-biweekly-fix',
   'js/features/my-pitch.js?v=20260806-pitch-vcf2',
   'js/features/lox-generator.js?v=20260807-lox-ui',
+  'js/features/lo-invite-admin.js?v=20260807-lo-auth',
   'js/features/pwa-push.js?v=20260806-pwa'
   ];
   var i = 0;

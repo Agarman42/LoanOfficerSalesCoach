@@ -416,6 +416,7 @@ function mountAuthRoutes(app) {
         const inv = s.invites[code];
         if (!inv) return { ok: false, code: 400, error: 'Invalid invite code' };
         if (inv.used_at) return { ok: false, code: 400, error: 'Invite already used' };
+        if (inv.revoked_at) return { ok: false, code: 400, error: 'Invite was revoked' };
         if (inv.expires_at && new Date(inv.expires_at).getTime() < Date.now()) {
           return { ok: false, code: 400, error: 'Invite expired' };
         }
@@ -879,6 +880,110 @@ function mountAuthRoutes(app) {
       res.status(500).json({ error: 'Usage failed' });
     }
   });
+
+  // ── Bridge: LO Sales Coach pushes realtor invites here ─────
+  function bridgeSecretOk(req) {
+    const expected = String(
+      process.env.AUTH_BRIDGE_SECRET ||
+        process.env.INVITE_BRIDGE_SECRET ||
+        process.env.PARTNER_CARD_SECRET ||
+        process.env.AUTH_SESSION_SECRET ||
+        sessionSecret()
+    );
+    const got = String(req.headers['x-auth-bridge-secret'] || req.body?.bridge_secret || '');
+    if (!expected || !got) return false;
+    try {
+      const a = Buffer.from(got);
+      const b = Buffer.from(expected);
+      if (a.length !== b.length) return false;
+      return crypto.timingSafeEqual(a, b);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  app.post('/api/auth/bridge/invite', async (req, res) => {
+    if (!bridgeSecretOk(req)) {
+      return res.status(401).json({ error: 'Invalid bridge secret' });
+    }
+    let code = String(req.body?.code || '')
+      .trim()
+      .toUpperCase();
+    if (!code) code = genInviteCode();
+    const emailOptional = req.body?.email_optional
+      ? store.normalizeEmail(req.body.email_optional)
+      : null;
+    const expiresAt =
+      req.body?.expires_at ||
+      new Date(Date.now() + 14 * 864e5).toISOString();
+
+    try {
+      const result = await store.withStore((s) => {
+        const existing = s.invites[code];
+        if (existing && existing.used_at) {
+          return { ok: false, code: 409, error: 'Invite code already used' };
+        }
+        if (existing && existing.revoked_at) {
+          // allow re-issue by overwriting revoked
+        } else if (existing && !existing.used_at) {
+          // update metadata / extend
+          existing.email_optional = emailOptional || existing.email_optional;
+          existing.expires_at = expiresAt;
+          existing.created_by_name = req.body?.created_by_name || existing.created_by_name;
+          existing.created_by_email = req.body?.created_by_email || existing.created_by_email;
+          existing.source = req.body?.source || existing.source || 'lo_sales_coach';
+          existing.revoked_at = null;
+          return { ok: true, invite: existing, updated: true };
+        }
+        const inv = {
+          code,
+          email_optional: emailOptional,
+          created_by: req.body?.created_by || 'lo_bridge',
+          created_by_name: req.body?.created_by_name || '',
+          created_by_email: req.body?.created_by_email || '',
+          created_at: new Date().toISOString(),
+          expires_at: expiresAt,
+          used_at: null,
+          used_by_user_id: null,
+          revoked_at: null,
+          source: req.body?.source || 'lo_sales_coach'
+        };
+        s.invites[code] = inv;
+        return { ok: true, invite: inv, updated: false };
+      });
+      if (!result.ok) return res.status(result.code).json({ error: result.error });
+      res.json({ ok: true, invite: result.invite, updated: !!result.updated });
+    } catch (e) {
+      console.error('[auth] bridge invite', e.message);
+      res.status(500).json({ error: 'Bridge invite failed' });
+    }
+  });
+
+  app.post('/api/auth/bridge/invite/revoke', async (req, res) => {
+    if (!bridgeSecretOk(req)) {
+      return res.status(401).json({ error: 'Invalid bridge secret' });
+    }
+    const code = String(req.body?.code || '')
+      .trim()
+      .toUpperCase();
+    if (!code) return res.status(400).json({ error: 'code required' });
+    try {
+      const result = await store.withStore((s) => {
+        const inv = s.invites[code];
+        if (!inv) return { ok: false, code: 404, error: 'Not found' };
+        if (inv.used_at) return { ok: false, code: 400, error: 'Already used' };
+        inv.revoked_at = new Date().toISOString();
+        return { ok: true };
+      });
+      if (!result.ok) return res.status(result.code).json({ error: result.error });
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Revoke failed' });
+    }
+  });
+
+  // Reject revoked invites on accept (belt + suspenders)
+  // (accept-invite already checks used/expires; add revoked check via wrap)
 
   /**
    * Protect Grok proxy — must be authenticated + active.
