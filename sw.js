@@ -1,6 +1,6 @@
 /* LO Sales Coach service worker — app shell cache + Web Push */
 /* eslint-disable no-restricted-globals */
-const SW_VERSION = 'lo-sw-v1-20260806';
+const SW_VERSION = 'lo-sw-v1-20260810-logo';
 const SHELL_CACHE = SW_VERSION + '-shell';
 
 const PRECACHE_URLS = [
@@ -10,14 +10,16 @@ const PRECACHE_URLS = [
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/icon-512-maskable.png',
   '/icons/apple-touch-icon.png',
+  '/icons/icon-32.png',
   '/css/tailwind-built.css?v=20260721-noloadspin',
-  '/css/main.css?v=20260806-pwa',
+  '/css/main.css?v=20260810-calc-rail',
   '/js/api.js?v=20260806-pwa',
   '/js/ui.js?v=20260729-no-backdrop',
-  '/js/main.js?v=20260730-gen-modal',
-  '/js/early-boot.js?v=20260730-gen-modal',
-  '/js/feature-loader.js?v=20260806-pwa',
+  '/js/main.js?v=20260810-calc-hash-fix',
+  '/js/early-boot.js?v=20260810-calc-hash-fix',
+  '/js/feature-loader.js?v=20260810-calc-hash-fix',
   '/js/app-version.js',
   '/js/features/pwa-push.js?v=20260806-pwa'
 ];
