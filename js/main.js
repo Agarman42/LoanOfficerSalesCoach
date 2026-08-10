@@ -536,11 +536,45 @@
     event: 'eventplanning'
   };
 
+  /**
+   * Nested tool anchors (NOT main > section). Opening them as "sections" hides the
+   * parent tool and looks blank — e.g. #calc-scenario-board hid #calculator.
+   * Map → parent section + scroll to the inner node after show.
+   */
+  const NESTED_SECTION_SCROLL = {
+    'calc-scenario-board': { parent: 'calculator', scrollId: 'calc-scenario-board' },
+    'calc-form': { parent: 'calculator', scrollId: 'calc-form' },
+    'calc-hero': { parent: 'calculator', scrollId: 'calc-hero' },
+    'calc-output': { parent: 'calculator', scrollId: 'calc-output' }
+  };
+
   function showSection(id) {
     if (!id) return;
 
     if (SECTION_ALIASES[id]) {
       id = SECTION_ALIASES[id];
+    }
+
+    // Nested hash (e.g. hard-refresh on #calc-scenario-board): open parent tool, then scroll
+    const nested = NESTED_SECTION_SCROLL[id];
+    if (nested) {
+      showSection(nested.parent);
+      try {
+        if (location.hash && location.hash.replace(/^#/, '') === id) {
+          history.replaceState(null, '', '#' + nested.parent);
+        }
+      } catch (e) { /* ignore */ }
+      setTimeout(function () {
+        const el = document.getElementById(nested.scrollId);
+        if (el && typeof el.scrollIntoView === 'function') {
+          try {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (e2) {
+            el.scrollIntoView(true);
+          }
+        }
+      }, 180);
+      return;
     }
 
     // Hide top-level tool sections only — never nest-hide inner tool chrome
@@ -558,6 +592,20 @@
       if (id !== 'home') showSection('home');
       else console.warn('[showSection] Home section missing from DOM');
       return;
+    }
+
+    // If someone passes a nested node id that slipped past the map, show its main section
+    if (target.tagName === 'SECTION' && target.parentElement && target.parentElement.closest('main > section')) {
+      const parentSec = target.closest('main > section');
+      if (parentSec && parentSec.id && parentSec.id !== id) {
+        showSection(parentSec.id);
+        setTimeout(function () {
+          try {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (e) { /* ignore */ }
+        }, 180);
+        return;
+      }
     }
 
     target.classList.remove('hidden');

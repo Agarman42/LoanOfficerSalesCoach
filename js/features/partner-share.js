@@ -454,11 +454,10 @@
           <i class="fas fa-handshake text-[#00A89D]"></i>
         </span>
         <div class="min-w-0">
-          <h3 class="text-base font-bold text-[#002B5C] dark:text-white m-0">Branded link (after they join)</h3>
+          <h3 class="text-base font-bold text-[#002B5C] dark:text-white m-0">Short partner link (optional)</h3>
           <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">
-            Short link so partners who <strong>already have</strong> Agent Sales Coach see you as their LO
-            (photo, phone, email). This does <strong>not</strong> create their account —
-            use <strong>Invite a realtor partner</strong> on Home first for new partners.
+            For partners who <strong>already have</strong> Agent access — re-share a short link with your photo and contact.
+            <strong>New partners only need Invite</strong> (branding is included on accept; no second link).
           </p>
         </div>
       </div>
@@ -520,14 +519,16 @@
           window.__loUser.role === 'loan_officer' ||
           window.__loUser.role === 'admin'));
 
-    // Step 2 secondary actions — branded link for partners who already have accounts
-    let step2Hint;
+    // Optional short link — only for partners who already have Agent access (not part of invite)
+    let optionalHint;
     if (!ready) {
-      step2Hint = `Finish My Profile (${missingLabels}) so your branded plate is ready after they join.`;
+      optionalHint = `Optional later: finish My Profile (${missingLabels}) if you want a short share URL for partners who already have access.`;
     } else if (hasLink) {
-      step2Hint = 'They already have an account? Send your short branded Agent link (photo + contact in the header).';
+      optionalHint =
+        'Optional — only for partners who already have Agent access. Re-share your short link (photo + contact). Not needed after a branded invite.';
     } else {
-      step2Hint = 'After they join, publish your LO card once, then share the branded link with partners who already have access.';
+      optionalHint =
+        'Optional — publish once if you want a short share URL for partners who already have Agent access. New partners only need the invite above.';
     }
 
     slot.innerHTML = `
@@ -541,23 +542,25 @@
               <div class="text-[10px] font-bold uppercase tracking-wider text-[#00A89D]">Partners</div>
               <h3 class="text-base sm:text-lg font-bold text-[#002B5C] dark:text-white m-0">Grow realtor partners</h3>
               <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 m-0 mt-1 leading-relaxed">
-                First get them into <strong>Agent Sales Coach</strong> with a personal invite (their account links to you). Then share tools and your branded link.
+                <strong>One invite does it all</strong> — they create an account and land in Agent Sales Coach with
+                <strong>your</strong> name, photo, and contact already applied. No second branded link required.
               </p>
             </div>
           </div>
         </div>
 
         <div class="px-4 sm:px-5 py-4 space-y-3">
-          <!-- Step 1: Invite (account creation) -->
+          <!-- Primary: branded invite (complete path) -->
           <div class="rounded-xl border-2 border-[#00A89D]/40 bg-white dark:bg-gray-900/80 p-3.5 sm:p-4">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
               <div class="flex items-start gap-2.5 flex-1 min-w-0">
-                <span class="shrink-0 w-7 h-7 rounded-full bg-[#00A89D] text-white text-xs font-black flex items-center justify-center">1</span>
+                <span class="shrink-0 w-7 h-7 rounded-full bg-[#00A89D] text-white text-xs flex items-center justify-center" aria-hidden="true">
+                  <i class="fas fa-user-plus"></i>
+                </span>
                 <div class="min-w-0">
-                  <div class="text-sm font-bold text-[#002B5C] dark:text-white">Invite partner</div>
+                  <div class="text-sm font-bold text-[#002B5C] dark:text-white">Send a branded invite</div>
                   <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mt-0.5 leading-relaxed">
-                    Personal invite link/code · they create their account · your branding rides along on accept.
-                    <span class="text-gray-500">This is how you get them into the product — not a generic email.</span>
+                    Personal link/code from My Profile branding. On accept: account + your LO plate/footer — one step for them, one link from you.
                   </p>
                 </div>
               </div>
@@ -569,14 +572,14 @@
             </div>
           </div>
 
-          <!-- Step 2: Share / email (existing partners) -->
+          <!-- Optional: short link for existing partners only -->
           <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/40 p-3.5 sm:p-4">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
               <div class="flex items-start gap-2.5 flex-1 min-w-0">
-                <span class="shrink-0 w-7 h-7 rounded-full bg-gray-300 dark:bg-gray-600 text-[#002B5C] dark:text-white text-xs font-black flex items-center justify-center">2</span>
+                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-gray-400 pt-1">Optional</span>
                 <div class="min-w-0">
-                  <div class="text-sm font-bold text-[#002B5C] dark:text-white">After they join — share tools</div>
-                  <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mt-0.5 leading-relaxed">${escapeHtml(step2Hint)}</p>
+                  <div class="text-sm font-bold text-[#002B5C] dark:text-white">Already have partners on Agent?</div>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 m-0 mt-0.5 leading-relaxed">${escapeHtml(optionalHint)}</p>
                   ${
                     hasLink
                       ? `<p class="text-[11px] font-mono text-gray-500 m-0 mt-1.5 truncate" title="${escapeAttr(link)}">${escapeHtml(link)}</p>`
@@ -584,7 +587,7 @@
                   }
                   <p class="text-[11px] text-gray-500 m-0 mt-1.5">
                     <i class="fas fa-info-circle text-[#00A89D] mr-1"></i>
-                    Email / branded link does <strong>not</strong> create an account — use <strong>Invite</strong> first for new partners.
+                    This short link does <strong>not</strong> create accounts and is <strong>not</strong> a second step after invite.
                   </p>
                 </div>
               </div>
@@ -593,8 +596,8 @@
                   hasLink
                     ? `<button type="button" data-partner-home="email"
                         class="px-3.5 py-2 rounded-full border-2 border-[#F15A29]/50 text-[#F15A29] text-xs font-bold hover:bg-[#F15A29]/10 transition"
-                        title="For partners who already have Agent access">
-                        <i class="fas fa-envelope mr-1"></i>Email branded link
+                        title="Only for partners who already have Agent access — not part of invite">
+                        <i class="fas fa-envelope mr-1"></i>Email short link
                       </button>
                       <button type="button" data-partner-home="copy"
                         class="px-3.5 py-2 rounded-full border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
@@ -603,7 +606,7 @@
                     : ready
                       ? `<button type="button" data-partner-home="open"
                           class="px-3.5 py-2 rounded-full border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                          Publish branded link
+                          Publish short link
                         </button>`
                       : `<button type="button" data-partner-home="open"
                           class="px-3.5 py-2 rounded-full border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">

@@ -630,7 +630,39 @@ function mountLoAuthRoutes(app) {
     }
   });
 
-  // ── Admin (LO tool users) ──────────────────────────────────
+  // ── Admin (LO tool users + usage) ──────────────────────────
+
+  function userActivitySummary(s, userId, sinceMs) {
+    const events = (s.usage_events || []).filter(
+      (ev) => ev.user_id === userId && (!sinceMs || new Date(ev.created_at).getTime() >= sinceMs)
+    );
+    let last_activity_at = null;
+    const featureCounts = {};
+    let logins = 0;
+    let sectionViews = 0;
+    for (const ev of events) {
+      if (!last_activity_at || String(ev.created_at) > last_activity_at) {
+        last_activity_at = ev.created_at;
+      }
+      if (ev.event_type === 'login' || ev.event_type === 'session_resume') logins += 1;
+      if (ev.event_type === 'section_view' || ev.event_type === 'tool_open') {
+        sectionViews += 1;
+        const feat = String(ev.path || '').trim() || '(unknown)';
+        if (feat !== 'app') featureCounts[feat] = (featureCounts[feat] || 0) + 1;
+      }
+    }
+    const top_features = Object.entries(featureCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([feature, count]) => ({ feature, count }));
+    return {
+      events_count: events.length,
+      logins_or_resumes: logins,
+      section_views: sectionViews,
+      last_activity_at,
+      top_features
+    };
+  }
 
   app.get('/api/admin/stats', requireAdmin, async (req, res) => {
     try {
@@ -638,37 +670,110 @@ function mountLoAuthRoutes(app) {
         const users = Object.values(s.users);
         const now = Date.now();
         const d7 = now - 7 * 864e5;
+        const d30 = now - 30 * 864e5;
+        const invites = Object.values(s.agent_invites || {});
+        const openInvites = invites.filter((i) => !i.used_at && !i.revoked_at);
+        const usedInvites = invites.filter((i) => !!i.used_at);
+        const events7 = (s.usage_events || []).filter(
+          (ev) => new Date(ev.created_at).getTime() >= d7
+        );
+        const featureCounts = {};
+        for (const ev of events7) {
+          if (ev.event_type !== 'section_view' && ev.event_type !== 'tool_open') continue;
+          const feat = String(ev.path || '').trim();
+          if (!feat || feat === 'app') continue;
+          featureCounts[feat] = (featureCounts[feat] || 0) + 1;
+        }
+        const topFeatures = Object.entries(featureCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 12)
+          .map(([feature, count]) => ({ feature, count }));
+
+        // Distinct users with any activity in window
+        const activeUserIds7 = new Set(
+          events7.map((ev) => ev.user_id).filter(Boolean)
+        );
+        users.forEach((u) => {
+          if (u.last_login_at && new Date(u.last_login_at).getTime() >= d7) {
+            activeUserIds7.add(u.id);
+          }
+        });
+
         return {
           totals: {
             users: users.length,
             active: users.filter((u) => u.status === 'active').length,
             deactivated: users.filter((u) => u.status === 'deactivated').length,
-            openAgentInvites: Object.values(s.agent_invites).filter(
-              (i) => !i.used_at && !i.revoked_at
-            ).length
+            admins: users.filter((u) => u.role === 'admin').length,
+            loan_officers: users.filter((u) => u.role === 'loan_officer').length,
+            openAgentInvites: openInvites.length,
+            usedAgentInvites: usedInvites.length,
+            agentInvitesTotal: invites.length
           },
           logins: {
             last7d: users.filter(
               (u) => u.last_login_at && new Date(u.last_login_at).getTime() >= d7
+            ).length,
+            last30d: users.filter(
+              (u) => u.last_login_at && new Date(u.last_login_at).getTime() >= d30
             ).length
-          }
+          },
+          signups: {
+            last7d: users.filter(
+              (u) => u.created_at && new Date(u.created_at).getTime() >= d7
+            ).length,
+            last30d: users.filter(
+              (u) => u.created_at && new Date(u.created_at).getTime() >= d30
+            ).length
+          },
+          activity: {
+            eventsLast7d: events7.length,
+            uniqueActiveUsers7d: activeUserIds7.size
+          },
+          topFeatures7d: topFeatures
         };
       });
       res.json({ ok: true, ...data });
     } catch (e) {
+      console.error('[lo-auth] admin stats', e.message);
       res.status(500).json({ error: 'Stats failed' });
     }
   });
 
   app.get('/api/admin/users', requireAdmin, async (req, res) => {
     try {
-      const list = await store.withStore((s) =>
-        Object.values(s.users)
-          .map((u) => store.publicUser(u))
-          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
-      );
+      const list = await store.withStore((s) => {
+        const now = Date.now();
+        const d7 = now - 7 * 864e5;
+        const invites = Object.values(s.agent_invites || {});
+        return Object.values(s.users)
+          .map((u) => {
+            const pub = store.publicUser(u);
+            const invForUser = invites.filter((i) => i.created_by === u.id);
+            const act7 = userActivitySummary(s, u.id, d7);
+            const actAll = userActivitySummary(s, u.id, 0);
+            return Object.assign({}, pub, {
+              invites_sent: invForUser.length,
+              invites_used: invForUser.filter((i) => !!i.used_at).length,
+              invites_open: invForUser.filter((i) => !i.used_at && !i.revoked_at).length,
+              last_activity_at: actAll.last_activity_at || u.last_login_at || null,
+              activity_7d: {
+                events: act7.events_count,
+                section_views: act7.section_views,
+                logins_or_resumes: act7.logins_or_resumes,
+                top_features: act7.top_features
+              }
+            });
+          })
+          .sort((a, b) => {
+            const ta = String(a.last_activity_at || a.last_login_at || a.created_at || '');
+            const tb = String(b.last_activity_at || b.last_login_at || b.created_at || '');
+            return tb.localeCompare(ta);
+          });
+      });
       res.json({ ok: true, users: list });
     } catch (e) {
+      console.error('[lo-auth] admin users', e.message);
       res.status(500).json({ error: 'List failed' });
     }
   });
@@ -686,6 +791,13 @@ function mountLoAuthRoutes(app) {
           u.status = req.body.status;
         }
         if (typeof req.body?.name === 'string') u.name = req.body.name.trim();
+        // Promote / demote LO ↔ admin (cannot demote yourself)
+        if (req.body?.role === 'admin' || req.body?.role === 'loan_officer') {
+          if (u.id === req.authUser.id && req.body.role !== 'admin') {
+            return { ok: false, code: 400, error: 'Cannot remove your own admin role' };
+          }
+          u.role = req.body.role;
+        }
         return { ok: true, user: store.publicUser(u) };
       });
       if (!result.ok) return res.status(result.code).json({ error: result.error });
@@ -719,12 +831,58 @@ function mountLoAuthRoutes(app) {
   });
 
   app.get('/api/admin/usage', requireAdmin, async (req, res) => {
-    const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 50));
+    const limit = Math.min(300, Math.max(1, Number(req.query.limit) || 80));
+    const userId = req.query.user_id ? String(req.query.user_id) : null;
     try {
-      const events = await store.withStore((s) => s.usage_events.slice(-limit).reverse());
+      const events = await store.withStore((s) => {
+        let list = s.usage_events || [];
+        if (userId) list = list.filter((ev) => ev.user_id === userId);
+        list = list.slice(-limit).reverse();
+        return list.map((ev) => {
+          const u = ev.user_id ? store.findUserById(s, ev.user_id) : null;
+          return {
+            id: ev.id,
+            user_id: ev.user_id,
+            user_email: u ? u.email : null,
+            user_name: u ? u.name || '' : null,
+            event_type: ev.event_type,
+            path: ev.path,
+            metadata: ev.metadata || null,
+            created_at: ev.created_at
+          };
+        });
+      });
       res.json({ ok: true, events });
     } catch (e) {
       res.status(500).json({ error: 'Usage failed' });
+    }
+  });
+
+  /** Admin: all agent invites across LOs */
+  app.get('/api/admin/agent-invites', requireAdmin, async (req, res) => {
+    try {
+      const invites = await store.withStore((s) => {
+        return Object.values(s.agent_invites || {})
+          .map((i) => {
+            const creator = i.created_by ? store.findUserById(s, i.created_by) : null;
+            return {
+              code: i.code,
+              email_optional: i.email_optional || null,
+              created_at: i.created_at,
+              expires_at: i.expires_at,
+              used_at: i.used_at || null,
+              revoked_at: i.revoked_at || null,
+              bridge_synced: i.bridge_synced !== false,
+              created_by: i.created_by || null,
+              created_by_email: creator ? creator.email : i.created_by_email || null,
+              created_by_name: creator ? creator.name : i.created_by_name || null
+            };
+          })
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+      });
+      res.json({ ok: true, invites, realtorAppUrl: realtorAppUrl() });
+    } catch (e) {
+      res.status(500).json({ error: 'Invite list failed' });
     }
   });
 

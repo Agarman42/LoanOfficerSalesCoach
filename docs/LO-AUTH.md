@@ -24,16 +24,16 @@ Must set the **same** `AUTH_BRIDGE_SECRET` on both Render services.
 
 - Register / non-admin login: **must** end with `@ruoff.com` (server-side).
 - Error copy: `Use your Ruoff email (@ruoff.com).`
-- Admin seed may use any `ADMIN_EMAIL` (e.g. Adam personal).
+- Admin seed may use any `ADMIN_EMAIL` (e.g. Adam personal). Additional admins: **Admin · Usage → Make admin** on a LO user (or set `role: admin` in the auth store).
 
 ## UI entry points
 
 | Action | Where |
 |--------|--------|
 | Sign in / create account | Full-screen gate when logged out |
-| Invite a realtor partner | **Home → Partners card (step 1)**, sidebar “Invite a realtor partner”, `#invite-realtors` page |
+| Invite a realtor partner | **Home → Partners card (primary)**, sidebar “Invite a realtor partner”, `#invite-realtors` page. One invite = account + LO branding on accept; short partner link is optional for people already on Agent. |
 | My Profile / Sign out | Header **My Profile** opens profile modal — Sign out is in the profile account bar |
-| Admin LO users | Sidebar **Admin · LO users** (admin only) |
+| Admin usage & LO users | Sidebar **Admin · Usage** (admin only) — who signed up, last login, login counts, tools opened (7d), agent invites across LOs, activate/deactivate, reset password, promote admin |
 
 ### Branding on invite (bridge)
 

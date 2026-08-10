@@ -487,9 +487,22 @@ function setCalcMode(mode, opts) {
 
   if (purchaseBtn) purchaseBtn.classList.toggle('is-active', isPurchase);
   if (refiBtn) refiBtn.classList.toggle('is-active', !isPurchase);
-  if (purch) purch.classList.toggle('hidden', !isPurchase);
-  if (refi) refi.classList.toggle('hidden', isPurchase);
-  if (homenowW) homenowW.classList.toggle('hidden', !isPurchase);
+  // class + [hidden] attribute so blocks truly collapse (avoids double loan fields)
+  if (purch) {
+    purch.classList.toggle('hidden', !isPurchase);
+    if (isPurchase) purch.removeAttribute('hidden');
+    else purch.setAttribute('hidden', '');
+  }
+  if (refi) {
+    refi.classList.toggle('hidden', isPurchase);
+    if (isPurchase) refi.setAttribute('hidden', '');
+    else refi.removeAttribute('hidden');
+  }
+  if (homenowW) {
+    homenowW.classList.toggle('hidden', !isPurchase);
+    if (isPurchase) homenowW.removeAttribute('hidden');
+    else homenowW.setAttribute('hidden', '');
+  }
 
   if (!isPurchase) {
     homeNowEnabled = false;
@@ -1086,10 +1099,19 @@ function replaceScenarioAt(idx) {
 
 function scrollToScenarioBoard() {
   const el = document.getElementById('calc-scenario-board');
-  if (el && typeof el.scrollIntoView === 'function') {
+  if (!el) return;
+  // Keep URL on #calculator — #calc-scenario-board is nested and used to hide the whole tool
+  try {
+    if (location.hash && /calc-scenario-board|calc-form|calc-hero/.test(location.hash)) {
+      history.replaceState(null, '', '#calculator');
+    } else if (!location.hash || location.hash === '#') {
+      history.replaceState(null, '', '#calculator');
+    }
+  } catch (e) { /* ignore */ }
+  if (typeof el.scrollIntoView === 'function') {
     try {
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } catch (e) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e2) {
       el.scrollIntoView(true);
     }
   }
@@ -2819,6 +2841,10 @@ function initCalculator() {
   document.getElementById('calc-print-btn')?.addEventListener('click', printCalcScenarios);
   document.getElementById('calc-board-save-vault-btn')?.addEventListener('click', saveBoardComparisonToVault);
   document.getElementById('calc-board-clear-btn')?.addEventListener('click', clearScenarioBoard);
+  document.getElementById('calc-jump-board')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    scrollToScenarioBoard();
+  });
 
   // Defaults — PMI in monthly $ (most common for LOs)
   setCalcMode('purchase', { silent: true });

@@ -56,8 +56,37 @@
     } catch (e) { /* ignore */ }
   }
 
+  // Nested anchors must open parent tool (same fix as main.js) — #calc-scenario-board is not a tool
+  const NESTED_EARLY = {
+    'calc-scenario-board': 'calculator',
+    'calc-form': 'calculator',
+    'calc-hero': 'calculator',
+    'calc-output': 'calculator'
+  };
+
   function showSectionEarly(id) {
     id = resolveId(id);
+    if (NESTED_EARLY[id]) {
+      const parent = NESTED_EARLY[id];
+      const scrollId = id;
+      showSectionEarly(parent);
+      try {
+        if (location.hash && location.hash.replace(/^#/, '') === scrollId) {
+          history.replaceState(null, '', '#' + parent);
+        }
+      } catch (e) { /* ignore */ }
+      setTimeout(function () {
+        const el = document.getElementById(scrollId);
+        if (el && el.scrollIntoView) {
+          try {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (e2) {
+            el.scrollIntoView(true);
+          }
+        }
+      }, 120);
+      return;
+    }
     const target = document.getElementById(id);
 
     // Top-level tools only — nested <section> inside a tool must not get .hidden
@@ -67,6 +96,25 @@
     });
 
     if (target) {
+      // Nested node (not a top-level main > section): show parent tool instead
+      let isTopLevel = false;
+      try {
+        isTopLevel = !!(target.parentElement && target.parentElement.tagName === 'MAIN');
+      } catch (e) {
+        isTopLevel = false;
+      }
+      if (!isTopLevel) {
+        const parentSec = target.closest && target.closest('main > section');
+        if (parentSec && parentSec.id && parentSec.id !== id) {
+          showSectionEarly(parentSec.id);
+          setTimeout(function () {
+            try {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (e2) { /* ignore */ }
+          }, 120);
+          return;
+        }
+      }
       target.classList.remove('hidden');
       scrollAfterSectionShow(id, target);
       if (id === 'smart-savings') {

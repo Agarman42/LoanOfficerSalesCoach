@@ -74,7 +74,7 @@
       '<div class="text-center mb-6">' +
       '<span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">SHARE WITH PARTNERS</span>' +
       '<h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Invite a realtor partner</h2>' +
-      '<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">One-time link to the <strong>Agent Sales Coach</strong>. Your name and branding from My Profile travel with the invite so they see <em>you</em> as their LO.</p></div>' +
+      '<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"><strong>One link does it all.</strong> They create an Agent account and land with <em>your</em> name, photo, and contact from My Profile already applied — no second branded link to send.</p></div>' +
       '<div class="grid grid-cols-1 lg:grid-cols-5 gap-5 max-w-5xl mx-auto">' +
       '<div class="lg:col-span-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 bg-white dark:bg-gray-900">' +
       '<h3 class="font-bold text-[#002B5C] dark:text-white mb-1">New invite</h3>' +
@@ -130,6 +130,7 @@
       esc(link) +
       '</div>' +
       (email ? '<div class="mt-1"><span class="font-bold">Locked to:</span> ' + esc(email) + '</div>' : '') +
+      '<p class="mt-2 mb-0 text-[11px] text-gray-500">Your branding from My Profile is attached — when they accept, they see you as their LO. No second link needed.</p>' +
       '</div>' +
       '<div class="flex flex-wrap gap-2">' +
       '<a href="' +
@@ -263,7 +264,31 @@
     });
   }
 
-  // ── Admin LO users ─────────────────────────────────────────
+  // ── Admin LO users & usage ─────────────────────────────────
+
+  function statCard(label, value, hint) {
+    return (
+      '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 text-center bg-white dark:bg-gray-900">' +
+      '<div class="text-2xl font-black text-[#002B5C] dark:text-white">' +
+      esc(value == null ? '—' : value) +
+      '</div><div class="text-[10px] font-bold tracking-wider text-gray-500 uppercase mt-1">' +
+      esc(label) +
+      '</div>' +
+      (hint
+        ? '<div class="text-[10px] text-gray-400 mt-1 leading-snug">' + esc(hint) + '</div>'
+        : '') +
+      '</div>'
+    );
+  }
+
+  function featureLabel(id) {
+    if (!id) return '—';
+    return String(id)
+      .replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, function (c) {
+        return c.toUpperCase();
+      });
+  }
 
   async function renderAdmin() {
     const el = document.getElementById('lo-admin-root');
@@ -271,100 +296,177 @@
     const u = user();
     if (!u || u.role !== 'admin') {
       el.innerHTML =
-        '<div class="p-8 text-center text-gray-500"><p class="font-bold text-lg">Admin only</p></div>';
+        '<div class="p-8 text-center text-gray-500"><p class="font-bold text-lg">Admin only</p>' +
+        '<p class="text-sm mt-2">Sign in with an admin account to see LO usage.</p></div>';
       return;
     }
 
     el.innerHTML =
       '<div class="text-center mb-6">' +
-      '<span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">ADAM ONLY</span>' +
-      '<h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Admin · LO users</h2>' +
-      '<p class="text-sm text-gray-600 dark:text-gray-400">Who is using Loan Officer Sales Coach.</p></div>' +
-      '<div id="lo-adm-stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 max-w-4xl mx-auto"></div>' +
-      '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900 max-w-5xl mx-auto">' +
-      '<div class="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex justify-between"><h3 class="font-bold m-0 text-[#002B5C] dark:text-white">Users</h3>' +
+      '<span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">ADMIN</span>' +
+      '<h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Admin · Usage &amp; LO users</h2>' +
+      '<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">' +
+      'Who is on Loan Officer Sales Coach, how often they sign in, which tools they open, and realtor invites they send.' +
+      '</p></div>' +
+      '<div id="lo-adm-stats" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6 max-w-6xl mx-auto"></div>' +
+      '<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 max-w-6xl mx-auto">' +
+      '<div class="lg:col-span-1 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">' +
+      '<h3 class="font-bold text-[#002B5C] dark:text-white m-0 mb-1">Top tools (7 days)</h3>' +
+      '<p class="text-[11px] text-gray-500 m-0 mb-3">Section opens from signed-in LOs</p>' +
+      '<div id="lo-adm-top-tools" class="text-sm space-y-1.5"></div></div>' +
+      '<div class="lg:col-span-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">' +
+      '<div class="flex justify-between items-center mb-2">' +
+      '<h3 class="font-bold text-[#002B5C] dark:text-white m-0">Recent activity</h3>' +
       '<button type="button" id="lo-adm-refresh" class="text-xs font-bold text-[#00A89D]">Refresh</button></div>' +
+      '<div id="lo-adm-usage" class="text-xs space-y-1 max-h-56 overflow-y-auto text-gray-600 dark:text-gray-300"></div></div></div>' +
+      '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900 max-w-6xl mx-auto mb-6">' +
+      '<div class="px-4 py-3 border-b border-gray-100 dark:border-gray-800"><h3 class="font-bold m-0 text-[#002B5C] dark:text-white">Loan officers</h3>' +
+      '<p class="text-[11px] text-gray-500 m-0 mt-0.5">Sorted by most recent activity. Logins = total lifetime sign-ins.</p></div>' +
       '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-xs uppercase text-gray-500 bg-gray-50 dark:bg-gray-800/50"><tr>' +
       '<th class="px-3 py-2">Name</th><th class="px-3 py-2">Email</th><th class="px-3 py-2">Status</th>' +
-      '<th class="px-3 py-2">Last login</th><th class="px-3 py-2">Logins</th><th class="px-3 py-2">Actions</th></tr></thead>' +
+      '<th class="px-3 py-2">Last login</th><th class="px-3 py-2">Logins</th>' +
+      '<th class="px-3 py-2">Active 7d</th><th class="px-3 py-2">Invites</th>' +
+      '<th class="px-3 py-2">Joined</th><th class="px-3 py-2">Actions</th></tr></thead>' +
       '<tbody id="lo-adm-users"></tbody></table></div></div>' +
-      '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 mt-4 p-4 bg-white dark:bg-gray-900 max-w-5xl mx-auto">' +
-      '<h3 class="font-bold text-[#002B5C] dark:text-white mb-2">Recent usage</h3>' +
-      '<div id="lo-adm-usage" class="text-xs space-y-1 max-h-40 overflow-y-auto text-gray-600"></div></div>';
+      '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900 max-w-6xl mx-auto">' +
+      '<div class="px-4 py-3 border-b border-gray-100 dark:border-gray-800"><h3 class="font-bold m-0 text-[#002B5C] dark:text-white">Agent invites (all LOs)</h3>' +
+      '<p class="text-[11px] text-gray-500 m-0 mt-0.5">Bridge invites to Agent Sales Coach — who invited, open vs used.</p></div>' +
+      '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-xs uppercase text-gray-500 bg-gray-50 dark:bg-gray-800/50"><tr>' +
+      '<th class="px-3 py-2">Code</th><th class="px-3 py-2">Status</th><th class="px-3 py-2">Locked email</th>' +
+      '<th class="px-3 py-2">Invited by</th><th class="px-3 py-2">Created</th><th class="px-3 py-2">Used</th></tr></thead>' +
+      '<tbody id="lo-adm-invites"></tbody></table></div></div>';
 
     el.querySelector('#lo-adm-refresh').addEventListener('click', loadAdmin);
     await loadAdmin();
   }
 
   async function loadAdmin() {
-    const [st, us, ug] = await Promise.all([
+    const [st, us, ug, inv] = await Promise.all([
       api('/api/admin/stats'),
       api('/api/admin/users'),
-      api('/api/admin/usage?limit=40')
+      api('/api/admin/usage?limit=80'),
+      api('/api/admin/agent-invites')
     ]);
+
     const statsEl = document.getElementById('lo-adm-stats');
     if (statsEl && st.data) {
       const t = st.data.totals || {};
       const l = st.data.logins || {};
-      statsEl.innerHTML = [
-        ['Active', t.active],
-        ['Deactivated', t.deactivated],
-        ['Users', t.users],
-        ['Logins 7d', l.last7d]
-      ]
-        .map(function (row) {
-          return (
-            '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 text-center bg-white dark:bg-gray-900">' +
-            '<div class="text-2xl font-black text-[#002B5C] dark:text-white">' +
-            esc(row[1] == null ? '—' : row[1]) +
-            '</div><div class="text-[10px] font-bold tracking-wider text-gray-500 uppercase mt-1">' +
-            esc(row[0]) +
-            '</div></div>'
-          );
-        })
-        .join('');
+      const a = st.data.activity || {};
+      const s = st.data.signups || {};
+      statsEl.innerHTML =
+        statCard('Active LOs', t.active, 'accounts enabled') +
+        statCard('Logged in 7d', l.last7d, 'unique users') +
+        statCard('Logged in 30d', l.last30d, 'unique users') +
+        statCard('Active users 7d', a.uniqueActiveUsers7d, 'login or tool use') +
+        statCard('New 7d', s.last7d, 'signups') +
+        statCard(
+          'Agent invites',
+          (t.openAgentInvites || 0) + ' open',
+          (t.usedAgentInvites || 0) + ' used · ' + (t.agentInvitesTotal || 0) + ' total'
+        );
+    }
+
+    const topEl = document.getElementById('lo-adm-top-tools');
+    if (topEl && st.data) {
+      const feats = st.data.topFeatures7d || [];
+      topEl.innerHTML = feats.length
+        ? feats
+            .map(function (f) {
+              return (
+                '<div class="flex justify-between gap-2 border-b border-gray-100 dark:border-gray-800 py-1.5">' +
+                '<span class="font-medium text-[#002B5C] dark:text-gray-100 truncate">' +
+                esc(featureLabel(f.feature)) +
+                '</span><span class="text-gray-500 shrink-0 tabular-nums">' +
+                esc(f.count) +
+                '</span></div>'
+              );
+            })
+            .join('')
+        : '<p class="text-gray-400 text-xs m-0">No section opens yet. Counts grow as LOs use tools after this update.</p>';
     }
 
     const body = document.getElementById('lo-adm-users');
     if (body) {
       const users = (us.data && us.data.users) || [];
-      body.innerHTML = users
-        .map(function (u) {
-          return (
-            '<tr class="border-t border-gray-100 dark:border-gray-800">' +
-            '<td class="px-3 py-2 font-semibold">' +
-            esc(u.name) +
-            (u.role === 'admin' ? ' <span class="text-[10px] text-[#00A89D]">ADMIN</span>' : '') +
-            '</td>' +
-            '<td class="px-3 py-2 text-xs break-all">' +
-            esc(u.email) +
-            '</td>' +
-            '<td class="px-3 py-2 text-xs">' +
-            esc(u.status) +
-            '</td>' +
-            '<td class="px-3 py-2 text-xs whitespace-nowrap">' +
-            esc(fmtDate(u.last_login_at)) +
-            '</td>' +
-            '<td class="px-3 py-2 text-center">' +
-            esc(u.login_count || 0) +
-            '</td>' +
-            '<td class="px-3 py-2"><div class="flex flex-wrap gap-1">' +
-            (u.status !== 'active'
-              ? '<button type="button" data-act="activate" data-id="' +
+      body.innerHTML = users.length
+        ? users
+            .map(function (u) {
+              const a7 = u.activity_7d || {};
+              const top =
+                (a7.top_features || [])
+                  .slice(0, 2)
+                  .map(function (f) {
+                    return featureLabel(f.feature);
+                  })
+                  .join(', ') || '—';
+              return (
+                '<tr class="border-t border-gray-100 dark:border-gray-800 align-top">' +
+                '<td class="px-3 py-2 font-semibold">' +
+                esc(u.name || '—') +
+                (u.role === 'admin'
+                  ? ' <span class="text-[10px] text-[#00A89D] font-bold">ADMIN</span>'
+                  : '') +
+                '<div class="text-[10px] text-gray-400 font-normal mt-0.5">Last activity: ' +
+                esc(fmtDate(u.last_activity_at)) +
+                '</div></td>' +
+                '<td class="px-3 py-2 text-xs break-all">' +
+                esc(u.email) +
+                '</td>' +
+                '<td class="px-3 py-2 text-xs">' +
+                esc(u.status) +
+                '</td>' +
+                '<td class="px-3 py-2 text-xs whitespace-nowrap">' +
+                esc(fmtDate(u.last_login_at)) +
+                '</td>' +
+                '<td class="px-3 py-2 text-center tabular-nums">' +
+                esc(u.login_count || 0) +
+                '</td>' +
+                '<td class="px-3 py-2 text-xs">' +
+                '<div class="tabular-nums font-semibold">' +
+                esc(a7.events || 0) +
+                ' events</div>' +
+                '<div class="text-[10px] text-gray-400">' +
+                esc(a7.section_views || 0) +
+                ' tools · ' +
+                esc(top) +
+                '</div></td>' +
+                '<td class="px-3 py-2 text-xs tabular-nums">' +
+                esc(u.invites_used || 0) +
+                ' used / ' +
+                esc(u.invites_sent || 0) +
+                '</td>' +
+                '<td class="px-3 py-2 text-xs whitespace-nowrap">' +
+                esc(fmtDate(u.created_at)) +
+                '</td>' +
+                '<td class="px-3 py-2"><div class="flex flex-wrap gap-1">' +
+                (u.status !== 'active'
+                  ? '<button type="button" data-act="activate" data-id="' +
+                    esc(u.id) +
+                    '" class="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-600 text-white">Activate</button>'
+                  : '') +
+                (u.status !== 'deactivated'
+                  ? '<button type="button" data-act="deactivate" data-id="' +
+                    esc(u.id) +
+                    '" class="text-[10px] font-bold px-2 py-1 rounded-full bg-red-600 text-white">Deactivate</button>'
+                  : '') +
+                (u.role !== 'admin'
+                  ? '<button type="button" data-act="make-admin" data-id="' +
+                    esc(u.id) +
+                    '" class="text-[10px] font-bold px-2 py-1 rounded-full border border-[#00A89D] text-[#0f766e]">Make admin</button>'
+                  : '') +
+                (u.role === 'admin'
+                  ? '<button type="button" data-act="make-lo" data-id="' +
+                    esc(u.id) +
+                    '" class="text-[10px] font-bold px-2 py-1 rounded-full border border-gray-300">Demote LO</button>'
+                  : '') +
+                '<button type="button" data-act="reset" data-id="' +
                 esc(u.id) +
-                '" class="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-600 text-white">Activate</button>'
-              : '') +
-            (u.status !== 'deactivated'
-              ? '<button type="button" data-act="deactivate" data-id="' +
-                esc(u.id) +
-                '" class="text-[10px] font-bold px-2 py-1 rounded-full bg-red-600 text-white">Deactivate</button>'
-              : '') +
-            '<button type="button" data-act="reset" data-id="' +
-            esc(u.id) +
-            '" class="text-[10px] font-bold px-2 py-1 rounded-full border border-gray-300">Reset pw</button></div></td></tr>'
-          );
-        })
-        .join('');
+                '" class="text-[10px] font-bold px-2 py-1 rounded-full border border-gray-300">Reset pw</button></div></td></tr>'
+              );
+            })
+            .join('')
+        : '<tr><td colspan="9" class="px-3 py-6 text-center text-gray-400">No users yet.</td></tr>';
 
       body.querySelectorAll('button[data-act]').forEach(function (btn) {
         btn.addEventListener('click', async function () {
@@ -377,6 +479,14 @@
             });
             if (!res.ok) toast((data && data.error) || 'Failed', 'error');
             else toast('Updated');
+            loadAdmin();
+          } else if (act === 'make-admin' || act === 'make-lo') {
+            const { res, data } = await api('/api/admin/users/' + encodeURIComponent(id), {
+              method: 'PATCH',
+              body: { role: act === 'make-admin' ? 'admin' : 'loan_officer' }
+            });
+            if (!res.ok) toast((data && data.error) || 'Failed', 'error');
+            else toast(act === 'make-admin' ? 'Promoted to admin' : 'Role set to loan officer');
             loadAdmin();
           } else if (act === 'reset') {
             const { res, data } = await api(
@@ -404,18 +514,79 @@
       usageEl.innerHTML = events.length
         ? events
             .map(function (ev) {
+              const who =
+                ev.user_name || ev.user_email
+                  ? (ev.user_name || '') + (ev.user_email ? ' <' + ev.user_email + '>' : '')
+                  : ev.user_id || 'unknown';
+              const detail =
+                ev.event_type === 'section_view' || ev.event_type === 'tool_open'
+                  ? featureLabel(ev.path)
+                  : esc(ev.path || '');
               return (
-                '<div><span class="text-gray-400">' +
+                '<div class="py-1 border-b border-gray-50 dark:border-gray-800/80">' +
+                '<span class="text-gray-400">' +
                 esc(fmtDate(ev.created_at)) +
+                '</span> · <span class="font-semibold text-[#002B5C] dark:text-gray-200">' +
+                esc(who) +
                 '</span> · <strong>' +
                 esc(ev.event_type) +
                 '</strong> · ' +
-                esc(ev.path || '') +
+                detail +
                 '</div>'
               );
             })
             .join('')
-        : '<p class="text-gray-400">No events yet.</p>';
+        : '<p class="text-gray-400 m-0">No events yet.</p>';
+    }
+
+    const invBody = document.getElementById('lo-adm-invites');
+    if (invBody) {
+      const invites = (inv.data && inv.data.invites) || [];
+      invBody.innerHTML = invites.length
+        ? invites
+            .map(function (i) {
+              const status = i.revoked_at
+                ? 'revoked'
+                : i.used_at
+                  ? 'used'
+                  : 'open';
+              const statusCls =
+                status === 'open'
+                  ? 'text-emerald-600'
+                  : status === 'used'
+                    ? 'text-[#00A89D]'
+                    : 'text-gray-400';
+              return (
+                '<tr class="border-t border-gray-100 dark:border-gray-800">' +
+                '<td class="px-3 py-2"><code class="font-bold text-sm">' +
+                esc(i.code) +
+                '</code></td>' +
+                '<td class="px-3 py-2 text-xs font-bold uppercase ' +
+                statusCls +
+                '">' +
+                esc(status) +
+                (i.bridge_synced === false
+                  ? ' <span class="text-amber-600">· not synced</span>'
+                  : '') +
+                '</td>' +
+                '<td class="px-3 py-2 text-xs">' +
+                esc(i.email_optional || '—') +
+                '</td>' +
+                '<td class="px-3 py-2 text-xs">' +
+                esc(i.created_by_name || '—') +
+                '<div class="text-[10px] text-gray-400">' +
+                esc(i.created_by_email || '') +
+                '</div></td>' +
+                '<td class="px-3 py-2 text-xs whitespace-nowrap">' +
+                esc(fmtDate(i.created_at)) +
+                '</td>' +
+                '<td class="px-3 py-2 text-xs whitespace-nowrap">' +
+                esc(fmtDate(i.used_at)) +
+                '</td></tr>'
+              );
+            })
+            .join('')
+        : '<tr><td colspan="6" class="px-3 py-6 text-center text-gray-400">No agent invites yet.</td></tr>';
     }
   }
 

@@ -793,63 +793,109 @@
     }
   }
 
-  function downloadPdf() {
-    const letter = ensureDraftForExport();
-    if (!letter) return;
-    const html =
-      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' +
-      escapeHtml(fileBaseName()) +
-      '</title><style>' +
-      'body{font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.35;color:#111;max-width:6.5in;margin:0.75in auto;white-space:pre-wrap}' +
-      '@media print{body{margin:0.75in}}' +
-      '</style></head><body>' +
-      escapeHtml(letter) +
-      '</body></html>';
-    const w = window.open('', '_blank', 'noopener,width=800,height=900');
-    if (!w) {
-      toast('Allow pop-ups to download PDF (Print → Save as PDF)', 'error');
-      return;
-    }
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
-    setTimeout(function () {
-      try {
-        w.focus();
-        w.print();
-      } catch (e) {
-        /* ignore */
-      }
-    }, 300);
-    toast('Use Print → Save as PDF in the print dialog');
+  /**
+   * Normalize letter for clipboard: keep real paragraph structure.
+   * Blank lines become \n\n; single newlines (labels / address lines) stay as line breaks.
+   * Never flatten to one line.
+   */
+  function letterPlainForClipboard(letterText) {
+    let t = String(letterText || '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    return t;
+  }
+
+  /** HTML with <p> blocks so paste into Word/email keeps structure. */
+  function letterHtmlForClipboard(plain) {
+    const blocks = String(plain || '').split(/\n\n+/);
+    const parts = blocks.map(function (block) {
+      const lines = String(block)
+        .split('\n')
+        .map(function (line) {
+          return escapeHtml(line);
+        });
+      return (
+        '<p style="margin:0 0 12pt 0;font-family:\'Times New Roman\',Times,serif;font-size:12pt;line-height:1.35;color:#111;">' +
+        (lines.length ? lines.join('<br>\n') : '&nbsp;') +
+        '</p>'
+      );
+    });
+    return (
+      '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>' +
+      parts.join('\n') +
+      '</body></html>'
+    );
   }
 
   function copyLetter() {
-    const letter = buildFullLetter();
-    if (!letter) {
+    const letter = ensureDraftForExport();
+    if (!letter) return;
+    const plain = letterPlainForClipboard(letter);
+    if (!plain) {
       toast('Nothing to copy yet', 'error');
       return;
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(letter).then(
+    const html = letterHtmlForClipboard(plain);
+
+    function okToast() {
+      toast('Letter copied — paste keeps paragraphs');
+    }
+
+    // Prefer dual-format clipboard (HTML + plain) for Word / Outlook / email
+    if (
+      typeof ClipboardItem !== 'undefined' &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.write === 'function'
+    ) {
+      try {
+        const item = new ClipboardItem({
+          'text/plain': new Blob([plain], { type: 'text/plain' }),
+          'text/html': new Blob([html], { type: 'text/html' })
+        });
+        navigator.clipboard.write([item]).then(okToast, function () {
+          copyPlainFallback(plain, okToast);
+        });
+        return;
+      } catch (e) {
+        /* fall through */
+      }
+    }
+
+    copyPlainFallback(plain, okToast);
+  }
+
+  function copyPlainFallback(plain, onOk) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(plain).then(
+        onOk ||
+          function () {
+            toast('Letter copied — paste keeps paragraphs');
+          },
         function () {
-          toast('Letter copied');
-        },
-        function () {
-          fallbackCopy(letter);
+          fallbackCopy(plain);
         }
       );
-    } else fallbackCopy(letter);
+      return;
+    }
+    fallbackCopy(plain);
   }
 
   function fallbackCopy(text) {
     const ta = document.createElement('textarea');
     ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    ta.style.whiteSpace = 'pre-wrap';
     document.body.appendChild(ta);
+    ta.focus();
     ta.select();
     try {
       document.execCommand('copy');
-      toast('Letter copied');
+      toast('Letter copied — paste keeps paragraphs');
     } catch (e) {
       toast('Copy failed', 'error');
     }
@@ -969,7 +1015,7 @@
       '<div class="lox-howto">' +
       '<div class="lox-howto-item"><span class="lox-howto-ico"><i class="fas fa-hand-pointer"></i></span><div><strong>1 · Situation</strong><p>Common underwriting case or free-form Custom</p></div></div>' +
       '<div class="lox-howto-item"><span class="lox-howto-ico"><i class="fas fa-list-check"></i></span><div><strong>2 · Few facts</strong><p>Only the minimum fields — AI writes the letter</p></div></div>' +
-      '<div class="lox-howto-item"><span class="lox-howto-ico"><i class="fas fa-file-export"></i></span><div><strong>3 · Export</strong><p>Polish, then Word / PDF / copy / save</p></div></div>' +
+      '<div class="lox-howto-item"><span class="lox-howto-ico"><i class="fas fa-file-export"></i></span><div><strong>3 · Export</strong><p>Polish, then Download Word or Copy letter</p></div></div>' +
       '</div>' +
       '<div class="lox-panel">' +
       '<div class="lox-panel-head">' +
@@ -1127,18 +1173,15 @@
       '<div class="lox-actions lox-actions--bar">' +
       '<button type="button" class="lox-btn lox-btn-primary" data-lox-docx' +
       (hasDraft ? '' : ' disabled') +
-      '><i class="fas fa-file-word"></i> Word</button>' +
-      '<button type="button" class="lox-btn lox-btn-primary lox-btn-navy" data-lox-pdf' +
-      (hasDraft ? '' : ' disabled') +
-      '><i class="fas fa-file-pdf"></i> PDF</button>' +
+      '><i class="fas fa-file-word"></i> Download Word</button>' +
       '<button type="button" class="lox-btn lox-btn-ghost" data-lox-copy' +
       (hasDraft ? '' : ' disabled') +
-      '><i class="fas fa-copy"></i> Copy</button>' +
+      '><i class="fas fa-copy"></i> Copy letter</button>' +
       '<button type="button" class="lox-btn lox-btn-ghost" data-lox-vault' +
       (hasDraft ? '' : ' disabled') +
       '><i class="far fa-bookmark"></i> Save</button>' +
       '</div>' +
-      '<p class="lox-hint">PDF opens Print → Save as PDF. Word is fully editable.</p>' +
+      '<p class="lox-hint">Word is the supported export. Copy keeps paragraph structure for paste into email or Word.</p>' +
       '</div></div></div>'
     );
   }
@@ -1157,11 +1200,9 @@
         '<p>Fill the details, then Generate with AI.</p></div>';
     }
     setImproveEnabled(hasDraft);
-    document.querySelectorAll('[data-lox-docx],[data-lox-pdf],[data-lox-copy],[data-lox-vault]').forEach(
-      function (b) {
-        b.disabled = !hasDraft || state.generating;
-      }
-    );
+    document.querySelectorAll('[data-lox-docx],[data-lox-copy],[data-lox-vault]').forEach(function (b) {
+      b.disabled = !hasDraft || state.generating;
+    });
     const genBtn = document.getElementById('lox-generate-btn');
     if (genBtn && !state.generating) {
       genBtn.innerHTML =
@@ -1271,9 +1312,6 @@
 
     el.querySelectorAll('[data-lox-docx]').forEach(function (btn) {
       btn.addEventListener('click', downloadDocx);
-    });
-    el.querySelectorAll('[data-lox-pdf]').forEach(function (btn) {
-      btn.addEventListener('click', downloadPdf);
     });
     el.querySelectorAll('[data-lox-copy]').forEach(function (btn) {
       btn.addEventListener('click', copyLetter);

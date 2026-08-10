@@ -3890,13 +3890,13 @@ html.dark #calculator.calc-studio {
 .calc-studio-shell {
   max-width: 72rem;
   margin: 0 auto;
-  padding: 1.25rem 1rem 2rem;
+  padding: 1.15rem 1rem 1.35rem;
 }
 @media (min-width: 640px) {
-  .calc-studio-shell { padding: 1.5rem 1.5rem 2.25rem; }
+  .calc-studio-shell { padding: 1.35rem 1.35rem 1.5rem; }
 }
 @media (min-width: 1024px) {
-  .calc-studio-shell { padding: 1.75rem 2rem 2.5rem; }
+  .calc-studio-shell { padding: 1.5rem 1.75rem 1.65rem; }
 }
 
 /* Header */
@@ -3953,6 +3953,9 @@ html.dark #calculator.calc-studio {
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--calc-muted);
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 .calc-step span {
   width: 1.25rem;
@@ -4323,29 +4326,77 @@ html.dark .calc-mode-toggle {
   background: rgba(0, 168, 157, 0.08);
 }
 
-/* Workspace */
+/*
+ * Workspace — single stacked column (inputs → results → compare).
+ * Side-by-side columns left a tall empty white void on the right; stacking removes it.
+ */
 .calc-workspace {
-  display: grid;
-  gap: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  align-items: stretch;
 }
-@media (min-width: 1280px) {
-  .calc-workspace {
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
-    align-items: start;
-  }
+.calc-inputs-col {
+  min-width: 0;
+  width: 100%;
 }
+.calc-results-col {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+/*
+ * Form layout (matches intended screenshot fix):
+ *   Loan (left)  |  Housing
+ *                |  Accelerate   ← stacked in .calc-form-rail, flush under Housing
+ *   HomeNow (full width)
+ * Nested rail avoids CSS grid row-height trap (Accelerate sitting under full Loan height).
+ */
 .calc-form {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.6rem;
+}
+.calc-form-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .calc-form-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.6rem 0.7rem;
+  }
+}
+.calc-form-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+/* Hide mode-switched blocks reliably (class + [hidden]) */
+#calculator .hidden,
+.calc-studio .hidden,
+#calculator [hidden] {
+  display: none !important;
 }
 .calc-panel {
   border-radius: var(--calc-radius);
   border: 1px solid var(--calc-line);
   background: rgba(255, 255, 255, 0.72);
-  padding: 1rem 1.05rem;
+  padding: 0.8rem 0.9rem;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  margin: 0;
+  height: auto;
+  align-self: start;
+}
+.calc-panel--housing,
+.calc-panel--accel {
+  height: fit-content;
 }
 .dark .calc-panel,
 html.dark .calc-panel {
@@ -4358,8 +4409,8 @@ html.dark .calc-panel {
 .calc-panel-head {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  margin-bottom: 0.85rem;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
 }
 .calc-panel-icon {
   width: 2.25rem;
@@ -4395,19 +4446,31 @@ html.dark .calc-panel-title { color: #fff; }
 .calc-fields {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 .calc-fields--2 {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.75rem;
+  gap: 0.65rem;
   margin-top: 0.75rem;
+}
+.calc-fields--flush {
+  margin-top: 0;
 }
 @media (min-width: 480px) {
   .calc-fields--2 { grid-template-columns: 1fr 1fr; }
 }
 .calc-fields--align-end { align-items: end; }
 .calc-field--span2 { grid-column: 1 / -1; }
+.calc-hint--tight {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+  line-height: 1.3;
+}
+.calc-seg--compact {
+  margin-top: 0.35rem;
+  max-width: 12rem;
+}
 .calc-field label {
   display: block;
   font-size: 0.68rem;
@@ -4728,14 +4791,14 @@ html.dark .calc-chip-hn { color: #5eead4; }
 .calc-results {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  min-height: 12rem;
+  gap: 0.65rem;
+  min-height: 0;
 }
 .calc-result-card {
   border-radius: calc(var(--calc-radius) + 0.1rem);
   border: 1px solid var(--calc-line);
   background: rgba(255, 255, 255, 0.85);
-  padding: 1.15rem 1.2rem;
+  padding: 0.95rem 1.05rem;
   box-shadow: 0 12px 32px -18px rgba(0, 43, 92, 0.22);
   animation: calc-fade-up 0.35s ease;
 }
@@ -4872,8 +4935,9 @@ html.dark .calc-result-card--accel {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 0.85rem;
-  margin-top: 0.35rem;
+  gap: 0.45rem 0.75rem;
+  margin-top: 0.15rem;
+  margin-bottom: 0.15rem;
 }
 .calc-link-btn {
   border: 0;
@@ -4896,19 +4960,52 @@ html.dark .calc-result-card--accel {
   line-height: 1.4;
 }
 
-/* Board */
+/* Board — full width, immediately under results (no side void, no large top gap) */
 .calc-board {
-  margin-top: 1.75rem;
-  padding-top: 1.35rem;
-  border-top: 1px solid var(--calc-line);
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem 0.95rem 0.9rem;
+  border-radius: var(--calc-radius);
+  border: 1px solid var(--calc-line);
+  scroll-margin-top: 6.5rem; /* clear sticky hero when jumping here */
+  background:
+    linear-gradient(180deg, rgba(0, 168, 157, 0.06), transparent 40%),
+    rgba(255, 255, 255, 0.78);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+}
+.dark .calc-board,
+html.dark .calc-board {
+  background:
+    linear-gradient(180deg, rgba(0, 168, 157, 0.12), transparent 45%),
+    rgba(15, 23, 42, 0.55);
+  box-shadow: none;
 }
 .calc-board-head {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 0.75rem 1rem;
-  margin-bottom: 0.9rem;
+  gap: 0.5rem 0.85rem;
+  margin-bottom: 0.55rem;
+}
+.calc-btn-jump-board {
+  text-decoration: none;
+  border-color: rgba(0, 168, 157, 0.4) !important;
+  color: #0f766e !important;
+}
+.calc-btn-jump-board:hover {
+  background: rgba(0, 168, 157, 0.1) !important;
+}
+.dark .calc-btn-jump-board,
+html.dark .calc-btn-jump-board {
+  color: #5eead4 !important;
+}
+a.calc-step {
+  text-decoration: none;
+  cursor: pointer;
+}
+a.calc-step:hover {
+  color: var(--calc-teal);
 }
 .calc-board-head-actions {
   display: flex;
@@ -4930,7 +5027,7 @@ html.dark .calc-result-card--accel {
   border-style: dashed !important;
   background: rgba(248, 250, 252, 0.65) !important;
   box-shadow: none !important;
-  min-height: 14rem;
+  min-height: 7.5rem;
 }
 .calc-scenario-card--empty::before {
   opacity: 0.25 !important;
@@ -5036,24 +5133,26 @@ html.dark .calc-btn-danger-outline {
 .calc-board-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.75rem;
+  gap: 0.55rem;
 }
-@media (min-width: 768px) {
-  .calc-board-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (min-width: 640px) {
+  .calc-board-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 .calc-scenario-card {
   position: relative;
-  border-radius: 1.15rem;
+  border-radius: 1rem;
   border: 1px solid var(--calc-line);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
-  padding: 1.05rem 1.05rem 0.95rem;
-  box-shadow: 0 12px 32px -18px rgba(0, 43, 92, 0.32);
+  padding: 0.8rem 0.85rem 0.75rem;
+  box-shadow: 0 10px 28px -16px rgba(0, 43, 92, 0.28);
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   overflow: hidden;
   animation: calc-fade-up 0.35s ease;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.4rem;
 }
 .calc-scenario-card::before {
   content: '';

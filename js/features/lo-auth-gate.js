@@ -303,9 +303,41 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
     paintAccountMenu();
     window.__loUser = currentUser;
     window.dispatchEvent(new CustomEvent('lo-auth-ready', { detail: { user: currentUser } }));
-    api('/api/auth/track', { method: 'POST', body: { event_type: 'tool_open', feature: 'app' } }).catch(
-      function () {}
-    );
+    trackUsage('tool_open', 'app');
+    ensureSectionTracking();
+  }
+
+  /** Debounced usage events for admin analytics (who uses which tools). */
+  var _trackLast = {};
+  function trackUsage(eventType, feature) {
+    if (!currentUser) return;
+    var key = String(eventType || '') + ':' + String(feature || '');
+    var now = Date.now();
+    // Avoid spam: same event+feature at most once per 45s
+    if (_trackLast[key] && now - _trackLast[key] < 45000) return;
+    _trackLast[key] = now;
+    api('/api/auth/track', {
+      method: 'POST',
+      body: { event_type: eventType || 'tool_open', feature: feature || '' }
+    }).catch(function () {});
+  }
+
+  var _sectionTrackHooked = false;
+  function ensureSectionTracking() {
+    if (_sectionTrackHooked) return;
+    _sectionTrackHooked = true;
+    var prev = window.onCoachSectionShown;
+    window.onCoachSectionShown = function (id) {
+      if (typeof prev === 'function') {
+        try {
+          prev(id);
+        } catch (e) {
+          /* ignore */
+        }
+      }
+      if (!id || id === 'lo-admin') return;
+      trackUsage('section_view', id);
+    };
   }
 
   function paintAccountMenu() {
