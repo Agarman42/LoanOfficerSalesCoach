@@ -48,24 +48,34 @@ Agent UI applies it via header LO plate + sticky footer (`lo-brand-chrome.js` / 
 ## Env (LO Render)
 
 ```
-DATABASE_URL=          # required for durable auth (Postgres)
+DATABASE_URL=             # required — prefer Render **External** Database URL
+# DATABASE_URL_EXTERNAL=  # optional override if DATABASE_URL is internal-only
+# RENDER_DB_REGION=oregon # used only if host is bare dpg-xxx-a (no domain)
 AUTH_SESSION_SECRET=
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
-AUTH_BRIDGE_SECRET=    # same as Agent
+AUTH_BRIDGE_SECRET=       # same as Agent
 REALTOR_APP_URL=https://ruoffagentsalescoach.onrender.com
-# AUTH_FORCE_FILE=1    # local only — force file store even if DATABASE_URL set
+# AUTH_FORCE_FILE=1       # local only — force file store even if DATABASE_URL set
 ```
 
 ## Env (Agent Render)
 
 ```
-DATABASE_URL=          # required for durable auth (same CRM Postgres OK)
+DATABASE_URL=             # prefer External URL (same CRM Postgres OK)
+# DATABASE_URL_EXTERNAL=
+# RENDER_DB_REGION=oregon
 AUTH_SESSION_SECRET=
-AUTH_BRIDGE_SECRET=    # same as LO
+AUTH_BRIDGE_SECRET=       # same as LO
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
 ```
+
+### Render `DATABASE_URL` gotcha
+
+If login fails with `getaddrinfo ENOTFOUND dpg-…-a`, the URL is using a **private internal hostname** that this web service cannot resolve.
+
+**Fix:** In Render → Postgres → **Connections** → copy the **External Database URL** into each web service’s `DATABASE_URL` (or `DATABASE_URL_EXTERNAL`).
 
 ## Auth tables (auto-created on startup)
 

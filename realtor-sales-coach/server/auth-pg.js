@@ -55,8 +55,69 @@ const SCHEMA_STATEMENTS = [
   )`
 ];
 
+/**
+ * Prefer public/external URLs when present. Internal Render hostnames
+ * (e.g. dpg-xxx-a with no domain) only resolve inside the same private network.
+ */
+function rawDatabaseUrlCandidates() {
+  return [
+    process.env.DATABASE_URL_EXTERNAL,
+    process.env.DATABASE_PUBLIC_URL,
+    process.env.POSTGRES_URL,
+    process.env.DATABASE_URL
+  ]
+    .map((v) => String(v || '').trim())
+    .filter(Boolean);
+}
+
+function extractHost(url) {
+  try {
+    // postgres://user:pass@host:5432/db
+    const m = String(url).match(/@([^/?]+)/);
+    if (!m) return '';
+    return m[1].split(':')[0];
+  } catch (e) {
+    return '';
+  }
+}
+
+function isShortRenderInternalHost(host) {
+  // e.g. dpg-d9p48iqjnfac73c2ode0-a  (no dots)
+  return /^dpg-[a-z0-9-]+$/i.test(host || '') && !String(host).includes('.');
+}
+
+/**
+ * Expand bare Render internal hosts to a public hostname when needed.
+ * Region can be set via RENDER_DB_REGION (default oregon).
+ */
+function expandRenderHost(url) {
+  const host = extractHost(url);
+  if (!isShortRenderInternalHost(host)) return url;
+  const region = String(process.env.RENDER_DB_REGION || process.env.POSTGRES_REGION || 'oregon')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '') || 'oregon';
+  const fullHost = host + '.' + region + '-postgres.render.com';
+  const expanded = url.replace('@' + host, '@' + fullHost);
+  console.warn(
+    '[auth-pg] DATABASE_URL host "' +
+      host +
+      '" looks like a Render internal hostname. Expanding to "' +
+      fullHost +
+      '". Prefer setting DATABASE_URL to the External Database URL from the Render Postgres dashboard.'
+  );
+  return expanded;
+}
+
 function databaseUrl() {
-  return String(process.env.DATABASE_URL || process.env.POSTGRES_URL || '').trim();
+  const candidates = rawDatabaseUrlCandidates();
+  if (!candidates.length) return '';
+  // Prefer a URL that already has a public/full hostname
+  for (const c of candidates) {
+    const h = extractHost(c);
+    if (h && h.includes('.')) return c;
+  }
+  return expandRenderHost(candidates[0]);
 }
 
 function isPgEnabled() {
@@ -71,9 +132,12 @@ function shouldUseSsl(url) {
   if (process.env.PGSSL === '1' || process.env.PGSSL === 'true') return true;
   if (/sslmode=require/i.test(url)) return true;
   if (/sslmode=disable/i.test(url)) return false;
-  // Render external hostnames need TLS; internal hostnames usually do not
-  if (/\.render\.com/i.test(url) && !/internal/i.test(url)) return true;
+  // External hosts need TLS
+  if (/\.render\.com/i.test(url)) return true;
   if (/neon\.tech|supabase\.co|amazonaws\.com/i.test(url)) return true;
+  // Bare internal dpg- host over expanded public name will use SSL above
+  const host = extractHost(url);
+  if (isShortRenderInternalHost(host)) return false;
   return false;
 }
 
@@ -94,7 +158,7 @@ function getPool() {
     console.log(
       '[auth-pg] pool created',
       'ssl=' + !!ssl,
-      'host=' + (url.match(/@([^/:]+)/) || [])[1] || '(unknown)'
+      'host=' + (extractHost(url) || '(unknown)')
     );
   }
   return pool;
