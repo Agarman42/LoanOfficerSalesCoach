@@ -66,13 +66,29 @@ app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// ── LO auth (Ruoff LOs) ──────────────────────────────────────
+// ── LO auth (Ruoff LOs) — Postgres when DATABASE_URL is set ──
 let loAuthApi = null;
+let loAuthBackend = 'unknown';
 try {
   const { mountLoAuthRoutes } = require('./server/lo-auth-routes');
-  const { seedAdminIfNeeded, STORE_PATH } = require('./server/lo-auth-store');
+  const {
+    seedAdminIfNeeded,
+    STORE_PATH,
+    initBackend,
+    USE_PG,
+    authPgHealth
+  } = require('./server/lo-auth-store');
   loAuthApi = mountLoAuthRoutes(app);
-  seedAdminIfNeeded()
+  initBackend()
+    .then((info) => {
+      loAuthBackend = (info && info.backend) || (USE_PG ? 'postgres' : 'file');
+      if (loAuthBackend === 'file' && (process.env.RENDER || process.env.NODE_ENV === 'production')) {
+        console.error(
+          '[lo-auth] CRITICAL: auth is file-backed on a production host — set DATABASE_URL or accounts will wipe on redeploy'
+        );
+      }
+      return seedAdminIfNeeded();
+    })
     .then((r) => {
       if (r && r.seeded) {
         console.log('[lo-auth] Seeded admin:', r.email);
@@ -80,10 +96,18 @@ try {
           console.log('[lo-auth] Generated ADMIN password (copy now):', r.password);
         }
       } else {
-        console.log('[lo-auth] Admin present — store:', STORE_PATH);
+        console.log(
+          '[lo-auth] Admin present — backend:',
+          loAuthBackend,
+          loAuthBackend === 'file' ? STORE_PATH : 'sc_auth_users app=lo'
+        );
       }
+      return typeof authPgHealth === 'function' ? authPgHealth() : null;
     })
-    .catch((e) => console.warn('[lo-auth] seed failed', e.message));
+    .then((h) => {
+      if (h) console.log('[lo-auth] health', JSON.stringify(h));
+    })
+    .catch((e) => console.warn('[lo-auth] init/seed failed', e.message));
   console.log('[lo-auth] Invite-gated auth enabled for LO Sales Coach');
 } catch (e) {
   console.warn('[lo-auth] failed to mount', e && e.message ? e.message : e);
@@ -105,6 +129,8 @@ app.get('/api/health', (_req, res) => {
         ? 'Server key present and looks like a real xai- key'
         : 'Server key is set but looks like a placeholder (too short). Put a real key from https://console.x.ai in .env and restart proxy.js',
     auth: process.env.AUTH_DISABLED === '1' ? 'disabled' : 'enabled',
+    authBackend: loAuthBackend || (process.env.DATABASE_URL ? 'postgres' : 'file'),
+    authDurable: !!(loAuthBackend === 'postgres' || process.env.DATABASE_URL),
     node: process.version,
     time: new Date().toISOString(),
     partnerCards: true,

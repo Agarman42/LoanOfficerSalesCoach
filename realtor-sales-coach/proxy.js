@@ -56,13 +56,29 @@ app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// ── Auth (Realtor only) ──────────────────────────────────────
+// ── Auth (Realtor / Agent) — Postgres when DATABASE_URL is set ──
 let authApi = null;
+let agentAuthBackend = 'unknown';
 try {
   const { mountAuthRoutes } = require('./server/auth-routes');
-  const { seedAdminIfNeeded, STORE_PATH } = require('./server/auth-store');
+  const {
+    seedAdminIfNeeded,
+    STORE_PATH,
+    initBackend,
+    USE_PG,
+    authPgHealth
+  } = require('./server/auth-store');
   authApi = mountAuthRoutes(app);
-  seedAdminIfNeeded()
+  initBackend()
+    .then((info) => {
+      agentAuthBackend = (info && info.backend) || (USE_PG ? 'postgres' : 'file');
+      if (agentAuthBackend === 'file' && (process.env.RENDER || process.env.NODE_ENV === 'production')) {
+        console.error(
+          '[auth] CRITICAL: auth is file-backed on a production host — set DATABASE_URL or accounts will wipe on redeploy'
+        );
+      }
+      return seedAdminIfNeeded();
+    })
     .then((r) => {
       if (r && r.seeded) {
         console.log('[auth] Seeded admin account:', r.email);
@@ -75,10 +91,18 @@ try {
           console.log('[auth] Admin password from ADMIN_PASSWORD env');
         }
       } else {
-        console.log('[auth] Admin already present — store:', STORE_PATH);
+        console.log(
+          '[auth] Admin already present — backend:',
+          agentAuthBackend,
+          agentAuthBackend === 'file' ? STORE_PATH : 'sc_auth_users app=agent'
+        );
       }
+      return typeof authPgHealth === 'function' ? authPgHealth() : null;
     })
-    .catch((e) => console.warn('[auth] seed failed', e.message));
+    .then((h) => {
+      if (h) console.log('[auth] health', JSON.stringify(h));
+    })
+    .catch((e) => console.warn('[auth] init/seed failed', e.message));
   console.log('[auth] Invite-gated auth enabled for Agent Sales Coach');
 } catch (e) {
   console.warn('[auth] failed to mount', e && e.message ? e.message : e);
@@ -91,6 +115,8 @@ app.get('/api/health', (_req, res) => {
     service: 'agent-sales-coach-proxy',
     hasServerKey: !!(process.env.XAI_API_KEY || process.env.GROK_API_KEY),
     auth: process.env.AUTH_DISABLED === '1' ? 'disabled' : 'enabled',
+    authBackend: agentAuthBackend || (process.env.DATABASE_URL ? 'postgres' : 'file'),
+    authDurable: !!(agentAuthBackend === 'postgres' || process.env.DATABASE_URL),
     node: process.version,
     time: new Date().toISOString()
   });

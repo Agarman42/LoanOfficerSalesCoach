@@ -1,22 +1,35 @@
 /**
- * Loan Officer Sales Coach — auth persistence (file JSON).
- * Separate from Agent store; same scrypt + invite patterns.
- * Invites for realtors are pushed to the Agent app via bridge API.
+ * Loan Officer Sales Coach — auth persistence.
+ * Primary: Postgres (DATABASE_URL) via sc_auth_* tables (app = 'lo').
+ * Fallback: local JSON file only when DATABASE_URL is unset (local dev).
  */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const authPg = require('./auth-pg');
 
 const STORE_PATH =
   process.env.LO_AUTH_STORE_PATH ||
   path.join(__dirname, '..', 'data', 'lo-auth-store.json');
 
+const APP = 'lo';
+const SHAPE = {
+  users: true,
+  agent_invites: true,
+  invites: false,
+  usage_events: true,
+  password_resets: true,
+  access_requests: false
+};
+
 const SCRYPT_N = 16384;
 const SCRYPT_R = 8;
 const SCRYPT_P = 1;
 const SCRYPT_KEYLEN = 64;
+
+const USE_PG = authPg.isPgEnabled();
 
 function ensureDir() {
   const dir = path.dirname(STORE_PATH);
@@ -34,7 +47,7 @@ function emptyStore() {
   };
 }
 
-function readStore() {
+function readStoreFile() {
   try {
     ensureDir();
     if (!fs.existsSync(STORE_PATH)) return emptyStore();
@@ -60,23 +73,30 @@ function readStore() {
   }
 }
 
-function writeStore(store) {
+function writeStoreFile(store) {
   ensureDir();
   const tmp = STORE_PATH + '.tmp';
   fs.writeFileSync(tmp, JSON.stringify(store, null, 2), 'utf8');
   fs.renameSync(tmp, STORE_PATH);
 }
 
-let chain = Promise.resolve();
-function withStore(mutator) {
-  const run = chain.then(() => {
-    const store = readStore();
+let fileChain = Promise.resolve();
+function withStoreFile(mutator) {
+  const run = fileChain.then(() => {
+    const store = readStoreFile();
     const result = mutator(store);
-    writeStore(store);
+    writeStoreFile(store);
     return result;
   });
-  chain = run.catch(() => {});
+  fileChain = run.catch(() => {});
   return run;
+}
+
+const withStorePg = USE_PG ? authPg.createWithStore(APP, SHAPE) : null;
+
+function withStore(mutator) {
+  if (USE_PG && withStorePg) return withStorePg(mutator);
+  return withStoreFile(mutator);
 }
 
 function newId(prefix) {
@@ -193,10 +213,32 @@ function seedAdminIfNeeded() {
   });
 }
 
+async function initBackend() {
+  if (!USE_PG) {
+    console.warn(
+      '[lo-auth-store] DATABASE_URL not set — using local file store (ephemeral on Render). Set DATABASE_URL for durable auth.'
+    );
+    return { backend: 'file', path: STORE_PATH };
+  }
+  try {
+    await authPg.migrate();
+    const imp = await authPg.importFileIfEmpty(APP, readStoreFile, SHAPE);
+    if (imp.imported) {
+      console.log('[lo-auth-store] migrated file users → Postgres:', imp.users);
+    }
+    console.log('[lo-auth-store] backend=postgres (sc_auth_* app=lo)');
+    return { backend: 'postgres', imported: !!imp.imported };
+  } catch (e) {
+    console.error('[lo-auth-store] Postgres init failed:', e.message);
+    throw e;
+  }
+}
+
 module.exports = {
   STORE_PATH,
+  USE_PG,
   withStore,
-  readStore,
+  readStore: readStoreFile,
   newId,
   normalizeEmail,
   isRuoffEmail,
@@ -206,5 +248,7 @@ module.exports = {
   findUserByEmail,
   findUserById,
   recordUsage,
-  seedAdminIfNeeded
+  seedAdminIfNeeded,
+  initBackend,
+  authPgHealth: () => authPg.health()
 };

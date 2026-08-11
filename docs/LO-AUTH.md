@@ -1,13 +1,17 @@
-# LO Sales Coach auth (v3.118)
+# LO Sales Coach auth (v3.132+)
 
 ## Architecture
 
-| App | Store | Cookie | Roles |
-|-----|--------|--------|--------|
-| **LO Sales Coach** | `data/lo-auth-store.json` | `lo_asc_session` (httpOnly, 30d remember) | `loan_officer`, `admin` |
-| **Agent Sales Coach** | `realtor-sales-coach/data/auth-store.json` | `asc_session` | `realtor`, `lo`, `admin` |
+| App | Durable store | Cookie | Roles |
+|-----|----------------|--------|--------|
+| **LO Sales Coach** | Postgres `sc_auth_*` rows with `app='lo'` | `lo_asc_session` (httpOnly, 30d remember) | `loan_officer`, `admin` |
+| **Agent Sales Coach** | Postgres `sc_auth_*` rows with `app='agent'` | `asc_session` | `realtor`, `lo`, `admin` |
 
-Separate stores (separate Render services). **Same email = same person long-term**, but accounts are not unified yet.
+**Primary backend is Postgres** via `DATABASE_URL` (same DB as CRM: `sales_coach_crm_db`). Auth tables use the `sc_auth_` prefix so they never touch CRM tables.
+
+Local file JSON (`data/lo-auth-store.json` / `data/auth-store.json`) is **fallback only** when `DATABASE_URL` is unset (local dev). On Render, file storage is ephemeral — do not rely on it.
+
+Separate apps share one DB but **are not merged**: `app` column distinguishes LO vs Agent. Same email = same person long-term conceptually, but accounts remain separate rows per app.
 
 ### Realtor invites from LO tool
 
@@ -44,21 +48,35 @@ Agent UI applies it via header LO plate + sticky footer (`lo-brand-chrome.js` / 
 ## Env (LO Render)
 
 ```
+DATABASE_URL=          # required for durable auth (Postgres)
 AUTH_SESSION_SECRET=
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
-AUTH_BRIDGE_SECRET=   # same as Agent
+AUTH_BRIDGE_SECRET=    # same as Agent
 REALTOR_APP_URL=https://ruoffagentsalescoach.onrender.com
+# AUTH_FORCE_FILE=1    # local only — force file store even if DATABASE_URL set
 ```
 
 ## Env (Agent Render)
 
 ```
+DATABASE_URL=          # required for durable auth (same CRM Postgres OK)
 AUTH_SESSION_SECRET=
-AUTH_BRIDGE_SECRET=   # same as LO
+AUTH_BRIDGE_SECRET=    # same as LO
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
 ```
+
+## Auth tables (auto-created on startup)
+
+- `sc_auth_users` — users per `app` (`lo` | `agent`)
+- `sc_auth_invites` — Agent invites + LO-side agent invite log (`app` scopes)
+- `sc_auth_usage_events` — admin usage feed
+- `sc_auth_password_resets` — reset tokens
+- `sc_auth_access_requests` — Agent access requests
+- `sc_auth_meta` — one-time file→PG migration markers
+
+On first boot with empty PG tables, existing local JSON auth files (if present) are imported once.
 
 ## Verify checklist
 
@@ -69,3 +87,5 @@ ADMIN_PASSWORD=
 5. Realtor cannot open LO tools with Agent session  
 6. Admin sees LO users + last login  
 7. Existing Agent realtor logins still work  
+8. `/api/health` shows `authBackend: "postgres"` and `authDurable: true` on Render  
+9. After redeploy, users and admin list still present (no wipe)  

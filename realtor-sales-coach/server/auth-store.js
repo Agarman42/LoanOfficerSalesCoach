@@ -1,23 +1,35 @@
 /**
- * Realtor Agent Sales Coach — auth persistence (file JSON).
- * Pure Node; no native deps. Optional Upstash Redis later (same pattern as partner-store).
- *
- * Data lives under realtor-sales-coach/data/auth-store.json (gitignored).
+ * Realtor Agent Sales Coach — auth persistence.
+ * Primary: Postgres (DATABASE_URL) via sc_auth_* tables (app = 'agent').
+ * Fallback: local JSON file only when DATABASE_URL is unset (local dev).
  */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const authPg = require('./auth-pg');
 
 const STORE_PATH =
   process.env.AUTH_STORE_PATH ||
   path.join(__dirname, '..', 'data', 'auth-store.json');
 
+const APP = 'agent';
+const SHAPE = {
+  users: true,
+  invites: true,
+  agent_invites: false,
+  usage_events: true,
+  password_resets: true,
+  access_requests: true
+};
+
 const SCRYPT_N = 16384;
 const SCRYPT_R = 8;
 const SCRYPT_P = 1;
 const SCRYPT_KEYLEN = 64;
+
+const USE_PG = authPg.isPgEnabled();
 
 function ensureDir() {
   const dir = path.dirname(STORE_PATH);
@@ -35,7 +47,7 @@ function emptyStore() {
   };
 }
 
-function readStore() {
+function readStoreFile() {
   try {
     ensureDir();
     if (!fs.existsSync(STORE_PATH)) return emptyStore();
@@ -61,32 +73,34 @@ function readStore() {
   }
 }
 
-function writeStore(store) {
+function writeStoreFile(store) {
   ensureDir();
   const tmp = STORE_PATH + '.tmp';
   fs.writeFileSync(tmp, JSON.stringify(store, null, 2), 'utf8');
   fs.renameSync(tmp, STORE_PATH);
 }
 
-/** Serialize mutations so concurrent requests don't clobber the file. */
-let chain = Promise.resolve();
-function withStore(mutator) {
-  const run = chain.then(() => {
-    const store = readStore();
+let fileChain = Promise.resolve();
+function withStoreFile(mutator) {
+  const run = fileChain.then(() => {
+    const store = readStoreFile();
     const result = mutator(store);
-    writeStore(store);
+    writeStoreFile(store);
     return result;
   });
-  chain = run.catch(() => {});
+  fileChain = run.catch(() => {});
   return run;
 }
 
+const withStorePg = USE_PG ? authPg.createWithStore(APP, SHAPE) : null;
+
+function withStore(mutator) {
+  if (USE_PG && withStorePg) return withStorePg(mutator);
+  return withStoreFile(mutator);
+}
+
 function newId(prefix) {
-  return (
-    (prefix || 'id') +
-    '_' +
-    crypto.randomBytes(12).toString('base64url')
-  );
+  return (prefix || 'id') + '_' + crypto.randomBytes(12).toString('base64url');
 }
 
 function normalizeEmail(email) {
@@ -126,12 +140,10 @@ function isRuoffEmail(email) {
   return /@ruoff\.com$/i.test(String(email || '').trim());
 }
 
-/** admin | lo | realtor — @ruoff.com (non-admin) defaults to lo */
 function resolveRole(email, requestedRole) {
   if (requestedRole === 'admin') return 'admin';
   if (requestedRole === 'lo') return 'lo';
   if (requestedRole === 'realtor') {
-    // Explicit realtor only when not a Ruoff domain
     return isRuoffEmail(email) ? 'lo' : 'realtor';
   }
   if (isRuoffEmail(email)) return 'lo';
@@ -192,7 +204,6 @@ function recordUsage(store, userId, eventType, pathOrFeature, metadata) {
     created_at: new Date().toISOString()
   };
   store.usage_events.push(ev);
-  // Cap growth — keep last 5000 events
   if (store.usage_events.length > 5000) {
     store.usage_events = store.usage_events.slice(-5000);
   }
@@ -205,9 +216,7 @@ function seedAdminIfNeeded() {
     if (hasAdmin) {
       return { seeded: false };
     }
-    const email = normalizeEmail(
-      process.env.ADMIN_EMAIL || 'agarman42@hotmail.com'
-    );
+    const email = normalizeEmail(process.env.ADMIN_EMAIL || 'agarman42@hotmail.com');
     let password = process.env.ADMIN_PASSWORD || '';
     let generated = false;
     if (!password || password.length < 8) {
@@ -241,11 +250,33 @@ function seedAdminIfNeeded() {
   });
 }
 
+async function initBackend() {
+  if (!USE_PG) {
+    console.warn(
+      '[auth-store] DATABASE_URL not set — using local file store (ephemeral on Render). Set DATABASE_URL for durable auth.'
+    );
+    return { backend: 'file', path: STORE_PATH };
+  }
+  try {
+    await authPg.migrate();
+    const imp = await authPg.importFileIfEmpty(APP, readStoreFile, SHAPE);
+    if (imp.imported) {
+      console.log('[auth-store] migrated file users → Postgres:', imp.users);
+    }
+    console.log('[auth-store] backend=postgres (sc_auth_* app=agent)');
+    return { backend: 'postgres', imported: !!imp.imported };
+  } catch (e) {
+    console.error('[auth-store] Postgres init failed:', e.message);
+    throw e;
+  }
+}
+
 module.exports = {
   STORE_PATH,
+  USE_PG,
   withStore,
-  readStore,
-  writeStore,
+  readStore: readStoreFile,
+  writeStore: writeStoreFile,
   newId,
   normalizeEmail,
   hashPassword,
@@ -258,5 +289,7 @@ module.exports = {
   isRuoffEmail,
   resolveRole,
   canInvite,
-  isAdmin
+  isAdmin,
+  initBackend,
+  authPgHealth: () => authPg.health()
 };
