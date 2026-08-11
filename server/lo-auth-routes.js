@@ -385,8 +385,11 @@ function mountLoAuthRoutes(app) {
         session: { expiresAt: new Date(sess.exp).toISOString(), remember }
       });
     } catch (e) {
-      console.error('[lo-auth] register', e.message);
-      return res.status(500).json({ error: 'Registration failed' });
+      console.error('[lo-auth] register', e.message, e.stack);
+      return res.status(500).json({
+        error: 'Registration failed',
+        detail: String(e.message || 'database error').slice(0, 240)
+      });
     }
   });
 
@@ -434,8 +437,11 @@ function mountLoAuthRoutes(app) {
         session: { expiresAt: new Date(sess.exp).toISOString(), remember }
       });
     } catch (e) {
-      console.error('[lo-auth] login', e.message);
-      return res.status(500).json({ error: 'Login failed' });
+      console.error('[lo-auth] login', e.message, e.stack);
+      return res.status(500).json({
+        error: 'Login failed',
+        detail: String(e.message || 'database error').slice(0, 240)
+      });
     }
   });
 

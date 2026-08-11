@@ -380,8 +380,11 @@ function mountAuthRoutes(app) {
         }
       });
     } catch (e) {
-      console.error('[auth] login error', e.message);
-      return res.status(500).json({ error: 'Login failed' });
+      console.error('[auth] login error', e.message, e.stack);
+      return res.status(500).json({
+        error: 'Login failed',
+        detail: String(e.message || 'database error').slice(0, 240)
+      });
     }
   });
 
@@ -477,8 +480,11 @@ function mountAuthRoutes(app) {
         linked_lo_brand: result.brand || (result.user && result.user.linked_lo_brand) || null
       });
     } catch (e) {
-      console.error('[auth] accept-invite', e.message);
-      return res.status(500).json({ error: 'Could not accept invite' });
+      console.error('[auth] accept-invite', e.message, e.stack);
+      return res.status(500).json({
+        error: 'Could not accept invite',
+        detail: String(e.message || 'database error').slice(0, 240)
+      });
     }
   });
 

@@ -107,9 +107,13 @@ try {
     .then((h) => {
       if (h) console.log('[lo-auth] health', JSON.stringify(h));
     })
-    .catch((e) => console.warn('[lo-auth] init/seed failed', e.message));
+    .catch((e) => {
+      loAuthBackend = 'postgres-error';
+      console.error('[lo-auth] init/seed failed', e.message, e.stack);
+    });
   console.log('[lo-auth] Invite-gated auth enabled for LO Sales Coach');
 } catch (e) {
+  loAuthBackend = 'mount-error';
   console.warn('[lo-auth] failed to mount', e && e.message ? e.message : e);
 }
 

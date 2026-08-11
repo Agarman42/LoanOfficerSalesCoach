@@ -102,9 +102,13 @@ try {
     .then((h) => {
       if (h) console.log('[auth] health', JSON.stringify(h));
     })
-    .catch((e) => console.warn('[auth] init/seed failed', e.message));
+    .catch((e) => {
+      agentAuthBackend = 'postgres-error';
+      console.error('[auth] init/seed failed', e.message, e.stack);
+    });
   console.log('[auth] Invite-gated auth enabled for Agent Sales Coach');
 } catch (e) {
+  agentAuthBackend = 'mount-error';
   console.warn('[auth] failed to mount', e && e.message ? e.message : e);
 }
 
