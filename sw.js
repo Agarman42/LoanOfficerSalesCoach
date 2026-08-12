@@ -1,6 +1,6 @@
 /* LO Sales Coach service worker — app shell cache + Web Push */
 /* eslint-disable no-restricted-globals */
-const SW_VERSION = 'lo-sw-v1-20260810-logo';
+const SW_VERSION = 'lo-sw-v1-20260812-perf';
 const SHELL_CACHE = SW_VERSION + '-shell';
 
 const PRECACHE_URLS = [
@@ -19,7 +19,7 @@ const PRECACHE_URLS = [
   '/js/ui.js?v=20260729-no-backdrop',
   '/js/main.js?v=20260810-calc-hash-fix',
   '/js/early-boot.js?v=20260810-calc-hash-fix',
-  '/js/feature-loader.js?v=20260810-calc-hash-fix',
+  '/js/feature-loader.js?v=20260812-perf-preload',
   '/js/app-version.js',
   '/js/features/pwa-push.js?v=20260806-pwa'
 ];

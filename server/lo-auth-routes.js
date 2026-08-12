@@ -158,12 +158,13 @@ function createSessionToken(userId, remember) {
 }
 
 async function loadActiveUser(userId) {
+  // Read-only: session checks must not rewrite the full auth blob on every API call
   return store.withStore((s) => {
     const u = store.findUserById(s, userId);
     if (!u) return null;
     if (u.status !== 'active') return { blocked: true, user: u };
     return { blocked: false, user: u };
-  });
+  }, { readOnly: true });
 }
 
 function sessionMiddleware(req, res, next) {
@@ -316,15 +317,23 @@ function mountLoAuthRoutes(app) {
   app.get('/api/auth/me', async (req, res) => {
     if (!req.authUser) return res.status(401).json({ authenticated: false });
     try {
-      await store.withStore((s) => {
+      const today = new Date().toISOString().slice(0, 10);
+      // Fast path: only write when we still need today's session_resume event
+      const needsResume = await store.withStore((s) => {
         const u = store.findUserById(s, req.authUser.id);
-        if (!u) return;
-        const today = new Date().toISOString().slice(0, 10);
-        if (u._last_resume_day !== today) {
-          u._last_resume_day = today;
-          store.recordUsage(s, u.id, 'session_resume', '/');
-        }
-      });
+        if (!u) return false;
+        return u._last_resume_day !== today;
+      }, { readOnly: true });
+      if (needsResume) {
+        await store.withStore((s) => {
+          const u = store.findUserById(s, req.authUser.id);
+          if (!u) return;
+          if (u._last_resume_day !== today) {
+            u._last_resume_day = today;
+            store.recordUsage(s, u.id, 'session_resume', '/');
+          }
+        });
+      }
     } catch (e) {
       /* ignore */
     }
@@ -503,7 +512,7 @@ function mountLoAuthRoutes(app) {
         let inv = Object.values(s.agent_invites);
         if (!isAdm) inv = inv.filter((i) => i.created_by === req.authUser.id);
         return inv.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
-      });
+      }, { readOnly: true });
       res.json({ ok: true, invites: list, realtorAppUrl: realtorAppUrl() });
     } catch (e) {
       res.status(500).json({ error: 'List failed' });

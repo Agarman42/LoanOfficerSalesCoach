@@ -151,12 +151,13 @@ function createSessionToken(userId, remember) {
 }
 
 async function loadActiveUser(userId) {
+  // Read-only: session checks must not rewrite the full auth blob on every API call
   return store.withStore((s) => {
     const u = store.findUserById(s, userId);
     if (!u) return null;
     if (u.status !== 'active') return { blocked: true, user: u };
     return { blocked: false, user: u };
-  });
+  }, { readOnly: true });
 }
 
 /**
@@ -302,17 +303,24 @@ function mountAuthRoutes(app) {
     if (!req.authUser) {
       return res.status(401).json({ authenticated: false });
     }
-    // Daily session_resume (once per UTC day)
+    // Daily session_resume (once per UTC day) — write only when needed
     try {
-      await store.withStore((s) => {
+      const today = new Date().toISOString().slice(0, 10);
+      const needsResume = await store.withStore((s) => {
         const u = store.findUserById(s, req.authUser.id);
-        if (!u) return;
-        const today = new Date().toISOString().slice(0, 10);
-        if (u._last_resume_day !== today) {
-          u._last_resume_day = today;
-          store.recordUsage(s, u.id, 'session_resume', req.path || '/');
-        }
-      });
+        if (!u) return false;
+        return u._last_resume_day !== today;
+      }, { readOnly: true });
+      if (needsResume) {
+        await store.withStore((s) => {
+          const u = store.findUserById(s, req.authUser.id);
+          if (!u) return;
+          if (u._last_resume_day !== today) {
+            u._last_resume_day = today;
+            store.recordUsage(s, u.id, 'session_resume', req.path || '/');
+          }
+        });
+      }
     } catch (e) {
       /* ignore */
     }
@@ -673,7 +681,7 @@ function mountAuthRoutes(app) {
           },
           logins: { last7d: logins7, last30d: logins30 }
         };
-      });
+      }, { readOnly: true });
       res.json({ ok: true, ...data });
     } catch (e) {
       res.status(500).json({ error: 'Stats failed' });
@@ -694,7 +702,7 @@ function mountAuthRoutes(app) {
           );
         }
         return users.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
-      });
+      }, { readOnly: true });
       res.json({ ok: true, users: list, scope: isAdm ? 'all' : 'realtors' });
     } catch (e) {
       res.status(500).json({ error: 'List failed' });
@@ -827,7 +835,7 @@ function mountAuthRoutes(app) {
           inv = inv.filter((i) => i.created_by === req.authUser.id);
         }
         return inv.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
-      });
+      }, { readOnly: true });
       res.json({ ok: true, invites: list, scope: isAdm ? 'all' : 'mine' });
     } catch (e) {
       res.status(500).json({ error: 'List failed' });
@@ -889,8 +897,9 @@ function mountAuthRoutes(app) {
   app.get('/api/admin/usage', requireAdmin, async (req, res) => {
     const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 50));
     try {
-      const events = await store.withStore((s) =>
-        s.usage_events.slice(-limit).reverse()
+      const events = await store.withStore(
+        (s) => s.usage_events.slice(-limit).reverse(),
+        { readOnly: true }
       );
       res.json({ ok: true, events });
     } catch (e) {

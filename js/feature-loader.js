@@ -2,9 +2,14 @@
  * Loads non-critical feature scripts AFTER DOM ready so the address bar can finish
  * and early-boot navigation stays responsive.
  *
+ * Performance (no features removed):
+ * - Preload all scripts in parallel (browser fetches concurrently)
+ * - Then inject/execute in the original order so dependencies stay intact
+ * - Every script in SCRIPTS still loads; nothing is skipped or disabled
+ *
  * Home Coach Setup (user-profile, home-favorites, onboarding-coach) loads via
  * <script defer> in <head> — NOT here — so setup paints right after main.js
- * instead of waiting on this sequential queue.
+ * instead of waiting on this queue.
  */
 (function () {
   'use strict';
@@ -71,32 +76,62 @@
   'js/features/lo-invite-admin.js?v=20260807-admin-usage',
   'js/features/pwa-push.js?v=20260806-pwa'
   ];
-  var i = 0;
-  function next() {
-    if (i >= SCRIPTS.length) {
+
+  function finish() {
+    try {
+      if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
+    } catch (e) {}
+    document.documentElement.classList.remove('coach-boot-stuck');
+    document.dispatchEvent(new CustomEvent('coach-features-loaded'));
+  }
+
+  /** Hint browser to fetch all scripts in parallel (does not execute). */
+  function preloadAll() {
+    if (!document.head) return;
+    for (var i = 0; i < SCRIPTS.length; i++) {
       try {
-        if (typeof window.__hardHideGlobalLoading === 'function') window.__hardHideGlobalLoading();
-      } catch (e) {}
-      document.documentElement.classList.remove('coach-boot-stuck');
-      document.dispatchEvent(new CustomEvent('coach-features-loaded'));
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'script';
+        link.href = SCRIPTS[i];
+        document.head.appendChild(link);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+  }
+
+  /**
+   * Execute in original order (dependency-safe). Preload makes later tags cache hits.
+   * Still loads every entry in SCRIPTS — nothing removed.
+   */
+  var i = 0;
+  function injectNext() {
+    if (i >= SCRIPTS.length) {
+      finish();
       return;
     }
     var src = SCRIPTS[i++];
     var s = document.createElement('script');
     s.src = src;
     s.async = false;
-    s.onload = function () { setTimeout(next, 0); }; // yield between scripts so UI can paint
+    s.onload = function () {
+      setTimeout(injectNext, 0);
+    };
     s.onerror = function () {
       console.warn('[feature-loader] failed', src);
-      setTimeout(next, 0);
+      setTimeout(injectNext, 0);
     };
     document.body.appendChild(s);
   }
+
   function start() {
     if (window.__featureLoaderStarted) return;
     window.__featureLoaderStarted = true;
-    setTimeout(next, 0);
+    preloadAll();
+    setTimeout(injectNext, 0);
   }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
   } else {
