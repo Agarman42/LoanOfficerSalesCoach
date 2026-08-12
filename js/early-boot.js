@@ -117,6 +117,15 @@
       }
       target.classList.remove('hidden');
       scrollAfterSectionShow(id, target);
+      // Kick on-demand feature scripts if the loader is already present (shell first, JS second)
+      if (typeof window.ensureFeatureScripts === 'function') {
+        try {
+          const ep = window.ensureFeatureScripts(id);
+          if (ep && typeof ep.then === 'function') {
+            ep.catch(function () { /* non-fatal; main showSection will retry */ });
+          }
+        } catch (e) { /* ignore */ }
+      }
       if (id === 'smart-savings') {
         try {
           if (typeof window.initSmartSavingsSection === 'function') {

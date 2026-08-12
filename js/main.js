@@ -577,6 +577,29 @@
       return;
     }
 
+    // Lazy-load heavy tool scripts before paint (deep links + search + sidebar).
+    // ensureFeatureScripts returns null when ready (sync path) or a Promise when loading.
+    // Must NOT re-enter when already ready — that caused an infinite microtask loop.
+    if (typeof window.ensureFeatureScripts === 'function') {
+      const ensureP = window.ensureFeatureScripts(id);
+      if (ensureP && typeof ensureP.then === 'function') {
+        showSection._pendingId = id;
+        ensureP
+          .then(function () {
+            if (showSection._pendingId !== id) return; // superseded by a newer navigation
+            showSection._pendingId = null;
+            showSection(id);
+          })
+          .catch(function (err) {
+            console.warn('[showSection] lazy load', err);
+            if (showSection._pendingId !== id) return;
+            showSection._pendingId = null;
+            showSection(id);
+          });
+        return;
+      }
+    }
+
     // Hide top-level tool sections only — never nest-hide inner tool chrome
     // (LOX picker, calc scenario board, Smart Savings wizard panels, etc.)
     // `main section` matches ALL descendants; nested <section> must not get .hidden.
