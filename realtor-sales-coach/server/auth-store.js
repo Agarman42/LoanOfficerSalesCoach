@@ -204,11 +204,33 @@ function recordUsage(store, userId, eventType, pathOrFeature, metadata) {
     metadata: metadata && typeof metadata === 'object' ? metadata : null,
     created_at: new Date().toISOString()
   };
+  if (!Array.isArray(store.usage_events)) store.usage_events = [];
   store.usage_events.push(ev);
   if (store.usage_events.length > 5000) {
     store.usage_events = store.usage_events.slice(-5000);
   }
   return ev;
+}
+
+/** Append-only usage (track/heartbeat) — no full auth blob rewrite on Postgres. */
+function appendUsage(userId, eventType, pathOrFeature, metadata) {
+  const ev = {
+    id: newId('evt'),
+    user_id: userId || null,
+    event_type: String(eventType || 'unknown').slice(0, 64),
+    path: pathOrFeature ? String(pathOrFeature).slice(0, 200) : null,
+    metadata: metadata && typeof metadata === 'object' ? metadata : null,
+    created_at: new Date().toISOString()
+  };
+  if (USE_PG && authPg.appendUsageEvent) {
+    return authPg.appendUsageEvent(APP, ev);
+  }
+  return withStore((s) => {
+    if (!Array.isArray(s.usage_events)) s.usage_events = [];
+    s.usage_events.push(ev);
+    if (s.usage_events.length > 5000) s.usage_events = s.usage_events.slice(-5000);
+    return ev;
+  });
 }
 
 function seedAdminIfNeeded() {
@@ -286,6 +308,7 @@ module.exports = {
   findUserByEmail,
   findUserById,
   recordUsage,
+  appendUsage,
   seedAdminIfNeeded,
   isRuoffEmail,
   resolveRole,

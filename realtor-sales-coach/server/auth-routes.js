@@ -626,9 +626,8 @@ function mountAuthRoutes(app) {
 
   app.post('/api/auth/heartbeat', requireAuth, async (req, res) => {
     try {
-      await store.withStore((s) => {
-        store.recordUsage(s, req.authUser.id, 'heartbeat', req.body?.path || '/');
-      });
+      // Append-only — no full auth blob rewrite
+      await store.appendUsage(req.authUser.id, 'heartbeat', req.body?.path || '/');
     } catch (e) {
       /* ignore */
     }
@@ -639,11 +638,7 @@ function mountAuthRoutes(app) {
     const eventType = String(req.body?.event_type || 'tool_open').slice(0, 64);
     const feature = String(req.body?.feature || req.body?.path || '').slice(0, 200);
     try {
-      await store.withStore((s) => {
-        store.recordUsage(s, req.authUser.id, eventType, feature, {
-          source: 'client'
-        });
-      });
+      await store.appendUsage(req.authUser.id, eventType, feature, { source: 'client' });
     } catch (e) {
       /* ignore */
     }
@@ -681,7 +676,7 @@ function mountAuthRoutes(app) {
           },
           logins: { last7d: logins7, last30d: logins30 }
         };
-      }, { readOnly: true });
+      }, { readOnly: true, includeUsage: true });
       res.json({ ok: true, ...data });
     } catch (e) {
       res.status(500).json({ error: 'Stats failed' });
@@ -899,7 +894,7 @@ function mountAuthRoutes(app) {
     try {
       const events = await store.withStore(
         (s) => s.usage_events.slice(-limit).reverse(),
-        { readOnly: true }
+        { readOnly: true, includeUsage: true }
       );
       res.json({ ok: true, events });
     } catch (e) {

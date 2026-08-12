@@ -489,14 +489,12 @@ function mountLoAuthRoutes(app) {
 
   app.post('/api/auth/track', requireAuth, async (req, res) => {
     try {
-      await store.withStore((s) => {
-        store.recordUsage(
-          s,
-          req.authUser.id,
-          String(req.body?.event_type || 'tool_open').slice(0, 64),
-          String(req.body?.feature || req.body?.path || '').slice(0, 200)
-        );
-      });
+      // Append-only row — does not rewrite sc_auth_store payload
+      await store.appendUsage(
+        req.authUser.id,
+        String(req.body?.event_type || 'tool_open').slice(0, 64),
+        String(req.body?.feature || req.body?.path || '').slice(0, 200)
+      );
     } catch (e) {
       /* ignore */
     }
@@ -747,7 +745,7 @@ function mountLoAuthRoutes(app) {
           },
           topFeatures7d: topFeatures
         };
-      }, { readOnly: true });
+      }, { readOnly: true, includeUsage: true });
       res.json({ ok: true, ...data });
     } catch (e) {
       console.error('[lo-auth] admin stats', e.message);
@@ -785,7 +783,7 @@ function mountLoAuthRoutes(app) {
             const tb = String(b.last_activity_at || b.last_login_at || b.created_at || '');
             return tb.localeCompare(ta);
           });
-      }, { readOnly: true });
+      }, { readOnly: true, includeUsage: true });
       res.json({ ok: true, users: list });
     } catch (e) {
       console.error('[lo-auth] admin users', e.message);
@@ -866,7 +864,7 @@ function mountLoAuthRoutes(app) {
             created_at: ev.created_at
           };
         });
-      }, { readOnly: true });
+      }, { readOnly: true, includeUsage: true });
       res.json({ ok: true, events });
     } catch (e) {
       res.status(500).json({ error: 'Usage failed' });

@@ -79,12 +79,21 @@ If login fails with `getaddrinfo ENOTFOUND dpg-…-a`, the URL is using a **priv
 
 ## Auth tables (auto-created on startup)
 
-- `sc_auth_users` — users per `app` (`lo` | `agent`)
-- `sc_auth_invites` — Agent invites + LO-side agent invite log (`app` scopes)
-- `sc_auth_usage_events` — admin usage feed
-- `sc_auth_password_resets` — reset tokens
-- `sc_auth_access_requests` — Agent access requests
+- `sc_auth_store` — durable auth document per app (users, invites, resets)
+- `sc_auth_users` — optional denormalized projection (debug; not on hot path)
+- `sc_auth_usage_events` — **append-only** usage/track rows (not rewritten with the blob)
 - `sc_auth_meta` — one-time file→PG migration markers
+
+### Performance (P0)
+
+| Path | Behavior |
+|------|----------|
+| Session / `loadActiveUser` | **Read-only** snapshot (no store rewrite) |
+| `/api/auth/me` | Write only when daily `session_resume` is new |
+| `/api/auth/track` (+ Agent heartbeat) | **INSERT** one usage row only |
+| Admin GETs needing activity | Read-only + hydrate usage from SQL |
+
+Login, invites, password reset still use full withStore RMW (required to mutate users/invites).
 
 On first boot with empty PG tables, existing local JSON auth files (if present) are imported once.
 

@@ -52,7 +52,22 @@ const SCHEMA_STATEMENTS = [
     app TEXT PRIMARY KEY,
     migrated_file_at TIMESTAMPTZ,
     notes TEXT
-  )`
+  )`,
+  // Append-only usage — never requires rewriting sc_auth_store payload
+  `CREATE TABLE IF NOT EXISTS sc_auth_usage_events (
+    app TEXT NOT NULL,
+    id TEXT NOT NULL,
+    user_id TEXT,
+    event_type TEXT,
+    path TEXT,
+    metadata JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (app, id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS sc_auth_usage_app_created_idx
+     ON sc_auth_usage_events (app, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS sc_auth_usage_app_user_idx
+     ON sc_auth_usage_events (app, user_id, created_at DESC)`
 ];
 
 /**
@@ -313,14 +328,152 @@ function parsePayload(rowPayload) {
   return payload;
 }
 
+function normalizeUsageEvent(ev) {
+  return {
+    id: String((ev && ev.id) || 'evt_' + crypto.randomBytes(10).toString('base64url')),
+    user_id: ev && ev.user_id ? String(ev.user_id) : null,
+    event_type: String((ev && ev.event_type) || 'unknown').slice(0, 64),
+    path: ev && ev.path != null ? String(ev.path).slice(0, 200) : null,
+    metadata: ev && ev.metadata && typeof ev.metadata === 'object' ? ev.metadata : null,
+    created_at: (ev && ev.created_at) || new Date().toISOString()
+  };
+}
+
+async function insertUsageRow(client, app, ev) {
+  const e = normalizeUsageEvent(ev);
+  await client.query(
+    `INSERT INTO sc_auth_usage_events (app, id, user_id, event_type, path, metadata, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6::jsonb,COALESCE($7::timestamptz, NOW()))
+     ON CONFLICT (app, id) DO NOTHING`,
+    [
+      app,
+      e.id,
+      e.user_id,
+      e.event_type,
+      e.path,
+      JSON.stringify(e.metadata),
+      e.created_at
+    ]
+  );
+  return e;
+}
+
+/**
+ * Lightweight append-only usage write — no auth blob load/rewrite.
+ */
+async function appendUsageEvent(app, ev) {
+  const p = getPool();
+  if (!p) throw new Error('DATABASE_URL not configured for auth');
+  await migrate();
+  const client = await p.connect();
+  try {
+    return await insertUsageRow(client, app, ev);
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * List usage events newest-first for admin APIs.
+ */
+async function listUsageEvents(app, opts) {
+  opts = opts || {};
+  const limit = Math.min(5000, Math.max(1, Number(opts.limit) || 500));
+  const userId = opts.userId ? String(opts.userId) : null;
+  const p = getPool();
+  if (!p) return [];
+  await migrate();
+  const client = await p.connect();
+  try {
+    let res;
+    if (userId) {
+      res = await client.query(
+        `SELECT id, user_id, event_type, path, metadata, created_at
+         FROM sc_auth_usage_events
+         WHERE app = $1 AND user_id = $2
+         ORDER BY created_at DESC
+         LIMIT $3`,
+        [app, userId, limit]
+      );
+    } else {
+      res = await client.query(
+        `SELECT id, user_id, event_type, path, metadata, created_at
+         FROM sc_auth_usage_events
+         WHERE app = $1
+         ORDER BY created_at DESC
+         LIMIT $2`,
+        [app, limit]
+      );
+    }
+    return res.rows.map((r) => ({
+      id: r.id,
+      user_id: r.user_id,
+      event_type: r.event_type,
+      path: r.path,
+      metadata: r.metadata,
+      created_at: r.created_at ? new Date(r.created_at).toISOString() : null
+    }));
+  } finally {
+    client.release();
+  }
+}
+
+/** One-time: copy blob.usage_events into SQL table if table empty for app. */
+async function migrateBlobUsageIfNeeded(client, app, blobEvents) {
+  const chk = await client.query(
+    'SELECT EXISTS(SELECT 1 FROM sc_auth_usage_events WHERE app = $1) AS e',
+    [app]
+  );
+  if (chk.rows[0] && chk.rows[0].e) return { migrated: false };
+  const list = Array.isArray(blobEvents) ? blobEvents.slice(-5000) : [];
+  if (!list.length) return { migrated: false };
+  for (const ev of list) {
+    await insertUsageRow(client, app, ev);
+  }
+  console.log('[auth-pg] migrated', list.length, 'blob usage events → SQL app=' + app);
+  return { migrated: true, count: list.length };
+}
+
+/**
+ * Hydrate store.usage_events from append-only SQL (for admin/stats read paths).
+ * Falls back to blob events if SQL empty.
+ */
+async function hydrateUsageEvents(client, app, store, limit) {
+  limit = limit || 5000;
+  try {
+    await migrateBlobUsageIfNeeded(client, app, store.usage_events);
+    const res = await client.query(
+      `SELECT id, user_id, event_type, path, metadata, created_at
+       FROM sc_auth_usage_events
+       WHERE app = $1
+       ORDER BY created_at ASC
+       LIMIT $2`,
+      [app, limit]
+    );
+    if (res.rows.length) {
+      store.usage_events = res.rows.map((r) => ({
+        id: r.id,
+        user_id: r.user_id,
+        event_type: r.event_type,
+        path: r.path,
+        metadata: r.metadata,
+        created_at: r.created_at ? new Date(r.created_at).toISOString() : null
+      }));
+    }
+  } catch (e) {
+    console.warn('[auth-pg] hydrateUsageEvents', e.message);
+  }
+  return store;
+}
+
 /**
  * Drop-in withStore(mutator) for existing auth routes.
  * @param {'lo'|'agent'} app
  * @param {object} [_shape] ignored (kept for call-site compatibility)
  *
  * withStore(fn) — read-modify-write under advisory lock
- * withStore(fn, { readOnly: true }) — fast snapshot read (no write, no user projection)
- *   Use for admin GETs; avoids rewriting the whole auth blob 4× on every admin page load.
+ * withStore(fn, { readOnly: true }) — fast snapshot read (no write)
+ * withStore(fn, { readOnly: true, includeUsage: true }) — also load usage events from SQL
  */
 function createWithStore(app, _shape) {
   let chain = Promise.resolve();
@@ -328,6 +481,8 @@ function createWithStore(app, _shape) {
   function withStore(mutator, opts) {
     opts = opts || {};
     const readOnly = !!opts.readOnly;
+    // includeUsage defaults false — session checks must stay cheap; admin passes true
+    const includeUsage = !!opts.includeUsage;
     const p = getPool();
     if (!p) {
       return Promise.reject(new Error('DATABASE_URL not configured for auth'));
@@ -341,6 +496,12 @@ function createWithStore(app, _shape) {
         try {
           const res = await client.query('SELECT payload FROM sc_auth_store WHERE app = $1', [app]);
           const store = ensureShape(app, parsePayload(res.rows[0] && res.rows[0].payload));
+          if (includeUsage) {
+            await hydrateUsageEvents(client, app, store, 5000);
+          } else {
+            // Session/user lookups: ignore blob usage (lives in sc_auth_usage_events)
+            store.usage_events = Array.isArray(store.usage_events) ? store.usage_events : [];
+          }
           const result = mutator(store);
           return result && typeof result.then === 'function' ? await result : result;
         } finally {
@@ -361,13 +522,19 @@ function createWithStore(app, _shape) {
           [app]
         );
         const store = ensureShape(app, parsePayload(res.rows[0] && res.rows[0].payload));
+        // One-time migrate any legacy blob usage into SQL
+        await migrateBlobUsageIfNeeded(client, app, store.usage_events);
 
         const result = mutator(store);
         const out = result && typeof result.then === 'function' ? await result : result;
 
-        if (Array.isArray(store.usage_events) && store.usage_events.length > 5000) {
-          store.usage_events = store.usage_events.slice(-5000);
+        // Flush usage events added during mutator to append-only table (not blob)
+        const pendingUsage = Array.isArray(store.usage_events) ? store.usage_events.slice() : [];
+        for (const ev of pendingUsage) {
+          await insertUsageRow(client, app, ev);
         }
+        // Keep blob small — usage lives in sc_auth_usage_events
+        store.usage_events = [];
 
         await client.query(
           `INSERT INTO sc_auth_store (app, payload, updated_at)
@@ -376,8 +543,6 @@ function createWithStore(app, _shape) {
           [app, JSON.stringify(store)]
         );
 
-        // Optional projection for SQL debugging only — expensive (delete+insert all users).
-        // Disabled by default so login/admin/track stay fast.
         if (
           process.env.AUTH_PROJECT_USERS === '1' ||
           process.env.AUTH_PROJECT_USERS === 'true'
@@ -508,6 +673,8 @@ module.exports = {
   migrate,
   createWithStore,
   importFileIfEmpty,
+  appendUsageEvent,
+  listUsageEvents,
   health,
   getPool
 };
