@@ -301,18 +301,52 @@ async function projectUsers(client, app, users) {
   }
 }
 
+function parsePayload(rowPayload) {
+  let payload = rowPayload;
+  if (typeof payload === 'string') {
+    try {
+      payload = JSON.parse(payload);
+    } catch (e) {
+      payload = null;
+    }
+  }
+  return payload;
+}
+
 /**
  * Drop-in withStore(mutator) for existing auth routes.
  * @param {'lo'|'agent'} app
  * @param {object} [_shape] ignored (kept for call-site compatibility)
+ *
+ * withStore(fn) — read-modify-write under advisory lock
+ * withStore(fn, { readOnly: true }) — fast snapshot read (no write, no user projection)
+ *   Use for admin GETs; avoids rewriting the whole auth blob 4× on every admin page load.
  */
 function createWithStore(app, _shape) {
   let chain = Promise.resolve();
 
-  function withStore(mutator) {
+  function withStore(mutator, opts) {
+    opts = opts || {};
+    const readOnly = !!opts.readOnly;
     const p = getPool();
     if (!p) {
       return Promise.reject(new Error('DATABASE_URL not configured for auth'));
+    }
+
+    // Read-only: concurrent, no lock write, no projectUsers
+    if (readOnly) {
+      return (async () => {
+        await migrate();
+        const client = await p.connect();
+        try {
+          const res = await client.query('SELECT payload FROM sc_auth_store WHERE app = $1', [app]);
+          const store = ensureShape(app, parsePayload(res.rows[0] && res.rows[0].payload));
+          const result = mutator(store);
+          return result && typeof result.then === 'function' ? await result : result;
+        } finally {
+          client.release();
+        }
+      })();
     }
 
     const run = chain.then(async () => {
@@ -322,24 +356,15 @@ function createWithStore(app, _shape) {
         await client.query('BEGIN');
         await client.query('SELECT pg_advisory_xact_lock($1)', [appLockKey(app)]);
 
-        const res = await client.query('SELECT payload FROM sc_auth_store WHERE app = $1 FOR UPDATE', [
-          app
-        ]);
-        let payload = res.rows[0] && res.rows[0].payload;
-        // node-pg returns JSONB as object
-        if (typeof payload === 'string') {
-          try {
-            payload = JSON.parse(payload);
-          } catch (e) {
-            payload = null;
-          }
-        }
-        const store = ensureShape(app, payload);
+        const res = await client.query(
+          'SELECT payload FROM sc_auth_store WHERE app = $1 FOR UPDATE',
+          [app]
+        );
+        const store = ensureShape(app, parsePayload(res.rows[0] && res.rows[0].payload));
 
         const result = mutator(store);
         const out = result && typeof result.then === 'function' ? await result : result;
 
-        // Cap usage growth before persist
         if (Array.isArray(store.usage_events) && store.usage_events.length > 5000) {
           store.usage_events = store.usage_events.slice(-5000);
         }
@@ -351,7 +376,14 @@ function createWithStore(app, _shape) {
           [app, JSON.stringify(store)]
         );
 
-        await projectUsers(client, app, store.users);
+        // Optional projection for SQL debugging only — expensive (delete+insert all users).
+        // Disabled by default so login/admin/track stay fast.
+        if (
+          process.env.AUTH_PROJECT_USERS === '1' ||
+          process.env.AUTH_PROJECT_USERS === 'true'
+        ) {
+          await projectUsers(client, app, store.users);
+        }
 
         await client.query('COMMIT');
         return out;

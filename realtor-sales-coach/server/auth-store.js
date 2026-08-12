@@ -94,8 +94,9 @@ function withStoreFile(mutator) {
 
 const withStorePg = USE_PG ? authPg.createWithStore(APP, SHAPE) : null;
 
-function withStore(mutator) {
-  if (USE_PG && withStorePg) return withStorePg(mutator);
+/** @param {function} mutator @param {{ readOnly?: boolean }} [opts] */
+function withStore(mutator, opts) {
+  if (USE_PG && withStorePg) return withStorePg(mutator, opts);
   return withStoreFile(mutator);
 }
 

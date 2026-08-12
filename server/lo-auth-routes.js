@@ -738,7 +738,7 @@ function mountLoAuthRoutes(app) {
           },
           topFeatures7d: topFeatures
         };
-      });
+      }, { readOnly: true });
       res.json({ ok: true, ...data });
     } catch (e) {
       console.error('[lo-auth] admin stats', e.message);
@@ -776,7 +776,7 @@ function mountLoAuthRoutes(app) {
             const tb = String(b.last_activity_at || b.last_login_at || b.created_at || '');
             return tb.localeCompare(ta);
           });
-      });
+      }, { readOnly: true });
       res.json({ ok: true, users: list });
     } catch (e) {
       console.error('[lo-auth] admin users', e.message);
@@ -857,7 +857,7 @@ function mountLoAuthRoutes(app) {
             created_at: ev.created_at
           };
         });
-      });
+      }, { readOnly: true });
       res.json({ ok: true, events });
     } catch (e) {
       res.status(500).json({ error: 'Usage failed' });
@@ -885,7 +885,7 @@ function mountLoAuthRoutes(app) {
             };
           })
           .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
-      });
+      }, { readOnly: true });
       res.json({ ok: true, invites, realtorAppUrl: realtorAppUrl() });
     } catch (e) {
       res.status(500).json({ error: 'Invite list failed' });
