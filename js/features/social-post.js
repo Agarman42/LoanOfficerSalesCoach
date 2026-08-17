@@ -282,6 +282,9 @@ Option 3:
         }
 
         output.classList.remove('hidden');
+        if (typeof window.scrollToGeneratedContent === 'function') {
+          window.scrollToGeneratedContent(output);
+        }
 
         gtag('event', 'generate_social_post', {
             event_category: 'Tool Usage',

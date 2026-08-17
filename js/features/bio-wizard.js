@@ -527,6 +527,9 @@
     overlay.querySelectorAll('input[name="bio-wizard-dest"]').forEach((radio) => {
       radio.addEventListener('change', updateDestSummary);
     });
+
+    overlay.addEventListener('input', () => writeWizardIntoForm({ silent: true }));
+    overlay.addEventListener('change', () => writeWizardIntoForm({ silent: true }));
   }
 
   function openBioWizard() {
@@ -542,14 +545,29 @@
     if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('bio', 'guided');
   }
 
-  function closeBioWizard() {
+  function flushWizardToForm() {
     if (!wizardEl) return;
     writeWizardIntoForm({ silent: true });
+    if (typeof window.flushBioDraftNow === 'function') window.flushBioDraftNow();
+  }
+
+  function closeBioWizard() {
+    if (!wizardEl) return;
+    flushWizardToForm();
     wizardEl.classList.add('hidden');
     wizardEl.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     if (typeof window.setCoachModeSwitch === 'function') window.setCoachModeSwitch('bio', 'full');
   }
+
+  window.addEventListener('pagehide', () => {
+    if (wizardEl && !wizardEl.classList.contains('hidden')) flushWizardToForm();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && wizardEl && !wizardEl.classList.contains('hidden')) {
+      flushWizardToForm();
+    }
+  });
 
   window.openBioWizard = openBioWizard;
   window.closeBioWizard = closeBioWizard;

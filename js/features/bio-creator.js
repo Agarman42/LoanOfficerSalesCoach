@@ -441,58 +441,75 @@
       existingBioPaste: (document.getElementById('bio-existing-paste')?.value || '').trim(),
       destination: document.getElementById('bio-destination')?.value || 'website-about',
       customLimitType: document.getElementById('bio-custom-limit-type')?.value || 'chars',
-      customLimitValue: document.getElementById('bio-custom-limit-value')?.value || '750'
+      customLimitValue: document.getElementById('bio-custom-limit-value')?.value || '750',
+      builderMode: detectBuilderMode()
     };
   }
 
+  function detectBuilderMode() {
+    const overlay = document.getElementById('bio-wizard-overlay');
+    if (overlay && !overlay.classList.contains('hidden')) return 'wizard';
+    return 'full';
+  }
+
   function applyDraftToForm(draft) {
-    if (!draft) return;
+    if (!draft || typeof draft !== 'object') return;
+    if (!Object.keys(draft).length) return;
+    const has = (key) => Object.prototype.hasOwnProperty.call(draft, key);
     const setVal = (id, val) => {
       const el = document.getElementById(id);
       if (el && val != null) el.value = val;
     };
     const setChips = (name, vals) => {
-      const set = new Set(vals || []);
+      const set = new Set(Array.isArray(vals) ? vals : []);
       document.querySelectorAll(`input[data-bio-chip="${name}"]`).forEach((cb) => {
         cb.checked = set.has(cb.value);
       });
     };
 
-    setChips('service', draft.serviceApproach);
-    setVal('bio-service-notes', draft.serviceApproachNotes);
-    setVal('bio-existing-paste', draft.existingBioPaste);
-    setVal('bio-years', draft.yearsConfirm);
-    setVal('bio-loves-most', draft.lovesMost);
-    setChips('who', draft.whoYouHelp);
-    setVal('bio-who-notes', draft.whoYouHelpNotes);
-    setChips('diff', draft.differentiators);
-    setVal('bio-diff-notes', draft.differentiatorsNotes);
-    setChips('personal', draft.personalLifeChips);
-    setVal('bio-family', draft.familyLife);
-    setVal('bio-hobbies', draft.hobbies);
-    setVal('bio-pets', draft.pets);
-    setVal('bio-community', draft.communityPersonal);
-    setVal('bio-additional', draft.additionalNotes);
-    const mentionEl = document.getElementById('bio-mention-company');
-    if (mentionEl) mentionEl.checked = !!draft.mentionCompany;
-    setVal('bio-tone', draft.toneOverride || '');
+    if (has('serviceApproach')) setChips('service', draft.serviceApproach);
+    if (has('serviceApproachNotes')) setVal('bio-service-notes', draft.serviceApproachNotes);
+    if (has('existingBioPaste')) setVal('bio-existing-paste', draft.existingBioPaste);
+    if (has('yearsConfirm')) setVal('bio-years', draft.yearsConfirm);
+    if (has('lovesMost')) setVal('bio-loves-most', draft.lovesMost);
+    if (has('whoYouHelp')) setChips('who', draft.whoYouHelp);
+    if (has('whoYouHelpNotes')) setVal('bio-who-notes', draft.whoYouHelpNotes);
+    if (has('differentiators')) setChips('diff', draft.differentiators);
+    if (has('differentiatorsNotes')) setVal('bio-diff-notes', draft.differentiatorsNotes);
+    if (has('personalLifeChips')) setChips('personal', draft.personalLifeChips);
+    if (has('familyLife')) setVal('bio-family', draft.familyLife);
+    if (has('hobbies')) setVal('bio-hobbies', draft.hobbies);
+    if (has('pets')) setVal('bio-pets', draft.pets);
+    if (has('communityPersonal')) setVal('bio-community', draft.communityPersonal);
+    if (has('additionalNotes')) setVal('bio-additional', draft.additionalNotes);
+    if (has('mentionCompany')) {
+      const mentionEl = document.getElementById('bio-mention-company');
+      if (mentionEl) mentionEl.checked = !!draft.mentionCompany;
+    }
+    if (has('toneOverride')) setVal('bio-tone', draft.toneOverride || '');
     if (draft.destination) {
       setVal('bio-destination', draft.destination);
       syncDestinationCards(draft.destination);
     }
-    setVal('bio-custom-limit-type', draft.customLimitType || 'chars');
-    setVal('bio-custom-limit-value', draft.customLimitValue || '750');
+    if (has('customLimitType')) setVal('bio-custom-limit-type', draft.customLimitType || 'chars');
+    if (has('customLimitValue')) setVal('bio-custom-limit-value', draft.customLimitValue || '750');
+    if (draft.builderMode === 'wizard' || draft.builderMode === 'full') {
+      if (typeof window.setCoachModeSwitch === 'function') {
+        window.setCoachModeSwitch('bio', draft.builderMode === 'wizard' ? 'guided' : 'full');
+      }
+    }
     toggleCustomLimitRow();
     refreshAllUI();
   }
 
+  function flushBioDraftNow() {
+    if (typeof window.patchUserProfile !== 'function') return;
+    window.patchUserProfile({ bioBuilderDraft: collectDraftFromForm() }, { silent: true });
+  }
+
   function scheduleDraftSave() {
     clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => {
-      if (typeof window.patchUserProfile === 'function') {
-        window.patchUserProfile({ bioBuilderDraft: collectDraftFromForm() }, { silent: true });
-      }
-    }, 600);
+    autoSaveTimer = setTimeout(flushBioDraftNow, 600);
   }
 
   function renderChipGroup(containerId, chipName, options) {
@@ -1450,7 +1467,11 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       </div>`;
 
     panel.classList.remove('hidden');
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof window.scrollToGeneratedContent === 'function') {
+      window.scrollToGeneratedContent(panel);
+    } else {
+      try { panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* ignore */ }
+    }
     renderRefineChips();
     document.getElementById('bio-copy-btn')?.addEventListener('click', copyBio);
     document.getElementById('bio-save-primary-btn')?.addEventListener('click', saveAsPrimaryBio);
@@ -1812,6 +1833,11 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
       scheduleDraftSave();
     });
 
+    window.addEventListener('pagehide', flushBioDraftNow);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flushBioDraftNow();
+    });
+
     root.addEventListener('click', (e) => {
       const starter = e.target.closest('.bio-starter-btn');
       if (starter) {
@@ -1846,6 +1872,7 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
     syncBioFromProfile();
   }
 
+  window.flushBioDraftNow = flushBioDraftNow;
   window.syncBioFromProfile = syncBioFromProfile;
   window.seedBioFieldsFromProfile = seedBioFieldsFromProfile;
   window.syncBioDestinationCards = syncDestinationCards;

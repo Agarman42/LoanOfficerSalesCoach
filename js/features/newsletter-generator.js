@@ -2072,7 +2072,30 @@ function buildPersonalPhotoInsert(photoUrl, widthPx) {
 </table>`;
 }
 
-/** Force every personal-photo variant onto the canonical centered markup. */
+/** Remove every personal-photo variant so we can insert exactly one capped block. */
+function stripPersonalPhotoVariants(html, photoUrl) {
+    let out = String(html || '');
+    if (!out) return out;
+    const url = String(photoUrl || '').trim();
+
+    out = out.replace(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<\/table>/gi, '');
+    out = out.replace(
+        /<table(?![^>]*data-nl-personal-photo)[^>]*>[\s\S]*?<img[^>]*alt=["']Personal photo["'][^>]*>[\s\S]*?<\/table>/gi,
+        ''
+    );
+    out = out.replace(/<img[^>]*alt=["']Personal photo["'][^>]*>/gi, '');
+    if (url) {
+        out = out.replace(/<img\b[^>]*>/gi, (tag) => {
+            const m = tag.match(/\bsrc=["']([^"']+)["']/i);
+            if (m && m[1] === url) return '';
+            return tag;
+        });
+    }
+    out = out.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, '');
+    return out;
+}
+
+/** Force every personal-photo variant onto ONE canonical centered, width-capped block. */
 function ensurePersonalPhotoCentered(htmlString, photoUrl) {
     let out = String(htmlString || '');
     const url = String(photoUrl || '').trim();
@@ -2081,37 +2104,35 @@ function ensurePersonalPhotoCentered(htmlString, photoUrl) {
     let src = url;
     if (!src) {
         const m = out.match(/<img[^>]*alt=["']Personal photo["'][^>]*\bsrc=["']([^"']+)["']/i)
-            || out.match(/<img[^>]*\bsrc=["']([^"']+)["'][^>]*alt=["']Personal photo["']/i);
+            || out.match(/<img[^>]*\bsrc=["']([^"']+)["'][^>]*alt=["']Personal photo["']/i)
+            || out.match(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<img[^>]*\bsrc=["']([^"']+)["']/i);
         src = m ? m[1] : '';
     }
     if (!src) return out;
 
-    const pxMatch = out.match(/alt=["']Personal photo["'][^>]*width=["'](\d+)["']/i)
-        || out.match(/alt=["']Personal photo["'][^>]*width:\s*(\d+)px/i)
-        || out.match(/width=["'](\d+)["'][^>]*alt=["']Personal photo["']/i);
-    const px = pxMatch ? parseInt(pxMatch[1], 10) : getPersonalPhotoWidthPx();
-    const block = buildPersonalPhotoInsert(src, px);
+    out = stripPersonalPhotoVariants(out, src);
+    if (/data-nl-personal-photo=["']1["']/i.test(out)) return out;
 
-    if (/data-nl-personal-photo=["']1["']/i.test(out)) {
-        return out.replace(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<\/table>/gi, block);
-    }
-    if (/alt=["']Personal photo["']/i.test(out)) {
-        let replaced = out.replace(
-            /<table(?![^>]*data-nl-personal-photo)[^>]*>[\s\S]*?<img[^>]*alt=["']Personal photo["'][^>]*>[\s\S]*?<\/table>/gi,
-            block
-        );
-        if (replaced === out) {
-            replaced = out.replace(/<img[^>]*alt=["']Personal photo["'][^>]*>/gi, block);
-        }
-        return replaced;
-    }
-    if (url && /A Note From/i.test(out) && !/alt=["']Personal photo["']/i.test(out)) {
-        return out.replace(
-            /(A Note From[\s\S]{0,1200}?)(<\/td>\s*<\/tr>\s*<\/table>)/i,
-            `$1${block}$2`
-        );
-    }
-    return out;
+    const px = Math.min(NL_MEDIA_MAX_PX, getPersonalPhotoWidthPx());
+    const block = buildPersonalPhotoInsert(src, px);
+    if (!block) return out;
+
+    const afterNote = out.replace(
+        /(A Note From[\s\S]{0,1200}?)(<\/td>\s*<\/tr>\s*<\/table>)/i,
+        `$1${block}$2`
+    );
+    if (afterNote !== out) return afterNote;
+
+    const afterPlaceholder = out.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, block);
+    if (afterPlaceholder !== out) return afterPlaceholder;
+
+    const personalMod = out.replace(
+        /(<h2[^>]*>\s*A Note From[\s\S]*?)(<\/td>\s*<\/tr>\s*<\/table>)/i,
+        `$1${block}$2`
+    );
+    if (personalMod !== out) return personalMod;
+
+    return out + block;
 }
 
 function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
@@ -3333,12 +3354,14 @@ const NL_PREVIEW_FLUID_HEAD = `
     text-align: center !important;
   }
   table[data-nl-personal-photo="1"] img,
-  img[alt="Personal photo"] {
+  img[alt="Personal photo"],
+  table[data-nl-personal-photo] img {
     display: block !important;
     float: none !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    max-width: 100% !important;
+    width: auto !important;
+    max-width: min(${NL_MEDIA_MAX_PX}px, 100%) !important;
     height: auto !important;
   }
   /* Video is a full section card — keep 100%/600 centered; width:auto blew up the thumb */
@@ -4611,7 +4634,11 @@ async function generateNewsletter(feedback = '') {
                 '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
                 '- Match the full "LO PROFILE & VOICE CONTEXT" section below for overall newsletter tone and voice — but the Personal Update must use ONLY what the user typed in the Personal Update field. Never substitute profile hobbies, goals, or challenges into the personal note.',
-                '- Location: ' + (document.getElementById('nl-location').value || 'Fort Wayne, Indiana'),
+                '- Location: ' + (function () {
+                    const locVal = (document.getElementById('nl-location')?.value || '').trim();
+                    if (locVal) return locVal;
+                    return '(not set — do NOT invent a city, metro, or local market. If Local Update is included, write generic community/homeowner language with no named city.)';
+                }()),
                 '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
                 '- Length selection: ' + getNewsletterLengthConfig().displayLabel,
                 '- Sections to generate: ' + sectionsSummary,
@@ -5022,15 +5049,13 @@ if (postSelections?.includeReferral) {
             if (!feedback) {
                 showNewsletterReviewHandoff();
             }
-            // Always land on the ready section (wizard and full form)
-            requestAnimationFrame(() => {
-                const ready = document.getElementById('nl-review-handoff') || output;
-                try {
-                    ready.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } catch (e) {
-                    try { output.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e2) {}
-                }
-            });
+            // Always land on the ready section (wizard and full form) after overlay hides
+            const ready = document.getElementById('nl-review-handoff') || output;
+            if (typeof window.scrollToGeneratedContent === 'function') {
+                window.scrollToGeneratedContent(ready);
+            } else {
+                try { ready.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+            }
             // Add a visible Clear button (premium pill style) so user can discard the persisted last version
             if (!output.querySelector('.nl-clear-btn')) {
               const clr = document.createElement('button');
@@ -5857,6 +5882,16 @@ function copyForOutlook() {
     };
   }
 
+  function toggleNewsletterLocationEmptyHint() {
+    const loc = (document.getElementById('nl-location')?.value || '').trim();
+    const wiz = (document.getElementById('nl-wizard-location')?.value || '').trim();
+    const hasMarket = !!loc || !!wiz;
+    const hint = document.getElementById('nl-location-empty-hint');
+    if (hint) hint.classList.toggle('hidden', hasMarket);
+    const wizHint = document.getElementById('nl-wizard-location-empty-hint');
+    if (wizHint) wizHint.classList.toggle('hidden', hasMarket);
+  }
+
   function setNewsletterFieldIfEmpty(id, value, options) {
     const opts = options || {};
     const v = String(value || '').trim();
@@ -5902,7 +5937,22 @@ function copyForOutlook() {
       syncNewsletterContactFromProfile();
 
       const market = (p.localArea || p.market || p.location || '').trim();
-      setNewsletterFieldIfEmpty('nl-location', market, { treatAsEmpty: ['Fort Wayne, Indiana'] });
+      const locEl = document.getElementById('nl-location');
+      const currentLoc = String(locEl?.value || '').trim();
+      const inventedOrEmpty = !currentLoc || currentLoc === 'Fort Wayne, Indiana';
+      if (market) {
+        setNewsletterFieldIfEmpty('nl-location', market, { treatAsEmpty: ['Fort Wayne, Indiana'], force: inventedOrEmpty });
+        setNewsletterFieldIfEmpty('nl-wizard-location', market, { treatAsEmpty: ['Fort Wayne, Indiana'], force: inventedOrEmpty });
+      } else if (locEl && inventedOrEmpty) {
+        locEl.value = '';
+        locEl.dispatchEvent(new Event('input', { bubbles: true }));
+        locEl.dispatchEvent(new Event('change', { bubbles: true }));
+        const wizLoc = document.getElementById('nl-wizard-location');
+        if (wizLoc && (!wizLoc.value.trim() || wizLoc.value.trim() === 'Fort Wayne, Indiana')) {
+          wizLoc.value = '';
+        }
+      }
+      toggleNewsletterLocationEmptyHint();
 
       const mappedTone = mapProfileToneToNewsletterTone(p.tone);
       if (mappedTone) setNewsletterFieldIfEmpty('nl-tone', mappedTone);

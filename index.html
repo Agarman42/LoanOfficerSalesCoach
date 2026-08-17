@@ -135,13 +135,13 @@
       Home Coach Setup: must not wait for sequential feature-loader (50+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
-    <script defer src="js/features/user-profile.js?v=20260807-signout"></script>
+    <script defer src="js/features/user-profile.js?v=20260817-v3139"></script>
     <script defer src="js/features/home-favorites.js?v=20260810-fav-catalog"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <!-- LO auth gate (@ruoff.com) + invite realtors / admin -->
     <script defer src="js/features/lo-auth-gate.js?v=20260807-admin-usage"></script>
     <script defer src="js/features/lo-invite-admin.js?v=20260807-lo-invite-ui"></script>
-    <script src="js/early-boot.js?v=20260812-lazy-features"></script>
+    <script src="js/early-boot.js?v=20260817-v3139"></script>
     <style id="lo-auth-boot-lock">
       html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style) { visibility: hidden !important; }
     </style>
@@ -7283,8 +7283,9 @@
           </div>
           <div>
             <label class="block text-lg font-semibold text-[#00A89D] mb-3">Your Local Market</label>
-            <input type="text" id="nl-location" value="Fort Wayne, Indiana" 
+            <input type="text" id="nl-location" value="" placeholder="City, State (from My Profile)"
                    class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
+            <p id="nl-location-empty-hint" class="hidden text-sm text-amber-700 dark:text-amber-300 mt-2 m-0">No local market in My Profile. Local Update will stay generic — we will not invent a city.</p>
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
@@ -9726,7 +9727,7 @@
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260812-lazy-features"></script>
+<script src="js/feature-loader.js?v=20260817-v3139"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

@@ -41,6 +41,39 @@
     );
   }
 
+  /**
+   * After a generate overlay hides, jump to the new output.
+   * Overlay hide lives in `finally` after generate — retry twice so layout is ready.
+   * Do not steal focus.
+   */
+  function scrollToGeneratedContent(el) {
+    if (!el) return;
+    function go() {
+      try {
+        if (typeof el.scrollIntoView === 'function') {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (e) {
+        try { el.scrollIntoView(true); } catch (e2) { /* ignore */ }
+      }
+      try {
+        const se = document.scrollingElement || document.documentElement;
+        if (se && typeof el.getBoundingClientRect === 'function') {
+          const rect = el.getBoundingClientRect();
+          const top = rect.top + (window.pageYOffset || se.scrollTop || 0);
+          if (typeof window.scrollTo === 'function' && (rect.top < 0 || rect.top > 80)) {
+            window.scrollTo({ top: Math.max(0, top - 12), behavior: 'smooth' });
+          }
+        }
+      } catch (e3) { /* ignore */ }
+    }
+    requestAnimationFrame(function () {
+      setTimeout(go, 80);
+      setTimeout(go, 280);
+    });
+  }
+  window.scrollToGeneratedContent = scrollToGeneratedContent;
+
   /** Home/load: stay at page top so the header (logo / LO brand plate) stays visible. */
   function scrollAfterSectionShow(id, target) {
     try {

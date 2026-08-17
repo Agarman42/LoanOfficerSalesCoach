@@ -522,7 +522,11 @@ Focus on building connection and trust — not closing the deal.`;
             }
 
             output.classList.remove('hidden');
-            output.scrollIntoView({ behavior: 'smooth' });
+            if (typeof window.scrollToGeneratedContent === 'function') {
+              window.scrollToGeneratedContent(output);
+            } else {
+              try { output.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* ignore */ }
+            }
         }
 
         if (typeof confetti === 'function') {

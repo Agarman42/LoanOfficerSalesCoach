@@ -841,6 +841,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 `;
 
         output.classList.remove('hidden');
+        if (typeof window.scrollToGeneratedContent === 'function') {
+          window.scrollToGeneratedContent(output);
+        }
 
         const nextStepsBtn = document.getElementById('blog-next-steps-btn');
         if (nextStepsBtn) {

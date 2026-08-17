@@ -721,8 +721,13 @@
 
   function updateStep2ValidationHints() {
     const loc = ($('nl-wizard-location')?.value || '').trim();
+    const real = !!loc;
     const hint = $('nl-wizard-location-hint');
-    if (hint) hint.classList.toggle('hidden', !loc);
+    if (hint) hint.classList.toggle('hidden', !real);
+    const emptyHint = $('nl-wizard-location-empty-hint');
+    if (emptyHint) emptyHint.classList.toggle('hidden', real);
+    const formHint = document.getElementById('nl-location-empty-hint');
+    if (formHint) formHint.classList.toggle('hidden', real);
   }
 
   function savePersonalStoryHistory() {
@@ -1048,9 +1053,8 @@
     if (currentStep === 2) {
       const loc = ($('nl-wizard-location')?.value || '').trim();
       if (!loc) {
-        showStepError('Add your local market so we can write relevant content.');
-        $('nl-wizard-location')?.focus();
-        return false;
+        // Do not invent a city — allow continue; Local Update stays generic.
+        updateStep2ValidationHints();
       }
     }
 
@@ -1419,9 +1423,10 @@
                 <p class="text-[11px] text-gray-400 mt-1 m-0">Shapes tone and examples in the AI draft.</p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-location">Local market <span class="text-[#F15A29]">*</span></label>
-                <input type="text" id="nl-wizard-location" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm" placeholder="City, State" required>
+                <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-location">Local market</label>
+                <input type="text" id="nl-wizard-location" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm" placeholder="City, State (from My Profile)">
                 <p id="nl-wizard-location-hint" class="hidden text-[11px] text-[#00A89D] mt-1 m-0"><i class="fas fa-check-circle"></i> Market set</p>
+                <p id="nl-wizard-location-empty-hint" class="hidden text-[11px] text-amber-700 dark:text-amber-300 mt-1 m-0">No local market in My Profile. Local Update will stay generic — we will not invent a city.</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-tone">Tone</label>

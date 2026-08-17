@@ -551,6 +551,12 @@
       companyWebsite: getVal('profile-company-website'),
       translationDefaultTarget: getRaw('profile-translation-default') || 'es',
       translationFavoriteLanguages: Array.from(document.querySelectorAll('.profile-translation-fav:checked')).map((c) => c.value),
+      // Preserve bio builder store — collectProfileFromForm rebuilds a new object
+      // and must not drop these or normalizeProfile will reset bioBuilderDraft to {}.
+      bioBuilderDraft: existing.bioBuilderDraft && typeof existing.bioBuilderDraft === 'object' ? existing.bioBuilderDraft : {},
+      professionalBio: existing.professionalBio || '',
+      professionalBioMeta: existing.professionalBioMeta && typeof existing.professionalBioMeta === 'object' ? existing.professionalBioMeta : null,
+      bioHistory: Array.isArray(existing.bioHistory) ? existing.bioHistory : [],
       lastUpdated: new Date().toISOString()
     };
   }

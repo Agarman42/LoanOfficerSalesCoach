@@ -24,7 +24,7 @@
     'js/features/section-bottom-banners.js?v=20260720-review',
     'js/features/coach-polish.js?v=20260721-ux-polish',
     'js/features/partner-share.js?v=20260807-one-invite-branded',
-    'js/app-version.js?v=20260812-v3138',
+    'js/app-version.js?v=20260817-v3139',
     'js/features/generation-rules.js?v=20260720-hobby-restraint',
     'js/features/save-ribbon.js',
     'js/features/wizard-a11y.js?v=20260720-polish2',
@@ -48,9 +48,9 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260710-lo-v286',
       'js/features/publish-kit.js?v=20260711-lo-v273',
-      'js/features/newsletter-generator.js?v=20260806-nl-docx-source',
+      'js/features/newsletter-generator.js?v=20260817-v3139',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
-      'js/features/newsletter-wizard.js?v=20260721-ux-polish'
+      'js/features/newsletter-wizard.js?v=20260817-v3139'
     ],
     'smart-savings': [
       'smart-savings/js/calculator-core.js?v=20260721-v334',
@@ -82,7 +82,7 @@
       'js/features/my-pitch.js?v=20260806-pitch-vcf2'
     ],
     'blog': [
-      'js/features/blog-creator.js?v=20260720-p2-hashtag'
+      'js/features/blog-creator.js?v=20260817-v3139'
     ],
     'planning': [
       'js/features/business-plan-wizard.js?v=20260729-plan-sync'
@@ -106,17 +106,17 @@
       'js/features/equity-scanner.js?v=20260623-lo-v222'
     ],
     'sales-script': [
-      'js/features/sales-scripts.js?v=20260715-lo-v225'
+      'js/features/sales-scripts.js?v=20260817-v3139'
     ],
     'bio-creator': [
-      'js/features/bio-creator.js?v=20260729-nmls-only',
-      'js/features/bio-wizard.js?v=20260729-no-backdrop'
+      'js/features/bio-creator.js?v=20260817-v3139',
+      'js/features/bio-wizard.js?v=20260817-v3139'
     ],
     'social': [
       'js/features/social-modals.js?v=20260623-lo-v222'
     ],
     'social-post': [
-      'js/features/social-post.js?v=20260729-profile-ux'
+      'js/features/social-post.js?v=20260817-v3139'
     ],
     'mindset-motivation': [
       'js/features/mindset-lab.js'
@@ -135,16 +135,16 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260720-p2-hashtag',
+      'js/features/blog-creator.js?v=20260817-v3139',
       'js/features/social-modals.js?v=20260623-lo-v222',
       'js/data/newsletter-dad-jokes.js?v=20260625-lo-v231',
       'js/data/newsletter-brain-teasers.js?v=20260625-lo-v233',
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260710-lo-v286',
       'js/features/publish-kit.js?v=20260711-lo-v273',
-      'js/features/newsletter-generator.js?v=20260806-nl-docx-source',
+      'js/features/newsletter-generator.js?v=20260817-v3139',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
-      'js/features/newsletter-wizard.js?v=20260721-ux-polish'
+      'js/features/newsletter-wizard.js?v=20260817-v3139'
     ]
   };
 
