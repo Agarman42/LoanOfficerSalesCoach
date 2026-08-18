@@ -18,6 +18,7 @@ const PRECACHE_URLS = [
   '/js/api.js?v=20260806-pwa',
   '/js/ui.js?v=20260729-no-backdrop',
   '/js/main.js?v=20260812-lazy-features',
+  '/js/early-boot.js?v=20260817-v3139',
   '/js/early-boot.js?v=20260818-v3140',
   '/js/features/newsletter-color-bundles.js?v=20260818-v3140',
   '/js/feature-loader.js?v=20260818-v3140',
