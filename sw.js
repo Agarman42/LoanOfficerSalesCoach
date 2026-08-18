@@ -1,6 +1,6 @@
 /* LO Sales Coach service worker — app shell cache + Web Push */
 /* eslint-disable no-restricted-globals */
-const SW_VERSION = 'lo-sw-v1-20260818-v3140';
+const SW_VERSION = 'lo-sw-v1-20260818-v3140p2';
 const SHELL_CACHE = SW_VERSION + '-shell';
 
 const PRECACHE_URLS = [
@@ -18,7 +18,8 @@ const PRECACHE_URLS = [
   '/js/api.js?v=20260806-pwa',
   '/js/ui.js?v=20260729-no-backdrop',
   '/js/main.js?v=20260812-lazy-features',
-  '/js/early-boot.js?v=20260817-v3139',
+  '/js/early-boot.js?v=20260818-v3140',
+  '/js/features/newsletter-color-bundles.js?v=20260818-v3140',
   '/js/feature-loader.js?v=20260818-v3140',
   '/js/app-version.js?v=20260818-v3140',
   '/js/features/pwa-push.js?v=20260806-pwa'
