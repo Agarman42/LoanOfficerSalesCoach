@@ -392,7 +392,6 @@
     refresh();
   }
 
-
   const PROFILE_BUNDLE_SELECT_ID = 'profile-newsletter-color-bundle';
   const PROFILE_STORAGE_KEYS = { userProfile: true, winPlanSetup: true };
 
@@ -405,81 +404,102 @@
     }
   }
 
-  function readSavedNewsletterColorBundle() {
-    try {
-      const raw = JSON.parse(localStorage.getItem('userProfile') || '{}') || {};
-      if (raw.newsletterColorBundle) return String(raw.newsletterColorBundle);
-    } catch (e) { /* ignore */ }
+  function readSavedNewsletterColorBundle(storage) {
+    let fromApi = '';
+    let fromStore = '';
     try {
       if (typeof window.getUserProfile === 'function') {
         const p = window.getUserProfile();
-        if (p && p.newsletterColorBundle) return String(p.newsletterColorBundle);
+        if (p && p.newsletterColorBundle) fromApi = String(p.newsletterColorBundle);
       }
+    } catch (e1) { /* ignore */ }
+    try {
+      const store = storage || (typeof localStorage !== 'undefined' ? localStorage : null);
+      const raw = store && store.getItem ? store.getItem('userProfile') : null;
+      const cur = JSON.parse(raw || '{}') || {};
+      if (cur.newsletterColorBundle) fromStore = String(cur.newsletterColorBundle);
     } catch (e2) { /* ignore */ }
-    return '';
-  }
-
-  function restoreSavedNewsletterColorBundle(profile) {
-    if (!profile || typeof profile !== 'object') return profile;
-    if (!profileBundleSelectUnusable()) return profile;
-    const saved = readSavedNewsletterColorBundle();
-    if (saved) profile.newsletterColorBundle = saved;
-    return profile;
+    // Previously saved profile: getUserProfile() then localStorage.userProfile.
+    // During setItem the store still holds the last persist (the value we must
+    // not clobber), so prefer that when present.
+    return fromStore || fromApi;
   }
 
   /**
-   * Pass 3 persist guard. collectProfileFromForm / persistProfile / performSave
-   * live inside user-profile.js IIFE (not on window). Wrap window hooks if they
-   * exist (collectProfileFromForm, persistProfile, patchUserProfile) and the
-   * actual write path localStorage.setItem('userProfile'|'winPlanSetup').
-   * If #profile-newsletter-color-bundle is missing or has zero options, put
-   * the previously saved newsletterColorBundle back — do not invent coastal-teal
-   * over Gold Luxury / Classic Navy.
+   * Pass 3 persist gate. collectProfileFromForm / persistProfile / performSave
+   * are IIFE-private in user-profile.js — they are not on window. Internal
+   * persist calls closed normalizeProfile, not window.normalizeUserProfile, so
+   * wrapping only the window function is theater.
+   *
+   * Real gate: intercept localStorage.setItem for userProfile / winPlanSetup.
+   * If #profile-newsletter-color-bundle is missing OR options.length === 0,
+   * restore newsletterColorBundle from the previously saved profile. Leave
+   * Gold Luxury / Classic Navy untouched (do not write coastal-teal over them).
+   * If nothing was saved, coastal-teal is OK. If the select has options and a
+   * real value, do not interfere.
+   *
+   * Also wrap window.normalizeUserProfile and window.patchUserProfile when
+   * they appear (poll/retry) so any window-path collect/normalize keeps the
+   * saved bundle. Idempotent via window._nlBundlePersistWrapped.
    */
-  function wrapCollectPersistNewsletterColorBundle() {
-    function wrapWindowFn(name, kind) {
+  function wrapCollectPersistAgainstEmptySelect() {
+    function restoreIfEmptySelect(profile) {
+      if (!profile || typeof profile !== 'object') return profile;
+      if (!profileBundleSelectUnusable()) return profile;
+      const saved = readSavedNewsletterColorBundle();
+      if (saved) profile.newsletterColorBundle = saved;
+      return profile;
+    }
+
+    function wrapWindowFn(name) {
       const orig = window[name];
-      if (typeof orig !== 'function' || orig.__nlBundleWrap) return false;
+      if (typeof orig !== 'function' || orig._nlBundleEmptySelectWrapped) {
+        return typeof orig === 'function';
+      }
       const wrapped = function () {
-        if (kind === 'persist' && arguments[0] && typeof arguments[0] === 'object') {
-          restoreSavedNewsletterColorBundle(arguments[0]);
+        if (arguments[0] && typeof arguments[0] === 'object') {
+          restoreIfEmptySelect(arguments[0]);
         }
         const result = orig.apply(this, arguments);
-        if (kind === 'collect' && result && typeof result === 'object') {
-          return restoreSavedNewsletterColorBundle(result);
+        if (result && typeof result === 'object') {
+          return restoreIfEmptySelect(result);
         }
         return result;
       };
-      wrapped.__nlBundleWrap = true;
+      wrapped._nlBundleEmptySelectWrapped = true;
       window[name] = wrapped;
       return true;
     }
 
-    wrapWindowFn('collectProfileFromForm', 'collect');
-    wrapWindowFn('persistProfile', 'persist');
-    wrapWindowFn('patchUserProfile', 'persist');
+    wrapWindowFn('normalizeUserProfile');
+    wrapWindowFn('patchUserProfile');
 
-    if (typeof Storage !== 'undefined' && Storage.prototype && !Storage.prototype.setItem.__nlBundleWrap) {
+    if (typeof window !== 'undefined' && window._nlBundlePersistWrapped) {
+      return true;
+    }
+    if (typeof window !== 'undefined') window._nlBundlePersistWrapped = true;
+
+    if (typeof Storage !== 'undefined' && Storage.prototype && !Storage.prototype.setItem._nlBundleEmptySelectWrapped) {
       const origSet = Storage.prototype.setItem;
       function wrappedSetItem(key, value) {
         if (PROFILE_STORAGE_KEYS[key] && profileBundleSelectUnusable()) {
           try {
             const next = JSON.parse(value || '{}') || {};
-            const saved = readSavedNewsletterColorBundle();
+            const saved = readSavedNewsletterColorBundle(this);
             if (saved) next.newsletterColorBundle = saved;
             value = JSON.stringify(next);
           } catch (e) { /* ignore */ }
         }
         return origSet.call(this, key, value);
       }
-      wrappedSetItem.__nlBundleWrap = true;
+      wrappedSetItem._nlBundleEmptySelectWrapped = true;
       Storage.prototype.setItem = wrappedSetItem;
     }
     return true;
   }
 
   function initNlColorBundlePickers() {
-    wrapCollectPersistNewsletterColorBundle();
+    wrapCollectPersistAgainstEmptySelect();
     wireProfileBundlePicker();
     wireNewsletterBundlePicker();
   }
@@ -517,25 +537,18 @@
     wireProfileBundlePicker,
     wireNewsletterBundlePicker,
     initNlColorBundlePickers,
-    profileBundleSelectUnusable,
-    readSavedNewsletterColorBundle,
-    restoreSavedNewsletterColorBundle,
-    wrapCollectPersistNewsletterColorBundle
+    wrapCollectPersistAgainstEmptySelect
   };
 
-  wrapCollectPersistNewsletterColorBundle();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wrapCollectPersistNewsletterColorBundle);
-  }
+  wrapCollectPersistAgainstEmptySelect();
   let wrapTries = 0;
   const wrapTimer = setInterval(() => {
-    wrapCollectPersistNewsletterColorBundle();
+    wrapCollectPersistAgainstEmptySelect();
     wrapTries += 1;
-    if (wrapTries >= 20 || typeof window.patchUserProfile === 'function') {
-      clearInterval(wrapTimer);
-    }
+    const normOk = typeof window.normalizeUserProfile === 'function'
+      && window.normalizeUserProfile._nlBundleEmptySelectWrapped;
+    const patchOk = typeof window.patchUserProfile === 'function'
+      && window.patchUserProfile._nlBundleEmptySelectWrapped;
+    if (wrapTries >= 20 || (normOk && patchOk)) clearInterval(wrapTimer);
   }, 250);
-  window.NlColorBundles.stopCollectPersistWrapRetry = function () {
-    clearInterval(wrapTimer);
-  };
 })();
