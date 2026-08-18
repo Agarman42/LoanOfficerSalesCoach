@@ -334,4 +334,33 @@
   window.addEventListener('pageshow', hardHideGlobalLoading);
   window.addEventListener('load', hardHideGlobalLoading);
   window.__hardHideGlobalLoading = hardHideGlobalLoading;
+
+  /**
+   * Pass-2 cache-bust: old feature-loader (v3139) omits color-bundles from CORE.
+   * index.html may still request that query after deploy. Inject the v3140 module
+   * unconditionally so Profile → NEWSLETTER LOOK paints 8 named options even when
+   * the cached loader never loads it. initNlColorBundlePickers self-inits if the
+   * document is already complete.
+   */
+  (function injectNewsletterColorBundles() {
+    var SRC = 'js/features/newsletter-color-bundles.js?v=20260818-v3140';
+    function hasSrc(needle) {
+      var nodes = document.getElementsByTagName('script');
+      for (var i = 0; i < nodes.length; i++) {
+        var s = nodes[i].getAttribute('src') || '';
+        if (s.indexOf(needle) !== -1) return true;
+      }
+      return false;
+    }
+    if (window.NlColorBundles && typeof window.NlColorBundles.initNlColorBundlePickers === 'function') {
+      return;
+    }
+    if (hasSrc('newsletter-color-bundles.js?v=20260818-v3140') || hasSrc(SRC)) {
+      return;
+    }
+    var el = document.createElement('script');
+    el.src = SRC;
+    el.async = false;
+    (document.head || document.documentElement).appendChild(el);
+  })();
 })();

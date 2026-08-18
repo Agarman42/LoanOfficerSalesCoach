@@ -268,21 +268,99 @@
     if (selectedId) selectEl.value = selectedId;
   }
 
-  function wireProfileBundlePicker() {
-    const select = document.getElementById('profile-newsletter-color-bundle');
+  function ensureProfileBundleUx(select) {
+    if (!select) return;
+    let swatches = document.getElementById('profile-newsletter-color-swatches');
+    if (!swatches) {
+      swatches = document.createElement('div');
+      swatches.id = 'profile-newsletter-color-swatches';
+      swatches.className = 'grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3';
+      swatches.setAttribute('role', 'listbox');
+      swatches.setAttribute('aria-label', 'Newsletter color bundles');
+      const wrap = select.closest('.profile-select-wrap') || select;
+      wrap.insertAdjacentElement('afterend', swatches);
+    }
+    const selected = select.value || DEFAULT_BUNDLE_ID;
+    swatches.innerHTML = '';
+    Object.values(NL_COLOR_BUNDLES).forEach((bundle) => {
+      const active = bundle.id === selected;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.bundleId = bundle.id;
+      btn.setAttribute('role', 'option');
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.title = bundle.description || bundle.label;
+      btn.className = 'flex items-center gap-2 w-full text-left px-2.5 py-2 rounded-xl border text-[12px] font-semibold transition ' +
+        (active
+          ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C] dark:text-white ring-2 ring-[#00A89D]/30'
+          : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-[#00A89D]/60');
+      btn.innerHTML =
+        '<span class="flex -space-x-1 flex-shrink-0" aria-hidden="true">' +
+        `<span class="inline-block w-4 h-4 rounded-full border border-white dark:border-gray-700 shadow-sm" style="background:${bundle.primary}"></span>` +
+        `<span class="inline-block w-4 h-4 rounded-full border border-white dark:border-gray-700 shadow-sm" style="background:${bundle.secondary}"></span>` +
+        '</span>' +
+        `<span class="truncate">${bundle.label}</span>`;
+      btn.addEventListener('click', () => {
+        if (select.value !== bundle.id) {
+          select.value = bundle.id;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+      swatches.appendChild(btn);
+    });
+  }
+
+  function refreshProfileBundlePreview(select) {
+    if (!select) return;
     const preview = document.getElementById('profile-newsletter-color-preview');
     const desc = document.getElementById('profile-newsletter-color-desc');
-    if (!select || select.dataset.nlBundleWired === '1') return;
-    select.dataset.nlBundleWired = '1';
-    populateBundleSelect(select, readProfileBundleId(), { includeProfileDefault: false });
-    select.value = readProfileBundleId();
-    const refresh = () => {
-      const bundle = getBundle(select.value);
-      renderBundlePreview(preview, bundle.id);
-      if (desc) desc.textContent = bundle.description;
-    };
-    select.addEventListener('change', refresh);
-    refresh();
+    const bundle = getBundle(select.value || DEFAULT_BUNDLE_ID);
+    if (preview) {
+      renderBundleMiniPreview(preview, bundle.id, { showDescription: false, showLabel: true });
+    }
+    if (desc) desc.textContent = bundle.description || '';
+    ensureProfileBundleUx(select);
+  }
+
+  let profilePickerRetryTimer = 0;
+  let profilePickerTries = 0;
+  const PROFILE_PICKER_MAX_TRIES = 24;
+
+  function scheduleProfilePickerRetry(preferredId) {
+    if (profilePickerTries >= PROFILE_PICKER_MAX_TRIES) return;
+    profilePickerTries += 1;
+    const delay = profilePickerTries < 8 ? 50 : 200;
+    clearTimeout(profilePickerRetryTimer);
+    profilePickerRetryTimer = setTimeout(() => wireProfileBundlePicker(preferredId), delay);
+  }
+
+  /** Fill + bind Profile → NEWSLETTER LOOK. Safe to call on every Profile open. */
+  function wireProfileBundlePicker(preferredId) {
+    const select = document.getElementById('profile-newsletter-color-bundle');
+    if (!select) {
+      scheduleProfilePickerRetry(preferredId);
+      return false;
+    }
+    profilePickerTries = 0;
+    clearTimeout(profilePickerRetryTimer);
+
+    const saved = String(preferredId || readProfileBundleId() || DEFAULT_BUNDLE_ID).trim() || DEFAULT_BUNDLE_ID;
+    const expected = Object.keys(NL_COLOR_BUNDLES).length;
+    if (select.options.length < expected) {
+      populateBundleSelect(select, saved, { includeProfileDefault: false });
+    }
+    if (!NL_COLOR_BUNDLES[select.value]) {
+      select.value = NL_COLOR_BUNDLES[saved] ? saved : DEFAULT_BUNDLE_ID;
+    } else if (NL_COLOR_BUNDLES[saved] && select.value !== saved) {
+      select.value = saved;
+    }
+
+    if (select.dataset.nlBundleWired !== '1') {
+      select.dataset.nlBundleWired = '1';
+      select.addEventListener('change', () => refreshProfileBundlePreview(select));
+    }
+    refreshProfileBundlePreview(select);
+    return true;
   }
 
   function wireNewsletterBundlePicker() {
@@ -314,7 +392,94 @@
     refresh();
   }
 
+
+  const PROFILE_BUNDLE_SELECT_ID = 'profile-newsletter-color-bundle';
+  const PROFILE_STORAGE_KEYS = { userProfile: true, winPlanSetup: true };
+
+  function profileBundleSelectUnusable() {
+    try {
+      const sel = document.getElementById(PROFILE_BUNDLE_SELECT_ID);
+      return !sel || !sel.options || sel.options.length === 0;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function readSavedNewsletterColorBundle() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('userProfile') || '{}') || {};
+      if (raw.newsletterColorBundle) return String(raw.newsletterColorBundle);
+    } catch (e) { /* ignore */ }
+    try {
+      if (typeof window.getUserProfile === 'function') {
+        const p = window.getUserProfile();
+        if (p && p.newsletterColorBundle) return String(p.newsletterColorBundle);
+      }
+    } catch (e2) { /* ignore */ }
+    return '';
+  }
+
+  function restoreSavedNewsletterColorBundle(profile) {
+    if (!profile || typeof profile !== 'object') return profile;
+    if (!profileBundleSelectUnusable()) return profile;
+    const saved = readSavedNewsletterColorBundle();
+    if (saved) profile.newsletterColorBundle = saved;
+    return profile;
+  }
+
+  /**
+   * Pass 3 persist guard. collectProfileFromForm / persistProfile / performSave
+   * live inside user-profile.js IIFE (not on window). Wrap window hooks if they
+   * exist (collectProfileFromForm, persistProfile, patchUserProfile) and the
+   * actual write path localStorage.setItem('userProfile'|'winPlanSetup').
+   * If #profile-newsletter-color-bundle is missing or has zero options, put
+   * the previously saved newsletterColorBundle back — do not invent coastal-teal
+   * over Gold Luxury / Classic Navy.
+   */
+  function wrapCollectPersistNewsletterColorBundle() {
+    function wrapWindowFn(name, kind) {
+      const orig = window[name];
+      if (typeof orig !== 'function' || orig.__nlBundleWrap) return false;
+      const wrapped = function () {
+        if (kind === 'persist' && arguments[0] && typeof arguments[0] === 'object') {
+          restoreSavedNewsletterColorBundle(arguments[0]);
+        }
+        const result = orig.apply(this, arguments);
+        if (kind === 'collect' && result && typeof result === 'object') {
+          return restoreSavedNewsletterColorBundle(result);
+        }
+        return result;
+      };
+      wrapped.__nlBundleWrap = true;
+      window[name] = wrapped;
+      return true;
+    }
+
+    wrapWindowFn('collectProfileFromForm', 'collect');
+    wrapWindowFn('persistProfile', 'persist');
+    wrapWindowFn('patchUserProfile', 'persist');
+
+    if (typeof Storage !== 'undefined' && Storage.prototype && !Storage.prototype.setItem.__nlBundleWrap) {
+      const origSet = Storage.prototype.setItem;
+      function wrappedSetItem(key, value) {
+        if (PROFILE_STORAGE_KEYS[key] && profileBundleSelectUnusable()) {
+          try {
+            const next = JSON.parse(value || '{}') || {};
+            const saved = readSavedNewsletterColorBundle();
+            if (saved) next.newsletterColorBundle = saved;
+            value = JSON.stringify(next);
+          } catch (e) { /* ignore */ }
+        }
+        return origSet.call(this, key, value);
+      }
+      wrappedSetItem.__nlBundleWrap = true;
+      Storage.prototype.setItem = wrappedSetItem;
+    }
+    return true;
+  }
+
   function initNlColorBundlePickers() {
+    wrapCollectPersistNewsletterColorBundle();
     wireProfileBundlePicker();
     wireNewsletterBundlePicker();
   }
@@ -351,6 +516,26 @@
     populateBundleSelect,
     wireProfileBundlePicker,
     wireNewsletterBundlePicker,
-    initNlColorBundlePickers
+    initNlColorBundlePickers,
+    profileBundleSelectUnusable,
+    readSavedNewsletterColorBundle,
+    restoreSavedNewsletterColorBundle,
+    wrapCollectPersistNewsletterColorBundle
+  };
+
+  wrapCollectPersistNewsletterColorBundle();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wrapCollectPersistNewsletterColorBundle);
+  }
+  let wrapTries = 0;
+  const wrapTimer = setInterval(() => {
+    wrapCollectPersistNewsletterColorBundle();
+    wrapTries += 1;
+    if (wrapTries >= 20 || typeof window.patchUserProfile === 'function') {
+      clearInterval(wrapTimer);
+    }
+  }, 250);
+  window.NlColorBundles.stopCollectPersistWrapRetry = function () {
+    clearInterval(wrapTimer);
   };
 })();
