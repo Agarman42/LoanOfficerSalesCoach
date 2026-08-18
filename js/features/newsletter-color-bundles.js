@@ -392,7 +392,94 @@
     refresh();
   }
 
+
+  const PROFILE_BUNDLE_SELECT_ID = 'profile-newsletter-color-bundle';
+  const PROFILE_STORAGE_KEYS = { userProfile: true, winPlanSetup: true };
+
+  function profileBundleSelectUnusable() {
+    try {
+      const sel = document.getElementById(PROFILE_BUNDLE_SELECT_ID);
+      return !sel || !sel.options || sel.options.length === 0;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function readSavedNewsletterColorBundle() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('userProfile') || '{}') || {};
+      if (raw.newsletterColorBundle) return String(raw.newsletterColorBundle);
+    } catch (e) { /* ignore */ }
+    try {
+      if (typeof window.getUserProfile === 'function') {
+        const p = window.getUserProfile();
+        if (p && p.newsletterColorBundle) return String(p.newsletterColorBundle);
+      }
+    } catch (e2) { /* ignore */ }
+    return '';
+  }
+
+  function restoreSavedNewsletterColorBundle(profile) {
+    if (!profile || typeof profile !== 'object') return profile;
+    if (!profileBundleSelectUnusable()) return profile;
+    const saved = readSavedNewsletterColorBundle();
+    if (saved) profile.newsletterColorBundle = saved;
+    return profile;
+  }
+
+  /**
+   * Pass 3 persist guard. collectProfileFromForm / persistProfile / performSave
+   * live inside user-profile.js IIFE (not on window). Wrap window hooks if they
+   * exist (collectProfileFromForm, persistProfile, patchUserProfile) and the
+   * actual write path localStorage.setItem('userProfile'|'winPlanSetup').
+   * If #profile-newsletter-color-bundle is missing or has zero options, put
+   * the previously saved newsletterColorBundle back — do not invent coastal-teal
+   * over Gold Luxury / Classic Navy.
+   */
+  function wrapCollectPersistNewsletterColorBundle() {
+    function wrapWindowFn(name, kind) {
+      const orig = window[name];
+      if (typeof orig !== 'function' || orig.__nlBundleWrap) return false;
+      const wrapped = function () {
+        if (kind === 'persist' && arguments[0] && typeof arguments[0] === 'object') {
+          restoreSavedNewsletterColorBundle(arguments[0]);
+        }
+        const result = orig.apply(this, arguments);
+        if (kind === 'collect' && result && typeof result === 'object') {
+          return restoreSavedNewsletterColorBundle(result);
+        }
+        return result;
+      };
+      wrapped.__nlBundleWrap = true;
+      window[name] = wrapped;
+      return true;
+    }
+
+    wrapWindowFn('collectProfileFromForm', 'collect');
+    wrapWindowFn('persistProfile', 'persist');
+    wrapWindowFn('patchUserProfile', 'persist');
+
+    if (typeof Storage !== 'undefined' && Storage.prototype && !Storage.prototype.setItem.__nlBundleWrap) {
+      const origSet = Storage.prototype.setItem;
+      function wrappedSetItem(key, value) {
+        if (PROFILE_STORAGE_KEYS[key] && profileBundleSelectUnusable()) {
+          try {
+            const next = JSON.parse(value || '{}') || {};
+            const saved = readSavedNewsletterColorBundle();
+            if (saved) next.newsletterColorBundle = saved;
+            value = JSON.stringify(next);
+          } catch (e) { /* ignore */ }
+        }
+        return origSet.call(this, key, value);
+      }
+      wrappedSetItem.__nlBundleWrap = true;
+      Storage.prototype.setItem = wrappedSetItem;
+    }
+    return true;
+  }
+
   function initNlColorBundlePickers() {
+    wrapCollectPersistNewsletterColorBundle();
     wireProfileBundlePicker();
     wireNewsletterBundlePicker();
   }
@@ -429,6 +516,26 @@
     populateBundleSelect,
     wireProfileBundlePicker,
     wireNewsletterBundlePicker,
-    initNlColorBundlePickers
+    initNlColorBundlePickers,
+    profileBundleSelectUnusable,
+    readSavedNewsletterColorBundle,
+    restoreSavedNewsletterColorBundle,
+    wrapCollectPersistNewsletterColorBundle
+  };
+
+  wrapCollectPersistNewsletterColorBundle();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wrapCollectPersistNewsletterColorBundle);
+  }
+  let wrapTries = 0;
+  const wrapTimer = setInterval(() => {
+    wrapCollectPersistNewsletterColorBundle();
+    wrapTries += 1;
+    if (wrapTries >= 20 || typeof window.patchUserProfile === 'function') {
+      clearInterval(wrapTimer);
+    }
+  }, 250);
+  window.NlColorBundles.stopCollectPersistWrapRetry = function () {
+    clearInterval(wrapTimer);
   };
 })();
