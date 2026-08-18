@@ -268,21 +268,103 @@
     if (selectedId) selectEl.value = selectedId;
   }
 
-  function wireProfileBundlePicker() {
-    const select = document.getElementById('profile-newsletter-color-bundle');
+  function ensureProfileBundleUx(select) {
+    if (!select) return;
+    let swatches = document.getElementById('profile-newsletter-color-swatches');
+    if (!swatches) {
+      swatches = document.createElement('div');
+      swatches.id = 'profile-newsletter-color-swatches';
+      swatches.className = 'grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3';
+      swatches.setAttribute('role', 'listbox');
+      swatches.setAttribute('aria-label', 'Newsletter color bundles');
+      const wrap = select.closest('.profile-select-wrap') || select;
+      wrap.insertAdjacentElement('afterend', swatches);
+    }
+    const selected = select.value || DEFAULT_BUNDLE_ID;
+    swatches.innerHTML = '';
+    Object.values(NL_COLOR_BUNDLES).forEach((bundle) => {
+      const active = bundle.id === selected;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.bundleId = bundle.id;
+      btn.setAttribute('role', 'option');
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.title = bundle.description || bundle.label;
+      btn.className = 'flex items-center gap-2 w-full text-left px-2.5 py-2 rounded-xl border text-[12px] font-semibold transition ' +
+        (active
+          ? 'border-[#00A89D] bg-[#00A89D]/10 text-[#002B5C] dark:text-white ring-2 ring-[#00A89D]/30'
+          : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-[#00A89D]/60');
+      const dots = document.createElement('span');
+      dots.className = 'flex -space-x-1 flex-shrink-0';
+      dots.setAttribute('aria-hidden', 'true');
+      dots.innerHTML =
+        '<span class="inline-block w-4 h-4 rounded-full border border-white dark:border-gray-700 shadow-sm" style="background:' + bundle.primary + '"></span>' +
+        '<span class="inline-block w-4 h-4 rounded-full border border-white dark:border-gray-700 shadow-sm" style="background:' + bundle.secondary + '"></span>';
+      const name = document.createElement('span');
+      name.className = 'truncate';
+      name.textContent = bundle.label;
+      btn.appendChild(dots);
+      btn.appendChild(name);
+      btn.addEventListener('click', () => {
+        if (select.value !== bundle.id) {
+          select.value = bundle.id;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+      swatches.appendChild(btn);
+    });
+  }
+
+  function refreshProfileBundlePreview(select) {
+    if (!select) return;
     const preview = document.getElementById('profile-newsletter-color-preview');
     const desc = document.getElementById('profile-newsletter-color-desc');
-    if (!select || select.dataset.nlBundleWired === '1') return;
-    select.dataset.nlBundleWired = '1';
-    populateBundleSelect(select, readProfileBundleId(), { includeProfileDefault: false });
-    select.value = readProfileBundleId();
-    const refresh = () => {
-      const bundle = getBundle(select.value);
-      renderBundlePreview(preview, bundle.id);
-      if (desc) desc.textContent = bundle.description;
-    };
-    select.addEventListener('change', refresh);
-    refresh();
+    const bundle = getBundle(select.value || DEFAULT_BUNDLE_ID);
+    renderBundlePreview(preview, bundle.id);
+    if (desc) desc.textContent = bundle.description || '';
+    ensureProfileBundleUx(select);
+  }
+
+  let profilePickerRetryTimer = 0;
+  let profilePickerTries = 0;
+  const PROFILE_PICKER_MAX_TRIES = 24;
+
+  function scheduleProfilePickerRetry(preferredId) {
+    if (profilePickerTries >= PROFILE_PICKER_MAX_TRIES) return;
+    profilePickerTries += 1;
+    const delay = profilePickerTries < 8 ? 50 : 200;
+    clearTimeout(profilePickerRetryTimer);
+    profilePickerRetryTimer = setTimeout(() => wireProfileBundlePicker(preferredId), delay);
+  }
+
+  /** Fill + bind Profile → Links → Newsletter look. Safe to call on every Profile open. */
+  function wireProfileBundlePicker(preferredId) {
+    const select = document.getElementById('profile-newsletter-color-bundle');
+    if (!select) {
+      scheduleProfilePickerRetry(preferredId);
+      return false;
+    }
+    profilePickerTries = 0;
+    clearTimeout(profilePickerRetryTimer);
+
+    const saved = String(preferredId || readProfileBundleId() || DEFAULT_BUNDLE_ID).trim() || DEFAULT_BUNDLE_ID;
+    const expected = Object.keys(NL_COLOR_BUNDLES).length;
+    if (select.options.length < expected) {
+      populateBundleSelect(select, saved, { includeProfileDefault: false });
+    }
+    if (!NL_COLOR_BUNDLES[select.value]) {
+      select.value = NL_COLOR_BUNDLES[saved] ? saved : DEFAULT_BUNDLE_ID;
+    } else if (NL_COLOR_BUNDLES[saved] && select.value !== saved) {
+      select.value = saved;
+    }
+
+    if (select.dataset.nlBundleWired !== '1') {
+      select.dataset.nlBundleWired = '1';
+      select.setAttribute('aria-describedby', 'profile-newsletter-color-desc');
+      select.addEventListener('change', () => refreshProfileBundlePreview(select));
+    }
+    refreshProfileBundlePreview(select);
+    return true;
   }
 
   function wireNewsletterBundlePicker() {
