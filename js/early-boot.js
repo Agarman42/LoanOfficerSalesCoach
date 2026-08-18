@@ -342,6 +342,43 @@
    * the cached loader never loads it. initNlColorBundlePickers self-inits if the
    * document is already complete.
    */
+  /**
+   * Pass-2 autosave clobber: Profile autosaves at 450ms. If the color-bundle
+   * select exists but CORE has not painted options yet, collectProfileFromForm
+   * does `'' || 'coastal-teal'` and overwrites a saved non-default bundle.
+   * Intercept storage writes and keep the already-saved value in that case.
+   */
+  (function guardNewsletterColorBundlePersist() {
+    var KEYS = { userProfile: true, winPlanSetup: true };
+    var orig = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (KEYS[key]) {
+        try {
+          var sel = document.getElementById('profile-newsletter-color-bundle');
+          if (sel && sel.options && sel.options.length === 0) {
+            var next = JSON.parse(value || '{}') || {};
+            var saved = '';
+            try {
+              if (typeof window.getUserProfile === 'function') {
+                saved = (window.getUserProfile() || {}).newsletterColorBundle || '';
+              }
+            } catch (e1) { /* ignore */ }
+            if (!saved) {
+              try {
+                var cur = JSON.parse(this.getItem('userProfile') || '{}') || {};
+                saved = cur.newsletterColorBundle || '';
+              } catch (e2) { /* ignore */ }
+            }
+            if (saved) next.newsletterColorBundle = saved;
+            else if (!next.newsletterColorBundle) next.newsletterColorBundle = 'coastal-teal';
+            value = JSON.stringify(next);
+          }
+        } catch (e3) { /* ignore */ }
+      }
+      return orig.call(this, key, value);
+    };
+  })();
+
   (function injectNewsletterColorBundles() {
     var SRC = 'js/features/newsletter-color-bundles.js?v=20260818-v3140';
     function hasSrc(needle) {
