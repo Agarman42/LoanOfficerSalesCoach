@@ -5471,11 +5471,14 @@ window.toggleSupportingSection = function(sectionId) {
       }
 
       if (!item) {
-        titleEl.textContent = "Content Coming Soon";
+        // Demo-safe fallback — never show "Coming Soon" on stage
+        titleEl.textContent = 'Pick another guide';
         contentEl.innerHTML = `
-          <p>This specific item is still being migrated into the new modern format.</p>
-          <p class="mt-4 text-sm text-gray-600">All original content from the Value Vault is being preserved. We're moving quickly to get every script, idea, and framework into rich modals like this one.</p>
-          <div class="mt-6 text-xs text-gray-500">If you need this content urgently, let us know and we'll prioritize it.</div>
+          <p class="text-[15px] text-gray-700 dark:text-gray-300">That specific vault item isn’t available in this view. Close this panel and open another guide from the Value Vault grid — Pop-Bys, nurture plays, and scripts are ready to use.</p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button type="button" onclick="if(typeof closeDetailModal==='function')closeDetailModal(); if(typeof window.showSection==='function')window.showSection('value-vault');" class="px-5 py-2 bg-[#00A89D] text-white rounded-2xl text-sm font-semibold hover:opacity-90">Back to Value Vault</button>
+            <button type="button" onclick="if(typeof closeDetailModal==='function')closeDetailModal();" class="px-5 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm font-medium">Close</button>
+          </div>
         `;
       } else {
         titleEl.textContent = item.title;
@@ -5503,7 +5506,7 @@ window.toggleSupportingSection = function(sectionId) {
             </div>
 
             <div class="prose prose-sm dark:prose-invert max-w-none">
-              ${item.content || '<p>Full details coming soon.</p>'}
+              ${item.content || '<p>Use this pop-by idea with a short handwritten note and a 48-hour follow-up text. Keep it personal and low-pressure.</p>'}
             </div>
 
             <div class="mt-6 border-t pt-4">
@@ -5537,7 +5540,7 @@ window.toggleSupportingSection = function(sectionId) {
             </div>
 
             <div class="prose prose-sm dark:prose-invert max-w-none">
-              ${item.content || '<p>Full details coming soon.</p>'}
+              ${item.content || '<p>Open another guide from the Value Vault — this entry’s detail panel is empty in this build.</p>'}
             </div>
 
             <div class="mt-6 border-t pt-4">

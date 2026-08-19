@@ -32,7 +32,7 @@
     'js/features/wizard-a11y.js?v=20260720-polish2',
     'js/features/coach-mode-switch.js?v=20260719-mode1',
     'js/features/tool-bridges.js?v=20260706-realtor-v273',
-    'js/features/legacy-helpers.js?v=20260706-realtor-v273',
+    'js/features/legacy-helpers.js?v=20260818-demo-safe',
     'js/features/rich-modals-restore.js?v=20260706-realtor-v273',
     'js/features/ai-chat.js?v=20260720-ai-chat'
   ];
@@ -69,7 +69,7 @@
       'js/features/popby-seasonal.js?v=20260706-realtor-v273',
       'js/features/value-vault.js?v=20260706-realtor-v273',
       'js/features/vault-rich-modals.js?v=20260706-realtor-v273',
-      'js/inline-extracted/re-block-1.js?v=20260721-static-tw'
+      'js/inline-extracted/re-block-1.js?v=20260818-demo-safe'
     ],
     'listing-description': [
       'js/features/listing-description.js?v=20260706-realtor-v279'
@@ -81,15 +81,15 @@
       'js/features/consultation-kit.js?v=20260706-realtor-v280'
     ],
     'bio-creator': [
-      'js/features/bio-creator.js?v=20260717-realtor-home',
-      'js/features/bio-wizard.js?v=20260720-polish2'
+      'js/features/bio-creator.js?v=20260818-realtor-bio',
+      'js/features/bio-wizard.js?v=20260818-realtor-bio'
     ],
     'blog': [
       'js/features/blog-creator.js?v=20260720-p2-hashtag'
     ],
     'social': [
-      'js/features/social-modals.js?v=20260706-realtor-v273',
-      'js/inline-extracted/re-block-1.js?v=20260721-static-tw'
+      'js/features/social-modals.js?v=20260818-demo-safe',
+      'js/inline-extracted/re-block-1.js?v=20260818-demo-safe'
     ],
     'social-post': [
       'js/features/social-post.js?v=20260729-profile-ux',
@@ -100,20 +100,20 @@
     ],
     'process': [
       'js/features/process-rich-modals.js?v=20260706-realtor-v273',
-      'js/inline-extracted/re-block-1.js?v=20260721-static-tw'
+      'js/inline-extracted/re-block-1.js?v=20260818-demo-safe'
     ],
     'database': [
       'js/features/nurture-rich-modals.js?v=20260706-realtor-v273',
       'js/features/database-rich-modals.js?v=20260706-realtor-v273',
-      'js/inline-extracted/re-block-2.js?v=20260721-static-tw'
+      'js/inline-extracted/re-block-2.js?v=20260818-demo-safe'
     ],
     'eventplanning': [
       'js/features/event-rich-modals.js?v=20260706-realtor-v273',
-      'js/inline-extracted/re-block-2.js?v=20260721-static-tw'
+      'js/inline-extracted/re-block-2.js?v=20260818-demo-safe'
     ],
     'referrals': [
       'js/features/referral-rich-modals.js?v=20260706-realtor-v273',
-      'js/inline-extracted/re-block-2.js?v=20260721-static-tw'
+      'js/inline-extracted/re-block-2.js?v=20260818-demo-safe'
     ],
     'calculator': [
       'js/features/calculator.js?v=20260806-biweekly-fix'
@@ -127,7 +127,7 @@
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
       'js/features/blog-creator.js?v=20260720-p2-hashtag',
-      'js/features/social-modals.js?v=20260706-realtor-v273',
+      'js/features/social-modals.js?v=20260818-demo-safe',
       'js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273',
       'js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273',
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',

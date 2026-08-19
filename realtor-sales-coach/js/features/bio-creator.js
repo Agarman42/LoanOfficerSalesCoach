@@ -1,6 +1,6 @@
 /**
- * js/features/bio-creator.js — Bio Builder (LO Sales Coach)
- * Profile-powered bios with guided coaching, platform limits, and profile persistence.
+ * js/features/bio-creator.js — Bio Builder (Agent / Realtor Sales Coach)
+ * Profile-powered realtor bios with guided coaching, platform limits, and profile persistence.
  */
 (function () {
   'use strict';
@@ -21,13 +21,13 @@
 
   const WHO_HELP_CHIPS = [
     'First-time homebuyers',
-    'Move-up buyers',
-    'Refinance & equity',
-    'Veterans (VA)',
-    'Self-employed / 1099',
-    'Investors',
-    'Down payment assistance',
-    'Credit-challenged buyers'
+    'Move-up buyers & growing families',
+    'Sellers / listing clients',
+    'Relocating buyers',
+    'Investors & house-hackers',
+    'Luxury / executive clients',
+    'Empty nesters & downsizers',
+    'New-construction buyers'
   ];
 
   const PERSONAL_LIFE_CHIPS = [
@@ -46,11 +46,11 @@
     'Fast, clear showings and negotiations',
     'Deep local market knowledge',
     'Exceptional communication',
-    'Creative financing solutions',
-    'Smooth closings for agents',
+    'Pricing & staging strategy that sells',
+    'Smooth closings for clients & co-broke agents',
     'Educational, low-pressure style',
     'Available when clients need me',
-    'Strong post-close support'
+    'Strong post-close follow-through & referrals'
   ];
 
   const REFINE_CHIPS = [
@@ -60,7 +60,7 @@
     'Sound more professional',
     'Add more local market flavor',
     'Emphasize communication & responsiveness',
-    'Lead with what agents love about me'
+    'Lead with what clients and co-broke agents love about me'
   ];
 
   const FIELD_CHECKS = [
@@ -90,20 +90,21 @@
 
   const STARTERS = {
     'loves-most': [
-      { label: 'First-time buyer win', text: 'I love the moment a nervous first-time buyer realizes buyers and sellership is actually possible — especially when we map out a clear path instead of overwhelming them with jargon.' },
-      { label: 'Clarity & education', text: 'What I love most is turning a confusing process into calm, step-by-step clarity — so families feel confident instead of anxious about the biggest purchase of their lives.' },
-      { label: 'Life-changing milestone', text: 'Helping someone go from "I didn\'t think we could afford this" to holding their keys at closing never gets old. That transformation is why I do this work.' }
+      { label: 'First-time buyer win', text: 'I love the moment a nervous first-time buyer realizes homeownership is actually possible — especially when we map a clear path instead of overwhelming them with jargon.' },
+      { label: 'Clarity & education', text: 'What I love most is turning a confusing process into calm, step-by-step clarity — so families feel confident about the biggest purchase of their lives.' },
+      { label: 'Life-changing milestone', text: 'Helping someone go from “I didn’t think we could do this” to holding keys at closing never gets old. That transformation is why I do this work.' }
     ],
     service: [
-      { label: 'Family-first', text: 'I treat every file like my own family is buying the house — proactive updates, no surprises, and someone who actually answers the phone.' },
+      { label: 'Family-first', text: 'I treat every client like family — proactive updates, no surprises, and someone who actually answers the phone.' },
       { label: 'Educator style', text: 'My clients describe me as patient and thorough. I explain the why behind every step so they never feel left in the dark.' }
     ],
     who: [
       { label: 'First-time focus', text: 'First-time buyers and young families in [your market] who want a guide, not a salesperson — especially when timelines feel tight.' },
-      { label: 'Move-up families', text: 'Busy move-up families juggling kids, work, and a tight closing window — they need speed and clarity without chaos.' }
+      { label: 'Move-up families', text: 'Busy move-up families juggling kids, work, and a tight closing window — they need speed and clarity without chaos.' },
+      { label: 'Sellers / listings', text: 'Sellers who want a clear pricing strategy, strong marketing, and proactive communication from listing day to closing.' }
     ],
     diff: [
-      { label: 'Agent favorite', text: 'Other agents and lenders refer me because I communicate early and often, protect their reputation at the closing table, and never go silent when things get complicated.' },
+      { label: 'Agent favorite', text: 'Other agents refer me because I communicate early and often, protect their reputation on co-broke files, and never go silent when things get complicated.' },
       { label: 'Speed + clarity', text: 'Fast, accurate showings and negotiations paired with plain-English explanations — clients know exactly where they stand and what happens next.' }
     ],
     family: [
@@ -111,7 +112,7 @@
       { label: 'Family-first', text: "Family-first at home and at work — I understand the stakes when you're buying the place where your kids will grow up." }
     ],
     hobbies: [
-      { label: 'Golf & outdoors', text: "When I'm not closing homes, I'm usually on the golf course or hiking trails around [your market]." },
+      { label: 'Golf & outdoors', text: "When I'm not helping clients buy or sell, I'm usually on the golf course or hiking trails around [your market]." },
       { label: 'Food & community', text: 'Passionate home cook and loyal supporter of local restaurants — I know this community plate by plate.' }
     ],
     pets: [
@@ -123,7 +124,7 @@
       { label: 'Volunteer', text: 'Regular volunteer at our local food bank and youth mentoring programs — this community gave me my start.' }
     ],
     additional: [
-      { label: 'License line', text: 'License #______ | [Languages spoken] | [Designations, e.g. CMB, CPA partner network]' }
+      { label: 'License line', text: 'License #______ | [Languages spoken] | [Designations, e.g. CRS, ABR, e-PRO]' }
     ]
   };
 
@@ -192,13 +193,13 @@
     },
     'realtor-partner': {
       label: 'Co-broke / Partner Intro',
-      short: 'Realtor Intro',
+      short: 'Agent Intro',
       icon: 'fa-handshake',
       limitType: 'words',
       limit: 150,
-      hint: 'Written for agents. Emphasize communication, clean files, on-time closings, and protecting their reputation.',
-      structure: 'First-person, partner-first tone. What other agents and lenders experience working with you. Specific reliability promises.',
-      pasteTip: 'Partner emails, referral one-pagers, or agent onboarding packets'
+      hint: 'Written for fellow agents. Emphasize communication, clean co-broke files, on-time closings, and protecting their reputation.',
+      structure: 'First-person, partner-first tone. What other agents experience working with you on co-broke deals. Specific reliability promises.',
+      pasteTip: 'Partner emails, referral one-pagers, or agent intro packets'
     },
     custom: {
       label: 'Custom Length',
@@ -251,8 +252,8 @@
     { icon: 'fa-heart', color: '#F15A29', title: 'Specific beats generic', text: 'One real detail — a client moment, agent feedback, or community tie-in — is worth more than ten adjectives like "passionate" or "dedicated."' },
     { icon: 'fa-paste', color: '#002B5C', title: 'Paste once, use everywhere', text: 'After you save a Primary Bio, Newsletter, Blog, Social, and AI Coach all speak in the same authentic voice.' },
     { icon: 'fa-star', color: '#F15A29', title: 'Experience.com angle', text: 'Review ecosystems reward bios that sound credible and human — not like they were copied from a template.' },
-    { icon: 'fa-handshake', color: '#00A89D', title: 'Realtor magnet', text: 'Agents skim for communication and reliability. If your bio answers "Will this LO go silent at the worst moment?" — you win.' },
-    { icon: 'fa-lightbulb', color: '#002B5C', title: 'Company standard', text: 'Paste your long bio at the top — we\'ll tighten it to 750 characters for the company website. Then adapt for Google, Zillow, or LinkedIn.' }
+    { icon: 'fa-handshake', color: '#00A89D', title: 'Co-broke magnet', text: 'Agents skim for communication and reliability. If your bio answers “Will this agent go silent at the worst moment?” — you win.' },
+    { icon: 'fa-lightbulb', color: '#002B5C', title: 'Brokerage standard', text: 'Paste your long bio at the top — we\'ll tighten it to 750 characters for the team/brokerage site. Then adapt for Google, Zillow, or LinkedIn.' }
   ];
 
   const BIO_LOADING_STEPS = [
@@ -562,7 +563,7 @@
     const chips = [
       { k: 'Name', v: p.name, ok: !!p.name },
       { k: 'Market', v: p.location, ok: !!p.location },
-      { k: 'License', v: p.nmls, ok: !!p.nmls },
+      { k: 'License', v: p.licenseNumber || p.nmls, ok: !!(p.licenseNumber || p.nmls) },
       { k: 'Intro', v: p.intro, ok: !!p.intro },
       { k: 'Tone', v: p.tone, ok: !!p.tone }
     ];
@@ -918,29 +919,29 @@ OUTPUT: Return ONLY the rewritten bio text. No title, labels, or markdown.`;
       ? `Note: User did not fully complete: ${missing.join(', ')}. Infer carefully from profile — do not fabricate specific awards, numbers, or credentials.`
       : '';
 
-    return `You are an elite real-estate marketing copywriter creating a platform-specific agent bio optimized for human trust AND search/AI discoverability.
+    return `You are an elite real-estate marketing copywriter creating a platform-specific REAL ESTATE AGENT bio optimized for human trust AND search/AI discoverability.
 
 DESTINATION: ${dest.label}
 ${lengthInstruction}
 Platform goal: ${dest.hint}
 Required structure: ${dest.structure}
 
-LOAN OFFICER PROFILE:
+REAL ESTATE AGENT PROFILE:
 ${profileCtx}
 
 STORY INPUTS (use these specifics — this is what makes the bio authentic):
-- Years in business: ${yearsLine}
+- Years in the business: ${yearsLine}
 - What they love most about helping buyers and sellers: ${draft.lovesMost || 'not specified'}
-- Customer service approach: ${[...(draft.serviceApproach || []), draft.serviceApproachNotes].filter(Boolean).join('; ') || 'not specified'}
-- Who they help most: ${[...(draft.whoYouHelp || []), draft.whoYouHelpNotes].filter(Boolean).join('; ') || 'not specified'}
-- What makes them different: ${[...(draft.differentiators || []), draft.differentiatorsNotes].filter(Boolean).join('; ') || 'not specified'}
+- Service style / client experience: ${[...(draft.serviceApproach || []), draft.serviceApproachNotes].filter(Boolean).join('; ') || 'not specified'}
+- Who they help most (buyers, sellers, niches): ${[...(draft.whoYouHelp || []), draft.whoYouHelpNotes].filter(Boolean).join('; ') || 'not specified'}
+- What makes them different as an agent: ${[...(draft.differentiators || []), draft.differentiatorsNotes].filter(Boolean).join('; ') || 'not specified'}
 - Life outside work (weave in 1–2 brief human details if provided — builds enormous trust):
   - Personal themes: ${(draft.personalLifeChips || []).join(', ') || 'none selected'}
   - Family: ${draft.familyLife || 'not provided'}
   - Hobbies & passions: ${draft.hobbies || 'not provided'}
   - Pets: ${draft.pets || 'not provided'}
   - Community / volunteering: ${draft.communityPersonal || 'not provided'}
-- Additional (awards, languages, designations): ${draft.additionalNotes || 'none'}
+- Additional (awards, languages, designations, license #): ${draft.additionalNotes || 'none'}
 
 VOICE: ${tone}
 ${companyNote}
@@ -949,11 +950,13 @@ ${inferNote}
 ${FIRST_PERSON_RULE}
 
 QUALITY RULES:
+- Write as a REAL ESTATE AGENT — never as a loan officer, lender, or mortgage professional.
+- Focus on listings, buyers, local expertise, service style, communication, and results — not rates, underwriting, or loan products.
 - NEVER sound like generic corporate boilerplate ("passionate professional dedicated to excellence").
-- Use at least ONE concrete, human detail from the story inputs (feeling, client type, or agent feedback).
+- Use at least ONE concrete, human detail from the story inputs (feeling, client type, or co-broke feedback).
 - Weave in the local market naturally if provided — good for SEO/GEO.
-- No rate promises, guaranteed approval, or superlatives like "best" or "#1" unless user provided proof.
-- No License/EHO boilerplate unless user included it in additional notes.
+- No rate promises, loan approvals, NMLS language, or superlatives like "best" or "#1" unless user provided proof.
+- No license/EHO boilerplate unless user included it in additional notes.
 - If life-outside-work details were provided, include at least one naturally — it separates memorable bios from generic ones. Never invent personal facts.
 
 ${feedback ? `REFINEMENT (keep destination + limit):\n${feedback}\n\nPREVIOUS BIO:\n${previousBio || lastGeneratedText}` : ''}
@@ -1287,7 +1290,7 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
           <span class="text-xs text-gray-500">Quick chips or your own notes</span>
         </div>
         <div id="bio-refine-chips" class="flex flex-wrap gap-2 mb-3"></div>
-        <textarea id="bio-feedback" rows="3" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" placeholder="e.g., Fill to 750 characters, mention VA loans, warmer tone…">${escapeHtml(savedFeedback)}</textarea>
+        <textarea id="bio-feedback" rows="3" class="w-full p-4 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" placeholder="e.g., Fill to 750 characters, emphasize listings & local expertise, warmer tone…">${escapeHtml(savedFeedback)}</textarea>
         <button type="button" id="bio-refine-btn" class="mt-3 bg-[#002B5C] text-white py-3 px-8 rounded-full font-bold inline-flex items-center gap-2 hover:bg-black transition">
           <i class="fas fa-magic"></i> Apply Edit
         </button>
@@ -1484,7 +1487,7 @@ OUTPUT: Return ONLY the final bio text. No title, labels, word count, or markdow
 
       const profileName = getCentralProfile().name || '';
       if (bioUsesThirdPersonLoVoice(text, profileName)) {
-        console.warn('[bio-creator] Third-person LO voice detected — auto-correcting to first person…');
+        console.warn('[bio-creator] Third-person agent voice detected — auto-correcting to first person…');
         const elapsedEl = document.getElementById('bio-loading-elapsed');
         if (elapsedEl) elapsedEl.textContent = 'Converting to first person (I/me/my)…';
         const fixPrompt = buildPrompt(

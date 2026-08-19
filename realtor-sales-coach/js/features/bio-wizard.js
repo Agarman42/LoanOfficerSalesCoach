@@ -1,6 +1,6 @@
 /**
  * Bio Builder guided wizard — writes to the same #bio-creator form fields.
- * LO Sales Coach only.
+ * Agent / Realtor Sales Coach.
  */
 (function () {
   'use strict';

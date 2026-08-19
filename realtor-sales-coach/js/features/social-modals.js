@@ -430,7 +430,12 @@
 
   function buildSummaryHtml(pillar) {
     const data = SOCIAL_PILLAR_CONTENT[pillar];
-    if (!data) return '<p class="p-6">Content coming soon.</p>';
+    if (!data) {
+      return `<div class="p-6 space-y-4">
+        <p class="text-[15px] text-gray-700 dark:text-gray-300 m-0">That pillar guide isn’t available here. Close and open Personal, Local, Educational, Client Wins, Value, or Engagement — those playbooks are ready for demo.</p>
+        <button type="button" onclick="if(typeof window.closeSocialContentModal==='function')window.closeSocialContentModal();" class="px-5 py-2 bg-[#00A89D] text-white rounded-2xl text-sm font-semibold">Close</button>
+      </div>`;
+    }
 
     let html = `<div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-6 mb-6">
       <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Why This Works</span></div>

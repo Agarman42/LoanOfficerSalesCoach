@@ -953,7 +953,25 @@ window.openReferralModal = function(partnerType) {
       window.notifyUser('Referral modal creation failed. Do a hard refresh (Ctrl/Cmd + Shift + R) + completely close the browser tab, then reopen the file.', 'error', 5000);
       return;
     }
-    const data = REFERRAL_PLAYBOOKS[partnerType] || { title: partnerType + ' Playbook', content: `<p>Full playbook for ${partnerType} coming soon. Focus on value-first touches and over-delivery on the first referral.</p>` };
+    const data = REFERRAL_PLAYBOOKS[partnerType] || {
+      title: (partnerType || 'Partner') + ' Playbook',
+      content: `
+        <div class="bg-[#00A89D]/10 border border-[#00A89D]/30 rounded-3xl p-5 mb-6">
+          <div class="flex items-center gap-2 mb-2"><i class="fas fa-lightbulb text-[#00A89D]"></i><span class="font-bold text-[#00A89D] uppercase tracking-wider text-sm">Value-First Partner Play</span></div>
+          <p class="text-[15px]">Lead with usefulness before any ask. Over-deliver on the first shared client or co-broke, communicate early, and protect their reputation. That pattern turns one good experience into years of referrals.</p>
+        </div>
+        <h4 class="font-bold text-lg mb-3">Starter Scripts</h4>
+        <div class="space-y-3 mb-6">
+          <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Hey [Name] — I’d love to be a reliable partner for you in [area]. If it helps, I can share a short market one-pager for your clients or co-host a no-pitch Q&A. What’s the best way to stay useful to you this month?">
+            <div class="flex justify-between gap-3"><div class="flex-1"><strong class="text-sm">Warm Partner Intro</strong><div class="text-[15px] mt-1">“Hey [Name] — I’d love to be a reliable partner for you in [area]. If it helps, I can share a short market one-pager for your clients or co-host a no-pitch Q&A. What’s the best way to stay useful to you this month?”</div></div><button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white h-fit">Copy</button></div>
+          </div>
+          <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4" data-copy-text="Thanks again for the trust on [client/file]. I’ll keep you updated without you having to chase me — and I’m always happy to return the favor when you need a strong agent in [area].">
+            <div class="flex justify-between gap-3"><div class="flex-1"><strong class="text-sm">After-First-Win Thank You</strong><div class="text-[15px] mt-1">“Thanks again for the trust on [client/file]. I’ll keep you updated without you having to chase me — and I’m always happy to return the favor when you need a strong agent in [area].”</div></div><button onclick="window.copyModalSection(this)" class="text-xs px-3 py-1 rounded-xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white h-fit">Copy</button></div>
+          </div>
+        </div>
+        <div class="p-4 bg-[#00A89D]/5 border border-[#00A89D]/20 rounded-2xl text-sm"><strong>Pro Tip:</strong> Calendar one value touch every 30 days for A+ partners — a market note, invite, or intro — with zero hard ask.</div>
+      `
+    };
     const richTitle = typeof window.getReferralPartnerModalTitle === 'function' ? window.getReferralPartnerModalTitle(partnerType) : null;
     titleEl.textContent = richTitle || data.title;
     if (typeof window.renderRichReferralPartner === 'function' && window.renderRichReferralPartner(partnerType, contentEl)) {

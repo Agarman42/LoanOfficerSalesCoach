@@ -210,7 +210,7 @@
         ];
         break;
       default:
-        items = ["Great content idea coming soon for " + category];
+        items = ["Add a personal or local post for " + category + " — keep it human, specific, and end with a real question."];
     }
 
     titleEl.textContent = title;
