@@ -5506,3 +5506,58 @@ html.dark .calc-result-card--standard .calc-row--total span:last-child {
 #pmi-affix-start.hidden, #pmi-affix-end.hidden { display: none !important; }
 .calc-input-wrap--pct .calc-input { padding-left: 0.85rem; }
 
+
+/* ===== Business Plan vision cards + generate CTA (Agent v3.69) =====
+   Built Tailwind may not include has-[:checked] / arbitrary utilities — use plain CSS. */
+.plan-style-card {
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, transform 0.12s ease;
+}
+.plan-style-card:hover {
+  border-color: rgba(0, 168, 157, 0.55) !important;
+}
+.plan-style-card:has(input:checked),
+.plan-style-card.is-selected {
+  border-color: #F15A29 !important;
+  background: rgba(241, 90, 41, 0.08) !important;
+  box-shadow: 0 0 0 3px rgba(241, 90, 41, 0.28), 0 10px 28px rgba(241, 90, 41, 0.12);
+}
+.plan-style-card:has(input:checked)::after,
+.plan-style-card.is-selected::after {
+  content: "Selected";
+  position: absolute;
+  top: 0.65rem;
+  right: 0.75rem;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #F15A29;
+  background: rgba(241, 90, 41, 0.12);
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+.plan-hobby-chip:has(input:checked) {
+  background: #00A89D !important;
+  border-color: #00A89D !important;
+  color: #fff !important;
+}
+.plan-generate-hero {
+  padding: 0.25rem;
+}
+.plan-generate-btn,
+#generate-plan-btn.plan-generate-btn {
+  box-shadow: 0 18px 40px rgba(0, 168, 157, 0.35), 0 8px 20px rgba(241, 90, 41, 0.22);
+  transform: translateZ(0);
+}
+.plan-generate-btn:hover,
+#generate-plan-btn.plan-generate-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 22px 48px rgba(0, 168, 157, 0.4), 0 10px 24px rgba(241, 90, 41, 0.28);
+}
+.plan-generate-btn:active,
+#generate-plan-btn.plan-generate-btn:active {
+  transform: translateY(0) scale(0.985);
+}

@@ -75,17 +75,11 @@
       bal.checked = true;
       bal.dispatchEvent(new Event('change', { bubbles: true }));
     }
-    // Highlight style cards if present
+    // Highlight style cards (plain .is-selected — works without Tailwind JIT)
     document.querySelectorAll('.plan-style-card').forEach((card) => {
       const input = card.querySelector('input[name="plan-style"]');
       if (!input) return;
-      if (input.checked) {
-        card.classList.add('border-[#00A89D]', 'bg-[#00A89D]/5');
-        card.classList.remove('border-gray-200', 'dark:border-gray-700');
-      } else {
-        card.classList.remove('border-[#00A89D]', 'bg-[#00A89D]/5');
-        card.classList.add('border-gray-200', 'dark:border-gray-700');
-      }
+      card.classList.toggle('is-selected', !!input.checked);
     });
   }
 

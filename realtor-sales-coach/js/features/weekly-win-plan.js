@@ -49,6 +49,105 @@
     }
   }
 
+  function normToken(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/[/&,()+_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * Map My Profile hobby values onto Business Plan chip values.
+   * Profile has a long list; plan form has a short set of chips.
+   */
+  const PROFILE_HOBBY_TO_PLAN_CHIPS = {
+    golf: ['Golf'],
+    'cards poker': ['Cards/Poker'],
+    poker: ['Cards/Poker'],
+    sports: ['Sports'],
+    'sports any': ['Sports'],
+    'youth coaching': ['Sports'],
+    'beach water sports': ['Sports'],
+    'snow sports': ['Sports'],
+    'cars motorsports': ['Sports'],
+    fitness: ['Fitness'],
+    'fitness gym': ['Fitness'],
+    'running cycling': ['Fitness'],
+    'yoga wellness': ['Fitness'],
+    outdoors: ['Outdoors'],
+    'outdoors nature': ['Outdoors'],
+    'outdoors hiking': ['Outdoors'],
+    'hunting fishing': ['Outdoors'],
+    boating: ['Outdoors'],
+    gardening: ['Outdoors'],
+    cooking: ['Cooking'],
+    'cooking foodie': ['Cooking'],
+    'wine beer': ['Cooking'],
+    crafts: ['Crafts'],
+    'crafts diy': ['Crafts'],
+    'home projects': ['Crafts'],
+    'family time': ['Family Time'],
+    pets: ['Family Time']
+  };
+
+  function expandHobbiesToPlanValues(hobbyList) {
+    const out = new Set();
+    (hobbyList || []).forEach((raw) => {
+      const key = normToken(raw);
+      if (!key) return;
+      if (['golf', 'cards poker', 'sports', 'sports any', 'crafts', 'crafts diy', 'family time', 'outdoors', 'outdoors nature', 'fitness', 'fitness gym', 'cooking', 'cooking foodie'].includes(key)) {
+        const legacyMap = {
+          'sports any': 'Sports',
+          'crafts diy': 'Crafts',
+          'outdoors nature': 'Outdoors',
+          'fitness gym': 'Fitness',
+          'cooking foodie': 'Cooking',
+          'cards poker': 'Cards/Poker',
+          golf: 'Golf',
+          sports: 'Sports',
+          crafts: 'Crafts',
+          'family time': 'Family Time',
+          outdoors: 'Outdoors',
+          fitness: 'Fitness',
+          cooking: 'Cooking'
+        };
+        out.add(legacyMap[key] || raw);
+      }
+      const mapped = PROFILE_HOBBY_TO_PLAN_CHIPS[key];
+      if (mapped) mapped.forEach((v) => out.add(v));
+    });
+    return out;
+  }
+
+  function hobbyListMatchesCheckbox(hobbyList, checkboxValue) {
+    const wanted = expandHobbiesToPlanValues(hobbyList);
+    if (wanted.has(checkboxValue)) return true;
+    const cb = normToken(checkboxValue);
+    return [...wanted].some((w) => {
+      const nw = normToken(w);
+      return nw === cb || nw.includes(cb) || cb.includes(nw);
+    });
+  }
+
+  function applyHobbyCheckboxesFromList(hobbyList, { scopeSelector = '' } = {}) {
+    const root = scopeSelector ? document.querySelector(scopeSelector) : document;
+    const boxes = root ? root.querySelectorAll('.hobby-checkbox') : document.querySelectorAll('.hobby-checkbox');
+    boxes.forEach((cb) => {
+      cb.checked = hobbyListMatchesCheckbox(hobbyList, cb.value);
+    });
+  }
+
+  function applyActivityCheckboxesFromList(activityList, { scopeSelector = '' } = {}) {
+    const list = (activityList || []).map(normToken);
+    const root = scopeSelector ? document.querySelector(scopeSelector) : document;
+    const boxes = root ? root.querySelectorAll('.activity-checkbox') : document.querySelectorAll('.activity-checkbox');
+    boxes.forEach((cb) => {
+      const cv = normToken(cb.value);
+      cb.checked = list.some((a) => a === cv || a.includes(cv) || cv.includes(a));
+    });
+  }
+
   // Merge central profile into the local userSetup for this tool
   // (central profile wins for rich fields; keeps backward compat)
   function getEffectiveSetup() {
@@ -59,15 +158,19 @@
       ...local,
       name: central.name || local.name || "Agent",
       email: central.email || '',
-      // Unit goal (number of loans) — this is what the Weekly Win Plan cares about for "Monthly Target"
+      // Unit goal (transactions) — Weekly Win Plan "Monthly Target"
       monthlyUnits: central.monthlyUnits || local.monthlyGoal || local.monthlyUnits || 8,
       // Dollar volume goal (for future use)
       monthlyVolume: central.monthlyGoal || '',
+      income: central.income || local.income || '',
       focus: central.focusLabel || central.focus || local.focus || '',
+      databaseSize: central.databaseSize || '',
+      databaseSizeLabel: central.databaseSizeLabel || '',
       hours: central.hours || local.hours || '',
       hobbies: central.hobbies || local.hobbies || [],
       hobbiesOther: central.hobbiesOther || local.hobbiesOther || '',
       preferredActivities: central.activities || local.preferredActivities || [],
+      activities: central.activities || local.activities || [],
       personality: central.personality || '',
       voiceTraits: central.voiceTraits || [],
       tone: central.tone || '',
@@ -2512,11 +2615,12 @@ function showTaskHelp(task) {
         }
     });
 
-    // Persist plan-style radio selection
+    // Persist plan-style radio selection (user click = lock style from profile auto-sync)
     document.querySelectorAll('input[name="plan-style"]').forEach(radio => {
         radio.addEventListener('change', () => {
             if (radio.checked) {
                 localStorage.setItem('winPlan_plan-style', radio.value);
+                try { localStorage.setItem('winPlan_plan-style_user', '1'); } catch (e) {}
             }
         });
     });
@@ -2594,60 +2698,184 @@ window.applyPlanFeedbackAndRegenerate = function() {
   }, 300);
 };
 
-window.syncPlanningFormFromProfile = function() {
+window.syncPlanningFormFromProfile = function(options) {
+  const force = !!(options && options.force);
   const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
-  const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : {};
+  const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : getEffectiveSetup();
 
-  const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el || val === undefined || val === null || val === '') return false;
+    el.value = val;
+    try {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (e) { /* ignore */ }
+    return true;
+  };
+  const fieldEmpty = (id) => {
+    const el = document.getElementById(id);
+    return !el || !String(el.value || '').trim();
+  };
+  const setValIfEmpty = (id, val) => {
+    if (val === undefined || val === null || val === '') return false;
+    if (force || fieldEmpty(id)) return setVal(id, val);
+    return false;
+  };
+  const localEmpty = (key) => {
+    try {
+      const v = localStorage.getItem(key);
+      return v == null || !String(v).trim() || v === 'null' || v === 'undefined' || v === '[]';
+    } catch (e) {
+      return true;
+    }
+  };
 
-  // Only pull annual numbers from profile if the user hasn't set specific local values yet (persistence wins for 2026-specific targets)
-  const hasLocalClosings = localStorage.getItem('winPlan_target-closings');
-  const hasLocalIncome = localStorage.getItem('winPlan_target-income');
-  const monthlyUnits = parseInt(p.monthlyUnits || eff.monthlyUnits || 8, 10);
-  if (monthlyUnits && !hasLocalClosings) {
+  const parseMonthlyUnits = (raw) => {
+    const m = String(raw || '').match(/(\d{1,3})/);
+    if (!m) return 0;
+    const n = parseInt(m[1], 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  };
+
+  // Map realtor profile focus → plan-style radio values
+  const focusToPlanStyle = (focus) => {
+    const f = String(focus || '').toLowerCase().replace(/[_-]+/g, ' ').trim();
+    if (!f) return '';
+    if (f.includes('referral') || f.includes('partner') || f.includes('agent network') || f.includes('co broke') || f.includes('cobroke')) {
+      return 'Referral Mastery';
+    }
+    if (f.includes('database') || f.includes('past client') || f.includes('sphere')) return 'Database Reactor';
+    if (f.includes('balanced') || f.includes('growth') || f.includes('listing') || f.includes('buyer') || f.includes('seller')) {
+      return 'Balanced Growth';
+    }
+    if (f === 'balanced growth' || f === 'balancedgrowth') return 'Balanced Growth';
+    return '';
+  };
+
+  const applyPlanStyle = (styleValue) => {
+    if (!styleValue) return false;
+    const styleRadio = Array.from(document.querySelectorAll('input[name="plan-style"]')).find(
+      (r) => r.value === styleValue
+    );
+    if (!styleRadio) return false;
+    document.querySelectorAll('input[name="plan-style"]').forEach((r) => {
+      r.checked = r.value === styleValue;
+    });
+    try {
+      styleRadio.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (e) { /* ignore */ }
+    document.querySelectorAll('.plan-style-card').forEach((card) => {
+      const input = card.querySelector('input[name="plan-style"]');
+      if (!input) return;
+      card.classList.toggle('is-selected', !!input.checked);
+    });
+    try { localStorage.setItem('winPlan_plan-style', styleValue); } catch (e) {}
+    return true;
+  };
+
+  const databaseTierMid = {
+    'under-50': 40,
+    '50-200': 125,
+    '200-500': 350,
+    '500-1000': 750,
+    '1000-plus': 1200
+  };
+
+  const monthlyUnits = parseMonthlyUnits(p.monthlyUnits || eff.monthlyUnits);
+  if (monthlyUnits && (force || fieldEmpty('target-closings') || localEmpty('winPlan_target-closings'))) {
     setVal('target-closings', String(monthlyUnits * 12));
+    try { localStorage.setItem('winPlan_target-closings', String(monthlyUnits * 12)); } catch (e) {}
   }
-  if ((p.monthlyGoal || eff.monthlyVolume) && !hasLocalIncome) {
-    setVal('target-income', p.monthlyGoal || eff.monthlyVolume);
+
+  // Annual income is profile.income — NOT monthlyGoal (volume text)
+  let annualIncome = p.income || eff.income || '';
+  if (!annualIncome && p.monthlyGoal && /^\d{4,}$/.test(String(p.monthlyGoal).replace(/[,$]/g, ''))) {
+    annualIncome = String(p.monthlyGoal).replace(/[,$]/g, '');
+  }
+  if (annualIncome) {
+    const num = String(annualIncome).replace(/[,$]/g, '').trim();
+    if (/^\d+(\.\d+)?$/.test(num)) {
+      if (force || fieldEmpty('target-income') || localEmpty('winPlan_target-income')) {
+        setVal('target-income', num);
+        try { localStorage.setItem('winPlan_target-income', num); } catch (e) {}
+      }
+    }
   }
   if (p.hours) setVal('weekly-hours-hint', p.hours);
 
-  // Set a balanced style by default ONLY if nothing chosen and no local saved style
-  const savedStyle = localStorage.getItem('winPlan_plan-style');
-  const checked = document.querySelector('input[name="plan-style"]:checked');
-  if (!checked && !savedStyle) {
-    const bal = Array.from(document.querySelectorAll('input[name="plan-style"]')).find(r => r.value === 'Balanced Growth');
-    if (bal) bal.checked = true;
+  const dbMid = databaseTierMid[p.databaseSize] || databaseTierMid[eff.databaseSize];
+  if (dbMid && (force || fieldEmpty('database-size') || localEmpty('winPlan_database-size'))) {
+    setVal('database-size', String(dbMid));
+    try { localStorage.setItem('winPlan_database-size', String(dbMid)); } catch (e) {}
   }
 
-  // === Pull hobbies & activities from central profile ONLY if no local overrides saved for this tool ===
-  // This way: profile provides smart defaults the first time (no clicking needed), but user's changes in the plan form persist.
+  const userChoseStyle = localStorage.getItem('winPlan_plan-style_user') === '1';
+  const checked = document.querySelector('input[name="plan-style"]:checked');
+  const checkedVal = checked?.value || '';
+  const mappedStyle = focusToPlanStyle(p.focus || p.focusLabel || p.focusValue || eff.focus);
+  const shouldApplyStyle =
+    !!mappedStyle &&
+    (force ||
+      !userChoseStyle ||
+      !checkedVal ||
+      (checkedVal === 'Referral Mastery' && mappedStyle !== 'Referral Mastery' && !userChoseStyle));
+
+  if (shouldApplyStyle) {
+    applyPlanStyle(mappedStyle);
+  } else if (!checkedVal) {
+    applyPlanStyle(mappedStyle || 'Balanced Growth');
+  } else if (typeof window.wirePlanStyleCards === 'function') {
+    try { window.wirePlanStyleCards(); } catch (e) {}
+  }
+
   const hasLocalHobbies = localStorage.getItem('winPlan_hobbies');
-  if (!hasLocalHobbies || hasLocalHobbies === '[]') {
-    const profileHobbies = p.hobbies || [];
-    document.querySelectorAll('.hobby-checkbox').forEach(cb => {
-      cb.checked = profileHobbies.includes(cb.value);
-    });
-    if (p.hobbiesOther) {
-      setVal('hobby-other', p.hobbiesOther);
+  const localHobbyEmpty = !hasLocalHobbies || hasLocalHobbies === '[]' || hasLocalHobbies === 'null';
+  let localHobbiesDead = false;
+  if (!force && !localHobbyEmpty) {
+    try {
+      const localList = JSON.parse(hasLocalHobbies);
+      applyHobbyCheckboxesFromList(localList, { scopeSelector: '#planning' });
+      localHobbiesDead = !document.querySelector('#planning .hobby-checkbox:checked') && (p.hobbies || []).length > 0;
+    } catch (e) {
+      localHobbiesDead = true;
     }
-    // Save the profile defaults as the initial local state so they persist
-    const defaultHobbies = Array.from(document.querySelectorAll('.hobby-checkbox')).filter(c => c.checked).map(c => c.value);
-    if (defaultHobbies.length) localStorage.setItem('winPlan_hobbies', JSON.stringify(defaultHobbies));
+  }
+  if (force || localHobbyEmpty || localHobbiesDead) {
+    const profileHobbies = [...(p.hobbies || [])];
+    if (p.hobbiesOther) profileHobbies.push(p.hobbiesOther);
+    applyHobbyCheckboxesFromList(profileHobbies, { scopeSelector: '#planning' });
+    if (p.hobbiesOther) {
+      setValIfEmpty('hobby-other', p.hobbiesOther);
+      if (force) setVal('hobby-other', p.hobbiesOther);
+    }
+    const defaultHobbies = Array.from(document.querySelectorAll('#planning .hobby-checkbox:checked')).map((c) => c.value);
+    localStorage.setItem('winPlan_hobbies', JSON.stringify(defaultHobbies));
   }
 
   const hasLocalActivities = localStorage.getItem('winPlan_activities');
-  if (!hasLocalActivities || hasLocalActivities === '[]') {
-    // Support both p.activities and p.preferredActivities for compatibility
+  const localActivityEmpty = !hasLocalActivities || hasLocalActivities === '[]' || hasLocalActivities === 'null';
+  let localActivitiesDead = false;
+  if (!force && !localActivityEmpty) {
+    try {
+      const localList = JSON.parse(hasLocalActivities);
+      applyActivityCheckboxesFromList(localList, { scopeSelector: '#planning' });
+      localActivitiesDead = !document.querySelector('#planning .activity-checkbox:checked') && (p.activities || []).length > 0;
+    } catch (e) {
+      localActivitiesDead = true;
+    }
+  }
+  if (force || localActivityEmpty || localActivitiesDead) {
     const profileActivities = [...(p.activities || []), ...(p.preferredActivities || [])];
-    document.querySelectorAll('.activity-checkbox').forEach(cb => {
-      cb.checked = profileActivities.includes(cb.value);
-    });
-    const defaultActivities = Array.from(document.querySelectorAll('.activity-checkbox')).filter(c => c.checked).map(c => c.value);
-    if (defaultActivities.length) localStorage.setItem('winPlan_activities', JSON.stringify(defaultActivities));
+    applyActivityCheckboxesFromList(profileActivities, { scopeSelector: '#planning' });
+    const defaultActivities = Array.from(document.querySelectorAll('#planning .activity-checkbox:checked')).map((c) => c.value);
+    localStorage.setItem('winPlan_activities', JSON.stringify(defaultActivities));
   }
 
-  // Pre-fill notes with profile context ONLY if the notes field is still empty (don't overwrite user's 2026 vision/notes)
+  if (force && typeof window.showToast === 'function') {
+    window.showToast('Business Plan form synced from My Profile (hobbies, activities, goals).', 'success');
+  }
+
   const notesEl = document.getElementById('plan-notes');
   if (notesEl && !notesEl.value.trim()) {
     const challenges = (p.challenges || []).join(', ');
@@ -2663,12 +2891,7 @@ window.syncPlanningFormFromProfile = function() {
   updatePlanLiveInsight();
   if (typeof window.updatePlanCompleteness === 'function') window.updatePlanCompleteness();
   if (typeof window.updateHobbyTactics === 'function') window.updateHobbyTactics();
-  if (typeof window.renderExtendedProfileInfo === 'function') window.renderExtendedProfileInfo();
-
-  // Silent sync — no toast to prevent corner popups saying "something was loaded"
-
-  // Populate extended relevant profile info visibly on the planning page (so user sees all valuable profile data is being used)
-  renderExtendedProfileInfo();
+  refreshPlanProfileHeader();
 };
 
 function renderExtendedProfileInfo() {
@@ -2676,7 +2899,7 @@ function renderExtendedProfileInfo() {
   if (!container) return;
 
   const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
-  const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : {};
+  const eff = (typeof window.getEffectiveSetup === 'function') ? window.getEffectiveSetup() : getEffectiveSetup();
   const esc = (s) => String(s || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -2687,7 +2910,6 @@ function renderExtendedProfileInfo() {
     if (!value) return '';
     const v = String(value).trim();
     if (!v) return '';
-    // Compact chip for the profile strip
     return `<span class="inline-flex items-center gap-1 max-w-full px-2 py-0.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300"><span class="text-gray-400 font-medium shrink-0">${esc(label)}</span><span class="truncate font-semibold text-[#002B5C] dark:text-white">${esc(v)}</span></span>`;
   };
 
@@ -2696,15 +2918,23 @@ function renderExtendedProfileInfo() {
   const focus = p.focusLabel || p.focus || eff.focus || '';
   const database = p.databaseSizeLabel || p.databaseSize || eff.databaseSizeLabel || eff.databaseSize || '';
   const challenges = (p.challenges || []).slice(0, 2).join(', ') || (eff.challenges || []).slice(0, 2).join(', ');
-  const hobbies = (p.hobbies || []).slice(0, 3).join(', ');
-  const activities = (p.activities || []).slice(0, 2).join(', ');
+  const hobbies = [...(p.hobbies || []), p.hobbiesOther].filter(Boolean).slice(0, 4).join(', ');
+  const activities = (p.activities || p.preferredActivities || []).slice(0, 3).join(', ');
   const tone = p.tone || eff.tone || '';
+  let income = p.income || eff.income || '';
+  if (income && /^\d+(\.\d+)?$/.test(String(income).replace(/[,$]/g, ''))) {
+    const n = Number(String(income).replace(/[,$]/g, ''));
+    income = Number.isFinite(n) ? `$${n.toLocaleString()}` : String(income);
+  } else {
+    income = '';
+  }
 
   parts.push(chip('Market', market));
   parts.push(chip('Focus', focus));
+  parts.push(chip('Income', income));
   parts.push(chip('Database', database));
   parts.push(chip('Hobbies', hobbies));
-  parts.push(chip('Activities', activities));
+  parts.push(chip('Relationships', activities));
   parts.push(chip('Tone', tone));
   parts.push(chip('Challenges', challenges));
 
@@ -2713,7 +2943,23 @@ function renderExtendedProfileInfo() {
     || '<span class="text-gray-400 text-[11px]">Complete your profile for richer plan personalization.</span>';
 }
 
-window.renderExtendedProfileInfo = renderExtendedProfileInfo;window.copyPlanFormatted = copyPlanFormatted;
+function refreshPlanProfileHeader() {
+  try {
+    const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
+    const nameEl = document.getElementById('plan-profile-name');
+    if (nameEl) {
+      const name = (p.name || '').trim();
+      nameEl.textContent = name || 'you';
+    }
+    renderExtendedProfileInfo();
+  } catch (e) {
+    console.warn('[planning] refreshPlanProfileHeader', e);
+  }
+}
+
+window.renderExtendedProfileInfo = renderExtendedProfileInfo;
+window.refreshPlanProfileHeader = refreshPlanProfileHeader;
+window.copyPlanFormatted = copyPlanFormatted;
 
 // === Fun Quick Start Presets (ported + active) ===
 window.applyPlanPreset = function(preset) {
@@ -3114,29 +3360,31 @@ function wirePlanLiveCalculations() {
   setTimeout(wirePlanCompleteness, 800);
   setTimeout(() => { if (typeof window.updateHobbyTactics === 'function') window.updateHobbyTactics(); }, 900);
 
-  // Visual active state for the pretty plan-style cards (only selected one highlighted)
+  // Visual active state for plan-style cards — uses .is-selected (works without Tailwind JIT)
   function wirePlanStyleCards() {
     document.querySelectorAll('.plan-style-card').forEach(card => {
       const radio = card.querySelector('input[type="radio"]');
       if (!radio) return;
-      if (card._styleWired) return; // guard against duplicate listeners (prevents freeze on repeated calls)
+      if (card._styleWired) return;
       card._styleWired = true;
-      const update = () => {
-        document.querySelectorAll('.plan-style-card').forEach(c => c.classList.remove('!border-[#F15A29]', 'ring-2', 'ring-[#F15A29]/30', 'bg-[#F15A29]/5', 'border-[#00A89D]', 'ring-2', 'ring-[#00A89D]/30', 'bg-[#00A89D]/5'));
-        if (radio.checked) {
-          // use orange for selected to match accent
-          card.classList.add('!border-[#F15A29]', 'ring-2', 'ring-[#F15A29]/30', 'bg-[#F15A29]/5');
-        }
+      const updateAll = () => {
+        document.querySelectorAll('.plan-style-card').forEach((c) => {
+          const r = c.querySelector('input[type="radio"]');
+          c.classList.toggle('is-selected', !!(r && r.checked));
+        });
       };
-      radio.addEventListener('change', update);
-      card.addEventListener('click', () => {
+      radio.addEventListener('change', updateAll);
+      card.addEventListener('click', (e) => {
+        // Let native label behavior run; also force for reliability
         radio.checked = true;
-        update();
-        // Fire change so live insight / "what this means in real life" + note updates immediately
+        try {
+          localStorage.setItem('winPlan_plan-style', radio.value);
+          localStorage.setItem('winPlan_plan-style_user', '1');
+        } catch (err) { /* ignore */ }
+        updateAll();
         radio.dispatchEvent(new Event('change', { bubbles: true }));
       });
-      // initial
-      if (radio.checked) update();
+      if (radio.checked) updateAll();
     });
   }
   setTimeout(wirePlanStyleCards, 700);

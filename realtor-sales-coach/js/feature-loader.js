@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260818-agent-lazy';
+  var V = '20260818-agent-v369';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -45,15 +45,15 @@
   var LAZY_BUNDLES = {
     'weekly-win-plan': [
       'js/data/weekend-plan-policy.js?v=20260706-realtor-v273',
-      'js/features/weekly-win-plan.js?v=20260720-hobby-restraint',
+      'js/features/weekly-win-plan.js?v=20260818-plan-profile',
       'js/features/prospecting-time-blocks.js?v=20260706-realtor-v273'
     ],
     // Business Plan generate/style/profile sync lives in weekly-win-plan.js
     'planning': [
       'js/data/weekend-plan-policy.js?v=20260706-realtor-v273',
-      'js/features/weekly-win-plan.js?v=20260720-hobby-restraint',
+      'js/features/weekly-win-plan.js?v=20260818-plan-profile',
       'js/features/prospecting-time-blocks.js?v=20260706-realtor-v273',
-      'js/features/business-plan-wizard.js?v=20260720-polish2'
+      'js/features/business-plan-wizard.js?v=20260818-plan-profile'
     ],
     'newsletter-generator': [
       'js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273',
