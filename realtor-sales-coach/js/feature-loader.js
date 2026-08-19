@@ -45,13 +45,13 @@
   var LAZY_BUNDLES = {
     'weekly-win-plan': [
       'js/data/weekend-plan-policy.js?v=20260706-realtor-v273',
-      'js/features/weekly-win-plan.js?v=20260818-plan-profile',
+      'js/features/weekly-win-plan.js?v=20260819-closings-copy',
       'js/features/prospecting-time-blocks.js?v=20260706-realtor-v273'
     ],
     // Business Plan generate/style/profile sync lives in weekly-win-plan.js
     'planning': [
       'js/data/weekend-plan-policy.js?v=20260706-realtor-v273',
-      'js/features/weekly-win-plan.js?v=20260818-plan-profile',
+      'js/features/weekly-win-plan.js?v=20260819-closings-copy',
       'js/features/prospecting-time-blocks.js?v=20260706-realtor-v273',
       'js/features/business-plan-wizard.js?v=20260818-plan-profile'
     ],

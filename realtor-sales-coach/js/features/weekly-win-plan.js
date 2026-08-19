@@ -201,7 +201,7 @@
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 min-w-0">
           <div class="flex items-center gap-2 text-[#00A89D] mb-1"><i class="fas fa-bullseye text-sm"></i> <span class="text-xs font-bold tracking-wider">MONTHLY GOAL</span></div>
-          <div class="font-semibold text-gray-900 dark:text-white text-[15px] break-words leading-tight">${p.monthlyUnits || eff.monthlyUnits || '—'} loans</div>
+          <div class="font-semibold text-gray-900 dark:text-white text-[15px] break-words leading-tight">${p.monthlyUnits || eff.monthlyUnits || '—'} closings</div>
         </div>
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 min-w-0">
           <div class="flex items-center gap-2 text-[#00A89D] mb-1"><i class="fas fa-dollar-sign text-sm"></i> <span class="text-xs font-bold tracking-wider">VOLUME GOAL</span></div>
@@ -2470,7 +2470,7 @@ function updateSetupDisplays() {
 
     const touchesNeeded = (effective.monthlyUnits || 8) * 9;
     const targetEl = document.getElementById('weekly-target');
-    if (targetEl) targetEl.textContent = `For ${effective.monthlyUnits || 8} loans: Aim for ~${touchesNeeded} touches this week`;
+    if (targetEl) targetEl.textContent = `For ${effective.monthlyUnits || 8} closings: Aim for ~${touchesNeeded} touches this week`;
 
     const streakEl = document.getElementById('streak-display');
     if (streakEl) streakEl.textContent = `${streak} Week Streak`;
@@ -3230,7 +3230,7 @@ function updatePlanLiveInsight() {
 
   let html = `<div class="flex flex-wrap gap-x-6 gap-y-1 items-start">`;
   if (closings) {
-    html += `<div class="flex items-center gap-2"><i class="fas fa-home text-[#F15A29]"></i> <span>To close <strong class="tabular-nums">${closings}</strong> loans: ~<strong class="tabular-nums">${leadsNeeded}</strong> conversations/referrals needed (${Math.round(ratio*100)}% ratio).</span></div>`;
+    html += `<div class="flex items-center gap-2"><i class="fas fa-home text-[#F15A29]"></i> <span>To close <strong class="tabular-nums">${closings}</strong> transactions: ~<strong class="tabular-nums">${leadsNeeded}</strong> conversations/referrals needed (${Math.round(ratio*100)}% ratio).</span></div>`;
   }
   if (weeklyConvos) {
     html += `<div class="flex items-center gap-2"><i class="fas fa-comments text-[#00A89D]"></i> <span><strong class="tabular-nums">${weeklyConvos}</strong> focused convos/week on avg — easy when you use the activities you picked.</span></div>`;
