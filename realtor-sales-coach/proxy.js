@@ -141,8 +141,10 @@ app.use(
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
       }
-      // Never serve auth data via static
-      if (filePath.includes(`${path.sep}data${path.sep}`)) {
+      // Never serve auth/session store via static.
+      // Only block the root `data/` folder — do NOT match `js/data/` (tool content).
+      const authDataPrefix = path.join(ROOT, 'data') + path.sep;
+      if (filePath === path.join(ROOT, 'data') || filePath.startsWith(authDataPrefix)) {
         res.statusCode = 404;
       }
     }
