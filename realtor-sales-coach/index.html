@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260818-plan-vision">
+    <link rel="stylesheet" href="css/main.css?v=20260819-polish373">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -352,16 +352,16 @@
       <div class="home-hero relative overflow-hidden rounded-[1.75rem] border border-white/10 shadow-2xl shadow-[#002B5C]/20">
         <div class="absolute inset-0 bg-gradient-to-br from-[#001429] via-[#002B5C] to-[#0a3d4a]"></div>
         <div class="absolute inset-0 opacity-90" style="background:radial-gradient(900px 280px at 10% -20%,rgba(0,168,157,0.35),transparent 55%),radial-gradient(700px 240px at 100% 0%,rgba(241,90,41,0.2),transparent 50%)"></div>
-        <div class="relative z-[1] px-6 py-7 sm:px-9 sm:py-9 md:px-11 md:py-10">
-          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div class="relative z-[1] px-5 py-6 sm:px-8 sm:py-7 md:px-10 md:py-8">
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
             <div class="min-w-0">
-              <div class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#5eead4] mb-3">
+              <div class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#5eead4] mb-2.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#00A89D] shadow-[0_0_10px_rgba(0,168,157,0.8)]"></span>
                 Home
               </div>
-              <h2 id="home-greeting" class="text-2xl sm:text-3xl md:text-[2.15rem] font-bold text-white tracking-tight m-0 leading-tight">Welcome back.</h2>
-              <p id="home-subline" class="text-sm sm:text-base text-white/55 m-0 mt-2 max-w-2xl leading-relaxed">Your launchpad — set up once, then run the day. Tools when you need them. Coach when you need to think.</p>
-              <div id="home-hero-stats" class="flex flex-wrap gap-2 mt-4" aria-label="Your setup status"></div>
+              <h2 id="home-greeting" class="text-2xl sm:text-3xl md:text-[2.05rem] font-bold text-white tracking-tight m-0 leading-tight">Welcome back.</h2>
+              <p id="home-subline" class="text-sm sm:text-[0.95rem] text-white/55 m-0 mt-1.5 max-w-2xl leading-relaxed">Your launchpad — set up once, then run the day. Tools when you need them. Coach when you need to think.</p>
+              <div id="home-hero-stats" class="flex flex-wrap gap-2 mt-3.5" aria-label="Your setup status"></div>
             </div>
             <div class="flex flex-wrap gap-2.5 shrink-0">
               <button type="button" onclick="window.showSection && window.showSection('ai-chat')" class="inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm text-white bg-gradient-to-r from-[#00A89D] to-[#F15A29] shadow-lg shadow-[#00A89D]/30 hover:brightness-105 hover:-translate-y-0.5 transition">
@@ -388,7 +388,7 @@
             <span class="text-[11px] font-extrabold tracking-[0.14em] uppercase text-[#F15A29]">Daily loop</span>
             <h3 class="text-lg sm:text-xl font-bold text-[#002B5C] dark:text-white m-0 tracking-tight">Start here today</h3>
           </div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Plan → nurture → content → opportunity</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 m-0">Plan → nurture → content → listing → open house</p>
         </div>
         <div id="home-start-here" class="px-3 sm:px-4 pb-3 sm:pb-4 pt-1">
           <div class="home-loop-rail">
@@ -428,8 +428,16 @@
               <span class="home-day-num" style="--step:#F15A29">5</span>
               <span class="home-day-icon" style="--step:#F15A29"><i class="fas fa-pen-fancy"></i></span>
               <span class="home-day-copy">
-                <span class="home-day-label">Opportunity</span>
+                <span class="home-day-label">Listing</span>
                 <span class="home-day-title">Listing Copy</span>
+              </span>
+            </button>
+            <button type="button" data-start-step="open-house" onclick="window.showSection('open-house')" class="home-day-card group">
+              <span class="home-day-num" style="--step:#002B5C">6</span>
+              <span class="home-day-icon" style="--step:#002B5C"><i class="fas fa-door-open"></i></span>
+              <span class="home-day-copy">
+                <span class="home-day-label">Show</span>
+                <span class="home-day-title">Open House</span>
               </span>
             </button>
           </div>
@@ -904,7 +912,7 @@
         <!-- Hero Generate (big, fun, low pressure) -->
         <div class="text-center mb-8">
           <div class="plan-generate-hero max-w-2xl mx-auto">
-            <button type="button" id="generate-plan-btn" class="plan-generate-btn group w-full sm:w-auto mx-auto bg-gradient-to-r from-[#00A89D] via-[#00A89D] to-[#F15A29] text-white py-5 sm:py-7 px-8 sm:px-14 rounded-full font-bold text-xl sm:text-2xl transition-all flex items-center gap-4 justify-center">
+            <button type="button" id="generate-plan-btn" class="coach-generate-btn plan-generate-btn group w-full sm:w-auto mx-auto bg-gradient-to-r from-[#00A89D] via-[#00A89D] to-[#F15A29] text-white py-5 sm:py-7 px-8 sm:px-14 rounded-full font-bold text-xl sm:text-2xl transition-all flex items-center gap-4 justify-center">
               <i class="fas fa-magic text-3xl group-hover:rotate-12 transition" aria-hidden="true"></i>
               <span>Build My 2026 Plan — Make It Real &amp; Fun</span>
             </button>
@@ -1163,13 +1171,15 @@
                 </div>
 
                 <div class="text-center">
-                    <button type="button" onclick="(function(){function run(){if(typeof window.generateListingDescription==='function'){window.generateListingDescription();}else if(typeof window.showToast==='function'){window.showToast('Listing Copy is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('listing-description'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
-                            class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-                        Generate Descriptions
+                    <button type="button" id="generate-listing-btn" onclick="(function(){function run(){if(typeof window.generateListingDescription==='function'){window.generateListingDescription();}else if(typeof window.showToast==='function'){window.showToast('Listing Copy is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('listing-description'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
+                            class="coach-generate-btn w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl inline-flex items-center justify-center gap-3">
+                        <i class="fas fa-magic" aria-hidden="true"></i>
+                        <span>Generate Descriptions</span>
                     </button>
                 </div>
             </div>
 
+            <div id="listing-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8"></div>
             <div id="listing-output" class="space-y-12 hidden"></div>
         </section>
 
@@ -1389,13 +1399,15 @@
                 </div>
 
                 <div class="text-center">
-                    <button type="button" onclick="(function(){function run(){if(typeof window.generateOpenHouse==='function'){window.generateOpenHouse();}else if(typeof window.showToast==='function'){window.showToast('Open House is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('open-house'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
-                            class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-                        Generate Open House Kit
+                    <button type="button" id="generate-oh-btn" onclick="(function(){function run(){if(typeof window.generateOpenHouse==='function'){window.generateOpenHouse();}else if(typeof window.showToast==='function'){window.showToast('Open House is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('open-house'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
+                            class="coach-generate-btn w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl inline-flex items-center justify-center gap-3">
+                        <i class="fas fa-magic" aria-hidden="true"></i>
+                        <span>Generate Open House Kit</span>
                     </button>
                 </div>
             </div>
 
+            <div id="oh-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8"></div>
             <div id="oh-output" class="space-y-12 hidden"></div>
         </section>
 
@@ -4161,8 +4173,8 @@
 
     <!-- Generate Button -->
     <div class="text-center mb-12">
-        <button onclick="generateSocialPost()" 
-                class="w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#00A89D] text-white px-16 py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
+        <button type="button" id="generate-social-btn" onclick="generateSocialPost()" 
+                class="coach-generate-btn w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-16 py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
             <i class="fas fa-magic"></i>
             <span>Generate My Post Now</span>
         </button>
@@ -4170,6 +4182,7 @@
     </div>
 
     <!-- Output -->
+    <div id="social-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8"></div>
     <div id="social-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
         <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
             <!-- Post content -->
@@ -4657,12 +4670,14 @@
         </div>
 
         <div class="text-center">
-            <button type="button" id="generate-bio-btn" class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 px-12 rounded-full font-bold text-xl shadow-xl hover:opacity-90 transition inline-flex items-center justify-center gap-3">
+            <button type="button" id="generate-bio-btn" class="coach-generate-btn bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 px-12 rounded-full font-bold text-xl shadow-xl hover:opacity-90 transition inline-flex items-center justify-center gap-3">
                 <i class="fas fa-magic"></i> Generate My Bio
             </button>
             <p id="bio-generate-hint" class="text-xs text-gray-500 mt-3 max-w-lg mx-auto">Complete essentials for best results. Answers auto-save as you type.</p>
         </div>
     </div>
+
+    <div id="bio-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8"></div>
 
     <div id="bio-output-panel" class="hidden mb-8">
         <div class="bg-white dark:bg-gray-900 border-2 border-[#00A89D]/30 rounded-3xl p-8 shadow-lg">
@@ -4827,8 +4842,8 @@
 
       <!-- Generate Button -->
         <div class="text-center">
-            <button onclick="generateSalesScript()" 
-                    class="w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#00A89D] text-white px-6 sm:px-10 md:px-16 py-4 sm:py-5 rounded-full hover:opacity-90 transition-all font-bold text-lg sm:text-xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
+            <button type="button" id="generate-script-btn" onclick="generateSalesScript()" 
+                    class="coach-generate-btn w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 sm:px-10 md:px-16 py-4 sm:py-5 rounded-full hover:opacity-90 transition-all font-bold text-lg sm:text-xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
                 <i class="fas fa-magic"></i>
                 <span>Generate Personalized Scripts</span>
             </button>
@@ -4837,6 +4852,7 @@
 
 
     <!-- Output -->
+    <div id="script-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8"></div>
     <div id="script-output" class="bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden">
         <div class="prose prose-lg dark:prose-invert max-w-none">
             <!-- Scripts will be inserted here (each with its own Copy + Save buttons) -->
@@ -5640,8 +5656,8 @@
 
     <!-- Generate Button Area -->
     <div class="text-center mb-12">
-        <button id="generate-blog-btn" onclick="generateBlog()" 
-                class="w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#00A89D] text-white px-6 sm:px-10 md:px-16 py-4 sm:py-5 rounded-full hover:opacity-90 transition-all font-bold text-lg sm:text-xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
+        <button type="button" id="generate-blog-btn" onclick="generateBlog()" 
+                class="coach-generate-btn w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 sm:px-10 md:px-16 py-4 sm:py-5 rounded-full hover:opacity-90 transition-all font-bold text-lg sm:text-xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
             <i class="fas fa-magic"></i>
             <span>Generate Blog + Reel + Posts</span>
         </button>
@@ -5649,6 +5665,7 @@
     </div>
 
     <!-- Output Area — blog + reel + social assets rendered here -->
+    <div id="blog-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8"></div>
     <div id="blog-output" class="bg-white dark:bg-gray-800 p-6 md:p-10 rounded-3xl shadow-inner border border-gray-200 dark:border-gray-700 min-h-96 hidden"></div>
 
 </section>
@@ -6152,6 +6169,8 @@
         <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Value Vault – Your Ultimate Resource Library</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Strategic tools, scripts, and ideas to help you give massive value first. Organized into six focused pillars covering pop-bys, client gifts, post-closing systems, objections, content, and nurture templates.</p>
     </div>
+
+    <div id="vault-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-6 max-w-3xl mx-auto"></div>
 
     <!-- Pre-Generate Explanatory Header -->
     <div id="vault-pregen-guidance" class="mb-8">
@@ -8131,8 +8150,8 @@
 
       <!-- Generate Button -->
       <div class="text-center">
-        <button id="generate-newsletter-btn" 
-                class="w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#00A89D] text-white px-6 sm:px-10 md:px-16 py-4 sm:py-6 rounded-full hover:opacity-90 transition-all font-bold text-lg sm:text-xl md:text-2xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
+        <button type="button" id="generate-newsletter-btn" 
+                class="coach-generate-btn w-full md:w-auto bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-6 sm:px-10 md:px-16 py-4 sm:py-6 rounded-full hover:opacity-90 transition-all font-bold text-lg sm:text-xl md:text-2xl shadow-2xl flex items-center justify-center gap-3 mx-auto">
           <i class="fas fa-magic"></i>
           <span>Generate My Newsletter</span>
         </button>
@@ -8394,14 +8413,16 @@
             <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
               One click turns the guidance above into your personalized 7-day prospecting roadmap — sized to your goals, hours, and style.
             </p>
-            <button id="generate-win-plan-btn"
-                    class="group px-12 py-4 bg-gradient-to-r from-[#00A89D] to-[#00A89D] text-white rounded-2xl font-semibold text-lg shadow-xl transition-all flex items-center gap-3 mx-auto hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0">
+            <button type="button" id="generate-win-plan-btn"
+                    class="coach-generate-btn group px-12 py-4 bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white rounded-2xl font-semibold text-lg shadow-xl transition-all flex items-center gap-3 mx-auto hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0">
                 <i class="fas fa-bolt-lightning group-active:scale-90 transition"></i>
                 <span>Build This Week's Plan</span>
             </button>
             <p class="text-xs text-gray-500 mt-4">Takes ~30 seconds • Stays saved locally until you make a new one</p>
           </div>
         </div>
+
+        <div id="weekly-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8 max-w-2xl mx-auto"></div>
 
         <!-- Results: This Week's Plan -->
         <div id="weekly-plan-results" class="hidden mt-10">

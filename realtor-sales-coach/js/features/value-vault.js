@@ -1244,7 +1244,13 @@ DAY OF
     const pool = eventIdeaPool[key] || [];
 
     if (pool.length === 0) {
-      container.innerHTML = `<p class="text-red-500">No ideas found for this combination.</p>`;
+      container.innerHTML = `<div class="text-center py-8 px-5 max-w-md mx-auto">
+        <div class="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#00A89D]/12 to-[#F15A29]/12">
+          <i class="fas fa-calendar-alt text-lg text-[#00A89D]"></i>
+        </div>
+        <h3 class="text-base font-bold text-[#002B5C] dark:text-white mb-1.5">No event ideas for that combo</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 m-0">Try a different budget or goal — every combination has ready ideas.</p>
+      </div>`;
       container.classList.remove('hidden');
       return;
     }

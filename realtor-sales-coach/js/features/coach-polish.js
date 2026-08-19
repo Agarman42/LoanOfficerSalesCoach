@@ -77,7 +77,7 @@
       title: 'No posts yet — let’s create 3 options',
       body: 'Choose a post type, add a detail or two from your week, and generate three ready-to-post variations in your voice.',
       tips: [
-        'Personal + local posts outperform pure rate posts.',
+        'Personal + local posts outperform listing-only posts.',
         'Batch once, then schedule across the week.',
         'Use the 30-day calendar below for a full month plan.'
       ],
@@ -112,6 +112,76 @@
       links: [
         { id: 'bio-creator', label: 'Primary bio →' },
         { id: 'social-post', label: 'Social posts →' }
+      ]
+    },
+    'listing-empty-state': {
+      icon: 'fa-pen-fancy',
+      title: 'MLS-ready listing copy appears here',
+      body: 'Add the address, key features, and any unique highlights, then generate long + short descriptions you can paste into the MLS.',
+      tips: [
+        'Lead with lifestyle and standout features — not just room counts.',
+        'Add custom highlights for the “wow” details photos miss.',
+        'Pair the listing with an Open House kit the same day.'
+      ],
+      links: [
+        { id: 'open-house', label: 'Open House kit →' },
+        { id: 'social-post', label: 'Social posts →' }
+      ]
+    },
+    'oh-empty-state': {
+      icon: 'fa-door-open',
+      title: 'Your open house kit will land here',
+      body: 'Pick a goal and property type, add highlights, then generate scripts, lead capture, and follow-up templates.',
+      tips: [
+        'Be specific about the weekend goal (buyer leads vs. seller impress).',
+        'Use custom notes for quirks (pets, first OH, price reduction).',
+        'Practice the greeting + CTA once out loud before doors open.'
+      ],
+      links: [
+        { id: 'listing-description', label: 'Listing Copy →' },
+        { id: 'weekly-win-plan', label: 'Block follow-up time →' }
+      ]
+    },
+    'bio-empty-state': {
+      icon: 'fa-id-card',
+      title: 'Your bio draft will show here',
+      body: 'Answer the essentials (or use Quick Setup), pick a destination length, then generate a bio ready for Zillow, brokerage, and LinkedIn.',
+      tips: [
+        'Save your best version as Primary — Newsletter & Coach pull from it.',
+        'Match the destination limit before you paste anywhere.',
+        'Keep one personal detail that makes you memorable.'
+      ],
+      links: [
+        { id: 'newsletter-generator', label: 'Newsletter →' },
+        { id: 'weekly-win-plan', label: 'Weekly Win Plan →' }
+      ]
+    },
+    'weekly-empty-state': {
+      icon: 'fa-fire',
+      title: 'Your 7-day win plan appears after generate',
+      body: 'Set hours and focus above, then Build This Week’s Plan. You’ll get protected time blocks and daily tasks sized to your goals.',
+      tips: [
+        'Protect 2–3 power hours before you add more tasks.',
+        'Pair one Value Vault touch with one content block.',
+        'Regenerate anytime — the plan stays local until you replace it.'
+      ],
+      links: [
+        { id: 'value-vault', label: 'Value Vault →' },
+        { id: 'planning', label: '2026 Business Plan →' }
+      ]
+    },
+    'vault-empty-state': {
+      icon: 'fa-gift',
+      title: 'Start with one pillar — then deliver',
+      body: 'Click a pillar card below (Pop-Bys is the usual demo start). Copy a script, deliver within 48 hours, and log the touch in Weekly Win Plan.',
+      tips: [
+        'Search by situation (“open house,” “past client”) not just pillar name.',
+        'Surprise Me is great when you need a fast idea on stage.',
+        'One excellent pop-by beats five average emails.'
+      ],
+      links: [
+        { id: 'weekly-win-plan', label: 'Weekly Win Plan →' },
+        { id: 'database', label: 'Database nurture →' }
       ]
     }
   };
@@ -160,6 +230,33 @@
         { id: 'social-post', label: 'Social posts' },
         { id: 'weekly-win-plan', label: 'Weekly Win Plan' },
         { id: 'blog', label: 'Blog Creator' }
+      ]
+    },
+    listing: {
+      eyebrow: 'Turn copy into opportunity',
+      message: 'Descriptions are ready — pair them with an Open House kit and a social teaser.',
+      links: [
+        { id: 'open-house', label: 'Open House kit' },
+        { id: 'social-post', label: 'Social posts' },
+        { id: 'weekly-win-plan', label: 'Block follow-up' }
+      ]
+    },
+    'open-house': {
+      eyebrow: 'Protect the follow-up',
+      message: 'Great open houses win on day-after touches. Block follow-up time and save your best scripts.',
+      links: [
+        { id: 'weekly-win-plan', label: 'Weekly Win Plan' },
+        { id: 'listing-description', label: 'Listing Copy' },
+        { id: 'database', label: 'Database nurture' }
+      ]
+    },
+    bio: {
+      eyebrow: 'Use this bio everywhere',
+      message: 'Save as Primary, then paste into Zillow / brokerage and let Newsletter pull from it.',
+      links: [
+        { id: 'newsletter-generator', label: 'Newsletter' },
+        { id: 'social-post', label: 'Social posts' },
+        { id: 'weekly-win-plan', label: 'Weekly Win Plan' }
       ]
     }
   };
@@ -238,9 +335,13 @@
       '#generate-win-plan-btn',
       '#generate-script-btn',
       '#generate-social-btn',
+      '#generate-listing-btn',
+      '#generate-oh-btn',
+      '.coach-generate-btn',
       'button[onclick*="generateSalesScript"]',
       'button[onclick*="generateSocialPost"]',
       'button[onclick*="generateListing"]',
+      'button[onclick*="generateOpenHouse"]',
       'button[onclick*="generateMonthlyPlan"]'
     ];
     selectors.forEach((sel) => {
@@ -306,7 +407,10 @@
     ['blog-output', 'blog-empty-state', 'blog'],
     ['social-output', 'social-empty-state', 'social'],
     ['script-output', 'script-empty-state', 'scripts'],
-    ['nl-preview', 'nl-empty-state', 'newsletter']
+    ['nl-preview', 'nl-empty-state', 'newsletter'],
+    ['listing-output', 'listing-empty-state', 'listing'],
+    ['oh-output', 'oh-empty-state', 'open-house'],
+    ['bio-output-panel', 'bio-empty-state', 'bio']
   ];
 
   function refreshOneOutput(outputId, emptyId, handoffKey) {
@@ -369,6 +473,21 @@
     bindGoButtons(host);
   }
 
+  function syncWeeklyEmpty() {
+    const results = document.getElementById('weekly-plan-results');
+    if (!results) return;
+    if (results.classList.contains('hidden')) showEmpty('weekly-empty-state');
+    else hideEmpty('weekly-empty-state');
+  }
+
+  function syncVaultEmpty() {
+    const anyPillarOpen = Array.from({ length: 6 }, (_, i) =>
+      document.getElementById(`value-vault-pillar-${i + 1}`)
+    ).some((el) => el && !el.classList.contains('hidden'));
+    if (anyPillarOpen) hideEmpty('vault-empty-state');
+    else showEmpty('vault-empty-state');
+  }
+
   function init() {
     Object.keys(EMPTY_SPECS).forEach(ensureEmptyState);
     outputPairs.forEach(([out, empty, handoff]) => {
@@ -380,17 +499,32 @@
     });
 
     wireGenerateA11y();
+    syncWeeklyEmpty();
+    syncVaultEmpty();
 
     const weeklyResults = document.getElementById('weekly-plan-results');
     if (weeklyResults && !weeklyResults._coachObs) {
       weeklyResults._coachObs = true;
       // attributes only — do not watch childList (handoff injection would loop)
       const wObs = new MutationObserver(() => {
+        syncWeeklyEmpty();
         if (!weeklyResults.classList.contains('hidden')) ensureWeeklyHandoff();
       });
       wObs.observe(weeklyResults, { attributes: true, attributeFilter: ['class'] });
       if (!weeklyResults.classList.contains('hidden')) ensureWeeklyHandoff();
     }
+
+    // Hide vault tip once a pillar panel opens
+    for (let i = 1; i <= 6; i += 1) {
+      const pillar = document.getElementById(`value-vault-pillar-${i}`);
+      if (!pillar || pillar._coachVaultObs) continue;
+      pillar._coachVaultObs = true;
+      const pObs = new MutationObserver(syncVaultEmpty);
+      pObs.observe(pillar, { attributes: true, attributeFilter: ['class'] });
+    }
+    document.getElementById('value-vault-pillars-grid')?.addEventListener('click', () => {
+      setTimeout(syncVaultEmpty, 50);
+    });
 
     document.addEventListener('click', (e) => {
       const link = e.target.closest('#sidebar a[href^="#"]');
@@ -398,6 +532,8 @@
       setTimeout(() => {
         wireGenerateA11y();
         ensureWeeklyHandoff();
+        syncWeeklyEmpty();
+        syncVaultEmpty();
         refreshAllOutputs();
       }, 400);
     });

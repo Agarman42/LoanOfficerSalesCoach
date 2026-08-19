@@ -447,7 +447,10 @@
     if (focus.includes('social') || focus.includes('content') || challenges.includes('content') || challenges.includes('social')) {
       return 'content';
     }
-    if (focus === 'equity-refi' || focus.includes('equity') || focus.includes('refi') || challenges.includes('pipeline')) {
+    if (focus.includes('open house') || focus.includes('open-house') || challenges.includes('open house') || challenges.includes('showing')) {
+      return 'open-house';
+    }
+    if (focus === 'equity-refi' || focus.includes('equity') || focus.includes('refi') || focus.includes('listing') || challenges.includes('pipeline') || challenges.includes('listing')) {
       return 'opportunity';
     }
     if (focus === 'referral-partners' || partners.includes('realtor') || focus.includes('referral') || focus.includes('partner') || challenges.includes('referral') || challenges.includes('realtor')) {
