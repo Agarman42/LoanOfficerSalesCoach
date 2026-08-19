@@ -363,7 +363,7 @@
       } else if (!isComplete) {
         subline.textContent = 'You’re underway. Finish setup, then run the daily loop. Open AI Coach when you need to think something through.';
       } else {
-        subline.textContent = 'Your launchpad — run the day, jump into tools, or open AI Coach when you need to think.';
+        subline.textContent = 'Set up once, then run the day — Daily loop, tools, and AI Coach when you need to think.';
       }
     }
 
@@ -502,14 +502,14 @@
     'weekly-win-plan': {
       icon: 'fa-fire',
       title: 'Start here this week',
-      body: 'Set hours and focus below, then generate. Block 2–3 power hours and execute one partner touch the same day. Pop-Bys live in the bottom banner / Value Vault.',
+      body: 'Set hours and focus, then build the plan. Protect 2–3 power hours and deliver one Value Vault touch the same day.',
       action: { label: 'Jump to form →', scroll: 'wwp-hours' },
       needsProfile: ['name', 'location']
     },
     'value-vault': {
       icon: 'fa-gift',
       title: 'Turn ideas into touches',
-      body: 'Search or filter the Pop-By library, copy a note, deliver within 48 hours, then log the touch in your Weekly Win Plan.',
+      body: 'Open Pop-Bys, copy a note, deliver within 48 hours, then log it in Weekly Win Plan.',
       action: { label: 'Back to Weekly Plan →', section: 'weekly-win-plan' }
     },
     'referrals': {
@@ -546,7 +546,7 @@
     'bio-creator': {
       icon: 'fa-id-card',
       title: 'Your voice starts with one bio',
-      body: 'Use Guided setup or Full form below. Save a Primary Bio so Newsletter, Blog, Social, and AI Coach speak like you.',
+      body: 'Guided or full form — then save as Primary so Newsletter and AI Coach sound like you.',
       // Land on Guided | Full toggle (not below it into the full form only)
       action: { label: 'Jump to form →', scroll: 'bio-wizard-entry' },
       needsProfile: ['name', 'location']
@@ -561,7 +561,7 @@
     'newsletter-generator': {
       icon: 'fa-envelope-open-text',
       title: 'Stay top of mind monthly',
-      body: 'Write a real Personal Update first, then generate. Review the preview before copy/download — compliance-safe by design. Use Guided setup or the form below when you’re ready.',
+      body: 'Write a Personal Update (40+ characters), pick sections, generate, then review the preview before you send.',
       // Land on guided-entry strip (wizard CTA) so it stays in view — not mid-form fields
       action: { label: 'Jump to form →', scroll: 'nl-wizard-entry' },
       needsProfile: ['name', 'location']
@@ -576,7 +576,7 @@
     'planning': {
       icon: 'fa-chart-line',
       title: 'Build your year around you',
-      body: 'Use the Guided setup | Full form switch below — same fields either way. Profile loads automatically.',
+      body: 'Guided or full form — same fields. Your profile loads automatically; then build the annual plan.',
       // No action button: avoids a second guided CTA next to the shared mode switch
       needsProfile: ['name', 'location']
     },

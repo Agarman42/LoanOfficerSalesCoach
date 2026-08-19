@@ -102,12 +102,12 @@
     },
     'nl-empty-state': {
       icon: 'fa-envelope-open-text',
-      title: 'Your newsletter preview will appear here',
-      body: 'Complete Personal Update (required), pick sections, then generate. Review the full preview before copy/download.',
+      title: 'Newsletter preview appears here',
+      body: 'Write a Personal Update (required, 40+ characters), pick sections, then generate. Review before you copy or download.',
       tips: [
-        'Lead with a real personal update — not a rate blast.',
-        'Use Guided Setup if you’re starting from zero.',
-        'After send day, repurpose the best section into social.'
+        'Lead with a real personal note — not a generic market dump.',
+        'Guided setup helps if you’re starting from zero.',
+        'After you send, pull one section into social.'
       ],
       links: [
         { id: 'bio-creator', label: 'Primary bio →' },
@@ -116,12 +116,12 @@
     },
     'listing-empty-state': {
       icon: 'fa-pen-fancy',
-      title: 'MLS-ready listing copy appears here',
-      body: 'Add the address, key features, and any unique highlights, then generate long + short descriptions you can paste into the MLS.',
+      title: 'Listing copy appears here',
+      body: 'Add features and highlights, then generate long + short MLS descriptions you can paste today.',
       tips: [
-        'Lead with lifestyle and standout features — not just room counts.',
-        'Add custom highlights for the “wow” details photos miss.',
-        'Pair the listing with an Open House kit the same day.'
+        'Lead with lifestyle and standouts — not only room counts.',
+        'Custom highlights capture the details photos miss.',
+        'Pair with an Open House kit the same day.'
       ],
       links: [
         { id: 'open-house', label: 'Open House kit →' },
@@ -130,26 +130,26 @@
     },
     'oh-empty-state': {
       icon: 'fa-door-open',
-      title: 'Your open house kit will land here',
-      body: 'Pick a goal and property type, add highlights, then generate scripts, lead capture, and follow-up templates.',
+      title: 'Open House kit appears here',
+      body: 'Pick a goal and property type, add highlights, then generate scripts, lead capture, and follow-up.',
       tips: [
-        'Be specific about the weekend goal (buyer leads vs. seller impress).',
-        'Use custom notes for quirks (pets, first OH, price reduction).',
-        'Practice the greeting + CTA once out loud before doors open.'
+        'Name the weekend goal (buyer leads vs. impress sellers).',
+        'Custom notes help with quirks (pets, first OH, price cut).',
+        'Practice the greeting + CTA once before doors open.'
       ],
       links: [
         { id: 'listing-description', label: 'Listing Copy →' },
-        { id: 'weekly-win-plan', label: 'Block follow-up time →' }
+        { id: 'weekly-win-plan', label: 'Block follow-up →' }
       ]
     },
     'bio-empty-state': {
       icon: 'fa-id-card',
-      title: 'Your bio draft will show here',
-      body: 'Answer the essentials (or use Quick Setup), pick a destination length, then generate a bio ready for Zillow, brokerage, and LinkedIn.',
+      title: 'Your bio appears here',
+      body: 'Fill essentials (or Quick Setup), pick a destination length, then generate a paste-ready bio.',
       tips: [
-        'Save your best version as Primary — Newsletter & Coach pull from it.',
-        'Match the destination limit before you paste anywhere.',
-        'Keep one personal detail that makes you memorable.'
+        'Save the best version as Primary — Newsletter & Coach use it.',
+        'Match the destination character limit before pasting.',
+        'Keep one memorable personal detail.'
       ],
       links: [
         { id: 'newsletter-generator', label: 'Newsletter →' },
@@ -158,12 +158,12 @@
     },
     'weekly-empty-state': {
       icon: 'fa-fire',
-      title: 'Your 7-day win plan appears after generate',
-      body: 'Set hours and focus above, then Build This Week’s Plan. You’ll get protected time blocks and daily tasks sized to your goals.',
+      title: 'Your 7-day plan appears here',
+      body: 'Set hours and focus above, then Build This Week’s Plan for protected blocks and daily tasks.',
       tips: [
-        'Protect 2–3 power hours before you add more tasks.',
+        'Protect 2–3 power hours before adding more tasks.',
         'Pair one Value Vault touch with one content block.',
-        'Regenerate anytime — the plan stays local until you replace it.'
+        'Rebuild anytime — the plan stays on this device until replaced.'
       ],
       links: [
         { id: 'value-vault', label: 'Value Vault →' },
@@ -173,10 +173,10 @@
     'vault-empty-state': {
       icon: 'fa-gift',
       title: 'Start with one pillar — then deliver',
-      body: 'Click a pillar card below (Pop-Bys is the usual demo start). Copy a script, deliver within 48 hours, and log the touch in Weekly Win Plan.',
+      body: 'Open Pop-Bys first for a fast win. Copy a script, deliver within 48 hours, then log it in Weekly Win Plan.',
       tips: [
-        'Search by situation (“open house,” “past client”) not just pillar name.',
-        'Surprise Me is great when you need a fast idea on stage.',
+        'Search by situation (“open house,” “past client”).',
+        'Surprise Me is perfect when you need one idea quickly.',
         'One excellent pop-by beats five average emails.'
       ],
       links: [
@@ -234,7 +234,7 @@
     },
     listing: {
       eyebrow: 'Turn copy into opportunity',
-      message: 'Descriptions are ready — pair them with an Open House kit and a social teaser.',
+      message: 'Listing copy is ready — pair it with an Open House kit and a social teaser.',
       links: [
         { id: 'open-house', label: 'Open House kit' },
         { id: 'social-post', label: 'Social posts' },

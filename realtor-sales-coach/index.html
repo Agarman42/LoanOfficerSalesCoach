@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260819-polish373">
+    <link rel="stylesheet" href="css/main.css?v=20260819-polish375">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -360,7 +360,7 @@
                 Home
               </div>
               <h2 id="home-greeting" class="text-2xl sm:text-3xl md:text-[2.05rem] font-bold text-white tracking-tight m-0 leading-tight">Welcome back.</h2>
-              <p id="home-subline" class="text-sm sm:text-[0.95rem] text-white/55 m-0 mt-1.5 max-w-2xl leading-relaxed">Your launchpad — set up once, then run the day. Tools when you need them. Coach when you need to think.</p>
+              <p id="home-subline" class="text-sm sm:text-[0.95rem] text-white/55 m-0 mt-1.5 max-w-2xl leading-relaxed">Set up once, then run the day — Daily loop, tools, and AI Coach when you need to think.</p>
               <div id="home-hero-stats" class="flex flex-wrap gap-2 mt-3.5" aria-label="Your setup status"></div>
             </div>
             <div class="flex flex-wrap gap-2.5 shrink-0">
@@ -645,10 +645,9 @@
         <section id="planning" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
         <!-- Title (matches other AI tools — this page is the annual plan only) -->
         <div class="text-center mb-6">
-            <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Your Custom 2026 Business Plan</h2>
+            <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">2026 Business Plan</h2>
             <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto m-0 leading-relaxed">
-              Most agents feel anxious or overwhelmed by “the plan.” This one starts with who you actually are —
-              your profile, hobbies, and real life — and turns it into a roadmap that feels doable instead of corporate.
+              An annual roadmap from your profile — goals, market, and how you actually want to work — not a corporate template.
             </p>
         </div>
 
@@ -657,10 +656,9 @@
           <div class="text-center mb-3">
             <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">YOUR YEAR, YOUR RULES</span>
           </div>
-          <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the 2026 Business Plan works — and how to get the most from it</h3>
+          <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Business Plan works</h3>
           <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">
-            This isn’t a corporate template. It’s a living roadmap built from your goals, hobbies, income target, and how you actually want to work —
-            refined with AI so it feels doable instead of overwhelming.
+            Confirm targets from your profile, add notes if you want, then build a plan you can turn into Weekly Win Plan tasks.
           </p>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -958,17 +956,17 @@
 
         <section id="listing-description" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <div class="text-center mb-6">
-                <h2 class="text-3xl font-bold mb-2 text-[#002B5C]">Smart Listing Description Generator</h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Create emotionally compelling, SEO-optimized listing descriptions in seconds. Choose tone, select features, add custom highlights — get 3 ready-to-use versions instantly.</p>
+                <h2 class="text-3xl font-bold mb-2 text-[#002B5C]">Listing Copy</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">MLS-ready descriptions in your voice — pick a tone, select features, add a few highlights, and generate long + short versions plus a Reel hook.</p>
             </div>
 
             <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width for consistent theme across all tools) -->
             <div class="mb-8">
               <div class="text-center mb-3">
-                <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#002B5C] bg-[#002B5C]/10 px-3 py-1 rounded-full">PROFESSIONAL COPY IN SECONDS</span>
+                <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#002B5C] bg-[#002B5C]/10 px-3 py-1 rounded-full">MLS-READY IN SECONDS</span>
               </div>
-              <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Smart Listing Description Generator works — and how to get the most from it</h3>
-              <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">This tool uses your selected features, tone, and local context to generate 3 distinct, high-converting descriptions that sound like you wrote them — not generic AI slop — plus ready-to-film Reel scripts you can shoot the same day. Every version is ready to tweak with one personal line from you.</p>
+              <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How Listing Copy works</h3>
+              <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Your features, tone, and local notes become three distinct descriptions that sound agent-written — plus a short Reel/social hook you can shoot the same day. Add one personal line before you publish.</p>
 
               <!-- 3 value cards -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -1174,7 +1172,7 @@
                     <button type="button" id="generate-listing-btn" onclick="(function(){function run(){if(typeof window.generateListingDescription==='function'){window.generateListingDescription();}else if(typeof window.showToast==='function'){window.showToast('Listing Copy is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('listing-description'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
                             class="coach-generate-btn w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl inline-flex items-center justify-center gap-3">
                         <i class="fas fa-magic" aria-hidden="true"></i>
-                        <span>Generate Descriptions</span>
+                        <span>Generate Listing Copy</span>
                     </button>
                 </div>
             </div>
@@ -1185,17 +1183,17 @@
 
         <section id="open-house" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
             <div class="text-center mb-6">
-                <h2 class="text-3xl font-bold mb-2 text-[#002B5C]">Open House Script &amp; Strategy Generator</h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Run confident, lead-generating open houses that impress buyers and partners. Get personalized scripts, talking points, objection handlers, lead capture strategy, and follow-up templates — tailored to your listing and goals.</p>
+                <h2 class="text-3xl font-bold mb-2 text-[#002B5C]">Open House Kit</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Scripts, lead capture, and follow-up for the weekend — tailored to your goal and listing so you show up prepared.</p>
             </div>
 
             <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width for consistent theme across all tools) -->
             <div class="mb-8">
               <div class="text-center mb-3">
-                <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#002B5C] bg-[#002B5C]/10 px-3 py-1 rounded-full">LEADS + IMPRESSIONS IN ONE GO</span>
+                <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#002B5C] bg-[#002B5C]/10 px-3 py-1 rounded-full">LEADS + FOLLOW-UP</span>
               </div>
-              <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Open House Script &amp; Strategy Generator works — and how to get the most from it</h3>
-              <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Select your primary goal and property type. The tool builds a complete kit — scripts for every moment, a lead capture system, objection handlers, and follow-up templates — so you show up as the organized professional buyers remember.</p>
+              <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Open House Kit works</h3>
+              <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Pick a goal and property type, add highlights, then generate greeting-to-follow-up scripts plus a simple lead-capture plan buyers remember.</p>
 
               <!-- 3 value cards -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -4418,8 +4416,8 @@
 
     <div class="text-center mb-6">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full mb-3">SEO · AI VISIBILITY · TRUST</span>
-        <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Bio Builder – Built for Real Estate Agents</h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Write a bio that positions you as a trusted local agent — listings, buyers, sphere, and service style. Generate paste-ready versions for Google, Zillow, LinkedIn, brokerage sites, and more.</p>
+        <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Bio Builder</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Paste-ready bios for Zillow, Google, LinkedIn, and your brokerage — built from your profile and story.</p>
         <p class="mt-3"><button type="button" onclick="window.openBioTips && window.openBioTips()" class="text-sm text-[#00A89D] underline hover:text-[#F15A29] font-semibold"><i class="fas fa-lightbulb mr-1"></i>What makes a bio actually work →</button></p>
     </div>
 
@@ -4673,7 +4671,7 @@
             <button type="button" id="generate-bio-btn" class="coach-generate-btn bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-4 px-12 rounded-full font-bold text-xl shadow-xl hover:opacity-90 transition inline-flex items-center justify-center gap-3">
                 <i class="fas fa-magic"></i> Generate My Bio
             </button>
-            <p id="bio-generate-hint" class="text-xs text-gray-500 mt-3 max-w-lg mx-auto">Complete essentials for best results. Answers auto-save as you type.</p>
+            <p id="bio-generate-hint" class="text-xs text-gray-500 mt-3 max-w-lg mx-auto">Orange fields are essentials · answers auto-save as you type</p>
         </div>
     </div>
 
@@ -6166,8 +6164,8 @@
 
 <section id="value-vault" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
-        <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Value Vault – Your Ultimate Resource Library</h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Strategic tools, scripts, and ideas to help you give massive value first. Organized into six focused pillars covering pop-bys, client gifts, post-closing systems, objections, content, and nurture templates.</p>
+        <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Value Vault</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">Pop-bys, gifts, post-closing, objections, content, and nurture — six pillars of scripts and ideas you can deliver this week.</p>
     </div>
 
     <div id="vault-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-6 max-w-3xl mx-auto"></div>
@@ -6177,8 +6175,8 @@
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">GIVE VALUE FIRST</span>
       </div>
-      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Value Vault works — and how to get the most from it</h3>
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Your searchable library of pop-bys, partner plays, objection handlers, nurture templates, and content sparks — built to compound trust with clients, sphere, and referral partners.</p>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How Value Vault works</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Open a pillar, copy a script or idea, deliver within 48 hours, then log the touch in your Weekly Win Plan.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
@@ -7449,19 +7447,19 @@
  <!-- NEWSLETTER GENERATOR TOOL -->
 <section id="newsletter-generator" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
-        <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Newsletter Generator – Personalized Emails in Seconds</h2>
+        <h2 class="text-3xl font-bold mb-2 text-[#00A89D]">Newsletter</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-6xl mx-auto">
-            Create beautiful, compliant, profile-powered newsletters your database will actually open. Mix value, local flavor, and personal updates effortlessly.
+            A profile-powered monthly send your sphere will open — personal update first, then local value.
         </p>
     </div>
 
     <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
     <div class="mb-8">
       <div class="text-center mb-3">
-        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">CONSISTENCY + PERSONAL = REFERRALS</span>
+        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">PERSONAL + CONSISTENT</span>
       </div>
-      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Newsletter Generator works — and how to get the most from it</h3>
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-2">This isn't just a mailer. It's a relationship engine that keeps you top-of-mind with the people who already know and trust you — turning your database into your most reliable source of referrals and repeat business.</p>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How Newsletter works</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-2">Write a real Personal Update, pick sections, generate, then review the preview before you copy or download.</p>
       <p id="nl-wizard-entry" class="text-center mb-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 scroll-mt-4">
         <button type="button" onclick="if(typeof window.openNewsletterWizard==='function')window.openNewsletterWizard();" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white text-sm font-bold shadow-md hover:opacity-95 transition"><i class="fas fa-magic"></i> Guided setup wizard</button>
         <button type="button" onclick="window.openNewsletterTips()" class="text-sm text-[#00A89D] underline hover:text-[#F15A29] font-semibold"><i class="fas fa-lightbulb mr-1"></i>Why newsletters crush it →</button>
@@ -8155,7 +8153,7 @@
           <i class="fas fa-magic"></i>
           <span>Generate My Newsletter</span>
         </button>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">Uses your central profile (branding, voice, social links) + curated content + AI (30–60s). Branding &amp; socials auto-included when filled in Profile.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">Uses your Profile (branding, voice, links) + sections you chose · usually 30–60 seconds</p>
       </div>
 
       <!-- Output -->
@@ -8268,9 +8266,8 @@
           <div class="text-center mb-3">
             <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">EXECUTION IS EVERYTHING</span>
           </div>
-          <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Weekly Win Plan works — and how to get the most from it</h3>
-          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-2">One unified plan: protected calendar blocks (when) with specific tasks inside each block (what). Built from your goals, hours, focus areas, and hobbies — no more juggling two separate tools.</p>
-          <p class="text-center text-xs text-[#002B5C]/80 dark:text-gray-400 mb-5 max-w-3xl mx-auto"><i class="fas fa-layer-group text-[#00A89D] mr-1"></i><strong>Prospecting Time Blocks live here.</strong> Former standalone PTB is merged into Weekly Win Plan — protected blocks + daily tasks in one flow.</p>
+          <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Weekly Win Plan works</h3>
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">Protected calendar blocks (when) with specific tasks inside each block (what) — sized to your goals, hours, and focus for the week.</p>
 
           <!-- 3 value / step cards (premium rounded, icon-led, matching equity style) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -8409,16 +8406,16 @@
             <div class="mb-4">
               <i class="fas fa-rocket text-4xl text-[#00A89D]"></i>
             </div>
-            <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white mb-2">Ready to build your plan?</h3>
+            <h3 class="text-2xl font-bold text-[#002B5C] dark:text-white mb-2">Ready for this week?</h3>
             <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              One click turns the guidance above into your personalized 7-day prospecting roadmap — sized to your goals, hours, and style.
+              Build a 7-day plan with protected time blocks and daily tasks — matched to your hours and focus above.
             </p>
             <button type="button" id="generate-win-plan-btn"
                     class="coach-generate-btn group px-12 py-4 bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white rounded-2xl font-semibold text-lg shadow-xl transition-all flex items-center gap-3 mx-auto hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0">
                 <i class="fas fa-bolt-lightning group-active:scale-90 transition"></i>
                 <span>Build This Week's Plan</span>
             </button>
-            <p class="text-xs text-gray-500 mt-4">Takes ~30 seconds • Stays saved locally until you make a new one</p>
+            <p class="text-xs text-gray-500 mt-4">Usually ~30 seconds · saved on this device until you rebuild</p>
           </div>
         </div>
 
