@@ -536,8 +536,30 @@
       id = aliases[id];
     }
 
-    // Hide all main content sections
-    document.querySelectorAll('main section').forEach(sec => {
+    // Lazy-load heavy tool scripts before paint (deep links + search + sidebar).
+    // ensureFeatureScripts returns null when ready, or a Promise while loading (shows overlay).
+    if (typeof window.ensureFeatureScripts === 'function') {
+      const ensureP = window.ensureFeatureScripts(id);
+      if (ensureP && typeof ensureP.then === 'function') {
+        showSection._pendingId = id;
+        ensureP
+          .then(function () {
+            if (showSection._pendingId !== id) return;
+            showSection._pendingId = null;
+            showSection(id);
+          })
+          .catch(function (err) {
+            console.warn('[showSection] lazy load', err);
+            if (showSection._pendingId !== id) return;
+            showSection._pendingId = null;
+            showSection(id);
+          });
+        return;
+      }
+    }
+
+    // Top-level tool sections only — never nest-hide inner <section> chrome
+    document.querySelectorAll('main > section').forEach(sec => {
       sec.classList.add('hidden');
     });
 
@@ -610,10 +632,21 @@
                 le.style.setProperty('visibility', 'visible', 'important');
                 le.style.setProperty('opacity', '1', 'important');
               }
+              const runWeekly = function () {
+                if (typeof window.generateWeeklyPlan === 'function') {
+                  window.generateWeeklyPlan();
+                } else if (typeof window.showToast === 'function') {
+                  window.showToast('Weekly Win Plan is preparing — one moment…', 'info');
+                }
+              };
               if (typeof window.generateWeeklyPlan === 'function') {
-                window.generateWeeklyPlan();
+                runWeekly();
+              } else if (typeof window.ensureFeatureScripts === 'function') {
+                const p = window.ensureFeatureScripts('weekly-win-plan');
+                if (p && typeof p.then === 'function') p.then(runWeekly).catch(runWeekly);
+                else runWeekly();
               } else {
-                console.warn('Weekly Win Plan generator not ready yet');
+                runWeekly();
               }
             });
           }
@@ -770,7 +803,7 @@
       window.showSection(targetId);
     } else {
       // Fallback if showSection not yet available
-      document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+      document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');
@@ -846,7 +879,7 @@
       setTimeout(() => {
         const home = document.getElementById('home');
         if (home) {
-          document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+          document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
           home.classList.remove('hidden');
           try {
             window.scrollTo(0, 0);

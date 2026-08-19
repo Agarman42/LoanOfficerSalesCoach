@@ -41,7 +41,8 @@
 
   function showSectionEarly(id) {
     id = resolveId(id);
-    var sections = document.querySelectorAll('main section');
+    // Top-level tools only — nested <section> inside a tool must not get .hidden
+    var sections = document.querySelectorAll('main > section');
     var target = document.getElementById(id);
 
     sections.forEach(function (sec) {
@@ -51,6 +52,15 @@
     if (target) {
       target.classList.remove('hidden');
       scrollAfterSectionShow(id, target);
+      // Kick on-demand feature scripts if loader is already present (shell first, JS second)
+      if (typeof window.ensureFeatureScripts === 'function') {
+        try {
+          var ep = window.ensureFeatureScripts(id);
+          if (ep && typeof ep.then === 'function') {
+            ep.catch(function () { /* main showSection will retry */ });
+          }
+        } catch (e) { /* ignore */ }
+      }
     } else if (id !== DEFAULT_SECTION) {
       showSectionEarly(DEFAULT_SECTION);
       return;

@@ -142,7 +142,7 @@
     <script src="js/ui.js?v=20260729-profile-ux"></script>
     <script src="js/features/app-feedback.js?v=20260709-realtor-v309"></script>
     <!-- Core UI (Phase 0.5) - menu, quotes, theme -->
-    <script defer src="js/main.js?v=20260730-gen-modal"></script>
+    <script defer src="js/main.js?v=20260818-agent-lazy"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260728-ai-asterisk"></script>
     <!-- LO brand plate from ?lo= token (must not wait for full feature-loader) -->
     <script defer src="js/features/lo-brand-chrome.js?v=20260807-brand-invite"></script>
@@ -156,7 +156,7 @@
     <!-- Invite-gated auth: lock UI until /api/auth/me succeeds (Realtor only) -->
     <script defer src="js/features/auth-gate.js?v=20260807-pass-eye"></script>
     <script defer src="js/features/admin-usage.js?v=20260807-invite-lo"></script>
-    <script src="js/early-boot.js?v=20260730-gen-modal"></script>
+    <script src="js/early-boot.js?v=20260818-agent-lazy"></script>
     <style id="asc-auth-boot-lock">
       /* Prevent coach chrome flash before auth-gate decides */
       html.asc-awaiting-auth body > :not(#asc-auth-gate):not(script):not(style) { visibility: hidden !important; }
@@ -782,20 +782,20 @@
               </div>
             </div>
 
-            <!-- Plan Style - identical base cards, only selected one highlighted (fixed for consistency) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
-                <input type="radio" name="plan-style" value="Referral Mastery" checked class="hidden">
+            <!-- Plan Style — native radio + CSS :has() so selection is visible without waiting on JS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" role="radiogroup" aria-label="2026 vision style">
+              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50 has-[:checked]:!border-[#F15A29] has-[:checked]:ring-2 has-[:checked]:ring-[#F15A29]/30 has-[:checked]:bg-[#F15A29]/5">
+                <input type="radio" name="plan-style" value="Referral Mastery" checked class="sr-only">
                 <div class="font-bold text-[#002B5C] dark:text-white">Referral Mastery</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">80%+ of business from your sphere, past clients, strong referrals, and a trusted network of fellow agents &amp; professional partners.</div>
               </label>
-              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
-                <input type="radio" name="plan-style" value="Database Reactor" class="hidden">
+              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50 has-[:checked]:!border-[#F15A29] has-[:checked]:ring-2 has-[:checked]:ring-[#F15A29]/30 has-[:checked]:bg-[#F15A29]/5">
+                <input type="radio" name="plan-style" value="Database Reactor" class="sr-only">
                 <div class="font-bold text-[#002B5C] dark:text-white">Database Reactor</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Mine your past clients, sphere, and sphere of influence for steady, high-trust business.</div>
               </label>
-              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
-                <input type="radio" name="plan-style" value="Balanced Growth" class="hidden">
+              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50 has-[:checked]:!border-[#F15A29] has-[:checked]:ring-2 has-[:checked]:ring-[#F15A29]/30 has-[:checked]:bg-[#F15A29]/5">
+                <input type="radio" name="plan-style" value="Balanced Growth" class="sr-only">
                 <div class="font-bold text-[#002B5C] dark:text-white">Balanced Growth</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Mix of referrals + database + social/prospecting + events. The flexible path.</div>
               </label>
@@ -908,7 +908,7 @@
 
         <!-- Hero Generate (big, fun, low pressure) -->
         <div class="text-center mb-8">
-          <button id="generate-plan-btn" class="group bg-gradient-to-r from-[#00A89D] via-[#00A89D] to-[#00A89D] text-white py-5 sm:py-7 px-8 sm:px-14 rounded-full font-bold text-xl sm:text-2xl shadow-2xl hover:scale-[1.01] active:scale-[0.985] transition-all flex items-center gap-4 mx-auto w-full sm:w-auto justify-center">
+          <button type="button" id="generate-plan-btn" class="group bg-gradient-to-r from-[#00A89D] via-[#00A89D] to-[#F15A29] text-white py-5 sm:py-7 px-8 sm:px-14 rounded-full font-bold text-xl sm:text-2xl shadow-2xl hover:scale-[1.01] active:scale-[0.985] transition-all flex items-center gap-4 mx-auto w-full sm:w-auto justify-center">
             <i class="fas fa-magic text-3xl group-hover:rotate-12 transition"></i>
             <span>Build My 2026 Plan — Make It Real &amp; Fun</span>
           </button>
@@ -1166,7 +1166,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button onclick="if (typeof window.generateListingDescription === 'function') window.generateListingDescription(); else if(typeof window.showToast==='function') window.showToast('Listing tool still loading — try again in a moment','info');"
+                    <button type="button" onclick="(function(){function run(){if(typeof window.generateListingDescription==='function'){window.generateListingDescription();}else if(typeof window.showToast==='function'){window.showToast('Listing Copy is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('listing-description'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
                             class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
                         Generate Descriptions
                     </button>
@@ -1392,7 +1392,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button onclick="if (typeof window.generateOpenHouse === 'function') window.generateOpenHouse(); else if(typeof window.showToast==='function') window.showToast('Open House tool still loading — try again in a moment','info');"
+                    <button type="button" onclick="(function(){function run(){if(typeof window.generateOpenHouse==='function'){window.generateOpenHouse();}else if(typeof window.showToast==='function'){window.showToast('Open House is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('open-house'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
                             class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
                         Generate Open House Kit
                     </button>
@@ -1561,7 +1561,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button onclick="if (typeof window.generateConsultationKit === 'function') window.generateConsultationKit(); else if(typeof window.showToast==='function') window.showToast('Consultation tool still loading — try again in a moment','info');"
+                    <button type="button" onclick="(function(){function run(){if(typeof window.generateConsultationKit==='function'){window.generateConsultationKit();}else if(typeof window.showToast==='function'){window.showToast('Consultation Kit is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('consultation'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
                             class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
                         Generate My Consultation Prep Kit
                     </button>
@@ -8424,7 +8424,7 @@
                     <i class="fas fa-share-alt"></i>
                     <span>Week theme → Social</span>
                 </button>
-                <button onclick=" (typeof window.generateWeeklyPlan==='function' ? window.generateWeeklyPlan() : (typeof generateWeeklyPlan==='function' ? generateWeeklyPlan() : console.warn('generateWeeklyPlan not ready'))) "
+                <button type="button" onclick="(function(){function run(){if(typeof window.generateWeeklyPlan==='function'){window.generateWeeklyPlan();}else if(typeof generateWeeklyPlan==='function'){generateWeeklyPlan();}else if(typeof window.showToast==='function'){window.showToast('Weekly Win Plan is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('weekly-win-plan'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-[#00A89D] text-[#00A89D] hover:bg-[#00A89D] hover:text-white text-sm font-semibold transition-all">
                     <i class="fas fa-redo"></i>
                     <span>Regenerate</span>
@@ -9436,7 +9436,7 @@ try {
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260728-realtor-parity"></script>
+<script src="js/feature-loader.js?v=20260818-agent-lazy"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

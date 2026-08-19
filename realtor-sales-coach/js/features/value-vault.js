@@ -374,19 +374,38 @@
   };
 
   window.openVaultItemWhenReady = function openVaultItemWhenReady(id, attempt = 0) {
-    const items = window.VALUE_VAULT_ITEMS;
-    const item = Array.isArray(items) ? items.find((i) => i.id === id) : null;
-    if (item && typeof window.showVaultItemModal === 'function') {
-      if (typeof window.showSection === 'function') window.showSection('value-vault');
-      window.showVaultItemModal(id);
-      return;
+    const openNow = function () {
+      const items = window.VALUE_VAULT_ITEMS;
+      const item = Array.isArray(items) ? items.find((i) => i.id === id) : null;
+      if (item && typeof window.showVaultItemModal === 'function') {
+        if (typeof window.showSection === 'function') window.showSection('value-vault');
+        window.showVaultItemModal(id);
+        return true;
+      }
+      return false;
+    };
+
+    if (openNow()) return;
+
+    // First attempt: ensure the Value Vault lazy bundle is loading (shows overlay)
+    if (attempt === 0 && typeof window.ensureFeatureScripts === 'function') {
+      const p = window.ensureFeatureScripts('value-vault');
+      if (p && typeof p.then === 'function') {
+        p.then(function () {
+          if (!openNow()) window.openVaultItemWhenReady(id, 1);
+        }).catch(function () {
+          window.openVaultItemWhenReady(id, 1);
+        });
+        return;
+      }
     }
+
     if (attempt < 40) {
       setTimeout(() => window.openVaultItemWhenReady(id, attempt + 1), 120);
       return;
     }
     if (typeof window.showToast === 'function') {
-      window.showToast('Value Vault is still loading — try again in a moment.', 'info');
+      window.showToast('Value Vault is preparing — open Value Vault from the sidebar, then try again.', 'info');
     }
   };
 

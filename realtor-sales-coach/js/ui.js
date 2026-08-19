@@ -129,7 +129,7 @@
 
     // Store initial hidden state of all main sections
     function cacheSectionStates() {
-      document.querySelectorAll('main section').forEach(sec => {
+      document.querySelectorAll('main > section').forEach(sec => {
         if (!originalDisplayStates.has(sec.id)) {
           originalDisplayStates.set(sec.id, sec.classList.contains('hidden'));
         }
@@ -155,7 +155,7 @@
       cacheSectionStates();
 
       let matchCount = 0;
-      const sections = document.querySelectorAll('main section');
+      const sections = document.querySelectorAll('main > section');
 
       sections.forEach(section => {
         const text = section.innerText.toLowerCase();
@@ -240,7 +240,7 @@
       if (banner) banner.remove();
 
       // Restore previous visibility (most were hidden)
-      document.querySelectorAll('main section').forEach(sec => {
+      document.querySelectorAll('main > section').forEach(sec => {
         const wasHidden = originalDisplayStates.get(sec.id);
         if (wasHidden) {
           sec.classList.add('hidden');
