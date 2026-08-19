@@ -803,20 +803,20 @@
               </div>
             </div>
 
-            <!-- Plan Style - identical base cards, only selected one highlighted (fixed for consistency) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
-                <input type="radio" name="plan-style" value="Referral Mastery" class="hidden">
+            <!-- Plan Style — native radio + CSS :has() so selection works even before JS wires highlights -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" role="radiogroup" aria-label="2026 vision style">
+              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50 has-[:checked]:!border-[#F15A29] has-[:checked]:ring-2 has-[:checked]:ring-[#F15A29]/30 has-[:checked]:bg-[#F15A29]/5">
+                <input type="radio" name="plan-style" value="Referral Mastery" class="sr-only">
                 <div class="font-bold text-[#002B5C] dark:text-white">Referral Mastery</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">80%+ of business from realtors &amp; partners you love working with.</div>
               </label>
-              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
-                <input type="radio" name="plan-style" value="Database Reactor" class="hidden">
+              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50 has-[:checked]:!border-[#F15A29] has-[:checked]:ring-2 has-[:checked]:ring-[#F15A29]/30 has-[:checked]:bg-[#F15A29]/5">
+                <input type="radio" name="plan-style" value="Database Reactor" class="sr-only">
                 <div class="font-bold text-[#002B5C] dark:text-white">Database Reactor</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Mine your past clients, sphere, and sphere of influence for steady, high-trust business.</div>
               </label>
-              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50">
-                <input type="radio" name="plan-style" value="Balanced Growth" class="hidden">
+              <label class="plan-style-card cursor-pointer border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-5 transition hover:border-[#00A89D]/50 has-[:checked]:!border-[#F15A29] has-[:checked]:ring-2 has-[:checked]:ring-[#F15A29]/30 has-[:checked]:bg-[#F15A29]/5">
+                <input type="radio" name="plan-style" value="Balanced Growth" class="sr-only">
                 <div class="font-bold text-[#002B5C] dark:text-white">Balanced Growth</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">Mix of referrals + database + social/prospecting + events. The flexible path. <span class="text-[#00A89D] font-medium">(synced from My Profile when set)</span></div>
               </label>
@@ -928,7 +928,7 @@
 
         <!-- Hero Generate (big, fun, low pressure) -->
         <div class="text-center mb-8">
-          <button id="generate-plan-btn" class="group bg-gradient-to-r from-[#00A89D] via-[#00A89D] to-[#F15A29] text-white py-5 sm:py-7 px-8 sm:px-14 rounded-full font-bold text-xl sm:text-2xl shadow-2xl hover:scale-[1.01] active:scale-[0.985] transition-all flex items-center gap-4 mx-auto w-full sm:w-auto justify-center">
+          <button type="button" id="generate-plan-btn" class="group bg-gradient-to-r from-[#00A89D] via-[#00A89D] to-[#F15A29] text-white py-5 sm:py-7 px-8 sm:px-14 rounded-full font-bold text-xl sm:text-2xl shadow-2xl hover:scale-[1.01] active:scale-[0.985] transition-all flex items-center gap-4 mx-auto w-full sm:w-auto justify-center">
             <i class="fas fa-magic text-3xl group-hover:rotate-12 transition"></i>
             <span>Build My 2026 Plan — Make It Real &amp; Fun</span>
           </button>
@@ -5413,6 +5413,19 @@
         </div>
     </div>
 
+    <!-- Hobbies / passions: include by default; click off for a fully professional blog -->
+    <div class="max-w-2xl mx-auto mb-6">
+      <label class="flex items-start gap-3 cursor-pointer select-none rounded-2xl border border-[#00A89D]/30 bg-gradient-to-br from-[#00A89D]/10 to-white dark:to-gray-800 p-4 sm:p-5">
+        <input type="checkbox" id="blog-include-hobbies" checked class="w-5 h-5 mt-0.5 accent-[#00A89D] flex-shrink-0" aria-describedby="blog-include-hobbies-help">
+        <div>
+          <span class="font-bold text-[#00A89D]"><i class="fas fa-heart mr-1" aria-hidden="true"></i> Include hobbies &amp; passions <span class="text-[10px] font-normal text-gray-500">(on by default)</span></span>
+          <p id="blog-include-hobbies-help" class="text-xs text-gray-600 dark:text-gray-300 mt-1.5 m-0 leading-relaxed">
+            On = light personal flavor from your profile (golf, sports, family, etc.). Turn off to exclude hobbies and passions entirely — topic-focused content only.
+          </p>
+        </div>
+      </label>
+    </div>
+
     <!-- Generate Button Area -->
     <div class="text-center mb-12">
         <button type="button" id="generate-blog-btn" onclick="generateBlog()"
@@ -9727,7 +9740,7 @@
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260817-v3139"></script>
+<script src="js/feature-loader.js?v=20260818-v3141-plan-blog"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

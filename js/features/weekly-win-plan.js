@@ -3387,19 +3387,24 @@ window.syncPlanningFormFromProfile = function(options) {
   if (!annualIncome && p.monthlyGoal && /^\d{4,}$/.test(String(p.monthlyGoal).replace(/[,$]/g, ''))) {
     annualIncome = String(p.monthlyGoal).replace(/[,$]/g, '');
   }
-  if (annualIncome && (force || fieldEmpty('target-income') || localEmpty('winPlan_target-income'))) {
-    // Reject non-numeric volume strings
+  if (annualIncome) {
     const num = String(annualIncome).replace(/[,$]/g, '').trim();
     if (/^\d+(\.\d+)?$/.test(num)) {
-      setVal('target-income', num);
-      try { localStorage.setItem('winPlan_target-income', num); } catch (e) {}
+      // Pull when empty, forced, or local stash is blank — never leave the field blank when profile has income
+      if (force || fieldEmpty('target-income') || localEmpty('winPlan_target-income')) {
+        setVal('target-income', num);
+        try { localStorage.setItem('winPlan_target-income', num); } catch (e) {}
+      }
     }
   }
   if (p.hours) setVal('weekly-hours-hint', p.hours);
 
-  // Database size midpoint when empty / forced
+  // Database size midpoint when empty / forced (always fill blank field from profile tier)
   const dbMid = databaseTierMid[p.databaseSize] || databaseTierMid[eff.databaseSize];
-  if (dbMid) setValIfEmpty('database-size', String(dbMid));
+  if (dbMid && (force || fieldEmpty('database-size') || localEmpty('winPlan_database-size'))) {
+    setVal('database-size', String(dbMid));
+    try { localStorage.setItem('winPlan_database-size', String(dbMid)); } catch (e) {}
+  }
 
   // Focus → plan style
   // HTML used to hard-check "Referral Mastery", so profile focus never applied.
@@ -3494,7 +3499,7 @@ window.syncPlanningFormFromProfile = function(options) {
   // Silent sync — no toast to prevent corner popups saying "something was loaded"
 
   // Populate extended relevant profile info visibly on the planning page (so user sees all valuable profile data is being used)
-  renderExtendedProfileInfo();
+  refreshPlanProfileHeader();
 };
 
 function renderExtendedProfileInfo() {
@@ -3522,15 +3527,23 @@ function renderExtendedProfileInfo() {
   const focus = p.focusLabel || p.focus || eff.focus || '';
   const database = p.databaseSizeLabel || p.databaseSize || eff.databaseSizeLabel || eff.databaseSize || '';
   const challenges = (p.challenges || []).slice(0, 2).join(', ') || (eff.challenges || []).slice(0, 2).join(', ');
-  const hobbies = (p.hobbies || []).slice(0, 3).join(', ');
-  const activities = (p.activities || []).slice(0, 2).join(', ');
+  const hobbies = [...(p.hobbies || []), p.hobbiesOther].filter(Boolean).slice(0, 4).join(', ');
+  const activities = (p.activities || p.preferredActivities || []).slice(0, 3).join(', ');
   const tone = p.tone || eff.tone || '';
+  let income = p.income || eff.income || '';
+  if (income && /^\d+(\.\d+)?$/.test(String(income).replace(/[,$]/g, ''))) {
+    const n = Number(String(income).replace(/[,$]/g, ''));
+    income = Number.isFinite(n) ? `$${n.toLocaleString()}` : String(income);
+  } else {
+    income = '';
+  }
 
   parts.push(chip('Market', market));
   parts.push(chip('Focus', focus));
+  parts.push(chip('Income', income));
   parts.push(chip('Database', database));
   parts.push(chip('Hobbies', hobbies));
-  parts.push(chip('Activities', activities));
+  parts.push(chip('Relationships', activities));
   parts.push(chip('Tone', tone));
   parts.push(chip('Challenges', challenges));
 
@@ -3539,7 +3552,24 @@ function renderExtendedProfileInfo() {
     || '<span class="text-gray-400 text-[11px]">Complete your profile for richer plan personalization.</span>';
 }
 
-window.renderExtendedProfileInfo = renderExtendedProfileInfo;window.copyPlanFormatted = copyPlanFormatted;
+/** Update planning profile name + chips (called when #planning opens). */
+function refreshPlanProfileHeader() {
+  try {
+    const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};
+    const nameEl = document.getElementById('plan-profile-name');
+    if (nameEl) {
+      const name = (p.name || '').trim();
+      nameEl.textContent = name || 'you';
+    }
+    renderExtendedProfileInfo();
+  } catch (e) {
+    console.warn('[planning] refreshPlanProfileHeader', e);
+  }
+}
+
+window.renderExtendedProfileInfo = renderExtendedProfileInfo;
+window.refreshPlanProfileHeader = refreshPlanProfileHeader;
+window.copyPlanFormatted = copyPlanFormatted;
 
 // === Fun Quick Start Presets (ported + active) ===
 window.applyPlanPreset = function(preset) {
@@ -3957,6 +3987,10 @@ function wirePlanLiveCalculations() {
       radio.addEventListener('change', update);
       card.addEventListener('click', () => {
         radio.checked = true;
+        try {
+          localStorage.setItem('winPlan_plan-style', radio.value);
+          localStorage.setItem('winPlan_plan-style_user', '1');
+        } catch (e) { /* ignore */ }
         update();
         // Fire change so live insight / "what this means in real life" + note updates immediately
         radio.dispatchEvent(new Event('change', { bubbles: true }));

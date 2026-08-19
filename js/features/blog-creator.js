@@ -127,23 +127,51 @@
     };
   }
 
+  /** Default ON — user can uncheck #blog-include-hobbies to exclude passions from this run. */
+  function blogIncludeHobbies() {
+    const el = document.getElementById('blog-include-hobbies');
+    // Missing checkbox = include (legacy / default)
+    return !el || el.checked !== false;
+  }
+
   // Build a rich personalization string for the prompt
-  function buildBlogPersonalization(profile) {
-    if (typeof window.buildProfileAiContext === 'function') {
-      return window.buildProfileAiContext(profile || getCentralProfile());
+  function buildBlogPersonalization(profile, opts) {
+    const includeHobbies = !(opts && opts.includeHobbies === false);
+    const base = profile || getCentralProfile() || {};
+    const p = Object.assign({}, base);
+    if (!includeHobbies) {
+      p.hobbies = [];
+      p.hobbiesOther = '';
     }
 
-    const eff = getEffectiveSetup();
-    const parts = [];
-    if (eff.personality) parts.push(`Your personality: ${eff.personality}`);
-    if (eff.voiceTraits && eff.voiceTraits.length) parts.push(`Voice traits: ${eff.voiceTraits.join(', ')}`);
-    if (eff.tone) parts.push(`Preferred tone: ${eff.tone}`);
-    if (eff.localArea) parts.push(`Primary market: ${eff.localArea}`);
-    if (eff.targetPartners && eff.targetPartners.length) parts.push(`Ideal audience/referral partners: ${eff.targetPartners.join(', ')}`);
-    if (eff.goals) parts.push(`Current focus/goals: ${eff.goals}`);
-    if (eff.challenges) parts.push(`Key challenges you help clients with: ${eff.challenges}`);
+    let text = '';
+    if (typeof window.buildProfileAiContext === 'function') {
+      text = window.buildProfileAiContext(p) || '';
+    } else {
+      const eff = Object.assign({}, getEffectiveSetup(), p);
+      const parts = [];
+      if (eff.personality) parts.push(`Your personality: ${eff.personality}`);
+      if (eff.voiceTraits && eff.voiceTraits.length) parts.push(`Voice traits: ${eff.voiceTraits.join(', ')}`);
+      if (eff.tone) parts.push(`Preferred tone: ${eff.tone}`);
+      if (eff.localArea || eff.location) parts.push(`Primary market: ${eff.localArea || eff.location}`);
+      if (eff.targetPartners && eff.targetPartners.length) parts.push(`Ideal audience/referral partners: ${eff.targetPartners.join(', ')}`);
+      if (eff.goals) parts.push(`Current focus/goals: ${eff.goals}`);
+      if (eff.challenges) parts.push(`Key challenges you help clients with: ${eff.challenges}`);
+      if (includeHobbies && eff.hobbies && eff.hobbies.length) parts.push(`Hobbies: ${eff.hobbies.join(', ')}`);
+      text = parts.length
+        ? parts.join('. ') + '.'
+        : 'Write in a helpful, trustworthy, conversational voice for a local mortgage professional.';
+    }
 
-    return parts.length ? parts.join('. ') + '.' : 'Write in a helpful, trustworthy, conversational voice for a local mortgage professional.';
+    if (!includeHobbies && text) {
+      // Strip any leftover hobby lines from shared profile context builders
+      text = text
+        .replace(/\bHobbies?:\s*[^.]*\./gi, '')
+        .replace(/\bPassions?:\s*[^.]*\./gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+    }
+    return text || 'Write in a helpful, trustworthy, conversational voice for a local mortgage professional.';
   }
 
   function trimBundleSectionEdges(text) {
@@ -593,9 +621,13 @@ if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
     // Pull rich personalization from the central Profile
     const profile = getCentralProfile();
     const richProfile = getEffectiveSetup();
-    const personalization = buildBlogPersonalization(richProfile);
+    const includeHobbies = blogIncludeHobbies();
+    const personalization = buildBlogPersonalization(richProfile, { includeHobbies });
+    const hobbyExcludeBlock = includeHobbies
+      ? ''
+      : `\n- HOBBIES / PASSIONS: EXCLUDED for this run. Do NOT mention the author's hobbies, sports teams, golf, fitness routines, family hobbies, crafts, cooking passions, travel hobbies, or any personal pastime anywhere in the blog, social caption, Google post, or Reel. Keep content professional and fully topic-focused.\n`;
 
-    const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized, authority-building content for loan officers. Write in the exact voice and style of this specific loan officer: ${personalization}
+    const systemPrompt = `You are an expert mortgage content writer creating high-quality, GEO-optimized, authority-building content for loan officers. Write in the exact voice and style of this specific loan officer: ${personalization}${hobbyExcludeBlock}
 
 Key Requirements:
 - Length: Exactly aim for the middle of ${lengthGuide} range (e.g., ~1,750 words for 1,500–2,000). Do not generate shorter—expand with more detailed explanations, additional examples, sub-sections, or relevant anecdotes to reach the word count while keeping it engaging and reader-focused. 
@@ -663,6 +695,10 @@ let finalPrompt = systemPrompt;
 
     if (typeof window.buildGenerationRulesPromptBlock === 'function') {
       finalPrompt += '\n' + window.buildGenerationRulesPromptBlock('blog').join('\n');
+    }
+    if (!includeHobbies) {
+      finalPrompt +=
+        '\n\nHOBBIES / PASSIONS EXCLUDED (user toggled off): Do not weave in golf, sports teams, fitness, family hobbies, crafts, cooking, travel pastimes, or any profile hobby/passion. Zero hobby references in blog, caption, Google post, and Reel.';
     }
 
     if (feedback) {
