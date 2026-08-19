@@ -150,7 +150,7 @@
       Home Coach Setup: must not wait for sequential feature-loader (40+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
-    <script defer src="js/features/user-profile.js?v=20260730-mobile-pass4"></script>
+    <script defer src="js/features/user-profile.js?v=20260818-realtor-profile"></script>
     <script defer src="js/features/home-favorites.js?v=20260818-hide-calc"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <!-- Invite-gated auth: lock UI until /api/auth/me succeeds (Realtor only) -->
@@ -8717,7 +8717,7 @@ try {
                 </div>
                 <div class="min-w-0">
                     <h2 id="profile-modal-title" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight m-0">My Profile</h2>
-                    <p id="profile-modal-subtitle" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 m-0 leading-snug">One profile powers every tool — fill it once, sound like you everywhere.</p>
+                    <p id="profile-modal-subtitle" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 m-0 leading-snug">Your realtor profile — goals, sphere, voice, and relationships power every tool.</p>
                 </div>
             </div>
             <button type="button" id="close-profile-modal" class="profile-close-btn flex-shrink-0" aria-label="Close profile">&times;</button>
@@ -8792,7 +8792,7 @@ try {
                     <div class="profile-empty-welcome-icon" aria-hidden="true"><i class="fas fa-user-edit"></i></div>
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-[#002B5C] dark:text-white m-0">Welcome — start with name + market</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-0.5 leading-relaxed">About 30 seconds. Every tool personalizes from this profile.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 m-0 mt-0.5 leading-relaxed">About 30 seconds. Listing copy, social, plans, and AI Coach all personalize from this.</p>
                     </div>
                 </div>
                 <div class="profile-panel-intro">
@@ -8800,7 +8800,7 @@ try {
                         <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Who you are</h3>
                         <span class="profile-panel-pill profile-panel-pill--start">Start here</span>
                     </div>
-                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">Name, market, and branding feed Newsletter, Scripts, and AI Coach.</p>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">Name, market, and branding feed Newsletter, Listing Copy, Bios, and AI Coach.</p>
                 </div>
                 <div class="profile-section-card">
                     <p class="profile-section-label">Identity</p>
@@ -8920,15 +8920,16 @@ try {
                 <div class="profile-panel-intro">
                     <div class="flex flex-wrap items-center gap-2">
                         <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Business &amp; goals</h3>
-                        <span class="profile-panel-pill">Weekly Plan</span>
+                        <span class="profile-panel-pill">Weekly Plan · Business Plan</span>
                     </div>
-                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">Focus and goals pull into Weekly Win Plan automatically.</p>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">Your production goals as a real estate agent — units, volume, income, and focus feed Weekly Win Plan and Business Plan.</p>
                 </div>
                 <div class="profile-section-card">
                     <p class="profile-section-label">Focus &amp; capacity</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="profile-field profile-field--essential profile-field-stack">
                             <label class="block text-sm font-medium" for="profile-focus">Primary Focus Style <span class="profile-field-tag profile-field-tag--essential">Essential</span></label>
+                            <p class="profile-field-help mb-1.5">How you want to grow this year — maps to Business Plan vision.</p>
                             <div class="profile-select-wrap">
                                 <select id="profile-focus" class="profile-input w-full">
                                     <option value="">Select...</option>
@@ -8941,7 +8942,8 @@ try {
                             </div>
                         </div>
                         <div class="profile-field-stack">
-                            <label class="block text-sm font-medium" for="profile-database-size">Past Client Database Size</label>
+                            <label class="block text-sm font-medium" for="profile-database-size">Sphere / Past Client Database Size</label>
+                            <p class="profile-field-help mb-1.5">Your book of past clients + sphere — used for nurture planning.</p>
                             <div class="profile-select-wrap">
                                 <select id="profile-database-size" class="profile-input w-full">
                                     <option value="">Select...</option>
@@ -8954,7 +8956,8 @@ try {
                             </div>
                         </div>
                         <div class="profile-field-stack">
-                            <label class="block text-sm font-medium" for="profile-monthly-units">Monthly Transaction Goal</label>
+                            <label class="block text-sm font-medium" for="profile-monthly-units">Monthly Transaction / Unit Goal</label>
+                            <p class="profile-field-help mb-1.5">Closed sides / units per month — not loan volume.</p>
                             <input type="text" id="profile-monthly-units" placeholder="e.g. 4 or 6–8" class="profile-input w-full">
                             <div class="profile-select-wrap mt-1">
                                 <select onchange="if (this.value) { document.getElementById('profile-monthly-units').value = this.value; this.selectedIndex = 0; document.getElementById('profile-monthly-units').dispatchEvent(new Event('input',{bubbles:true})); }" class="profile-input w-full text-xs py-1.5">
@@ -8969,7 +8972,8 @@ try {
                             </div>
                         </div>
                         <div class="profile-field-stack">
-                            <label class="block text-sm font-medium" for="profile-monthly-goal">Monthly Volume Goal</label>
+                            <label class="block text-sm font-medium" for="profile-monthly-goal">Monthly Sales Volume Goal</label>
+                            <p class="profile-field-help mb-1.5">Dollar volume of closed real estate (GCI sits under income below).</p>
                             <input type="text" id="profile-monthly-goal" placeholder="e.g. $3M – $4M" class="profile-input w-full">
                             <div class="profile-select-wrap mt-1">
                                 <select onchange="if (this.value) { document.getElementById('profile-monthly-goal').value = this.value; this.selectedIndex = 0; document.getElementById('profile-monthly-goal').dispatchEvent(new Event('input',{bubbles:true})); }" class="profile-input w-full text-xs py-1.5">
@@ -8997,7 +9001,8 @@ try {
                             </div>
                         </div>
                         <div class="profile-field-stack">
-                            <label class="block text-sm font-medium" for="profile-income">Target Annual Income</label>
+                            <label class="block text-sm font-medium" for="profile-income">Target Annual Income (GCI / take-home)</label>
+                            <p class="profile-field-help mb-1.5">Feeds 2026 Business Plan income target — your realtor production goal.</p>
                             <input type="number" id="profile-income" placeholder="e.g. 300000" class="profile-input w-full" min="0" step="1000">
                         </div>
                     </div>
@@ -9074,7 +9079,7 @@ try {
                         <label class="profile-check-chip"><input type="checkbox" value="Short & direct" class="profile-voice accent-[#00A89D]"> Short &amp; direct</label>
                         <label class="profile-check-chip"><input type="checkbox" value="Warm and encouraging" class="profile-voice accent-[#00A89D]"> Warm and encouraging</label>
                         <label class="profile-check-chip"><input type="checkbox" value="Data-backed / specific" class="profile-voice accent-[#00A89D]"> Data-backed / specific</label>
-                        <label class="profile-check-chip"><input type="checkbox" value="Partner-first language" class="profile-voice accent-[#00A89D]"> Partner-first language</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Client-and-partner-first language" class="profile-voice accent-[#00A89D]"> Client- and partner-first language</label>
                     </div>
                     <p id="profile-voice-cap-hint" class="text-[11px] text-gray-400 m-0 mt-2 hidden">Max 3 fine-tunes — uncheck one to pick another.</p>
                 </div>
@@ -9129,11 +9134,11 @@ try {
                         <h3 class="text-base sm:text-lg font-semibold text-[#00A89D] m-0">Prospecting style</h3>
                         <span class="profile-panel-pill">Weekly Plan</span>
                     </div>
-                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">How you hunt — shapes Weekly Win Plan recommendations.</p>
+                    <p class="text-xs text-gray-500 m-0 mt-1 leading-relaxed">How you grow your real estate business — shapes Weekly Win Plan and Business Plan tactics.</p>
                 </div>
                 <div class="profile-section-card">
                     <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                        <p class="profile-section-label m-0">Preferred activities</p>
+                        <p class="profile-section-label m-0">Preferred relationship activities</p>
                         <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-activity"> Select all</label>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm profile-chip-grid">
@@ -9149,22 +9154,23 @@ try {
                 </div>
                 <div class="profile-section-card">
                     <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                        <p class="profile-section-label m-0">Target partner types</p>
+                        <p class="profile-section-label m-0">Target referral / SOI partner types</p>
                         <label class="flex items-center gap-1 text-xs text-[#00A89D] cursor-pointer select-none"><input type="checkbox" class="profile-select-all accent-[#00A89D]" data-target=".profile-partner"> Select all</label>
                     </div>
+                    <p class="text-xs text-gray-500 m-0 mb-2 leading-relaxed">Who you want in your professional network as a real estate agent.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm profile-chip-grid">
                         <label class="profile-check-chip"><input type="checkbox" value="Fellow Agents / Co-Broke Partners" class="profile-partner accent-[#00A89D]"> Fellow Agents / Co-Broke Partners</label>
-                        <label class="profile-check-chip"><input type="checkbox" value="Lenders & Mortgage Partners (cross-referrals)" class="profile-partner accent-[#00A89D]"> Lenders &amp; Mortgage Partners</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Preferred Lenders" class="profile-partner accent-[#00A89D]"> Preferred Lenders</label>
                         <label class="profile-check-chip"><input type="checkbox" value="Home Inspectors" class="profile-partner accent-[#00A89D]"> Home Inspectors</label>
-                        <label class="profile-check-chip"><input type="checkbox" value="Title Company Representatives" class="profile-partner accent-[#00A89D]"> Title Company Representatives</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Title Company Representatives" class="profile-partner accent-[#00A89D]"> Title / Escrow Partners</label>
                         <label class="profile-check-chip"><input type="checkbox" value="Insurance Agents" class="profile-partner accent-[#00A89D]"> Insurance Agents</label>
-                        <label class="profile-check-chip"><input type="checkbox" value="Small Business Owners" class="profile-partner accent-[#00A89D]"> Small Business Owners</label>
+                        <label class="profile-check-chip"><input type="checkbox" value="Small Business Owners" class="profile-partner accent-[#00A89D]"> Small Business Owners / SOI</label>
                     </div>
-                    <input type="text" id="profile-partner-other" placeholder="Other partner types" class="mt-3 profile-input w-full text-sm">
+                    <input type="text" id="profile-partner-other" placeholder="Other partner types (e.g. attorneys, contractors)" class="mt-3 profile-input w-full text-sm">
                 </div>
                 <div class="profile-section-card">
                     <p class="profile-section-label">Partners you're growing now</p>
-                    <textarea id="profile-partner-focus" rows="2" placeholder="e.g. Sarah &amp; Mike at ABC Realty..." class="profile-input w-full text-sm"></textarea>
+                    <textarea id="profile-partner-focus" rows="2" placeholder="e.g. Sarah &amp; Mike at ABC Realty — co-broke + listing swaps..." class="profile-input w-full text-sm"></textarea>
                 </div>
             </div>
 

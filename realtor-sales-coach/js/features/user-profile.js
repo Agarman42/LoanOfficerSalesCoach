@@ -41,7 +41,7 @@
     { key: 'phone', weight: 6, hint: 'Add your phone', tools: 'Scripts, Newsletter', tab: 'identity', focusId: 'profile-phone' },
     { key: 'blogPageUrl', weight: 8, hint: 'Add your blog page URL', tools: 'Newsletter, Blog', tab: 'content', focusId: 'profile-blog-url' },
     { key: 'focus', weight: 10, hint: 'Pick your business focus', tools: 'Weekly Plan', tab: 'business', focusId: 'profile-focus' },
-    { key: 'monthlyUnits', weight: 8, hint: 'Set a monthly closing goal', tools: 'Weekly Plan', tab: 'business', focusId: 'profile-monthly-units' },
+    { key: 'monthlyUnits', weight: 8, hint: 'Set a monthly transaction goal', tools: 'Weekly Plan', tab: 'business', focusId: 'profile-monthly-units' },
     { key: 'hobbies', weight: 8, hint: 'Add 1–2 hobbies', tools: 'Social, Content', tab: 'personal', focusId: 'profile-hobbies-other' },
     { key: 'tone', weight: 10, hint: 'Choose your tone', tools: 'AI, Scripts', tab: 'content', focusId: 'profile-tone' },
     { key: 'partnerTypes', weight: 8, hint: 'Select partner types', tools: 'Referrals', tab: 'prospecting', focusId: 'profile-partner-other' },
@@ -61,10 +61,10 @@
   };
 
   const WIZARD_STEP_HINTS = {
-    identity: '~45 sec · Name, market, intro, and branding power Newsletter, Scripts, and AI Coach.',
-    business: '~60 sec · Focus + goals feed Weekly Win Plan.',
+    identity: '~45 sec · Name, market, intro, and branding power Newsletter, Listing Copy, Bios, and AI Coach.',
+    business: '~60 sec · Focus, units, volume, and income feed Weekly Win Plan and Business Plan.',
     content: '~45 sec · Tone, fine-tunes, and links for every AI writing tool.',
-    prospecting: '~40 sec · Activities and partner types for outreach plans.',
+    prospecting: '~40 sec · Relationship activities and referral partner types for outreach plans.',
     personal: '~30 sec · Optional flavor for Social and AI Coach.'
   };
 
@@ -87,10 +87,18 @@
   const VOICE_TRAIT_LEGACY = {
     'Uses humor / light-hearted': 'Uses humor lightly',
     'Witty and clever': 'Uses humor lightly',
-    'Very professional & polished': 'Partner-first language',
+    'Very professional & polished': 'Client-and-partner-first language',
+    'Partner-first language': 'Client-and-partner-first language',
     'Conversational (like a trusted friend)': 'Warm and encouraging',
     Conversational: 'Warm and encouraging',
     'Straightforward / no fluff': 'Short & direct'
+  };
+
+  /** Migrate older partner-type labels to realtor-native values (IDs unchanged for plan sync). */
+  const PARTNER_TYPE_LEGACY = {
+    'Lenders & Mortgage Partners (cross-referrals)': 'Preferred Lenders',
+    'Lenders & Mortgage Partners': 'Preferred Lenders',
+    'Title Company Representatives': 'Title Company Representatives'
   };
 
   const VOICE_TRAIT_MAX = 3;
@@ -209,9 +217,10 @@
     const focus = normalizeFocus(p.focus);
     const hobbies = asArray(p.hobbies);
     const activities = asArray(p.activities);
-    const partnerTypes = asArray(p.partnerTypes).length
+    const partnerTypes = (asArray(p.partnerTypes).length
       ? asArray(p.partnerTypes)
-      : asArray(p.targetPartners);
+      : asArray(p.targetPartners)
+    ).map((t) => PARTNER_TYPE_LEGACY[t] || t);
     const challenges = asArray(p.challenges);
     const niches = asArray(p.niches);
     const voiceTraits = asArray(p.voiceTraits);
@@ -228,6 +237,7 @@
       name: (p.name || '').trim(),
       email: (p.email || '').trim(),
       phone: (p.phone || '').trim(),
+      // Keep reading legacy `nmls` key if present; UI is Real Estate License # only
       licenseNumber: (p.licenseNumber || p.nmls || '').trim(),
       intro: (p.intro || '').trim(),
       location,
@@ -324,13 +334,15 @@
       previewRow('Name', p.name),
       previewRow('Email', p.email),
       previewRow('Phone', p.phone),
+      previewRow('License #', p.licenseNumber),
       previewRow('Company', p.companyName),
       previewRow('Market', p.location),
       previewRow('Intro', p.intro),
       previewRow('Focus', p.focusLabel || p.focus),
       previewRow('Goals', [p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(' · ')),
+      previewRow('Income target', p.income),
       previewRow('Hours/wk', p.hours),
-      previewRow('Database', p.databaseSizeLabel || p.databaseSize),
+      previewRow('Sphere / database', p.databaseSizeLabel || p.databaseSize),
       previewRow('Partners', [...p.partnerTypes, p.partnerTypesOther].filter(Boolean).join(', ')),
       previewRow('Partner focus', p.partnerFocus),
       previewRow('Hobbies', [...p.hobbies, p.hobbiesOther].filter(Boolean).join(', ')),
@@ -371,16 +383,18 @@
     if (p.tagline) lines.push(`Tagline: ${p.tagline}`);
     if (p.location) lines.push(`Primary market: ${p.location}`);
     if (p.intro) lines.push(`One-line intro: ${p.intro}`);
+    if (p.licenseNumber) lines.push(`Real estate license #: ${p.licenseNumber}`);
     if (p.focusLabel) lines.push(`Business focus: ${p.focusLabel}`);
     if (p.monthlyUnits || p.monthlyGoal) {
-      lines.push(`Goals: ${[p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(', ')}`);
+      lines.push(`Production goals: ${[p.monthlyUnits, p.monthlyGoal].filter(Boolean).join(', ')}`);
     }
-    if (p.databaseSizeLabel) lines.push(`Past client database: ${p.databaseSizeLabel}`);
-    if (p.partnerFocus) lines.push(`Partner focus: ${p.partnerFocus}`);
+    if (p.income) lines.push(`Target annual income: ${p.income}`);
+    if (p.databaseSizeLabel) lines.push(`Sphere / past client database: ${p.databaseSizeLabel}`);
+    if (p.partnerFocus) lines.push(`Partners growing now: ${p.partnerFocus}`);
     if (p.personality) lines.push(`Personality: ${p.personality}`);
     if (p.hobbies.length) lines.push(`Hobbies: ${p.hobbies.join(', ')}`);
-    if (p.activities.length) lines.push(`Preferred activities: ${p.activities.join(', ')}`);
-    if (p.partnerTypes.length) lines.push(`Target partners: ${p.partnerTypes.join(', ')}`);
+    if (p.activities.length) lines.push(`Preferred relationship activities: ${p.activities.join(', ')}`);
+    if (p.partnerTypes.length) lines.push(`Target referral partners: ${p.partnerTypes.join(', ')}`);
     if (p.challenges.length) lines.push(`Challenges: ${p.challenges.join(', ')}`);
     if (p.niches.length) lines.push(`Ideal clients: ${p.niches.join(', ')}`);
     if (p.tone) lines.push(`Tone: ${p.tone}`);
@@ -392,7 +406,7 @@
     if (p.professionalBio) lines.push(`Professional bio: ${p.professionalBio}`);
     return lines.length
       ? lines.join('. ') + '.'
-      : 'Limited profile details set yet — personalize generally but ask for more if helpful.';
+      : 'Limited realtor profile details set yet — personalize for a real estate agent audience.';
   }
 
   // --- Modal state ---
@@ -592,7 +606,13 @@
 
     sets.forEach(([sel, key]) => {
       document.querySelectorAll(sel).forEach((cb) => {
-        cb.checked = profile[key] && profile[key].includes(cb.value);
+        const list = profile[key] || [];
+        let on = list.includes(cb.value);
+        // Realtor partner chip renamed; still check legacy mortgage-partner labels
+        if (!on && sel === '.profile-partner' && cb.value === 'Preferred Lenders') {
+          on = list.some((t) => /lender|mortgage/i.test(String(t)));
+        }
+        cb.checked = on;
       });
     });
 
