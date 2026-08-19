@@ -136,15 +136,7 @@
       sectionId: 'ai-chat',
       group: 'Quick Actions',
     },
-    {
-      id: 'action-mortgage-calculator',
-      title: 'Mortgage Calculator',
-      subtitle: 'Payments, HomeNow, scenario compare & client PDF',
-      icon: 'fas fa-calculator',
-      keywords: ['mortgage calculator', 'payment calculator', 'pmi', 'homenow', 'scenarios', 'amortization', 'biweekly'],
-      sectionId: 'calculator',
-      group: 'Quick Actions',
-    },
+    // Mortgage Calculator intentionally omitted from Agent search (UI-hidden; calculator.js retained)
     {
       id: 'action-profile',
       title: 'My Profile & Preferences',

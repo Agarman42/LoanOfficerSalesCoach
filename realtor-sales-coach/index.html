@@ -142,7 +142,7 @@
     <script src="js/ui.js?v=20260729-profile-ux"></script>
     <script src="js/features/app-feedback.js?v=20260709-realtor-v309"></script>
     <!-- Core UI (Phase 0.5) - menu, quotes, theme -->
-    <script defer src="js/main.js?v=20260818-agent-lazy"></script>
+    <script defer src="js/main.js?v=20260818-hide-calc"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260728-ai-asterisk"></script>
     <!-- LO brand plate from ?lo= token (must not wait for full feature-loader) -->
     <script defer src="js/features/lo-brand-chrome.js?v=20260807-brand-invite"></script>
@@ -151,12 +151,12 @@
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
     <script defer src="js/features/user-profile.js?v=20260730-mobile-pass4"></script>
-    <script defer src="js/features/home-favorites.js?v=20260728-realtor-parity"></script>
+    <script defer src="js/features/home-favorites.js?v=20260818-hide-calc"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <!-- Invite-gated auth: lock UI until /api/auth/me succeeds (Realtor only) -->
     <script defer src="js/features/auth-gate.js?v=20260807-pass-eye"></script>
     <script defer src="js/features/admin-usage.js?v=20260807-invite-lo"></script>
-    <script src="js/early-boot.js?v=20260818-agent-lazy"></script>
+    <script src="js/early-boot.js?v=20260818-hide-calc"></script>
     <style id="asc-auth-boot-lock">
       /* Prevent coach chrome flash before auth-gate decides */
       html.asc-awaiting-auth body > :not(#asc-auth-gate):not(script):not(style) { visibility: hidden !important; }
@@ -321,7 +321,8 @@
                 <li><a href="#mindset-motivation" class="sidebar-link"><i class="fas fa-brain" aria-hidden="true"></i><span>Mindset Lab</span></a></li>
                 <li><a href="#books" class="sidebar-link"><i class="fas fa-book" aria-hidden="true"></i><span>Book Vault</span></a></li>
                 <li><a href="#client-translation" class="sidebar-link"><i class="fas fa-language" aria-hidden="true"></i><span>Client translation</span></a></li>
-                <li><a href="#calculator" class="sidebar-link"><i class="fas fa-calculator" aria-hidden="true"></i><span>Mortgage calculator</span></a></li>
+                <!-- Mortgage Calculator hidden from realtor UI (code retained at #calculator) -->
+                <li class="hidden" aria-hidden="true"><a href="#calculator" class="sidebar-link" tabindex="-1"><i class="fas fa-calculator" aria-hidden="true"></i><span>Mortgage calculator</span></a></li>
                 <li><a href="#saved-items" data-home-fav="saved-items" onclick="showSavedItemsLibrary(); return false;" class="sidebar-link"><i class="fas fa-bookmark" aria-hidden="true"></i><span class="flex-1">My Saved Items</span><span id="global-saved-count" class="hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[#00A89D] text-white rounded-full items-center justify-center shrink-0">0</span></a></li>
                 <li><a href="#admin-usage" class="sidebar-link" style="display:none"><i class="fas fa-user-plus" aria-hidden="true"></i><span>Invite partners</span></a></li>
             </ul>
@@ -478,14 +479,7 @@
               <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
             </button>
 
-            <button type="button" onclick="window.showSection('calculator')" class="home-tool group">
-              <span class="home-tool-icon" style="background:rgba(0,168,157,0.12);color:#00A89D"><i class="fas fa-calculator" aria-hidden="true"></i></span>
-              <span class="home-tool-text">
-                <span class="home-tool-title">Mortgage Calculator</span>
-                <span class="home-tool-sub">Payments &amp; scenarios</span>
-              </span>
-              <i class="fas fa-chevron-right home-tool-chevron" aria-hidden="true"></i>
-            </button>
+            <!-- Mortgage Calculator removed from Home jump-in (feature code retained) -->
 
             <button type="button" onclick="window.showSection('content-hub')" class="home-tool group">
               <i class="fas fa-pen-nib text-[#00A89D]"></i>
@@ -9283,9 +9277,9 @@ try {
 
 <!-- deferred to feature-loader: js/features/user-profile.js?v=20260721-unfreeze -->
 <!-- Home setup + favorites AFTER profile so setup CTAs can open My Profile -->
-<!-- deferred to feature-loader: js/features/onboarding-coach.js?v=20260730-home-tiles
+<!-- deferred to feature-loader: js/features/onboarding-coach.js?v=20260730-home-tiles -->
 <script>window.HOME_FAVORITES_CONFIG={variant:"realtor"};</script>
-<!-- deferred to feature-loader: js/features/home-favorites.js?v=20260721-endbody-paint -->
+<!-- deferred to feature-loader: js/features/home-favorites.js?v=20260818-hide-calc -->
 
 <!-- ===================================================== -->
 <!-- EVENT PLANNING VIEW GUIDE MODALS (premium rich — matches journey + templates polish) -->
@@ -9439,7 +9433,7 @@ try {
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260818-agent-lazy"></script>
+<script src="js/feature-loader.js?v=20260818-hide-calc"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

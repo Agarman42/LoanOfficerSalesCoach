@@ -44,7 +44,7 @@
     { sectionId: 'listing-description', title: 'Listing Copy', icon: 'fa-pen-fancy', sub: 'MLS-ready', accent: '#F15A29' },
     { sectionId: 'open-house', title: 'Open House', icon: 'fa-door-open', sub: 'Scripts & strategy', accent: '#00A89D' },
     { sectionId: 'consultation', title: 'Consult Kit', icon: 'fa-handshake', sub: 'Buyer & seller', accent: '#F15A29' },
-    { sectionId: 'calculator', title: 'Mortgage Calculator', icon: 'fa-calculator', sub: 'Payments & scenarios', accent: '#00A89D' },
+    // calculator intentionally omitted from realtor favorites catalog (UI-hidden; code retained)
     { sectionId: 'ai-chat', title: 'AI Coach', icon: 'fa-robot', sub: 'Think with me', accent: '#00A89D' },
     { sectionId: 'value-vault', title: 'Value Vault', icon: 'fa-gem', sub: 'Gifts & pop-bys', accent: '#F15A29' },
     { sectionId: 'database', title: 'Database Nurturing', icon: 'fa-database', sub: 'Sphere', accent: '#002B5C' },
@@ -111,12 +111,15 @@
   }
 
   function loadIds() {
-    const { storageKey } = getConfig();
+    const { storageKey, catalog } = getConfig();
     try {
       const raw = localStorage.getItem(storageKey);
       if (!raw) return [];
       const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr.map(String) : [];
+      if (!Array.isArray(arr)) return [];
+      const allowed = new Set((catalog || []).map((c) => c.sectionId));
+      // Drop UI-hidden tools (e.g. calculator) from previously saved realtor favorites
+      return arr.map(String).filter((id) => !allowed.size || allowed.has(id));
     } catch (e) {
       return [];
     }

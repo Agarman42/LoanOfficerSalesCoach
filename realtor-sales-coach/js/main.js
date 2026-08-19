@@ -536,6 +536,16 @@
       id = aliases[id];
     }
 
+    // Mortgage Calculator is UI-hidden for realtors (code retained). Redirect deep links home.
+    if (id === 'calculator' || id === 'mortgage-calculator') {
+      id = 'home';
+      try {
+        if (location.hash && /calculator/i.test(location.hash)) {
+          history.replaceState(null, '', location.pathname + location.search + '#home');
+        }
+      } catch (e) { /* ignore */ }
+    }
+
     // Lazy-load heavy tool scripts before paint (deep links + search + sidebar).
     // ensureFeatureScripts returns null when ready, or a Promise while loading (shows overlay).
     if (typeof window.ensureFeatureScripts === 'function') {

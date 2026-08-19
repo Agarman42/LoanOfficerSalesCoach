@@ -21,7 +21,7 @@
     'js/features/saved-items-library.js?v=20260806-vault-ui',
     'js/features/global-search-deep-index.js?v=20260719-content-hub',
     'js/features/global-search-dynamic-index.js?v=20260717-realtor-search',
-    'js/features/global-search-config.js?v=20260719-content-hub',
+    'js/features/global-search-config.js?v=20260818-hide-calc',
     'js/features/global-search.js?v=20260719-content-hub',
     'js/features/section-bottom-banners.js?v=20260720-p2-content-hub',
     'js/features/coach-polish.js?v=20260728-realtor-parity',

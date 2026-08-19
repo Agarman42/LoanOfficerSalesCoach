@@ -14,7 +14,10 @@
     'referral-partners': 'referrals',
     'prospecting': 'weekly-win-plan',
     'content': 'content-hub',
-    'content-studio': 'content-hub'
+    'content-studio': 'content-hub',
+    // Mortgage Calculator UI-hidden for realtors — deep links land on Home
+    'calculator': 'home',
+    'mortgage-calculator': 'home'
   };
 
   var navReady = false;
