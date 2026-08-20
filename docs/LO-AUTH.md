@@ -30,6 +30,24 @@ Must set the **same** `AUTH_BRIDGE_SECRET` on both Render services.
 - Error copy: `Use your Ruoff email (@ruoff.com).`
 - Admin seed may use any `ADMIN_EMAIL` (e.g. Adam personal). Additional admins: **Admin · Usage → Make admin** on a LO user (or set `role: admin` in the auth store).
 
+## Forgot password (email)
+
+Self-serve reset mirrors Agent:
+
+1. Sign in screen → **Forgot password?** (enter `@ruoff.com` email first).
+2. If mail is configured, user gets `#reset=TOKEN` link (1 hour).
+3. They set a new password on the gate and sign in.
+
+**Render env (LO service):**
+
+```
+RESEND_API_KEY=re_...
+MAIL_FROM=Loan Officer Sales Coach <noreply@yourverifieddomain.com>
+APP_PUBLIC_URL=https://loanofficersalescoach.onrender.com
+```
+
+Or SMTP (`SMTP_URL` / `SMTP_HOST`…). Without mail config, use **Admin · Usage → Reset password** and share a temp password.
+
 ## UI entry points
 
 | Action | Where |

@@ -44,6 +44,15 @@ You can also open the app and choose **Accept invite** or **Request access** if 
 3. Check **Remember this device (30 days)** on a personal or work laptop you trust.  
 4. Click **Sign in**.
 
+### Forgot password
+
+1. On the sign-in screen, enter your email.  
+2. Click **Forgot password?**  
+3. If email reset is enabled, check your inbox for a reset link (expires in about an hour).  
+4. Open the link, set a new password, and sign in.  
+
+If you don’t get an email, ask your Ruoff loan officer or an admin for a temporary password.
+
 ### Sign out
 
 Open **My Profile** (header) → use **Sign out** in the account area when you’re on a shared computer.

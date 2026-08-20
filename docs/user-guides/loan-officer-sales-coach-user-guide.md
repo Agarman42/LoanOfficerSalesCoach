@@ -46,6 +46,15 @@ From Home (Partners card) or the sidebar invite path:
 
 One invite path covers account access; optional short partner links are for people already on the Agent tool.
 
+### Forgot password
+
+1. On the sign-in screen, enter your Ruoff email.  
+2. Click **Forgot password?**  
+3. If email reset is enabled for your team, check your inbox for a reset link (expires in about an hour).  
+4. Set a new password and sign in.  
+
+If you don’t get an email, ask an admin to issue a temporary password from **Admin · Usage**.
+
 ### Sign out
 
 Open **My Profile** → **Sign out** when using a shared machine.

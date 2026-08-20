@@ -144,6 +144,24 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
     });
   }
 
+  function parseHashReset() {
+    const h = location.hash || '';
+    const m = h.match(/reset=([^&]+)/i);
+    if (m) return decodeURIComponent(m[1]);
+    const q = new URLSearchParams(location.search || '');
+    return q.get('reset') || '';
+  }
+
+  function clearResetHash() {
+    if (location.hash && /reset=/i.test(location.hash)) {
+      try {
+        history.replaceState(null, '', location.pathname + location.search);
+      } catch (e) {
+        location.hash = '';
+      }
+    }
+  }
+
   function renderGate(mode) {
     injectStyles();
     document.documentElement.classList.remove('lo-awaiting-auth');
@@ -157,18 +175,26 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
     }
     setLocked(true);
     mode = mode || 'login';
+    const resetToken = parseHashReset();
+    if (mode !== 'reset' && resetToken) mode = 'reset';
 
     root.innerHTML =
       '<div class="lo-card"><div class="lo-brand"><div class="lo-mark">LO</div><div>' +
       '<h1>Loan Officer Sales Coach</h1>' +
-      '<p class="lo-sub">One-time setup with your Ruoff email. You\'ll stay signed in on this device.</p></div></div>' +
-      '<div class="lo-tabs">' +
-      '<button type="button" class="lo-tab' +
-      (mode === 'login' ? ' is-on' : '') +
-      '" data-mode="login">Sign in</button>' +
-      '<button type="button" class="lo-tab' +
-      (mode === 'register' ? ' is-on' : '') +
-      '" data-mode="register">Create account</button></div>' +
+      '<p class="lo-sub">' +
+      (mode === 'reset'
+        ? 'Choose a new password to finish resetting your account.'
+        : "One-time setup with your Ruoff email. You'll stay signed in on this device.") +
+      '</p></div></div>' +
+      (mode === 'reset'
+        ? ''
+        : '<div class="lo-tabs">' +
+          '<button type="button" class="lo-tab' +
+          (mode === 'login' ? ' is-on' : '') +
+          '" data-mode="login">Sign in</button>' +
+          '<button type="button" class="lo-tab' +
+          (mode === 'register' ? ' is-on' : '') +
+          '" data-mode="register">Create account</button></div>') +
       '<div id="lo-gate-panel"></div>' +
       '<div class="lo-err" id="lo-gate-err"></div>' +
       '<div class="lo-ok" id="lo-gate-ok"></div>' +
@@ -183,6 +209,64 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
     const panel = root.querySelector('#lo-gate-panel');
     const errEl = root.querySelector('#lo-gate-err');
     const okEl = root.querySelector('#lo-gate-ok');
+
+    if (mode === 'reset') {
+      panel.innerHTML =
+        '<form id="lo-reset-form">' +
+        '<label for="lo-newpass">New password (min 8)</label>' +
+        passwordFieldHtml('lo-newpass', { minlength: 8, autocomplete: 'new-password', placeholder: '••••••••' }) +
+        '<label for="lo-newpass2">Confirm password</label>' +
+        passwordFieldHtml('lo-newpass2', { minlength: 8, autocomplete: 'new-password', placeholder: '••••••••' }) +
+        '<button type="submit" class="lo-btn" id="lo-reset-btn">Update password</button>' +
+        '<button type="button" class="lo-btn lo-btn-ghost" id="lo-reset-cancel">Back to sign in</button></form>';
+      bindPasswordToggles(panel);
+      panel.querySelector('#lo-reset-cancel').addEventListener('click', function () {
+        clearResetHash();
+        renderGate('login');
+      });
+      panel.querySelector('#lo-reset-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        showErr(errEl, '');
+        showOk(okEl, '');
+        const p1 = panel.querySelector('#lo-newpass').value;
+        const p2 = panel.querySelector('#lo-newpass2').value;
+        if (p1.length < 8) {
+          showErr(errEl, 'Password must be at least 8 characters');
+          return;
+        }
+        if (p1 !== p2) {
+          showErr(errEl, 'Passwords do not match');
+          return;
+        }
+        const token = resetToken || parseHashReset();
+        if (!token) {
+          showErr(errEl, 'Reset link is missing or expired. Request a new one from Sign in.');
+          return;
+        }
+        const btn = panel.querySelector('#lo-reset-btn');
+        btn.disabled = true;
+        try {
+          const { res, data } = await api('/api/auth/reset-password', {
+            method: 'POST',
+            body: { token: token, password: p1 }
+          });
+          if (!res.ok) {
+            showErr(errEl, (data && data.error) || 'Reset failed');
+            return;
+          }
+          clearResetHash();
+          showOk(okEl, (data && data.message) || 'Password updated. You can sign in.');
+          setTimeout(function () {
+            renderGate('login');
+          }, 900);
+        } catch (err) {
+          showErr(errEl, 'Network error — try again in a moment');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+      return;
+    }
 
     if (mode === 'login') {
       panel.innerHTML =
@@ -233,7 +317,11 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
           method: 'POST',
           body: { email }
         });
-        showOk(okEl, (data && data.message) || 'Ask an admin for a temp password if needed.');
+        showOk(
+          okEl,
+          (data && data.message) ||
+            'If that account exists, check your email for a reset link — or ask an admin for a temporary password.'
+        );
       });
     } else {
       panel.innerHTML =
@@ -384,7 +472,8 @@ html.lo-awaiting-auth body > :not(#lo-auth-gate):not(script):not(style){visibili
     } catch (e) {
       /* show login */
     }
-    renderGate('login');
+    if (parseHashReset()) renderGate('reset');
+    else renderGate('login');
   }
 
   window.loAuth = {

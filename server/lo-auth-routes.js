@@ -9,6 +9,7 @@
 const crypto = require('crypto');
 const axios = require('axios');
 const store = require('./lo-auth-store');
+const mail = require('./mail');
 
 const COOKIE_NAME = 'lo_asc_session';
 const SESSION_DAYS = Number(process.env.AUTH_SESSION_DAYS || 30);
@@ -460,18 +461,22 @@ function mountLoAuthRoutes(app) {
   });
 
   app.post('/api/auth/forgot-password', async (req, res) => {
+    const mailReady = mail.isConfigured();
     const generic = {
       ok: true,
-      message:
-        'If that account exists, ask an admin for a temporary password from Admin · usage (SMTP reset comes later).'
+      message: mailReady
+        ? 'If that email has an account, we sent a reset link. Check your inbox (and spam) within the hour.'
+        : 'If that account exists, ask an admin for a temporary password from Admin · usage.'
     };
     const email = store.normalizeEmail(req.body?.email);
     if (!email) return res.json(generic);
     try {
       const token = crypto.randomBytes(24).toString('base64url');
+      let userFound = false;
       await store.withStore((s) => {
         const u = store.findUserByEmail(s, email);
         if (!u || u.status === 'deactivated') return;
+        userFound = true;
         s.password_resets[token] = {
           user_id: u.id,
           created_at: new Date().toISOString(),
@@ -481,10 +486,63 @@ function mountLoAuthRoutes(app) {
           console.log(`[lo-auth] reset token for ${email}: ${token}`);
         }
       });
+
+      if (userFound && mailReady) {
+        const base = mail.publicAppUrl(req);
+        const resetUrl = base + '/#reset=' + encodeURIComponent(token);
+        const sendResult = await mail.sendMail({
+          to: email,
+          subject: 'Reset your Loan Officer Sales Coach password',
+          text:
+            'Reset your Loan Officer Sales Coach password using this link (expires in 1 hour):\n\n' +
+            resetUrl +
+            '\n\nIf you did not request this, you can ignore this email.',
+          html:
+            '<p>Reset your <strong>Loan Officer Sales Coach</strong> password using the link below (expires in 1 hour):</p>' +
+            '<p><a href="' +
+            resetUrl +
+            '">' +
+            resetUrl +
+            '</a></p>' +
+            '<p>If you did not request this, you can ignore this email.</p>'
+        });
+        if (!sendResult.ok) {
+          console.warn('[lo-auth] password reset email not sent:', sendResult.reason);
+        }
+      }
     } catch (e) {
-      /* ignore */
+      /* ignore — still return generic */
     }
     return res.json(generic);
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    const token = String(req.body?.token || '').trim();
+    const password = String(req.body?.password || '');
+    if (!token || password.length < 8) {
+      return res.status(400).json({ error: 'Valid token and new password (min 8) required' });
+    }
+    try {
+      const result = await store.withStore((s) => {
+        const row = s.password_resets[token];
+        if (!row) return { ok: false, error: 'Invalid or expired reset link' };
+        if (new Date(row.expires_at).getTime() < Date.now()) {
+          delete s.password_resets[token];
+          return { ok: false, error: 'Invalid or expired reset link' };
+        }
+        const u = store.findUserById(s, row.user_id);
+        if (!u || u.status === 'deactivated') {
+          return { ok: false, error: 'Account not available' };
+        }
+        u.password_hash = store.hashPassword(password);
+        delete s.password_resets[token];
+        return { ok: true };
+      });
+      if (!result.ok) return res.status(400).json({ error: result.error });
+      return res.json({ ok: true, message: 'Password updated. You can sign in.' });
+    } catch (e) {
+      return res.status(500).json({ error: 'Reset failed' });
+    }
   });
 
   app.post('/api/auth/track', requireAuth, async (req, res) => {
