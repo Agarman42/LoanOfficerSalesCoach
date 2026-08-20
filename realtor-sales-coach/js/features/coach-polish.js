@@ -172,16 +172,27 @@
     },
     'vault-empty-state': {
       icon: 'fa-gift',
-      title: 'Start with one pillar — then deliver',
-      body: 'Open Pop-Bys first for a fast win. Copy a script, deliver within 48 hours, then log it in Weekly Win Plan.',
+      title: 'Pick a pillar to explore',
+      body: 'Start with Pop-Bys for a fast win — copy, deliver within 48 hours, then log it in Weekly Win Plan.',
       tips: [
         'Search by situation (“open house,” “past client”).',
-        'Surprise Me is perfect when you need one idea quickly.',
-        'One excellent pop-by beats five average emails.'
+        'Surprise Me when you need one idea quickly.'
       ],
       links: [
-        { id: 'weekly-win-plan', label: 'Weekly Win Plan →' },
-        { id: 'database', label: 'Database nurture →' }
+        { id: 'weekly-win-plan', label: 'Weekly Win Plan →' }
+      ]
+    },
+    'consult-empty-state': {
+      icon: 'fa-handshake',
+      title: 'Your consult kit appears here',
+      body: 'Choose buyer or seller, add a few client details, then generate talking points and follow-up.',
+      tips: [
+        'Presets are fastest when you’re short on time.',
+        'Personal details make rapport scripts land better.'
+      ],
+      links: [
+        { id: 'open-house', label: 'Open House kit →' },
+        { id: 'listing-description', label: 'Listing Copy →' }
       ]
     }
   };
@@ -337,11 +348,13 @@
       '#generate-social-btn',
       '#generate-listing-btn',
       '#generate-oh-btn',
+      '#generate-consult-btn',
       '.coach-generate-btn',
       'button[onclick*="generateSalesScript"]',
       'button[onclick*="generateSocialPost"]',
       'button[onclick*="generateListing"]',
       'button[onclick*="generateOpenHouse"]',
+      'button[onclick*="generateConsultationKit"]',
       'button[onclick*="generateMonthlyPlan"]'
     ];
     selectors.forEach((sel) => {
@@ -410,6 +423,7 @@
     ['nl-preview', 'nl-empty-state', 'newsletter'],
     ['listing-output', 'listing-empty-state', 'listing'],
     ['oh-output', 'oh-empty-state', 'open-house'],
+    ['consult-output', 'consult-empty-state', null],
     ['bio-output-panel', 'bio-empty-state', 'bio']
   ];
 

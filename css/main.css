@@ -6855,3 +6855,30 @@ html.dark .lo-push-toggle { color: #e2e8f0; }
   .lox-actions--bar .lox-btn { flex: 1 1 calc(50% - 0.4rem); }
 }
 
+
+
+/* Shared primary generate CTAs — teal → orange */
+.coach-generate-btn {
+  background-image: linear-gradient(90deg, #00A89D 0%, #00A89D 45%, #F15A29 100%);
+  box-shadow: 0 14px 32px rgba(0, 168, 157, 0.28), 0 6px 16px rgba(241, 90, 41, 0.18);
+  transform: translateZ(0);
+}
+.coach-generate-btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(0, 168, 157, 0.34), 0 8px 20px rgba(241, 90, 41, 0.24);
+}
+.coach-generate-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+}
+.coach-generate-btn:disabled,
+.coach-generate-btn[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: wait;
+  filter: none;
+  transform: none;
+}
+.coach-generate-btn:focus-visible {
+  outline: 3px solid rgba(241, 90, 41, 0.55);
+  outline-offset: 3px;
+}

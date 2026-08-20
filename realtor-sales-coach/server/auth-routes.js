@@ -6,6 +6,7 @@
 
 const crypto = require('crypto');
 const store = require('./auth-store');
+const mail = require('./mail');
 
 const COOKIE_NAME = 'asc_session';
 const SESSION_DAYS_REMEMBER = Number(process.env.AUTH_SESSION_DAYS || 30);
@@ -294,7 +295,8 @@ function mountAuthRoutes(app) {
       shortHours: SESSION_HOURS_SHORT,
       inviteRequired: true,
       requestAccessEnabled: true,
-      smtpConfigured: !!(process.env.SMTP_URL || process.env.SMTP_HOST),
+      smtpConfigured: mail.isConfigured(),
+      mailConfigured: mail.isConfigured(),
       app: 'realtor-agent-sales-coach'
     });
   });
@@ -559,18 +561,22 @@ function mountAuthRoutes(app) {
   app.post('/api/auth/forgot-password', async (req, res) => {
     const email = store.normalizeEmail(req.body?.email);
     // Always generic response (no email enumeration)
+    const mailReady = mail.isConfigured();
     const generic = {
       ok: true,
-      message:
-        'If that email has an account, a reset path is available. With SMTP unset, ask your admin to issue a temporary password from /admin.'
+      message: mailReady
+        ? 'If that email has an account, we sent a reset link. Check your inbox (and spam) within the hour.'
+        : 'If that email has an account, ask your admin (or Ruoff LO) to issue a temporary password from Admin · usage.'
     };
     if (!email) return res.json(generic);
 
     try {
       const token = crypto.randomBytes(24).toString('base64url');
+      let userFound = false;
       await store.withStore((s) => {
         const u = store.findUserByEmail(s, email);
         if (!u || u.status === 'deactivated') return;
+        userFound = true;
         s.password_resets[token] = {
           user_id: u.id,
           created_at: new Date().toISOString(),
@@ -584,10 +590,28 @@ function mountAuthRoutes(app) {
         }
       });
 
-      // SMTP optional — not configured → admin path
-      if (process.env.SMTP_URL || process.env.SMTP_HOST) {
-        // Placeholder: wire nodemailer later; still return generic
-        console.log('[auth] SMTP configured but mailer not implemented — use admin temp password');
+      if (userFound && mailReady) {
+        const base = mail.publicAppUrl(req);
+        const resetUrl = base + '/#reset=' + encodeURIComponent(token);
+        const sendResult = await mail.sendMail({
+          to: email,
+          subject: 'Reset your Agent Sales Coach password',
+          text:
+            'Reset your Agent Sales Coach password using this link (expires in 1 hour):\n\n' +
+            resetUrl +
+            '\n\nIf you did not request this, you can ignore this email.',
+          html:
+            '<p>Reset your <strong>Agent Sales Coach</strong> password using the link below (expires in 1 hour):</p>' +
+            '<p><a href="' +
+            resetUrl +
+            '">' +
+            resetUrl +
+            '</a></p>' +
+            '<p>If you did not request this, you can ignore this email.</p>'
+        });
+        if (!sendResult.ok) {
+          console.warn('[auth] password reset email not sent:', sendResult.reason);
+        }
       }
       return res.json(generic);
     } catch (e) {

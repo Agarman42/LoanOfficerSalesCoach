@@ -127,6 +127,20 @@
         { id: 'bio-creator', label: 'Primary bio →' },
         { id: 'social-post', label: 'Social posts →' }
       ]
+    },
+    'weekly-empty-state': {
+      icon: 'fa-fire',
+      title: 'Your 7-day plan appears here',
+      body: 'Set hours and focus above, then Build This Week’s Plan for protected blocks and daily tasks.',
+      tips: [
+        'Protect 2–3 power hours before adding more tasks.',
+        'Pair Equity outreach with one Value Vault touch.',
+        'Rebuild anytime — the plan stays on this device until replaced.'
+      ],
+      links: [
+        { id: 'equity-scanner', label: 'Equity Scanner →' },
+        { id: 'value-vault', label: 'Value Vault →' }
+      ]
     }
   };
 
@@ -261,6 +275,8 @@
       '#generate-win-plan-btn',
       '#generate-script-btn',
       '#generate-social-btn',
+      '#generate-equity-btn',
+      '.coach-generate-btn',
       'button[onclick*="generateSalesScript"]',
       'button[onclick*="generateSocialPost"]',
       'button[onclick*="generateEquityReport"]',
@@ -393,6 +409,13 @@
     bindGoButtons(host);
   }
 
+  function syncWeeklyEmpty() {
+    const results = document.getElementById('weekly-plan-results');
+    if (!results) return;
+    if (results.classList.contains('hidden')) showEmpty('weekly-empty-state');
+    else hideEmpty('weekly-empty-state');
+  }
+
   function init() {
     Object.keys(EMPTY_SPECS).forEach(ensureEmptyState);
     outputPairs.forEach(([out, empty, handoff]) => {
@@ -404,12 +427,14 @@
     });
 
     wireGenerateA11y();
+    syncWeeklyEmpty();
 
     const weeklyResults = document.getElementById('weekly-plan-results');
     if (weeklyResults && !weeklyResults._coachObs) {
       weeklyResults._coachObs = true;
       // attributes only — do not watch childList (handoff injection would loop)
       const wObs = new MutationObserver(() => {
+        syncWeeklyEmpty();
         if (!weeklyResults.classList.contains('hidden')) ensureWeeklyHandoff();
       });
       wObs.observe(weeklyResults, { attributes: true, attributeFilter: ['class'] });
@@ -422,6 +447,7 @@
       setTimeout(() => {
         wireGenerateA11y();
         ensureWeeklyHandoff();
+        syncWeeklyEmpty();
         refreshAllOutputs();
       }, 400);
     });

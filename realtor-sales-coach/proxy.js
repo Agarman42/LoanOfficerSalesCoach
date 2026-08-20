@@ -209,10 +209,19 @@ app.post('/api/v1/chat/completions', (req, res, next) => {
 
 // SPA-style fallback: unknown non-API GETs → index.html
 // Express 5: bare "*" crashes boot; absolute sendFile paths need { root }.
+// Never fall back for static asset extensions — missing .js/.css must 404
+// (otherwise browsers execute index.html as script and features break silently).
 app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'Not found', path: req.path });
+  }
+  if (
+    /\.(js|mjs|cjs|css|map|json|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot|txt|xml|webmanifest)$/i.test(
+      req.path
+    )
+  ) {
+    return res.status(404).type('text').send('Not found');
   }
   if (res.headersSent) return next();
   return res.sendFile('index.html', { root: ROOT }, (err) => {

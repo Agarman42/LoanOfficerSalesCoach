@@ -44,7 +44,7 @@ LOs get **Invite partners** in the sidebar / account menu. After creating an inv
 | `AUTH_STORE_PATH` | Optional | Default `data/auth-store.json` |
 | `AUTH_DISABLED` | Optional | `1` disables API auth (dev only — never prod) |
 | `XAI_API_KEY` | For AI | Unchanged |
-| `SMTP_*` | Optional | Forgot-password email not wired yet → use **admin temp password** |
+| `RESEND_API_KEY` or `SMTP_*` | Optional | Forgot-password email via Resend or SMTP (nodemailer). Also set `MAIL_FROM` + `APP_PUBLIC_URL`. Without mail config → **admin temp password** |
 
 ## First boot (local)
 
@@ -109,8 +109,8 @@ On Render (RuoffAgentSalesCoach), set `AUTH_SESSION_SECRET`, `ADMIN_EMAIL`, `ADM
 
 ## Forgot password
 
-Without SMTP: realtor asks Adam → Admin · usage → **Reset pw** → share temp password.  
-With SMTP (future): `POST /api/auth/forgot-password` + email link.
+Without mail config: realtor asks admin/LO → Admin · usage → **Reset pw** → share temp password.  
+With `RESEND_API_KEY` or SMTP: Sign in → **Forgot password?** → email with `#reset=TOKEN` link → set new password on the gate.
 
 ## Confirm LO Coach untouched
 

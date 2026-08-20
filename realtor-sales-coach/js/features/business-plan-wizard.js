@@ -456,7 +456,7 @@
                 <input type="number" id="bp-wizard-income" placeholder="e.g. 275000" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
               </div>
               <div>
-                <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bp-wizard-closings">Target funded loans / closings</label>
+                <label class="block text-sm font-semibold text-[#00A89D] mb-1" for="bp-wizard-closings">Target closings / transactions</label>
                 <input type="number" id="bp-wizard-closings" placeholder="e.g. 65" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800">
               </div>
             </div>

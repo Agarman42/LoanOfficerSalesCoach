@@ -27,7 +27,7 @@
       "Knock on one local business door with a small pop-by.",
       "Review and update CRM notes for follow-ups.",
       "Post one 75% personal life story on social and tag partners.",
-      "Review a past client file for refinance opportunity.",
+      "Review a past client for move-up, referral, or re-engage opportunity.",
       "Time-block a passion activity with a partner (golf, etc.).",
       "Like/comment on team closing photos.",
       "Send milestone update texts to active clients."
@@ -35,12 +35,12 @@
     weekly: [
       "Pipeline review with key referral partners.",
       "Send weekly updates to active clients.",
-      "Host a 15-min coaching Zoom for realtors.",
+      "Host a short value Zoom for sphere or past clients.",
       "Attend at least one networking event.",
       "Send value-first 'Who do you know?' texts to partners.",
       "Create and send a value-packed email/newsletter.",
       "Host casual coffee or lunch with a partner.",
-      "Review past loans for refinance opportunities.",
+      "Review past clients for move-up, referral, and re-engage opportunities.",
       "Host a passion-blended activity with 2-3 realtors.",
       "Send 10–15 birthday/anniversary videos.",
       "Post client success stories on social.",
@@ -48,7 +48,7 @@
     ],
     monthly: [
       "Deliver pop-by gifts to top 10 partners/clients.",
-      "Host an Ask Your Lender Zoom call.",
+      "Co-host a buyer Q&A Zoom with your preferred lender.",
       "Host a first-time homebuyer seminar.",
       "Send handwritten birthday/anniversary cards.",
       "Record a long-form video on a trending topic.",
@@ -157,7 +157,7 @@
           "Quick kitchen hack or recipe I used this week",
           "Throwback to my very first closing — 5 years ago!",
           "Pet photo Friday! Meet my dog 🐶",
-          "What I’m grateful for this week as a loan officer",
+          "What I’m grateful for this week as an agent"
           "A funny story from a recent client meeting",
           "Favorite local restaurant I took a client to"
         ];

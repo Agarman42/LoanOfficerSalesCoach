@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260819-polish375">
+    <link rel="stylesheet" href="css/main.css?v=20260820-harden377">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -336,7 +336,7 @@
     <!-- AI Chat Assistant - Persistent on every page (now a full Coach with suggestions, vault saves, tool bridges & profile memory) -->
 <div class="fixed bottom-4 right-4 z-50">
     <button onclick="showSection('ai-chat')" 
-            class="bg-gradient-to-r from-[#00A89D] to-[#00A89D] text-white px-5 py-3.5 rounded-full shadow-2xl hover:scale-105 transition-all flex items-center gap-2 text-sm font-semibold"
+            class="bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white px-5 py-3.5 rounded-full shadow-2xl hover:scale-105 transition-all flex items-center gap-2 text-sm font-semibold"
             title="Open your AI Coach — profile-aware, tool-connected, and always ready">
         <i class="fas fa-robot text-lg"></i>
         <span class="hidden sm:inline">Coach</span>
@@ -1568,13 +1568,15 @@
                 </div>
 
                 <div class="text-center">
-                    <button type="button" onclick="(function(){function run(){if(typeof window.generateConsultationKit==='function'){window.generateConsultationKit();}else if(typeof window.showToast==='function'){window.showToast('Consultation Kit is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('consultation'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
-                            class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl">
-                        Generate My Consultation Prep Kit
+                    <button type="button" id="generate-consult-btn" onclick="(function(){function run(){if(typeof window.generateConsultationKit==='function'){window.generateConsultationKit();}else if(typeof window.showToast==='function'){window.showToast('Consultation Kit is preparing — one moment…','info');}} if(typeof window.ensureFeatureScripts==='function'){var p=window.ensureFeatureScripts('consultation'); if(p&&p.then){p.then(run).catch(run); return;}} run();})();"
+                            class="coach-generate-btn w-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white py-5 rounded-full hover:opacity-90 transition-all font-bold text-xl shadow-2xl inline-flex items-center justify-center gap-3">
+                        <i class="fas fa-magic" aria-hidden="true"></i>
+                        <span>Generate Consultation Kit</span>
                     </button>
                 </div>
             </div>
 
+            <div id="consult-empty-state" class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-8"></div>
             <div id="consult-output" class="space-y-12 hidden"></div>
         </section>
 

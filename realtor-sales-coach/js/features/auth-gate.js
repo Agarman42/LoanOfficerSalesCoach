@@ -168,6 +168,24 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
     return q.get('invite') || '';
   }
 
+  function parseHashReset() {
+    const h = location.hash || '';
+    const m = h.match(/reset=([^&]+)/i);
+    if (m) return decodeURIComponent(m[1]);
+    const q = new URLSearchParams(location.search || '');
+    return q.get('reset') || '';
+  }
+
+  function clearResetHash() {
+    if (location.hash && /reset=/i.test(location.hash)) {
+      try {
+        history.replaceState(null, '', location.pathname + location.search);
+      } catch (e) {
+        location.hash = '';
+      }
+    }
+  }
+
   function renderGate(mode) {
     injectStyles();
     document.documentElement.classList.remove('asc-awaiting-auth');
@@ -183,23 +201,31 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
     setBodyLocked(true);
     mode = mode || 'login';
     const invitePrefill = parseHashInvite();
+    const resetToken = parseHashReset();
+    if (mode !== 'reset' && resetToken) mode = 'reset';
 
     root.innerHTML =
       '<div class="asc-card">' +
       '<div class="asc-brand"><div class="asc-brand-mark">AG</div>' +
       '<div><h1>Agent Sales Coach</h1>' +
-      '<p class="asc-sub">Sign in with your invite to use the tools. Remember this device for 30 days.</p></div></div>' +
-      '<div class="asc-tabs" role="tablist">' +
-      '<button type="button" class="asc-tab' +
-      (mode === 'login' ? ' is-on' : '') +
-      '" data-mode="login">Sign in</button>' +
-      '<button type="button" class="asc-tab' +
-      (mode === 'invite' ? ' is-on' : '') +
-      '" data-mode="invite">Accept invite</button>' +
-      '<button type="button" class="asc-tab' +
-      (mode === 'request' ? ' is-on' : '') +
-      '" data-mode="request">Request access</button>' +
-      '</div>' +
+      '<p class="asc-sub">' +
+      (mode === 'reset'
+        ? 'Choose a new password to finish resetting your account.'
+        : 'Sign in with your invite to use the tools. Remember this device for 30 days.') +
+      '</p></div></div>' +
+      (mode === 'reset'
+        ? ''
+        : '<div class="asc-tabs" role="tablist">' +
+          '<button type="button" class="asc-tab' +
+          (mode === 'login' ? ' is-on' : '') +
+          '" data-mode="login">Sign in</button>' +
+          '<button type="button" class="asc-tab' +
+          (mode === 'invite' ? ' is-on' : '') +
+          '" data-mode="invite">Accept invite</button>' +
+          '<button type="button" class="asc-tab' +
+          (mode === 'request' ? ' is-on' : '') +
+          '" data-mode="request">Request access</button>' +
+          '</div>') +
       '<div id="asc-gate-panel"></div>' +
       '<div class="asc-err" id="asc-gate-err"></div>' +
       '<div class="asc-ok" id="asc-gate-ok"></div>' +
@@ -215,6 +241,75 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
     const panel = root.querySelector('#asc-gate-panel');
     const errEl = root.querySelector('#asc-gate-err');
     const okEl = root.querySelector('#asc-gate-ok');
+
+    if (mode === 'reset') {
+      panel.innerHTML =
+        '<form id="asc-reset-form">' +
+        '<label for="asc-newpass">New password (min 8)</label>' +
+        passwordFieldHtml('asc-newpass', {
+          name: 'password',
+          minlength: 8,
+          autocomplete: 'new-password',
+          placeholder: '••••••••'
+        }) +
+        '<label for="asc-newpass2">Confirm password</label>' +
+        passwordFieldHtml('asc-newpass2', {
+          name: 'password2',
+          minlength: 8,
+          autocomplete: 'new-password',
+          placeholder: '••••••••'
+        }) +
+        '<button type="submit" class="asc-btn" id="asc-reset-btn">Update password</button>' +
+        '<button type="button" class="asc-btn asc-btn-ghost" id="asc-reset-cancel">Back to sign in</button>' +
+        '</form>';
+      bindPasswordToggles(panel);
+      panel.querySelector('#asc-reset-cancel').addEventListener('click', function () {
+        clearResetHash();
+        renderGate('login');
+      });
+      panel.querySelector('#asc-reset-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        showError(errEl, '');
+        showOk(okEl, '');
+        const p1 = panel.querySelector('#asc-newpass').value;
+        const p2 = panel.querySelector('#asc-newpass2').value;
+        if (p1.length < 8) {
+          showError(errEl, 'Password must be at least 8 characters');
+          return;
+        }
+        if (p1 !== p2) {
+          showError(errEl, 'Passwords do not match');
+          return;
+        }
+        const token = resetToken || parseHashReset();
+        if (!token) {
+          showError(errEl, 'Reset link is missing or expired. Request a new one from Sign in.');
+          return;
+        }
+        const btn = panel.querySelector('#asc-reset-btn');
+        btn.disabled = true;
+        try {
+          const { res, data } = await api('/api/auth/reset-password', {
+            method: 'POST',
+            body: { token: token, password: p1 }
+          });
+          if (!res.ok) {
+            showError(errEl, (data && data.error) || 'Reset failed');
+            return;
+          }
+          clearResetHash();
+          showOk(okEl, (data && data.message) || 'Password updated. You can sign in.');
+          setTimeout(function () {
+            renderGate('login');
+          }, 900);
+        } catch (err) {
+          showError(errEl, 'Network error — try again in a moment');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+      return;
+    }
 
     if (mode === 'login') {
       panel.innerHTML =
@@ -274,7 +369,7 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
         showOk(
           okEl,
           (data && data.message) ||
-            'If that account exists, your admin can issue a temporary password from /admin.'
+            'If that account exists, check your email for a reset link — or ask your admin for a temporary password.'
         );
       });
     } else if (mode === 'invite') {
@@ -581,7 +676,9 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
       /* offline / server down — still show login */
     }
     const invite = parseHashInvite();
-    renderGate(invite ? 'invite' : 'login');
+    const reset = parseHashReset();
+    if (reset) renderGate('reset');
+    else renderGate(invite ? 'invite' : 'login');
   }
 
   // Public helpers

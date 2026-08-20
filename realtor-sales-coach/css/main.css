@@ -5605,3 +5605,29 @@ html.dark .calc-result-card--standard .calc-row--total span:last-child {
   padding-top: 0.95rem;
   padding-bottom: 0.95rem;
 }
+
+/* Prevent rare mobile horizontal bleed on Home tiles */
+#home,
+#home .home-loop-panel,
+#home .home-jump-panel,
+#home-favorites-panel {
+  max-width: 100%;
+  overflow-x: clip;
+}
+#home .home-loop-rail,
+#home .home-tool-grid,
+#home-favorites-grid {
+  max-width: 100%;
+}
+
+/* Vault start tip — compact so it doesn’t stack heavily with pregen guidance */
+#vault-empty-state .text-center {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+#vault-empty-state h3 {
+  font-size: 1.05rem !important;
+}
+#vault-empty-state ul {
+  margin-bottom: 0.75rem !important;
+}
