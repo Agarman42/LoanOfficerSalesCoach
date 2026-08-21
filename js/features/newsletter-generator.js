@@ -2932,7 +2932,7 @@ function buildPersonalVideoTable(personalVideoUrl) {
         </tr>
         <tr>
           <td align="center" style="padding-top:18px;">
-            <a href="${href}" target="_blank" rel="noopener" style="display:inline-block;padding:16px 40px;background:#F15A29;color:#fff;font-weight:bold;font-size:19px;text-decoration:none;border-radius:30px;">▶ Watch Video</a>
+            ${buildEmailSafeCtaButton(href, '▶ Watch Video', { bg: '#F15A29', color: '#ffffff', radius: 30, padding: '16px 40px', fontSize: '19px' })}
           </td>
         </tr>
       </table>
@@ -3110,7 +3110,11 @@ function buildCompactReferralRowHtml(firstName, email) {
     <td width="600" align="center" style="width:600px;padding:14px 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
       <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
       <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#666;">Know someone buying or refinancing? Forward this email — or tap below.</p>
-      <a href="mailto:${safeEmail}?subject=${mailSubject}&body=${mailBody}" style="display:inline-block;padding:9px 20px;background:#00A89D;color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;border-radius:20px;">Send a Referral</a>
+      ${buildEmailSafeCtaButton(
+          `mailto:${safeEmail}?subject=${mailSubject}&body=${mailBody}`,
+          'Send a Referral',
+          { bg: '#00A89D', color: '#ffffff', radius: 20, padding: '9px 20px', fontSize: '13px' }
+      )}
     </td>
   </tr>
 </table>`;
@@ -5074,6 +5078,9 @@ if (postSelections?.includeReferral) {
 
 /** Full raw HTML used for .html / .docx download and “Copy full HTML source” (not the Outlook-cleaned variant). */
 function getNewsletterRawHtmlForDownload() {
+    // Download / full-source copy should match CRM paste: email-safe, brand colors kept
+    const clean = typeof getCleanOutlookHTML === 'function' ? getCleanOutlookHTML() : '';
+    if (clean) return clean;
     const rawEl = document.getElementById('nl-html-raw');
     return rawEl && rawEl.value ? String(rawEl.value) : '';
 }
@@ -5432,39 +5439,154 @@ function wrapBodyForOutlookPaste(html) {
     return bodyMatch[1] + inner + bodyMatch[3];
 }
 
-function getCleanOutlookHTML() {
-    const rawEl = document.getElementById('nl-html-raw');
-    if (!rawEl || !rawEl.value) {
-        return '';
-    }
+/**
+ * Build a table-based "bulletproof" CTA for Gmail/Outlook.
+ * Keeps brand fill color + pill radius without relying on CSS classes.
+ */
+function buildEmailSafeCtaButton(href, labelHtml, opts) {
+    opts = opts || {};
+    const bg = opts.bg || '#F15A29';
+    const color = opts.color || '#ffffff';
+    const radius = opts.radius != null ? opts.radius : 30;
+    const pad = opts.padding || '14px 32px';
+    const fontSize = opts.fontSize || '16px';
+    const safeHref = String(href || '#').replace(/"/g, '&quot;');
+    const label = String(labelHtml == null ? 'Click here' : labelHtml);
+    return (
+        '<table border="0" cellpadding="0" cellspacing="0" role="presentation" align="center" ' +
+        'style="border-collapse:separate;mso-table-lspace:0pt;mso-table-rspace:0pt;margin:0 auto;">' +
+        '<tr><td align="center" bgcolor="' + bg + '" style="border-radius:' + radius + 'px;background-color:' + bg + ';">' +
+        '<a href="' + safeHref + '" target="_blank" rel="noopener" ' +
+        'style="display:inline-block;padding:' + pad + ';font-family:Arial,Helvetica,sans-serif;' +
+        'font-size:' + fontSize + ';font-weight:bold;line-height:1.25;color:' + color + ';' +
+        'text-decoration:none;border-radius:' + radius + 'px;mso-padding-alt:0;">' +
+        label +
+        '</a></td></tr></table>'
+    );
+}
 
-    let cleanHTML = rawEl.value;
+function parseCssDecl(style, prop) {
+    const re = new RegExp('(?:^|;)\\s*' + prop.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*([^;]+)', 'i');
+    const m = String(style || '').match(re);
+    return m ? m[1].trim() : '';
+}
 
-    // === BRAND COLOR NORMALIZATION for clean Outlook / vault copies ===
-    // Replaces obnoxious orange (#F15A29) headers/buttons with professional navy (#002B5C)
-    // so the saved-to-vault version (and what Copy for Outlook copies) has subdued, email-appropriate styling.
-    // The full branded orange version is still available via raw download if desired.
-    cleanHTML = cleanHTML.replace(/#F15A29/gi, '#002B5C');
-    cleanHTML = cleanHTML.replace(/F15A29/gi, '002B5C');
-    // Also catch in style/bgcolor attrs etc.
-    cleanHTML = cleanHTML.replace(/color\s*:\s*#?F15A29/gi, 'color:#002B5C');
-    cleanHTML = cleanHTML.replace(/background\s*:\s*#?F15A29/gi, 'background:#002B5C');
-    cleanHTML = cleanHTML.replace(/background-color\s*:\s*#?F15A29/gi, 'background-color:#002B5C');
-    cleanHTML = cleanHTML.replace(/bgcolor\s*=\s*["']?#?F15A29["']?/gi, 'bgcolor="#002B5C"');
+/**
+ * Turn pill-styled <a> CTAs into table+bgcolor buttons so radius/padding survive CRM paste.
+ * Skips anchors already wrapped in a data-nl-email-btn table.
+ */
+function convertStyledAnchorsToBulletproofButtons(html) {
+    return String(html || '').replace(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi, (full, attrs, inner) => {
+        if (/data-nl-email-btn=["']1["']/i.test(attrs)) return full;
+        // Already inside a bulletproof cell from a prior pass — leave alone if parent marker nearby
+        const styleMatch = attrs.match(/\bstyle\s*=\s*("([^"]*)"|'([^']*)')/i);
+        const style = styleMatch ? (styleMatch[2] || styleMatch[3] || '') : '';
+        const bg =
+            parseCssDecl(style, 'background-color') ||
+            parseCssDecl(style, 'background') ||
+            '';
+        const display = parseCssDecl(style, 'display');
+        const padding = parseCssDecl(style, 'padding');
+        const looksLikeBtn =
+            /#(?:F15A29|00A89D|002B5C|008F85)/i.test(bg) ||
+            (/inline-block/i.test(display) && /padding/i.test(style) && /background/i.test(style));
+        if (!looksLikeBtn) return full;
 
-    // === HERO IMAGE - Light gray background on sides + centered (cleaned only) ===
+        const hrefMatch = attrs.match(/\bhref\s*=\s*("([^"]*)"|'([^']*)')/i);
+        const href = hrefMatch ? (hrefMatch[2] || hrefMatch[3] || '#') : '#';
+        let bgNorm = bg.replace(/\s*!important/i, '').trim();
+        if (/^#f15a29$/i.test(bgNorm)) bgNorm = '#F15A29';
+        if (/^#00a89d$/i.test(bgNorm)) bgNorm = '#00A89D';
+        if (/^#002b5c$/i.test(bgNorm)) bgNorm = '#002B5C';
+        if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(bgNorm)) {
+            if (/f15a29/i.test(style)) bgNorm = '#F15A29';
+            else if (/00a89d/i.test(style)) bgNorm = '#00A89D';
+            else if (/002b5c/i.test(style)) bgNorm = '#002B5C';
+            else bgNorm = '#F15A29';
+        }
+        const color = parseCssDecl(style, 'color') || '#ffffff';
+        const radiusRaw = parseCssDecl(style, 'border-radius') || '30px';
+        const radius = parseInt(radiusRaw, 10) || 30;
+        const fontSize = parseCssDecl(style, 'font-size') || '16px';
+        const pad = padding || '14px 32px';
+        const label = String(inner || '').replace(/\s+/g, ' ').trim() || 'Click here';
+        return (
+            '<table border="0" cellpadding="0" cellspacing="0" role="presentation" data-nl-email-btn="1" align="center" ' +
+            'style="border-collapse:separate;mso-table-lspace:0pt;mso-table-rspace:0pt;margin:0 auto;">' +
+            '<tr><td align="center" bgcolor="' + bgNorm + '" style="border-radius:' + radius + 'px;background-color:' + bgNorm + ';">' +
+            '<a href="' + String(href).replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" ' +
+            'style="display:inline-block;padding:' + pad + ';font-family:Arial,Helvetica,sans-serif;' +
+            'font-size:' + fontSize + ';font-weight:bold;line-height:1.25;color:' +
+            (color || '#ffffff') + ';text-decoration:none;border-radius:' + radius + 'px;">' +
+            label +
+            '</a></td></tr></table>'
+        );
+    });
+}
+
+function hardenImagesForEmail(html) {
+    return String(html || '').replace(/<img\b([^>]*)>/gi, (full, attrs) => {
+        let a = String(attrs || '');
+        if (/style\s*=/i.test(a)) {
+            a = a.replace(/style\s*=\s*"([^"]*)"/i, (m, styleVal) => {
+                let s = styleVal
+                    .replace(/\bmax-width\s*:\s*[^;"]*/gi, '')
+                    .replace(/\bheight\s*:\s*[^;"]*/gi, '')
+                    .replace(/\bdisplay\s*:\s*[^;"]*/gi, '');
+                s = (s.replace(/;+\s*$/, '') + ';max-width:100%;height:auto;display:block;border:0;').replace(/;;+/g, ';');
+                return 'style="' + s + '"';
+            });
+            a = a.replace(/style\s*=\s*'([^']*)'/i, (m, styleVal) => {
+                let s = styleVal
+                    .replace(/\bmax-width\s*:\s*[^;']*/gi, '')
+                    .replace(/\bheight\s*:\s*[^;']*/gi, '')
+                    .replace(/\bdisplay\s*:\s*[^;']*/gi, '');
+                s = (s.replace(/;+\s*$/, '') + ';max-width:100%;height:auto;display:block;border:0;').replace(/;;+/g, ';');
+                return "style='" + s + "'";
+            });
+        } else {
+            a += ' style="max-width:100%;height:auto;display:block;border:0;"';
+        }
+        return '<img' + a + '>';
+    });
+}
+
+function stripWebOnlyEmailChrome(html) {
+    let out = String(html || '');
+    // External/internal stylesheets & style blocks — email clients strip or ignore inconsistently
+    out = out.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
+    out = out.replace(/<link\b[^>]*rel=["']?stylesheet["']?[^>]*>/gi, '');
+    // class= alone is unreliable in many ESPs; keep inline styles
+    out = out.replace(/\sclass=(["'])[^"']*\1/gi, '');
+    out = out.replace(/\sclass=[^\s>]+/gi, '');
+    return out;
+}
+
+/**
+ * Email-client-safe export for CRM paste / Outlook / Gmail.
+ * Keeps brand colors (orange Watch Video, teal referral, navy accents).
+ * Does NOT flatten orange → navy (that made CTAs look worse in-inbox).
+ */
+function toEmailSafeNewsletterHTML(htmlString) {
+    if (!htmlString) return '';
+
+    let cleanHTML = String(htmlString);
+
+    cleanHTML = stripWebOnlyEmailChrome(cleanHTML);
+
+    // === HERO IMAGE - Light gray background on sides + centered ===
     cleanHTML = cleanHTML.replace(
         /<tr>\s*<td[^>]*>\s*<img src="([^"]+)"[^>]*alt=["']Hero[^>]*>[\s\S]*?<\/td>\s*<\/tr>/gi,
         `<tr>
-            <td align="center" style="background:#f9f9f9; padding:0; text-align:center;">
-                <img src="$1" alt="Hero Image" width="600" 
-                     style="width:600px; max-width:600px; height:auto; display:block; margin:0 auto; border:0;">
+            <td align="center" style="background:#f9f9f9;padding:0;text-align:center;">
+                <img src="$1" alt="Hero Image" width="600"
+                     style="width:600px;max-width:100%;height:auto;display:block;margin:0 auto;border:0;">
             </td>
         </tr>
-        <tr><td height="20" align="center"></td></tr>`
+        <tr><td height="20" align="center" style="font-size:0;line-height:0;">&nbsp;</td></tr>`
     );
 
-    // === UNIFORM PADDING ON EVERY TEAL CARD'S CONTENT TD (cleaned only) ===
+    // === UNIFORM PADDING ON EVERY TEAL CARD'S CONTENT TD ===
     cleanHTML = cleanHTML.replace(
         /(<table[^>]*?border-left:\s*8px solid #00A89D[^>]*>)([\s\S]*?<td[^>]*?)(style="[^"]*?")/gi,
         (match, tableStart, tdBeforeStyle, styleAttr) => {
@@ -5483,9 +5605,19 @@ function getCleanOutlookHTML() {
     cleanHTML = normalizePersonalVideoBlocks(cleanHTML);
     cleanHTML = normalizeNewsletterModuleWidths(cleanHTML);
     cleanHTML = ensureContentRowsCentered(cleanHTML);
+    cleanHTML = hardenImagesForEmail(cleanHTML);
+    cleanHTML = convertStyledAnchorsToBulletproofButtons(cleanHTML);
     cleanHTML = wrapBodyForOutlookPaste(cleanHTML);
 
     return cleanHTML;
+}
+
+function getCleanOutlookHTML() {
+    const rawEl = document.getElementById('nl-html-raw');
+    if (!rawEl || !rawEl.value) {
+        return '';
+    }
+    return toEmailSafeNewsletterHTML(rawEl.value);
 }
 
 function copyHtmlToOutlookClipboard(html, onSuccess, onError) {
@@ -5514,7 +5646,11 @@ function copyForOutlook() {
     }
 
     const onSuccess = () => {
-        alert('✅ Outlook-optimized HTML copied!\n\nPaste into a NEW email in Outlook.');
+        if (window.showToast) {
+            window.showToast('Email-safe HTML copied — paste into Outlook / CRM blast.', 'success');
+        } else {
+            alert('Email-safe HTML copied!\n\nPaste into Outlook or your CRM email blast.');
+        }
     };
 
     copyHtmlToOutlookClipboard(cleanHTML, onSuccess).catch(() => {
@@ -5587,10 +5723,11 @@ function copyForOutlook() {
   window.buildNewsletterHtmlSourceDocx = buildNewsletterHtmlSourceDocx;
   window.copyForOutlook = copyForOutlook;
   window.getCleanOutlookHTML = getCleanOutlookHTML;
+  window.toEmailSafeNewsletterHTML = toEmailSafeNewsletterHTML;
+  window.buildEmailSafeCtaButton = buildEmailSafeCtaButton;
 
-  // Centralized save for newsletter that ALWAYS uses the exact same cleaned Outlook version
-  // as what copyForOutlook() would copy to clipboard. This ensures "Save to Vault" never
-  // has the orange headers that the raw/preview might.
+  // Centralized save for newsletter — same email-safe HTML as Copy for Outlook / Email
+  // (inline styles, bulletproof CTAs, brand colors preserved).
   window.saveNewsletterToVault = function() {
     if (typeof window.toggleSaveIdea !== 'function') {
       alert('Saved Items system not ready yet. Please try again in a moment.');
@@ -5606,9 +5743,9 @@ function copyForOutlook() {
     const title = baseTitle + ' — ' + new Date().toISOString().slice(0, 16).replace('T', ' ');
     window.toggleSaveIdea(title, clean, null, 'newsletter', { format: 'html' });
     if (window.showToast) {
-      window.showToast('Newsletter (Outlook version) saved to My Saved Items!', 'success');
+      window.showToast('Newsletter (email-safe HTML) saved to My Saved Items!', 'success');
     } else {
-      alert('Newsletter (Outlook version) saved to My Saved Items!');
+      alert('Newsletter (email-safe HTML) saved to My Saved Items!');
     }
   };
 
