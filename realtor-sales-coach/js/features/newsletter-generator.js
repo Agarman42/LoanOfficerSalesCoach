@@ -3418,180 +3418,15 @@ function extractStandaloneNewsletterHtml(html) {
     return src;
 }
 
-function newsletterModuleRank(el) {
-    if (!el || el.nodeType !== 1) return 15;
-    const html = el.outerHTML || '';
-    const text = el.textContent || '';
-    if (/data-nl-brain-teaser-answer/i.test(html)) return 50;
-    if (/data-nl-disclaimer-block/i.test(html)) return 40;
-    if (/Equal Housing/i.test(text) && /informational purposes/i.test(text)) return 40;
-    if (/data-nl-referral-block/i.test(html) || /Send a Referral/i.test(text)) return 30;
-    return 10;
-}
-
-function classifyNewsletterRow(tr) {
-    const html = tr.innerHTML || '';
-    const text = (tr.textContent || '').replace(/\s+/g, ' ').trim();
-    if (!text && /height=["']?2\d["']?/i.test(html)) return 'spacer';
-    if (/data-nl-brain-teaser-answer/i.test(html) || (/^Answer:/i.test(text) && text.length < 160)) return 'answer';
-    if (/data-nl-disclaimer-block/i.test(html) || /Equal Housing/i.test(text)) return 'footer';
-    if (/data-nl-referral-block/i.test(html) || /Send a Referral/i.test(text)) return 'referral';
-    if (/data-nl-personal-video/i.test(html) || /Personal Video Update/i.test(text)) return 'video';
-    if (/A Note From/i.test(text)) return 'personal';
-    if (/My Recent Blog|From the Blog|Blog Highlight/i.test(text)) return 'blog';
-    if (tr.querySelector('h1') || /alt=["']Hero["']/i.test(html)) return 'header';
-    return 'content';
-}
-
-function reorderNewsletterMainTableRows(mainTable) {
-    if (!mainTable) return;
-    const tbody = mainTable.tBodies[0] || mainTable;
-    const rows = Array.from(tbody.rows || []);
-    if (rows.length < 3) return;
-    const buckets = {
-        header: [], personal: [], video: [], content: [], blog: [],
-        referral: [], footer: [], answer: []
-    };
-    const pending = [];
-    rows.forEach((tr) => {
-        const kind = classifyNewsletterRow(tr);
-        if (kind === 'spacer') {
-            pending.push(tr);
-            return;
-        }
-        const list = buckets[kind] || buckets.content;
-        pending.forEach((sp) => list.push(sp));
-        pending.length = 0;
-        list.push(tr);
-    });
-    const order = ['header', 'personal', 'video', 'content', 'blog', 'referral', 'footer', 'answer'];
-    order.forEach((k) => {
-        buckets[k].forEach((tr) => tbody.appendChild(tr));
-    });
-    pending.forEach((tr) => tbody.appendChild(tr));
-}
-
-function unwrapNewsletterBodyShells(body) {
-    if (!body) return;
-    let guard = 0;
-    while (guard++ < 8) {
-        const kids = Array.from(body.children).filter((el) => el.nodeType === 1);
-        if (kids.length !== 1) break;
-        const wrap = kids[0];
-        const tag = wrap.tagName;
-        if (tag === 'TABLE') break;
-        if (!wrap.querySelector('table')) break;
-        while (wrap.firstChild) body.insertBefore(wrap.firstChild, wrap);
-        wrap.remove();
-    }
-    Array.from(body.children).forEach((el) => {
-        if (!el || el.nodeType !== 1) return;
-        if (el.tagName === 'TABLE') return;
-        if (el.querySelector && el.querySelector('table')) return;
-        el.parentNode.removeChild(el);
-    });
-}
-
-function stabilizeNewsletterBodyModules(doc) {
-    const body = doc.body;
-    if (!body) return;
-    unwrapNewsletterBodyShells(body);
-    Array.from(body.children).forEach((root) => {
-        if (!root || root.nodeType !== 1) return;
-        root.querySelectorAll(
-            'table[data-nl-disclaimer-block="1"], table[data-nl-referral-block="1"], table[data-nl-brain-teaser-answer="1"]'
-        ).forEach((t) => {
-            if (t === root || t.parentElement === body) return;
-            body.appendChild(t);
-        });
-    });
-    const kids = Array.from(body.children).filter((el) => el.nodeType === 1);
-    const pinned = kids.filter((el) => newsletterModuleRank(el) >= 30)
-        .sort((a, b) => newsletterModuleRank(a) - newsletterModuleRank(b));
-    const rest = kids.filter((el) => newsletterModuleRank(el) < 30);
-    rest.concat(pinned).forEach((el) => body.appendChild(el));
-}
-
-function trimNewsletterBodyAfterFooter(doc) {
-    const body = doc.body;
-    if (!body) return;
-    const kids = Array.from(body.childNodes);
-    let lastKeep = -1;
-    kids.forEach((n, i) => {
-        if (!n || n.nodeType !== 1) return;
-        const html = n.outerHTML || '';
-        const text = n.textContent || '';
-        if (/data-nl-disclaimer-block/i.test(html)
-            || /data-nl-brain-teaser-answer/i.test(html)
-            || (/Equal Housing/i.test(text) && /informational purposes/i.test(text))) {
-            lastKeep = i;
-        }
-    });
-    if (lastKeep < 0) return;
-    for (let i = kids.length - 1; i > lastKeep; i--) {
-        const n = kids[i];
-        if (n && n.parentNode) n.parentNode.removeChild(n);
-    }
-}
-
-function constrainNewsletterMedia(doc) {
-    doc.querySelectorAll('img').forEach((img) => {
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        img.style.float = 'none';
-        if (!img.getAttribute('alt')) img.setAttribute('alt', '');
-        const w = parseInt(img.getAttribute('width') || '0', 10);
-        if (w > 600) img.setAttribute('width', '600');
-    });
-    doc.querySelectorAll('table').forEach((table) => {
-        const style = table.getAttribute('style') || '';
-        if (!/max-width/i.test(style) && /width:\s*600px/i.test(style)) {
-            table.setAttribute('style', style.replace(/;?\s*$/, ';max-width:600px;'));
-        }
-    });
-}
-
-function newsletterPlainText(html) {
-    return String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-}
-
+/** Light sanitizer only — never rearrange logo/title/section order. */
 function sealAndStabilizeNewsletterHtml(html) {
-    const extracted = extractStandaloneNewsletterHtml(html);
-    if (!extracted.trim()) return String(html || '');
-    if (typeof DOMParser === 'undefined') return extracted;
-    const originalText = newsletterPlainText(extracted);
-    let doc;
-    try {
-        doc = new DOMParser().parseFromString(extracted, 'text/html');
-    } catch (e) {
-        return extracted;
-    }
-    if (!doc || !doc.body) return extracted;
-    doc.querySelectorAll('script, iframe, object, embed').forEach((n) => n.remove());
-    constrainNewsletterMedia(doc);
-    stabilizeNewsletterBodyModules(doc);
-    trimNewsletterBodyAfterFooter(doc);
-    if (doc.body) {
-        doc.body.setAttribute('contenteditable', 'false');
-        doc.body.style.margin = doc.body.style.margin || '0';
-        doc.body.style.overflowX = 'hidden';
-    }
-    const sealed = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-    const sealedText = newsletterPlainText(sealed);
-    if (originalText.length > 40 && sealedText.length < Math.max(40, originalText.length * 0.4)) {
-        return extracted;
-    }
-    if (!/<table/i.test(sealed) && /<table/i.test(extracted)) {
-        return extracted;
-    }
-    return sealed;
+    return extractStandaloneNewsletterHtml(html);
 }
 window.sealAndStabilizeNewsletterHtml = sealAndStabilizeNewsletterHtml;
 
 function hardenNewsletterPreviewHtml(html) {
-    let out = sealAndStabilizeNewsletterHtml(html);
+    let out = extractStandaloneNewsletterHtml(html);
     if (!out.trim()) return out;
-
     // Strip scripts in sandboxed preview (security + quiet console)
     out = out
         .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
@@ -5364,14 +5199,56 @@ async function generateNewsletter(feedback = '') {
                 '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.nar.realtor/research-and-statistics" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">NAR Research</a>, <a href="https://www.housingwire.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">HousingWire</a>.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any blog section yourself unless instructed in SECTION SELECTION. Leave <!-- BLOG SECTION PLACEHOLDER --> only when blog is included.',
                 '',
-                'OUTPUT: complete standalone HTML email only (DOCTYPE through </html>). Table-based 600px layout, inline CSS, teal 8px left-border cards.',
-                'Include a header (title + location) and the required hero image URL. Generate ONLY checked content sections — no extras, no footer, no referral, no disclaimer, no signature.',
-                'Leave these placeholders exactly when those options are included: <!-- BLOG SECTION PLACEHOLDER -->, [PERSONAL PHOTO PLACEHOLDER], <!-- PERSONAL VIDEO PLACEHOLDER -->, <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->.',
-                'Personal note heading: A Note From [Name]. Do not invent personal facts. Do not hardcode a brokerage logo.'
-            ];
-            if (selections.personal) {
-                promptLines.push('Include the Personal Note section after main content cards.');
+                'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate ONLY the optional content sections listed in SECTION SELECTION — each as its own teal card. Do not invent extra sections. After included sections, append the skeleton placeholders/footer below. Leave untouched placeholders only for sections marked INCLUDE.',
+                '',
+'<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head><meta charset="UTF-8"></head>',
+    '<body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif;">',
+    '  <table width="600" align="center" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;margin:0 auto;background:#ffffff;border-collapse:collapse;">',
+    '    <tr><td style="padding:40px 20px; text-align:center; background:#f9f9f9;">',
+    '      <table align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;">',
+    '        <tr>',
+    '          <td align="center">',
+    '            <!-- [YOUR LOGO / BRAND HEADER HERE] - Custom branding from your profile (company, logo, tagline) is injected automatically in post-processing. Do not hardcode any specific brokerage logo. -->',
+    '          </td>',
+    '        </tr>',
+    '      </table>',
+    '      <h1 style="color:#002B5C; font-size:36px; margin:8px 0 6px; text-align:center;">[Title]</h1>',
+    '      <p style="color:#666; margin:0 0 12px; text-align:center;">Insights from [Location]</p>',
+    '    </td></tr>',
+    '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
+    '    <tr><td height="20"></td></tr>',
+    '    <!-- MAIN CONTENT SECTIONS: generate ONLY the checked sections from SECTION SELECTION as full teal cards here -->',
+    '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
+    '    <tr><td height="20"></td></tr>'
+];
+            if (selections.includeBlog) {
+                promptLines.push('    <!-- BLOG SECTION PLACEHOLDER -->');
             }
+            if (selections.personal) {
+                promptLines.push(
+                    '    <!-- Personal Note Section -->',
+                    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
+                    '      <tr><td style="padding:30px;">',
+                    '        <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">A Note From [Name]</h2>',
+                    '        <p style="margin:15px 0 25px; font-size:18px; line-height:1.6;">[Polished personal update]</p>',
+                    selections.includePhoto ? '        [PERSONAL PHOTO PLACEHOLDER]' : '',
+                    '      </td></tr>',
+                    '    </table></td></tr>',
+                    '    <tr><td height="20"></td></tr>'
+                );
+            }
+            if (selections.includeVideo) {
+                promptLines.push('    <!-- PERSONAL VIDEO PLACEHOLDER -->');
+            }
+            promptLines.push(
+                '    <!-- DISCLAIMER: added in post-processing after signature + referral — do NOT include a disclaimer row in the body -->',
+                (selections.contentSections.puzzle ? '    <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->' : ''),
+                '  </table>',
+                '</bo' + 'dy>',
+                '</ht' + 'ml>'
+            );
         }
 
         if (!feedback && window.NlEntertainment && typeof window.NlEntertainment.buildPromptLines === 'function') {
@@ -5383,7 +5260,7 @@ async function generateNewsletter(feedback = '') {
         // Centralized API call (Phase 0)
         let fullContent = await window.callGrokAPI(prompt, {
             temperature: feedback ? 0.7 : 0.8,
-            max_tokens: 6000,
+            max_tokens: 12000,
             timeoutMs: 75000,
             model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
         });
