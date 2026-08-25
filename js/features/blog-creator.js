@@ -24,28 +24,66 @@
     if (!BLOG_ENABLE_RUOFF_PUBLISH) return '';
     // Clarity-only UI: same id + copyBlogAndJumpToPublisher behavior — copies blog, then opens builder.
     return `
-        <div id="jump-publish-wrap" class="w-full basis-full order-first mb-1">
-          <button type="button" id="jump-publish-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white px-6 py-4 rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:opacity-95 transition-all inline-flex items-center justify-center gap-2">
+        <div id="jump-publish-wrap" class="w-full">
+          <button type="button" id="jump-publish-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white px-6 py-4 sm:py-5 rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:opacity-95 transition-all inline-flex items-center justify-center gap-2.5">
             <i class="fas fa-copy" aria-hidden="true"></i>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
             <span>Copy &amp; Open Ruoff Plus Blog Builder</span>
           </button>
-          <p id="jump-publish-hint" class="text-sm text-gray-600 dark:text-gray-400 m-0 mt-2 text-center leading-snug max-w-2xl mx-auto">
-            <strong class="text-[#002B5C] dark:text-white">Content is copied for you</strong> — Ruoff Plus opens next. Paste into the blog body (Ctrl/Cmd+V), then finish title and publish there.
+          <p id="jump-publish-hint" class="text-sm text-gray-600 dark:text-gray-400 m-0 mt-2.5 text-center leading-relaxed max-w-2xl mx-auto">
+            Content is copied automatically. Ruoff Plus opens next — paste into the blog body, then finish title and publish.
           </p>
         </div>`;
   }
 
-  /** Refresh labels on older saved output so restore still teaches the dual action. */
+  function getBlogSecondaryActionsHtml() {
+    // Quieter secondary row — no filled navy competing with the primary CTA
+    return `
+        <div id="blog-secondary-actions" class="pt-3 border-t border-gray-200 dark:border-gray-700">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Other actions</p>
+          <div class="flex flex-wrap gap-2">
+            <button id="copy-blog-btn" type="button" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition" title="Copy blog only — does not open Ruoff Plus">
+              <i class="fas fa-copy"></i> Copy blog only
+            </button>
+            <button id="download-blog-btn" type="button" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+              <i class="fas fa-download"></i> Download .doc
+            </button>
+            <button type="button" id="blog-next-steps-btn" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+              <i class="fas fa-list-check"></i> Next steps
+            </button>
+            <button type="button" onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+              <i class="fas fa-bookmark"></i> Save to vault
+            </button>
+            <button type="button" onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition">
+              <i class="fas fa-trash"></i> Clear
+            </button>
+          </div>
+        </div>`;
+  }
+
+  /** Refresh labels / hierarchy on older saved output so restore matches current UX. */
   function clarifyRuoffPublishLabels(html) {
     let patched = html || '';
-    if (!BLOG_ENABLE_RUOFF_PUBLISH || !patched.includes('id="jump-publish-btn"')) return patched;
-    if (patched.includes('id="jump-publish-hint"')) return patched;
-    // Replace bare old button with clarified control + hint
-    patched = patched.replace(
-      /<button([^>]*\bid="jump-publish-btn"[^>]*)>[\s\S]*?<\/button>/i,
-      () => getRuoffPublishButtonHtml().replace(/^\s+|\s+$/g, '')
-    );
+    if (!BLOG_ENABLE_RUOFF_PUBLISH) return patched;
+    // Full rebuild of action strip when secondary hierarchy block is missing
+    if (patched.includes('id="jump-publish-btn"') && !patched.includes('id="blog-secondary-actions"')) {
+      const rebuilt =
+        '<div id="blog-action-area" class="mb-8 space-y-4">' +
+        getRuoffPublishButtonHtml() +
+        getBlogSecondaryActionsHtml() +
+        '</div>';
+      const replaced = patched.replace(
+        /<div[^>]*class="[^"]*mb-8[^"]*"[^>]*>[\s\S]*?id="copy-blog-btn"[\s\S]*?<\/div>\s*(?=<div class="ai-output blog-companion)/i,
+        rebuilt
+      );
+      if (replaced !== patched) return replaced;
+    }
+    if (patched.includes('id="jump-publish-btn"') && !patched.includes('id="jump-publish-hint"')) {
+      patched = patched.replace(
+        /<button([^>]*\bid="jump-publish-btn"[^>]*)>[\s\S]*?<\/button>/i,
+        () => getRuoffPublishButtonHtml().replace(/^\s+|\s+$/g, '')
+      );
+    }
     return patched;
   }
 
@@ -810,25 +848,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         </div>
     </div>
 
-    <div class="mb-8 space-y-3">
+    <div id="blog-action-area" class="mb-8 space-y-4">
         ${getRuoffPublishButtonHtml()}
-        <div class="flex flex-wrap gap-2 sm:gap-3">
-        <button id="copy-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#002B5C] text-white text-sm font-semibold hover:bg-black transition" title="Copy blog only — does not open Ruoff Plus">
-            <i class="fas fa-copy"></i> Copy blog only
-        </button>
-        <button id="download-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-            <i class="fas fa-download"></i> Download .doc
-        </button>
-        <button type="button" id="blog-next-steps-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#00A89D] text-[#00A89D] text-sm font-semibold hover:bg-[#00A89D]/10 transition">
-            <i class="fas fa-list-check"></i> Next steps
-        </button>
-        <button onclick="if(typeof window.saveBlogToVault==='function') window.saveBlogToVault(); else alert('Save ready after refresh');" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-            <i class="fas fa-bookmark"></i> Save to vault
-        </button>
-        <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-            <i class="fas fa-trash"></i> Clear
-        </button>
-        </div>
+        ${getBlogSecondaryActionsHtml()}
     </div>
 
     <div class="ai-output blog-companion-card mb-5">
