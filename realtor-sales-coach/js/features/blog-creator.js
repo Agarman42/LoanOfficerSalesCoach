@@ -22,10 +22,30 @@
 
   function getRuoffPublishButtonHtml() {
     if (!BLOG_ENABLE_RUOFF_PUBLISH) return '';
+    // Clarity-only UI: same id + copyBlogAndJumpToPublisher behavior — copies blog, then opens builder.
     return `
-        <button id="jump-publish-btn" class="bg-[#00A89D] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#008F85] transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-external-link-alt"></i> Publish on Site
-        </button>`;
+        <div id="jump-publish-wrap" class="w-full basis-full order-first mb-1">
+          <button type="button" id="jump-publish-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white px-6 py-4 rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:opacity-95 transition-all inline-flex items-center justify-center gap-2">
+            <i class="fas fa-copy" aria-hidden="true"></i>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            <span>Copy &amp; Open Ruoff Plus Blog Builder</span>
+          </button>
+          <p id="jump-publish-hint" class="text-sm text-gray-600 dark:text-gray-400 m-0 mt-2 text-center leading-snug max-w-2xl mx-auto">
+            <strong class="text-[#002B5C] dark:text-white">Content is copied for you</strong> — Ruoff Plus opens next. Paste into the blog body (Ctrl/Cmd+V), then finish title and publish there.
+          </p>
+        </div>`;
+  }
+
+  /** Refresh labels on older saved output so restore still teaches the dual action. */
+  function clarifyRuoffPublishLabels(html) {
+    let patched = html || '';
+    if (!BLOG_ENABLE_RUOFF_PUBLISH || !patched.includes('id="jump-publish-btn"')) return patched;
+    if (patched.includes('id="jump-publish-hint"')) return patched;
+    patched = patched.replace(
+      /<button([^>]*\bid="jump-publish-btn"[^>]*)>[\s\S]*?<\/button>/i,
+      () => getRuoffPublishButtonHtml().replace(/^\s+|\s+$/g, '')
+    );
+    return patched;
   }
 
   function getBlogFeedbackHtml() {
@@ -45,6 +65,7 @@
   /** Patch older persisted blog output missing publish btn or feedback (localStorage restore). */
   function patchRestoredBlogOutput(html) {
     let patched = html || '';
+    patched = clarifyRuoffPublishLabels(patched);
     if (BLOG_ENABLE_RUOFF_PUBLISH && !patched.includes('id="jump-publish-btn"')) {
       patched = patched.replace(
         /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
@@ -752,14 +773,15 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         </div>
     </div>
 
-    <div class="flex flex-wrap gap-2 sm:gap-3 mb-8">
-        <button id="copy-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#002B5C] text-white text-sm font-semibold hover:bg-black transition">
-            <i class="fas fa-copy"></i> Copy blog
+    <div class="mb-8 space-y-3">
+        ${getRuoffPublishButtonHtml()}
+        <div class="flex flex-wrap gap-2 sm:gap-3">
+        <button id="copy-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#002B5C] text-white text-sm font-semibold hover:bg-black transition" title="Copy blog only — does not open Ruoff Plus">
+            <i class="fas fa-copy"></i> Copy blog only
         </button>
         <button id="download-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-[#002B5C] dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition">
             <i class="fas fa-download"></i> Download .doc
         </button>
-        ${getRuoffPublishButtonHtml()}
         <button type="button" id="blog-next-steps-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#00A89D] text-[#00A89D] text-sm font-semibold hover:bg-[#00A89D]/10 transition">
             <i class="fas fa-list-check"></i> Next steps
         </button>
@@ -769,6 +791,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         <button onclick="if(window.clearSavedBlog){window.clearSavedBlog();}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
             <i class="fas fa-trash"></i> Clear
         </button>
+        </div>
     </div>
 
     <div class="ai-output blog-companion-card mb-5">

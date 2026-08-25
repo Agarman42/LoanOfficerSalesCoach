@@ -43,7 +43,7 @@
     blog: [
       { id: 'proofread', label: 'Read the blog aloud — adjusted anything that doesn\'t sound like me' },
       { id: 'edits', label: 'Used Refine with Edits for any last changes (if needed)' },
-      { id: 'publish', label: 'Published on my site using the Publish on Site button above' },
+      { id: 'publish', label: 'Used Copy & Open Ruoff Plus Blog Builder (copied for me — pasted into the body)' },
       { id: 'social', label: 'Posted the matching social caption' },
       { id: 'google', label: 'Posted the Google Business update' },
       { id: 'reel', label: 'Filmed or scheduled the Reel script (or saved for later)' },
