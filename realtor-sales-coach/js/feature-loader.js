@@ -86,7 +86,7 @@
     ],
     'blog': [
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/blog-creator.js?v=20260825-next-steps-v381'
+      'js/features/blog-creator.js?v=20260825-agent-publish-v382'
     ],
     'social': [
       'js/features/social-modals.js?v=20260818-demo-safe',
@@ -127,7 +127,7 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260825-next-steps-v381',
+      'js/features/blog-creator.js?v=20260825-agent-publish-v382',
       'js/features/social-modals.js?v=20260818-demo-safe',
       'js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273',
       'js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273',

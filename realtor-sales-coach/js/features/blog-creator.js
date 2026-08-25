@@ -17,22 +17,27 @@
 (function () {
   'use strict';
 
-  // LO tool only — Realtors cannot publish on sales.ruoff.com
-  const BLOG_ENABLE_RUOFF_PUBLISH = true;
+  // Agent / Realtor tool — never open Ruoff Plus (LO-only publisher).
+  const BLOG_ENABLE_RUOFF_PUBLISH = false;
 
-  function getRuoffPublishButtonHtml() {
-    if (!BLOG_ENABLE_RUOFF_PUBLISH) return '';
-    // Clarity-only UI: same id + copyBlogAndJumpToPublisher behavior — copies blog, then opens builder.
+  /** Primary publish actions for agents: copy how they prefer, publish on their own site/platforms. */
+  function getBlogPrimaryPublishHtml() {
     return `
-        <div id="jump-publish-wrap" class="w-full">
-          <button type="button" id="jump-publish-btn" class="w-full bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white px-6 py-4 sm:py-5 rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:opacity-95 transition-all inline-flex items-center justify-center gap-2.5">
-            <i class="fas fa-copy" aria-hidden="true"></i>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-            <span>Copy &amp; Open Ruoff Plus Blog Builder</span>
-          </button>
-          <p id="jump-publish-hint" class="text-sm text-gray-600 dark:text-gray-400 m-0 mt-2.5 text-center leading-relaxed max-w-2xl mx-auto">
-            Content is copied automatically. Ruoff Plus opens next — paste into the blog body, then finish title and publish.
+        <div id="blog-publish-actions" class="w-full space-y-3">
+          <p class="text-sm text-gray-600 dark:text-gray-400 m-0 leading-relaxed">
+            Copy this post and publish on <strong>your website</strong> (WordPress, Squarespace, etc.) or hand it to your marketing person.
           </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <button type="button" id="copy-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-[#00A89D] to-[#008F85] text-white font-bold text-sm shadow-md hover:opacity-95 transition" title="Keeps headings and formatting for site builders">
+              <i class="fas fa-copy" aria-hidden="true"></i> Copy formatted
+            </button>
+            <button type="button" id="copy-blog-plain-btn" class="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 border-[#002B5C] text-[#002B5C] dark:border-gray-300 dark:text-gray-100 font-bold text-sm hover:bg-[#002B5C]/5 dark:hover:bg-white/5 transition" title="Plain text for email or simple CMS fields">
+              <i class="fas fa-align-left" aria-hidden="true"></i> Copy plain text
+            </button>
+            <button type="button" id="download-blog-btn" class="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border-2 border-gray-300 dark:border-gray-600 text-[#002B5C] dark:text-gray-100 font-bold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition" title="Download a Word-compatible .doc">
+              <i class="fas fa-download" aria-hidden="true"></i> Download .doc
+            </button>
+          </div>
         </div>`;
   }
 
@@ -41,12 +46,6 @@
         <div id="blog-secondary-actions" class="pt-3 border-t border-gray-200 dark:border-gray-700">
           <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Other actions</p>
           <div class="flex flex-wrap gap-2">
-            <button id="copy-blog-btn" type="button" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition" title="Copy blog only — does not open Ruoff Plus">
-              <i class="fas fa-copy"></i> Copy blog only
-            </button>
-            <button id="download-blog-btn" type="button" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-              <i class="fas fa-download"></i> Download .doc
-            </button>
             <button type="button" id="blog-next-steps-btn" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
               <i class="fas fa-list-check"></i> Next steps
             </button>
@@ -60,26 +59,44 @@
         </div>`;
   }
 
-  /** Refresh labels / hierarchy on older saved output so restore matches current UX. */
-  function clarifyRuoffPublishLabels(html) {
+  function getBlogActionAreaHtml() {
+    return (
+      '<div id="blog-action-area" class="mb-8 space-y-4">' +
+      getBlogPrimaryPublishHtml() +
+      getBlogSecondaryActionsHtml() +
+      '</div>'
+    );
+  }
+
+  /** Strip LO Ruoff+ CTAs and rebuild Agent-friendly publish actions on restore. */
+  function normalizeAgentBlogActions(html) {
     let patched = html || '';
-    if (!BLOG_ENABLE_RUOFF_PUBLISH) return patched;
-    if (patched.includes('id="jump-publish-btn"') && !patched.includes('id="blog-secondary-actions"')) {
-      const rebuilt =
-        '<div id="blog-action-area" class="mb-8 space-y-4">' +
-        getRuoffPublishButtonHtml() +
-        getBlogSecondaryActionsHtml() +
-        '</div>';
+    const rebuilt = getBlogActionAreaHtml();
+
+    // Replace any existing action strip (Ruoff+ era or older button rows)
+    if (patched.includes('id="blog-action-area"')) {
       const replaced = patched.replace(
-        /<div[^>]*class="[^"]*mb-8[^"]*"[^>]*>[\s\S]*?id="copy-blog-btn"[\s\S]*?<\/div>\s*(?=<div class="ai-output blog-companion)/i,
+        /<div[^>]*\bid="blog-action-area"[^>]*>[\s\S]*?<\/div>\s*(?=<div class="ai-output blog-companion|<div class="ai-output mb-5|<!-- Social|<div class="mt-8 bg-white)/i,
         rebuilt
       );
       if (replaced !== patched) return replaced;
     }
-    if (patched.includes('id="jump-publish-btn"') && !patched.includes('id="jump-publish-hint"')) {
+    if (patched.includes('id="jump-publish-btn"') || patched.includes('Ruoff Plus') || patched.includes('sales.ruoff.com')) {
+      const replaced = patched.replace(
+        /<div[^>]*class="[^"]*mb-8[^"]*"[^>]*>[\s\S]*?(?:id="copy-blog-btn"|id="jump-publish-btn"|id="download-blog-btn")[\s\S]*?<\/div>\s*(?=<div class="ai-output blog-companion|<div class="ai-output mb-5|<!-- Social)/i,
+        rebuilt
+      );
+      if (replaced !== patched) return replaced;
+      // Last resort: drop Ruoff button/wrap fragments
+      patched = patched.replace(/<div[^>]*\bid="jump-publish-wrap"[^>]*>[\s\S]*?<\/div>/gi, '');
+      patched = patched.replace(/<button[^>]*\bid="jump-publish-btn"[^>]*>[\s\S]*?<\/button>/gi, '');
+      patched = patched.replace(/Ruoff Plus Blog Builder/gi, '');
+      patched = patched.replace(/https?:\/\/sales\.ruoff\.com\/blog/gi, '');
+    }
+    if (!patched.includes('id="copy-blog-btn"') && patched.includes('class="ai-output blog-companion')) {
       patched = patched.replace(
-        /<button([^>]*\bid="jump-publish-btn"[^>]*)>[\s\S]*?<\/button>/i,
-        () => getRuoffPublishButtonHtml().replace(/^\s+|\s+$/g, '')
+        /(<div class="ai-output blog-companion)/i,
+        rebuilt + '$1'
       );
     }
     return patched;
@@ -99,23 +116,30 @@
     </div>`;
   }
 
-  /** Patch older persisted blog output missing publish btn or feedback (localStorage restore). */
+  /** Patch older persisted blog output (strip Ruoff+, ensure Agent publish actions + feedback). */
   function patchRestoredBlogOutput(html) {
     let patched = html || '';
-    patched = clarifyRuoffPublishLabels(patched);
-    if (BLOG_ENABLE_RUOFF_PUBLISH && !patched.includes('id="jump-publish-btn"')) {
-      patched = patched.replace(
-        /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
-        `$1${getRuoffPublishButtonHtml()}`
-      );
+    patched = normalizeAgentBlogActions(patched);
+    // Ensure primary/secondary action area exists after normalize edge cases
+    if (!patched.includes('id="blog-publish-actions"') && !patched.includes('id="copy-blog-plain-btn"')) {
+      if (patched.includes('id="blog-action-area"')) {
+        patched = patched.replace(
+          /<div[^>]*\bid="blog-action-area"[^>]*>[\s\S]*?<\/div>\s*(?=<div class="ai-output blog-companion|<div class="ai-output mb-5)/i,
+          getBlogActionAreaHtml()
+        );
+      } else if (patched.includes('class="ai-output blog-companion')) {
+        patched = patched.replace(/(<div class="ai-output blog-companion)/i, getBlogActionAreaHtml() + '$1');
+      }
     }
-    if (!patched.includes('id="blog-next-steps-btn"')) {
+    if (!patched.includes('id="blog-next-steps-btn"') && patched.includes('id="blog-secondary-actions"')) {
+      // secondary already rebuilt by normalize; no-op
+    } else if (!patched.includes('id="blog-next-steps-btn"')) {
       patched = patched.replace(
-        /(<button id="download-blog-btn"[\s\S]*?<\/button>)/,
+        /(id="blog-secondary-actions"[\s\S]*?<div class="flex flex-wrap gap-2">)/i,
         `$1
-        <button type="button" id="blog-next-steps-btn" class="bg-white dark:bg-gray-900 border-2 border-[#00A89D] text-[#00A89D] px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-[#00A89D]/10 transition-all flex items-center justify-center gap-2 flex-1">
-            <i class="fas fa-list-check"></i> Next Steps
-        </button>`
+            <button type="button" id="blog-next-steps-btn" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+              <i class="fas fa-list-check"></i> Next steps
+            </button>`
       );
     }
     patched = patched.replace(/id="blog-publish-kit-btn"/g, 'id="blog-next-steps-btn"');
@@ -803,17 +827,14 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
                   <span>${qualityNote}</span>
                 </p>
             </div>
-            <span class="text-[11px] px-2.5 py-1 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold shrink-0 hidden sm:inline">Publish-ready</span>
+            <span class="text-[11px] px-2.5 py-1 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold shrink-0 hidden sm:inline">Ready to copy</span>
         </div>
         <div class="ai-output-body prose dark:prose-invert max-w-none text-[15px] leading-relaxed">
             ${marked.parse(blogMarkdown)}
         </div>
     </div>
 
-    <div id="blog-action-area" class="mb-8 space-y-4">
-        ${getRuoffPublishButtonHtml()}
-        ${getBlogSecondaryActionsHtml()}
-    </div>
+    ${getBlogActionAreaHtml()}
 
     <div class="ai-output blog-companion-card mb-5">
         <div class="ai-output-header">
@@ -886,16 +907,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 
         output.classList.remove('hidden');
 
-        wireBlogNextStepsButton();
-
-        const copyBlogBtn = document.getElementById('copy-blog-btn');
-        if (copyBlogBtn) copyBlogBtn.onclick = copyBlogWithFormatting;
-        const downloadBlogBtn = document.getElementById('download-blog-btn');
-        if (downloadBlogBtn) downloadBlogBtn.onclick = downloadBlogWord;
+        wireBlogPublishActions();
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
         document.getElementById('copy-google-btn').onclick = copyGooglePostWithFormatting;
-        const jumpPublishBtn = document.getElementById('jump-publish-btn');
-        if (jumpPublishBtn) jumpPublishBtn.onclick = copyBlogAndJumpToPublisher;
 
         const copyReelBtn = document.getElementById('copy-reel-btn');
         if (copyReelBtn) {
@@ -985,7 +999,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
     }
 }
 
-// Rich copy for blog
+// Rich copy for blog (WordPress / Squarespace / most site builders)
 function copyBlogWithFormatting() {
     const blogContent = document.querySelector('#blog-output .prose');
     if (!blogContent) {
@@ -1001,21 +1015,39 @@ function copyBlogWithFormatting() {
     });
 
     navigator.clipboard.write([clipboardItem]).then(() => {
-        alert('Blog copied with formatting!');
+        alert('Blog copied with formatting — paste into your website or CMS.');
     }).catch(err => {
         console.error('Rich copy failed:', err);
         navigator.clipboard.writeText(plainText).then(() => {
-            alert('Copied as plain text (rich formatting not supported in this browser)');
+            alert('Copied as plain text (rich formatting not supported in this browser).');
         });
     });
 }
-function copyBlogAndJumpToPublisher() {
-    copyBlogWithFormatting();   // Runs the exact same rich copy + shows your alert
 
-    // Tiny delay so the clipboard finishes before we open the tab (feels instant)
-    setTimeout(() => {
-        window.open('https://sales.ruoff.com/blog', '_blank');
-    }, 250);
+function copyBlogPlainText() {
+    const blogContent = document.querySelector('#blog-output .prose');
+    if (!blogContent) {
+        alert('No blog content to copy!');
+        return;
+    }
+    const plainText = (blogContent.innerText || blogContent.textContent || '').trim();
+    navigator.clipboard.writeText(plainText).then(() => {
+        alert('Blog copied as plain text — paste anywhere.');
+    }).catch(() => {
+        const range = document.createRange();
+        range.selectNodeContents(blogContent);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand('copy');
+        sel.removeAllRanges();
+        alert('Blog copied as plain text — paste anywhere.');
+    });
+}
+
+/** Legacy no-op for old HTML — agents do not publish via Ruoff Plus. */
+function copyBlogAndJumpToPublisher() {
+    copyBlogWithFormatting();
 }
 
 window.saveBlogAsset = function(assetType, btnEl) {
@@ -1211,21 +1243,32 @@ function wireBlogNextStepsButton() {
   };
 }
 
+/** Wire Agent publish/copy actions + Next Steps (no Ruoff+ jump). */
+function wireBlogPublishActions() {
+  const copyBtn = document.getElementById('copy-blog-btn');
+  if (copyBtn) copyBtn.onclick = copyBlogWithFormatting;
+  const plainBtn = document.getElementById('copy-blog-plain-btn');
+  if (plainBtn) plainBtn.onclick = copyBlogPlainText;
+  const dlBtn = document.getElementById('download-blog-btn');
+  if (dlBtn) dlBtn.onclick = downloadBlogWord;
+  // Defensive: never leave a Ruoff+ jump handler if old DOM somehow remains
+  const jumpBtn = document.getElementById('jump-publish-btn');
+  if (jumpBtn) {
+    jumpBtn.onclick = copyBlogWithFormatting;
+    jumpBtn.setAttribute('hidden', 'hidden');
+    jumpBtn.style.display = 'none';
+  }
+  wireBlogNextStepsButton();
+}
+
 // Re-attach onclick handlers for the buttons that use element ids (the ones inside the persisted HTML).
 // Called after fresh generate and after restoring lastBlogOutput on init.
 function attachBlogOutputListeners() {
-  const copyBtn = document.getElementById('copy-blog-btn');
-  if (copyBtn) copyBtn.onclick = copyBlogWithFormatting;
-  const dlBtn = document.getElementById('download-blog-btn');
-  if (dlBtn) dlBtn.onclick = downloadBlogWord;
+  wireBlogPublishActions();
   const capBtn = document.getElementById('copy-caption-btn');
   if (capBtn) capBtn.onclick = copySocialCaption;
   const googBtn = document.getElementById('copy-google-btn');
   if (googBtn) googBtn.onclick = copyGooglePostWithFormatting;
-  const jumpBtn = document.getElementById('jump-publish-btn');
-  if (jumpBtn) jumpBtn.onclick = copyBlogAndJumpToPublisher;
-
-  wireBlogNextStepsButton();
 
   const refineBtn = document.getElementById('blog-refine-btn');
   if (refineBtn) {
@@ -1266,7 +1309,7 @@ function downloadBlogWord() {
         return;
     }
 
-    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Mortgage Blog Post</title><style>
+    const header = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Real Estate Blog Post</title><style>
         body {font-family: Calibri, Arial, sans-serif; margin: 60px; line-height: 1.6; color: #000; background: white;}
         h1 {color: #002B5C; text-align: center; font-size: 32px; margin-bottom: 40px;}
         h2 {color: #00A89D; border-bottom: 2px solid #00A89D; padding-bottom: 8px; font-size: 24px; margin-top: 40px;}
@@ -1288,11 +1331,11 @@ function downloadBlogWord() {
     a.href = url;
 
     const titleEl = blogEl.querySelector('h1');
-    const filename = titleEl ? titleEl.innerText.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_blog.doc' : 'mortgage_blog.doc';
+    const filename = titleEl ? titleEl.innerText.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_blog.doc' : 'real_estate_blog.doc';
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    alert('Blog downloaded as Word doc! Open in Word for best formatting.');
+    alert('Blog downloaded as Word doc — open in Word, then paste or upload to your site.');
 }
 
 // === Missing helper: Copy the suggested social caption ===
@@ -1354,7 +1397,8 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   window.generateBlog = generateBlog;
   window.processBlogFile = processBlogFile;
   window.copyBlogWithFormatting = copyBlogWithFormatting;
-  window.copyBlogAndJumpToPublisher = copyBlogAndJumpToPublisher;
+  window.copyBlogPlainText = copyBlogPlainText;
+  window.copyBlogAndJumpToPublisher = copyBlogAndJumpToPublisher; // legacy alias → copy only (no Ruoff+)
   window.downloadBlogWord = downloadBlogWord;
   window.copySocialCaption = copySocialCaption;
   window.copyGooglePostWithFormatting = copyGooglePostWithFormatting;
