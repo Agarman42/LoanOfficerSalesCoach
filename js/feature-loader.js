@@ -83,7 +83,8 @@
       'js/features/my-pitch.js?v=20260806-pitch-vcf2'
     ],
     'blog': [
-      'js/features/blog-creator.js?v=20260820-publish-hierarchy-v3146'
+      'js/features/publish-kit.js?v=20260711-lo-v273',
+      'js/features/blog-creator.js?v=20260820-next-steps-fix-v3147'
     ],
     // Business Plan generate/style/profile sync live in weekly-win-plan.js (shared file)
     'planning': [
@@ -139,7 +140,7 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260820-publish-hierarchy-v3146',
+      'js/features/blog-creator.js?v=20260820-next-steps-fix-v3147',
       'js/features/social-modals.js?v=20260623-lo-v222',
       'js/data/newsletter-dad-jokes.js?v=20260625-lo-v231',
       'js/data/newsletter-brain-teasers.js?v=20260625-lo-v233',

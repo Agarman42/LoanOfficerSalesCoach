@@ -886,15 +886,12 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
 
         output.classList.remove('hidden');
 
-        const nextStepsBtn = document.getElementById('blog-next-steps-btn');
-        if (nextStepsBtn) {
-          nextStepsBtn.onclick = () => {
-            if (typeof window.openBlogNextSteps === 'function') window.openBlogNextSteps();
-          };
-        }
+        wireBlogNextStepsButton();
 
-        document.getElementById('copy-blog-btn').onclick = copyBlogWithFormatting;
-        document.getElementById('download-blog-btn').onclick = downloadBlogWord;
+        const copyBlogBtn = document.getElementById('copy-blog-btn');
+        if (copyBlogBtn) copyBlogBtn.onclick = copyBlogWithFormatting;
+        const downloadBlogBtn = document.getElementById('download-blog-btn');
+        if (downloadBlogBtn) downloadBlogBtn.onclick = downloadBlogWord;
         document.getElementById('copy-caption-btn').onclick = copySocialCaption;
         document.getElementById('copy-google-btn').onclick = copyGooglePostWithFormatting;
         const jumpPublishBtn = document.getElementById('jump-publish-btn');
@@ -1161,6 +1158,46 @@ window.clearSavedBlog = function() {
   }
 };
 
+/** Ensure Next Steps works even if publish-kit.js was not loaded yet (blog-only visit). */
+function wireBlogNextStepsButton() {
+  const nextStepsBtn = document.getElementById('blog-next-steps-btn');
+  if (!nextStepsBtn) return;
+  nextStepsBtn.onclick = function () {
+    function open() {
+      if (typeof window.openBlogNextSteps === 'function') {
+        window.openBlogNextSteps();
+        return true;
+      }
+      return false;
+    }
+    if (open()) return;
+    if (typeof window.ensureFeatureScripts === 'function') {
+      const p = window.ensureFeatureScripts('blog');
+      if (p && typeof p.then === 'function') {
+        p.then(function () {
+          if (!open()) {
+            if (typeof window.showToast === 'function') {
+              window.showToast('Next Steps is still loading — try again in a moment.', 'info');
+            } else {
+              alert('Next Steps is still loading — try again in a moment.');
+            }
+          }
+        }).catch(function () {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Could not open Next Steps. Refresh and try again.', 'error');
+          }
+        });
+        return;
+      }
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast('Next Steps is still loading — try again in a moment.', 'info');
+    } else {
+      alert('Next Steps is still loading — try again in a moment.');
+    }
+  };
+}
+
 // Re-attach onclick handlers for the buttons that use element ids (the ones inside the persisted HTML).
 // Called after fresh generate and after restoring lastBlogOutput on init.
 function attachBlogOutputListeners() {
@@ -1175,12 +1212,7 @@ function attachBlogOutputListeners() {
   const jumpBtn = document.getElementById('jump-publish-btn');
   if (jumpBtn) jumpBtn.onclick = copyBlogAndJumpToPublisher;
 
-  const nextStepsBtn = document.getElementById('blog-next-steps-btn');
-  if (nextStepsBtn) {
-    nextStepsBtn.onclick = () => {
-      if (typeof window.openBlogNextSteps === 'function') window.openBlogNextSteps();
-    };
-  }
+  wireBlogNextStepsButton();
 
   const refineBtn = document.getElementById('blog-refine-btn');
   if (refineBtn) {
