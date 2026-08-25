@@ -49,7 +49,10 @@
     // Anything else (your Render URL, custom domain, Netlify, etc.) = hosted production
     return true;
   }
-  const DEFAULT_MODEL = 'grok-4-1-fast-reasoning';  // Only underwriting overrides this for better factual accuracy on guideline questions (all other tools must use this model)
+  const DEFAULT_MODEL = 'grok-4-1-fast-reasoning';  // Workhorse for most tools
+  const CONTENT_MODEL = 'grok-4.6'; // Blog + Newsletter prose
+  window.GROK_DEFAULT_MODEL = DEFAULT_MODEL;
+  window.GROK_CONTENT_MODEL = CONTENT_MODEL;
 
   /**
    * Get the current API key from localStorage.

@@ -6882,3 +6882,17 @@ html.dark .lo-push-toggle { color: #e2e8f0; }
   outline: 3px solid rgba(241, 90, 41, 0.55);
   outline-offset: 3px;
 }
+
+/* Newsletter preview is a sealed iframe document — never let page modules paint into it */
+#nl-preview {
+  isolation: isolate;
+  contain: layout paint;
+  overflow: hidden;
+  position: relative;
+}
+#nl-preview > iframe,
+#nl-preview > iframe.nl-preview-iframe {
+  display: block;
+  background: #fff;
+  max-width: 100%;
+}

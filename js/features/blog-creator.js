@@ -460,7 +460,11 @@ Blog excerpt:
 ${excerpt}`;
 
     try {
-      const raw = await window.callGrokAPI(prompt, { temperature: 0.35, max_tokens: 2500 });
+      const raw = await window.callGrokAPI(prompt, {
+        temperature: 0.35,
+        max_tokens: 2500,
+        model: window.GROK_CONTENT_MODEL || 'grok-4.6'
+      });
       if (!raw) return null;
       return parseBlogBundleFromResponse(raw);
     } catch (e) {
@@ -794,7 +798,8 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         // Centralized API call (Phase 0) - no more hardcoded key
         let fullContent = await window.callGrokAPI(finalPrompt, {
             temperature: feedback ? 0.35 : 0.25,
-            max_tokens: 18000
+            max_tokens: 18000,
+            model: window.GROK_CONTENT_MODEL || 'grok-4.6'
         });
 
         if (!fullContent) throw new Error('Empty response from API');

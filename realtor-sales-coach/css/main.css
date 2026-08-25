@@ -5631,3 +5631,17 @@ html.dark .calc-result-card--standard .calc-row--total span:last-child {
 #vault-empty-state ul {
   margin-bottom: 0.75rem !important;
 }
+
+/* Newsletter preview is a sealed iframe document — never let page modules paint into it */
+#nl-preview {
+  isolation: isolate;
+  contain: layout paint;
+  overflow: hidden;
+  position: relative;
+}
+#nl-preview > iframe,
+#nl-preview > iframe.nl-preview-iframe {
+  display: block;
+  background: #fff;
+  max-width: 100%;
+}
