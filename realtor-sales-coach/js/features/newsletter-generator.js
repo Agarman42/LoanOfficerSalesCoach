@@ -2412,20 +2412,20 @@ function buildAgentBrandHeader(ctx) {
     return inner ? wrapBrandingForEmail(inner) : '';
 }
 
-/** Portrait crop — oval frame shows more forehead than a tight circle. */
-const NL_SIGNATURE_HEADSHOT_W = 86;
-const NL_SIGNATURE_HEADSHOT_H = 112;
-const NL_SIGNATURE_HEADSHOT_POS = 'center 18%';
+/** Square circle crop — ring lives on the image (not an outer oval cell). */
+const NL_SIGNATURE_HEADSHOT_SIZE = 88;
+const NL_SIGNATURE_HEADSHOT_POS = 'center 20%';
 const NL_SIGNATURE_LOGO_W = 100;
 const NL_SIGNATURE_LOGO_MAX_H = 72;
 const NL_OUTLOOK_SECTION_SPACER_ROW = '<tr><td height="20" style="height:20px;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>';
 
 function buildSignatureHeadshotCell(headshotUrl, name) {
+    const s = NL_SIGNATURE_HEADSHOT_SIZE;
     return `<td width="100" align="center" valign="middle" style="width:100px;padding-right:10px;vertical-align:middle;">
-      <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
+      <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;border-collapse:collapse;">
         <tr>
-          <td width="${NL_SIGNATURE_HEADSHOT_W}" height="${NL_SIGNATURE_HEADSHOT_H}" align="center" valign="middle" style="width:${NL_SIGNATURE_HEADSHOT_W}px;height:${NL_SIGNATURE_HEADSHOT_H}px;line-height:0;border-radius:50%/40%;border:3px solid #00A89D;overflow:hidden;background:#eef7f6;">
-            <img src="${escBrandingAttr(headshotUrl)}" alt="${escBrandingAttr(name || 'Agent')}" width="${NL_SIGNATURE_HEADSHOT_W}" height="${NL_SIGNATURE_HEADSHOT_H}" style="width:${NL_SIGNATURE_HEADSHOT_W}px;height:${NL_SIGNATURE_HEADSHOT_H}px;display:block;border:0;object-fit:cover;object-position:${NL_SIGNATURE_HEADSHOT_POS};">
+          <td align="center" valign="middle" style="padding:0;line-height:0;font-size:0;border:0;background:transparent;">
+            <img src="${escBrandingAttr(headshotUrl)}" alt="${escBrandingAttr(name || 'Agent')}" data-nl-signature-headshot="1" width="${s}" height="${s}" style="width:${s}px;height:${s}px;display:block;margin:0 auto;border:3px solid #00A89D;border-radius:50%;box-sizing:border-box;-webkit-box-sizing:border-box;object-fit:cover;object-position:${NL_SIGNATURE_HEADSHOT_POS};background:#eef7f6;">
           </td>
         </tr>
       </table>
@@ -2444,16 +2444,18 @@ function buildSignatureLogoCell(logoUrl) {
     </td>`;
 }
 
-/** Outlook ignores border-radius — use a teal bgcolor frame instead of CSS oval. */
+/** Outlook ignores border-radius — 3px teal padding as a tight square frame. */
 function buildSignatureHeadshotCellOutlook(headshotUrl, name) {
+    const s = NL_SIGNATURE_HEADSHOT_SIZE;
+    const inner = s - 6;
     return `<td width="100" align="center" valign="middle" style="width:100px;padding-right:12px;vertical-align:middle;">
       <table cellpadding="0" cellspacing="0" role="presentation" align="center" border="0">
         <tr>
           <td align="center" bgcolor="#00A89D" style="background:#00A89D;padding:3px;line-height:0;font-size:0;mso-line-height-rule:exactly;">
             <table cellpadding="0" cellspacing="0" border="0" role="presentation">
               <tr>
-                <td width="${NL_SIGNATURE_HEADSHOT_W}" height="${NL_SIGNATURE_HEADSHOT_H}" align="center" valign="top" bgcolor="#eef7f6" style="width:${NL_SIGNATURE_HEADSHOT_W}px;height:${NL_SIGNATURE_HEADSHOT_H}px;background:#eef7f6;line-height:0;font-size:0;">
-                  <img src="${escBrandingAttr(headshotUrl)}" alt="${escBrandingAttr(name || 'Agent')}" width="${NL_SIGNATURE_HEADSHOT_W}" height="${NL_SIGNATURE_HEADSHOT_H}" style="width:${NL_SIGNATURE_HEADSHOT_W}px;height:${NL_SIGNATURE_HEADSHOT_H}px;display:block;border:0;">
+                <td width="${inner}" height="${inner}" align="center" valign="middle" bgcolor="#eef7f6" style="width:${inner}px;height:${inner}px;background:#eef7f6;line-height:0;font-size:0;">
+                  <img src="${escBrandingAttr(headshotUrl)}" alt="${escBrandingAttr(name || 'Agent')}" width="${inner}" height="${inner}" style="width:${inner}px;height:${inner}px;display:block;border:0;">
                 </td>
               </tr>
             </table>
@@ -3360,6 +3362,32 @@ const NL_PREVIEW_FLUID_HEAD = `
     max-width: 100% !important;
     height: auto !important;
     float: none !important;
+  }
+  /* Signature headshot: crop to a circle; ring sits on the photo, not outside it */
+  table[data-nl-signature-block="1"] img[data-nl-signature-headshot="1"],
+  table[data-nl-signature-block="1"] td[style*="border-radius"] > img {
+    width: 88px !important;
+    height: 88px !important;
+    max-width: 88px !important;
+    border-radius: 50% !important;
+    border: 3px solid #00A89D !important;
+    box-sizing: border-box !important;
+    -webkit-box-sizing: border-box !important;
+    object-fit: cover !important;
+    object-position: center 20% !important;
+    display: block !important;
+    margin: 0 auto !important;
+    background: #eef7f6 !important;
+  }
+  table[data-nl-signature-block="1"] td[style*="border-radius:50%/40%"],
+  table[data-nl-signature-block="1"] td[style*="border-radius:50% / 40%"] {
+    width: auto !important;
+    height: auto !important;
+    border: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
   }
   table[data-nl-disclaimer-block="1"] {
     margin-bottom: 0 !important;
