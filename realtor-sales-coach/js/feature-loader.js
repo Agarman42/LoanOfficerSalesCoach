@@ -60,7 +60,7 @@
       'js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273',
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260707-realtor-v303',
-      'js/features/publish-kit.js?v=20260708-realtor-v276',
+      'js/features/publish-kit.js?v=20260820-next-steps-direct',
       'js/features/newsletter-generator.js?v=20260804-nl-ig-dirs',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260720-last-issue-chip'
@@ -85,8 +85,8 @@
       'js/features/bio-wizard.js?v=20260818-realtor-bio'
     ],
     'blog': [
-      'js/features/publish-kit.js?v=20260708-realtor-v276',
-      'js/features/blog-creator.js?v=20260820-next-steps-fix-v380'
+      'js/features/publish-kit.js?v=20260820-next-steps-direct',
+      'js/features/blog-creator.js?v=20260825-next-steps-v381'
     ],
     'social': [
       'js/features/social-modals.js?v=20260818-demo-safe',
@@ -94,7 +94,7 @@
     ],
     'social-post': [
       'js/features/social-post.js?v=20260729-profile-ux',
-      'js/features/publish-kit.js?v=20260708-realtor-v276'
+      'js/features/publish-kit.js?v=20260820-next-steps-direct'
     ],
     'sales-script': [
       'js/features/sales-scripts.js?v=20260706-realtor-v273'
@@ -127,13 +127,13 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260820-next-steps-fix-v380',
+      'js/features/blog-creator.js?v=20260825-next-steps-v381',
       'js/features/social-modals.js?v=20260818-demo-safe',
       'js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273',
       'js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273',
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260707-realtor-v303',
-      'js/features/publish-kit.js?v=20260708-realtor-v276',
+      'js/features/publish-kit.js?v=20260820-next-steps-direct',
       'js/features/newsletter-generator.js?v=20260804-nl-ig-dirs',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260720-last-issue-chip'

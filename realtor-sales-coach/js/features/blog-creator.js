@@ -1171,30 +1171,43 @@ function wireBlogNextStepsButton() {
       return false;
     }
     if (open()) return;
+
+    function stillLoadingMsg() {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Next Steps is still loading — try again in a moment.', 'info');
+      } else {
+        alert('Next Steps is still loading — try again in a moment.');
+      }
+    }
+    function loadFailedMsg() {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Could not open Next Steps. Refresh and try again.', 'error');
+      } else {
+        alert('Could not open Next Steps. Refresh and try again.');
+      }
+    }
+    function afterLoad() {
+      if (!open()) stillLoadingMsg();
+    }
+
     if (typeof window.ensureFeatureScripts === 'function') {
       const p = window.ensureFeatureScripts('blog');
       if (p && typeof p.then === 'function') {
-        p.then(function () {
-          if (!open()) {
-            if (typeof window.showToast === 'function') {
-              window.showToast('Next Steps is still loading — try again in a moment.', 'info');
-            } else {
-              alert('Next Steps is still loading — try again in a moment.');
-            }
-          }
-        }).catch(function () {
-          if (typeof window.showToast === 'function') {
-            window.showToast('Could not open Next Steps. Refresh and try again.', 'error');
-          }
-        });
+        p.then(afterLoad).catch(loadFailedMsg);
         return;
       }
     }
-    if (typeof window.showToast === 'function') {
-      window.showToast('Next Steps is still loading — try again in a moment.', 'info');
-    } else {
-      alert('Next Steps is still loading — try again in a moment.');
+
+    if (!document.querySelector('script[src*="publish-kit.js"]') && typeof window.openBlogNextSteps !== 'function') {
+      const s = document.createElement('script');
+      s.src = 'js/features/publish-kit.js?v=20260820-next-steps-direct';
+      s.onload = afterLoad;
+      s.onerror = loadFailedMsg;
+      (document.body || document.documentElement).appendChild(s);
+      return;
     }
+
+    stillLoadingMsg();
   };
 }
 
