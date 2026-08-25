@@ -5632,16 +5632,19 @@ html.dark .calc-result-card--standard .calc-row--total span:last-child {
   margin-bottom: 0.75rem !important;
 }
 
-/* Newsletter preview is a sealed iframe document — never let page modules paint into it */
+/* Newsletter preview: isolate from page modules without collapsing the iframe */
 #nl-preview {
   isolation: isolate;
-  contain: layout paint;
-  overflow: hidden;
   position: relative;
+  overflow: auto;
+  min-height: 400px;
 }
 #nl-preview > iframe,
 #nl-preview > iframe.nl-preview-iframe {
   display: block;
   background: #fff;
+  width: 100%;
   max-width: 100%;
+  min-height: 500px;
+  border: 0;
 }
