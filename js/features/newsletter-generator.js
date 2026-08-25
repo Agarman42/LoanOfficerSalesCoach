@@ -3290,6 +3290,73 @@ function repairLoNewsletterForPreview(html) {
     return out;
 }
 
+/** Compact previous HTML so edit requests stay inside timeout budgets. */
+function compactNewsletterHtmlForModel(html, maxChars) {
+    const cap = maxChars || 14000;
+    let out = String(html || '');
+    out = out.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
+    out = out.replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, '<head><meta charset="UTF-8"></head>');
+    out = out.replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+    out = out.replace(/\s{2,}/g, ' ');
+    if (out.length > cap) {
+        out = out.slice(0, cap) + '\n<!-- truncated for edit size -->';
+    }
+    return out;
+}
+
+function isNewsletterTimeoutError(err) {
+    const msg = String((err && (err.message || err.name)) || err || '');
+    return /timed out|AbortError|timeout/i.test(msg);
+}
+
+function newsletterTimeoutUserMessage() {
+    return 'Generation timed out. Try a shorter personal update or fewer sections, then generate again.';
+}
+
+function clearNewsletterGenerateError() {
+    document.getElementById('nl-generate-error')?.remove();
+}
+
+function showNewsletterGenerateError(message, opts) {
+    const preservePreview = !!(opts && opts.preservePreview);
+    clearNewsletterGenerateError();
+    const output = document.getElementById('newsletter-output');
+    if (output) output.classList.remove('hidden');
+    const bar = document.createElement('div');
+    bar.id = 'nl-generate-error';
+    bar.setAttribute('role', 'alert');
+    bar.className = 'mb-4 p-4 rounded-2xl border-2 border-red-400 bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-100';
+    const safe = String(message || 'Newsletter generation failed. Please try again.')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    bar.innerHTML =
+        '<p class="m-0 font-semibold leading-relaxed">' + safe + '</p>' +
+        '<button type="button" id="nl-generate-retry" class="mt-3 inline-flex items-center px-4 py-2 rounded-full bg-[#002B5C] text-white text-sm font-semibold hover:bg-[#001429]">Try generating again</button>';
+    const preview = document.getElementById('nl-preview');
+    if (preview && preview.parentNode) preview.parentNode.insertBefore(bar, preview);
+    else if (output) output.insertBefore(bar, output.firstChild);
+    const retry = bar.querySelector('#nl-generate-retry');
+    if (retry) {
+        retry.onclick = function () {
+            clearNewsletterGenerateError();
+            const feedback = document.getElementById('nl-feedback');
+            if (feedback) {
+                feedback.focus();
+                feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            const generateBtn = document.getElementById('nl-wizard-generate')
+                || document.querySelector('[data-nl-generate], #generate-newsletter, button[onclick*="generateNewsletter"]');
+            if (generateBtn) generateBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+    }
+    if (!preservePreview && preview && !preview.querySelector('iframe')) {
+        preview.innerHTML = '<p class="p-6 text-sm text-gray-600">No newsletter preview yet. Adjust sections and generate again.</p>';
+    }
+    bar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (typeof window.notifyUser === 'function') window.notifyUser(message, 'error', 8000);
+    else if (typeof window.showToast === 'function') window.showToast(message, 'error');
+}
+
 /** Strip post-processed tail blocks before sending HTML back to the model for edits. */
 function getNewsletterHtmlForFeedbackEdit() {
     let base = (lastGeneratedHTML || document.getElementById('nl-html-raw')?.value || '').trim();
@@ -3300,7 +3367,7 @@ function getNewsletterHtmlForFeedbackEdit() {
     if (window.NlEntertainment && typeof window.NlEntertainment.stripBrainTeaserAnswerBlocks === 'function') {
         base = window.NlEntertainment.stripBrainTeaserAnswerBlocks(base);
     }
-    return base;
+    return compactNewsletterHtmlForModel(base, 14000);
 }
 
 /**
@@ -4668,6 +4735,7 @@ async function generateNewsletter(feedback = '') {
         le0.style.setProperty('pointer-events', 'auto', 'important');
     }
 
+    clearNewsletterGenerateError();
     _nlGenerating = true;
 
     if (!feedback) {
@@ -4792,22 +4860,14 @@ async function generateNewsletter(feedback = '') {
 
         if (feedback) {
             promptLines = [
-                'You are a precise newsletter editor. Your ONLY job is to return the COMPLETE, VALID, STANDALONE HTML document with the exact changes requested.',
-                'CRITICAL RULES (never break these):',
-                '1. Output ONLY the full HTML — start with <!DOCTYPE html> and end with </html>. NOTHING else. No explanations, no code blocks, no "Here is the updated version".',
-                '2. Copy the PREVIOUS FULL NEWSLETTER exactly and modify ONLY the section(s) the user asked for.',
-                '3. Keep EVERY section, every table, every image, every placeholder, and every closing tag intact.',
-                '4. If the edit request is short, still return the ENTIRE document — do not shorten anything.',
-                '5. Never truncate. If you feel the response is getting long, prioritize completing the full structure first.',
-                '6. COMPLIANCE (NON-NEGOTIABLE): NEVER add, change, or include ANY mention of specific mortgage rates, interest rates, APRs, or "current rates" anywhere in the document.',
+                'You are a precise newsletter editor. Return ONLY a complete standalone HTML email (start with <!DOCTYPE html>, end with </html>).',
+                'Apply ONLY the user edit. Keep section order, placeholders, and table structure. No rates/APRs. No extra commentary.',
                 '',
-                'PREVIOUS FULL NEWSLETTER HTML (use this as your base):',
-                getNewsletterHtmlForFeedbackEdit(),
+                'USER EDIT:',
+                String(feedback || '').slice(0, 2500),
                 '',
-                'USER EDIT REQUEST (apply this intelligently):',
-                feedback,
-                '',
-                'Output the complete updated HTML now.'
+                'CURRENT NEWSLETTER HTML (compacted — edit this):',
+                getNewsletterHtmlForFeedbackEdit()
             ];
         } else {
             promptLines = [
@@ -4845,7 +4905,7 @@ async function generateNewsletter(feedback = '') {
                 '- Title: ' + (document.getElementById('nl-title').value || 'Mortgage Insights'),
                 '- Length selection: ' + getNewsletterLengthConfig().displayLabel,
                 '- Sections to generate: ' + sectionsSummary,
-                '- Personal update: "' + personalUpdateText + '"',
+                '- Personal update: "' + String(personalUpdateText || '').slice(0, 1200) + '"',
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
                 '- Section direction & extra instructions:\n' + getCombinedSpecificTopicsForPrompt(selections),
@@ -4909,62 +4969,14 @@ async function generateNewsletter(feedback = '') {
                 '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any blog section yourself unless instructed in SECTION SELECTION. Leave <!-- BLOG SECTION PLACEHOLDER --> only when blog is included.',
                 '',
-                'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate ONLY the optional content sections listed in SECTION SELECTION — each as its own teal card. Do not invent extra sections (no Client Story, no bonus Market block, etc.). After included sections, append the skeleton placeholders/footer below. Leave untouched placeholders only for sections marked INCLUDE.',
-                '',
-'<!DOCTYPE html>',
-    '<html lang="en">',
-    '<head><meta charset="UTF-8"></head>',
-    '<body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif;">',
-    '    <tr><td style="padding:40px 20px; text-align:center; background:#f9f9f9;">',
-    '      <table align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;">',
-    '        <tr>',
-    '          <td align="center">',
-    '            <img src="https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Ruoff_Mortgage_FC-Jan-18-2026-05-19-19-8281-AM.png" alt="Ruoff Mortgage" width="200" style="width:200px; max-width:200px; height:auto; display:block;">',
-    '          </td>',
-    '        </tr>',
-    '      </table>',
-    '      <h1 style="color:#002B5C; font-size:36px; margin:20px 0 8px; text-align:center;">[Title]</h1>',
-    '      <p style="color:#666; margin:0 0 25px; text-align:center;">Insights from [Location]</p>',
-    '      <!-- Teal accent bar under header to tie it together -->',
-    '      <table width="100%" cellpadding="0" cellspacing="0">',
-    '        <tr>',
-    '          <td height="6" bgcolor="#00A89D" style="background:#00A89D;"></td>',
-    '        </tr>',
-    '      </table>',
-    '    </td></tr>',
-    '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
-    '    <tr><td height="20"></td></tr>',
-    '    <!-- MAIN CONTENT SECTIONS: generate ONLY the checked sections from SECTION SELECTION as full teal cards here -->',
-    '    <tr><td><table width="100%" ... teal card ...> ... </table></td></tr>',
-    '    <tr><td height="20"></td></tr>'
-];
-            if (selections.includeBlog) {
-                promptLines.push('    <!-- BLOG SECTION PLACEHOLDER -->');
-            }
+                'OUTPUT: complete standalone HTML email only (DOCTYPE through </html>). Table-based 600px layout, inline CSS, teal 8px left-border cards.',
+                'Include a header (logo + title + location) and the required hero image URL. Generate ONLY checked content sections — no extras, no footer, no referral, no disclaimer.',
+                'Leave these placeholders exactly when those options are included: <!-- BLOG SECTION PLACEHOLDER -->, [PERSONAL PHOTO PLACEHOLDER], <!-- PERSONAL VIDEO PLACEHOLDER -->, <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->.',
+                'Personal note heading: A Note From [Name]. Do not invent personal facts.'
+            ];
             if (selections.personal) {
-                promptLines.push(
-                    '    <!-- Personal Note Section -->',
-                    '    <tr><td><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9; border-left:8px solid #00A89D; border-collapse:separate;">',
-                    '      <tr><td style="padding:30px;">',
-                    '        <h2 style="color:#002B5C; font-size:26px; margin:0 0 20px;">A Note From [Name]</h2>',
-                    '        <p style="margin:15px 0 25px; font-size:18px; line-height:1.6;">[Polished personal update]</p>',
-                    selections.includePhoto ? '        [PERSONAL PHOTO PLACEHOLDER]' : '',
-                    '      </td></tr>',
-                    '    </table></td></tr>',
-                    '    <tr><td height="20"></td></tr>'
-                );
+                promptLines.push('Include the Personal Note section after main content cards.');
             }
-            if (selections.includeVideo) {
-                promptLines.push('    <!-- PERSONAL VIDEO PLACEHOLDER -->');
-            }
-            promptLines.push(
-                '    <!-- REFERRAL CTA: compact block added in post-processing immediately before disclaimer when enabled -->',
-                '    <!-- DISCLAIMER: added in post-processing — do NOT include disclaimer text or footer rows in the body -->',
-                (selections.contentSections.puzzle ? '    <!-- BRAIN_TEASER_ANSWER_PLACEHOLDER -->' : ''),
-                '  </table>',
-                '</bo' + 'dy>',
-                '</ht' + 'ml>'
-            );
         }
 
         const prompt = promptLines.join('\n');
@@ -4972,8 +4984,8 @@ async function generateNewsletter(feedback = '') {
         // Centralized API call (Phase 0)
         let fullContent = await window.callGrokAPI(prompt, {
             temperature: feedback ? 0.7 : 0.8,
-            max_tokens: 12000,
-            timeoutMs: feedback ? 180000 : 120000,
+            max_tokens: 8000,
+            timeoutMs: 180000,
             model: window.GROK_CONTENT_MODEL || 'grok-4.6'
         });
 
@@ -4993,41 +5005,14 @@ async function generateNewsletter(feedback = '') {
 
     } catch (err) {
         console.error('Generation failed', err);
-        
         html = '';
-        lastGeneratedHTML = '';
-
-        const friendly = typeof window.formatFriendlyApiError === 'function'
-          ? window.formatFriendlyApiError(err, 'Newsletter generation failed. No content was created — please try again.')
-          : 'Newsletter generation failed. No content was created — please try again.';
-        const safeFriendly = String(friendly).replace(/</g, '&lt;');
-        
-        const errorMessage = `
-            <div style="padding: 40px 20px; background: #fff3f3; border: 2px solid #ff4d4d; border-radius: 12px; color: #c00; text-align: center; font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto;">
-                <h2 style="margin: 0 0 20px; font-size: 28px; color: #c00;">Generation Failed</h2>
-                <p style="font-size: 18px; margin: 0 0 15px; line-height: 1.5;">
-                    ${safeFriendly}
-                </p>
-                <p style="font-size: 14px; color: #555; margin: 0 0 25px;">
-                    No content was created so you never paste half-finished or inaccurate copy.
-                </p>
-                <button onclick="location.reload()" style="padding: 12px 32px; background: #c00; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-                    Retry Generation
-                </button>
-            </div>
-        `;
-        
-        const previewEl = document.getElementById('nl-preview');
-        if (previewEl) {
-            mountNewsletterPreviewIframe(previewEl, `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${errorMessage}</body></html>`);
-        }
-        
-        const rawEl = document.getElementById('nl-html-raw');
-        if (rawEl) rawEl.value = '';
-        
-        if (typeof window.notifyUser === 'function') window.notifyUser(friendly, 'error');
-        else alert(friendly);
-        
+        const hadGoodPreview = !!(lastGeneratedHTML && lastGeneratedHTML.trim());
+        const friendly = isNewsletterTimeoutError(err)
+          ? newsletterTimeoutUserMessage()
+          : (typeof window.formatFriendlyApiError === 'function'
+            ? window.formatFriendlyApiError(err, 'Newsletter generation failed. Please try again.')
+            : 'Newsletter generation failed. Please try again.');
+        showNewsletterGenerateError(friendly, { preservePreview: hadGoodPreview });
         gtag('event', feedback ? 'edit_newsletter_failed' : 'generate_newsletter_failed', {
             event_category: 'Tool Usage',
             event_label: feedback ? 'Newsletter Edit Failed' : 'Newsletter Generation Failed',

@@ -157,7 +157,7 @@
           "Quick kitchen hack or recipe I used this week",
           "Throwback to my very first closing — 5 years ago!",
           "Pet photo Friday! Meet my dog 🐶",
-          "What I’m grateful for this week as an agent"
+          "What I’m grateful for this week as an agent",
           "A funny story from a recent client meeting",
           "Favorite local restaurant I took a client to"
         ];

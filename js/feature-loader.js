@@ -49,7 +49,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260825-nl-preview-fix-v3150',
+      'js/features/newsletter-generator.js?v=20260825-nl-timeout-v3151',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260817-v3139'
     ],
@@ -147,7 +147,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260825-nl-preview-fix-v3150',
+      'js/features/newsletter-generator.js?v=20260825-nl-timeout-v3151',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260817-v3139'
     ]

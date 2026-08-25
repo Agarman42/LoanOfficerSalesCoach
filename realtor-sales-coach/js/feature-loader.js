@@ -32,7 +32,7 @@
     'js/features/wizard-a11y.js?v=20260720-polish2',
     'js/features/coach-mode-switch.js?v=20260719-mode1',
     'js/features/tool-bridges.js?v=20260706-realtor-v273',
-    'js/features/legacy-helpers.js?v=20260818-demo-safe',
+    'js/features/legacy-helpers.js?v=20260825-syntax-fix',
     'js/features/rich-modals-restore.js?v=20260706-realtor-v273',
     'js/features/ai-chat.js?v=20260720-ai-chat'
   ];
@@ -61,7 +61,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260707-realtor-v303',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260825-nl-preview-fix-v384',
+      'js/features/newsletter-generator.js?v=20260825-nl-timeout-v385',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260720-last-issue-chip'
     ],
@@ -134,7 +134,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260707-realtor-v303',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260825-nl-preview-fix-v384',
+      'js/features/newsletter-generator.js?v=20260825-nl-timeout-v385',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260720-last-issue-chip'
     ]
