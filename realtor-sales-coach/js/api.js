@@ -50,8 +50,10 @@
     return true;
   }
   const DEFAULT_MODEL = 'grok-4-1-fast-reasoning';  // Workhorse for most tools
-  const CONTENT_MODEL = 'grok-4.6'; // Blog + Newsletter prose
+  const FAST_MODEL = 'grok-4-1-fast-reasoning';
+  const CONTENT_MODEL = 'grok-4.6'; // Blog only — Newsletter uses FAST_MODEL
   window.GROK_DEFAULT_MODEL = DEFAULT_MODEL;
+  window.GROK_FAST_MODEL = FAST_MODEL;
   window.GROK_CONTENT_MODEL = CONTENT_MODEL;
 
   /**

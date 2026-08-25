@@ -16,10 +16,11 @@
 
   const STORAGE_KEY = 'grokApiKey';
   const DEFAULT_MODEL = 'grok-4-1-fast-reasoning';
-  // Long-form public content (Blog + Newsletter) uses the current high-quality flagship.
+  const FAST_MODEL = 'grok-4-1-fast-reasoning';
+  // Blog keeps the flagship; Newsletter uses FAST_MODEL for speed.
   const CONTENT_MODEL = 'grok-4.6';
-  // Underwriting may override model for factual accuracy; other tools use DEFAULT_MODEL.
   window.GROK_DEFAULT_MODEL = DEFAULT_MODEL;
+  window.GROK_FAST_MODEL = FAST_MODEL;
   window.GROK_CONTENT_MODEL = CONTENT_MODEL;
   const DEBUG = !!(typeof window !== 'undefined' && window.GROK_API_DEBUG);
 

@@ -23,6 +23,8 @@
 
 let lastGeneratedHTML = '';
 let _nlGenerating = false;
+let _nlGeneratingStarted = 0;
+let _nlOverlayWatch = null;
 
 function safeParseJSONArray(storageKey, fallback = []) {
     try {
@@ -3317,6 +3319,26 @@ function clearNewsletterGenerateError() {
     document.getElementById('nl-generate-error')?.remove();
 }
 
+function hideNewsletterLoading() {
+    _nlGenerating = false;
+    window.__coachGenerationActive = false;
+    const loadingElFinal = document.getElementById('global-loading');
+    if (loadingElFinal && loadingElFinal.dataset.originalContent) {
+        loadingElFinal.innerHTML = loadingElFinal.dataset.originalContent;
+        delete loadingElFinal.dataset.originalContent;
+    }
+    if (typeof window.hideLoading === 'function') {
+        window.hideLoading();
+    } else if (loadingElFinal) {
+        loadingElFinal.classList.add('hidden');
+        loadingElFinal.classList.remove('is-visible', 'flex');
+        loadingElFinal.style.setProperty('display', 'none', 'important');
+        loadingElFinal.style.setProperty('visibility', 'hidden', 'important');
+        loadingElFinal.style.setProperty('opacity', '0', 'important');
+        loadingElFinal.style.setProperty('pointer-events', 'none', 'important');
+    }
+}
+
 function showNewsletterGenerateError(message, opts) {
     const preservePreview = !!(opts && opts.preservePreview);
     clearNewsletterGenerateError();
@@ -4709,7 +4731,10 @@ function showNewsletterReviewHandoff() {
 }
 
 async function generateNewsletter(feedback = '') {
-    if (_nlGenerating) return;
+    if (_nlGenerating) {
+        if (!_nlGeneratingStarted || (Date.now() - _nlGeneratingStarted) < 80000) return;
+        hideNewsletterLoading();
+    }
     if (!feedback && !validatePersonalUpdateForGeneration()) {
         return;
     }
@@ -4737,6 +4762,13 @@ async function generateNewsletter(feedback = '') {
 
     clearNewsletterGenerateError();
     _nlGenerating = true;
+    _nlGeneratingStarted = Date.now();
+    if (_nlOverlayWatch) clearTimeout(_nlOverlayWatch);
+    _nlOverlayWatch = setTimeout(function () {
+        hideNewsletterLoading();
+        const hadGood = !!(lastGeneratedHTML && lastGeneratedHTML.trim());
+        showNewsletterGenerateError(newsletterTimeoutUserMessage(), { preservePreview: hadGood });
+    }, 80000);
 
     if (!feedback) {
         syncNewsletterContactFromProfile();
@@ -4984,9 +5016,9 @@ async function generateNewsletter(feedback = '') {
         // Centralized API call (Phase 0)
         let fullContent = await window.callGrokAPI(prompt, {
             temperature: feedback ? 0.7 : 0.8,
-            max_tokens: 8000,
-            timeoutMs: 180000,
-            model: window.GROK_CONTENT_MODEL || 'grok-4.6'
+            max_tokens: 6000,
+            timeoutMs: 75000,
+            model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
         });
 
         if (!fullContent) throw new Error('Empty response from API');
@@ -5020,21 +5052,11 @@ async function generateNewsletter(feedback = '') {
         });
 
     } finally {
-        _nlGenerating = false;
-
-        // Restore the original #global-loading markup (standard spinner + title + message) then hide via the shared helper.
-        // Matches the finally pattern used by weekly-win-plan.js and other feature modules.
-        const loadingElFinal = document.getElementById('global-loading');
-        if (loadingElFinal && loadingElFinal.dataset.originalContent) {
-            loadingElFinal.innerHTML = loadingElFinal.dataset.originalContent;
-            delete loadingElFinal.dataset.originalContent;
+        if (_nlOverlayWatch) {
+            clearTimeout(_nlOverlayWatch);
+            _nlOverlayWatch = null;
         }
-        if (typeof window.hideLoading === 'function') {
-            window.hideLoading();
-        } else if (loadingElFinal) {
-            loadingElFinal.classList.add('hidden');
-            loadingElFinal.style.setProperty('display', 'none', 'important');
-        }
+        hideNewsletterLoading();
 
         if (html && html.trim() !== '') {
             const postSelections = feedback ? null : getNewsletterSelections();
