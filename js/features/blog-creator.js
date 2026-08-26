@@ -463,7 +463,8 @@ ${excerpt}`;
       const raw = await window.callGrokAPI(prompt, {
         temperature: 0.35,
         max_tokens: 2500,
-        model: window.GROK_CONTENT_MODEL || 'grok-4.6'
+        timeoutMs: 45000,
+        model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
       });
       if (!raw) return null;
       return parseBlogBundleFromResponse(raw);
@@ -558,10 +559,36 @@ window.removeBlogUploadedFile = function() {
 };
 
 let _blogGenerating = false;
+let _blogGeneratingStarted = 0;
+let _blogOverlayWatch = null;
+
+function hideBlogLoading() {
+    _blogGenerating = false;
+    window.__coachGenerationActive = false;
+    if (_blogOverlayWatch) {
+        clearTimeout(_blogOverlayWatch);
+        _blogOverlayWatch = null;
+    }
+    const loadingEl = document.getElementById('global-loading');
+    if (loadingEl && loadingEl.dataset.originalContent) {
+        loadingEl.innerHTML = loadingEl.dataset.originalContent;
+        delete loadingEl.dataset.originalContent;
+    }
+    if (loadingEl) {
+        loadingEl.classList.add('hidden');
+        loadingEl.classList.remove('is-visible', 'flex');
+        loadingEl.style.setProperty('display', 'none', 'important');
+    }
+    if (typeof window.hideLoading === 'function') window.hideLoading();
+}
 
 async function generateBlog(feedback = '') {
-    if (_blogGenerating) return;
+    if (_blogGenerating) {
+        if (!_blogGeneratingStarted || (Date.now() - _blogGeneratingStarted) < 80000) return;
+        hideBlogLoading();
+    }
     _blogGenerating = true;
+    _blogGeneratingStarted = Date.now();
     console.log('%c[blog-creator] generateBlog() called', feedback ? 'with feedback' : 'fresh', 'color:#00A89D');
 
     // Ensure latest local area is persisted before generation
@@ -627,6 +654,17 @@ async function generateBlog(feedback = '') {
     if (typeof window.forceShowGlobalLoading === 'function') {
       window.forceShowGlobalLoading(loadingTitle);
     }
+    if (_blogOverlayWatch) clearTimeout(_blogOverlayWatch);
+    _blogOverlayWatch = setTimeout(function () {
+        hideBlogLoading();
+        const outEl = document.getElementById('blog-output');
+        if (outEl && !outEl.querySelector('.prose')) {
+            outEl.innerHTML = '<div class="text-center py-16"><p class="text-red-600 text-xl font-bold mb-4">Generation timed out</p><p class="text-gray-700 dark:text-gray-300 max-w-md mx-auto">Try a shorter topic or the Short length, then generate again.</p></div>';
+            outEl.classList.remove('hidden');
+        } else if (typeof window.notifyUser === 'function') {
+            window.notifyUser('Blog generation timed out. Your last post is still here — try again with a shorter length.', 'error', 8000);
+        }
+    }, 80000);
 
     if (loadingEl) loadingEl.dataset.originalContent = loadingEl.innerHTML;
 
@@ -637,7 +675,7 @@ const blogLoadingContent = `
                 <div class="text-center mb-8">
                     <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
                     <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">Building Your Authority Blog Post...</h3>
-                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">45–90 seconds. We’re creating the full package for you.</p>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">Usually 20–45 seconds — creating the full package for you.</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Full SEO/GEO-optimized blog + social caption + Google Business post + 30-45s Reel script</p>
                 </div>
 
@@ -798,8 +836,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         // Centralized API call (Phase 0) - no more hardcoded key
         let fullContent = await window.callGrokAPI(finalPrompt, {
             temperature: feedback ? 0.35 : 0.25,
-            max_tokens: 18000,
-            model: window.GROK_CONTENT_MODEL || 'grok-4.6'
+            max_tokens: 8000,
+            timeoutMs: 75000,
+            model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
         });
 
         if (!fullContent) throw new Error('Empty response from API');
@@ -999,7 +1038,9 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         let friendlyMessage = 'Error generating content. Please try again.';
 
         const errorMsg = error?.message || '';
-        if (errorMsg.includes('413') || errorMsg.includes('PayloadTooLarge') || errorMsg.includes('too large')) {
+        if (/timed out|AbortError|timeout/i.test(errorMsg)) {
+            friendlyMessage = 'Generation timed out. Try a shorter topic or the Short length, then generate again.';
+        } else if (errorMsg.includes('413') || errorMsg.includes('PayloadTooLarge') || errorMsg.includes('too large')) {
             friendlyMessage = `
                 <strong>Document too large</strong><br><br>
                 The uploaded file + prompt exceeded the server limit.<br>
@@ -1012,22 +1053,23 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             friendlyMessage = `API error: ${errorMsg}`;
         }
 
-        output.innerHTML = `
+        if (output.querySelector('.prose') && /timed out|AbortError|timeout/i.test(errorMsg)) {
+            if (typeof window.notifyUser === 'function') {
+                window.notifyUser(friendlyMessage, 'error', 8000);
+            } else {
+                alert(friendlyMessage);
+            }
+        } else {
+            output.innerHTML = `
             <div class="text-center py-16">
                 <p class="text-red-600 text-xl font-bold mb-4">Generation failed</p>
                 <p class="text-gray-700 dark:text-gray-300 max-w-md mx-auto">${friendlyMessage}</p>
             </div>
         `;
-        output.classList.remove('hidden');
-    } finally {
-        _blogGenerating = false;
-        if (loadingEl) {
-            if (loadingEl.dataset.originalContent) {
-                loadingEl.innerHTML = loadingEl.dataset.originalContent;
-            }
-            loadingEl.classList.add('hidden');
+            output.classList.remove('hidden');
         }
-        window.hideLoading?.();   // extra safety in case global helper is used elsewhere
+    } finally {
+        hideBlogLoading();
     }
 }
 
