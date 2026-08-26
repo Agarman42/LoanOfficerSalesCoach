@@ -658,11 +658,16 @@ async function generateBlog(feedback = '') {
     _blogOverlayWatch = setTimeout(function () {
         hideBlogLoading();
         const outEl = document.getElementById('blog-output');
-        if (outEl && !outEl.querySelector('.prose')) {
+        if (outEl && outEl.querySelector('.prose')) {
+            outEl.classList.remove('hidden');
+            if (typeof window.notifyUser === 'function') {
+                window.notifyUser('Blog generation timed out. Your last post is still here — try again with a shorter length.', 'error', 8000);
+            } else if (typeof window.showToast === 'function') {
+                window.showToast('Blog generation timed out. Your last post is still here.', 'error');
+            }
+        } else if (outEl) {
             outEl.innerHTML = '<div class="text-center py-16"><p class="text-red-600 text-xl font-bold mb-4">Generation timed out</p><p class="text-gray-700 dark:text-gray-300 max-w-md mx-auto">Try a shorter topic or the Short length, then generate again.</p></div>';
             outEl.classList.remove('hidden');
-        } else if (typeof window.notifyUser === 'function') {
-            window.notifyUser('Blog generation timed out. Your last post is still here — try again with a shorter length.', 'error', 8000);
         }
     }, 80000);
 
@@ -716,7 +721,6 @@ if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
     if (loadingEl) {
         loadingEl.classList.remove('hidden');
     }
-    if (output) output.innerHTML = '';
 
     const lengthGuide = lengthSelect === 'long' ? '1,500–2,000 words' : lengthSelect === 'medium' ? '1,000-1,500 words' : '600-1,000 words';
 
@@ -805,9 +809,9 @@ let finalPrompt = systemPrompt;
 
     if (feedback) {
         if (!lastBlogBundle) {
-            _blogGenerating = false;
+            hideBlogLoading();
+            if (output) output.classList.remove('hidden');
             alert('Generate a blog first, then use feedback to refine it.');
-            window.hideLoading?.();
             return;
         }
         finalPrompt = `You are an expert mortgage content editor. The user already has a complete blog bundle (blog + social caption + Google post + Reel script). Apply ONLY the requested edits while keeping the same overall structure and section labels.
@@ -1053,13 +1057,14 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             friendlyMessage = `API error: ${errorMsg}`;
         }
 
-        if (output.querySelector('.prose') && /timed out|AbortError|timeout/i.test(errorMsg)) {
+        if (output && output.querySelector('.prose')) {
+            output.classList.remove('hidden');
             if (typeof window.notifyUser === 'function') {
                 window.notifyUser(friendlyMessage, 'error', 8000);
             } else {
                 alert(friendlyMessage);
             }
-        } else {
+        } else if (output) {
             output.innerHTML = `
             <div class="text-center py-16">
                 <p class="text-red-600 text-xl font-bold mb-4">Generation failed</p>

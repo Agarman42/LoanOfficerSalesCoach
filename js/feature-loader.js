@@ -49,7 +49,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260825-nl-layout-restore-v3153',
+      'js/features/newsletter-generator.js?v=20260826-demo-audit-v3155',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260817-v3139'
     ],
@@ -84,7 +84,7 @@
     ],
     'blog': [
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/blog-creator.js?v=20260826-blog-fast-v3154'
+      'js/features/blog-creator.js?v=20260826-demo-audit-v3155'
     ],
     // Business Plan generate/style/profile sync live in weekly-win-plan.js (shared file)
     'planning': [
@@ -140,14 +140,14 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260826-blog-fast-v3154',
+      'js/features/blog-creator.js?v=20260826-demo-audit-v3155',
       'js/features/social-modals.js?v=20260623-lo-v222',
       'js/data/newsletter-dad-jokes.js?v=20260625-lo-v231',
       'js/data/newsletter-brain-teasers.js?v=20260625-lo-v233',
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260825-nl-layout-restore-v3153',
+      'js/features/newsletter-generator.js?v=20260826-demo-audit-v3155',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260817-v3139'
     ]

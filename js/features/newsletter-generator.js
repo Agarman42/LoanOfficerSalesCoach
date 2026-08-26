@@ -3322,20 +3322,25 @@ function clearNewsletterGenerateError() {
 function hideNewsletterLoading() {
     _nlGenerating = false;
     window.__coachGenerationActive = false;
+    if (_nlOverlayWatch) {
+        clearTimeout(_nlOverlayWatch);
+        _nlOverlayWatch = null;
+    }
     const loadingElFinal = document.getElementById('global-loading');
     if (loadingElFinal && loadingElFinal.dataset.originalContent) {
         loadingElFinal.innerHTML = loadingElFinal.dataset.originalContent;
         delete loadingElFinal.dataset.originalContent;
     }
-    if (typeof window.hideLoading === 'function') {
-        window.hideLoading();
-    } else if (loadingElFinal) {
+    if (loadingElFinal) {
         loadingElFinal.classList.add('hidden');
         loadingElFinal.classList.remove('is-visible', 'flex');
         loadingElFinal.style.setProperty('display', 'none', 'important');
         loadingElFinal.style.setProperty('visibility', 'hidden', 'important');
         loadingElFinal.style.setProperty('opacity', '0', 'important');
         loadingElFinal.style.setProperty('pointer-events', 'none', 'important');
+    }
+    if (typeof window.hideLoading === 'function') {
+        window.hideLoading();
     }
 }
 
@@ -3360,15 +3365,18 @@ function showNewsletterGenerateError(message, opts) {
     if (retry) {
         retry.onclick = function () {
             clearNewsletterGenerateError();
-            const feedback = document.getElementById('nl-feedback');
-            if (feedback) {
-                feedback.focus();
-                feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const fb = (document.getElementById('nl-feedback')?.value || '').trim();
+            if (typeof generateNewsletter === 'function') {
+                generateNewsletter(fb);
                 return;
             }
-            const generateBtn = document.getElementById('nl-wizard-generate')
+            const generateBtn = document.getElementById('generate-newsletter-btn')
+                || document.getElementById('nl-wizard-generate')
                 || document.querySelector('[data-nl-generate], #generate-newsletter, button[onclick*="generateNewsletter"]');
-            if (generateBtn) generateBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (generateBtn) {
+                generateBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                generateBtn.focus();
+            }
         };
     }
     if (!preservePreview && preview && !preview.querySelector('iframe')) {

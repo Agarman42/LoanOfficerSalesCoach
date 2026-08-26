@@ -2394,15 +2394,9 @@ function buildAgentBrandHeaderTable(ctx) {
 
     return `<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-brand-header="1" style="${NL_MODULE_WIDTH_STYLE}border-collapse:collapse;">
   <tr>
-    <td width="100%" style="width:100%;padding:12px 30px 14px;text-align:center;font-family:Arial,Helvetica,sans-serif;background:#f9f9f9;">
+    <td width="100%" style="width:100%;padding:12px 30px 8px;text-align:center;font-family:Arial,Helvetica,sans-serif;background:#f9f9f9;">
       ${logoHtml}
     </td>
-  </tr>
-  <tr>
-    <td width="100%" height="6" bgcolor="#00A89D" style="width:100%;background:#00A89D;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="100%" height="20" style="width:100%;background:#f9f9f9;font-size:0;line-height:0;">&nbsp;</td>
   </tr>
 </table>`;
 }
@@ -3208,20 +3202,25 @@ function clearNewsletterGenerateError() {
 function hideNewsletterLoading() {
     _nlGenerating = false;
     window.__coachGenerationActive = false;
+    if (_nlOverlayWatch) {
+        clearTimeout(_nlOverlayWatch);
+        _nlOverlayWatch = null;
+    }
     const loadingElFinal = document.getElementById('global-loading');
     if (loadingElFinal && loadingElFinal.dataset.originalContent) {
         loadingElFinal.innerHTML = loadingElFinal.dataset.originalContent;
         delete loadingElFinal.dataset.originalContent;
     }
-    if (typeof window.hideLoading === 'function') {
-        window.hideLoading();
-    } else if (loadingElFinal) {
+    if (loadingElFinal) {
         loadingElFinal.classList.add('hidden');
         loadingElFinal.classList.remove('is-visible', 'flex');
         loadingElFinal.style.setProperty('display', 'none', 'important');
         loadingElFinal.style.setProperty('visibility', 'hidden', 'important');
         loadingElFinal.style.setProperty('opacity', '0', 'important');
         loadingElFinal.style.setProperty('pointer-events', 'none', 'important');
+    }
+    if (typeof window.hideLoading === 'function') {
+        window.hideLoading();
     }
 }
 
@@ -3246,14 +3245,18 @@ function showNewsletterGenerateError(message, opts) {
     if (retry) {
         retry.onclick = function () {
             clearNewsletterGenerateError();
-            const feedback = document.getElementById('nl-feedback');
-            if (feedback) {
-                feedback.focus();
-                feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const fb = (document.getElementById('nl-feedback')?.value || '').trim();
+            if (typeof generateNewsletter === 'function') {
+                generateNewsletter(fb);
                 return;
             }
-            const generateBtn = document.getElementById('nl-wizard-generate');
-            if (generateBtn) generateBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const generateBtn = document.getElementById('generate-newsletter-btn')
+                || document.getElementById('nl-wizard-generate')
+                || document.querySelector('[data-nl-generate], #generate-newsletter, button[onclick*="generateNewsletter"]');
+            if (generateBtn) {
+                generateBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                generateBtn.focus();
+            }
         };
     }
     if (!preservePreview && preview && !preview.querySelector('iframe')) {
@@ -5244,6 +5247,12 @@ async function generateNewsletter(feedback = '') {
     '      </table>',
     '      <h1 style="color:#002B5C; font-size:36px; margin:8px 0 6px; text-align:center;">[Title]</h1>',
     '      <p style="color:#666; margin:0 0 12px; text-align:center;">Insights from [Location]</p>',
+    '      <!-- Teal accent bar under header to tie it together -->',
+    '      <table width="100%" cellpadding="0" cellspacing="0">',
+    '        <tr>',
+    '          <td height="6" bgcolor="#00A89D" style="background:#00A89D;"></td>',
+    '        </tr>',
+    '      </table>',
     '    </td></tr>',
     '    <tr><td style="background:#f9f9f9; padding:0; margin:0;" align="center"><img src="[REQUIRED HERO IMAGE URL]" alt="Hero" width="600" style="width:600px; max-width:600px; height:auto; display:block; border:0;"></td></tr>',
     '    <tr><td height="20"></td></tr>',
