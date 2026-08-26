@@ -61,7 +61,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260707-realtor-v303',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260826-demo-audit-v391',
+      'js/features/newsletter-generator.js?v=20260826-nl-header-width-v392',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260720-last-issue-chip'
     ],
@@ -134,7 +134,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260707-realtor-v303',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260826-demo-audit-v391',
+      'js/features/newsletter-generator.js?v=20260826-nl-header-width-v392',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260720-last-issue-chip'
     ]

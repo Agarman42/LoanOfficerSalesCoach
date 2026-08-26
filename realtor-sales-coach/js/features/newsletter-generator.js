@@ -2652,7 +2652,10 @@ function injectAgentBranding(html) {
         : '';
 
     if (header && !/data-nl-brand-header/i.test(html)) {
-        const nestedPlaceholderRe = /<table[^>]*\balign=["']?center["']?[^>]*>[\s\S]*?<!--\s*\[YOUR LOGO\s*\/\s*BRAND HEADER HERE\][\s\S]*?<\/table>/i;
+        // Only the inner logo placeholder table — never the outer width=600 email shell
+        // (that shell also has align="center"; a greedy match unwraps it and the teal
+        // header bar goes full-bleed across the preview).
+        const nestedPlaceholderRe = /<table(?![^>]*\bwidth\s*=\s*["']?600)[^>]*\balign=["']?center["']?[^>]*>[\s\S]{0,350}?<!--\s*\[YOUR LOGO\s*\/\s*BRAND HEADER HERE\][\s\S]{0,250}?<\/table>/i;
         const placeholderCommentRe = /<!--\s*\[YOUR LOGO\s*\/\s*BRAND HEADER HERE\][^>]*-->/i;
         if (nestedPlaceholderRe.test(html)) {
             html = html.replace(nestedPlaceholderRe, header);
@@ -3397,7 +3400,8 @@ const NL_PREVIEW_FLUID_HEAD = `
   }
   table[data-nl-referral-block="1"],
   table[data-nl-disclaimer-block="1"],
-  table[data-nl-brain-teaser-answer="1"] {
+  table[data-nl-brain-teaser-answer="1"],
+  table[data-nl-brand-header="1"] {
     width: 100% !important;
     max-width: 600px !important;
     margin-left: auto !important;
