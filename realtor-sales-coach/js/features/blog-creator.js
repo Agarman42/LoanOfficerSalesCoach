@@ -555,6 +555,7 @@ window.removeBlogUploadedFile = function() {
 let _blogGenerating = false;
 let _blogGeneratingStarted = 0;
 let _blogOverlayWatch = null;
+let _blogRunId = 0;
 
 function hideBlogLoading() {
     _blogGenerating = false;
@@ -583,6 +584,7 @@ async function generateBlog(feedback = '') {
     }
     _blogGenerating = true;
     _blogGeneratingStarted = Date.now();
+    const blogRunId = ++_blogRunId;
     console.log('%c[blog-creator] generateBlog() called', feedback ? 'with feedback' : 'fresh', 'color:#00A89D');
 
     // Ensure latest local area is persisted before generation
@@ -650,6 +652,7 @@ async function generateBlog(feedback = '') {
     }
     if (_blogOverlayWatch) clearTimeout(_blogOverlayWatch);
     _blogOverlayWatch = setTimeout(function () {
+        if (blogRunId !== _blogRunId) return;
         hideBlogLoading();
         const outEl = document.getElementById('blog-output');
         if (outEl && outEl.querySelector('.prose')) {
@@ -663,7 +666,7 @@ async function generateBlog(feedback = '') {
             outEl.innerHTML = '<div class="text-center py-16"><p class="text-red-600 text-xl font-bold mb-4">Generation timed out</p><p class="text-gray-700 dark:text-gray-300 max-w-md mx-auto">Try a shorter topic or the Short length, then generate again.</p></div>';
             outEl.classList.remove('hidden');
         }
-    }, 80000);
+    }, 130000);
 
     if (loadingEl) loadingEl.dataset.originalContent = loadingEl.innerHTML;
 
@@ -855,6 +858,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         }
 
         lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
+        try { localStorage.setItem('lastBlogBundle', JSON.stringify(lastBlogBundle)); } catch (e) {}
         window._blogNextStepsId = `blog_${Date.now().toString(36)}`;
 
         const qualityNote = (typeof window.GenerationRules !== 'undefined' && window.GenerationRules.getQualityNoteText)
@@ -877,7 +881,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             <span class="text-[11px] px-2.5 py-1 rounded-full bg-[#00A89D]/10 text-[#00A89D] font-semibold shrink-0 hidden sm:inline">Ready to copy</span>
         </div>
         <div class="ai-output-body prose dark:prose-invert max-w-none text-[15px] leading-relaxed">
-            ${marked.parse(blogMarkdown)}
+            ${(typeof marked !== 'undefined' && marked && typeof marked.parse === 'function') ? marked.parse(blogMarkdown) : String(blogMarkdown || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>')}
         </div>
     </div>
 
@@ -1046,7 +1050,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             output.classList.remove('hidden');
         }
     } finally {
-        hideBlogLoading();
+        if (blogRunId === _blogRunId) hideBlogLoading();
     }
 }
 
@@ -1059,20 +1063,26 @@ function copyBlogWithFormatting() {
     }
     const html = blogContent.innerHTML;
     const plainText = blogContent.innerText;
-
-    const clipboardItem = new ClipboardItem({
-        'text/html': new Blob([html], { type: 'text/html' }),
-        'text/plain': new Blob([plainText], { type: 'text/plain' })
-    });
-
-    navigator.clipboard.write([clipboardItem]).then(() => {
-        alert('Blog copied with formatting — paste into your website or CMS.');
-    }).catch(err => {
-        console.error('Rich copy failed:', err);
+    const fallbackPlain = () => {
         navigator.clipboard.writeText(plainText).then(() => {
             alert('Copied as plain text (rich formatting not supported in this browser).');
+        }).catch(() => alert('Could not copy. Select the post and copy manually.'));
+    };
+
+    try {
+        const clipboardItem = new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([plainText], { type: 'text/plain' })
         });
-    });
+        navigator.clipboard.write([clipboardItem]).then(() => {
+            alert('Blog copied with formatting — paste into your website or CMS.');
+        }).catch((err) => {
+            console.error('Rich copy failed:', err);
+            fallbackPlain();
+        });
+    } catch (e) {
+        fallbackPlain();
+    }
 }
 
 function copyBlogPlainText() {
@@ -1233,6 +1243,7 @@ window.saveBlogToVault = function() {
 // My Saved Items (Vault) copies are independent and stay until the user deletes them from the library.
 window.clearSavedBlog = function() {
   try { localStorage.removeItem('lastBlogOutput'); } catch (e) {}
+  try { localStorage.removeItem('lastBlogBundle'); } catch (e) {}
   lastBlogBundle = null;
   const out = document.getElementById('blog-output');
   if (out) {
@@ -1542,6 +1553,11 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
     } else {
         console.warn('[blog-creator] generate-blog-btn not found in DOM');
     }
+
+    try {
+      const savedBundle = localStorage.getItem('lastBlogBundle');
+      if (savedBundle && !lastBlogBundle) lastBlogBundle = JSON.parse(savedBundle);
+    } catch (e) {}
 
     // Restore last generated blog bundle (the full output with post + assets + action buttons) so it survives refresh.
     // Stays until the user clicks Clear (in the output area) or generates a fresh version.

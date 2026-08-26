@@ -5064,7 +5064,7 @@ if (postSelections?.includeReferral) {
             html = ensureLoNewsletterFooter(html);
             html = repairLoNewsletterForPreview(html);
 
-            if (!feedback && window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
+            if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
                 html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
             }
 
@@ -5143,10 +5143,10 @@ if (postSelections?.includeReferral) {
         }
 
         const output = document.getElementById('newsletter-output');
-        if (output) {
+        if (output && html && html.trim() !== '') {
             output.classList.remove('hidden');
             hideNewsletterEmptyPreview();
-            // Unhide "ready" handoff AFTER output is visible, then scroll there
+            // Unhide "ready" handoff AFTER a successful generate — not on fail
             if (!feedback) {
                 showNewsletterReviewHandoff();
             }
@@ -5849,6 +5849,8 @@ function copyForOutlook() {
   // Clear the last persisted newsletter (tool preview + raw). Vault copies in My Saved Items are unaffected.
   window.clearSavedNewsletter = function() {
     try { localStorage.removeItem('lastNewsletterHTML'); } catch (e) {}
+    lastGeneratedHTML = '';
+    window.lastGeneratedHTML = '';
     const preview = document.getElementById('nl-preview');
     if (preview) preview.innerHTML = '';
     const raw = document.getElementById('nl-html-raw');
