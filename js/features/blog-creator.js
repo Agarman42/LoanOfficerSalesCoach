@@ -479,6 +479,46 @@ ${excerpt}`;
     return !bundle.captionText || !bundle.googlePostText || !bundle.reelScriptText;
   }
 
+  const BLOG_EXTRAS_PENDING_HTML =
+    '<p class="blog-companion-pending text-sm text-gray-500 m-0"><i class="fas fa-spinner fa-spin mr-1.5" aria-hidden="true"></i>Finishing this piece…</p>';
+
+  function companionPanelHtml(formatter, text, pending) {
+    if (text && String(text).trim()) return formatter(text);
+    return pending ? BLOG_EXTRAS_PENDING_HTML : formatter(text);
+  }
+
+  function mergeBlogExtrasInto(current, extras) {
+    if (!extras) return current;
+    let captionText = current.captionText || extras.captionText || '';
+    let googlePostText = current.googlePostText || extras.googlePostText || '';
+    let reelScriptText = current.reelScriptText || extras.reelScriptText || '';
+    if (!captionText && extras.blogMarkdown && /caption/i.test(extras.blogMarkdown)) {
+      const re = parseBlogBundleFromResponse(extras.blogMarkdown);
+      captionText = re.captionText || captionText;
+      googlePostText = re.googlePostText || googlePostText;
+      reelScriptText = re.reelScriptText || reelScriptText;
+    }
+    return Object.assign({}, current, { captionText, googlePostText, reelScriptText });
+  }
+
+  function applyBlogCompanionPanels(bundle) {
+    const cap = document.getElementById('social-caption');
+    if (cap) {
+      cap.setAttribute('data-raw-text', escapeBlogHtml(bundle.captionText || ''));
+      cap.innerHTML = formatCaptionHtml(bundle.captionText);
+    }
+    const goog = document.getElementById('google-post');
+    if (goog) {
+      goog.setAttribute('data-raw-text', escapeBlogHtml(bundle.googlePostText || ''));
+      goog.innerHTML = formatGooglePostHtml(bundle.googlePostText);
+    }
+    const reel = document.getElementById('reel-script');
+    if (reel) {
+      reel.setAttribute('data-raw-text', escapeBlogHtml(bundle.reelScriptText || ''));
+      reel.innerHTML = formatReelScriptHtml(bundle.reelScriptText);
+    }
+  }
+
   function extractBlogTitle(blogMarkdown) {
     const m = String(blogMarkdown || '').match(/^#\s+(.+)$/m);
     if (!m) return 'Blog Post';
@@ -683,7 +723,7 @@ const blogLoadingContent = `
                 <div class="text-center mb-8">
                     <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F15A29] mb-5"></div>
                     <h3 class="text-3xl font-bold text-[#002B5C] dark:text-white mb-2 tracking-tight">Building Your Authority Blog Post...</h3>
-                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">Usually 20–45 seconds — creating the full package for you.</p>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-1">Usually 20–45 seconds for the post — caption, Google, and Reel finish right after if needed.</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Full SEO/GEO-optimized blog + social caption + Google Business post + 30-45s Reel script</p>
                 </div>
 
@@ -851,26 +891,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         if (!fullContent) throw new Error('Empty response from API');
 
         let { blogMarkdown, captionText, googlePostText, reelScriptText } = parseBlogBundleFromResponse(fullContent);
-
-        // Model often truncates before companions when blog is long — second pass for extras only
-        if (bundleExtrasMissing({ captionText, googlePostText, reelScriptText }) && blogMarkdown) {
-          if (typeof window.showLoading === 'function') {
-            try { window.showLoading('Finishing social caption, Google post & Reel…'); } catch (e) { /* ignore */ }
-          }
-          const extras = await generateBlogExtrasFromBlog(blogMarkdown, topicInput);
-          if (extras) {
-            captionText = captionText || extras.captionText || '';
-            googlePostText = googlePostText || extras.googlePostText || '';
-            reelScriptText = reelScriptText || extras.reelScriptText || '';
-            // If parser put the whole extras blob in blogMarkdown of extras, re-parse full raw-like
-            if (!captionText && extras.blogMarkdown && /caption/i.test(extras.blogMarkdown)) {
-              const re = parseBlogBundleFromResponse(extras.blogMarkdown);
-              captionText = re.captionText || captionText;
-              googlePostText = re.googlePostText || googlePostText;
-              reelScriptText = re.reelScriptText || reelScriptText;
-            }
-          }
-        }
+        const extrasNeeded = bundleExtrasMissing({ captionText, googlePostText, reelScriptText }) && !!blogMarkdown;
 
         lastBlogBundle = { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput };
         try { localStorage.setItem('lastBlogBundle', JSON.stringify(lastBlogBundle)); } catch (e) {}
@@ -921,7 +942,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             </div>
         </div>
         <div id="social-caption" class="blog-companion-panel" data-raw-text="${escapeBlogHtml(captionText || '')}">
-            ${formatCaptionHtml(captionText)}
+            ${companionPanelHtml(formatCaptionHtml, captionText, extrasNeeded && !captionText)}
         </div>
     </div>
 
@@ -941,7 +962,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             </div>
         </div>
         <div id="google-post" class="blog-companion-panel" data-raw-text="${escapeBlogHtml(googlePostText || '')}">
-            ${formatGooglePostHtml(googlePostText)}
+            ${companionPanelHtml(formatGooglePostHtml, googlePostText, extrasNeeded && !googlePostText)}
         </div>
     </div>
 
@@ -961,7 +982,7 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
             </div>
         </div>
         <div id="reel-script" class="blog-companion-panel blog-companion-panel-reel" data-raw-text="${escapeBlogHtml(reelScriptText || '')}">
-            ${formatReelScriptHtml(reelScriptText)}
+            ${companionPanelHtml(formatReelScriptHtml, reelScriptText, extrasNeeded && !reelScriptText)}
         </div>
         <p class="text-xs text-gray-500 m-0 mt-3">Structured for filming — copy the full block or each section as needed.</p>
         <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
@@ -1032,6 +1053,29 @@ Return the FULL updated output in this order: blog markdown first, then **Sugges
         if (feedback) {
             const fbEl = document.getElementById('blog-feedback');
             if (fbEl) fbEl.value = '';
+        }
+
+        hideBlogLoading();
+
+        if (extrasNeeded) {
+          try {
+            const extras = await generateBlogExtrasFromBlog(blogMarkdown, topicInput);
+            if (blogRunId !== _blogRunId) return;
+            const merged = mergeBlogExtrasInto(
+              { blogMarkdown, captionText, googlePostText, reelScriptText, topicInput },
+              extras
+            );
+            captionText = merged.captionText;
+            googlePostText = merged.googlePostText;
+            reelScriptText = merged.reelScriptText;
+            lastBlogBundle = merged;
+            try { localStorage.setItem('lastBlogBundle', JSON.stringify(lastBlogBundle)); } catch (e) {}
+            applyBlogCompanionPanels(merged);
+            try { localStorage.setItem('lastBlogOutput', output.innerHTML); } catch (e) {}
+          } catch (extrasErr) {
+            console.warn('[blog-creator] extras pass failed', extrasErr);
+            applyBlogCompanionPanels(lastBlogBundle || { captionText, googlePostText, reelScriptText });
+          }
         }
 
         gtag('event', feedback ? 'edit_blog' : 'generate_blog', {

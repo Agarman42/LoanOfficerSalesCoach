@@ -84,7 +84,7 @@
     ],
     'blog': [
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/blog-creator.js?v=20260826-demo-audit-v3156'
+      'js/features/blog-creator.js?v=20260827-blog-show-first-v3157'
     ],
     // Business Plan generate/style/profile sync live in weekly-win-plan.js (shared file)
     'planning': [
@@ -140,7 +140,7 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260826-demo-audit-v3156',
+      'js/features/blog-creator.js?v=20260827-blog-show-first-v3157',
       'js/features/social-modals.js?v=20260623-lo-v222',
       'js/data/newsletter-dad-jokes.js?v=20260625-lo-v231',
       'js/data/newsletter-brain-teasers.js?v=20260625-lo-v233',
