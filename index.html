@@ -7578,11 +7578,14 @@
           </div>
         </div>
 
-        <div class="mb-6">
-          <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 mb-3 flex items-center gap-2">
-            <i class="fas fa-hand-holding-heart text-[#00A89D] text-[10px]"></i> Engagement &amp; Entertainment
-          </p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 m-0">Check a section, then shuffle or customize inline. Click any preview to open the picker — switch between types without closing the modal.</p>
+        <details id="nl-custom-content-details" class="mb-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
+          <summary class="text-sm font-bold text-[#002B5C] dark:text-white cursor-pointer flex flex-wrap items-center gap-2 list-none">
+            <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-magic text-[#00A89D] text-xs"></i></span>
+            <span id="nl-custom-content-summary" class="min-w-0">Custom Content</span>
+            <span id="nl-custom-content-count" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#00A89D]/15 text-[#00A89D]">0 active</span>
+            <span class="text-xs font-normal text-gray-500">(Fun Fact, Tip, Quote, Joke, Brain Teaser, Custom section)</span>
+          </summary>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 mb-3 m-0">Check a section, then shuffle or customize. Click a preview to pick from the library.</p>
           <div id="nl-engagement-summary" class="flex flex-wrap items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#00A89D]/5 border border-[#00A89D]/20">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-star text-[#00A89D] text-xs"></i></span>
@@ -7704,7 +7707,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </details>
 
         <div class="mb-6 pt-5 border-t border-gray-200 dark:border-gray-700">
           <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 mb-3 flex items-center gap-2">

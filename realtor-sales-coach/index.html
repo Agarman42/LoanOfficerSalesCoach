@@ -7700,11 +7700,14 @@
           </div>
         </div>
 
-        <div class="mb-6">
-          <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 mb-3 flex items-center gap-2">
-            <i class="fas fa-hand-holding-heart text-[#00A89D] text-[10px]"></i> Engagement &amp; Entertainment
-          </p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 m-0">Check a section, then open the <strong>Engagement hub</strong> to pick Fun Facts, Tips, Quotes, Dad Jokes &amp; Brain Teasers in one modal — switch tabs without closing.</p>
+        <details id="nl-custom-content-details" class="mb-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
+          <summary class="text-sm font-bold text-[#002B5C] dark:text-white cursor-pointer flex flex-wrap items-center gap-2 list-none">
+            <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-magic text-[#00A89D] text-xs"></i></span>
+            <span id="nl-custom-content-summary" class="min-w-0">Custom Content</span>
+            <span id="nl-custom-content-count" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#00A89D]/15 text-[#00A89D]">0 active</span>
+            <span class="text-xs font-normal text-gray-500">(Fun Fact, Tip, Quote, Joke, Brain Teaser, Custom section)</span>
+          </summary>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 mb-3 m-0">Check a section, then shuffle or customize. Click a preview to pick from the library.</p>
           <div id="nl-engagement-summary" class="flex flex-wrap items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#00A89D]/5 border border-[#00A89D]/20">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-sparkles text-[#00A89D] text-xs"></i></span>
@@ -7729,7 +7732,7 @@
                   <span class="nl-curated-status text-[10px] font-bold uppercase tracking-wide text-[#00A89D]" data-nl-status-for="fun"></span>
                   <button type="button" data-nl-reset-used="funFacts" class="nl-curated-reset text-[10px] text-gray-400 hover:text-[#00A89D] font-medium transition" title="Clear shuffle history">Start fresh</button>
                 </div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm italic border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="fun-fact-preview-inline" data-nl-choice="funFact" role="button" tabindex="0" title="Click to choose or write your own"></div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm italic border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="fun-fact-preview" data-nl-choice="funFact" role="button" tabindex="0" title="Click to choose or write your own"></div>
               </div>
             </div>
             <div id="nl-engagement-row-tip" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40" data-nl-curated-section="tip">
@@ -7745,7 +7748,7 @@
                   <span class="nl-curated-status text-[10px] font-bold uppercase tracking-wide text-[#00A89D]" data-nl-status-for="tip"></span>
                   <button type="button" data-nl-reset-used="proTips" class="nl-curated-reset text-[10px] text-gray-400 hover:text-[#00A89D] font-medium transition">Start fresh</button>
                 </div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm italic border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="pro-tip-preview-inline" data-nl-choice="proTip" role="button" tabindex="0" title="Click to choose or write your own"></div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm italic border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="pro-tip-preview" data-nl-choice="proTip" role="button" tabindex="0" title="Click to choose or write your own"></div>
               </div>
             </div>
             <div id="nl-engagement-row-quote" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40" data-nl-curated-section="quote">
@@ -7761,7 +7764,7 @@
                   <span class="nl-curated-status text-[10px] font-bold uppercase tracking-wide text-[#00A89D]" data-nl-status-for="quote"></span>
                   <button type="button" data-nl-reset-used="quotes" class="nl-curated-reset text-[10px] text-gray-400 hover:text-[#00A89D] font-medium transition">Start fresh</button>
                 </div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm italic border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="quote-preview-inline" data-nl-choice="quote" role="button" tabindex="0"></div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm italic border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="quote-preview" data-nl-choice="quote" role="button" tabindex="0"></div>
               </div>
             </div>
             <div id="nl-engagement-row-dadjoke" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40" data-nl-curated-section="dadjoke">
@@ -7777,7 +7780,7 @@
                   <span class="nl-curated-status text-[10px] font-bold uppercase tracking-wide text-[#00A89D]" data-nl-status-for="dadjoke"></span>
                   <button type="button" data-nl-reset-used="dadJokes" class="nl-curated-reset text-[10px] text-gray-400 hover:text-[#00A89D] font-medium transition">Start fresh</button>
                 </div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="dad-joke-preview-inline" data-nl-choice="dadJoke" role="button" tabindex="0"></div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="dad-joke-preview" data-nl-choice="dadJoke" role="button" tabindex="0"></div>
               </div>
             </div>
             <div id="nl-engagement-row-puzzle" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40" data-nl-curated-section="puzzle">
@@ -7793,7 +7796,16 @@
                   <span class="nl-curated-status text-[10px] font-bold uppercase tracking-wide text-[#00A89D]" data-nl-status-for="puzzle"></span>
                   <button type="button" data-nl-reset-used="puzzleAll" class="nl-curated-reset text-[10px] text-gray-400 hover:text-[#00A89D] font-medium transition">Start fresh</button>
                 </div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="brain-teaser-preview-inline" data-nl-choice="puzzle" role="button" tabindex="0"></div>
+                <p class="text-[11px] text-gray-500 m-0 mb-2">Format — each opens the library where you can browse, search, or write your own.</p>
+                <div class="flex flex-wrap gap-1.5 mb-2">
+                  <button type="button" data-nl-puzzle-open="trivia" class="nl-puzzle-type-card text-xs px-2.5 py-1.5 rounded-full border-2 border-[#00A89D] bg-[#00A89D]/10 font-semibold text-[#002B5C] dark:text-white transition">🧠 Trivia</button>
+                  <button type="button" data-nl-puzzle-open="scramble" class="nl-puzzle-type-card text-xs px-2.5 py-1.5 rounded-full border-2 border-gray-200 dark:border-gray-700 font-semibold text-gray-600 dark:text-gray-300 hover:border-[#00A89D]/60 transition">🔤 Scramble</button>
+                  <button type="button" data-nl-puzzle-open="riddle" class="nl-puzzle-type-card text-xs px-2.5 py-1.5 rounded-full border-2 border-gray-200 dark:border-gray-700 font-semibold text-gray-600 dark:text-gray-300 hover:border-[#00A89D]/60 transition">❓ Riddle</button>
+                </div>
+                <input type="radio" name="nl-puzzle-type" value="trivia" class="sr-only" checked>
+                <input type="radio" name="nl-puzzle-type" value="scramble" class="sr-only">
+                <input type="radio" name="nl-puzzle-type" value="riddle" class="sr-only">
+                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="brain-teaser-preview" data-nl-choice="puzzle" role="button" tabindex="0"></div>
               </div>
             </div>
             <div id="nl-engagement-row-custom-section" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40">
@@ -7817,7 +7829,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </details>
 
         <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
           <label class="block text-lg font-semibold text-[#00A89D] mb-1">Extra Instructions <span class="text-sm font-normal text-gray-500">(optional)</span></label>
@@ -7967,193 +7979,6 @@
       </div>
 
     </div>
-
-    <!-- Custom Content Choices (expandable dropdown - kept as requested, styled to match cards) -->
-    <details id="nl-custom-content-details" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-sm p-6 mb-12">
-            <summary class="text-xl font-bold text-[#002B5C] dark:text-white cursor-pointer flex flex-wrap items-center gap-2 list-none">
-              <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-magic text-[#00A89D]"></i></span>
-              <span id="nl-custom-content-summary" class="min-w-0">Custom Content Choices</span>
-              <span id="nl-custom-content-count" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#00A89D]/15 text-[#00A89D]">0 active</span>
-              <span class="text-xs font-normal text-gray-500">(click to expand)</span>
-            </summary>
-
-            <div id="nl-custom-content-empty" class="hidden mt-6 p-5 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 text-center">
-              <p class="text-sm text-gray-600 dark:text-gray-400 m-0">No curated sections selected yet. Check <strong>Fun Facts</strong>, <strong>Real Estate Tip</strong>, <strong>Motivational Quote</strong>, <strong>Dad Joke</strong>, or <strong>Weekly Brain Teaser</strong> in <strong>Sections to Include</strong> above — only those will appear here.</p>
-            </div>
-
-            <div id="nl-custom-content-body" class="mt-6 space-y-6">
-              <p id="nl-custom-content-intro" class="text-sm text-gray-600 dark:text-gray-400 p-4 rounded-2xl bg-[#00A89D]/5 border border-[#00A89D]/20 mb-2">Pick from the library, regenerate random, or write your own — your choices are injected after generation.</p>
-
-              <!-- Fun Fact -->
-              <div id="nl-custom-section-fun" class="nl-custom-section-block" data-nl-custom-section="fun">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-                  <h4 class="text-lg font-semibold text-[#00A89D]">Fun Fact</h4>
-                  <div class="flex flex-wrap gap-2">
-                    <button onclick="regenerateRandom('funFact')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                    <button type="button" data-nl-choice="funFact" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
-                    <button onclick="resetUsed('funFacts')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
-                  </div>
-                </div>
-                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm italic border border-gray-200 dark:border-gray-700" id="fun-fact-preview"></div>
-              </div>
-
-              <!-- Pro Tip -->
-              <div id="nl-custom-section-tip" class="nl-custom-section-block" data-nl-custom-section="tip">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-                  <h4 class="text-lg font-semibold text-[#00A89D]">Pro Tip</h4>
-                  <div class="flex flex-wrap gap-2">
-                    <button onclick="regenerateRandom('proTip')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                    <button type="button" data-nl-choice="proTip" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
-                    <button onclick="resetUsed('proTips')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
-                  </div>
-                </div>
-                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm italic border border-gray-200 dark:border-gray-700" id="pro-tip-preview"></div>
-              </div>
-
-              <!-- Quote -->
-              <div id="nl-custom-section-quote" class="nl-custom-section-block" data-nl-custom-section="quote">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-                  <h4 class="text-lg font-semibold text-[#00A89D]">Motivational Quote</h4>
-                  <div class="flex flex-wrap gap-2">
-                    <button onclick="regenerateRandom('quote')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                    <button type="button" data-nl-choice="quote" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
-                    <button onclick="resetUsed('quotes')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
-                  </div>
-                </div>
-                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm italic border border-gray-200 dark:border-gray-700" id="quote-preview"></div>
-              </div>
-
-              <!-- Dad Joke -->
-              <div id="nl-custom-section-dadjoke" class="nl-custom-section-block" data-nl-custom-section="dadjoke">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-                  <h4 class="text-lg font-semibold text-[#F15A29]">Dad Joke of the Week</h4>
-                  <div class="flex flex-wrap gap-2">
-                    <button onclick="regenerateRandom('dadJoke')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                    <button type="button" data-nl-choice="dadJoke" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
-                    <button onclick="resetUsed('dadJokes')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh</button>
-                  </div>
-                </div>
-                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm border border-gray-200 dark:border-gray-700" id="dad-joke-preview"></div>
-                <details class="mt-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
-                  <summary class="text-sm font-semibold text-[#002B5C] dark:text-white cursor-pointer select-none">✏️ Write your own joke</summary>
-                  <div class="mt-3 space-y-3">
-                    <textarea id="nl-custom-dadjoke-input" rows="3" placeholder="Type your dad joke here…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
-                    <button type="button" id="nl-custom-dadjoke-apply" class="text-xs px-4 py-2 bg-[#F15A29] text-white rounded-full font-semibold hover:opacity-90">Use my joke</button>
-                  </div>
-                </details>
-              </div>
-
-              <!-- Weekly Brain Teaser -->
-              <div id="brain-teaser-panel" class="nl-custom-section-block" data-nl-custom-section="puzzle">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                  <div>
-                    <h4 class="text-lg font-semibold text-[#F15A29]">Weekly Brain Teaser</h4>
-                    <p class="text-xs text-gray-500 mt-1">Pick one format per edition. You&apos;ll see the answer here while setting up; subscribers only get it in fine print at the bottom of the newsletter.</p>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                  <label class="nl-puzzle-type-card flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:border-[#00A89D]/60 text-center">
-                    <input type="radio" name="nl-puzzle-type" value="trivia" class="sr-only" checked>
-                    <span class="text-2xl">🧠</span>
-                    <span class="font-semibold text-[#002B5C] dark:text-white">Trivia</span>
-                    <span class="text-xs text-gray-500">One question</span>
-                  </label>
-                  <label class="nl-puzzle-type-card flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:border-[#00A89D]/60 text-center">
-                    <input type="radio" name="nl-puzzle-type" value="scramble" class="sr-only">
-                    <span class="text-2xl">🔤</span>
-                    <span class="font-semibold text-[#002B5C] dark:text-white">Word Scramble</span>
-                    <span class="text-xs text-gray-500">Unscramble letters</span>
-                  </label>
-                  <label class="nl-puzzle-type-card flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:border-[#00A89D]/60 text-center">
-                    <input type="radio" name="nl-puzzle-type" value="riddle" class="sr-only">
-                    <span class="text-2xl">❓</span>
-                    <span class="font-semibold text-[#002B5C] dark:text-white">Riddle</span>
-                    <span class="text-xs text-gray-500">Classic brain teaser</span>
-                  </label>
-                </div>
-
-                <div id="nl-puzzle-filter-panel" class="mb-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-800/60">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                    <p class="text-sm font-semibold text-[#002B5C] dark:text-white">Filter trivia &amp; word scrambles</p>
-                    <p class="text-xs text-gray-500" id="nl-puzzle-filter-count">—</p>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
-                    <div class="flex flex-wrap gap-2" id="nl-puzzle-topic-filters" role="group" aria-label="Trivia and scramble topic filter">
-                      <button type="button" data-nl-topic="all" class="nl-puzzle-topic-pill text-xs px-3 py-1.5 rounded-full border-2 font-semibold transition-all">All topics</button>
-                      <button type="button" data-nl-topic="mortgage" class="nl-puzzle-topic-pill text-xs px-3 py-1.5 rounded-full border-2 font-semibold transition-all">🏠 Mortgage &amp; Home</button>
-                    </div>
-                    <div id="nl-puzzle-category-wrap" class="hidden flex items-center gap-2 border-l border-gray-200 dark:border-gray-600 pl-3">
-                      <label for="nl-puzzle-category-select" class="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Category</label>
-                      <select id="nl-puzzle-category-select" class="min-w-[160px] max-w-[220px] px-3 py-1.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                        <option value="all">All categories</option>
-                      </select>
-                    </div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-2">Filters apply to <strong>trivia</strong> and <strong>word scrambles</strong> only. Use category + search in <strong>Choose Specific</strong> to browse the full trivia library.</p>
-                </div>
-
-                <div id="nl-puzzle-riddle-hint" class="hidden mb-4 p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
-                  <p class="text-xs text-gray-500 m-0">Riddles use the full library — no topic filters. Use <strong>Choose Specific</strong> and search to browse all riddles. Dad jokes work the same way.</p>
-                </div>
-
-                <div class="flex flex-wrap gap-2 mb-2">
-                  <button onclick="regenerateRandom('puzzle')" class="text-xs px-3 py-1.5 bg-[#00A89D] text-white rounded-full font-medium hover:bg-[#008F85]">Regenerate Random</button>
-                  <button type="button" data-nl-choice="puzzle" class="nl-choice-btn text-xs px-3 py-1.5 bg-[#002B5C] text-white rounded-full font-medium hover:bg-[#001F44]">Choose Specific</button>
-                  <button onclick="resetUsed('puzzleAll')" class="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 underline">Start fresh (all types)</button>
-                </div>
-                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm border border-gray-200 dark:border-gray-700" id="brain-teaser-preview"></div>
-                <details class="mt-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4" id="nl-custom-puzzle-panel">
-                  <summary class="text-sm font-semibold text-[#002B5C] dark:text-white cursor-pointer select-none">✏️ Write your own <span id="nl-custom-puzzle-type-label">trivia</span></summary>
-                  <div class="mt-3 space-y-3">
-                    <div id="nl-custom-fields-trivia" class="space-y-3">
-                      <div>
-                        <label for="nl-custom-trivia-question" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Question</label>
-                        <textarea id="nl-custom-trivia-question" rows="2" placeholder="e.g., What does PMI stand for?" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
-                      </div>
-                      <div>
-                        <label for="nl-custom-trivia-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer</label>
-                        <input type="text" id="nl-custom-trivia-answer" placeholder="e.g., Private Mortgage Insurance" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                      </div>
-                    </div>
-                    <div id="nl-custom-fields-scramble" class="space-y-3 hidden">
-                      <div>
-                        <label for="nl-custom-scramble-prompt" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Prompt</label>
-                        <textarea id="nl-custom-scramble-prompt" rows="2" placeholder="e.g., Unscramble this word every homeowner hopes to build:" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
-                      </div>
-                      <div>
-                        <label for="nl-custom-scramble-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer (unscrambled word)</label>
-                        <div class="flex flex-wrap gap-2">
-                          <input type="text" id="nl-custom-scramble-answer" placeholder="e.g., Equity" class="flex-1 min-w-[140px] p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                          <button type="button" id="nl-custom-scramble-shuffle" class="text-xs px-3 py-2 border-2 border-[#00A89D] text-[#00A89D] rounded-full font-semibold hover:bg-[#00A89D]/10 whitespace-nowrap">Scramble letters</button>
-                        </div>
-                      </div>
-                      <div>
-                        <label for="nl-custom-scramble-letters" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Scrambled letters</label>
-                        <input type="text" id="nl-custom-scramble-letters" placeholder="e.g., YTUIQE" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm uppercase tracking-widest focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                      </div>
-                      <div>
-                        <label for="nl-custom-scramble-hint" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Hint (optional)</label>
-                        <input type="text" id="nl-custom-scramble-hint" placeholder="e.g., Grows as you pay down the loan" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                      </div>
-                    </div>
-                    <div id="nl-custom-fields-riddle" class="space-y-3 hidden">
-                      <div>
-                        <label for="nl-custom-riddle-text" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Riddle</label>
-                        <textarea id="nl-custom-riddle-text" rows="3" placeholder="e.g., What has hands but cannot clap?" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30"></textarea>
-                      </div>
-                      <div>
-                        <label for="nl-custom-riddle-answer" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Answer</label>
-                        <input type="text" id="nl-custom-riddle-answer" placeholder="e.g., A clock" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                      </div>
-                    </div>
-                    <button type="button" id="nl-custom-puzzle-apply" class="text-xs px-4 py-2 bg-[#F15A29] text-white rounded-full font-semibold hover:opacity-90">Use my brain teaser</button>
-                  </div>
-                </details>
-              </div>
-
-            <p id="nl-custom-content-footer" class="text-xs text-gray-500 mt-4">Curated lists avoid repeats until you hit <strong>Start fresh</strong>. Check Dad Joke or Brain Teaser above to include them in your edition.</p>
-        </details>
 
       <!-- Pre-flight summary -->
       <div id="nl-preflight-summary" class="mb-6 w-full">

@@ -909,6 +909,8 @@ function injectEngagementPolishStyles() {
     style.textContent = `
       @keyframes nlPreviewFlash { 0%,100%{opacity:1;transform:scale(1)} 45%{opacity:.4;transform:scale(.985)} }
       .nl-preview-flash { animation: nlPreviewFlash .45s ease; }
+      #nl-custom-content-details > summary { list-style: none; }
+      #nl-custom-content-details > summary::-webkit-details-marker { display: none; }
     `;
     document.head.appendChild(style);
 }
@@ -2813,6 +2815,8 @@ const NL_CUSTOM_CONTENT_BLOCKS = {
 };
 
 function scrollToNewsletterCustomContent(sectionKey) {
+    const details = document.getElementById('nl-custom-content-details');
+    if (details) details.open = true;
     openNewsletterEngagementHub(sectionKey);
 }
 
@@ -2836,6 +2840,24 @@ function updateCustomSectionFieldsVisibility() {
         row.classList.toggle('ring-1', show);
         row.classList.toggle('ring-[#00A89D]/25', show);
     }
+    if (show) {
+        const details = document.getElementById('nl-custom-content-details');
+        if (details) details.open = true;
+    }
+}
+
+function updateCustomContentDetailsSummary(activeLabels) {
+    const labels = Array.isArray(activeLabels) ? activeLabels.slice() : [];
+    if (document.getElementById('nl-custom-section')?.checked) labels.push('Custom section');
+    const summaryEl = document.getElementById('nl-custom-content-summary');
+    const countEl = document.getElementById('nl-custom-content-count');
+    if (summaryEl) {
+        summaryEl.textContent = labels.length ? `Custom Content (${labels.join(', ')})` : 'Custom Content';
+    }
+    if (countEl) {
+        countEl.textContent = labels.length ? `${labels.length} active` : '';
+        countEl.classList.toggle('hidden', !labels.length);
+    }
 }
 
 function updateCustomContentChoicesVisibility() {
@@ -2854,6 +2876,11 @@ function updateCustomContentChoicesVisibility() {
     updateCustomSectionFieldsVisibility();
     updateCuratedRowStatuses();
     updateEngagementSectionSummary();
+    const activeLabels = [];
+    Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([key, cfg]) => {
+        if (document.getElementById(cfg.checkboxId)?.checked) activeLabels.push(cfg.shortLabel);
+    });
+    updateCustomContentDetailsSummary(activeLabels);
 }
 
 function wireCustomContentJumpControls() {

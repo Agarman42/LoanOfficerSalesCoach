@@ -4171,7 +4171,8 @@ function updateSpecificTopicsPlaceholder() {
 }
 
 function scrollToNewsletterCustomContent(sectionKey) {
-    // Primary path: multi-section engagement hub (same as LO)
+    const details = document.getElementById('nl-custom-content-details');
+    if (details) details.open = true;
     if (sectionKey && NL_CUSTOM_CONTENT_BLOCKS[sectionKey]) {
         openNewsletterEngagementHub(sectionKey);
         return;
@@ -4385,6 +4386,24 @@ function updateCustomSectionFieldsVisibility() {
         row.classList.toggle('ring-1', show);
         row.classList.toggle('ring-[#00A89D]/25', show);
     }
+    if (show) {
+        const details = document.getElementById('nl-custom-content-details');
+        if (details) details.open = true;
+    }
+}
+
+function updateCustomContentDetailsSummary(activeLabels) {
+    const labels = Array.isArray(activeLabels) ? activeLabels.slice() : [];
+    if (document.getElementById('nl-custom-section')?.checked) labels.push('Custom section');
+    const summaryEl = document.getElementById('nl-custom-content-summary');
+    const countEl = document.getElementById('nl-custom-content-count');
+    if (summaryEl) {
+        summaryEl.textContent = labels.length ? `Custom Content (${labels.join(', ')})` : 'Custom Content';
+    }
+    if (countEl) {
+        countEl.textContent = labels.length ? `${labels.length} active` : '';
+        countEl.classList.toggle('hidden', !labels.length);
+    }
 }
 
 function updateCustomContentChoicesVisibility() {
@@ -4409,41 +4428,7 @@ function updateCustomContentChoicesVisibility() {
     });
     try { updateCustomSectionFieldsVisibility(); } catch (e) {}
     try { updateCuratedRowStatuses(); updateEngagementSectionSummary(); } catch (e) {}
-
-    const anyVisible = activeLabels.length > 0;
-    const emptyEl = document.getElementById('nl-custom-content-empty');
-    const bodyEl = document.getElementById('nl-custom-content-body');
-    const footerEl = document.getElementById('nl-custom-content-footer');
-    const introEl = document.getElementById('nl-custom-content-intro');
-    const summaryEl = document.getElementById('nl-custom-content-summary');
-    const countEl = document.getElementById('nl-custom-content-count');
-    const detailsEl = document.getElementById('nl-custom-content-details');
-
-    if (emptyEl) emptyEl.classList.toggle('hidden', anyVisible);
-    if (bodyEl) bodyEl.classList.toggle('hidden', !anyVisible);
-    if (footerEl) footerEl.classList.toggle('hidden', !anyVisible);
-
-    if (introEl) {
-        introEl.innerHTML = anyVisible
-            ? `Customize <strong>${activeLabels.join(', ')}</strong> — pick from the library, regenerate random, or write your own.`
-            : '';
-    }
-
-    if (summaryEl) {
-        summaryEl.textContent = anyVisible
-            ? `Custom Content Choices (${activeLabels.join(', ')})`
-            : 'Custom Content Choices';
-    }
-
-    if (countEl) {
-        countEl.textContent = anyVisible ? `${activeLabels.length} active` : '';
-        countEl.classList.toggle('hidden', !anyVisible);
-    }
-
-    if (detailsEl) {
-        detailsEl.classList.toggle('hidden', !anyVisible);
-        if (!anyVisible) detailsEl.open = false;
-    }
+    updateCustomContentDetailsSummary(activeLabels);
 }
 
 function extractYouTubeVideoId(url) {
