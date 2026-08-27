@@ -7796,6 +7796,26 @@
                 <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="brain-teaser-preview-inline" data-nl-choice="puzzle" role="button" tabindex="0"></div>
               </div>
             </div>
+            <div id="nl-engagement-row-custom-section" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40">
+              <div class="flex flex-wrap items-center gap-2 p-3">
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0" for="nl-custom-section"><input type="checkbox" id="nl-custom-section" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Custom section ✍️</span></label>
+              </div>
+              <div id="nl-custom-section-fields" class="hidden px-3 pb-3 space-y-3">
+                <div>
+                  <label for="nl-custom-section-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title</label>
+                  <input type="text" id="nl-custom-section-title" maxlength="80" placeholder="Golf Tip" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                </div>
+                <div>
+                  <label for="nl-custom-section-body" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section body</label>
+                  <textarea id="nl-custom-section-body" rows="4" maxlength="2500" placeholder="Type the tip or note you want in this edition…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30 resize-y min-h-[6rem]"></textarea>
+                </div>
+                <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                  <input type="checkbox" id="nl-custom-section-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0">
+                  <span>Polish this with AI (keep my meaning)</span>
+                </label>
+                <p class="text-xs text-gray-500 m-0">This will appear as its own section in the newsletter.</p>
+              </div>
+            </div>
           </div>
         </div>
 

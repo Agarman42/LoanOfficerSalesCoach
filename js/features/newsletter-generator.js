@@ -1950,7 +1950,9 @@ const persistentFields = [
     'nl-personal-video',
     'nl-personal-video-size',
     'nl-color-bundle',
-    'nl-specific'
+    'nl-specific',
+    'nl-custom-section-title',
+    'nl-custom-section-body'
     // Direction notes (market/industry/local/recipes) intentionally NOT persisted —
     // cleared after a successful generate so next issue starts blank.
 ];
@@ -2624,6 +2626,9 @@ document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEac
             const fields = document.getElementById('blog-fields');
             if (fields) fields.classList.toggle('hidden', !cb.checked);
         }
+        if (cb.id === 'nl-custom-section' && typeof updateCustomSectionFieldsVisibility === 'function') {
+            updateCustomSectionFieldsVisibility();
+        }
         if (
             typeof NL_CUSTOM_CONTENT_BLOCKS !== 'undefined' &&
             Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)
@@ -2648,6 +2653,9 @@ function wireNewsletterSectionUiAfterLoad() {
     const blogFields = document.getElementById('blog-fields');
     if (blogCb && blogFields) {
         blogFields.classList.toggle('hidden', !blogCb.checked);
+    }
+    if (typeof updateCustomSectionFieldsVisibility === 'function') {
+        updateCustomSectionFieldsVisibility();
     }
 
     try {
@@ -2772,6 +2780,19 @@ function getCuratedPreviewSnippet(previewId, maxLen = 72) {
     return truncateDirectionPreview(text, maxLen);
 }
 
+function updateCustomSectionFieldsVisibility() {
+    const cb = document.getElementById('nl-custom-section');
+    const fields = document.getElementById('nl-custom-section-fields');
+    const row = document.getElementById('nl-engagement-row-custom-section');
+    const show = !!cb?.checked;
+    if (fields) fields.classList.toggle('hidden', !show);
+    if (row) {
+        row.classList.toggle('border-[#00A89D]/50', show);
+        row.classList.toggle('ring-1', show);
+        row.classList.toggle('ring-[#00A89D]/25', show);
+    }
+}
+
 function updateCustomContentChoicesVisibility() {
     Object.entries(NL_CUSTOM_CONTENT_BLOCKS).forEach(([key, cfg]) => {
         const cb = document.getElementById(cfg.checkboxId);
@@ -2785,6 +2806,7 @@ function updateCustomContentChoicesVisibility() {
             el.classList.toggle('hidden', !show);
         });
     });
+    updateCustomSectionFieldsVisibility();
     updateCuratedRowStatuses();
     updateEngagementSectionSummary();
 }
@@ -3995,6 +4017,227 @@ function injectBlogBeforePersonal(html, blogInnerTableHtml, options) {
     return insertRowsInsideMainTable(out, wrapBlogForTail(out));
 }
 
+let _nlLastCustomSection = null;
+
+function getNewsletterCustomSectionState() {
+    const enabled = !!document.getElementById('nl-custom-section')?.checked;
+    const title = (document.getElementById('nl-custom-section-title')?.value || '').trim().slice(0, 80);
+    const body = (document.getElementById('nl-custom-section-body')?.value || '').trim().slice(0, 2500);
+    const polish = !!document.getElementById('nl-custom-section-polish')?.checked;
+    return { enabled, title, body, polish, ready: !!(enabled && title && body) };
+}
+
+function getNewsletterCustomSection() {
+    const state = getNewsletterCustomSectionState();
+    if (!state.ready) return null;
+    return { title: state.title, body: state.body, polish: state.polish };
+}
+
+function escapeNewsletterCustomText(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function formatCustomSectionBodyHtml(text) {
+    const escaped = escapeNewsletterCustomText(text).replace(/\r\n/g, '\n').trim();
+    if (!escaped) return '';
+    const paras = escaped.split(/\n\s*\n/).map((p) => p.replace(/\n/g, '<br>'));
+    return paras
+        .map((p) => `<p style="margin:0 0 12px; font-size:16px; line-height:1.6; color:#333;">${p}</p>`)
+        .join('');
+}
+
+function buildCustomNewsletterSectionTable(title, body) {
+    const heading = escapeNewsletterCustomText(title);
+    const bodyHtml = formatCustomSectionBodyHtml(body);
+    return `<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-custom-section="1" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
+        <tr>
+            <td style="padding:30px;">
+                <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">${heading}</h2>
+                ${bodyHtml}
+            </td>
+        </tr>
+    </table>`;
+}
+
+function stripCustomNewsletterSection(html) {
+    let out = String(html || '');
+    const marker = /<table\b[^>]*data-nl-custom-section=["']1["'][^>]*>/i;
+    let guard = 0;
+    while (guard++ < 6) {
+        const match = marker.exec(out);
+        if (!match) break;
+        const tableStart = match.index;
+        const closeRel = typeof findMatchingTableCloseIndex === 'function'
+            ? findMatchingTableCloseIndex(out.slice(tableStart))
+            : -1;
+        const tableEnd = closeRel >= 0 ? tableStart + closeRel : out.indexOf('</table>', tableStart);
+        if (tableEnd < 0) break;
+        let end = closeRel >= 0 ? tableEnd : tableEnd + 8;
+        const before = out.slice(0, tableStart);
+        const trOpen = before.lastIndexOf('<tr');
+        let start = tableStart;
+        if (trOpen >= 0 && /<tr[^>]*>\s*<td[^>]*>\s*$/i.test(before.slice(trOpen))) {
+            start = trOpen;
+        }
+        let after = out.slice(end);
+        after = after.replace(/^\s*<\/td>\s*<\/tr>/i, '');
+        after = after.replace(/^\s*<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>/i, '');
+        const beforeStart = out.slice(0, start).replace(/<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*$/i, '');
+        out = beforeStart + after;
+        marker.lastIndex = 0;
+    }
+    return out;
+}
+
+function injectCustomSectionBeforePersonal(html, innerTableHtml, options) {
+    if (!innerTableHtml) return html;
+    const personalIncluded = !!(options && options.personalIncluded);
+    let out = String(html || '');
+
+    const personalIdx = findBlogInsertBeforePersonalIndex(out);
+    if (personalIdx >= 0) {
+        const before = out.slice(0, personalIdx);
+        const spacerLen = matchSectionSpacerRowLengthAt(out, personalIdx);
+        const section = wrapNewsletterSectionRows(innerTableHtml, {
+            skipLeadingSpacer: endsWithSectionSpacerRow(before),
+        });
+        if (spacerLen > 0) {
+            return out.slice(0, personalIdx) + section + out.slice(personalIdx + spacerLen);
+        }
+        return out.slice(0, personalIdx) + section + out.slice(personalIdx);
+    }
+
+    const wrapForTail = () => wrapNewsletterSectionRows(innerTableHtml, {
+        skipLeadingSpacer: endsWithSectionSpacerRow(out),
+    });
+
+    if (personalIncluded) {
+        const personalComment = /<!--\s*Personal Note Section\s*-->/i;
+        const commentMatch = personalComment.exec(out);
+        if (commentMatch) {
+            const section = wrapNewsletterSectionRows(innerTableHtml, {
+                skipLeadingSpacer: endsWithSectionSpacerRow(out.slice(0, commentMatch.index)),
+            });
+            return out.slice(0, commentMatch.index) + section + out.slice(commentMatch.index);
+        }
+        return insertRowsInsideMainTable(out, wrapForTail());
+    }
+
+    if (out.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
+        const spacerBeforePlaceholder = /<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*<!--\s*PERSONAL VIDEO PLACEHOLDER\s*-->/i;
+        const section = wrapNewsletterSectionRows(innerTableHtml, {
+            skipLeadingSpacer: spacerBeforePlaceholder.test(out) || endsWithSectionSpacerRow(out),
+        });
+        return out.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', section + '\n<!-- PERSONAL VIDEO PLACEHOLDER -->');
+    }
+
+    if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
+        return out.replace('[REFERRAL CTA PLACEHOLDER]', wrapForTail() + '\n[REFERRAL CTA PLACEHOLDER]');
+    }
+
+    const referralBlock = /<tr>\s*<td[^>]*>[\s\S]*?Know Someone Ready to Buy or Refinance\?[\s\S]*?<\/tr>/i;
+    if (referralBlock.test(out)) {
+        return out.replace(referralBlock, wrapForTail() + '$&');
+    }
+
+    const footerRow = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i;
+    if (footerRow.test(out)) {
+        return out.replace(footerRow, wrapForTail() + '$1');
+    }
+
+    const disclaimerTable = /(<table\b[^>]*data-nl-disclaimer-block=["']1["'][^>]*>)/i;
+    if (disclaimerTable.test(out)) {
+        return out.replace(disclaimerTable, wrapForTail() + '\n$1');
+    }
+
+    return insertRowsInsideMainTable(out, wrapForTail());
+}
+
+function applyNewsletterCustomSection(html, custom, options) {
+    let out = stripCustomNewsletterSection(html);
+    if (!custom || !String(custom.title || '').trim() || !String(custom.body || '').trim()) {
+        return out;
+    }
+    const title = String(custom.title).trim();
+    const body = String(custom.body).trim();
+    const inner = buildCustomNewsletterSectionTable(title, body);
+    out = injectCustomSectionBeforePersonal(out, inner, options);
+    _nlLastCustomSection = {
+        title,
+        rawBody: custom.rawBody != null ? String(custom.rawBody) : body,
+        injectedBody: body
+    };
+    return out;
+}
+
+function buildCustomSectionPromptLines() {
+    const state = getNewsletterCustomSectionState();
+    if (!state.ready) {
+        return [
+            '- CUSTOM SECTION: not included. Do NOT invent a user-authored custom card, extra untitled section, or bonus tip block. Placement is handled by the app if the user adds one later.'
+        ];
+    }
+    return [
+        '- CUSTOM SECTION FIELDS (explicit payload — do NOT write this card yourself):',
+        `- Title: ${state.title}`,
+        `- Body: ${state.body.slice(0, 1200)}`,
+        `- AI polish requested: ${state.polish ? 'yes' : 'no'}`,
+        '- The app injects this card AFTER market/blog-type content and BEFORE the Personal Note / video / referral / footer. Do not invent a different location or duplicate this content.'
+    ];
+}
+
+async function polishNewsletterCustomSection(title, body) {
+    const raw = String(body || '').trim();
+    if (!raw) return raw;
+    try {
+        const prompt = [
+            'Lightly polish this newsletter section for grammar and clarity only.',
+            'Keep the author\'s meaning and specifics. Do not add claims, guarantees, new facts, headings, or disclaimers.',
+            'Do not rename the section. Return ONLY the polished body text — no title, no quotes, no markdown.',
+            '',
+            'Section title (do not change or repeat): ' + String(title || '').trim(),
+            'Body:',
+            raw
+        ].join('\n');
+        const result = await window.callGrokAPI(prompt, {
+            temperature: 0.2,
+            max_tokens: 600,
+            timeoutMs: 12000,
+            model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
+        });
+        let text = String(result || '').trim()
+            .replace(/^```[\s\S]*?```$/g, '')
+            .replace(/^```(?:text|markdown)?\s*/i, '')
+            .replace(/```$/g, '')
+            .replace(/^["']|["']$/g, '')
+            .trim();
+        const titlePlain = String(title || '').trim();
+        if (titlePlain) {
+            text = text.replace(new RegExp('^' + escapeRegex(titlePlain) + '\\s*[:\\-–—]?\\s*', 'i'), '').trim();
+        }
+        if (/<[a-z][\s\S]*>/i.test(text)) return raw;
+        if (!text || text.length > Math.max(raw.length * 3, raw.length + 400)) return raw;
+        return text;
+    } catch (e) {
+        return raw;
+    }
+}
+
+function resolveCustomSectionBodyForGenerate(custom, isFeedback) {
+    if (!custom) return Promise.resolve('');
+    if (isFeedback && _nlLastCustomSection
+        && _nlLastCustomSection.title === custom.title
+        && _nlLastCustomSection.rawBody === custom.body) {
+        return Promise.resolve(_nlLastCustomSection.injectedBody || custom.body);
+    }
+    if (!custom.polish) return Promise.resolve(custom.body);
+    return polishNewsletterCustomSection(custom.title, custom.body).then((text) => text || custom.body);
+}
+
 function stripPersonalVideoBlocks(html) {
     return String(html || '').replace(
         /<tr>\s*<td[^>]*>\s*<table[^>]*>[\s\S]*?Personal Video Update[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?20["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi,
@@ -4047,7 +4290,7 @@ function getNewsletterSelections() {
     const extra = (window.NlEntertainment && typeof window.NlEntertainment.getSelectionsExtra === 'function')
         ? window.NlEntertainment.getSelectionsExtra()
         : { puzzleType: 'trivia' };
-    return { personal, includePhoto, includeVideo, includeBlog, includeReferral, contentSections, puzzleType: extra.puzzleType || 'trivia' };
+    return { personal, includePhoto, includeVideo, includeBlog, includeReferral, contentSections, puzzleType: extra.puzzleType || 'trivia', customSection: getNewsletterCustomSection() };
 }
 
 function escapeRegex(str) {
@@ -4188,6 +4431,8 @@ function buildNewsletterSectionsPrompt(selections) {
         lines.push('- Referral CTA (EXCLUDE): do NOT include any referral ask, "Know Someone" heading, referral button, or [REFERRAL CTA PLACEHOLDER]. End with personal note / video / blog then go straight to the footer disclaimer.');
     }
 
+    lines.push('');
+    lines.push(...buildCustomSectionPromptLines());
     lines.push('');
     lines.push(...buildCoreSectionDirectionsPromptLines(selections));
 
@@ -4439,13 +4684,27 @@ function updateNewsletterPreflightSummary() {
         if (!blogUrl) warnings.push('Blog is checked but no URL — the blog card will be skipped.');
     }
 
+    const customState = getNewsletterCustomSectionState();
+    if (customState.enabled) {
+        if (customState.ready) {
+            chips.push({
+                text: `Custom · ${customState.title}`,
+                style: 'included',
+                removeId: 'nl-custom-section'
+            });
+        } else {
+            chips.push({ text: 'Custom section (needs title & body)', style: 'warn', removeId: 'nl-custom-section' });
+            warnings.push('Custom section is checked but title or body is empty — it will be skipped.');
+        }
+    }
+
     if (sel.includeReferral) {
         chips.push({ text: 'Referral CTA (before disclaimer)', style: 'included', removeId: 'nl-include-referral' });
     } else {
         chips.push({ text: 'Referral CTA off', style: 'off' });
     }
 
-    const anyContent = Object.values(sel.contentSections).some(Boolean) || sel.personal;
+    const anyContent = Object.values(sel.contentSections).some(Boolean) || sel.personal || customState.ready;
     if (!anyContent) warnings.push('No content sections or Personal Update selected — your newsletter may be very thin.');
 
     chipsEl.innerHTML = chips.length
@@ -4640,7 +4899,14 @@ async function generateNewsletter(feedback = '') {
     const includedLabels = Object.entries(NL_CONTENT_SECTIONS)
         .filter(([key]) => selections.contentSections[key])
         .map(([, cfg]) => cfg.label);
-    const sectionsSummary = includedLabels.length ? includedLabels.join(', ') : '(no optional content sections selected)';
+    const customForRun = getNewsletterCustomSection();
+    const customBodyPromise = resolveCustomSectionBodyForGenerate(customForRun, !!feedback);
+    let sectionsSummary = includedLabels.length ? includedLabels.join(', ') : '(no optional content sections selected)';
+    if (customForRun) {
+        sectionsSummary = includedLabels.length
+            ? `${sectionsSummary}, ${customForRun.title}`
+            : customForRun.title;
+    }
 
     // === SAVE ORIGINAL LOADING CONTENT (after force so we capture the clean base card) ===
     const loadingEl = document.getElementById('global-loading');
@@ -4722,6 +4988,7 @@ async function generateNewsletter(feedback = '') {
         loadingEl.style.setProperty('inset', '0', 'important');
     }
 
+    let customInjectPayload = null;
     try {
         const personalPhotoUrl = selections.includePhoto
             ? (document.getElementById('nl-personal-photo')?.value.trim() || '')
@@ -4741,6 +5008,7 @@ async function generateNewsletter(feedback = '') {
             promptLines = [
                 'You are a precise newsletter editor. Return ONLY a complete standalone HTML email (start with <!DOCTYPE html>, end with </html>).',
                 'Apply ONLY the user edit. Keep section order, placeholders, and table structure. No rates/APRs. No extra commentary.',
+                'Do not invent or relocate a custom user section. The app re-injects it after market/blog content and before the Personal Note.',
                 '',
                 'USER EDIT:',
                 String(feedback || '').slice(0, 2500),
@@ -4787,6 +5055,9 @@ async function generateNewsletter(feedback = '') {
                 '- Personal update: "' + String(personalUpdateText || '').slice(0, 1200) + '"',
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
+                '- Custom section title: ' + (customForRun ? customForRun.title : '(none)'),
+                '- Custom section body: ' + (customForRun ? customForRun.body.slice(0, 1200) : '(none)'),
+                '- Custom section AI polish: ' + (customForRun && customForRun.polish ? 'yes' : 'no'),
                 '- Section direction & extra instructions:\n' + getCombinedSpecificTopicsForPrompt(selections),
                 ...(typeof window.buildGenerationRulesPromptBlock === 'function'
                     ? window.buildGenerationRulesPromptBlock('newsletter')
@@ -4847,6 +5118,7 @@ async function generateNewsletter(feedback = '') {
                 '- Use consistent module spacing of 20px between sections. Main content tables should be width="600".',
                 '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any blog section yourself unless instructed in SECTION SELECTION. Leave <!-- BLOG SECTION PLACEHOLDER --> only when blog is included.',
+                '- CUSTOM SECTION RULE: Do NOT write the user custom section card. The app injects it after market/blog content and before the Personal Note / video / referral / footer.',
                 '',
                 'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate ONLY the optional content sections listed in SECTION SELECTION — each as its own teal card. Do not invent extra sections (no Client Story, no bonus Market block, etc.). After included sections, append the skeleton placeholders/footer below. Leave untouched placeholders only for sections marked INCLUDE.',
                 'Stop immediately after </html>. Do not add extra cards, duplicate sections, or commentary after the closing tag.',
@@ -4910,13 +5182,19 @@ async function generateNewsletter(feedback = '') {
 
         const prompt = promptLines.join('\n');
 
-        // Centralized API call (Phase 0)
-        let fullContent = await window.callGrokAPI(prompt, {
-            temperature: feedback ? 0.7 : 0.8,
-            max_tokens: getNewsletterMaxTokens(),
-            timeoutMs: 75000,
-            model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
-        });
+        // Centralized API call (Phase 0). Custom-section polish runs in parallel on the fast model.
+        const [fullContent, customBodyOut] = await Promise.all([
+            window.callGrokAPI(prompt, {
+                temperature: feedback ? 0.7 : 0.8,
+                max_tokens: getNewsletterMaxTokens(),
+                timeoutMs: 75000,
+                model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
+            }),
+            customBodyPromise
+        ]);
+        customInjectPayload = customForRun
+            ? { title: customForRun.title, body: customBodyOut || customForRun.body, rawBody: customForRun.body }
+            : null;
 
         if (!fullContent) throw new Error('Empty response from API');
 
@@ -5068,6 +5346,10 @@ if (postSelections?.includeReferral) {
                     html = applyUncheckedNewsletterSectionFilters(html, postSelections);
                 }
             } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
+
+            html = applyNewsletterCustomSection(html, customInjectPayload, {
+                personalIncluded: !!getNewsletterSelections().personal
+            });
 
             // Always inject styled compliance footer — prevents orphan plain-text disclaimers.
             html = ensureLoNewsletterFooter(html);
@@ -5809,6 +6091,7 @@ function copyForOutlook() {
     const blogCb = document.getElementById('nl-include-blog');
     const blogFields = document.getElementById('blog-fields');
     if (blogCb && blogFields) blogFields.classList.toggle('hidden', !blogCb.checked);
+    if (typeof updateCustomSectionFieldsVisibility === 'function') updateCustomSectionFieldsVisibility();
 
     if (typeof updateCustomContentChoicesVisibility === 'function') updateCustomContentChoicesVisibility();
     if (typeof updateCoreSectionDirectionUI === 'function') updateCoreSectionDirectionUI();
@@ -5816,6 +6099,8 @@ function copyForOutlook() {
   }
 
   window.generateNewsletter = generateNewsletter;
+  window.applyNewsletterCustomSection = applyNewsletterCustomSection;
+  window.getNewsletterCustomSection = getNewsletterCustomSection;
   window.updateNewsletterPreflightSummary = updateNewsletterPreflightSummary;
   window.updatePersonalMediaPreviews = updatePersonalMediaPreviews;
   window.reloadNewsletterPersistedValues = reloadNewsletterPersistedValues;

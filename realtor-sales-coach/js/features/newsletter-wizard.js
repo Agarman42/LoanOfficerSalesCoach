@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'nlWizardLastStep';
-  const WIZARD_DOM_VERSION = '23';
+  const WIZARD_DOM_VERSION = '24';
   const PERSONAL_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -30,7 +30,9 @@
     ['nl-wizard-video', 'nl-personal-video'],
     ['nl-wizard-blog-url', 'nl-blog-url'],
     ['nl-wizard-blog-title', 'nl-blog-title'],
-    ['nl-wizard-specific', 'nl-specific']
+    ['nl-wizard-specific', 'nl-specific'],
+    ['nl-wizard-custom-section-title', 'nl-custom-section-title'],
+    ['nl-wizard-custom-section-body', 'nl-custom-section-body']
   ];
 
   const SECTION_GROUPS = [
@@ -39,7 +41,7 @@
       desc: 'AI-written from credible sources — steer topics on the next step.',
       items: [
         { id: 'nl-market', label: 'Market Updates', emoji: '📈', hint: 'Housing trends & market context for your area' },
-        { id: 'nl-industry', label: 'Industry News', emoji: '📰', hint: 'Mortgage industry headlines & timely updates' },
+        { id: 'nl-industry', label: 'Industry News', emoji: '📰', hint: 'Real estate headlines & timely market updates' },
         { id: 'nl-local', label: 'Local Update', emoji: '🎉', hint: 'Events, openings & neighborhood highlights' },
         { id: 'nl-recipes', label: 'Recipes', emoji: '🍳', hint: 'Seasonal favorite or cozy dish for the month' }
       ]
@@ -49,7 +51,7 @@
       desc: 'Short, scannable value — picked from our curated library.',
       items: [
         { id: 'nl-fun', label: 'Fun Facts', emoji: '🤓', hint: 'Light break readers love to skim' },
-        { id: 'nl-tip', label: 'Homeownership Tip', emoji: '🏡', hint: 'Practical tip for buyers & homeowners' },
+        { id: 'nl-tip', label: 'Real Estate Tip', emoji: '🏡', hint: 'Practical tip for buyers, sellers & clients' },
         { id: 'nl-quote', label: 'Motivational Quote', emoji: '💪', hint: 'Quick inspiration to close the scroll' }
       ]
     },
@@ -58,7 +60,8 @@
       desc: 'Optional personality — great for standing out in the inbox.',
       items: [
         { id: 'nl-dadjoke', label: 'Dad Joke', emoji: '😄', hint: 'Corny humor that gets forwarded' },
-        { id: 'nl-puzzle', label: 'Brain Teaser', emoji: '🧩', hint: 'Trivia, word scramble, or riddle' }
+        { id: 'nl-puzzle', label: 'Brain Teaser', emoji: '🧩', hint: 'Trivia, word scramble, or riddle' },
+        { id: 'nl-custom-section', label: 'Custom section', emoji: '✍️', hint: 'Your own titled block — Golf Tip, Prospecting Tip, Realtor Sales Tip' }
       ]
     }
   ];
@@ -72,7 +75,7 @@
   /** Curated library sections — shuffle / browse modals on step 4. */
   const CURATED_SECTIONS = [
     { key: 'fun', checkboxId: 'nl-fun', label: 'Fun Facts', emoji: '🤓', choiceCat: 'funFact', previewId: 'fun-fact-preview' },
-    { key: 'tip', checkboxId: 'nl-tip', label: 'Homeownership Tip', emoji: '🏡', choiceCat: 'proTip', previewId: 'pro-tip-preview' },
+    { key: 'tip', checkboxId: 'nl-tip', label: 'Real Estate Tip', emoji: '🏡', choiceCat: 'proTip', previewId: 'pro-tip-preview' },
     { key: 'quote', checkboxId: 'nl-quote', label: 'Motivational Quote', emoji: '💪', choiceCat: 'quote', previewId: 'quote-preview' },
     { key: 'dadjoke', checkboxId: 'nl-dadjoke', label: 'Dad Joke', emoji: '😄', choiceCat: 'dadJoke', previewId: 'dad-joke-preview' },
     { key: 'puzzle', checkboxId: 'nl-puzzle', label: 'Brain Teaser', emoji: '🧩', choiceCat: 'puzzle', previewId: 'brain-teaser-preview' }
@@ -137,6 +140,8 @@
       const w = $(cfg.wizardId);
       if (w) persistFormValue(cfg.inputId, w.value, { silent });
     });
+    const wizPolish = $('nl-wizard-custom-section-polish');
+    if (wizPolish) setCheckbox('nl-custom-section-polish', wizPolish.checked);
     syncMediaSizeToForm();
   }
 
@@ -233,6 +238,7 @@
     updateSelectedSectionsPreview();
     updateDirectionFieldsVisibility();
     updateWizardCuratedPanel();
+    updateWizardCustomSectionFields();
   }
 
   function getCentralProfile() {
@@ -874,6 +880,9 @@
     if (wizVideoSize && formVideoSize) wizVideoSize.value = formVideoSize.value || String(NL_MEDIA_SIZE_DEFAULT);
 
     syncAllWizardSectionToggles();
+    const wizPolish = $('nl-wizard-custom-section-polish');
+    if (wizPolish) wizPolish.checked = !!$('nl-custom-section-polish')?.checked;
+    updateWizardCustomSectionFields();
     togglePersonalFields();
     toggleBlogFields();
     updateProfileCard();
@@ -897,6 +906,7 @@
     setCheckbox('nl-include-video', $('nl-wizard-include-video')?.checked);
     setCheckbox('nl-include-blog', $('nl-wizard-include-blog')?.checked);
     setCheckbox('nl-include-referral', $('nl-wizard-include-referral')?.checked);
+    setCheckbox('nl-custom-section-polish', $('nl-wizard-custom-section-polish')?.checked);
 
     syncMediaSizeToForm();
 
@@ -980,6 +990,7 @@
     });
     SECTION_GROUPS.slice(1).forEach((group) => {
       group.items.forEach((item) => {
+        if (item.id === 'nl-custom-section') return;
         if ($(item.id)?.checked) items.push({ emoji: item.emoji, label: item.label });
       });
     });
@@ -987,6 +998,12 @@
     if ($('nl-wizard-include-blog')?.checked) {
       const blogTitle = ($('nl-wizard-blog-title')?.value || '').trim();
       items.push({ emoji: '📝', label: 'Blog feature', note: blogTitle || 'Before personal note' });
+    }
+
+    const customTitle = ($('nl-custom-section-title')?.value || $('nl-wizard-custom-section-title')?.value || '').trim();
+    const customBody = ($('nl-custom-section-body')?.value || $('nl-wizard-custom-section-body')?.value || '').trim();
+    if ($('nl-custom-section')?.checked && customTitle && customBody) {
+      items.push({ emoji: '✍️', label: customTitle, note: 'Your custom section' });
     }
 
     const personalOn = $('nl-wizard-personal')?.checked;
@@ -1293,6 +1310,46 @@
     `;
   }
 
+  function updateWizardCustomSectionFields() {
+    const checked = !!$('nl-custom-section')?.checked;
+    const fields = $('nl-wizard-custom-section-fields');
+    if (fields) fields.classList.toggle('hidden', !checked);
+    const card = wizardEl?.querySelector('[data-nl-wizard-section-card="nl-custom-section"]');
+    if (card) {
+      card.classList.toggle('border-[#00A89D]', checked);
+      card.classList.toggle('bg-[#00A89D]/8', checked);
+    }
+  }
+
+  function buildCustomSectionWizardCard(item) {
+    return `
+      <div data-nl-wizard-section-card="${item.id}" class="sm:col-span-2 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 transition">
+        <label class="flex items-start gap-3 p-3.5 cursor-pointer">
+          <input type="checkbox" data-nl-wizard-section="${item.id}" class="mt-0.5 w-5 h-5 text-[#00A89D] flex-shrink-0 rounded">
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold text-[#002B5C] dark:text-white leading-snug">${item.label} <span aria-hidden="true">${item.emoji}</span></span>
+            <span class="block text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">${item.hint || ''}</span>
+          </span>
+        </label>
+        <div id="nl-wizard-custom-section-fields" class="hidden px-3 pb-3 space-y-2">
+          <div>
+            <label for="nl-wizard-custom-section-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title</label>
+            <input type="text" id="nl-wizard-custom-section-title" maxlength="80" placeholder="Golf Tip" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <div>
+            <label for="nl-wizard-custom-section-body" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section body</label>
+            <textarea id="nl-wizard-custom-section-body" rows="4" maxlength="2500" placeholder="Type the tip or note you want in this edition…" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm resize-y min-h-[6rem]"></textarea>
+          </div>
+          <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+            <input type="checkbox" id="nl-wizard-custom-section-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0">
+            <span>Polish this with AI (keep my meaning)</span>
+          </label>
+          <p class="text-xs text-gray-500 m-0">This will appear as its own section in the newsletter.</p>
+        </div>
+      </div>
+    `;
+  }
+
   function buildSectionGroupHtml(group, gi) {
     return `
       <div class="mb-6 last:mb-0">
@@ -1308,6 +1365,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           ${group.items.map((item) => {
             if (group.label === 'Core content') return buildCoreSectionCard(item);
+            if (item.id === 'nl-custom-section') return buildCustomSectionWizardCard(item);
             return `
               <label data-nl-wizard-section-card="${item.id}" class="flex items-start gap-3 p-3.5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 hover:border-[#00A89D]/40 cursor-pointer transition">
                 <input type="checkbox" data-nl-wizard-section="${item.id}" class="mt-0.5 w-5 h-5 text-[#00A89D] flex-shrink-0 rounded">
@@ -1723,6 +1781,7 @@
           updateSelectedSectionsPreview();
           updateDirectionFieldsVisibility();
           updateWizardCuratedPanel();
+          if (id === 'nl-custom-section') updateWizardCustomSectionFields();
         }
       });
     });
@@ -1760,7 +1819,8 @@
     const onPersistInput = () => persistWizardSettings();
     [
       'nl-wizard-audience', 'nl-wizard-location', 'nl-wizard-tone', 'nl-wizard-length', 'nl-wizard-newsletter-title',
-      'nl-wizard-blog-url', 'nl-wizard-blog-title', 'nl-wizard-specific'
+      'nl-wizard-blog-url', 'nl-wizard-blog-title', 'nl-wizard-specific',
+      'nl-wizard-custom-section-title', 'nl-wizard-custom-section-body'
     ].forEach((id) => {
       const el = $(id);
       if (!el) return;
@@ -1781,6 +1841,9 @@
     });
 
     $('nl-wizard-include-blog')?.addEventListener('change', toggleBlogFields);
+    $('nl-wizard-custom-section-polish')?.addEventListener('change', () => {
+      setCheckbox('nl-custom-section-polish', $('nl-wizard-custom-section-polish')?.checked);
+    });
     $('nl-wizard-personal')?.addEventListener('change', () => {
       togglePersonalFields();
       if ($('nl-wizard-personal')?.checked) setCheckbox('nl-personal', true);
