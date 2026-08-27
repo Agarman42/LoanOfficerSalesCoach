@@ -3047,49 +3047,64 @@ function buildPersonalPhotoInsert(photoUrl, widthPx) {
 </table>`;
 }
 
-/** Force every personal-photo variant onto the canonical centered markup. */
+/** Remove every personal-photo variant so we can insert exactly one capped block. */
+function stripPersonalPhotoVariants(html, photoUrl) {
+    let out = String(html || '');
+    if (!out) return out;
+    const url = String(photoUrl || '').trim();
+
+    out = out.replace(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<\/table>/gi, '');
+    out = out.replace(
+        /<table(?![^>]*data-nl-personal-photo)[^>]*>[\s\S]*?<img[^>]*alt=["']Personal photo["'][^>]*>[\s\S]*?<\/table>/gi,
+        ''
+    );
+    out = out.replace(/<img[^>]*alt=["']Personal photo["'][^>]*>/gi, '');
+    if (url) {
+        out = out.replace(/<img\b[^>]*>/gi, (tag) => {
+            const m = tag.match(/\bsrc=["']([^"']+)["']/i);
+            if (m && m[1] === url) return '';
+            return tag;
+        });
+    }
+    out = out.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, '');
+    return out;
+}
+
+/** Force every personal-photo variant onto ONE canonical centered block. */
 function ensurePersonalPhotoCentered(htmlString, photoUrl) {
     let out = String(htmlString || '');
     const url = String(photoUrl || '').trim();
     if (!out) return out;
 
-    // Prefer current form URL; fall back to any existing img src
     let src = url;
     if (!src) {
         const m = out.match(/<img[^>]*alt=["']Personal photo["'][^>]*\bsrc=["']([^"']+)["']/i)
-            || out.match(/<img[^>]*\bsrc=["']([^"']+)["'][^>]*alt=["']Personal photo["']/i);
+            || out.match(/<img[^>]*\bsrc=["']([^"']+)["'][^>]*alt=["']Personal photo["']/i)
+            || out.match(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<img[^>]*\bsrc=["']([^"']+)["']/i);
         src = m ? m[1] : '';
     }
     if (!src) return out;
 
-    const pxMatch = out.match(/alt=["']Personal photo["'][^>]*width=["'](\d+)["']/i)
-        || out.match(/alt=["']Personal photo["'][^>]*width:\s*(\d+)px/i)
-        || out.match(/width=["'](\d+)["'][^>]*alt=["']Personal photo["']/i);
-    const px = pxMatch ? parseInt(pxMatch[1], 10) : getPersonalPhotoWidthPx();
-    const block = buildPersonalPhotoInsert(src, px);
+    out = stripPersonalPhotoVariants(out, src);
+    const block = buildPersonalPhotoInsert(src);
+    if (!block) return out;
 
-    if (/data-nl-personal-photo=["']1["']/i.test(out)) {
-        return out.replace(/<table[^>]*data-nl-personal-photo=["']1["'][^>]*>[\s\S]*?<\/table>/gi, block);
-    }
-    if (/alt=["']Personal photo["']/i.test(out)) {
-        // Wrap any bare / poorly framed photo img in the canonical table
-        let replaced = out.replace(
-            /<table(?![^>]*data-nl-personal-photo)[^>]*>[\s\S]*?<img[^>]*alt=["']Personal photo["'][^>]*>[\s\S]*?<\/table>/gi,
-            block
-        );
-        if (replaced === out) {
-            replaced = out.replace(/<img[^>]*alt=["']Personal photo["'][^>]*>/gi, block);
-        }
-        return replaced;
-    }
-    // Placeholder not used and model omitted photo — inject into personal note when URL present
-    if (url && /A Note From/i.test(out) && !/alt=["']Personal photo["']/i.test(out)) {
-        return out.replace(
-            /(A Note From[\s\S]{0,1200}?)(<\/td>\s*<\/tr>\s*<\/table>)/i,
-            `$1${block}$2`
-        );
-    }
-    return out;
+    const afterNote = out.replace(
+        /(A Note From[\s\S]{0,1200}?)(<\/td>\s*<\/tr>\s*<\/table>)/i,
+        `$1${block}$2`
+    );
+    if (afterNote !== out) return afterNote;
+
+    const afterPlaceholder = out.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, block);
+    if (afterPlaceholder !== out) return afterPlaceholder;
+
+    const personalMod = out.replace(
+        /(<h2[^>]*>\s*A Note From[\s\S]*?)(<\/td>\s*<\/tr>\s*<\/table>)/i,
+        `$1${block}$2`
+    );
+    if (personalMod !== out) return personalMod;
+
+    return out + block;
 }
 
 function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
@@ -4596,15 +4611,46 @@ function stripCustomNewsletterSection(html) {
     return out;
 }
 
+function findInsertBeforePersonalIndex(html) {
+    const src = String(html || '');
+    const h2Re = /<h2[^>]*>\s*A\s*Note\s*From\b[^<]*<\/h2>/i;
+    const h2Match = h2Re.exec(src);
+    if (!h2Match) return -1;
+    const h2End = h2Match.index + h2Match[0].length;
+    let searchFrom = h2Match.index;
+    while (searchFrom > 0) {
+        const trPos = src.lastIndexOf('<tr', searchFrom);
+        if (trPos < 0) break;
+        const segment = src.substring(trPos, h2End);
+        const isOuterCard = /<tr[\s>][\s\S]*?<table\b/i.test(segment)
+            && /<h2[^>]*>\s*A\s*Note\s*From\b/i.test(segment);
+        if (isOuterCard) {
+            let insertAt = trPos;
+            const beforeCard = src.substring(0, insertAt);
+            const spacerRe = /<tr>\s*<td[^>]*height=["']?\d+["']?[^>]*>\s*<\/td>\s*<\/tr>\s*$/i;
+            const spacerMatch = spacerRe.exec(beforeCard);
+            if (spacerMatch) insertAt = spacerMatch.index;
+            return insertAt;
+        }
+        searchFrom = trPos - 1;
+    }
+    return h2Match.index;
+}
+
 function injectCustomSectionBeforePersonal(html, innerTableHtml) {
     if (!innerTableHtml) return html;
     const section = wrapNewsletterSectionRows(innerTableHtml);
     let out = String(html || '');
 
-    const noteHeading = /(<tr>\s*<td[^>]*>\s*<table[^>]*>[\s\S]{0,120}?A Note From)/i;
-    if (noteHeading.test(out)) {
-        return out.replace(noteHeading, section + '$1');
+    if (out.includes('<!-- CUSTOM SECTION PLACEHOLDER -->')) {
+        return out.replace('<!-- CUSTOM SECTION PLACEHOLDER -->', section);
     }
+
+    const personalIdx = findInsertBeforePersonalIndex(out);
+    if (personalIdx >= 0) {
+        return out.slice(0, personalIdx) + section + out.slice(personalIdx);
+    }
+
     const personalComment = /<!--\s*Personal Note Section\s*-->/i;
     if (personalComment.test(out)) {
         return out.replace(personalComment, section + '\n<!-- Personal Note Section -->');
@@ -4612,26 +4658,21 @@ function injectCustomSectionBeforePersonal(html, innerTableHtml) {
     if (out.includes('<!-- PERSONAL VIDEO PLACEHOLDER -->')) {
         return out.replace('<!-- PERSONAL VIDEO PLACEHOLDER -->', section + '\n<!-- PERSONAL VIDEO PLACEHOLDER -->');
     }
-    if (out.includes('[REFERRAL CTA PLACEHOLDER]')) {
-        return out.replace('[REFERRAL CTA PLACEHOLDER]', section + '\n[REFERRAL CTA PLACEHOLDER]');
-    }
-    const referral = /<tr>\s*<td[^>]*>[\s\S]*?Know Someone Thinking About Buying or Selling\?[\s\S]*?<\/tr>/i;
-    if (referral.test(out)) {
-        return out.replace(referral, section + '$&');
-    }
-    const footerRow = /(<tr>\s*<td[^>]*background:\s*#002B5C[^>]*>)/i;
-    if (footerRow.test(out)) {
-        return out.replace(footerRow, section + '$1');
+    const sigTable = /(<table\b[^>]*data-nl-signature-block=["']1["'][^>]*>)/i;
+    if (sigTable.test(out)) {
+        return out.replace(sigTable, section + '\n$1');
     }
     const disclaimerTable = /(<table\b[^>]*data-nl-disclaimer-block=["']1["'][^>]*>)/i;
     if (disclaimerTable.test(out)) {
         return out.replace(disclaimerTable, section + '\n$1');
     }
-    const sigTable = /(<table\b[^>]*data-nl-signature-block=["']1["'][^>]*>)/i;
-    if (sigTable.test(out)) {
-        return out.replace(sigTable, section + '\n$1');
+    const referral = /<tr>\s*<td[^>]*>[\s\S]*?Know Someone Thinking About Buying or Selling\?[\s\S]*?<\/tr>/i;
+    if (referral.test(out)) {
+        return out.replace(referral, section + '$&');
     }
-    return out.replace(/<\/table>\s*<\/body>/i, section + '\n</table></body>');
+    const module = `<table width="600" align="center" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;border-collapse:collapse;">${section}</table>`;
+    if (/<\/body>/i.test(out)) return out.replace(/<\/body>/i, module + '</body>');
+    return out + module;
 }
 
 function applyNewsletterCustomSection(html, custom) {
@@ -4666,23 +4707,51 @@ function buildCustomSectionPromptLines() {
     ];
 }
 
-async function polishNewsletterCustomSection(title, body) {
+function isCustomSectionBrief(text) {
+    const t = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!t) return false;
+    if (/^(please\s+)?(include|write|add|give|create|draft|make|need|want|insert|put)\b/i.test(t)) return true;
+    if (/^(can you|could you|would you|i want|i need|help me)\b/i.test(t)) return true;
+    if (/\b(write|include|give me|create|draft|add)\b[\s\S]{0,80}\b(tip|advice|note|section|blurb)\b/i.test(t)) return true;
+    if (/\b(a |an |some )?(tip|note|section|blurb|paragraph) (on|about|for|regarding|to help)\b/i.test(t)) return true;
+    if (t.length < 120 && /\b(include a|write a|give me a|tip about|tip on)\b/i.test(t)) return true;
+    return false;
+}
+
+async function prepareCustomSectionBody(title, body, options) {
     const raw = String(body || '').trim();
     if (!raw) return raw;
+    const asBrief = isCustomSectionBrief(raw);
+    const polish = !!(options && options.polish);
+    if (!asBrief && !polish) return raw;
     try {
-        const prompt = [
-            'Lightly polish this newsletter section for grammar and clarity only.',
-            'Keep the author\'s meaning and specifics. Do not add claims, guarantees, new facts, headings, or disclaimers.',
-            'Do not rename the section. Return ONLY the polished body text — no title, no quotes, no markdown.',
-            '',
-            'Section title (do not change or repeat): ' + String(title || '').trim(),
-            'Body:',
-            raw
-        ].join('\n');
+        const prompt = asBrief
+            ? [
+                'You write ONE short real-estate newsletter section for a local realtor / listing agent.',
+                'The user gave a REQUEST, not finished copy. Write 3–6 short sentences that fulfill it.',
+                'Keep the user\'s title unused in the body — do not repeat or rename it.',
+                'Stay on-brief. No extra headings, no guarantees, no invented statistics.',
+                'No mortgage rates, APR, lender, refinance, or loan-officer language.',
+                'Return ONLY the finished body as plain text.',
+                '',
+                'Section title: ' + String(title || '').trim(),
+                'Request:',
+                raw
+            ].join('\n')
+            : [
+                'Lightly polish this realtor newsletter section for grammar and clarity only.',
+                'Keep the author\'s meaning and specifics. Do not add claims, guarantees, new facts, headings, or disclaimers.',
+                'No mortgage rates, APR, or lender-only language. Do not rename the section.',
+                'Return ONLY the polished body text — no title, no quotes, no markdown.',
+                '',
+                'Section title (do not change or repeat): ' + String(title || '').trim(),
+                'Body:',
+                raw
+            ].join('\n');
         const result = await window.callGrokAPI(prompt, {
-            temperature: 0.2,
-            max_tokens: 600,
-            timeoutMs: 12000,
+            temperature: asBrief ? 0.5 : 0.2,
+            max_tokens: 700,
+            timeoutMs: asBrief ? 18000 : 12000,
             model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
         });
         let text = String(result || '').trim()
@@ -4697,7 +4766,9 @@ async function polishNewsletterCustomSection(title, body) {
             text = text.replace(new RegExp('^' + escaped + '\\s*[:\\-–—]?\\s*', 'i'), '').trim();
         }
         if (/<[a-z][\s\S]*>/i.test(text)) return raw;
-        if (!text || text.length > Math.max(raw.length * 3, raw.length + 400)) return raw;
+        if (!text) return raw;
+        if (asBrief && text.length < 40) return raw;
+        if (!asBrief && text.length > Math.max(raw.length * 3, raw.length + 400)) return raw;
         return text;
     } catch (e) {
         return raw;
@@ -4711,8 +4782,9 @@ function resolveCustomSectionBodyForGenerate(custom, isFeedback) {
         && _nlLastCustomSection.rawBody === custom.body) {
         return Promise.resolve(_nlLastCustomSection.injectedBody || custom.body);
     }
-    if (!custom.polish) return Promise.resolve(custom.body);
-    return polishNewsletterCustomSection(custom.title, custom.body).then((text) => text || custom.body);
+    const asBrief = isCustomSectionBrief(custom.body);
+    if (!asBrief && !custom.polish) return Promise.resolve(custom.body);
+    return prepareCustomSectionBody(custom.title, custom.body, { polish: !!custom.polish }).then((text) => text || custom.body);
 }
 
 function injectPersonalVideoSection(html, personalVideoUrl) {
@@ -5043,6 +5115,10 @@ function restoreNewsletterFormPersistence() {
     const hasSaved = Array.isArray(savedSections);
     document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
         if (!cb.id || !cb.id.startsWith('nl-')) return;
+        if (cb.id === 'nl-custom-section-polish') {
+            restoreCustomSectionPolishCheckbox(cb);
+            return;
+        }
         if (hasSaved) {
             cb.checked = savedSections.includes(cb.id);
         } else if (cb.id === 'nl-include-referral' || cb.id === 'nl-include-signature') {
@@ -5084,6 +5160,46 @@ function restoreNewsletterFormPersistence() {
             try { syncNewsletterFromProfile(true); } catch (e) {}
         }, 60);
     }
+}
+
+function restoreCustomSectionPolishCheckbox(cb) {
+    if (!cb) cb = document.getElementById('nl-custom-section-polish');
+    if (!cb) return;
+    let saved = null;
+    try { saved = localStorage.getItem('nl-custom-section-polish'); } catch (e) {}
+    if (saved === '0' || saved === 'false') cb.checked = false;
+    else cb.checked = true;
+}
+
+function persistCustomSectionPolishCheckbox() {
+    const cb = document.getElementById('nl-custom-section-polish');
+    if (!cb) return;
+    try { localStorage.setItem('nl-custom-section-polish', cb.checked ? '1' : '0'); } catch (e) {}
+}
+
+function wireCustomSectionPlaceholderHints() {
+    const titleEl = document.getElementById('nl-custom-section-title');
+    const bodyEl = document.getElementById('nl-custom-section-body');
+    const examples = [
+        'Home Maintenance Tip',
+        'Seasonal Home Advice',
+        'Value-Add Tip',
+        'Neighborhood Insight',
+        'Buyer/Seller Tip'
+    ];
+    if (bodyEl && !bodyEl.dataset.nlBodyPhWired) {
+        bodyEl.dataset.nlBodyPhWired = '1';
+        bodyEl.placeholder = 'Type the finished tip, or tell us what to write (example: a short tip on winterizing a home).';
+    }
+    if (!titleEl || titleEl.dataset.nlRotatePh === '1') return;
+    titleEl.dataset.nlRotatePh = '1';
+    let i = 0;
+    titleEl.placeholder = examples[0];
+    setInterval(() => {
+        if (document.activeElement === titleEl) return;
+        i = (i + 1) % examples.length;
+        titleEl.placeholder = examples[i];
+    }, 3500);
 }
 
 function persistNewsletterSectionCheckboxes() {
@@ -5130,6 +5246,7 @@ function wireNewsletterFormPersistence() {
             if (cb.id === 'nl-custom-section' && typeof updateCustomSectionFieldsVisibility === 'function') {
                 updateCustomSectionFieldsVisibility();
             }
+            if (cb.id === 'nl-custom-section-polish') persistCustomSectionPolishCheckbox();
             if (cb.id === 'nl-include-signature' || cb.id === 'nl-include-social') {
                 if (typeof updateBrandPreview === 'function') updateBrandPreview();
             }
@@ -5494,6 +5611,9 @@ async function generateNewsletter(feedback = '') {
             if (selections.includeBlog) {
                 promptLines.push('    <!-- BLOG SECTION PLACEHOLDER -->');
             }
+            if (customForRun) {
+                promptLines.push('    <!-- CUSTOM SECTION PLACEHOLDER -->');
+            }
             if (selections.personal) {
                 promptLines.push(
                     '    <!-- Personal Note Section -->',
@@ -5597,15 +5717,11 @@ async function generateNewsletter(feedback = '') {
                     ? (document.getElementById('nl-personal-video')?.value.trim() || '')
                     : '';
 
-                let photoInsert = '';
-                if (includePhoto && personalPhotoUrl) {
-                    photoInsert = buildPersonalPhotoInsert(personalPhotoUrl);
-                }
-
-                html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, photoInsert);
-                // Canonicalize any AI-authored or partial photo markup (intermittent left-bias)
                 if (includePhoto && personalPhotoUrl) {
                     html = ensurePersonalPhotoCentered(html, personalPhotoUrl);
+                } else {
+                    html = stripPersonalPhotoVariants(html, '');
+                    html = html.replace(/\[PERSONAL PHOTO PLACEHOLDER\]/gi, '');
                 }
 
 // Blog injection - robust version using dedicated placeholder + fallbacks
@@ -5700,8 +5816,6 @@ html = html.replace(/\[Name\]/g, firstName);
 html = applyUncheckedNewsletterSectionFilters(html, postSelections);
             } // end if (!feedback) — skip all the injection logic when the model already returned a full edited document
 
-            html = applyNewsletterCustomSection(html, customInjectPayload);
-
             if (!feedback) {
                 html = stripReferralFromBody(html);
                 try {
@@ -5714,6 +5828,12 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
                     html = injectAgentBranding(html);
                 } catch (e) { /* non-fatal */ }
             }
+
+            if (!customInjectPayload && typeof getNewsletterCustomSection === 'function') {
+                const late = getNewsletterCustomSection();
+                if (late) customInjectPayload = { title: late.title, body: late.body, rawBody: late.body };
+            }
+            html = applyNewsletterCustomSection(html, customInjectPayload);
             if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
                 html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
             }
@@ -5961,6 +6081,8 @@ function copyForOutlook() {
   window.generateNewsletter = generateNewsletter;
   window.applyNewsletterCustomSection = applyNewsletterCustomSection;
   window.getNewsletterCustomSection = getNewsletterCustomSection;
+  window.ensurePersonalPhotoCentered = ensurePersonalPhotoCentered;
+  window.isCustomSectionBrief = isCustomSectionBrief;
   window.NL_PERSISTENT_FIELD_IDS = persistentFields.slice();
   window.showNewsletterReviewHandoff = showNewsletterReviewHandoff;
   window.hideNewsletterEmptyPreview = hideNewsletterEmptyPreview;
@@ -6365,6 +6487,7 @@ function copyForOutlook() {
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
     try { updateCustomContentChoicesVisibility(); } catch (e) {}
+    try { wireCustomSectionPlaceholderHints(); } catch (e) {}
     try {
       if (window.NlColorBundles?.wireNewsletterBundlePicker) {
         window.NlColorBundles.wireNewsletterBundlePicker();

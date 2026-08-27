@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'nlWizardLastStep';
-  const WIZARD_DOM_VERSION = '25';
+  const WIZARD_DOM_VERSION = '26';
   const PERSONAL_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -61,7 +61,7 @@
       items: [
         { id: 'nl-dadjoke', label: 'Dad Joke', emoji: '😄', hint: 'Corny humor that gets forwarded' },
         { id: 'nl-puzzle', label: 'Brain Teaser', emoji: '🧩', hint: 'Trivia, word scramble, or riddle' },
-        { id: 'nl-custom-section', label: 'Custom section', emoji: '✍️', hint: 'Your own titled block — Credit Tip, This Week’s Win, Client Story' }
+        { id: 'nl-custom-section', label: 'Custom section', emoji: '✍️', hint: 'Your own titled block — Credit Tip, First-Time Buyer Tip, Seasonal Home Advice' }
       ]
     }
   ];
@@ -1349,10 +1349,10 @@
           </div>
           <div>
             <label for="nl-wizard-custom-section-body" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section body</label>
-            <textarea id="nl-wizard-custom-section-body" rows="4" maxlength="2500" placeholder="Type the tip or note you want in this edition…" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm resize-y min-h-[6rem]"></textarea>
+            <textarea id="nl-wizard-custom-section-body" rows="4" maxlength="2500" placeholder="Type the finished tip, or tell us what to write (example: a short tip on winterizing a home)." class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm resize-y min-h-[6rem]"></textarea>
           </div>
           <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-            <input type="checkbox" id="nl-wizard-custom-section-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0">
+            <input type="checkbox" id="nl-wizard-custom-section-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0" checked>
             <span>Polish this with AI (keep my meaning)</span>
           </label>
           <p class="text-xs text-gray-500 m-0">This will appear as its own section in the newsletter.</p>

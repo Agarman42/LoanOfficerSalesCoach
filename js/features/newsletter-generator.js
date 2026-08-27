@@ -2526,6 +2526,10 @@ function restoreNewsletterFormPersistence() {
     const hasSaved = Array.isArray(savedSections) && savedSections.length > 0;
     document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
         if (!cb.id || !cb.id.startsWith('nl-')) return;
+        if (cb.id === 'nl-custom-section-polish') {
+            restoreCustomSectionPolishCheckbox(cb);
+            return;
+        }
         // Personal update stays user's choice each time unless they checked it before
         if (hasSaved) {
             cb.checked = savedSections.includes(cb.id);
@@ -2591,6 +2595,46 @@ persistentFields.forEach(id => {
     }
 });
 
+function restoreCustomSectionPolishCheckbox(cb) {
+    if (!cb) cb = document.getElementById('nl-custom-section-polish');
+    if (!cb) return;
+    let saved = null;
+    try { saved = localStorage.getItem('nl-custom-section-polish'); } catch (e) {}
+    if (saved === '0' || saved === 'false') cb.checked = false;
+    else cb.checked = true;
+}
+
+function persistCustomSectionPolishCheckbox() {
+    const cb = document.getElementById('nl-custom-section-polish');
+    if (!cb) return;
+    try { localStorage.setItem('nl-custom-section-polish', cb.checked ? '1' : '0'); } catch (e) {}
+}
+
+function wireCustomSectionPlaceholderHints() {
+    const titleEl = document.getElementById('nl-custom-section-title');
+    const bodyEl = document.getElementById('nl-custom-section-body');
+    const examples = [
+        'Credit Tip',
+        'First-Time Buyer Tip',
+        'Homeowner Money-Saving Tip',
+        'Seasonal Home Advice',
+        'This Week’s Win'
+    ];
+    if (bodyEl && !bodyEl.dataset.nlBodyPhWired) {
+        bodyEl.dataset.nlBodyPhWired = '1';
+        bodyEl.placeholder = 'Type the finished tip, or tell us what to write (example: a short tip on winterizing a home).';
+    }
+    if (!titleEl || titleEl.dataset.nlRotatePh === '1') return;
+    titleEl.dataset.nlRotatePh = '1';
+    let i = 0;
+    titleEl.placeholder = examples[0];
+    setInterval(() => {
+        if (document.activeElement === titleEl) return;
+        i = (i + 1) % examples.length;
+        titleEl.placeholder = examples[i];
+    }, 3500);
+}
+
 function persistNewsletterSectionCheckboxes() {
     const checked = Array.from(
         document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked')
@@ -2629,6 +2673,7 @@ document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEac
         if (cb.id === 'nl-custom-section' && typeof updateCustomSectionFieldsVisibility === 'function') {
             updateCustomSectionFieldsVisibility();
         }
+        if (cb.id === 'nl-custom-section-polish') persistCustomSectionPolishCheckbox();
         if (
             typeof NL_CUSTOM_CONTENT_BLOCKS !== 'undefined' &&
             Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)
@@ -4097,6 +4142,10 @@ function injectCustomSectionBeforePersonal(html, innerTableHtml, options) {
     if (!innerTableHtml) return html;
     const personalIncluded = !!(options && options.personalIncluded);
     let out = String(html || '');
+    const wrappedEarly = wrapNewsletterSectionRows(innerTableHtml, { skipLeadingSpacer: false });
+    if (out.includes('<!-- CUSTOM SECTION PLACEHOLDER -->')) {
+        return out.replace('<!-- CUSTOM SECTION PLACEHOLDER -->', wrappedEarly);
+    }
 
     const personalIdx = findBlogInsertBeforePersonalIndex(out);
     if (personalIdx >= 0) {
@@ -4190,23 +4239,50 @@ function buildCustomSectionPromptLines() {
     ];
 }
 
-async function polishNewsletterCustomSection(title, body) {
+function isCustomSectionBrief(text) {
+    const t = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!t) return false;
+    if (/^(please\s+)?(include|write|add|give|create|draft|make|need|want|insert|put)\b/i.test(t)) return true;
+    if (/^(can you|could you|would you|i want|i need|help me)\b/i.test(t)) return true;
+    if (/\b(write|include|give me|create|draft|add)\b[\s\S]{0,80}\b(tip|advice|note|section|blurb)\b/i.test(t)) return true;
+    if (/\b(a |an |some )?(tip|note|section|blurb|paragraph) (on|about|for|regarding|to help)\b/i.test(t)) return true;
+    if (t.length < 120 && /\b(include a|write a|give me a|tip about|tip on)\b/i.test(t)) return true;
+    return false;
+}
+
+async function prepareCustomSectionBody(title, body, options) {
     const raw = String(body || '').trim();
     if (!raw) return raw;
+    const asBrief = isCustomSectionBrief(raw);
+    const polish = !!(options && options.polish);
+    if (!asBrief && !polish) return raw;
     try {
-        const prompt = [
-            'Lightly polish this newsletter section for grammar and clarity only.',
-            'Keep the author\'s meaning and specifics. Do not add claims, guarantees, new facts, headings, or disclaimers.',
-            'Do not rename the section. Return ONLY the polished body text — no title, no quotes, no markdown.',
-            '',
-            'Section title (do not change or repeat): ' + String(title || '').trim(),
-            'Body:',
-            raw
-        ].join('\n');
+        const prompt = asBrief
+            ? [
+                'You write ONE short mortgage / homeownership newsletter section for a local loan officer.',
+                'The user gave a REQUEST, not finished copy. Write 3–6 short sentences that fulfill it.',
+                'Keep the user\'s title unused in the body — do not repeat or rename it.',
+                'Stay on-brief. No extra headings, no guarantees, no invented rates, APRs, or statistics.',
+                'Return ONLY the finished body as plain text.',
+                '',
+                'Section title: ' + String(title || '').trim(),
+                'Request:',
+                raw
+            ].join('\n')
+            : [
+                'Lightly polish this loan-officer newsletter section for grammar and clarity only.',
+                'Keep the author\'s meaning and specifics. Do not add claims, guarantees, new facts, headings, or disclaimers.',
+                'Do not invent rates or APRs. Do not rename the section.',
+                'Return ONLY the polished body text — no title, no quotes, no markdown.',
+                '',
+                'Section title (do not change or repeat): ' + String(title || '').trim(),
+                'Body:',
+                raw
+            ].join('\n');
         const result = await window.callGrokAPI(prompt, {
-            temperature: 0.2,
-            max_tokens: 600,
-            timeoutMs: 12000,
+            temperature: asBrief ? 0.5 : 0.2,
+            max_tokens: 700,
+            timeoutMs: asBrief ? 18000 : 12000,
             model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
         });
         let text = String(result || '').trim()
@@ -4220,7 +4296,9 @@ async function polishNewsletterCustomSection(title, body) {
             text = text.replace(new RegExp('^' + escapeRegex(titlePlain) + '\\s*[:\\-–—]?\\s*', 'i'), '').trim();
         }
         if (/<[a-z][\s\S]*>/i.test(text)) return raw;
-        if (!text || text.length > Math.max(raw.length * 3, raw.length + 400)) return raw;
+        if (!text) return raw;
+        if (asBrief && text.length < 40) return raw;
+        if (!asBrief && text.length > Math.max(raw.length * 3, raw.length + 400)) return raw;
         return text;
     } catch (e) {
         return raw;
@@ -4234,8 +4312,9 @@ function resolveCustomSectionBodyForGenerate(custom, isFeedback) {
         && _nlLastCustomSection.rawBody === custom.body) {
         return Promise.resolve(_nlLastCustomSection.injectedBody || custom.body);
     }
-    if (!custom.polish) return Promise.resolve(custom.body);
-    return polishNewsletterCustomSection(custom.title, custom.body).then((text) => text || custom.body);
+    const asBrief = isCustomSectionBrief(custom.body);
+    if (!asBrief && !custom.polish) return Promise.resolve(custom.body);
+    return prepareCustomSectionBody(custom.title, custom.body, { polish: !!custom.polish }).then((text) => text || custom.body);
 }
 
 function stripPersonalVideoBlocks(html) {
@@ -5153,6 +5232,9 @@ async function generateNewsletter(feedback = '') {
 ];
             if (selections.includeBlog) {
                 promptLines.push('    <!-- BLOG SECTION PLACEHOLDER -->');
+            }
+            if (customForRun) {
+                promptLines.push('    <!-- CUSTOM SECTION PLACEHOLDER -->');
             }
             if (selections.personal) {
                 promptLines.push(
@@ -6077,6 +6159,10 @@ function copyForOutlook() {
     if (savedSections.length) {
       document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
         if (!cb.id || !cb.id.startsWith('nl-')) return;
+        if (cb.id === 'nl-custom-section-polish') {
+          restoreCustomSectionPolishCheckbox(cb);
+          return;
+        }
         if (cb.id === 'nl-include-referral' && !savedSections.includes(cb.id)) {
           cb.checked = true;
           return;
@@ -6101,6 +6187,7 @@ function copyForOutlook() {
   window.generateNewsletter = generateNewsletter;
   window.applyNewsletterCustomSection = applyNewsletterCustomSection;
   window.getNewsletterCustomSection = getNewsletterCustomSection;
+  window.isCustomSectionBrief = isCustomSectionBrief;
   window.updateNewsletterPreflightSummary = updateNewsletterPreflightSummary;
   window.updatePersonalMediaPreviews = updatePersonalMediaPreviews;
   window.reloadNewsletterPersistedValues = reloadNewsletterPersistedValues;
@@ -6524,6 +6611,7 @@ function copyForOutlook() {
     try { wireNewsletterFeedbackFocusGuard(); } catch (e) {}
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
+    try { wireCustomSectionPlaceholderHints(); } catch (e) {}
 
     // Restore form/checkboxes THEN show engagement pickers.
     // Must run here (end of file) so NL_CUSTOM_CONTENT_BLOCKS exists — mid-script
