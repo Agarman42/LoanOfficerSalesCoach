@@ -1345,7 +1345,8 @@
         <div id="nl-wizard-custom-section-fields" class="hidden px-3 pb-3 space-y-2">
           <div>
             <label for="nl-wizard-custom-section-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title</label>
-            <input type="text" id="nl-wizard-custom-section-title" maxlength="80" placeholder="Credit Tip" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+            <input type="text" id="nl-wizard-custom-section-title" maxlength="80" placeholder="Credit Tip · First-Time Buyer Tip · Money-Saving Tip · Seasonal Home Advice · This Week’s Win" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+            <p id="nl-wizard-custom-section-title-ideas" class="text-xs text-gray-500 mt-1 mb-0 leading-snug">Credit Tip · First-Time Buyer Tip · Money-Saving Tip · Seasonal Home Advice · This Week’s Win</p>
           </div>
           <div>
             <label for="nl-wizard-custom-section-body" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section body</label>
@@ -1723,6 +1724,9 @@
     }
 
     wireWizardEvents();
+    if (typeof window.wireCustomSectionPlaceholderHints === 'function') {
+      try { window.wireCustomSectionPlaceholderHints(); } catch (e) {}
+    }
   }
 
   function wireWizardEvents() {

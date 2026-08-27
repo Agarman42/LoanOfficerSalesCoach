@@ -4561,6 +4561,16 @@ function escapeNewsletterCustomText(str) {
         .replace(/"/g, '&quot;');
 }
 
+function toCustomSectionTitleCase(title) {
+    const raw = String(title || '').trim();
+    if (!raw) return '';
+    const allCaps = raw === raw.toUpperCase() && /[A-Z]/.test(raw);
+    return raw.replace(/[A-Za-z0-9]+(?:['’][A-Za-z0-9]+)*/g, (word) => {
+        if (!allCaps && word.length <= 4 && /^[A-Z0-9]+$/.test(word)) return word;
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+}
+
 function formatCustomSectionBodyHtml(text) {
     const escaped = escapeNewsletterCustomText(text).replace(/\r\n/g, '\n').trim();
     if (!escaped) return '';
@@ -4571,7 +4581,7 @@ function formatCustomSectionBodyHtml(text) {
 }
 
 function buildCustomNewsletterSectionTable(title, body) {
-    const heading = escapeNewsletterCustomText(title);
+    const heading = escapeNewsletterCustomText(toCustomSectionTitleCase(title) || title);
     const bodyHtml = formatCustomSectionBodyHtml(body);
     return `<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-custom-section="1" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
         <tr>
@@ -4676,6 +4686,14 @@ function applyNewsletterCustomSection(html, custom) {
     return out;
 }
 
+function describeCustomSectionBodyForPrompt(body) {
+    const raw = String(body || '');
+    if (isCustomSectionBrief(raw)) {
+        return '(user request — the app generates this card separately; do not copy the request into the HTML)';
+    }
+    return raw.slice(0, 1200);
+}
+
 function buildCustomSectionPromptLines() {
     const state = getNewsletterCustomSectionState();
     if (!state.ready) {
@@ -4686,7 +4704,7 @@ function buildCustomSectionPromptLines() {
     return [
         '- CUSTOM SECTION FIELDS (explicit payload — do NOT write this card yourself):',
         `- Title: ${state.title}`,
-        `- Body: ${state.body.slice(0, 1200)}`,
+        `- Body: ${describeCustomSectionBodyForPrompt(state.body)}`,
         `- AI polish requested: ${state.polish ? 'yes' : 'no'}`,
         '- The app injects this card AFTER market/blog-type content and BEFORE the Personal Note / video / referral / footer. Do not invent a different location or duplicate this content.'
     ];
@@ -4695,11 +4713,12 @@ function buildCustomSectionPromptLines() {
 function isCustomSectionBrief(text) {
     const t = String(text || '').replace(/\s+/g, ' ').trim();
     if (!t) return false;
-    if (/^(please\s+)?(include|write|add|give|create|draft|make|need|want|insert|put)\b/i.test(t)) return true;
-    if (/^(can you|could you|would you|i want|i need|help me)\b/i.test(t)) return true;
+    if (/^(please\s+)?(include|write|add|give|create|draft|make|need|want|insert|put|share)\b/i.test(t)) return true;
+    if (/^(can you|could you|would you|will you|i want|i need|i'd like|id like|help me|let's|lets)\b/i.test(t)) return true;
+    if (/\bplease\b[\s\S]{0,80}\b(include|write|add|create|draft)\b/i.test(t) && t.length < 220) return true;
     if (/\b(write|include|give me|create|draft|add)\b[\s\S]{0,80}\b(tip|advice|note|section|blurb)\b/i.test(t)) return true;
     if (/\b(a |an |some )?(tip|note|section|blurb|paragraph) (on|about|for|regarding|to help)\b/i.test(t)) return true;
-    if (t.length < 120 && /\b(include a|write a|give me a|tip about|tip on)\b/i.test(t)) return true;
+    if (t.length < 160 && /\b(include a|write a|give me a|add a|tip about|tip on|please include|please write|please add)\b/i.test(t)) return true;
     return false;
 }
 
@@ -4714,6 +4733,7 @@ async function prepareCustomSectionBody(title, body, options) {
             ? [
                 'You write ONE short real-estate newsletter section for a local realtor / listing agent.',
                 'The user gave a REQUEST, not finished copy. Write 3–6 short sentences that fulfill it.',
+                'Write the finished tip itself. Do NOT repeat, quote, or paraphrase the instruction (never "please include..." or "here is a tip as requested").',
                 'Keep the user\'s title unused in the body — do not repeat or rename it.',
                 'Stay on-brief. No extra headings, no guarantees, no invented statistics.',
                 'No mortgage rates, APR, lender, refinance, or loan-officer language.',
@@ -4768,8 +4788,11 @@ function resolveCustomSectionBodyForGenerate(custom, isFeedback) {
         return Promise.resolve(_nlLastCustomSection.injectedBody || custom.body);
     }
     const asBrief = isCustomSectionBrief(custom.body);
+    // Requests always generate (even if polish is off). Finished copy polishes only when checked.
     if (!asBrief && !custom.polish) return Promise.resolve(custom.body);
-    return prepareCustomSectionBody(custom.title, custom.body, { polish: !!custom.polish }).then((text) => text || custom.body);
+    return prepareCustomSectionBody(custom.title, custom.body, { polish: !!custom.polish })
+        .then((text) => text || custom.body)
+        .catch(() => custom.body);
 }
 
 function injectPersonalVideoSection(html, personalVideoUrl) {
@@ -5162,29 +5185,42 @@ function persistCustomSectionPolishCheckbox() {
     try { localStorage.setItem('nl-custom-section-polish', cb.checked ? '1' : '0'); } catch (e) {}
 }
 
+const NL_CUSTOM_SECTION_TITLE_IDEAS = [
+    'Home Maintenance Tip',
+    'Seasonal Advice',
+    'Value-Add Tip',
+    'Neighborhood Insight',
+    'Buyer/Seller Tip'
+];
+const NL_CUSTOM_SECTION_TITLE_IDEAS_TEXT = NL_CUSTOM_SECTION_TITLE_IDEAS.join(' · ');
+const NL_CUSTOM_SECTION_BODY_PLACEHOLDER = 'Type the finished tip, or tell us what to write (example: a short tip on winterizing a home).';
+
 function wireCustomSectionPlaceholderHints() {
-    const titleEl = document.getElementById('nl-custom-section-title');
-    const bodyEl = document.getElementById('nl-custom-section-body');
-    const examples = [
-        'Home Maintenance Tip',
-        'Seasonal Home Advice',
-        'Value-Add Tip',
-        'Neighborhood Insight',
-        'Buyer/Seller Tip'
-    ];
-    if (bodyEl && !bodyEl.dataset.nlBodyPhWired) {
+    const ideas = NL_CUSTOM_SECTION_TITLE_IDEAS_TEXT;
+    const titleEls = [
+        document.getElementById('nl-custom-section-title'),
+        document.getElementById('nl-wizard-custom-section-title')
+    ].filter(Boolean);
+    const bodyEls = [
+        document.getElementById('nl-custom-section-body'),
+        document.getElementById('nl-wizard-custom-section-body')
+    ].filter(Boolean);
+    bodyEls.forEach((bodyEl) => {
+        if (bodyEl.dataset.nlBodyPhWired) return;
         bodyEl.dataset.nlBodyPhWired = '1';
-        bodyEl.placeholder = 'Type the finished tip, or tell us what to write (example: a short tip on winterizing a home).';
-    }
-    if (!titleEl || titleEl.dataset.nlRotatePh === '1') return;
-    titleEl.dataset.nlRotatePh = '1';
-    let i = 0;
-    titleEl.placeholder = examples[0];
-    setInterval(() => {
-        if (document.activeElement === titleEl) return;
-        i = (i + 1) % examples.length;
-        titleEl.placeholder = examples[i];
-    }, 3500);
+        bodyEl.placeholder = NL_CUSTOM_SECTION_BODY_PLACEHOLDER;
+    });
+    titleEls.forEach((titleEl) => {
+        titleEl.dataset.nlStaticPh = '1';
+        delete titleEl.dataset.nlRotatePh;
+        titleEl.placeholder = ideas;
+    });
+    [
+        document.getElementById('nl-custom-section-title-ideas'),
+        document.getElementById('nl-wizard-custom-section-title-ideas')
+    ].filter(Boolean).forEach((el) => {
+        if (!(el.textContent || '').trim()) el.textContent = ideas;
+    });
 }
 
 function persistNewsletterSectionCheckboxes() {
@@ -5503,7 +5539,7 @@ async function generateNewsletter(feedback = '') {
                 '- Personal photo URL: "' + personalPhotoUrl + '"',
                 '- Personal video URL: "' + personalVideoUrl + '"',
                 '- Custom section title: ' + (customForRun ? customForRun.title : '(none)'),
-                '- Custom section body: ' + (customForRun ? customForRun.body.slice(0, 1200) : '(none)'),
+                '- Custom section body: ' + (customForRun ? describeCustomSectionBodyForPrompt(customForRun.body) : '(none)'),
                 '- Custom section AI polish: ' + (customForRun && customForRun.polish ? 'yes' : 'no'),
                 '- Section direction & extra instructions:\n' + getCombinedSpecificTopicsForPrompt(selections),
                 ...(typeof window.buildGenerationRulesPromptBlock === 'function'
@@ -6068,6 +6104,12 @@ function copyForOutlook() {
   window.getNewsletterCustomSection = getNewsletterCustomSection;
   window.ensurePersonalPhotoCentered = ensurePersonalPhotoCentered;
   window.isCustomSectionBrief = isCustomSectionBrief;
+  window.toCustomSectionTitleCase = toCustomSectionTitleCase;
+  window.prepareCustomSectionBody = prepareCustomSectionBody;
+  window.resolveCustomSectionBodyForGenerate = resolveCustomSectionBodyForGenerate;
+  window.buildCustomNewsletterSectionTable = buildCustomNewsletterSectionTable;
+  window.wireCustomSectionPlaceholderHints = wireCustomSectionPlaceholderHints;
+  window.NL_CUSTOM_SECTION_TITLE_IDEAS_TEXT = NL_CUSTOM_SECTION_TITLE_IDEAS_TEXT;
   window.NL_PERSISTENT_FIELD_IDS = persistentFields.slice();
   window.showNewsletterReviewHandoff = showNewsletterReviewHandoff;
   window.hideNewsletterEmptyPreview = hideNewsletterEmptyPreview;
