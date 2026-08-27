@@ -238,21 +238,35 @@
     if (selectedId) selectEl.value = selectedId;
   }
 
-  function wireProfileBundlePicker() {
-    const select = document.getElementById('profile-newsletter-color-bundle');
+  function refreshProfileBundlePreview(select) {
+    if (!select) return;
     const preview = document.getElementById('profile-newsletter-color-preview');
     const desc = document.getElementById('profile-newsletter-color-desc');
-    if (!select || select.dataset.nlBundleWired === '1') return;
-    select.dataset.nlBundleWired = '1';
-    populateBundleSelect(select, readProfileBundleId(), { includeProfileDefault: false });
-    select.value = readProfileBundleId();
-    const refresh = () => {
-      const bundle = getBundle(select.value);
-      renderBundlePreview(preview, bundle.id);
-      if (desc) desc.textContent = bundle.description;
-    };
-    select.addEventListener('change', refresh);
-    refresh();
+    const bundle = getBundle(select.value);
+    renderBundlePreview(preview, bundle.id);
+    if (desc) desc.textContent = bundle.description || '';
+  }
+
+  /** Fill + bind Profile branding picker. Safe to call on every Profile open. */
+  function wireProfileBundlePicker(preferredId) {
+    const select = document.getElementById('profile-newsletter-color-bundle');
+    if (!select) return false;
+    const saved = String(preferredId || readProfileBundleId() || DEFAULT_BUNDLE_ID).trim() || DEFAULT_BUNDLE_ID;
+    const expected = Object.keys(NL_COLOR_BUNDLES).length;
+    if (select.options.length < expected) {
+      populateBundleSelect(select, saved, { includeProfileDefault: false });
+    }
+    if (!NL_COLOR_BUNDLES[select.value]) {
+      select.value = NL_COLOR_BUNDLES[saved] ? saved : DEFAULT_BUNDLE_ID;
+    } else if (NL_COLOR_BUNDLES[saved] && select.value !== saved) {
+      select.value = saved;
+    }
+    if (select.dataset.nlBundleWired !== '1') {
+      select.dataset.nlBundleWired = '1';
+      select.addEventListener('change', () => refreshProfileBundlePreview(select));
+    }
+    refreshProfileBundlePreview(select);
+    return true;
   }
 
   function wireNewsletterBundlePicker() {

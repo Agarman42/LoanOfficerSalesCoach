@@ -150,7 +150,7 @@
       Home Coach Setup: must not wait for sequential feature-loader (40+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
-    <script defer src="js/features/user-profile.js?v=20260818-realtor-profile"></script>
+    <script defer src="js/features/user-profile.js?v=20260827-nl-bundle-profile"></script>
     <script defer src="js/features/home-favorites.js?v=20260818-hide-calc"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <!-- Invite-gated auth: lock UI until /api/auth/me succeeds (Realtor only) -->
@@ -8931,7 +8931,16 @@ try {
                         <div class="profile-field-stack md:col-span-2">
                             <label class="block text-sm font-medium" for="profile-newsletter-color-bundle">Newsletter color bundle</label>
                             <div class="profile-select-wrap">
-                                <select id="profile-newsletter-color-bundle" class="profile-input w-full"></select>
+                                <select id="profile-newsletter-color-bundle" class="profile-input w-full">
+                                    <option value="coastal-teal">Coastal Teal</option>
+                                    <option value="classic-navy">Classic Navy</option>
+                                    <option value="warm-agent">Warm Agent</option>
+                                    <option value="forest-estate">Forest Estate</option>
+                                    <option value="royal-burgundy">Royal Burgundy</option>
+                                    <option value="slate-modern">Slate Modern</option>
+                                    <option value="gold-luxury">Gold Luxury</option>
+                                    <option value="berry-bold">Berry Bold</option>
+                                </select>
                             </div>
                             <div id="profile-newsletter-color-preview"></div>
                             <p id="profile-newsletter-color-desc" class="profile-field-help"></p>

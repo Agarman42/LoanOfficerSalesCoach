@@ -444,7 +444,13 @@
       tagline: getVal('profile-tagline'),
       logoUrl: getVal('profile-logo-url'),
       headshotUrl: getVal('profile-headshot-url'),
-      newsletterColorBundle: getRaw('profile-newsletter-color-bundle') || 'coastal-teal',
+      newsletterColorBundle: (function () {
+        const el = get('profile-newsletter-color-bundle');
+        const raw = (el && el.value) ? String(el.value).trim() : '';
+        if (raw) return raw;
+        // Empty select (palettes not loaded yet) must not overwrite a saved bundle.
+        return existing.newsletterColorBundle || 'coastal-teal';
+      })(),
       socialLinks,
       monthlyUnits: getRaw('profile-monthly-units'),
       monthlyGoal: getRaw('profile-monthly-goal'),
@@ -555,6 +561,68 @@
     persistProfile(collectProfileFromForm(), showFeedback, closeAfter);
   }
 
+  const PROFILE_NL_BUNDLE_OPTIONS = [
+    ['coastal-teal', 'Coastal Teal'],
+    ['classic-navy', 'Classic Navy'],
+    ['warm-agent', 'Warm Agent'],
+    ['forest-estate', 'Forest Estate'],
+    ['royal-burgundy', 'Royal Burgundy'],
+    ['slate-modern', 'Slate Modern'],
+    ['gold-luxury', 'Gold Luxury'],
+    ['berry-bold', 'Berry Bold']
+  ];
+  const COLOR_BUNDLES_SRC = 'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile';
+
+  function seedProfileBundleSelect(select, selectedId) {
+    if (!select) return;
+    if (select.options.length === 0) {
+      PROFILE_NL_BUNDLE_OPTIONS.forEach(([id, label]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = label;
+        select.appendChild(opt);
+      });
+    }
+    if (selectedId) select.value = selectedId;
+  }
+
+  function loadNewsletterColorBundlesScript() {
+    if (window.NlColorBundles) return Promise.resolve();
+    if (window.__nlColorBundlesLoading) return window.__nlColorBundlesLoading;
+    window.__nlColorBundlesLoading = new Promise((resolve) => {
+      const existing = document.querySelector(`script[src="${COLOR_BUNDLES_SRC}"]`);
+      if (existing && window.NlColorBundles) {
+        resolve();
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = COLOR_BUNDLES_SRC;
+      s.onload = () => resolve();
+      s.onerror = () => resolve();
+      document.head.appendChild(s);
+    });
+    return window.__nlColorBundlesLoading;
+  }
+
+  function ensureProfileNewsletterColorBundlePicker(preferredId) {
+    const select = document.getElementById('profile-newsletter-color-bundle');
+    if (!select) return;
+    const saved = String(preferredId || 'coastal-teal').trim() || 'coastal-teal';
+    seedProfileBundleSelect(select, saved);
+    const wire = () => {
+      if (window.NlColorBundles?.wireProfileBundlePicker) {
+        window.NlColorBundles.wireProfileBundlePicker(saved);
+      } else {
+        select.value = saved;
+      }
+    };
+    if (window.NlColorBundles?.wireProfileBundlePicker) {
+      wire();
+      return;
+    }
+    loadNewsletterColorBundlesScript().then(wire);
+  }
+
   function loadProfileIntoForm() {
     const profile = normalizeProfile(readRawProfile());
 
@@ -630,23 +698,7 @@
       if (el) el.value = social[s] || '';
     });
 
-    if (window.NlColorBundles?.wireProfileBundlePicker) {
-      window.NlColorBundles.wireProfileBundlePicker();
-      const bundleSel = document.getElementById('profile-newsletter-color-bundle');
-      if (bundleSel) {
-        bundleSel.value = profile.newsletterColorBundle || 'coastal-teal';
-        if (window.NlColorBundles.renderBundlePreview) {
-          window.NlColorBundles.renderBundlePreview(
-            document.getElementById('profile-newsletter-color-preview'),
-            bundleSel.value
-          );
-        }
-        const desc = document.getElementById('profile-newsletter-color-desc');
-        if (desc && window.NlColorBundles.getBundle) {
-          desc.textContent = window.NlColorBundles.getBundle(bundleSel.value).description || '';
-        }
-      }
-    }
+    ensureProfileNewsletterColorBundlePicker(profile.newsletterColorBundle || 'coastal-teal');
 
     syncSelectAllStates();
     refreshIntroHelpers(profile);

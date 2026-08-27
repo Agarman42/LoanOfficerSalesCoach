@@ -1969,6 +1969,7 @@ body.modal-open {
 /* Custom select chevron */
 .profile-select-wrap {
     position: relative;
+    z-index: 2;
 }
 .profile-select-wrap select {
     appearance: none;
