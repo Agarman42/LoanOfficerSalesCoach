@@ -2026,6 +2026,14 @@ function getNewsletterLengthConfig() {
     return { key, ...NL_LENGTH_CONFIG[key] };
 }
 
+/** Ceiling only — model should stop at </html>. Tighter caps on Short/Standard avoid runaway HTML. */
+function getNewsletterMaxTokens() {
+    const key = getNewsletterLengthKey();
+    if (key === 'short') return 8000;
+    if (key === 'long') return 12000;
+    return 10000;
+}
+
 function buildNewsletterLengthPromptBlock() {
     const cfg = getNewsletterLengthConfig();
     return [
@@ -4841,6 +4849,7 @@ async function generateNewsletter(feedback = '') {
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any blog section yourself unless instructed in SECTION SELECTION. Leave <!-- BLOG SECTION PLACEHOLDER --> only when blog is included.',
                 '',
                 'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate ONLY the optional content sections listed in SECTION SELECTION — each as its own teal card. Do not invent extra sections (no Client Story, no bonus Market block, etc.). After included sections, append the skeleton placeholders/footer below. Leave untouched placeholders only for sections marked INCLUDE.',
+                'Stop immediately after </html>. Do not add extra cards, duplicate sections, or commentary after the closing tag.',
                 '',
 '<!DOCTYPE html>',
     '<html lang="en">',
@@ -4904,7 +4913,7 @@ async function generateNewsletter(feedback = '') {
         // Centralized API call (Phase 0)
         let fullContent = await window.callGrokAPI(prompt, {
             temperature: feedback ? 0.7 : 0.8,
-            max_tokens: 12000,
+            max_tokens: getNewsletterMaxTokens(),
             timeoutMs: 75000,
             model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
         });

@@ -2989,6 +2989,14 @@ function getNewsletterLengthConfig() {
     return { key, ...NL_LENGTH_CONFIG[key] };
 }
 
+/** Ceiling only — model should stop at </html>. Tighter caps on Short/Standard avoid runaway HTML. */
+function getNewsletterMaxTokens() {
+    const key = getNewsletterLengthKey();
+    if (key === 'short') return 8000;
+    if (key === 'long') return 12000;
+    return 10000;
+}
+
 function buildNewsletterLengthPromptBlock() {
     const cfg = getNewsletterLengthConfig();
     return [
@@ -5156,16 +5164,12 @@ async function generateNewsletter(feedback = '') {
                 '- EVERY fact, statistic, trend, event, or claim MUST be 100% accurate and verifiable.',
                 '- NEVER guess, hallucinate, or invent information. If uncertain, OMIT it or use safe evergreen phrasing.',
                 '- Local Spotlight: Use ONLY fun, interesting, or little known facts about the area. NEVER dated events. Verify and confirm accuracy above all else.',
-                '- Fun Facts: If the Fun Fact section is included, output ONLY the heading <h2>Fun Fact</h2> and an empty paragraph <p id="fun-fact-placeholder"></p>.',
-                '- Pro Tip: If the Pro Tip section is included, output ONLY the heading <h2>Pro Tip</h2> and an empty paragraph <p id="pro-tip-placeholder"></p>.',
-                '- Motivational Quote: If the Motivational Quote section is included, output ONLY the heading <h2>Motivational Quote</h2> and an empty paragraph <p id="quote-placeholder"></p>.',
                 '- Prefer safe, educational, evergreen content.',
                 '',
                 buildNewsletterSectionsPrompt(selections),
                 '',
                 'User Inputs:',
                 '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
-                '- Audience guidance: ' + getAudienceGuidance(document.getElementById('nl-audience')?.value || 'full'),
                 '- Audience guidance: ' + getAudienceGuidance(document.getElementById('nl-audience')?.value || 'full'),
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
                 '- Match the full "AGENT PROFILE & VOICE CONTEXT" section below for overall tone — but the Personal Update must use ONLY what the user typed in the Personal Update field.',
@@ -5230,11 +5234,10 @@ async function generateNewsletter(feedback = '') {
                 '- Main container: <table width="600" align="center"...> with background white.',
                 '- Use consistent module spacing of 20px between sections. Main content tables should be width="600".',
                 '- Sections: EACH section MUST be in its OWN nested table with background:#f9f9f9 and border-left:8px solid #00A89D to create distinct shaded card boxes with individual teal stripes. Add a spacer row <tr><td height="20"></td></tr> between sections for separation. NEVER merge sections into one cell.',
-                '- For the Market Update / Market section ONLY: ALWAYS end with a "Sources" paragraph containing 1-2 HYPERLINKED credible sources. REQUIRED FORMAT (use exactly): <p style="font-size:14px; color:#666; margin-top:20px;">Sources: <a href="https://www.nar.realtor/research-and-statistics" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">NAR Research</a>, <a href="https://www.housingwire.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">HousingWire</a></p>. Use ONLY real, permanent URLs from trusted sites like NAR, HousingWire, Redfin Data Center, or local MLS/market reports. NEVER plain text names — links are mandatory.',
-                '- For the Industry News / Industry Insights section ONLY: Same as above — ALWAYS include 1-2 HYPERLINKED sources in the exact format. Examples: <a href="https://www.nar.realtor/research-and-statistics" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">NAR Research</a>, <a href="https://www.housingwire.com" style="color:#00A89D; text-decoration:underline;" target="_blank" rel="noopener">HousingWire</a>.',
                 '- BLOG RULE (VERY IMPORTANT): DO NOT create any blog section yourself unless instructed in SECTION SELECTION. Leave <!-- BLOG SECTION PLACEHOLDER --> only when blog is included.',
                 '',
                 'OUTPUT ONLY complete standalone HTML. Follow the header exactly. Then generate ONLY the optional content sections listed in SECTION SELECTION — each as its own teal card. Do not invent extra sections. After included sections, append the skeleton placeholders/footer below. Leave untouched placeholders only for sections marked INCLUDE.',
+                'Stop immediately after </html>. Do not add extra cards, duplicate sections, or commentary after the closing tag.',
                 '',
 '<!DOCTYPE html>',
     '<html lang="en">',
@@ -5292,16 +5295,12 @@ async function generateNewsletter(feedback = '') {
             );
         }
 
-        if (!feedback && window.NlEntertainment && typeof window.NlEntertainment.buildPromptLines === 'function') {
-            promptLines.push(...window.NlEntertainment.buildPromptLines(getNewsletterSelections()));
-        }
-
         const prompt = promptLines.join('\n');
 
         // Centralized API call (Phase 0)
         let fullContent = await window.callGrokAPI(prompt, {
             temperature: feedback ? 0.7 : 0.8,
-            max_tokens: 12000,
+            max_tokens: getNewsletterMaxTokens(),
             timeoutMs: 75000,
             model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
         });
