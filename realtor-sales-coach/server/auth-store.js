@@ -21,7 +21,8 @@ const SHAPE = {
   agent_invites: false,
   usage_events: true,
   password_resets: true,
-  access_requests: true
+  access_requests: true,
+  event_codes: true
 };
 
 const SCRYPT_N = 16384;
@@ -43,7 +44,8 @@ function emptyStore() {
     invites: {},
     usage_events: [],
     password_resets: {},
-    access_requests: {}
+    access_requests: {},
+    event_codes: {}
   };
 }
 
@@ -65,7 +67,9 @@ function readStoreFile() {
       access_requests:
         parsed.access_requests && typeof parsed.access_requests === 'object'
           ? parsed.access_requests
-          : {}
+          : {},
+      event_codes:
+        parsed.event_codes && typeof parsed.event_codes === 'object' ? parsed.event_codes : {}
     };
   } catch (e) {
     console.warn('[auth-store] read failed', e.message);
@@ -273,6 +277,86 @@ function seedAdminIfNeeded() {
   });
 }
 
+function loFilePath() {
+  return (
+    process.env.LO_AUTH_STORE_PATH ||
+    path.join(__dirname, '..', '..', 'data', 'lo-auth-store.json')
+  );
+}
+
+let loWithStorePg = null;
+function withLoStore(mutator, opts) {
+  opts = opts || {};
+  if (USE_PG && authPg.createWithStore) {
+    if (!loWithStorePg) loWithStorePg = authPg.createWithStore('lo');
+    return loWithStorePg(mutator, opts);
+  }
+  return Promise.resolve().then(() => {
+    const fp = loFilePath();
+    if (!fs.existsSync(fp)) return mutator({ users: {} });
+    let parsed = {};
+    try {
+      parsed = JSON.parse(fs.readFileSync(fp, 'utf8') || '{}') || {};
+    } catch (e) {
+      parsed = {};
+    }
+    return mutator({
+      users: parsed.users && typeof parsed.users === 'object' ? parsed.users : {}
+    });
+  });
+}
+
+/** Read-only lookup of an LO Sales Coach user (shared Postgres app=lo, or local file). */
+async function lookupLoUserByEmail(email) {
+  const e = normalizeEmail(email);
+  if (!e) return null;
+  try {
+    return await withLoStore((s) => {
+      const u = Object.values(s.users || {}).find((x) => x && x.email === e) || null;
+      if (!u) return null;
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.name || '',
+        company: u.company || '',
+        phone: u.phone || '',
+        password_hash: u.password_hash || '',
+        status: u.status || 'active',
+        role: u.role || 'loan_officer'
+      };
+    }, { readOnly: true });
+  } catch (e) {
+    console.warn('[auth-store] LO user lookup failed', e.message);
+    return null;
+  }
+}
+
+function parseEmailList(raw) {
+  const text = Array.isArray(raw) ? raw.join('\n') : String(raw || '');
+  const parts = text.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
+  const emails = [];
+  const invalid = [];
+  const seen = new Set();
+  parts.forEach((p) => {
+    const e = normalizeEmail(p);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) {
+      invalid.push(p);
+      return;
+    }
+    if (seen.has(e)) return;
+    seen.add(e);
+    emails.push(e);
+  });
+  return { emails, invalid };
+}
+
+function normalizeEventCode(code) {
+  return String(code || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, '');
+}
+
 async function initBackend() {
   if (!USE_PG) {
     console.warn(
@@ -315,5 +399,8 @@ module.exports = {
   canInvite,
   isAdmin,
   initBackend,
+  lookupLoUserByEmail,
+  parseEmailList,
+  normalizeEventCode,
   authPgHealth: () => authPg.health()
 };

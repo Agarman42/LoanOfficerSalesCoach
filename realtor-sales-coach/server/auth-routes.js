@@ -224,6 +224,75 @@ function genInviteCode() {
   return crypto.randomBytes(5).toString('base64url').toUpperCase();
 }
 
+function genEventCode() {
+  return 'MM-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+}
+
+function accessNotifyEmail() {
+  return store.normalizeEmail(
+    process.env.ACCESS_REQUEST_NOTIFY_EMAIL ||
+      process.env.ADMIN_EMAIL ||
+      'agarman42@hotmail.com'
+  );
+}
+
+function remainingEventUses(ec) {
+  if (!ec) return 0;
+  const max = Math.max(0, Number(ec.max_uses) || 0);
+  const used = Math.max(0, Number(ec.used_count) || 0);
+  return Math.max(0, max - used);
+}
+
+function publicEventCode(ec) {
+  if (!ec) return null;
+  return {
+    id: ec.id || ec.code,
+    code: ec.code,
+    label: ec.label || '',
+    max_uses: Number(ec.max_uses) || 0,
+    used_count: Number(ec.used_count) || 0,
+    remaining: remainingEventUses(ec),
+    starts_at: ec.starts_at || null,
+    ends_at: ec.ends_at || null,
+    created_at: ec.created_at,
+    created_by: ec.created_by || null,
+    created_by_name: ec.created_by_name || '',
+    revoked_at: ec.revoked_at || null
+  };
+}
+
+function eventCodeRejectReason(ec) {
+  if (!ec || ec.revoked_at) return 'Invalid access code';
+  const now = Date.now();
+  if (ec.starts_at && new Date(ec.starts_at).getTime() > now) {
+    return 'This access code is not active yet';
+  }
+  if (ec.ends_at && new Date(ec.ends_at).getTime() < now) {
+    return 'This access code has expired';
+  }
+  if (remainingEventUses(ec) <= 0) {
+    return 'This access code has reached its signup limit';
+  }
+  return null;
+}
+
+function publicAccessRequest(reqRow, user) {
+  if (!reqRow) return null;
+  return {
+    id: reqRow.id,
+    email: reqRow.email,
+    name: reqRow.name || '',
+    company: reqRow.company || '',
+    phone: reqRow.phone || '',
+    referred_by_lo_name: reqRow.referred_by_lo_name || '',
+    note: reqRow.note || '',
+    status: reqRow.status || 'pending',
+    created_at: reqRow.created_at,
+    user_id: reqRow.user_id || (user && user.id) || null,
+    user_status: user ? user.status : null
+  };
+}
+
 function genTempPassword() {
   return crypto.randomBytes(8).toString('base64url');
 }
@@ -350,27 +419,107 @@ function mountAuthRoutes(app) {
     }
 
     try {
-      const result = await store.withStore((s) => {
+      const agentHit = await store.withStore((s) => {
         const u = store.findUserByEmail(s, email);
-        if (!u || !store.verifyPassword(password, u.password_hash)) {
+        if (!u) return { kind: 'missing' };
+        if (u.status === 'deactivated') return { kind: 'deactivated' };
+        if (store.verifyPassword(password, u.password_hash)) {
+          if (u.status === 'pending') return { kind: 'pending' };
+          if (u.status !== 'active') return { kind: 'inactive' };
+          return { kind: 'ok', userId: u.id };
+        }
+        return { kind: 'badpass' };
+      }, { readOnly: true });
+
+      if (agentHit.kind === 'deactivated') {
+        return res.status(403).json({ error: 'Account deactivated. Contact your Ruoff partner.' });
+      }
+      if (agentHit.kind === 'pending') {
+        return res.status(403).json({ error: 'Account pending approval.' });
+      }
+      if (agentHit.kind === 'inactive') {
+        return res.status(403).json({ error: 'Account not active.' });
+      }
+
+      let loginUserId = agentHit.kind === 'ok' ? agentHit.userId : null;
+
+      if (!loginUserId && store.isRuoffEmail(email)) {
+        const loUser = await store.lookupLoUserByEmail(email);
+        const loOk =
+          loUser &&
+          loUser.status === 'active' &&
+          loUser.password_hash &&
+          store.verifyPassword(password, loUser.password_hash);
+        if (loOk) {
+          const linked = await store.withStore((s) => {
+            let u = store.findUserByEmail(s, email);
+            if (u && u.status === 'deactivated') {
+              return { ok: false, code: 403, error: 'Account deactivated. Contact your Ruoff partner.' };
+            }
+            const now = new Date().toISOString();
+            if (!u) {
+              const id = store.newId('usr');
+              u = {
+                id,
+                email,
+                password_hash: loUser.password_hash,
+                name: loUser.name || '',
+                company: loUser.company || 'Ruoff Mortgage',
+                phone: loUser.phone || '',
+                role: 'lo',
+                status: 'active',
+                invite_code: null,
+                invited_by: null,
+                referred_by_lo_name: '',
+                linked_from_lo: true,
+                lo_user_id: loUser.id || null,
+                created_at: now,
+                last_login_at: now,
+                login_count: 1
+              };
+              s.users[id] = u;
+            } else {
+              u.password_hash = loUser.password_hash;
+              if (u.role !== 'admin') u.role = 'lo';
+              u.status = 'active';
+              u.linked_from_lo = true;
+              if (!u.name && loUser.name) u.name = loUser.name;
+              if (!u.company && loUser.company) u.company = loUser.company;
+              u.last_login_at = now;
+              u.login_count = (u.login_count || 0) + 1;
+            }
+            store.recordUsage(s, u.id, 'login', '/login', { remember: !!remember, via: 'lo_shared' });
+            return { ok: true, user: store.publicUser(u) };
+          });
+          if (!linked.ok) {
+            return res.status(linked.code).json({ error: linked.error });
+          }
+          clearLoginAttempts(ip);
+          const sess = createSessionToken(linked.user.id, remember);
+          setSessionCookie(res, req, sess.token, sess.maxAgeSec);
+          return res.json({
+            ok: true,
+            user: linked.user,
+            session: { expiresAt: new Date(sess.exp).toISOString(), remember }
+          });
+        }
+      }
+
+      if (!loginUserId) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      const result = await store.withStore((s) => {
+        const u = store.findUserById(s, loginUserId);
+        if (!u || u.status !== 'active') {
           return { ok: false, code: 401, error: 'Invalid email or password' };
         }
-        if (u.status === 'deactivated') {
-          return { ok: false, code: 403, error: 'Account deactivated. Contact your Ruoff partner.' };
-        }
-        if (u.status === 'pending') {
-          return { ok: false, code: 403, error: 'Account pending approval.' };
-        }
-        if (u.status !== 'active') {
-          return { ok: false, code: 403, error: 'Account not active.' };
-        }
-        // Promote legacy @ruoff.com accounts to LO role so invites work
         if (store.isRuoffEmail(u.email) && u.role === 'realtor') {
           u.role = 'lo';
         }
         u.last_login_at = new Date().toISOString();
         u.login_count = (u.login_count || 0) + 1;
-        store.recordUsage(s, u.id, 'login', '/login', { remember: !!remember });
+        store.recordUsage(s, u.id, 'login', '/login', { remember: !!remember, via: 'agent' });
         return { ok: true, user: store.publicUser(u) };
       });
 
@@ -511,11 +660,36 @@ function mountAuthRoutes(app) {
     }
 
     try {
-      await store.withStore((s) => {
-        if (store.findUserByEmail(s, email)) {
-          return;
+      const saved = await store.withStore((s) => {
+        const existing = store.findUserByEmail(s, email);
+        if (existing && existing.status === 'active') {
+          return { ok: false, code: 409, error: 'An account with this email already exists — sign in instead' };
+        }
+        if (existing && existing.status === 'deactivated') {
+          return { ok: false, code: 403, error: 'This email was deactivated. Contact your Ruoff partner.' };
+        }
+        if (existing && existing.status === 'pending') {
+          const id = existing.access_request_id || store.newId('req');
+          if (!s.access_requests) s.access_requests = {};
+          s.access_requests[id] = Object.assign({}, s.access_requests[id] || {}, {
+            id,
+            email,
+            name: name || existing.name,
+            company: company || existing.company || '',
+            phone: phone || existing.phone || '',
+            referred_by_lo_name: referred || existing.referred_by_lo_name || '',
+            note: note || existing.access_note || '',
+            status: 'pending',
+            user_id: existing.id,
+            created_at: (s.access_requests[id] && s.access_requests[id].created_at) || existing.created_at
+          });
+          existing.access_request_id = id;
+          return { ok: true, duplicate: true, request: s.access_requests[id] };
         }
         const id = store.newId('req');
+        const uid = store.newId('usr');
+        const now = new Date().toISOString();
+        if (!s.access_requests) s.access_requests = {};
         s.access_requests[id] = {
           id,
           email,
@@ -525,10 +699,9 @@ function mountAuthRoutes(app) {
           referred_by_lo_name: referred,
           note,
           status: 'pending',
-          created_at: new Date().toISOString()
+          user_id: uid,
+          created_at: now
         };
-        // Also create pending user so admin can activate
-        const uid = store.newId('usr');
         s.users[uid] = {
           id: uid,
           email,
@@ -541,20 +714,205 @@ function mountAuthRoutes(app) {
           invite_code: null,
           invited_by: null,
           referred_by_lo_name: referred,
-          created_at: new Date().toISOString(),
+          created_at: now,
           last_login_at: null,
           login_count: 0,
           access_request_id: id,
           access_note: note
         };
+        return { ok: true, duplicate: false, request: s.access_requests[id] };
       });
+
+      if (!saved.ok) {
+        return res.status(saved.code).json({ error: saved.error });
+      }
+
+      const mailReady = mail.isConfigured();
+      let notified = false;
+      if (mailReady && saved.request) {
+        const notifyTo = accessNotifyEmail();
+        const sendResult = await mail.sendMail({
+          to: notifyTo,
+          subject: 'Agent Sales Coach access request: ' + name,
+          text:
+            name +
+            ' (' +
+            email +
+            ') requested access to Agent Sales Coach.\n\n' +
+            'Company: ' +
+            (company || '—') +
+            '\nRuoff LO: ' +
+            (referred || '—') +
+            '\nNote: ' +
+            (note || '—') +
+            '\n\nApprove this request in Admin · usage. This email is a notification only — the request is already saved in the pending queue.',
+          html:
+            '<p><strong>' +
+            name +
+            '</strong> (' +
+            email +
+            ') requested access to Agent Sales Coach.</p>' +
+            '<p>Company: ' +
+            (company || '—') +
+            '<br>Ruoff LO: ' +
+            (referred || '—') +
+            '<br>Note: ' +
+            (note || '—') +
+            '</p>' +
+            '<p>Approve it in <strong>Admin · usage</strong>. The request is already in the pending queue.</p>'
+        });
+        notified = !!(sendResult && sendResult.ok);
+        if (!notified) {
+          console.warn('[auth] access-request email not sent:', sendResult && sendResult.reason);
+        }
+      }
+
+      const message = notified
+        ? 'Request submitted. An admin was emailed and will review it shortly.'
+        : 'Request submitted. It is waiting in Admin · usage' +
+          (mailReady
+            ? ' (notification email could not be sent).'
+            : ' — email is not configured, so nobody was notified automatically.');
+
       return res.json({
         ok: true,
-        message:
-          'Request submitted. An admin will review and invite you shortly.'
+        notified,
+        mailConfigured: mailReady,
+        message
       });
     } catch (e) {
       return res.status(500).json({ error: 'Could not submit request' });
+    }
+  });
+
+  app.post('/api/auth/signup-access-code', async (req, res) => {
+    const code = store.normalizeEventCode(req.body?.code || req.body?.access_code || '');
+    const email = store.normalizeEmail(req.body?.email);
+    const password = String(req.body?.password || '');
+    const name = String(req.body?.name || '').trim();
+    const company = String(req.body?.company || '').trim();
+    const phone = String(req.body?.phone || '').trim();
+    const remember = req.body?.remember !== false;
+
+    if (!code) {
+      return res.status(400).json({ error: 'Access code is required' });
+    }
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
+    if (!password || password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    try {
+      const result = await store.withStore((s) => {
+        if (!s.event_codes) s.event_codes = {};
+        const ec = s.event_codes[code];
+        if (ec) {
+          const reject = eventCodeRejectReason(ec);
+          if (reject) return { ok: false, code: 400, error: reject };
+          const existing = store.findUserByEmail(s, email);
+          if (existing && existing.status === 'active') {
+            return { ok: false, code: 409, error: 'An account with this email already exists — sign in instead' };
+          }
+          const now = new Date().toISOString();
+          let u = existing;
+          if (!u) {
+            const id = store.newId('usr');
+            u = {
+              id,
+              email,
+              password_hash: store.hashPassword(password),
+              name,
+              company,
+              phone,
+              role: store.resolveRole(email, null),
+              status: 'active',
+              invite_code: null,
+              event_code: code,
+              invited_by: ec.created_by || null,
+              referred_by_lo_name: ec.created_by_name || '',
+              created_at: now,
+              last_login_at: now,
+              login_count: 1
+            };
+            s.users[id] = u;
+          } else {
+            u.password_hash = store.hashPassword(password);
+            u.name = name || u.name;
+            u.company = company || u.company;
+            u.phone = phone || u.phone;
+            u.status = 'active';
+            u.event_code = code;
+            if (u.role !== 'admin' && store.isRuoffEmail(email)) u.role = 'lo';
+            u.last_login_at = now;
+            u.login_count = (u.login_count || 0) + 1;
+          }
+          ec.used_count = (Number(ec.used_count) || 0) + 1;
+          if (!Array.isArray(ec.used_by)) ec.used_by = [];
+          ec.used_by.push({ user_id: u.id, email, at: now });
+          if (u.access_request_id && s.access_requests && s.access_requests[u.access_request_id]) {
+            s.access_requests[u.access_request_id].status = 'approved';
+            s.access_requests[u.access_request_id].approved_via = 'event_code';
+          }
+          store.recordUsage(s, u.id, 'login', '/signup-access-code', { event_code: code });
+          return { ok: true, user: store.publicUser(u), remaining: remainingEventUses(ec) };
+        }
+
+        const inv = s.invites[code];
+        if (!inv) return { ok: false, code: 400, error: 'Invalid access code' };
+        if (inv.used_at) return { ok: false, code: 400, error: 'Invite already used' };
+        if (inv.revoked_at) return { ok: false, code: 400, error: 'Invite was revoked' };
+        if (inv.expires_at && new Date(inv.expires_at).getTime() < Date.now()) {
+          return { ok: false, code: 400, error: 'Invite expired' };
+        }
+        if (inv.email_optional && inv.email_optional !== email) {
+          return { ok: false, code: 400, error: 'This invite is locked to a different email' };
+        }
+        if (store.findUserByEmail(s, email)) {
+          return { ok: false, code: 409, error: 'An account with this email already exists — sign in instead' };
+        }
+        const id = store.newId('usr');
+        const now = new Date().toISOString();
+        s.users[id] = {
+          id,
+          email,
+          password_hash: store.hashPassword(password),
+          name,
+          company,
+          phone,
+          role: store.resolveRole(email, null),
+          status: 'active',
+          invite_code: code,
+          invited_by: inv.created_by || null,
+          referred_by_lo_name: inv.created_by_name || '',
+          linked_lo_brand: inv.inviter_brand || null,
+          created_at: now,
+          last_login_at: now,
+          login_count: 1
+        };
+        inv.used_at = now;
+        inv.used_by_user_id = id;
+        store.recordUsage(s, id, 'login', '/signup-access-code', { invite: code });
+        return { ok: true, user: store.publicUser(s.users[id]) };
+      });
+
+      if (!result.ok) {
+        return res.status(result.code).json({ error: result.error });
+      }
+      const sess = createSessionToken(result.user.id, remember);
+      setSessionCookie(res, req, sess.token, sess.maxAgeSec);
+      return res.json({
+        ok: true,
+        user: result.user,
+        remaining: result.remaining
+      });
+    } catch (e) {
+      console.error('[auth] signup-access-code', e.message, e.stack);
+      return res.status(500).json({
+        error: 'Could not create account',
+        detail: String(e.message || 'database error').slice(0, 240)
+      });
     }
   });
 
@@ -638,6 +996,7 @@ function mountAuthRoutes(app) {
           return { ok: false, error: 'Account not available' };
         }
         u.password_hash = store.hashPassword(password);
+        if (u.status === 'pending') u.status = 'active';
         delete s.password_resets[token];
         return { ok: true };
       });
@@ -690,15 +1049,20 @@ function mountAuthRoutes(app) {
         const openInvites = Object.values(s.invites).filter(
           (i) => !i.used_at && (!i.expires_at || new Date(i.expires_at).getTime() > now)
         ).length;
+        const pendingRequests = Object.values(s.access_requests || {}).filter(
+          (r) => r && r.status === 'pending'
+        ).length;
         return {
           totals: {
             users: users.length,
             active,
             pending,
             deactivated,
-            openInvites
+            openInvites,
+            pendingRequests
           },
-          logins: { last7d: logins7, last30d: logins30 }
+          logins: { last7d: logins7, last30d: logins30 },
+          mailConfigured: mail.isConfigured()
         };
       }, { readOnly: true, includeUsage: true });
       res.json({ ok: true, ...data });
@@ -910,6 +1274,301 @@ function mountAuthRoutes(app) {
       });
     } catch (e) {
       res.status(500).json({ error: 'Create invite failed' });
+    }
+  });
+
+  app.post('/api/admin/invites/bulk', requireInviteManager, async (req, res) => {
+    const parsed = store.parseEmailList(req.body?.emails || req.body?.list || '');
+    const days = Math.min(90, Math.max(1, Number(req.body?.expires_days) || 14));
+    if (!parsed.emails.length) {
+      return res.status(400).json({
+        error: 'Paste at least one email (comma, space, or newline separated)',
+        invalid: parsed.invalid
+      });
+    }
+    if (parsed.emails.length > 200) {
+      return res.status(400).json({ error: 'Please paste 200 emails or fewer at a time' });
+    }
+    try {
+      const result = await store.withStore((s) => {
+        const created = [];
+        const skipped = [];
+        parsed.invalid.forEach((raw) => skipped.push({ email: raw, reason: 'invalid' }));
+        parsed.emails.forEach((email) => {
+          const existing = store.findUserByEmail(s, email);
+          if (existing && existing.status === 'active') {
+            skipped.push({ email, reason: 'already_active' });
+            return;
+          }
+          const openForEmail = Object.values(s.invites || {}).find(
+            (i) =>
+              i &&
+              i.email_optional === email &&
+              !i.used_at &&
+              !i.revoked_at &&
+              (!i.expires_at || new Date(i.expires_at).getTime() > Date.now())
+          );
+          if (openForEmail) {
+            skipped.push({ email, reason: 'invite_exists', code: openForEmail.code });
+            return;
+          }
+          let code = genInviteCode();
+          let guard = 0;
+          while (s.invites[code] && guard++ < 8) code = genInviteCode();
+          const inv = {
+            code,
+            email_optional: email,
+            created_by: req.authUser.id,
+            created_by_name: req.authUser.name || '',
+            created_by_email: req.authUser.email || '',
+            created_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + days * 864e5).toISOString(),
+            used_at: null,
+            used_by_user_id: null,
+            source: 'bulk'
+          };
+          s.invites[code] = inv;
+          created.push(inv);
+        });
+        store.recordUsage(s, req.authUser.id, 'invite_bulk', String(created.length), {
+          created: created.length,
+          skipped: skipped.length
+        });
+        return { created, skipped };
+      });
+      const fromName = req.authUser.name || 'Your Ruoff loan officer';
+      const items = result.created.map((inv) => {
+        const link = inviteLinkFor(req, inv.code);
+        return {
+          invite: inv,
+          email: inv.email_optional,
+          code: inv.code,
+          link,
+          mailto: buildInviteMailto({
+            link,
+            code: inv.code,
+            toEmail: inv.email_optional,
+            fromName
+          })
+        };
+      });
+      const copyAll = items
+        .map((i) => i.email + '\t' + i.link + '\t' + i.code)
+        .join('\n');
+      const mailtoAll = items.length
+        ? 'mailto:?bcc=' +
+          encodeURIComponent(items.map((i) => i.email).join(',')) +
+          '&subject=' +
+          encodeURIComponent("You're invited to the Ruoff Agent Sales Coach") +
+          '&body=' +
+          encodeURIComponent(
+            'Hi,\n\nYou\'ve been invited to the Ruoff Agent Sales Coach.\n\n' +
+              items.map((i) => i.email + ': ' + i.link).join('\n') +
+              '\n\nThanks,\n' +
+              fromName +
+              '\n'
+          )
+        : '';
+      res.json({
+        ok: true,
+        created: items,
+        skipped: result.skipped,
+        copy_all: copyAll,
+        mailto: mailtoAll,
+        message:
+          'Created ' +
+          items.length +
+          ' invite' +
+          (items.length === 1 ? '' : 's') +
+          (result.skipped.length ? '; skipped ' + result.skipped.length : '')
+      });
+    } catch (e) {
+      console.error('[auth] bulk invite', e.message);
+      res.status(500).json({ error: 'Bulk invite failed' });
+    }
+  });
+
+  app.get('/api/admin/access-requests', requireAdmin, async (req, res) => {
+    try {
+      const list = await store.withStore((s) => {
+        const reqs = Object.values(s.access_requests || {});
+        return reqs
+          .map((r) => {
+            const u =
+              (r.user_id && s.users[r.user_id]) ||
+              store.findUserByEmail(s, r.email);
+            return publicAccessRequest(r, u);
+          })
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+      }, { readOnly: true });
+      res.json({
+        ok: true,
+        requests: list,
+        pending: list.filter((r) => r.status === 'pending'),
+        mailConfigured: mail.isConfigured()
+      });
+    } catch (e) {
+      res.status(500).json({ error: 'Could not load access requests' });
+    }
+  });
+
+  app.post('/api/admin/access-requests/:id/approve', requireAdmin, async (req, res) => {
+    const id = String(req.params.id || '');
+    try {
+      const result = await store.withStore((s) => {
+        const row = (s.access_requests || {})[id];
+        if (!row) return { ok: false, code: 404, error: 'Request not found' };
+        const u =
+          (row.user_id && s.users[row.user_id]) ||
+          store.findUserByEmail(s, row.email);
+        if (!u) return { ok: false, code: 404, error: 'User for this request was not found' };
+        if (u.status === 'deactivated') {
+          return { ok: false, code: 400, error: 'Account is deactivated — reactivate from the user list' };
+        }
+        u.status = 'active';
+        row.status = 'approved';
+        row.approved_at = new Date().toISOString();
+        row.approved_by = req.authUser.id;
+        const mailReady = mail.isConfigured();
+        let tempPassword = null;
+        let resetToken = null;
+        if (mailReady) {
+          resetToken = crypto.randomBytes(24).toString('base64url');
+          s.password_resets[resetToken] = {
+            user_id: u.id,
+            created_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 7 * 864e5).toISOString()
+          };
+        } else {
+          tempPassword = genTempPassword();
+          u.password_hash = store.hashPassword(tempPassword);
+        }
+        store.recordUsage(s, req.authUser.id, 'access_approve', u.email, { request_id: id });
+        return {
+          ok: true,
+          user: store.publicUser(u),
+          request: publicAccessRequest(row, u),
+          tempPassword,
+          resetToken,
+          mailReady
+        };
+      });
+      if (!result.ok) return res.status(result.code).json({ error: result.error });
+
+      let setPasswordSent = false;
+      if (result.mailReady && result.resetToken) {
+        const resetUrl = mail.publicAppUrl(req) + '/#reset=' + encodeURIComponent(result.resetToken);
+        const sendResult = await mail.sendMail({
+          to: result.user.email,
+          subject: 'Your Agent Sales Coach account is ready',
+          text:
+            'Your Agent Sales Coach access was approved.\n\nSet your password here (link expires in 7 days):\n' +
+            resetUrl +
+            '\n\nThen sign in with this email.',
+          html:
+            '<p>Your <strong>Agent Sales Coach</strong> access was approved.</p>' +
+            '<p><a href="' +
+            resetUrl +
+            '">Set your password</a> (link expires in 7 days), then sign in with this email.</p>'
+        });
+        setPasswordSent = !!(sendResult && sendResult.ok);
+      }
+
+      res.json({
+        ok: true,
+        user: result.user,
+        request: result.request,
+        tempPassword: result.tempPassword || undefined,
+        setPasswordSent,
+        mailConfigured: result.mailReady,
+        note: result.mailReady
+          ? setPasswordSent
+            ? 'Approved. A set-password email was sent to the realtor.'
+            : 'Approved, but the set-password email could not be sent. Use Reset pw and share a temp password.'
+          : 'Approved. Email is not configured — copy the temp password and send it yourself.'
+      });
+    } catch (e) {
+      res.status(500).json({ error: 'Approve failed' });
+    }
+  });
+
+  app.get('/api/admin/event-codes', requireInviteManager, async (req, res) => {
+    try {
+      const isAdm = store.isAdmin(req.authUser);
+      const list = await store.withStore((s) => {
+        let codes = Object.values(s.event_codes || {});
+        if (!isAdm) codes = codes.filter((c) => c.created_by === req.authUser.id);
+        return codes
+          .map(publicEventCode)
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+      }, { readOnly: true });
+      res.json({ ok: true, event_codes: list, scope: isAdm ? 'all' : 'mine' });
+    } catch (e) {
+      res.status(500).json({ error: 'Could not list event codes' });
+    }
+  });
+
+  app.post('/api/admin/event-codes', requireInviteManager, async (req, res) => {
+    const label = String(req.body?.label || 'Realtor mastermind').trim().slice(0, 80) || 'Realtor mastermind';
+    let code = store.normalizeEventCode(req.body?.code);
+    if (!code) code = genEventCode();
+    if (code.length < 4 || code.length > 32 || !/^[A-Z0-9][A-Z0-9_-]*$/.test(code)) {
+      return res.status(400).json({ error: 'Code must be 4–32 letters, numbers, hyphens, or underscores' });
+    }
+    const maxUses = Math.min(500, Math.max(1, Number(req.body?.max_uses) || 120));
+    let startsAt = req.body?.starts_at ? new Date(req.body.starts_at) : new Date();
+    if (Number.isNaN(startsAt.getTime())) startsAt = new Date();
+    let endsAt = null;
+    if (req.body?.ends_at) {
+      endsAt = new Date(req.body.ends_at);
+      if (Number.isNaN(endsAt.getTime())) endsAt = null;
+    }
+    if (!endsAt) {
+      const days = Math.min(90, Math.max(1, Number(req.body?.expires_days) || 14));
+      endsAt = new Date(startsAt.getTime() + days * 864e5);
+    }
+    if (endsAt.getTime() <= startsAt.getTime()) {
+      return res.status(400).json({ error: 'End date must be after the start date' });
+    }
+
+    try {
+      const result = await store.withStore((s) => {
+        if (!s.event_codes) s.event_codes = {};
+        if (s.event_codes[code] && !s.event_codes[code].revoked_at) {
+          return { ok: false, code: 409, error: 'That event code already exists' };
+        }
+        if (s.invites && s.invites[code] && !s.invites[code].used_at && !s.invites[code].revoked_at) {
+          return { ok: false, code: 409, error: 'That code is already used as a single-use invite' };
+        }
+        const row = {
+          id: store.newId('evc'),
+          code,
+          label,
+          max_uses: maxUses,
+          used_count: 0,
+          used_by: [],
+          starts_at: startsAt.toISOString(),
+          ends_at: endsAt.toISOString(),
+          created_by: req.authUser.id,
+          created_by_name: req.authUser.name || '',
+          created_by_email: req.authUser.email || '',
+          created_at: new Date().toISOString(),
+          revoked_at: null
+        };
+        s.event_codes[code] = row;
+        store.recordUsage(s, req.authUser.id, 'event_code_create', code, { max_uses: maxUses });
+        return { ok: true, event_code: publicEventCode(row) };
+      });
+      if (!result.ok) return res.status(result.code).json({ error: result.error });
+      res.json({
+        ok: true,
+        event_code: result.event_code,
+        message:
+          'Event code ready. Realtors enter it on Sign in → Have an access code? Remaining uses: ' +
+          result.event_code.remaining
+      });
+    } catch (e) {
+      res.status(500).json({ error: 'Could not create event code' });
     }
   });
 

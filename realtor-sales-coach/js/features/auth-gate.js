@@ -168,6 +168,14 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
     return q.get('invite') || '';
   }
 
+  function parseHashAccessCode() {
+    const h = location.hash || '';
+    const m = h.match(/(?:^|#|&)code=([^&]+)/i);
+    if (m) return decodeURIComponent(m[1]);
+    const q = new URLSearchParams(location.search || '');
+    return q.get('code') || '';
+  }
+
   function parseHashReset() {
     const h = location.hash || '';
     const m = h.match(/reset=([^&]+)/i);
@@ -201,8 +209,10 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
     setBodyLocked(true);
     mode = mode || 'login';
     const invitePrefill = parseHashInvite();
+    const codePrefill = parseHashAccessCode();
     const resetToken = parseHashReset();
     if (mode !== 'reset' && resetToken) mode = 'reset';
+    if (mode === 'login' && codePrefill && !invitePrefill) mode = 'code';
 
     root.innerHTML =
       '<div class="asc-card">' +
@@ -222,6 +232,9 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
           '<button type="button" class="asc-tab' +
           (mode === 'invite' ? ' is-on' : '') +
           '" data-mode="invite">Accept invite</button>' +
+          '<button type="button" class="asc-tab' +
+          (mode === 'code' ? ' is-on' : '') +
+          '" data-mode="code">Have an access code?</button>' +
           '<button type="button" class="asc-tab' +
           (mode === 'request' ? ' is-on' : '') +
           '" data-mode="request">Request access</button>' +
@@ -324,6 +337,7 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
         }) +
         '<div class="asc-row"><input type="checkbox" id="asc-remember" checked> <label for="asc-remember" style="margin:0;font-weight:600">Remember this device (30 days)</label></div>' +
         '<button type="submit" class="asc-btn" id="asc-login-btn">Sign in</button>' +
+        '<button type="button" class="asc-btn asc-btn-ghost" id="asc-code-btn">Have an access code?</button>' +
         '<button type="button" class="asc-btn asc-btn-ghost" id="asc-forgot-btn">Forgot password?</button>' +
         '</form>';
       bindPasswordToggles(panel);
@@ -353,6 +367,9 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
         } finally {
           btn.disabled = false;
         }
+      });
+      panel.querySelector('#asc-code-btn').addEventListener('click', function () {
+        renderGate('code');
       });
       panel.querySelector('#asc-forgot-btn').addEventListener('click', async function () {
         showError(errEl, '');
@@ -425,6 +442,58 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
           }
           // Clean invite from hash (keep ?lo= if present)
           if (location.hash && /invite=/i.test(location.hash)) {
+            history.replaceState(null, '', location.pathname + location.search);
+          }
+          onAuthenticated();
+        } catch (err) {
+          showError(errEl, 'Network error');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    } else if (mode === 'code') {
+      panel.innerHTML =
+        '<form id="asc-code-form">' +
+        '<label for="asc-acode">Access code</label>' +
+        '<input id="asc-acode" type="text" required autocomplete="off" placeholder="e.g. MASTERMIND26" value="' +
+        escapeAttr(codePrefill) +
+        '">' +
+        '<label for="asc-cname">Your name</label>' +
+        '<input id="asc-cname" type="text" required autocomplete="name" placeholder="Full name">' +
+        '<label for="asc-cemail">Email</label>' +
+        '<input id="asc-cemail" type="email" required autocomplete="email" placeholder="you@example.com">' +
+        '<label for="asc-cpass">Create password (min 8)</label>' +
+        passwordFieldHtml('asc-cpass', {
+          name: 'password',
+          minlength: 8,
+          autocomplete: 'new-password'
+        }) +
+        '<div class="asc-row"><input type="checkbox" id="asc-cremember" checked> <label for="asc-cremember" style="margin:0;font-weight:600">Remember this device</label></div>' +
+        '<button type="submit" class="asc-btn">Create account &amp; enter</button>' +
+        '</form>';
+      bindPasswordToggles(panel);
+      panel.querySelector('#asc-code-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        showError(errEl, '');
+        const btn = e.target.querySelector('.asc-btn');
+        btn.disabled = true;
+        try {
+          const { res, data } = await api('/api/auth/signup-access-code', {
+            method: 'POST',
+            body: {
+              code: panel.querySelector('#asc-acode').value,
+              name: panel.querySelector('#asc-cname').value,
+              email: panel.querySelector('#asc-cemail').value,
+              password: panel.querySelector('#asc-cpass').value,
+              remember: panel.querySelector('#asc-cremember').checked
+            }
+          });
+          if (!res.ok) {
+            showError(errEl, (data && data.error) || 'Access code failed');
+            return;
+          }
+          currentUser = data.user;
+          if (location.hash && /code=/i.test(location.hash)) {
             history.replaceState(null, '', location.pathname + location.search);
           }
           onAuthenticated();
@@ -676,9 +745,12 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
       /* offline / server down — still show login */
     }
     const invite = parseHashInvite();
+    const code = parseHashAccessCode();
     const reset = parseHashReset();
     if (reset) renderGate('reset');
-    else renderGate(invite ? 'invite' : 'login');
+    else if (invite) renderGate('invite');
+    else if (code) renderGate('code');
+    else renderGate('login');
   }
 
   // Public helpers

@@ -229,7 +229,8 @@ function emptyPayload(app) {
     invites: {},
     usage_events: [],
     password_resets: {},
-    access_requests: {}
+    access_requests: {},
+    event_codes: {}
   };
 }
 
@@ -248,6 +249,8 @@ function ensureShape(app, raw) {
     out.invites = raw.invites && typeof raw.invites === 'object' ? raw.invites : {};
     out.access_requests =
       raw.access_requests && typeof raw.access_requests === 'object' ? raw.access_requests : {};
+    out.event_codes =
+      raw.event_codes && typeof raw.event_codes === 'object' ? raw.event_codes : {};
   }
   return out;
 }

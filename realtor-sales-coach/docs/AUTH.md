@@ -9,8 +9,11 @@
 |------|-----|
 | **Accept invite** | Realtor gets one-time code or link from Adam; sets password; active immediately |
 | **Admin create user** | Adam creates email + temp password in Admin · usage |
-| **Request access** | Public form creates `pending` user; Adam activates + resets password |
-| **No public open signup** | Unauthenticated visitors only see login / invite / request |
+| **Request access** | Public form creates a pending request + pending user; Admin · usage shows the queue. Emails Adam only if mail is configured — otherwise the queue is the notification. |
+| **Event access code** | Admin / LO creates a multi-use code (e.g. mastermind, ~120 uses, event day + 14 days). Realtor: Sign in → Have an access code? |
+| **Bulk invite** | Admin / LO pastes emails; pending single-use invites; copy-all + open in email client. Skips active Agent accounts. |
+| **Shared LO login** | An `@ruoff.com` user on LO Sales Coach signs into Agent with the same email/password (`role=lo`). No second register. |
+| **No public open signup** | Unauthenticated visitors only see login / invite / access code / request |
 
 Roles: `realtor` | `lo` | `admin`. Status: `active` | `pending` | `deactivated`.
 
@@ -58,6 +61,25 @@ PORT=3001 node proxy.js
 ```
 
 Open `http://localhost:3001` → sign in with admin email/password from env (or generated password in server log).
+
+## Event code for a mastermind (Admin or Ruoff LO)
+
+1. Sign in to Agent Sales Coach → **Admin · usage** (or Invite partners).
+2. **Event access code**: label `Realtor mastermind`, code e.g. `MASTERMIND26` (or leave blank), max uses `120`, days open `14`.
+3. Create event code — remaining uses show on that card.
+4. In the room: realtors open the app → **Have an access code?** → code + name + email + password → they are in.
+
+Invalid, expired, or maxed codes show a clear error. Realtors stay gated; this is not public signup.
+
+## Bulk invite from an email list
+
+1. **Bulk invite** → paste emails (comma, space, or newline).
+2. Create invites. Already-active Agent accounts are skipped.
+3. **Copy all links** or **Open in email client**.
+
+## Shared login for Ruoff LOs
+
+Use the same `@ruoff.com` email and password as LO Sales Coach on the Agent sign-in screen. Agent creates/links an Agent profile with `role=lo` (not full admin unless the Agent account is already admin). Realtors still need an invite or event code.
 
 ## Invite realtors (any Ruoff LO)
 

@@ -178,8 +178,8 @@
     const badge = admin ? 'ADMIN' : 'RUOFF LO';
     const title = admin ? 'Admin · Accounts & usage' : 'Invite realtor partners';
     const sub = admin
-      ? 'Invite realtors, activate/deactivate, reset passwords, and see who is using the Agent Sales Coach.'
-      : 'Create a one-time invite link, email it to your realtor, or reset their password if they get locked out.';
+      ? 'Event codes for rooms of 75–100, bulk invites, pending access requests, and account tools. Requests stay in this queue even if email is not configured.'
+      : 'Create a one-time invite, paste a list of emails, or make an event code for a mastermind. Reset a realtor password if they get locked out.';
 
     el.innerHTML =
       '<div class="text-center mb-6">' +
@@ -192,9 +192,42 @@
       '<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">' +
       sub +
       '</p></div>' +
-      (admin ? '<div id="adm-stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>' : '') +
+      (admin ? '<div id="adm-stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6"></div>' : '') +
+      (admin
+        ? '<div id="adm-requests" class="rounded-2xl border-2 border-amber-300/70 bg-amber-50/70 dark:bg-amber-950/20 dark:border-amber-700 p-4 mb-6">' +
+          '<h3 class="font-bold text-[#002B5C] dark:text-white mb-1">Pending access requests</h3>' +
+          '<p id="adm-req-mail-note" class="text-xs text-amber-800 dark:text-amber-200 mb-3"></p>' +
+          '<div id="adm-req-list" class="text-sm space-y-2"></div></div>'
+        : '') +
       '<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">' +
       '<div class="lg:col-span-1 space-y-4">' +
+      '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">' +
+      '<h3 class="font-bold text-[#002B5C] dark:text-white mb-1">Event access code</h3>' +
+      '<p class="text-xs text-gray-500 mb-3">For a mastermind in the room. Default: 120 uses, today through 14 days later.</p>' +
+      '<label class="text-xs font-bold block mb-1">Label</label>' +
+      '<input id="adm-ec-label" type="text" value="Realtor mastermind" class="w-full mb-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 px-3 py-2 text-sm bg-transparent">' +
+      '<label class="text-xs font-bold block mb-1">Code (blank = auto)</label>' +
+      '<input id="adm-ec-code" type="text" placeholder="MASTERMIND26" class="w-full mb-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 px-3 py-2 text-sm bg-transparent uppercase">' +
+      '<div class="grid grid-cols-2 gap-2 mb-2">' +
+      '<div><label class="text-xs font-bold block mb-1">Max uses</label>' +
+      '<input id="adm-ec-max" type="number" min="1" max="500" value="120" class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 px-3 py-2 text-sm bg-transparent"></div>' +
+      '<div><label class="text-xs font-bold block mb-1">Days open</label>' +
+      '<input id="adm-ec-days" type="number" min="1" max="90" value="14" class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 px-3 py-2 text-sm bg-transparent"></div></div>' +
+      '<button type="button" id="adm-ec-btn" class="w-full rounded-full bg-[#002B5C] text-white font-bold py-2.5 text-sm">' +
+      '<i class="fas fa-key mr-1"></i> Create event code</button>' +
+      '<div id="adm-ec-out" class="mt-3 text-xs hidden"></div>' +
+      '<div id="adm-ec-list" class="mt-3 text-xs space-y-2 max-h-40 overflow-y-auto text-gray-600 dark:text-gray-300"></div>' +
+      '</div>' +
+      '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">' +
+      '<h3 class="font-bold text-[#002B5C] dark:text-white mb-1">Bulk invite</h3>' +
+      '<p class="text-xs text-gray-500 mb-3">Paste emails (comma, space, or newline). Skips people who already have an active Agent account.</p>' +
+      '<textarea id="adm-bulk-emails" rows="5" class="w-full mb-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 px-3 py-2 text-sm bg-transparent" placeholder="agent1@broker.com&#10;agent2@broker.com"></textarea>' +
+      '<label class="text-xs font-bold block mb-1">Expires (days)</label>' +
+      '<input id="adm-bulk-days" type="number" min="1" max="90" value="14" class="w-full mb-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 px-3 py-2 text-sm bg-transparent">' +
+      '<button type="button" id="adm-bulk-btn" class="w-full rounded-full bg-[#00A89D] text-white font-bold py-2.5 text-sm">' +
+      '<i class="fas fa-list mr-1"></i> Create invites</button>' +
+      '<div id="adm-bulk-out" class="mt-3 hidden"></div>' +
+      '</div>' +
       '<div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">' +
       '<h3 class="font-bold text-[#002B5C] dark:text-white mb-1">Create invite</h3>' +
       '<p class="text-xs text-gray-500 mb-3">Optional: lock the invite to one email so only that agent can use it.</p>' +
@@ -253,6 +286,122 @@
       loadAll(admin);
     });
 
+    el.querySelector('#adm-ec-btn')?.addEventListener('click', async function () {
+      const btn = el.querySelector('#adm-ec-btn');
+      if (btn) btn.disabled = true;
+      try {
+        const { res, data } = await api('/api/admin/event-codes', {
+          method: 'POST',
+          body: {
+            label: el.querySelector('#adm-ec-label').value,
+            code: el.querySelector('#adm-ec-code').value || undefined,
+            max_uses: Number(el.querySelector('#adm-ec-max').value) || 120,
+            expires_days: Number(el.querySelector('#adm-ec-days').value) || 14
+          }
+        });
+        const out = el.querySelector('#adm-ec-out');
+        if (!res.ok) {
+          toast((data && data.error) || 'Event code failed', 'error');
+          return;
+        }
+        const ec = data.event_code || {};
+        if (out) {
+          out.classList.remove('hidden');
+          out.innerHTML =
+            '<div class="rounded-xl border border-[#00A89D]/40 bg-[#00A89D]/10 p-3">' +
+            '<div class="font-bold text-[#0f766e]">Code: <code>' +
+            esc(ec.code) +
+            '</code></div>' +
+            '<div class="mt-1">' +
+            esc(ec.remaining) +
+            ' of ' +
+            esc(ec.max_uses) +
+            ' uses remaining</div>' +
+            '<div class="text-gray-500 mt-1">Realtors: Sign in → Have an access code?</div></div>';
+        }
+        try {
+          await navigator.clipboard.writeText(ec.code);
+          toast('Event code copied: ' + ec.code);
+        } catch (e) {
+          toast('Event code: ' + ec.code);
+        }
+        loadAll(admin);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    el.querySelector('#adm-bulk-btn')?.addEventListener('click', async function () {
+      const btn = el.querySelector('#adm-bulk-btn');
+      if (btn) btn.disabled = true;
+      try {
+        const { res, data } = await api('/api/admin/invites/bulk', {
+          method: 'POST',
+          body: {
+            emails: el.querySelector('#adm-bulk-emails').value,
+            expires_days: Number(el.querySelector('#adm-bulk-days').value) || 14
+          }
+        });
+        const box = el.querySelector('#adm-bulk-out');
+        if (!res.ok) {
+          toast((data && data.error) || 'Bulk invite failed', 'error');
+          return;
+        }
+        const created = data.created || [];
+        const skipped = data.skipped || [];
+        if (box) {
+          box.classList.remove('hidden');
+          box.innerHTML =
+            '<div class="rounded-2xl border-2 border-[#00A89D]/40 bg-[#00A89D]/10 p-3 space-y-2">' +
+            '<div class="font-bold text-[#0f766e] text-sm">' +
+            esc(data.message || created.length + ' invites created') +
+            '</div>' +
+            (created.length
+              ? '<pre class="text-[11px] whitespace-pre-wrap break-all bg-white/80 dark:bg-gray-800 p-2 rounded-xl max-h-32 overflow-y-auto">' +
+                esc(
+                  created
+                    .map(function (i) {
+                      return (i.email || '') + '  ' + (i.link || '');
+                    })
+                    .join('\n')
+                ) +
+                '</pre>'
+              : '') +
+            (skipped.length
+              ? '<div class="text-[11px] text-gray-600">Skipped: ' +
+                esc(
+                  skipped
+                    .map(function (s) {
+                      return (s.email || '') + ' (' + (s.reason || '') + ')';
+                    })
+                    .join(', ')
+                ) +
+                '</div>'
+              : '') +
+            '<div class="flex flex-wrap gap-2">' +
+            (data.mailto
+              ? '<a href="' +
+                esc(data.mailto) +
+                '" class="inline-flex items-center justify-center gap-2 rounded-full bg-[#00A89D] text-white font-bold py-2 px-4 text-xs"><i class="fas fa-envelope"></i> Open in email client</a>'
+              : '') +
+            '<button type="button" id="adm-bulk-copy" class="rounded-full border-2 border-[#00A89D] text-[#0f766e] font-bold py-2 px-4 text-xs">Copy all links</button>' +
+            '</div></div>';
+          box.querySelector('#adm-bulk-copy')?.addEventListener('click', async function () {
+            try {
+              await navigator.clipboard.writeText(data.copy_all || '');
+              toast('All invite links copied');
+            } catch (e) {
+              toast('Copy failed — select the list above');
+            }
+          });
+        }
+        toast(data.message || 'Invites created');
+        loadAll(admin);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
     el.querySelector('#adm-inv-btn')?.addEventListener('click', async function () {
       const btn = el.querySelector('#adm-inv-btn');
       const email = el.querySelector('#adm-inv-email').value;
@@ -302,25 +451,31 @@
     const body = document.getElementById('adm-users-body');
     if (!body) return;
 
-    const tasks = [api('/api/admin/users'), api('/api/admin/invites')];
+    const tasks = [api('/api/admin/users'), api('/api/admin/invites'), api('/api/admin/event-codes')];
     if (admin) {
       tasks.unshift(api('/api/admin/stats'));
       tasks.push(api('/api/admin/usage?limit=40'));
+      tasks.push(api('/api/admin/access-requests'));
     }
 
     const results = await Promise.all(tasks);
     let st = null;
     let us;
     let inv;
+    let ec = null;
     let ug = null;
+    let reqs = null;
     if (admin) {
       st = results[0];
       us = results[1];
       inv = results[2];
-      ug = results[3];
+      ec = results[3];
+      ug = results[4];
+      reqs = results[5];
     } else {
       us = results[0];
       inv = results[1];
+      ec = results[2];
     }
 
     if (us.res.status === 403) {
@@ -335,7 +490,8 @@
       const l = st.data.logins || {};
       statsEl.innerHTML = [
         ['Active', t.active],
-        ['Pending', t.pending],
+        ['Pending users', t.pending],
+        ['Access requests', t.pendingRequests],
         ['Deactivated', t.deactivated],
         ['Logins 7d', l.last7d]
       ]
@@ -476,6 +632,101 @@
         }
       });
     });
+
+    const reqNote = document.getElementById('adm-req-mail-note');
+    const reqList = document.getElementById('adm-req-list');
+    if (admin && reqList) {
+      const mailOn = !!(reqs && reqs.data && reqs.data.mailConfigured);
+      if (reqNote) {
+        reqNote.textContent = mailOn
+          ? 'Mail is configured — Adam is emailed when someone requests access. Approve here either way.'
+          : 'Email is not configured, so nobody was notified automatically. Approve from this queue.';
+      }
+      const pending = (reqs && reqs.data && (reqs.data.pending || reqs.data.requests)) || [];
+      const shown = pending.filter(function (r) {
+        return r.status === 'pending';
+      });
+      reqList.innerHTML = shown.length
+        ? shown
+            .map(function (r) {
+              return (
+                '<div class="rounded-xl border border-amber-200 dark:border-amber-800 bg-white/80 dark:bg-gray-900 p-3 flex flex-wrap gap-2 items-start justify-between">' +
+                '<div class="min-w-0"><div class="font-bold text-[#002B5C] dark:text-white">' +
+                esc(r.name || '—') +
+                ' <span class="font-normal text-xs text-gray-500">' +
+                esc(r.email) +
+                '</span></div>' +
+                '<div class="text-[11px] text-gray-500">' +
+                esc(r.company || '') +
+                (r.referred_by_lo_name ? ' · LO: ' + esc(r.referred_by_lo_name) : '') +
+                (r.note ? ' · ' + esc(r.note) : '') +
+                '</div>' +
+                '<div class="text-[10px] text-gray-400">' +
+                esc(fmtDate(r.created_at)) +
+                '</div></div>' +
+                '<button type="button" data-approve-req="' +
+                esc(r.id) +
+                '" class="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-600 text-white">Approve</button></div>'
+              );
+            })
+            .join('')
+        : '<p class="text-gray-500 m-0">No pending requests.</p>';
+      reqList.querySelectorAll('[data-approve-req]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          const id = btn.getAttribute('data-approve-req');
+          const { res, data } = await api(
+            '/api/admin/access-requests/' + encodeURIComponent(id) + '/approve',
+            { method: 'POST', body: {} }
+          );
+          if (!res.ok) {
+            toast((data && data.error) || 'Approve failed', 'error');
+            return;
+          }
+          if (data.tempPassword) {
+            try {
+              await navigator.clipboard.writeText(data.tempPassword);
+              toast('Approved. Temp password copied: ' + data.tempPassword);
+            } catch (e) {
+              toast('Approved. Temp password: ' + data.tempPassword);
+            }
+          } else {
+            toast(data.note || 'Approved');
+          }
+          loadAll(admin);
+        });
+      });
+    }
+
+    const ecList = document.getElementById('adm-ec-list');
+    if (ecList) {
+      const codes = (ec && ec.data && ec.data.event_codes) || [];
+      ecList.innerHTML = codes.length
+        ? codes
+            .map(function (c) {
+              const dead = c.revoked_at || c.remaining <= 0;
+              return (
+                '<div class="flex flex-wrap gap-2 items-baseline border-b border-gray-100 dark:border-gray-800 py-1">' +
+                '<code class="font-bold">' +
+                esc(c.code) +
+                '</code>' +
+                '<span>' +
+                esc(c.label || '') +
+                '</span>' +
+                '<span class="' +
+                (dead ? 'text-gray-400' : 'text-emerald-600 font-bold') +
+                '">' +
+                esc(c.remaining) +
+                '/' +
+                esc(c.max_uses) +
+                ' left</span>' +
+                '<span class="text-gray-400">until ' +
+                esc(fmtDate(c.ends_at)) +
+                '</span></div>'
+              );
+            })
+            .join('')
+        : '<p class="text-gray-400 m-0">No event codes yet.</p>';
+    }
 
     const invEl = document.getElementById('adm-invites-list');
     if (invEl) {
