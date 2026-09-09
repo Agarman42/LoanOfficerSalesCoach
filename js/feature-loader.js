@@ -24,7 +24,7 @@
     'js/features/section-bottom-banners.js?v=20260720-review',
     'js/features/coach-polish.js?v=20260721-ux-polish',
     'js/features/partner-share.js?v=20260807-one-invite-branded',
-    'js/app-version.js?v=20260818-v3140',
+    'js/app-version.js?v=20260909-v3164',
     'js/features/newsletter-color-bundles.js?v=20260818-v3140',
     'js/features/generation-rules.js?v=20260720-hobby-restraint',
     'js/features/save-ribbon.js',
@@ -32,7 +32,7 @@
     'js/features/coach-mode-switch.js?v=20260720-polish',
     'js/features/tool-bridges.js',
     'js/features/legacy-helpers.js?v=20260623-lo-v222',
-    'js/features/app-bulk.js?v=20260709-lo-v290',
+    'js/features/app-bulk.js?v=20260909-popby-merge-v3164',
     'js/features/ai-chat.js?v=20260720-polish',
     'js/features/pwa-push.js?v=20260806-pwa'
   ];
@@ -64,10 +64,10 @@
       'js/features/lox-generator.js?v=20260810-lox-export'
     ],
     'value-vault': [
-      'js/data/popby-library.js?v=20260623-lo-v222',
-      'js/data/lo-fact-vault.js?v=20260623-lo-v222',
+      'js/data/popby-library.js?v=20260909-popby-merge-v3164',
+      'js/data/lo-fact-vault.js?v=20260909-popby-merge-v3164',
       'js/features/popby-seasonal.js?v=20260623-lo-v222',
-      'js/features/value-vault.js?v=20260623-lo-v222',
+      'js/features/value-vault.js?v=20260909-popby-merge-v3164',
       'js/features/fact-vault-ui.js?v=20260623-lo-v222',
       'js/features/vault-rich-modals.js?v=20260623-lo-v222'
     ],

@@ -172,6 +172,9 @@
   // SEARCH / FILTER (DOM + VALUE_VAULT_ITEMS data)
   // =====================================================
   function getVaultItems() {
+    if (typeof window.mergeLazyVaultLibraries === 'function') {
+      window.mergeLazyVaultLibraries();
+    }
     return Array.isArray(window.VALUE_VAULT_ITEMS) ? window.VALUE_VAULT_ITEMS : [];
   }
 

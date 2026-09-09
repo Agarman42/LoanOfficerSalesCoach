@@ -3167,7 +3167,9 @@ window.openExpandedSocialExamplesModal = function(pillar) {
 
     // === NEW ADDITIONS (with rich modal formatting) ===
 
-    // Pop-By library loaded from js/data/popby-library.js (169+ ideas, organized + filterable)
+    // Pop-By + fact libraries live in lazy scripts (js/data/popby-library.js, lo-fact-vault.js).
+    // Spread here in case those files ever load first; mergeLazyVaultLibraries() catches the
+    // normal CORE-then-lazy order where these windows are still empty at this snapshot.
     ...(window.POPBY_LIBRARY_ITEMS || []),
     ...(window.LO_FACT_VAULT_ITEMS || []),
 
@@ -5787,6 +5789,33 @@ Repeat this cycle every 90 days.`
   // Make the data globally available for other modules (Idea of the Day, etc.)
   window.VALUE_VAULT_ITEMS = VALUE_VAULT_ITEMS;
 
+  // popby-library.js / lo-fact-vault.js are lazy-loaded after this CORE file. The array
+  // snapshot above is therefore often empty for those libraries — append them when they
+  // arrive (and again at render) so the Pop-By Ideas Library is not stuck at 0.
+  function mergeLazyVaultLibraries() {
+    const vault = window.VALUE_VAULT_ITEMS;
+    if (!Array.isArray(vault)) return 0;
+    const existing = new Set();
+    for (let i = 0; i < vault.length; i++) {
+      const id = vault[i] && vault[i].id;
+      if (id) existing.add(id);
+    }
+    const extras = []
+      .concat(Array.isArray(window.POPBY_LIBRARY_ITEMS) ? window.POPBY_LIBRARY_ITEMS : [])
+      .concat(Array.isArray(window.LO_FACT_VAULT_ITEMS) ? window.LO_FACT_VAULT_ITEMS : []);
+    let added = 0;
+    for (let i = 0; i < extras.length; i++) {
+      const item = extras[i];
+      if (!item || !item.id || existing.has(item.id)) continue;
+      vault.push(item);
+      existing.add(item.id);
+      added += 1;
+    }
+    return added;
+  }
+  window.mergeLazyVaultLibraries = mergeLazyVaultLibraries;
+  mergeLazyVaultLibraries();
+
   // Pop-By filter state (simple module-level for now)
   let currentPopByFilter = 'All';
   let currentCostFilter = 'All';
@@ -5841,7 +5870,9 @@ Repeat this cycle every 90 days.`
     const container = document.getElementById('value-vault-grid');
     if (!container) return;
 
-    const popbyItems = VALUE_VAULT_ITEMS.filter(i => i.type === 'pop-by');
+    mergeLazyVaultLibraries();
+    const vaultItems = Array.isArray(window.VALUE_VAULT_ITEMS) ? window.VALUE_VAULT_ITEMS : VALUE_VAULT_ITEMS;
+    const popbyItems = vaultItems.filter(i => i.type === 'pop-by');
     const countEl = document.getElementById('popby-library-count');
     if (countEl) countEl.textContent = String(popbyItems.length);
 
@@ -6007,7 +6038,9 @@ Repeat this cycle every 90 days.`
   };
 
   window.surprisePopBy = function() {
-    const popbys = VALUE_VAULT_ITEMS.filter(i => i.type === 'pop-by');
+    mergeLazyVaultLibraries();
+    const vaultItems = Array.isArray(window.VALUE_VAULT_ITEMS) ? window.VALUE_VAULT_ITEMS : VALUE_VAULT_ITEMS;
+    const popbys = vaultItems.filter(i => i.type === 'pop-by');
     if (!popbys.length) return;
     const random = popbys[Math.floor(Math.random() * popbys.length)];
     showVaultItemModal(random.id);
@@ -6199,7 +6232,9 @@ Repeat this cycle every 90 days.`
         closeAllModals();
       }
 
-      const item = VALUE_VAULT_ITEMS.find(i => i.id === id);
+      mergeLazyVaultLibraries();
+      const vaultItems = Array.isArray(window.VALUE_VAULT_ITEMS) ? window.VALUE_VAULT_ITEMS : VALUE_VAULT_ITEMS;
+      const item = vaultItems.find(i => i.id === id);
 
       let modal = document.getElementById('detail-modal');
 
@@ -6419,7 +6454,9 @@ Repeat this cycle every 90 days.`
   };
 
   window.saveVaultItem = function(id, btnEl) {
-    const item = VALUE_VAULT_ITEMS.find(i => i.id === id);
+    mergeLazyVaultLibraries();
+    const vaultItems = Array.isArray(window.VALUE_VAULT_ITEMS) ? window.VALUE_VAULT_ITEMS : VALUE_VAULT_ITEMS;
+    const item = vaultItems.find(i => i.id === id);
     if (!item) return;
 
     // Determine a good type based on the item

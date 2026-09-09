@@ -46,4 +46,8 @@
     fact('fact-leadership-culture', 'Culture', 'Leadership & Culture', 'Direct access to leadership; borrower/partner/employee experience first', 'Approachable leadership, annual sales rally, President\'s Club for top producers, 98.5% customer satisfaction, Top 100 / Inc 500 recognition.', ['culture', 'recruiting']),
     fact('fact-lo-testimonials', 'Culture', 'LO Testimonials — Why Ruoff', 'Real quotes from producers on culture, ops, and technology', '<p>Producers consistently cite: family culture, operations that “go the extra mile,” accessible leadership, unmatched technology (Ruoff+), and marketing support.</p><ul class="mt-3 space-y-2 text-sm list-disc pl-4"><li><strong>Ryan Vannatter (10 yr):</strong> “Ruoff exceeded 100% of what they promised when I joined.”</li><li><strong>Tracy Adams (26 yr):</strong> “You’re never just a number — leadership owns mistakes and makes them right.”</li><li><strong>Nick Staker:</strong> “Strong ops + direct access to decision-makers let me scale without losing service.”</li><li><strong>Brandon Behny (returnee):</strong> “After coming back, I will never work for another lender.”</li></ul>', ['culture', 'testimonials'])
   ];
+
+  if (typeof window.mergeLazyVaultLibraries === 'function') {
+    window.mergeLazyVaultLibraries();
+  }
 })();
