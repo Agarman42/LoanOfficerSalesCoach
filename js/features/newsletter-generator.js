@@ -2661,42 +2661,60 @@ function persistNewsletterSectionCheckboxes() {
     } catch (e) { /* private mode */ }
 }
 
-// Save checkboxes on change + handle show/hide for Personal and Blog sections
-// (NL_CUSTOM_CONTENT_BLOCKS is defined later — only read on user change events.)
-document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
-    cb.addEventListener('change', () => {
-        persistNewsletterSectionCheckboxes();
+function onNewsletterSectionCheckboxChange(cb) {
+    if (!cb || !cb.id || !cb.id.startsWith('nl-')) return;
+    persistNewsletterSectionCheckboxes();
 
-        // Visual toggles for expandable sections
-        if (cb.id === 'nl-personal') {
-            const fields = document.getElementById('personal-fields');
-            if (fields) fields.classList.toggle('hidden', !cb.checked);
+    if (cb.id === 'nl-personal') {
+        const fields = document.getElementById('personal-fields');
+        if (fields) fields.classList.toggle('hidden', !cb.checked);
+    }
+    if (cb.id === 'nl-include-video' && cb.checked) {
+        const personalCb = document.getElementById('nl-personal');
+        const fields = document.getElementById('personal-fields');
+        if (personalCb && !personalCb.checked) {
+            personalCb.checked = true;
+            if (fields) fields.classList.remove('hidden');
+            persistNewsletterSectionCheckboxes();
         }
-        if (cb.id === 'nl-include-video' && cb.checked) {
-            const personalCb = document.getElementById('nl-personal');
-            const fields = document.getElementById('personal-fields');
-            if (personalCb && !personalCb.checked) {
-                personalCb.checked = true;
-                if (fields) fields.classList.remove('hidden');
-                persistNewsletterSectionCheckboxes();
-            }
-        }
-        if (cb.id === 'nl-include-blog') {
-            const fields = document.getElementById('blog-fields');
-            if (fields) fields.classList.toggle('hidden', !cb.checked);
-        }
-        if (cb.id === 'nl-custom-section' && typeof updateCustomSectionFieldsVisibility === 'function') {
-            updateCustomSectionFieldsVisibility();
-        }
-        if (cb.id === 'nl-custom-section-polish') persistCustomSectionPolishCheckbox();
-        if (
-            typeof NL_CUSTOM_CONTENT_BLOCKS !== 'undefined' &&
-            Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)
-        ) {
-            updateCustomContentChoicesVisibility();
-        }
+    }
+    if (cb.id === 'nl-include-blog') {
+        const fields = document.getElementById('blog-fields');
+        if (fields) fields.classList.toggle('hidden', !cb.checked);
+    }
+    if (cb.id === 'nl-custom-section') {
+        updateCustomSectionFieldsVisibility();
+    }
+    if (cb.id === 'nl-custom-section-polish') persistCustomSectionPolishCheckbox();
+    if (
+        typeof NL_CUSTOM_CONTENT_BLOCKS !== 'undefined' &&
+        Object.values(NL_CUSTOM_CONTENT_BLOCKS).some((cfg) => cfg.checkboxId === cb.id)
+    ) {
+        updateCustomContentChoicesVisibility();
+    }
+}
+
+/**
+ * Agent-style: wire at init (and via delegation) so Custom section / personal / blog
+ * show-hide still works after lazy load. Mid-script querySelectorAll can miss or go stale.
+ */
+function wireNewsletterSectionCheckboxes() {
+    const root = document.getElementById('newsletter-generator');
+    if (root && !root._nlSectionDelegateWired) {
+        root._nlSectionDelegateWired = true;
+        root.addEventListener('change', (e) => {
+            const cb = e.target;
+            if (!cb || cb.type !== 'checkbox') return;
+            onNewsletterSectionCheckboxChange(cb);
+        });
+    }
+    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
+        if (cb._nlSectionWired) return;
+        cb._nlSectionWired = true;
+        cb.addEventListener('change', () => onNewsletterSectionCheckboxChange(cb));
     });
-});
+    try { updateCustomSectionFieldsVisibility(); } catch (e) {}
+}
 
 /**
  * Expand/collapse + show engagement pickers + wire entertainment UI.
@@ -2713,6 +2731,9 @@ function wireNewsletterSectionUiAfterLoad() {
     const blogFields = document.getElementById('blog-fields');
     if (blogCb && blogFields) {
         blogFields.classList.toggle('hidden', !blogCb.checked);
+    }
+    if (typeof wireNewsletterSectionCheckboxes === 'function') {
+        try { wireNewsletterSectionCheckboxes(); } catch (e) {}
     }
     if (typeof updateCustomSectionFieldsVisibility === 'function') {
         updateCustomSectionFieldsVisibility();
@@ -2847,7 +2868,13 @@ function updateCustomSectionFieldsVisibility() {
     const fields = document.getElementById('nl-custom-section-fields');
     const row = document.getElementById('nl-engagement-row-custom-section');
     const show = !!cb?.checked;
-    if (fields) fields.classList.toggle('hidden', !show);
+    if (fields) {
+        fields.classList.toggle('hidden', !show);
+        if (show) {
+            fields.removeAttribute('hidden');
+            if (fields.style.display === 'none') fields.style.display = '';
+        }
+    }
     if (row) {
         row.classList.toggle('border-[#00A89D]/50', show);
         row.classList.toggle('ring-1', show);
@@ -6257,6 +6284,8 @@ function copyForOutlook() {
   window.resolveCustomSectionBodyForGenerate = resolveCustomSectionBodyForGenerate;
   window.buildCustomNewsletterSectionTable = buildCustomNewsletterSectionTable;
   window.wireCustomSectionPlaceholderHints = wireCustomSectionPlaceholderHints;
+  window.updateCustomSectionFieldsVisibility = updateCustomSectionFieldsVisibility;
+  window.wireNewsletterSectionCheckboxes = wireNewsletterSectionCheckboxes;
   window.NL_CUSTOM_SECTION_TITLE_IDEAS_TEXT = NL_CUSTOM_SECTION_TITLE_IDEAS_TEXT;
   window.updateNewsletterPreflightSummary = updateNewsletterPreflightSummary;
   window.updatePersonalMediaPreviews = updatePersonalMediaPreviews;
@@ -6682,6 +6711,7 @@ function copyForOutlook() {
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
     try { wireCustomSectionPlaceholderHints(); } catch (e) {}
+    try { wireNewsletterSectionCheckboxes(); } catch (e) {}
 
     // Restore form/checkboxes THEN show engagement pickers.
     // Must run here (end of file) so NL_CUSTOM_CONTENT_BLOCKS exists — mid-script
@@ -6731,6 +6761,12 @@ function copyForOutlook() {
         const toggleBlog = () => blogFields.classList.toggle('hidden', !blogCb.checked);
         blogCb.addEventListener('change', toggleBlog);
         toggleBlog();
+      }
+      if (typeof wireNewsletterSectionCheckboxes === 'function') {
+        try { wireNewsletterSectionCheckboxes(); } catch (e) {}
+      }
+      if (typeof updateCustomSectionFieldsVisibility === 'function') {
+        try { updateCustomSectionFieldsVisibility(); } catch (e) {}
       }
       // Re-apply engagement row visibility after any late checkbox/profile tweaks
       try {
