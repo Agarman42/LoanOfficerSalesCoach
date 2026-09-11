@@ -3156,6 +3156,7 @@ function ensurePersonalPhotoCentered(htmlString, photoUrl) {
 
 function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
     if (!el) return;
+    if (document.activeElement === el) return;
     el.max = String(maxPct);
     el.min = String(NL_MEDIA_SIZE_MIN);
     let v = parseInt(el.value, 10);
@@ -3211,6 +3212,20 @@ function formatPersonalVideoSizeLabel() {
     const px = getPersonalVideoWidthPx();
     if (pct >= NL_MEDIA_SIZE_MAX) return `Max size (${px}px)`;
     return `${pct}% (${px}px)`;
+}
+
+/** Label only — do not clamp or resize thumbs (that fights the range thumb while dragging). */
+function paintPersonalMediaSliderLabel(el) {
+    if (!el) return;
+    const isPhoto = el.id === 'nl-personal-photo-size';
+    const label = document.getElementById(isPhoto ? 'nl-personal-photo-size-label' : 'nl-personal-video-size-label');
+    if (!label) return;
+    const raw = parseInt(el.value, 10);
+    const max = isPhoto ? NL_PHOTO_SIZE_MAX : NL_MEDIA_SIZE_MAX;
+    const fallback = isPhoto ? NL_PHOTO_SIZE_DEFAULT : NL_MEDIA_SIZE_DEFAULT;
+    const pct = Number.isNaN(raw) ? fallback : Math.min(max, Math.max(NL_MEDIA_SIZE_MIN, raw));
+    const px = Math.min(NL_MEDIA_MAX_PX, Math.max(120, Math.round(NL_CARD_CONTENT_WIDTH * pct / 100)));
+    label.textContent = pct >= max ? `Max size (${px}px)` : `${pct}% (${px}px)`;
 }
 
 function updatePersonalVideoSizeUI() {
@@ -5500,13 +5515,9 @@ function wireNewsletterLiveFeedback() {
     root.querySelectorAll('input, select, textarea').forEach((el) => {
         if (el.id === 'nl-feedback' || el.id === 'nl-html-raw') return;
         if (el.id === 'nl-personal-photo-size' || el.id === 'nl-personal-video-size') {
-            /* Form thumbs + labels on input; letter patch on change (pointerup). */
             el.addEventListener('input', () => {
                 if (isNewsletterWizardOpen() || window.__nlFormSyncing) return;
-                updatePersonalPhotoSizeUI();
-                updatePersonalVideoSizeUI();
-                applyPersonalPhotoPreviewSizing();
-                applyPersonalVideoPreviewSizing();
+                paintPersonalMediaSliderLabel(el);
             });
             el.addEventListener('change', refresh);
             return;
@@ -5728,13 +5739,15 @@ function wireNewsletterFormPersistence() {
                 else localStorage.setItem(id, el.value);
             } catch (e) { /* ignore */ }
         };
-        if (id === 'nl-location') {
+        if (id === 'nl-location' || id === 'nl-personal-photo-size' || id === 'nl-personal-video-size') {
             el.addEventListener('change', save);
             el.addEventListener('blur', save);
-            el.addEventListener('input', () => {
-                const err = document.getElementById('nl-location-error');
-                if (err && (el.value || '').trim()) err.classList.add('hidden');
-            });
+            if (id === 'nl-location') {
+                el.addEventListener('input', () => {
+                    const err = document.getElementById('nl-location-error');
+                    if (err && (el.value || '').trim()) err.classList.add('hidden');
+                });
+            }
         } else {
             el.addEventListener('input', save);
             el.addEventListener('change', save);
