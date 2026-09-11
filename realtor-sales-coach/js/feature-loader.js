@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260911-agent-v3109';
+  var V = '20260911-agent-v3110';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -62,9 +62,9 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260911-nl-get-most-v3108',
+      'js/features/newsletter-generator.js?v=20260911-nl-location-v3110',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
-      'js/features/newsletter-wizard.js?v=20260911-listing-price-hero-v3103'
+      'js/features/newsletter-wizard.js?v=20260911-nl-location-v3110'
     ],
     'value-vault': [
       'js/features/popby-seasonal.js?v=20260706-realtor-v273',
@@ -135,9 +135,9 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260911-nl-get-most-v3108',
+      'js/features/newsletter-generator.js?v=20260911-nl-location-v3110',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
-      'js/features/newsletter-wizard.js?v=20260911-listing-price-hero-v3103'
+      'js/features/newsletter-wizard.js?v=20260911-nl-location-v3110'
     ]
   };
 

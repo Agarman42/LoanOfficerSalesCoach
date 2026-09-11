@@ -323,7 +323,7 @@
     const email = (profile.email || profile.workEmail || '').trim()
       || $('nl-email')?.value?.trim()
       || '—';
-    const market = (profile.localArea || profile.market || profile.location || '').trim()
+    const market = (profile.location || profile.localMarket || profile.localArea || profile.market || profile.city || profile.serviceArea || '').trim()
       || $('nl-location')?.value?.trim()
       || $('nl-wizard-location')?.value?.trim()
       || '—';
@@ -863,7 +863,13 @@
         w.value = '';
         return;
       }
-      if (f) w.value = f.value || '';
+      if (f) {
+        if (formId === 'nl-location' && !(f.value || '').trim() && (w.value || '').trim()) {
+          persistFormValue('nl-location', w.value, { silent: true });
+        } else {
+          w.value = f.value || '';
+        }
+      }
     });
 
     CORE_DIRECTIONS.forEach((cfg) => {
@@ -1078,10 +1084,13 @@
     showStepError('');
 
     if (currentStep === 2) {
-      const loc = ($('nl-wizard-location')?.value || '').trim();
+      const loc = ($('nl-wizard-location')?.value || $('nl-location')?.value || '').trim();
       if (!loc) {
         showStepError('Add your local market so we can write relevant content.');
-        $('nl-wizard-location')?.focus();
+        const locEl = $('nl-wizard-location');
+        const prev = locEl ? locEl.value : '';
+        locEl?.focus();
+        if (locEl && locEl.value !== prev) locEl.value = prev;
         return false;
       }
     }
@@ -1560,7 +1569,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-location">Local market <span class="text-[#F15A29]">*</span></label>
-                <input type="text" id="nl-wizard-location" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm" placeholder="City, State" required>
+                <input type="text" id="nl-wizard-location" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm" placeholder="City, State" autocomplete="off">
                 <p id="nl-wizard-location-hint" class="hidden text-[11px] text-[#00A89D] mt-1 m-0"><i class="fas fa-check-circle"></i> Market set</p>
               </div>
               <div>
@@ -1910,8 +1919,18 @@
     });
 
     const onPersistInput = () => persistWizardSettings();
+    const locWiz = $('nl-wizard-location');
+    if (locWiz) {
+      locWiz.addEventListener('input', () => {
+        updateStep2ValidationHints();
+        const err = $('nl-wizard-step-error');
+        if (err && (locWiz.value || '').trim()) err.classList.add('hidden');
+      });
+      locWiz.addEventListener('blur', () => persistFormValue('nl-location', locWiz.value, { silent: true }));
+      locWiz.addEventListener('change', () => persistFormValue('nl-location', locWiz.value, { silent: true }));
+    }
     [
-      'nl-wizard-audience', 'nl-wizard-location', 'nl-wizard-tone', 'nl-wizard-length', 'nl-wizard-newsletter-title',
+      'nl-wizard-audience', 'nl-wizard-tone', 'nl-wizard-length', 'nl-wizard-newsletter-title',
       'nl-wizard-blog-url', 'nl-wizard-blog-title', 'nl-wizard-specific',
       'nl-wizard-custom-section-title', 'nl-wizard-custom-section-body',
       'nl-wizard-listing-spotlight-title',
@@ -1923,7 +1942,6 @@
       if (!el) return;
       el.addEventListener('input', () => {
         onPersistInput();
-        if (id === 'nl-wizard-location') updateStep2ValidationHints();
       });
     });
     $('nl-wizard-color-bundle')?.addEventListener('change', () => {
@@ -2114,6 +2132,9 @@
       try { window.updatePreviews(); } catch (e) {}
     }
     syncProfileAndRefresh();
+    if (typeof window.fillNewsletterLocationFromProfileIfEmpty === 'function') {
+      try { window.fillNewsletterLocationFromProfileIfEmpty(); } catch (e) {}
+    }
     readFormIntoWizard();
 
     currentStep = 1;

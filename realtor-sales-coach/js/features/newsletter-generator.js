@@ -1790,7 +1790,7 @@ if (!window._nlEscListener) {
 
 // === PERSISTENCE SETUP (edition-specific only — branding/contact from profile) ===
 const persistentFields = [
-    'nl-audience', 'nl-tone', 'nl-title', 'nl-length',
+    'nl-audience', 'nl-location', 'nl-tone', 'nl-title', 'nl-length',
     'nl-blog-url', 'nl-blog-title',
     'nl-include-blog',
     'nl-include-referral',
@@ -1853,7 +1853,7 @@ function getNewsletterProfileContext() {
     return {
         name: (profile.name || '').trim(),
         email: (profile.email || profile.workEmail || '').trim(),
-        location: (profile.location || profile.localArea || profile.market || '').trim(),
+        location: (profile.location || profile.localMarket || profile.localArea || profile.market || profile.city || profile.serviceArea || '').trim(),
         company: (profile.companyName || '').trim(),
         tagline: (profile.tagline || '').trim(),
         phone: (profile.phone || '').trim(),
@@ -1864,9 +1864,58 @@ function getNewsletterProfileContext() {
     };
 }
 
+function getProfileMarketValue(profile) {
+    const p = profile || ((typeof window.getUserProfile === 'function') ? window.getUserProfile() : {}) || {};
+    return String(
+      p.location || p.localMarket || p.localArea || p.market || p.city || p.serviceArea || ''
+    ).trim();
+}
+
+function fillNewsletterLocationFromProfileIfEmpty() {
+    const el = document.getElementById('nl-location');
+    if (!el) return '';
+    if (document.activeElement === el) return (el.value || '').trim();
+    if ((el.value || '').trim()) return el.value.trim();
+    try {
+      const saved = localStorage.getItem('nl-location');
+      if (saved && saved.trim()) {
+        el.value = saved.trim();
+        return el.value.trim();
+      }
+    } catch (e) { /* ignore */ }
+    const fromProfile = getProfileMarketValue();
+    if (fromProfile) el.value = fromProfile;
+    return (el.value || '').trim();
+}
+
 function getNewsletterLocation() {
-    const ctx = getNewsletterProfileContext();
-    return ctx.location || 'your local market';
+    const typed = (document.getElementById('nl-location')?.value || '').trim();
+    if (typed) return typed;
+    return getProfileMarketValue() || 'your local market';
+}
+
+function validateNewsletterLocationForGeneration() {
+    fillNewsletterLocationFromProfileIfEmpty();
+    const el = document.getElementById('nl-location');
+    const err = document.getElementById('nl-location-error');
+    const val = (el?.value || '').trim();
+    if (val) {
+      if (err) {
+        err.textContent = '';
+        err.classList.add('hidden');
+      }
+      return true;
+    }
+    if (err) {
+      err.textContent = 'Add your local market so we can write relevant content.';
+      err.classList.remove('hidden');
+    }
+    try { el?.focus({ preventScroll: false }); } catch (e) { el?.focus(); }
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (typeof window.notifyUser === 'function') {
+      window.notifyUser('Add your local market (City, State) before generating.', 'warning', 3200);
+    }
+    return false;
 }
 
 function getAgentBrandingContext() {
@@ -5657,8 +5706,17 @@ function wireNewsletterFormPersistence() {
                 else localStorage.setItem(id, el.value);
             } catch (e) { /* ignore */ }
         };
-        el.addEventListener('input', save);
-        el.addEventListener('change', save);
+        if (id === 'nl-location') {
+            el.addEventListener('change', save);
+            el.addEventListener('blur', save);
+            el.addEventListener('input', () => {
+                const err = document.getElementById('nl-location-error');
+                if (err && (el.value || '').trim()) err.classList.add('hidden');
+            });
+        } else {
+            el.addEventListener('input', save);
+            el.addEventListener('change', save);
+        }
     });
 
     document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
@@ -5750,6 +5808,9 @@ async function generateNewsletter(feedback = '') {
         hideNewsletterLoading();
     }
     if (!feedback && !validatePersonalUpdateForGeneration()) {
+        return;
+    }
+    if (!feedback && !validateNewsletterLocationForGeneration()) {
         return;
     }
     clearNewsletterGenerateError();
@@ -6640,6 +6701,8 @@ function copyForOutlook() {
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
+  window.fillNewsletterLocationFromProfileIfEmpty = fillNewsletterLocationFromProfileIfEmpty;
+  window.getNewsletterLocation = getNewsletterLocation;
   window.fillPersonalFromProfile = fillPersonalFromProfile;
 
   // These helpers are called from HTML onclick in the newsletter section
@@ -6892,6 +6955,8 @@ function copyForOutlook() {
         blogUrlEl.value = profileBlog;
       }
 
+      fillNewsletterLocationFromProfileIfEmpty();
+
       updateNewsletterProfileStatus();
       try { updateNewsletterPreflightSummary(); } catch (e) {}
 
@@ -7058,6 +7123,8 @@ function copyForOutlook() {
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
+  window.fillNewsletterLocationFromProfileIfEmpty = fillNewsletterLocationFromProfileIfEmpty;
+  window.getNewsletterLocation = getNewsletterLocation;
   window.updateNewsletterProfileStatus = updateNewsletterProfileStatus;
   window.refreshNewsletterColorScheme = refreshNewsletterColorScheme;
   window.updateCustomContentChoicesVisibility = updateCustomContentChoicesVisibility;
