@@ -4485,16 +4485,10 @@ function updateCustomSectionFieldsVisibility() {
         row.classList.toggle('ring-1', show);
         row.classList.toggle('ring-[#00A89D]/25', show);
     }
-    if (show) {
-        const details = document.getElementById('nl-custom-content-details');
-        if (details) details.open = true;
-    }
 }
 
 function updateCustomContentDetailsSummary(activeLabels) {
     const labels = Array.isArray(activeLabels) ? activeLabels.slice() : [];
-    if (document.getElementById('nl-custom-section')?.checked) labels.push('Custom section');
-    if (isListingSpotlightEnabled() && document.getElementById('nl-listing-spotlight')?.checked) labels.push('Listing Spotlight');
     const summaryEl = document.getElementById('nl-custom-content-summary');
     const countEl = document.getElementById('nl-custom-content-count');
     if (summaryEl) {
@@ -4819,10 +4813,6 @@ function updateListingSpotlightFieldsVisibility() {
         row.classList.toggle('border-[#00A89D]/50', show);
         row.classList.toggle('ring-1', show);
         row.classList.toggle('ring-[#00A89D]/25', show);
-    }
-    if (show) {
-        const details = document.getElementById('nl-custom-content-details');
-        if (details) details.open = true;
     }
 }
 

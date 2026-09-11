@@ -7427,11 +7427,28 @@
           <span class="block text-xs font-normal text-gray-500 dark:text-gray-400 mt-0.5">Why a short monthly letter stays in front of your sphere</span>
         </span>
       </summary>
-      <ul class="mt-4 mb-0 pl-5 list-disc space-y-2 text-sm text-gray-700 dark:text-gray-300">
-        <li>A short monthly letter keeps your name first when someone is ready to buy, sell, or refer.</li>
-        <li>Lead with a real Personal Update, then local market and neighborhood value — people open mail from humans they know.</li>
-        <li>End with one soft ask. Logo &amp; headshot look best at 400–600px wide (logo) and 400×400px square (headshot) — set them in Profile.</li>
-      </ul>
+      <div class="mt-4 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-1.5">Why it works</p>
+          <ul class="m-0 pl-5 list-disc space-y-1">
+            <li><strong>Stay top-of-mind</strong> — a short monthly letter keeps your name first when someone is ready to buy, sell, or refer.</li>
+            <li><strong>Build real trust</strong> — market + local flavor + your personal story. People open mail from humans they know.</li>
+            <li><strong>Turn sends into referrals</strong> — great content plus one soft ask = warm inbound without cold calling.</li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-[#00A89D] m-0 mb-1.5">How to use it</p>
+          <ul class="m-0 pl-5 list-disc space-y-1">
+            <li><strong>Complete your profile once</strong> — name, email, market, branding, voice. This page is edition-specific.</li>
+            <li><strong>Lead with the Personal Update</strong> + photo or video. Highest-open section.</li>
+            <li><strong>Add direction</strong> under Market, Local, etc. when you have a topic or link.</li>
+            <li><strong>Pick a cadence</strong> you can keep (monthly is fine) and generate every time.</li>
+            <li><strong>End with a soft CTA</strong> — “Know anyone thinking about buying or selling?”</li>
+            <li><strong>Save winners</strong> to My Saved Items; a strong issue becomes social posts or a blog angle.</li>
+          </ul>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400 m-0">Logo &amp; headshot: 400–600px wide (logo) and 400×400px square (headshot) — set them in Profile.</p>
+      </div>
     </details>
 
     <!-- Premium Form Cards (matching Blog Creator / Social Post / 2026 Plan) -->
@@ -7730,14 +7747,84 @@
           </div>
         </div>
 
+        <div id="nl-listing-custom-block" class="mb-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-4">
+          <h4 class="text-base font-bold text-[#002B5C] dark:text-white m-0">Your listing &amp; custom section</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3 m-0">Optional — add a featured home or a section you write yourself</p>
+          <div class="grid grid-cols-1 gap-3">
+            <div id="nl-engagement-row-listing-spotlight" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40">
+              <div class="flex flex-wrap items-center gap-2 p-3">
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0" for="nl-listing-spotlight"><input type="checkbox" id="nl-listing-spotlight" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Listing Spotlight 🏠</span></label>
+              </div>
+              <div id="nl-listing-spotlight-fields" class="hidden px-3 pb-3 space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label for="nl-listing-spotlight-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="text" id="nl-listing-spotlight-title" maxlength="80" placeholder="Listing Spotlight · Featured Home · Just Listed" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-photo" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Photo URL <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="url" id="nl-listing-spotlight-photo" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-address" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Address / neighborhood</label>
+                    <input type="text" id="nl-listing-spotlight-address" maxlength="120" placeholder="123 Maple Street, Broad Ripple" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-price" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Price</label>
+                    <input type="text" id="nl-listing-spotlight-price" maxlength="40" placeholder="$425,000" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-stats" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Beds / baths / sqft <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="text" id="nl-listing-spotlight-stats" maxlength="80" placeholder="3 bed · 2 bath · 1,806 sq ft" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-link" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Listing link <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="url" id="nl-listing-spotlight-link" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                </div>
+                <div>
+                  <label for="nl-listing-spotlight-hook" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">One-line hook <span class="font-normal text-gray-400">(optional) — Why this one</span></label>
+                  <input type="text" id="nl-listing-spotlight-hook" maxlength="280" placeholder="Sunlit kitchen and a backyard that actually fits a gathering" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                </div>
+                <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                  <input type="checkbox" id="nl-listing-spotlight-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0" checked>
+                  <span>Polish hook with AI (hook only — never change price, address, or beds/baths)</span>
+                </label>
+                <p class="text-xs text-gray-500 m-0">Needs address and price. You supply the facts — this is not an MLS feed.</p>
+              </div>
+            </div>
+            <div id="nl-engagement-row-custom-section" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40">
+              <div class="flex flex-wrap items-center gap-2 p-3">
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0" for="nl-custom-section"><input type="checkbox" id="nl-custom-section" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Custom section ✍️</span></label>
+              </div>
+              <div id="nl-custom-section-fields" class="hidden px-3 pb-3 space-y-3">
+                <div>
+                  <label for="nl-custom-section-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title</label>
+                  <input type="text" id="nl-custom-section-title" maxlength="80" placeholder="Home Maintenance Tip · Seasonal Advice · Value-Add Tip · Neighborhood Insight · Buyer/Seller Tip" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  <p id="nl-custom-section-title-ideas" class="text-xs text-gray-500 mt-1 mb-0 leading-snug">Home Maintenance Tip · Seasonal Advice · Value-Add Tip · Neighborhood Insight · Buyer/Seller Tip</p>
+                </div>
+                <div>
+                  <label for="nl-custom-section-body" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section body</label>
+                  <textarea id="nl-custom-section-body" rows="4" maxlength="2500" placeholder="Type the finished tip, or tell us what to write (example: a short tip on winterizing a home)." class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30 resize-y min-h-[6rem]"></textarea>
+                </div>
+                <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                  <input type="checkbox" id="nl-custom-section-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0" checked>
+                  <span>Polish this with AI (keep my meaning)</span>
+                </label>
+                <p class="text-xs text-gray-500 m-0">This will appear as its own section in the newsletter.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <details id="nl-custom-content-details" class="mb-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
           <summary class="text-sm font-bold text-[#002B5C] dark:text-white cursor-pointer flex flex-wrap items-center gap-2 list-none">
             <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-magic text-[#00A89D] text-xs"></i></span>
             <span id="nl-custom-content-summary" class="min-w-0">Add-ons</span>
             <span id="nl-custom-content-count" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#00A89D]/15 text-[#00A89D]">0 active</span>
-            <span class="text-xs font-normal text-gray-500">(library + sections you write)</span>
+            <span class="text-xs font-normal text-gray-500">(Fun Fact, Tip, Quote, Joke, Brain Teaser)</span>
           </summary>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 mb-3 m-0">Optional extras. Library picks shuffle from our lists; Custom section and Listing Spotlight are yours to write.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 mb-3 m-0">Optional library extras. Check a section, then shuffle or customize.</p>
           <div id="nl-engagement-summary" class="flex flex-wrap items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#00A89D]/5 border border-[#00A89D]/20">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-sparkles text-[#00A89D] text-xs"></i></span>
@@ -7840,71 +7927,6 @@
               </div>
             </div>
           </div>
-          <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 m-0 mb-2">You write</p>
-          <div class="grid grid-cols-1 gap-3">
-            <div id="nl-engagement-row-custom-section" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40">
-              <div class="flex flex-wrap items-center gap-2 p-3">
-                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0" for="nl-custom-section"><input type="checkbox" id="nl-custom-section" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Custom section ✍️</span></label>
-              </div>
-              <div id="nl-custom-section-fields" class="hidden px-3 pb-3 space-y-3">
-                <div>
-                  <label for="nl-custom-section-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title</label>
-                  <input type="text" id="nl-custom-section-title" maxlength="80" placeholder="Home Maintenance Tip · Seasonal Advice · Value-Add Tip · Neighborhood Insight · Buyer/Seller Tip" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                  <p id="nl-custom-section-title-ideas" class="text-xs text-gray-500 mt-1 mb-0 leading-snug">Home Maintenance Tip · Seasonal Advice · Value-Add Tip · Neighborhood Insight · Buyer/Seller Tip</p>
-                </div>
-                <div>
-                  <label for="nl-custom-section-body" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section body</label>
-                  <textarea id="nl-custom-section-body" rows="4" maxlength="2500" placeholder="Type the finished tip, or tell us what to write (example: a short tip on winterizing a home)." class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30 resize-y min-h-[6rem]"></textarea>
-                </div>
-                <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                  <input type="checkbox" id="nl-custom-section-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0" checked>
-                  <span>Polish this with AI (keep my meaning)</span>
-                </label>
-                <p class="text-xs text-gray-500 m-0">This will appear as its own section in the newsletter.</p>
-              </div>
-            </div>
-            <div id="nl-engagement-row-listing-spotlight" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40">
-              <div class="flex flex-wrap items-center gap-2 p-3">
-                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0" for="nl-listing-spotlight"><input type="checkbox" id="nl-listing-spotlight" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Listing Spotlight 🏠</span></label>
-              </div>
-              <div id="nl-listing-spotlight-fields" class="hidden px-3 pb-3 space-y-3">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label for="nl-listing-spotlight-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title <span class="font-normal text-gray-400">(optional)</span></label>
-                    <input type="text" id="nl-listing-spotlight-title" maxlength="80" placeholder="Listing Spotlight · Featured Home · Just Listed" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                  </div>
-                  <div>
-                    <label for="nl-listing-spotlight-photo" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Photo URL <span class="font-normal text-gray-400">(optional)</span></label>
-                    <input type="url" id="nl-listing-spotlight-photo" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                  </div>
-                  <div>
-                    <label for="nl-listing-spotlight-address" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Address / neighborhood</label>
-                    <input type="text" id="nl-listing-spotlight-address" maxlength="120" placeholder="123 Maple Street, Broad Ripple" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                  </div>
-                  <div>
-                    <label for="nl-listing-spotlight-price" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Price</label>
-                    <input type="text" id="nl-listing-spotlight-price" maxlength="40" placeholder="$425,000" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                  </div>
-                  <div>
-                    <label for="nl-listing-spotlight-stats" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Beds / baths / sqft <span class="font-normal text-gray-400">(optional)</span></label>
-                    <input type="text" id="nl-listing-spotlight-stats" maxlength="80" placeholder="3 bed · 2 bath · 1,806 sq ft" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                  </div>
-                  <div>
-                    <label for="nl-listing-spotlight-link" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Listing link <span class="font-normal text-gray-400">(optional)</span></label>
-                    <input type="url" id="nl-listing-spotlight-link" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                  </div>
-                </div>
-                <div>
-                  <label for="nl-listing-spotlight-hook" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">One-line hook <span class="font-normal text-gray-400">(optional) — Why this one</span></label>
-                  <input type="text" id="nl-listing-spotlight-hook" maxlength="280" placeholder="Sunlit kitchen and a backyard that actually fits a gathering" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                </div>
-                <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                  <input type="checkbox" id="nl-listing-spotlight-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0" checked>
-                  <span>Polish hook with AI (hook only — never change price, address, or beds/baths)</span>
-                </label>
-                <p class="text-xs text-gray-500 m-0">Needs address and price. You supply the facts — this is not an MLS feed.</p>
-              </div>
-            </div>
           </div>
         </details>
 
