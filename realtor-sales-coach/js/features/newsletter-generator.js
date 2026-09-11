@@ -1812,7 +1812,13 @@ const persistentFields = [
     'nl-personal-video-size',
     'nl-color-bundle',
     'nl-custom-section-title',
-    'nl-custom-section-body'
+    'nl-custom-section-body',
+    'nl-listing-spotlight-photo',
+    'nl-listing-spotlight-address',
+    'nl-listing-spotlight-price',
+    'nl-listing-spotlight-stats',
+    'nl-listing-spotlight-hook',
+    'nl-listing-spotlight-link'
     // Direction notes (market/industry/local/recipes) intentionally NOT persisted
 ];
 const NL_DIRECTION_FIELD_IDS = [
@@ -4369,6 +4375,7 @@ function buildNewsletterSectionsPrompt(selections) {
 
     lines.push('');
     lines.push(...buildCustomSectionPromptLines());
+    lines.push(...buildListingSpotlightPromptLines());
     lines.push('');
     lines.push(...buildCoreSectionDirectionsPromptLines(selections));
 
@@ -4395,6 +4402,7 @@ function updateCustomSectionFieldsVisibility() {
 function updateCustomContentDetailsSummary(activeLabels) {
     const labels = Array.isArray(activeLabels) ? activeLabels.slice() : [];
     if (document.getElementById('nl-custom-section')?.checked) labels.push('Custom section');
+    if (isListingSpotlightEnabled() && document.getElementById('nl-listing-spotlight')?.checked) labels.push('Listing Spotlight');
     const summaryEl = document.getElementById('nl-custom-content-summary');
     const countEl = document.getElementById('nl-custom-content-count');
     if (summaryEl) {
@@ -4427,6 +4435,7 @@ function updateCustomContentChoicesVisibility() {
         if (show) activeLabels.push(cfg.shortLabel);
     });
     try { updateCustomSectionFieldsVisibility(); } catch (e) {}
+    try { updateListingSpotlightFieldsVisibility(); } catch (e) {}
     try { updateCuratedRowStatuses(); updateEngagementSectionSummary(); } catch (e) {}
     updateCustomContentDetailsSummary(activeLabels);
 }
@@ -4684,6 +4693,246 @@ function applyNewsletterCustomSection(html, custom) {
         injectedBody: body
     };
     return out;
+}
+
+function isListingSpotlightEnabled() {
+    return window.ENABLE_NL_LISTING_SPOTLIGHT !== false;
+}
+
+function applyListingSpotlightKillSwitch() {
+    const enabled = isListingSpotlightEnabled();
+    const row = document.getElementById('nl-engagement-row-listing-spotlight');
+    if (row) row.classList.toggle('hidden', !enabled);
+    document.querySelectorAll('[data-nl-wizard-section-card="nl-listing-spotlight"]').forEach((el) => {
+        el.classList.toggle('hidden', !enabled);
+    });
+    if (!enabled) {
+        const cb = document.getElementById('nl-listing-spotlight');
+        if (cb) cb.checked = false;
+        const fields = document.getElementById('nl-listing-spotlight-fields');
+        if (fields) fields.classList.add('hidden');
+        const wizFields = document.getElementById('nl-wizard-listing-spotlight-fields');
+        if (wizFields) wizFields.classList.add('hidden');
+    }
+}
+
+function updateListingSpotlightFieldsVisibility() {
+    applyListingSpotlightKillSwitch();
+    const cb = document.getElementById('nl-listing-spotlight');
+    const fields = document.getElementById('nl-listing-spotlight-fields');
+    const row = document.getElementById('nl-engagement-row-listing-spotlight');
+    const show = isListingSpotlightEnabled() && !!cb?.checked;
+    if (fields) fields.classList.toggle('hidden', !show);
+    if (row && isListingSpotlightEnabled()) {
+        row.classList.toggle('border-[#00A89D]/50', show);
+        row.classList.toggle('ring-1', show);
+        row.classList.toggle('ring-[#00A89D]/25', show);
+    }
+    if (show) {
+        const details = document.getElementById('nl-custom-content-details');
+        if (details) details.open = true;
+    }
+}
+
+function sanitizeListingHttpUrl(url) {
+    let u = String(url || '').trim();
+    if (!u) return '';
+    if (/[\s<>"'`]/.test(u.replace(/^https?:\/\//i, ''))) return '';
+    if (/^(javascript|data|vbscript|file):/i.test(u)) return '';
+    if (/^\/\//.test(u)) u = 'https:' + u;
+    else if (!/^https?:\/\//i.test(u)) {
+        if (/^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}([/:?#].*)?$/i.test(u)) u = 'https://' + u;
+        else return '';
+    }
+    if (!/^https?:\/\//i.test(u)) return '';
+    return u;
+}
+
+function listingPhotoUrlIsUsable(url) {
+    const href = sanitizeListingHttpUrl(url);
+    if (!href) return '';
+    if (typeof looksLikeImageUrl === 'function' && looksLikeImageUrl(href)) return href;
+    if (/^https?:\/\//i.test(href)) return href;
+    return '';
+}
+
+function getNewsletterListingSpotlightState() {
+    if (!isListingSpotlightEnabled()) {
+        return { enabled: false, address: '', price: '', stats: '', hook: '', photoUrl: '', link: '', polish: false, ready: false };
+    }
+    const enabled = !!document.getElementById('nl-listing-spotlight')?.checked;
+    const address = (document.getElementById('nl-listing-spotlight-address')?.value || '').trim().slice(0, 120);
+    const price = (document.getElementById('nl-listing-spotlight-price')?.value || '').trim().slice(0, 40);
+    const stats = (document.getElementById('nl-listing-spotlight-stats')?.value || '').trim().slice(0, 80);
+    const hook = (document.getElementById('nl-listing-spotlight-hook')?.value || '').trim().slice(0, 280);
+    const photoUrl = listingPhotoUrlIsUsable(document.getElementById('nl-listing-spotlight-photo')?.value || '');
+    const link = sanitizeListingHttpUrl(document.getElementById('nl-listing-spotlight-link')?.value || '').slice(0, 500);
+    const polish = !!document.getElementById('nl-listing-spotlight-polish')?.checked;
+    return { enabled, address, price, stats, hook, photoUrl, link, polish, ready: !!(enabled && address && price) };
+}
+
+function getNewsletterListingSpotlight() {
+    const state = getNewsletterListingSpotlightState();
+    if (!state.ready) return null;
+    return {
+        address: state.address,
+        price: state.price,
+        stats: state.stats,
+        hook: state.hook,
+        photoUrl: state.photoUrl,
+        link: state.link,
+        polish: state.polish
+    };
+}
+
+let _nlLastListingSpotlight = null;
+
+function stripListingSpotlightSection(html) {
+    let out = String(html || '');
+    out = out.replace(
+        /<tr>\s*<td[^>]*>\s*<table[^>]*data-nl-listing-spotlight=["']1["'][^>]*>[\s\S]*?<\/table>\s*<\/td>\s*<\/tr>\s*(?:<tr>\s*<td[^>]*height=["']?(?:16|20)["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi,
+        ''
+    );
+    out = out.replace(
+        /<table[^>]*data-nl-listing-spotlight=["']1["'][^>]*>[\s\S]*?<\/table>\s*(?:<tr>\s*<td[^>]*height=["']?(?:16|20)["']?[^>]*>\s*<\/td>\s*<\/tr>\s*)?/gi,
+        ''
+    );
+    return out;
+}
+
+function buildListingSpotlightTable(listing) {
+    const address = escapeNewsletterCustomText(toCustomSectionTitleCase(listing.address) || listing.address);
+    const price = escapeNewsletterCustomText(listing.price);
+    const stats = escapeNewsletterCustomText(listing.stats || '');
+    const factsLine = stats ? `${price} · ${stats}` : price;
+    const photoHref = listingPhotoUrlIsUsable(listing.photoUrl);
+    const linkHref = sanitizeListingHttpUrl(listing.link);
+    const hookHtml = listing.hook
+        ? `<p style="margin:0 0 12px; font-size:16px; line-height:1.6; color:#333;">${escapeNewsletterCustomText(listing.hook)}</p>`
+        : '';
+    const photoHtml = photoHref
+        ? `<img src="${escapeNewsletterCustomText(photoHref)}" alt="${address}" width="540" style="display:block;width:100%;max-width:540px;height:auto;border-radius:8px;margin:0 0 16px;" onerror="this.style.display='none';this.removeAttribute('src');">`
+        : '';
+    const linkHtml = linkHref
+        ? `<p style="margin:0 0 12px;"><a href="${escapeNewsletterCustomText(linkHref)}" target="_blank" rel="noopener" style="color:#00A89D;font-weight:bold;text-decoration:none;font-size:16px;">See this listing →</a></p>`
+        : '';
+    return `<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-listing-spotlight="1" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
+        <tr>
+            <td style="padding:30px;">
+                ${photoHtml}
+                <h2 style="color:#002B5C; font-size:26px; margin:0 0 10px;">${address}</h2>
+                <p style="margin:0 0 12px; font-size:16px; line-height:1.5; color:#002B5C; font-weight:700;">${factsLine}</p>
+                ${hookHtml}
+                ${linkHtml}
+                <p style="margin:0; font-size:12px; line-height:1.4; color:#888;">Information supplied by the agent. Not an MLS feed.</p>
+            </td>
+        </tr>
+    </table>`;
+}
+
+function applyNewsletterListingSpotlight(html, listing) {
+    let out = stripListingSpotlightSection(html);
+    if (!isListingSpotlightEnabled()) return out;
+    if (!listing || !String(listing.address || '').trim() || !String(listing.price || '').trim()) {
+        return out;
+    }
+    const payload = {
+        address: String(listing.address).trim(),
+        price: String(listing.price).trim(),
+        stats: String(listing.stats || '').trim(),
+        hook: String(listing.hook || '').trim(),
+        photoUrl: listingPhotoUrlIsUsable(listing.photoUrl),
+        link: sanitizeListingHttpUrl(listing.link)
+    };
+    out = injectCustomSectionBeforePersonal(out, buildListingSpotlightTable(payload));
+    _nlLastListingSpotlight = {
+        address: payload.address,
+        price: payload.price,
+        stats: payload.stats,
+        photoUrl: payload.photoUrl,
+        link: payload.link,
+        rawHook: listing.rawHook != null ? String(listing.rawHook) : payload.hook,
+        injectedHook: payload.hook
+    };
+    return out;
+}
+
+function buildListingSpotlightPromptLines() {
+    const state = getNewsletterListingSpotlightState();
+    if (!state.ready) {
+        return [
+            '- LISTING SPOTLIGHT: not included. Do NOT invent a listing card, property spotlight, or MLS-style listing block.'
+        ];
+    }
+    return [
+        '- LISTING SPOTLIGHT (explicit payload — do NOT write this card yourself and do NOT invent listing facts):',
+        `- Address: ${state.address}`,
+        `- Price: ${state.price}`,
+        '- The app injects this card AFTER market/blog/custom section and BEFORE the Personal Note / video / referral / footer. Do not duplicate it.'
+    ];
+}
+
+async function prepareListingSpotlightHook(hook) {
+    const raw = String(hook || '').trim();
+    if (!raw) return '';
+    try {
+        const prompt = [
+            'Lightly polish this one-line real-estate listing hook for grammar and warmth only.',
+            'Keep the author meaning. Do not add claims, guarantees, or new facts.',
+            'Never change, invent, or mention a different price, address, beds, baths, or square footage.',
+            'Return ONLY the polished hook as plain text — one or two short sentences, no title, no quotes, no markdown.',
+            '',
+            'Hook:',
+            raw
+        ].join('\n');
+        const result = await window.callGrokAPI(prompt, {
+            temperature: 0.2,
+            max_tokens: 180,
+            timeoutMs: 10000,
+            model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
+        });
+        let text = String(result || '').trim()
+            .replace(/^```[\s\S]*?```$/g, '')
+            .replace(/^```(?:text|markdown)?\s*/i, '')
+            .replace(/```$/g, '')
+            .replace(/^["']|["']$/g, '')
+            .trim();
+        if (/<[a-z][\s\S]*>/i.test(text)) return raw;
+        if (!text) return raw;
+        if (text.length > Math.max(raw.length * 3, raw.length + 180)) return raw;
+        return text.slice(0, 280);
+    } catch (e) {
+        return raw;
+    }
+}
+
+function resolveListingSpotlightHookForGenerate(listing, isFeedback) {
+    if (!listing) return Promise.resolve('');
+    const hook = String(listing.hook || '').trim();
+    if (!hook) return Promise.resolve('');
+    if (isFeedback && _nlLastListingSpotlight
+        && _nlLastListingSpotlight.address === listing.address
+        && _nlLastListingSpotlight.price === listing.price
+        && _nlLastListingSpotlight.rawHook === hook) {
+        return Promise.resolve(_nlLastListingSpotlight.injectedHook || hook);
+    }
+    if (!listing.polish) return Promise.resolve(hook);
+    return prepareListingSpotlightHook(hook).then((text) => text || hook).catch(() => hook);
+}
+
+function restoreListingSpotlightPolishCheckbox(cb) {
+    if (!cb) cb = document.getElementById('nl-listing-spotlight-polish');
+    if (!cb) return;
+    let saved = null;
+    try { saved = localStorage.getItem('nl-listing-spotlight-polish'); } catch (e) {}
+    if (saved === '0' || saved === 'false') cb.checked = false;
+    else cb.checked = true;
+}
+
+function persistListingSpotlightPolishCheckbox() {
+    const cb = document.getElementById('nl-listing-spotlight-polish');
+    if (!cb) return;
+    try { localStorage.setItem('nl-listing-spotlight-polish', cb.checked ? '1' : '0'); } catch (e) {}
 }
 
 function describeCustomSectionBodyForPrompt(body) {
@@ -5008,6 +5257,15 @@ function updateNewsletterPreflightSummary() {
             warnings.push('Custom section is checked but title or body is empty — it will be skipped.');
         }
     }
+    const listingState = getNewsletterListingSpotlightState();
+    if (listingState.enabled) {
+        if (listingState.ready) {
+            chips.push({ text: `Listing · ${listingState.address}`, style: 'included', removeId: 'nl-listing-spotlight' });
+        } else {
+            chips.push({ text: 'Listing Spotlight (needs address & price)', style: 'warn', removeId: 'nl-listing-spotlight' });
+            warnings.push('Listing Spotlight is checked but address or price is empty — it will be skipped.');
+        }
+    }
     const includeSig = document.getElementById('nl-include-signature')?.checked !== false;
     const includeSocial = document.getElementById('nl-include-social')?.checked !== false;
     if (includeSig) chips.push({ text: 'Signature block', style: 'included', removeId: 'nl-include-signature' });
@@ -5127,6 +5385,10 @@ function restoreNewsletterFormPersistence() {
             restoreCustomSectionPolishCheckbox(cb);
             return;
         }
+        if (cb.id === 'nl-listing-spotlight-polish') {
+            restoreListingSpotlightPolishCheckbox(cb);
+            return;
+        }
         if (hasSaved) {
             cb.checked = savedSections.includes(cb.id);
         } else if (cb.id === 'nl-include-referral' || cb.id === 'nl-include-signature') {
@@ -5161,6 +5423,9 @@ function restoreNewsletterFormPersistence() {
     }
     if (typeof updateCustomSectionFieldsVisibility === 'function') {
         updateCustomSectionFieldsVisibility();
+    }
+    if (typeof updateListingSpotlightFieldsVisibility === 'function') {
+        updateListingSpotlightFieldsVisibility();
     }
 
     if (typeof syncNewsletterFromProfile === 'function') {
@@ -5268,6 +5533,10 @@ function wireNewsletterFormPersistence() {
                 updateCustomSectionFieldsVisibility();
             }
             if (cb.id === 'nl-custom-section-polish') persistCustomSectionPolishCheckbox();
+            if (cb.id === 'nl-listing-spotlight' && typeof updateListingSpotlightFieldsVisibility === 'function') {
+                updateListingSpotlightFieldsVisibility();
+            }
+            if (cb.id === 'nl-listing-spotlight-polish') persistListingSpotlightPolishCheckbox();
             if (cb.id === 'nl-include-signature' || cb.id === 'nl-include-social') {
                 if (typeof updateBrandPreview === 'function') updateBrandPreview();
             }
@@ -5379,6 +5648,9 @@ async function generateNewsletter(feedback = '') {
     const customForRun = getNewsletterCustomSection();
     const customBodyPromise = resolveCustomSectionBodyForGenerate(customForRun, !!feedback);
     let customInjectPayload = null;
+    const listingForRun = getNewsletterListingSpotlight();
+    const listingHookPromise = resolveListingSpotlightHookForGenerate(listingForRun, !!feedback);
+    let listingInjectPayload = null;
 
     // === FIRST NAME EXTRACTION (moved to top for safety) ===
     const fullName = p.name || 'Your Agent';
@@ -5663,17 +5935,29 @@ async function generateNewsletter(feedback = '') {
         const prompt = promptLines.join('\n');
 
         // Centralized API call (Phase 0). Custom-section polish runs in parallel on the fast model.
-        const [fullContent, customBodyOut] = await Promise.all([
+        const [fullContent, customBodyOut, listingHookOut] = await Promise.all([
             window.callGrokAPI(prompt, {
                 temperature: feedback ? 0.7 : 0.8,
                 max_tokens: getNewsletterMaxTokens(),
                 timeoutMs: 75000,
                 model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
             }),
-            customBodyPromise
+            customBodyPromise,
+            listingHookPromise
         ]);
         customInjectPayload = customForRun
             ? { title: customForRun.title, body: customBodyOut || customForRun.body, rawBody: customForRun.body }
+            : null;
+        listingInjectPayload = listingForRun
+            ? {
+                address: listingForRun.address,
+                price: listingForRun.price,
+                stats: listingForRun.stats,
+                hook: listingHookOut || listingForRun.hook,
+                rawHook: listingForRun.hook,
+                photoUrl: listingForRun.photoUrl,
+                link: listingForRun.link
+            }
             : null;
 
         if (!fullContent) throw new Error('Empty response from API');
@@ -5855,6 +6139,15 @@ html = applyUncheckedNewsletterSectionFilters(html, postSelections);
                 if (late) customInjectPayload = { title: late.title, body: late.body, rawBody: late.body };
             }
             html = applyNewsletterCustomSection(html, customInjectPayload);
+            try {
+                if (!listingInjectPayload && typeof getNewsletterListingSpotlight === 'function') {
+                    const lateListing = getNewsletterListingSpotlight();
+                    if (lateListing) listingInjectPayload = lateListing;
+                }
+                html = applyNewsletterListingSpotlight(html, listingInjectPayload);
+            } catch (e) {
+                console.warn('[newsletter] listing spotlight inject failed — continuing without the card', e);
+            }
             if (window.NlEntertainment && typeof window.NlEntertainment.injectTeaserAnswerAtEnd === 'function') {
                 html = window.NlEntertainment.injectTeaserAnswerAtEnd(html, getNewsletterSelections());
             }
@@ -6102,6 +6395,11 @@ function copyForOutlook() {
   window.generateNewsletter = generateNewsletter;
   window.applyNewsletterCustomSection = applyNewsletterCustomSection;
   window.getNewsletterCustomSection = getNewsletterCustomSection;
+  window.applyNewsletterListingSpotlight = applyNewsletterListingSpotlight;
+  window.getNewsletterListingSpotlight = getNewsletterListingSpotlight;
+  window.getNewsletterListingSpotlightState = getNewsletterListingSpotlightState;
+  window.updateListingSpotlightFieldsVisibility = updateListingSpotlightFieldsVisibility;
+  window.isListingSpotlightEnabled = isListingSpotlightEnabled;
   window.ensurePersonalPhotoCentered = ensurePersonalPhotoCentered;
   window.isCustomSectionBrief = isCustomSectionBrief;
   window.toCustomSectionTitleCase = toCustomSectionTitleCase;
@@ -6515,6 +6813,7 @@ function copyForOutlook() {
     try { wireCustomContentJumpControls(); } catch (e) {}
     try { updateCustomContentChoicesVisibility(); } catch (e) {}
     try { wireCustomSectionPlaceholderHints(); } catch (e) {}
+    try { applyListingSpotlightKillSwitch(); updateListingSpotlightFieldsVisibility(); } catch (e) {}
     try {
       if (window.NlColorBundles?.wireNewsletterBundlePicker) {
         window.NlColorBundles.wireNewsletterBundlePicker();

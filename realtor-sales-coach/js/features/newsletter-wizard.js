@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'nlWizardLastStep';
-  const WIZARD_DOM_VERSION = '25';
+  const WIZARD_DOM_VERSION = '26';
   const PERSONAL_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -32,7 +32,13 @@
     ['nl-wizard-blog-title', 'nl-blog-title'],
     ['nl-wizard-specific', 'nl-specific'],
     ['nl-wizard-custom-section-title', 'nl-custom-section-title'],
-    ['nl-wizard-custom-section-body', 'nl-custom-section-body']
+    ['nl-wizard-custom-section-body', 'nl-custom-section-body'],
+    ['nl-wizard-listing-spotlight-photo', 'nl-listing-spotlight-photo'],
+    ['nl-wizard-listing-spotlight-address', 'nl-listing-spotlight-address'],
+    ['nl-wizard-listing-spotlight-price', 'nl-listing-spotlight-price'],
+    ['nl-wizard-listing-spotlight-stats', 'nl-listing-spotlight-stats'],
+    ['nl-wizard-listing-spotlight-hook', 'nl-listing-spotlight-hook'],
+    ['nl-wizard-listing-spotlight-link', 'nl-listing-spotlight-link']
   ];
 
   const SECTION_GROUPS = [
@@ -61,7 +67,8 @@
       items: [
         { id: 'nl-dadjoke', label: 'Dad Joke', emoji: '😄', hint: 'Corny humor that gets forwarded' },
         { id: 'nl-puzzle', label: 'Brain Teaser', emoji: '🧩', hint: 'Trivia, word scramble, or riddle' },
-        { id: 'nl-custom-section', label: 'Custom section', emoji: '✍️', hint: 'Your own titled block — Home Maintenance Tip, Seasonal Home Advice, Value-Add Tip' }
+        { id: 'nl-custom-section', label: 'Custom section', emoji: '✍️', hint: 'Your own titled block — Home Maintenance Tip, Seasonal Home Advice, Value-Add Tip' },
+        { id: 'nl-listing-spotlight', label: 'Listing Spotlight', emoji: '🏠', hint: 'One featured listing — you supply the facts (not an MLS feed)' }
       ]
     }
   ];
@@ -142,6 +149,8 @@
     });
     const wizPolish = $('nl-wizard-custom-section-polish');
     if (wizPolish) setCheckbox('nl-custom-section-polish', wizPolish.checked);
+    const wizListingPolish = $('nl-wizard-listing-spotlight-polish');
+    if (wizListingPolish) setCheckbox('nl-listing-spotlight-polish', wizListingPolish.checked);
     syncMediaSizeToForm();
   }
 
@@ -239,6 +248,7 @@
     updateDirectionFieldsVisibility();
     updateWizardCuratedPanel();
     updateWizardCustomSectionFields();
+    updateWizardListingSpotlightFields();
   }
 
   function getCentralProfile() {
@@ -882,7 +892,10 @@
     syncAllWizardSectionToggles();
     const wizPolish = $('nl-wizard-custom-section-polish');
     if (wizPolish) wizPolish.checked = !!$('nl-custom-section-polish')?.checked;
+    const wizListingPolish = $('nl-wizard-listing-spotlight-polish');
+    if (wizListingPolish) wizListingPolish.checked = !!$('nl-listing-spotlight-polish')?.checked;
     updateWizardCustomSectionFields();
+    updateWizardListingSpotlightFields();
     togglePersonalFields();
     toggleBlogFields();
     updateProfileCard();
@@ -907,6 +920,7 @@
     setCheckbox('nl-include-blog', $('nl-wizard-include-blog')?.checked);
     setCheckbox('nl-include-referral', $('nl-wizard-include-referral')?.checked);
     setCheckbox('nl-custom-section-polish', $('nl-wizard-custom-section-polish')?.checked);
+    setCheckbox('nl-listing-spotlight-polish', $('nl-wizard-listing-spotlight-polish')?.checked);
 
     syncMediaSizeToForm();
 
@@ -990,7 +1004,7 @@
     });
     SECTION_GROUPS.slice(1).forEach((group) => {
       group.items.forEach((item) => {
-        if (item.id === 'nl-custom-section') return;
+        if (item.id === 'nl-custom-section' || item.id === 'nl-listing-spotlight') return;
         if ($(item.id)?.checked) items.push({ emoji: item.emoji, label: item.label });
       });
     });
@@ -1004,6 +1018,13 @@
     const customBody = ($('nl-custom-section-body')?.value || $('nl-wizard-custom-section-body')?.value || '').trim();
     if ($('nl-custom-section')?.checked && customTitle && customBody) {
       items.push({ emoji: '✍️', label: customTitle, note: 'Your custom section' });
+    }
+
+    const listingOn = window.ENABLE_NL_LISTING_SPOTLIGHT !== false && !!$('nl-listing-spotlight')?.checked;
+    const listingAddress = ($('nl-listing-spotlight-address')?.value || $('nl-wizard-listing-spotlight-address')?.value || '').trim();
+    const listingPrice = ($('nl-listing-spotlight-price')?.value || $('nl-wizard-listing-spotlight-price')?.value || '').trim();
+    if (listingOn && listingAddress && listingPrice) {
+      items.push({ emoji: '🏠', label: listingAddress, note: listingPrice });
     }
 
     const personalOn = $('nl-wizard-personal')?.checked;
@@ -1351,6 +1372,64 @@
     `;
   }
 
+  function updateWizardListingSpotlightFields() {
+    const enabled = window.ENABLE_NL_LISTING_SPOTLIGHT !== false;
+    const checked = enabled && !!$('nl-listing-spotlight')?.checked;
+    const fields = $('nl-wizard-listing-spotlight-fields');
+    if (fields) fields.classList.toggle('hidden', !checked);
+    const card = wizardEl?.querySelector('[data-nl-wizard-section-card="nl-listing-spotlight"]');
+    if (card) {
+      card.classList.toggle('hidden', !enabled);
+      card.classList.toggle('border-[#00A89D]', checked);
+      card.classList.toggle('bg-[#00A89D]/8', checked);
+    }
+  }
+
+  function buildListingSpotlightWizardCard(item) {
+    return `
+      <div data-nl-wizard-section-card="${item.id}" class="sm:col-span-2 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 transition">
+        <label class="flex items-start gap-3 p-3.5 cursor-pointer">
+          <input type="checkbox" data-nl-wizard-section="${item.id}" class="mt-0.5 w-5 h-5 text-[#00A89D] flex-shrink-0 rounded">
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold text-[#002B5C] dark:text-white leading-snug">${item.label} <span aria-hidden="true">${item.emoji}</span></span>
+            <span class="block text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">${item.hint || ''}</span>
+          </span>
+        </label>
+        <div id="nl-wizard-listing-spotlight-fields" class="hidden px-3 pb-3 space-y-2">
+          <div>
+            <label for="nl-wizard-listing-spotlight-photo" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Photo URL (optional)</label>
+            <input type="url" id="nl-wizard-listing-spotlight-photo" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <div>
+            <label for="nl-wizard-listing-spotlight-address" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Address / neighborhood</label>
+            <input type="text" id="nl-wizard-listing-spotlight-address" maxlength="120" placeholder="123 Maple Street, Broad Ripple" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <div>
+            <label for="nl-wizard-listing-spotlight-price" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Price</label>
+            <input type="text" id="nl-wizard-listing-spotlight-price" maxlength="40" placeholder="$425,000" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <div>
+            <label for="nl-wizard-listing-spotlight-stats" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Beds / baths / sqft (optional)</label>
+            <input type="text" id="nl-wizard-listing-spotlight-stats" maxlength="80" placeholder="4 bed · 3 bath · 2,400 sqft" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <div>
+            <label for="nl-wizard-listing-spotlight-hook" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">One-line hook (optional) — Why this one</label>
+            <input type="text" id="nl-wizard-listing-spotlight-hook" maxlength="280" placeholder="Sunlit kitchen and a backyard that actually fits a gathering" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <div>
+            <label for="nl-wizard-listing-spotlight-link" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Listing link (optional)</label>
+            <input type="url" id="nl-wizard-listing-spotlight-link" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+            <input type="checkbox" id="nl-wizard-listing-spotlight-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0" checked>
+            <span>Polish hook with AI (hook only — never change price, address, or beds/baths)</span>
+          </label>
+          <p class="text-xs text-gray-500 m-0">Needs address and price. You supply the facts — this is not an MLS feed.</p>
+        </div>
+      </div>
+    `;
+  }
+
   function buildSectionGroupHtml(group, gi) {
     return `
       <div class="mb-6 last:mb-0">
@@ -1367,6 +1446,10 @@
           ${group.items.map((item) => {
             if (group.label === 'Core content') return buildCoreSectionCard(item);
             if (item.id === 'nl-custom-section') return buildCustomSectionWizardCard(item);
+            if (item.id === 'nl-listing-spotlight') {
+              if (window.ENABLE_NL_LISTING_SPOTLIGHT === false) return '';
+              return buildListingSpotlightWizardCard(item);
+            }
             return `
               <label data-nl-wizard-section-card="${item.id}" class="flex items-start gap-3 p-3.5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 hover:border-[#00A89D]/40 cursor-pointer transition">
                 <input type="checkbox" data-nl-wizard-section="${item.id}" class="mt-0.5 w-5 h-5 text-[#00A89D] flex-shrink-0 rounded">
@@ -1786,6 +1869,7 @@
           updateDirectionFieldsVisibility();
           updateWizardCuratedPanel();
           if (id === 'nl-custom-section') updateWizardCustomSectionFields();
+          if (id === 'nl-listing-spotlight') updateWizardListingSpotlightFields();
         }
       });
     });
@@ -1824,7 +1908,10 @@
     [
       'nl-wizard-audience', 'nl-wizard-location', 'nl-wizard-tone', 'nl-wizard-length', 'nl-wizard-newsletter-title',
       'nl-wizard-blog-url', 'nl-wizard-blog-title', 'nl-wizard-specific',
-      'nl-wizard-custom-section-title', 'nl-wizard-custom-section-body'
+      'nl-wizard-custom-section-title', 'nl-wizard-custom-section-body',
+      'nl-wizard-listing-spotlight-photo', 'nl-wizard-listing-spotlight-address',
+      'nl-wizard-listing-spotlight-price', 'nl-wizard-listing-spotlight-stats',
+      'nl-wizard-listing-spotlight-hook', 'nl-wizard-listing-spotlight-link'
     ].forEach((id) => {
       const el = $(id);
       if (!el) return;
@@ -1847,6 +1934,9 @@
     $('nl-wizard-include-blog')?.addEventListener('change', toggleBlogFields);
     $('nl-wizard-custom-section-polish')?.addEventListener('change', () => {
       setCheckbox('nl-custom-section-polish', $('nl-wizard-custom-section-polish')?.checked);
+    });
+    $('nl-wizard-listing-spotlight-polish')?.addEventListener('change', () => {
+      setCheckbox('nl-listing-spotlight-polish', $('nl-wizard-listing-spotlight-polish')?.checked);
     });
     $('nl-wizard-personal')?.addEventListener('change', () => {
       togglePersonalFields();

@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260818-agent-v369';
+  var V = '20260911-agent-v3101';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -27,7 +27,7 @@
     'js/features/coach-polish.js?v=20260728-realtor-parity',
     'js/app-version.js?v=' + V,
     'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
-    'js/features/generation-rules.js?v=20260720-hobby-restraint',
+    'js/features/generation-rules.js?v=20260911-listing-spotlight',
     'js/features/feature-checkboxes.js?v=20260706-realtor-v277',
     'js/features/save-ribbon.js?v=20260706-realtor-v273',
     'js/features/wizard-a11y.js?v=20260720-polish2',
@@ -62,9 +62,9 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260827-nl-custom-v399',
+      'js/features/newsletter-generator.js?v=20260911-listing-spotlight-v3101',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
-      'js/features/newsletter-wizard.js?v=20260827-nl-custom-v399'
+      'js/features/newsletter-wizard.js?v=20260911-listing-spotlight-v3101'
     ],
     'value-vault': [
       'js/features/popby-seasonal.js?v=20260706-realtor-v273',
@@ -135,9 +135,9 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260827-nl-custom-v399',
+      'js/features/newsletter-generator.js?v=20260911-listing-spotlight-v3101',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
-      'js/features/newsletter-wizard.js?v=20260827-nl-custom-v399'
+      'js/features/newsletter-wizard.js?v=20260911-listing-spotlight-v3101'
     ]
   };
 

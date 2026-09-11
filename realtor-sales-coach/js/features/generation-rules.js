@@ -6,6 +6,9 @@
 (function () {
   'use strict';
 
+  // Agent Newsletter Listing Spotlight. Set false to hide the chip and never inject the card.
+  window.ENABLE_NL_LISTING_SPOTLIGHT = true;
+
   const RULE_DEFS = [
     {
       id: 'strictCompliance',
