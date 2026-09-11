@@ -306,7 +306,6 @@
     'client-appreciation-modal',
     'referral-modal',
     'blog-tips-modal',
-    'newsletter-tips-modal',
     'api-key-modal',
     'content-modal',
     'newsletter-choice-modal',

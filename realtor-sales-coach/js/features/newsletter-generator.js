@@ -38,30 +38,6 @@ function wireHowThisWorksPanel() {
     }
 }
 
-  window.openNewsletterTips = function openNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (!modal) return;
-    if (typeof window.openAppModal === 'function') {
-      window.openAppModal(modal);
-    } else {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      modal.style.display = 'flex';
-    }
-  };
-
-  window.closeNewsletterTips = function closeNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (!modal) return;
-    if (typeof window.closeAppModal === 'function') {
-      window.closeAppModal(modal);
-    } else {
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
-      modal.style.display = 'none';
-    }
-  };
-
 // Hero Images (20 pre-approved Midwest homes)
 const heroImages = [
     'https://2759433.fs1.hubspotusercontent-na1.net/hubfs/2759433/Hero%20Images%20for%20Newsletter/b19e864a-dd57-45c4-b14e-4a340bfeb685.jpg',
