@@ -26,29 +26,17 @@ let _nlGenerating = false;
 let _nlGeneratingStarted = 0;
 let _nlOverlayWatch = null;
 
-  window.openNewsletterTips = function openNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (!modal) return;
-    if (typeof window.openAppModal === 'function') {
-      window.openAppModal(modal);
-    } else {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      modal.style.display = 'flex';
+function wireHowThisWorksPanel() {
+    const el = document.getElementById('nl-how-this-works');
+    if (!el) return;
+    const key = 'nl-how-this-works-seen-agent';
+    let seen = false;
+    try { seen = localStorage.getItem(key) === '1'; } catch (e) {}
+    el.open = !seen;
+    if (!seen) {
+      try { localStorage.setItem(key, '1'); } catch (e) {}
     }
-  };
-
-  window.closeNewsletterTips = function closeNewsletterTips() {
-    const modal = document.getElementById('newsletter-tips-modal');
-    if (!modal) return;
-    if (typeof window.closeAppModal === 'function') {
-      window.closeAppModal(modal);
-    } else {
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
-      modal.style.display = 'none';
-    }
-  };
+}
 
 // Hero Images (20 pre-approved Midwest homes)
 const heroImages = [
@@ -2258,8 +2246,7 @@ function buildCompactReferralHtmlForOutlook(firstName, email) {
     return `<table width="600" cellpadding="0" cellspacing="0" align="center" border="0" data-nl-referral-block="1" style="width:600px;background:#fafafa;border-top:2px solid #e0e0e0;border-collapse:collapse;">
   <tr>
     <td width="600" align="center" style="width:600px;padding:14px 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
-      <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
-      <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#666;">Know someone buying or selling? Forward this email — or tap below.</p>
+      <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
       <a href="mailto:${escBrandingAttr(email)}?subject=${mailSubject}&body=${mailBody}" style="display:inline-block;padding:9px 20px;background:#00A89D;color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;border-radius:20px;">Send a Referral</a>
     </td>
   </tr>
@@ -5231,8 +5218,7 @@ function buildCompactReferralHtml(firstName, email) {
     const inner = `<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-referral-block="1" style="background:#fafafa;border-top:2px solid #e0e0e0;${NL_MODULE_WIDTH_STYLE}">
   <tr>
     <td width="100%" style="width:100%;padding:14px 24px 18px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
-      <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
-      <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#666;">Know someone buying or selling? Forward this email — or tap below.</p>
+      <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#002B5C;letter-spacing:0.2px;">${REFERRAL_CTA_HEADLINE}</p>
       <a href="mailto:${escBrandingAttr(email)}?subject=${mailSubject}&body=${mailBody}" style="display:inline-block;padding:9px 20px;background:#00A89D;color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;border-radius:20px;">Send a Referral</a>
     </td>
   </tr>
@@ -6566,6 +6552,8 @@ function copyForOutlook() {
   window.applyNewsletterCustomSection = applyNewsletterCustomSection;
   window.getNewsletterCustomSection = getNewsletterCustomSection;
   window.applyNewsletterListingSpotlight = applyNewsletterListingSpotlight;
+  window.buildCompactReferralHtml = buildCompactReferralHtml;
+  window.buildDefaultNewsletterDisclaimerHtml = buildDefaultNewsletterDisclaimerHtml;
   window.restoreNewsletterFormPersistence = restoreNewsletterFormPersistence;
   window.getNewsletterListingSpotlight = getNewsletterListingSpotlight;
   window.getNewsletterListingSpotlightState = getNewsletterListingSpotlightState;
@@ -6991,6 +6979,7 @@ function copyForOutlook() {
     try { wireCustomSectionPlaceholderHints(); } catch (e) {}
     try { applyListingSpotlightKillSwitch(); updateListingSpotlightFieldsVisibility(); } catch (e) {}
     try { wireNewsletterPreviewResize(); } catch (e) {}
+    try { wireHowThisWorksPanel(); } catch (e) {}
     try {
       if (window.NlColorBundles?.wireNewsletterBundlePicker) {
         window.NlColorBundles.wireNewsletterBundlePicker();
