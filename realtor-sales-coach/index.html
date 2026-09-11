@@ -7455,19 +7455,17 @@
         </p>
     </div>
 
-    <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
-    <div class="mb-8">
-      <div class="text-center mb-3">
-        <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">PERSONAL + CONSISTENT</span>
-      </div>
-      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How Newsletter works</h3>
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-2">Write a real Personal Update, pick sections, generate, then review the preview before you copy or download.</p>
-      <p id="nl-wizard-entry" class="text-center mb-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 scroll-mt-4">
-        <button type="button" onclick="if(typeof window.openNewsletterWizard==='function')window.openNewsletterWizard();" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white text-sm font-bold shadow-md hover:opacity-95 transition"><i class="fas fa-magic"></i> Guided setup wizard</button>
-        <button type="button" onclick="window.openNewsletterTips()" class="text-sm text-[#00A89D] underline hover:text-[#F15A29] font-semibold"><i class="fas fa-lightbulb mr-1"></i>Why newsletters crush it →</button>
-      </p>
+    <p id="nl-wizard-entry" class="text-center mb-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 scroll-mt-4">
+      <button type="button" onclick="if(typeof window.openNewsletterWizard==='function')window.openNewsletterWizard();" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00A89D] to-[#F15A29] text-white text-sm font-bold shadow-md hover:opacity-95 transition"><i class="fas fa-magic"></i> Guided setup wizard</button>
+      <button type="button" onclick="window.openNewsletterTips()" class="text-sm text-[#00A89D] underline hover:text-[#F15A29] font-semibold"><i class="fas fa-lightbulb mr-1"></i>Why newsletters crush it →</button>
+    </p>
 
-      <!-- 3 value / why cards -->
+    <details id="nl-how-this-works" class="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
+      <summary class="text-sm font-bold text-[#002B5C] dark:text-white cursor-pointer list-none flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-info-circle text-[#00A89D] text-xs"></i></span>
+        How this works
+      </summary>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-3 mb-4 m-0">Write a real Personal Update, pick sections, generate, then review the preview before you copy or download.</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 text-center">
           <div class="mx-auto mb-3 w-10 h-10 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center">
@@ -7514,7 +7512,7 @@
           <span>Regenerate or tweak as needed. Save your best issues (or individual sections) to My Saved Items. One consistent newsletter at a time, you’re building an asset that compounds for years.</span>
         </div>
       </div>
-    </div>
+    </details>
 
     <!-- Premium Form Cards (matching Blog Creator / Social Post / 2026 Plan) -->
     <div class="space-y-8 mb-12">
@@ -7541,6 +7539,116 @@
         </p>
         <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 mb-0 leading-snug">Logo &amp; headshot look best at 400–600px wide (logo) and 400×400px square (headshot) — sizing tips in <button type="button" onclick="if(typeof window.openUserProfile==='function'){window.openUserProfile();}" class="text-[#00A89D] hover:underline font-semibold">My Profile</button>.</p>
       </div>
+
+      <!-- Card 4: Personal Update (Highly Recommended) -->
+      <div id="nl-personal-card" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
+        <div class="flex items-center mb-4">
+          <input type="checkbox" id="nl-personal" checked class="mr-3 h-5 w-5 text-[#00A89D] flex-shrink-0">
+          <label for="nl-personal" class="text-xl font-semibold text-[#00A89D]">Personal Update ❤️ (Highly Recommended)</label>
+        </div>
+
+        <div id="personal-fields" class="ml-2 space-y-6">
+          <div>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
+              <strong class="text-[#002B5C] dark:text-white">Write this fresh every issue</strong> — we won't pull hobbies from your profile. Be specific: a closing, family moment, or community story. If you include a photo or video, describe what's in it.
+            </p>
+            <div class="flex flex-wrap gap-2 mb-3" id="nl-story-prompts"></div>
+            <div class="relative" id="nl-personal-text-wrap">
+              <textarea id="nl-personal-text" rows="5" placeholder="e.g., Just helped the Martinez family get keys to their first home — what a joy! (Photo: us at the front door.)" 
+                        class="w-full p-4 pr-24 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50"></textarea>
+              <div id="nl-personal-history-trigger" class="hidden absolute right-3 top-3 z-10">
+                <button type="button" id="nl-personal-history-load-btn"
+                        class="nl-personal-history-pill text-[10px] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-full px-2.5 py-0.5 bg-white/95 dark:bg-gray-800/95 hover:border-[#00A89D] hover:text-[#00A89D] transition shadow-sm font-medium"
+                        title="Load the personal update from your last issue">
+                  Last issue
+                </button>
+                <div id="nl-personal-history-popover" class="hidden absolute right-0 top-full mt-1.5 w-72 max-w-[calc(100vw-3rem)] p-3 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg bg-white dark:bg-gray-800 text-left z-20">
+                  <p class="text-[10px] font-bold uppercase tracking-wide text-gray-400 m-0 mb-1.5">What you wrote last issue</p>
+                  <p id="nl-personal-history-snippet" class="text-xs text-gray-700 dark:text-gray-200 m-0 mb-2 max-h-28 overflow-y-auto leading-relaxed"></p>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" id="nl-personal-history-use" class="text-xs px-3 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition">Use this text</button>
+                    <button type="button" id="nl-personal-history-dismiss" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">Hide</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="button" onclick="if(typeof window.fillPersonalFromProfile==='function'){window.fillPersonalFromProfile();}" class="mt-1 text-xs text-[#00A89D] hover:underline">Optional: starter ideas from my profile</button>
+            <div id="nl-personal-char-meter" class="hidden mt-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Personal update length</span>
+                <span id="nl-personal-char-count" class="text-xs font-semibold text-gray-500">0 / 40 min</span>
+              </div>
+              <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                <div id="nl-personal-char-bar" class="h-full rounded-full bg-amber-400 transition-all duration-300" style="width:0%"></div>
+              </div>
+              <p id="nl-personal-char-hint" class="text-xs mt-1.5 text-gray-500 m-0">Write at least 40 characters with real details.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div class="flex items-center mb-2">
+                <input type="checkbox" id="nl-include-photo" class="mr-2 h-4 w-4 text-[#00A89D]" checked>
+                <label for="nl-include-photo" class="font-medium">Include Personal Photo</label>
+              </div>
+              <input type="text" id="nl-personal-photo" placeholder="Paste direct image URL" 
+                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Best: landscape or square JPG/PNG, 800–1200px wide — displays up to full newsletter width (600px).</p>
+              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p class="m-0 mb-1"><i class="fas fa-lightbulb text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Free image host — no account required</strong></p>
+                <p class="m-0">Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a>, then copy the <strong>Hotlink / Direct link</strong> (not the page URL) and paste it above — that works best. Same tip for <strong>headshots</strong> and <strong>company logos</strong>.</p>
+              </div>
+              <div id="nl-personal-photo-size-wrap" class="hidden mt-2">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <label for="nl-personal-photo-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Photo size in newsletter</label>
+                  <span id="nl-personal-photo-size-label" class="text-xs font-semibold text-[#00A89D]">Max size (400px)</span>
+                </div>
+                <input type="range" id="nl-personal-photo-size" min="30" max="75" step="5" value="70"
+                       class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
+              </div>
+              <div id="nl-personal-photo-preview-wrap" class="hidden mt-2 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800/60">
+                <div class="p-3 bg-gray-100 dark:bg-gray-900/80 overflow-x-auto">
+                  <div id="nl-personal-photo-preview-stage" class="w-full max-w-[600px] mx-auto min-h-[80px] flex items-center justify-center rounded-lg border border-dashed border-gray-300/80 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 px-2 py-3">
+                    <img id="nl-personal-photo-preview-img" alt="Photo preview" class="block h-auto max-w-none rounded-lg shadow-sm">
+                  </div>
+                </div>
+                <p id="nl-personal-photo-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center mb-2">
+                <input type="checkbox" id="nl-include-video" class="mr-2 h-4 w-4 text-[#00A89D]">
+                <label for="nl-include-video" class="font-medium">Include Personal Video (YouTube/Shorts)</label>
+              </div>
+              <input type="text" id="nl-personal-video" placeholder="Paste YouTube video or Shorts URL" 
+                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Paste a public YouTube or Shorts link — thumbnail preview appears below when the URL is valid.</p>
+              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p class="m-0 mb-1"><i class="fas fa-video text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Free video link</strong></p>
+                <p class="m-0">Use a free <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">YouTube</a> account — <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">upload your video or Short</a>, set it to <strong>Unlisted</strong> or <strong>Public</strong>, then paste the share URL above.</p>
+              </div>
+              <div id="nl-personal-video-size-wrap" class="hidden mt-2">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <label for="nl-personal-video-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Video size in newsletter</label>
+                  <span id="nl-personal-video-size-label" class="text-xs font-semibold text-[#00A89D]">Max size (400px)</span>
+                </div>
+                <input type="range" id="nl-personal-video-size" min="30" max="75" step="5" value="70"
+                       class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
+              </div>
+              <div id="nl-personal-video-preview-wrap" class="hidden mt-2 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800/60">
+                <div class="p-3 bg-gray-100 dark:bg-gray-900/80 overflow-x-auto">
+                  <div id="nl-personal-video-preview-stage" class="w-full max-w-[600px] mx-auto min-h-[80px] flex items-center justify-center rounded-lg border border-dashed border-gray-300/80 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 px-2 py-3">
+                    <a id="nl-personal-video-preview-link" href="#" target="_blank" rel="noopener" class="block rounded-lg shadow-sm">
+                      <img id="nl-personal-video-preview-thumb" alt="Video thumbnail preview" class="block h-auto max-w-none rounded-lg">
+                    </a>
+                  </div>
+                </div>
+                <p id="nl-personal-video-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <!-- Card 2: Audience + Market + Tone + Length + Title -->
       <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
@@ -7588,7 +7696,7 @@
       <!-- Card 3: Sections to Include (+ specific topics folded in) -->
       <div id="nl-sections-card" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
         <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
-          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-list-check text-[#00A89D]"></i></span> Sections to Include
+          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-list-check text-[#00A89D]"></i></span> Core sections
         </h3>
 
         <div class="mb-6">
@@ -7700,14 +7808,39 @@
           </div>
         </div>
 
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-3">
+            <div class="flex items-center mb-2">
+              <input type="checkbox" id="nl-include-blog" class="mr-3 h-5 w-5 text-[#00A89D]">
+              <label for="nl-include-blog" class="text-lg font-semibold text-[#00A89D]">Include Recent Blog Link</label>
+            </div>
+            <div id="blog-fields" class="hidden space-y-3">
+              <input type="url" id="nl-blog-url" placeholder="Blog post or blog page URL (e.g., https://yourblog.com/latest-post)"
+                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
+              <input type="text" id="nl-blog-title" placeholder="Blog Title (optional)"
+                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
+            </div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-3">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" id="nl-include-referral" checked class="mt-1 h-5 w-5 text-[#00A89D]">
+              <div>
+                <label for="nl-include-referral" class="text-lg font-semibold text-[#00A89D] cursor-pointer">Include Referral Ask 🤝</label>
+                <p class="text-xs text-gray-500 mt-1 mb-0">Adds a short, subtle referral line <strong>below your email signature</strong> — not a big card in the body. Uncheck for a softer close.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <details id="nl-custom-content-details" class="mb-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
           <summary class="text-sm font-bold text-[#002B5C] dark:text-white cursor-pointer flex flex-wrap items-center gap-2 list-none">
             <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-magic text-[#00A89D] text-xs"></i></span>
-            <span id="nl-custom-content-summary" class="min-w-0">Custom Content</span>
+            <span id="nl-custom-content-summary" class="min-w-0">Add-ons</span>
             <span id="nl-custom-content-count" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#00A89D]/15 text-[#00A89D]">0 active</span>
-            <span class="text-xs font-normal text-gray-500">(Fun Fact, Tip, Quote, Joke, Brain Teaser, Custom section, Listing Spotlight)</span>
+            <span class="text-xs font-normal text-gray-500">(library + sections you write)</span>
           </summary>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 mb-3 m-0">Check a section, then shuffle or customize. Click a preview to pick from the library.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 mb-3 m-0">Optional extras. Library picks shuffle from our lists; Custom section and Listing Spotlight are yours to write.</p>
           <div id="nl-engagement-summary" class="flex flex-wrap items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#00A89D]/5 border border-[#00A89D]/20">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-7 h-7 rounded-lg bg-[#00A89D]/15 flex items-center justify-center flex-shrink-0"><i class="fas fa-sparkles text-[#00A89D] text-xs"></i></span>
@@ -7718,10 +7851,11 @@
               <button type="button" id="nl-open-engagement-hub" class="text-xs px-2.5 py-1.5 rounded-full border border-[#002B5C] text-[#002B5C] dark:text-gray-200 font-semibold hover:bg-[#002B5C]/5 transition" title="Open one modal to pick all engagement types"><i class="fas fa-sliders-h mr-1"></i>Engagement hub</button>
             </div>
           </div>
-          <div class="grid grid-cols-1 gap-3">
+          <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 m-0 mb-2">From the library</p>
+          <div class="grid grid-cols-1 gap-3 mb-4">
             <div id="nl-engagement-row-fun" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40" data-nl-curated-section="fun">
               <div class="flex flex-wrap items-center gap-2 p-3">
-                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0"><input type="checkbox" id="nl-fun" checked class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Fun Facts 🤓</span></label>
+                <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0"><input type="checkbox" id="nl-fun" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Fun Facts 🤓</span></label>
                 <div class="nl-curated-row-actions hidden flex flex-wrap gap-1.5 flex-shrink-0">
                   <button type="button" data-nl-shuffle="funFact" class="text-xs px-2.5 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition" title="Shuffle random pick"><i class="fas fa-dice mr-1"></i>Shuffle</button>
                   <button type="button" class="nl-inline-customize-btn text-xs px-2.5 py-1.5 rounded-full border border-[#00A89D] text-[#00A89D] font-semibold hover:bg-[#00A89D]/10 transition whitespace-nowrap" data-nl-jump-custom="fun" aria-label="Customize Fun Facts">Customize</button>
@@ -7808,6 +7942,9 @@
                 <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#00A89D]/50 transition nl-custom-preview-open min-h-[2.5rem]" id="brain-teaser-preview" data-nl-choice="puzzle" role="button" tabindex="0"></div>
               </div>
             </div>
+          </div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-[#002B5C]/70 dark:text-gray-400 m-0 mb-2">You write</p>
+          <div class="grid grid-cols-1 gap-3">
             <div id="nl-engagement-row-custom-section" class="nl-curated-section-row rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 transition-all hover:border-[#00A89D]/40">
               <div class="flex flex-wrap items-center gap-2 p-3">
                 <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0" for="nl-custom-section"><input type="checkbox" id="nl-custom-section" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Custom section ✍️</span></label>
@@ -7834,33 +7971,35 @@
                 <label class="flex items-center gap-3 text-lg cursor-pointer flex-1 min-w-0" for="nl-listing-spotlight"><input type="checkbox" id="nl-listing-spotlight" class="w-6 h-6 text-[#00A89D] flex-shrink-0"> <span class="truncate">Listing Spotlight 🏠</span></label>
               </div>
               <div id="nl-listing-spotlight-fields" class="hidden px-3 pb-3 space-y-3">
-                <div>
-                  <label for="nl-listing-spotlight-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title <span class="font-normal text-gray-400">(optional)</span></label>
-                  <input type="text" id="nl-listing-spotlight-title" maxlength="80" placeholder="Listing Spotlight · Featured Home · Just Listed" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                </div>
-                <div>
-                  <label for="nl-listing-spotlight-photo" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Photo URL <span class="font-normal text-gray-400">(optional)</span></label>
-                  <input type="url" id="nl-listing-spotlight-photo" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                </div>
-                <div>
-                  <label for="nl-listing-spotlight-address" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Address / neighborhood</label>
-                  <input type="text" id="nl-listing-spotlight-address" maxlength="120" placeholder="123 Maple Street, Broad Ripple" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                </div>
-                <div>
-                  <label for="nl-listing-spotlight-price" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Price</label>
-                  <input type="text" id="nl-listing-spotlight-price" maxlength="40" placeholder="$425,000" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                </div>
-                <div>
-                  <label for="nl-listing-spotlight-stats" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Beds / baths / sqft <span class="font-normal text-gray-400">(optional)</span></label>
-                  <input type="text" id="nl-listing-spotlight-stats" maxlength="80" placeholder="3 bed · 2 bath · 1,806 sq ft" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label for="nl-listing-spotlight-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="text" id="nl-listing-spotlight-title" maxlength="80" placeholder="Listing Spotlight · Featured Home · Just Listed" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-photo" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Photo URL <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="url" id="nl-listing-spotlight-photo" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-address" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Address / neighborhood</label>
+                    <input type="text" id="nl-listing-spotlight-address" maxlength="120" placeholder="123 Maple Street, Broad Ripple" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-price" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Price</label>
+                    <input type="text" id="nl-listing-spotlight-price" maxlength="40" placeholder="$425,000" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-stats" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Beds / baths / sqft <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="text" id="nl-listing-spotlight-stats" maxlength="80" placeholder="3 bed · 2 bath · 1,806 sq ft" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
+                  <div>
+                    <label for="nl-listing-spotlight-link" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Listing link <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="url" id="nl-listing-spotlight-link" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                  </div>
                 </div>
                 <div>
                   <label for="nl-listing-spotlight-hook" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">One-line hook <span class="font-normal text-gray-400">(optional) — Why this one</span></label>
                   <input type="text" id="nl-listing-spotlight-hook" maxlength="280" placeholder="Sunlit kitchen and a backyard that actually fits a gathering" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
-                </div>
-                <div>
-                  <label for="nl-listing-spotlight-link" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Listing link <span class="font-normal text-gray-400">(optional)</span></label>
-                  <input type="url" id="nl-listing-spotlight-link" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
                 </div>
                 <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                   <input type="checkbox" id="nl-listing-spotlight-polish" class="mt-0.5 w-4 h-4 text-[#00A89D] flex-shrink-0" checked>
@@ -7880,143 +8019,6 @@
           <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Language requests here apply to the entire newsletter (all sections).</p>
         </div>
 
-      </div>
-
-      <!-- Card 4: Personal Update (Highly Recommended) -->
-      <div id="nl-personal-card" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
-        <div class="flex items-center mb-4">
-          <input type="checkbox" id="nl-personal" class="mr-3 h-5 w-5 text-[#00A89D] flex-shrink-0">
-          <label for="nl-personal" class="text-xl font-semibold text-[#00A89D]">Personal Update ❤️ (Highly Recommended)</label>
-        </div>
-
-        <div id="personal-fields" class="hidden ml-2 space-y-6">
-          <div>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
-              <strong class="text-[#002B5C] dark:text-white">Write this fresh every issue</strong> — we won't pull hobbies from your profile. Be specific: a closing, family moment, or community story. If you include a photo or video, describe what's in it.
-            </p>
-            <div class="flex flex-wrap gap-2 mb-3" id="nl-story-prompts"></div>
-            <div class="relative" id="nl-personal-text-wrap">
-              <textarea id="nl-personal-text" rows="5" placeholder="e.g., Just helped the Martinez family get keys to their first home — what a joy! (Photo: us at the front door.)" 
-                        class="w-full p-4 pr-24 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#00A89D]/50"></textarea>
-              <div id="nl-personal-history-trigger" class="hidden absolute right-3 top-3 z-10">
-                <button type="button" id="nl-personal-history-load-btn"
-                        class="nl-personal-history-pill text-[10px] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-full px-2.5 py-0.5 bg-white/95 dark:bg-gray-800/95 hover:border-[#00A89D] hover:text-[#00A89D] transition shadow-sm font-medium"
-                        title="Load the personal update from your last issue">
-                  Last issue
-                </button>
-                <div id="nl-personal-history-popover" class="hidden absolute right-0 top-full mt-1.5 w-72 max-w-[calc(100vw-3rem)] p-3 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg bg-white dark:bg-gray-800 text-left z-20">
-                  <p class="text-[10px] font-bold uppercase tracking-wide text-gray-400 m-0 mb-1.5">What you wrote last issue</p>
-                  <p id="nl-personal-history-snippet" class="text-xs text-gray-700 dark:text-gray-200 m-0 mb-2 max-h-28 overflow-y-auto leading-relaxed"></p>
-                  <div class="flex flex-wrap gap-2">
-                    <button type="button" id="nl-personal-history-use" class="text-xs px-3 py-1.5 rounded-full bg-[#00A89D] text-white font-semibold hover:bg-[#008F85] transition">Use this text</button>
-                    <button type="button" id="nl-personal-history-dismiss" class="text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">Hide</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <button type="button" onclick="if(typeof window.fillPersonalFromProfile==='function'){window.fillPersonalFromProfile();}" class="mt-1 text-xs text-[#00A89D] hover:underline">Optional: starter ideas from my profile</button>
-            <div id="nl-personal-char-meter" class="hidden mt-2 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50">
-              <div class="flex items-center justify-between gap-2 mb-1.5">
-                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Personal update length</span>
-                <span id="nl-personal-char-count" class="text-xs font-semibold text-gray-500">0 / 40 min</span>
-              </div>
-              <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                <div id="nl-personal-char-bar" class="h-full rounded-full bg-amber-400 transition-all duration-300" style="width:0%"></div>
-              </div>
-              <p id="nl-personal-char-hint" class="text-xs mt-1.5 text-gray-500 m-0">Write at least 40 characters with real details.</p>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div class="flex items-center mb-2">
-                <input type="checkbox" id="nl-include-photo" class="mr-2 h-4 w-4 text-[#00A89D]" checked>
-                <label for="nl-include-photo" class="font-medium">Include Personal Photo</label>
-              </div>
-              <input type="text" id="nl-personal-photo" placeholder="Paste direct image URL" 
-                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Best: landscape or square JPG/PNG, 800–1200px wide — displays up to full newsletter width (600px).</p>
-              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                <p class="m-0 mb-1"><i class="fas fa-lightbulb text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Free image host — no account required</strong></p>
-                <p class="m-0">Upload at <a href="https://8upload.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">8upload.com</a>, then copy the <strong>Hotlink / Direct link</strong> (not the page URL) and paste it above — that works best. Same tip for <strong>headshots</strong> and <strong>company logos</strong>.</p>
-              </div>
-              <div id="nl-personal-photo-size-wrap" class="hidden mt-2">
-                <div class="flex items-center justify-between gap-2 mb-1">
-                  <label for="nl-personal-photo-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Photo size in newsletter</label>
-                  <span id="nl-personal-photo-size-label" class="text-xs font-semibold text-[#00A89D]">Max size (400px)</span>
-                </div>
-                <input type="range" id="nl-personal-photo-size" min="30" max="75" step="5" value="70"
-                       class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
-              </div>
-              <div id="nl-personal-photo-preview-wrap" class="hidden mt-2 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800/60">
-                <div class="p-3 bg-gray-100 dark:bg-gray-900/80 overflow-x-auto">
-                  <div id="nl-personal-photo-preview-stage" class="w-full max-w-[600px] mx-auto min-h-[80px] flex items-center justify-center rounded-lg border border-dashed border-gray-300/80 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 px-2 py-3">
-                    <img id="nl-personal-photo-preview-img" alt="Photo preview" class="block h-auto max-w-none rounded-lg shadow-sm">
-                  </div>
-                </div>
-                <p id="nl-personal-photo-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
-              </div>
-            </div>
-            <div>
-              <div class="flex items-center mb-2">
-                <input type="checkbox" id="nl-include-video" class="mr-2 h-4 w-4 text-[#00A89D]">
-                <label for="nl-include-video" class="font-medium">Include Personal Video (YouTube/Shorts)</label>
-              </div>
-              <input type="text" id="nl-personal-video" placeholder="Paste YouTube video or Shorts URL" 
-                     class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 m-0">Paste a public YouTube or Shorts link — thumbnail preview appears below when the URL is valid.</p>
-              <div class="mt-2 p-3 rounded-xl border border-[#00A89D]/25 bg-[#00A89D]/5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                <p class="m-0 mb-1"><i class="fas fa-video text-[#00A89D] mr-1" aria-hidden="true"></i><strong class="text-[#002B5C] dark:text-white">Free video link</strong></p>
-                <p class="m-0">Use a free <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">YouTube</a> account — <a href="https://www.youtube.com/upload" target="_blank" rel="noopener noreferrer" class="text-[#00A89D] font-semibold underline hover:text-[#F15A29]">upload your video or Short</a>, set it to <strong>Unlisted</strong> or <strong>Public</strong>, then paste the share URL above.</p>
-              </div>
-              <div id="nl-personal-video-size-wrap" class="hidden mt-2">
-                <div class="flex items-center justify-between gap-2 mb-1">
-                  <label for="nl-personal-video-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Video size in newsletter</label>
-                  <span id="nl-personal-video-size-label" class="text-xs font-semibold text-[#00A89D]">Max size (400px)</span>
-                </div>
-                <input type="range" id="nl-personal-video-size" min="30" max="75" step="5" value="70"
-                       class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
-              </div>
-              <div id="nl-personal-video-preview-wrap" class="hidden mt-2 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800/60">
-                <div class="p-3 bg-gray-100 dark:bg-gray-900/80 overflow-x-auto">
-                  <div id="nl-personal-video-preview-stage" class="w-full max-w-[600px] mx-auto min-h-[80px] flex items-center justify-center rounded-lg border border-dashed border-gray-300/80 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 px-2 py-3">
-                    <a id="nl-personal-video-preview-link" href="#" target="_blank" rel="noopener" class="block rounded-lg shadow-sm">
-                      <img id="nl-personal-video-preview-thumb" alt="Video thumbnail preview" class="block h-auto max-w-none rounded-lg">
-                    </a>
-                  </div>
-                </div>
-                <p id="nl-personal-video-preview-status" class="text-xs px-3 py-2 m-0 text-gray-500 border-t border-gray-200 dark:border-gray-700"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card: Referral CTA -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
-        <div class="flex items-start gap-3">
-          <input type="checkbox" id="nl-include-referral" checked class="mt-1 h-5 w-5 text-[#00A89D]">
-          <div>
-            <label for="nl-include-referral" class="text-lg font-semibold text-[#00A89D] cursor-pointer">Include Referral Ask 🤝</label>
-            <p class="text-xs text-gray-500 mt-1">Adds a short, subtle referral line <strong>below your email signature</strong> — not a big card in the body. Uncheck for a softer close.</p>
-          </div>
-        </div>
-      </div>
-
-
-      <!-- Card 5: Include Recent Blog Link -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
-        <div class="mb-6">
-          <div class="flex items-center mb-3">
-            <input type="checkbox" id="nl-include-blog" class="mr-3 h-5 w-5 text-[#00A89D]">
-            <label for="nl-include-blog" class="text-lg font-semibold text-[#00A89D]">Include Recent Blog Link</label>
-          </div>
-          <div id="blog-fields" class="hidden ml-2 space-y-4">
-            <input type="url" id="nl-blog-url" placeholder="Blog post or blog page URL (e.g., https://yourblog.com/latest-post)" 
-                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
-            <input type="text" id="nl-blog-title" placeholder="Blog Title (optional)" 
-                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 focus:ring-4 focus:ring-[#00A89D]/50">
-          </div>
-        </div>
       </div>
 
     </div>

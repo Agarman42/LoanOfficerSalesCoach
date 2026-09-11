@@ -4511,7 +4511,7 @@ function updateCustomContentDetailsSummary(activeLabels) {
     const summaryEl = document.getElementById('nl-custom-content-summary');
     const countEl = document.getElementById('nl-custom-content-count');
     if (summaryEl) {
-        summaryEl.textContent = labels.length ? `Custom Content (${labels.join(', ')})` : 'Custom Content';
+        summaryEl.textContent = labels.length ? `Add-ons (${labels.join(', ')})` : 'Add-ons';
     }
     if (countEl) {
         countEl.textContent = labels.length ? `${labels.length} active` : '';
@@ -5537,6 +5537,17 @@ function restoreNewsletterFormPersistence() {
         savedSections = null;
     }
     const hasSaved = Array.isArray(savedSections);
+    const emptyDraftOn = {
+        'nl-personal': true,
+        'nl-include-photo': true,
+        'nl-market': true,
+        'nl-industry': true,
+        'nl-local': true,
+        'nl-tip': true,
+        'nl-include-referral': true,
+        'nl-include-signature': true,
+        'nl-include-social': true
+    };
     document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
         if (!cb.id || !cb.id.startsWith('nl-')) return;
         if (cb.id === 'nl-custom-section-polish') {
@@ -5549,8 +5560,8 @@ function restoreNewsletterFormPersistence() {
         }
         if (hasSaved) {
             cb.checked = savedSections.includes(cb.id);
-        } else if (cb.id === 'nl-include-referral' || cb.id === 'nl-include-signature') {
-            cb.checked = true;
+        } else {
+            cb.checked = !!emptyDraftOn[cb.id];
         }
     });
 
@@ -6555,6 +6566,7 @@ function copyForOutlook() {
   window.applyNewsletterCustomSection = applyNewsletterCustomSection;
   window.getNewsletterCustomSection = getNewsletterCustomSection;
   window.applyNewsletterListingSpotlight = applyNewsletterListingSpotlight;
+  window.restoreNewsletterFormPersistence = restoreNewsletterFormPersistence;
   window.getNewsletterListingSpotlight = getNewsletterListingSpotlight;
   window.getNewsletterListingSpotlightState = getNewsletterListingSpotlightState;
   window.updateListingSpotlightFieldsVisibility = updateListingSpotlightFieldsVisibility;

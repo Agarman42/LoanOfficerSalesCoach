@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260911-agent-v3103';
+  var V = '20260911-agent-v3104';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -62,7 +62,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260911-listing-price-hero-v3103',
+      'js/features/newsletter-generator.js?v=20260911-nl-setup-ia-v3104',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260911-listing-price-hero-v3103'
     ],
@@ -135,7 +135,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260911-listing-price-hero-v3103',
+      'js/features/newsletter-generator.js?v=20260911-nl-setup-ia-v3104',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260911-listing-price-hero-v3103'
     ]
