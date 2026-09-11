@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'nlWizardLastStep';
-  const WIZARD_DOM_VERSION = '26';
+  const WIZARD_DOM_VERSION = '27';
   const PERSONAL_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -33,6 +33,7 @@
     ['nl-wizard-specific', 'nl-specific'],
     ['nl-wizard-custom-section-title', 'nl-custom-section-title'],
     ['nl-wizard-custom-section-body', 'nl-custom-section-body'],
+    ['nl-wizard-listing-spotlight-title', 'nl-listing-spotlight-title'],
     ['nl-wizard-listing-spotlight-photo', 'nl-listing-spotlight-photo'],
     ['nl-wizard-listing-spotlight-address', 'nl-listing-spotlight-address'],
     ['nl-wizard-listing-spotlight-price', 'nl-listing-spotlight-price'],
@@ -1397,6 +1398,10 @@
         </label>
         <div id="nl-wizard-listing-spotlight-fields" class="hidden px-3 pb-3 space-y-2">
           <div>
+            <label for="nl-wizard-listing-spotlight-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title (optional)</label>
+            <input type="text" id="nl-wizard-listing-spotlight-title" maxlength="80" placeholder="Listing Spotlight · Featured Home · Just Listed" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+          </div>
+          <div>
             <label for="nl-wizard-listing-spotlight-photo" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Photo URL (optional)</label>
             <input type="url" id="nl-wizard-listing-spotlight-photo" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
           </div>
@@ -1909,6 +1914,7 @@
       'nl-wizard-audience', 'nl-wizard-location', 'nl-wizard-tone', 'nl-wizard-length', 'nl-wizard-newsletter-title',
       'nl-wizard-blog-url', 'nl-wizard-blog-title', 'nl-wizard-specific',
       'nl-wizard-custom-section-title', 'nl-wizard-custom-section-body',
+      'nl-wizard-listing-spotlight-title',
       'nl-wizard-listing-spotlight-photo', 'nl-wizard-listing-spotlight-address',
       'nl-wizard-listing-spotlight-price', 'nl-wizard-listing-spotlight-stats',
       'nl-wizard-listing-spotlight-hook', 'nl-wizard-listing-spotlight-link'

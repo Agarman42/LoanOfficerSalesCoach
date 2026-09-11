@@ -1813,6 +1813,7 @@ const persistentFields = [
     'nl-color-bundle',
     'nl-custom-section-title',
     'nl-custom-section-body',
+    'nl-listing-spotlight-title',
     'nl-listing-spotlight-photo',
     'nl-listing-spotlight-address',
     'nl-listing-spotlight-price',
@@ -3573,21 +3574,125 @@ function applyNewsletterPreviewIframeIsolation(iframe) {
     wireNewsletterPreviewIframeScroll(iframe);
 }
 
+const NL_PREVIEW_HEIGHT_KEY = 'nl-preview-pane-height-agent';
+const NL_PREVIEW_HEIGHT_MIN = 480;
+
+function getNewsletterPreviewHeightBounds() {
+    const max = Math.max(320, Math.round(window.innerHeight * 0.9));
+    const min = Math.min(NL_PREVIEW_HEIGHT_MIN, max);
+    return { min, max };
+}
+
+function clampNewsletterPreviewHeight(px) {
+    const { min, max } = getNewsletterPreviewHeightBounds();
+    const n = Number(px);
+    if (!Number.isFinite(n)) return Math.min(max, Math.max(min, Math.round(window.innerHeight * 0.7)));
+    return Math.round(Math.min(max, Math.max(min, n)));
+}
+
+function readSavedNewsletterPreviewHeight() {
+    try {
+        const raw = localStorage.getItem(NL_PREVIEW_HEIGHT_KEY);
+        if (raw == null) return null;
+        const n = parseInt(raw, 10);
+        return Number.isFinite(n) ? n : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function persistNewsletterPreviewHeight(px) {
+    try { localStorage.setItem(NL_PREVIEW_HEIGHT_KEY, String(px)); } catch (e) {}
+}
+
+function applyNewsletterPreviewPaneHeight(px) {
+    const shell = document.getElementById('nl-preview-shell');
+    const preview = document.getElementById('nl-preview');
+    if (!shell || !preview) return clampNewsletterPreviewHeight(px);
+    const h = clampNewsletterPreviewHeight(px);
+    shell.style.height = h + 'px';
+    const iframe = preview.querySelector('iframe');
+    if (iframe) {
+        iframe.style.height = '100%';
+        iframe.style.minHeight = '0';
+    }
+    persistNewsletterPreviewHeight(h);
+    return h;
+}
+
+function wireNewsletterPreviewResize() {
+    const shell = document.getElementById('nl-preview-shell');
+    const handle = document.getElementById('nl-preview-resize');
+    const preview = document.getElementById('nl-preview');
+    if (!shell || !handle || !preview) return;
+    const saved = readSavedNewsletterPreviewHeight();
+    applyNewsletterPreviewPaneHeight(saved != null ? saved : Math.round(window.innerHeight * 0.7));
+    if (handle.dataset.nlResizeWired === '1') return;
+    handle.dataset.nlResizeWired = '1';
+    let dragging = false;
+    let startY = 0;
+    let startH = 0;
+    const onMove = (e) => {
+        if (!dragging) return;
+        applyNewsletterPreviewPaneHeight(startH + (e.clientY - startY));
+    };
+    const onUp = () => {
+        if (!dragging) return;
+        dragging = false;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        persistNewsletterPreviewHeight(clampNewsletterPreviewHeight(shell.getBoundingClientRect().height));
+    };
+    handle.addEventListener('pointerdown', (e) => {
+        if (e.button != null && e.button !== 0) return;
+        e.preventDefault();
+        dragging = true;
+        startY = e.clientY;
+        startH = shell.getBoundingClientRect().height;
+        document.body.style.cursor = 'ns-resize';
+        document.body.style.userSelect = 'none';
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
+    });
+    handle.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        const next = applyNewsletterPreviewPaneHeight(shell.getBoundingClientRect().height + (e.key === 'ArrowUp' ? -24 : 24));
+        persistNewsletterPreviewHeight(next);
+    });
+    window.addEventListener('resize', () => {
+        applyNewsletterPreviewPaneHeight(shell.getBoundingClientRect().height);
+    });
+}
+
 function mountNewsletterPreviewIframe(previewEl, html) {
     if (!previewEl) return null;
     previewEl.innerHTML = '';
     const iframe = document.createElement('iframe');
     iframe.className = 'w-full border-0 rounded-2xl shadow-2xl bg-white nl-preview-iframe';
-    // Mobile: shorter fixed viewport so the phone isn't one giant iframe; desktop keeps tall preview
+    const resizable = !!document.getElementById('nl-preview-shell');
     const mobile = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches;
-    iframe.style.height = mobile ? 'min(72dvh, 72vh)' : 'min(85vh, 900px)';
-    iframe.style.minHeight = mobile ? '320px' : '500px';
+    if (resizable) {
+        iframe.style.height = '100%';
+        iframe.style.minHeight = '0';
+    } else {
+        iframe.style.height = mobile ? 'min(72dvh, 72vh)' : 'min(85vh, 900px)';
+        iframe.style.minHeight = mobile ? '320px' : '500px';
+    }
     iframe.style.width = '100%';
     iframe.style.maxWidth = '100%';
     iframe.style.border = '0';
     applyNewsletterPreviewIframeIsolation(iframe);
     iframe.srcdoc = hardenNewsletterPreviewHtml(html);
     previewEl.appendChild(iframe);
+    if (resizable) {
+        const saved = readSavedNewsletterPreviewHeight();
+        applyNewsletterPreviewPaneHeight(saved != null ? saved : Math.round(window.innerHeight * 0.7));
+    }
     if (iframe.contentDocument?.readyState === 'complete') {
         configureNewsletterPreviewIframeOnLoad(iframe);
     }
@@ -4758,9 +4863,10 @@ function listingPhotoUrlIsUsable(url) {
 
 function getNewsletterListingSpotlightState() {
     if (!isListingSpotlightEnabled()) {
-        return { enabled: false, address: '', price: '', stats: '', hook: '', photoUrl: '', link: '', polish: false, ready: false };
+        return { enabled: false, sectionTitle: '', address: '', price: '', stats: '', hook: '', photoUrl: '', link: '', polish: false, ready: false };
     }
     const enabled = !!document.getElementById('nl-listing-spotlight')?.checked;
+    const sectionTitle = (document.getElementById('nl-listing-spotlight-title')?.value || '').trim().slice(0, 80);
     const address = (document.getElementById('nl-listing-spotlight-address')?.value || '').trim().slice(0, 120);
     const price = (document.getElementById('nl-listing-spotlight-price')?.value || '').trim().slice(0, 40);
     const stats = (document.getElementById('nl-listing-spotlight-stats')?.value || '').trim().slice(0, 80);
@@ -4768,13 +4874,14 @@ function getNewsletterListingSpotlightState() {
     const photoUrl = listingPhotoUrlIsUsable(document.getElementById('nl-listing-spotlight-photo')?.value || '');
     const link = sanitizeListingHttpUrl(document.getElementById('nl-listing-spotlight-link')?.value || '').slice(0, 500);
     const polish = !!document.getElementById('nl-listing-spotlight-polish')?.checked;
-    return { enabled, address, price, stats, hook, photoUrl, link, polish, ready: !!(enabled && address && price) };
+    return { enabled, sectionTitle, address, price, stats, hook, photoUrl, link, polish, ready: !!(enabled && address && price) };
 }
 
 function getNewsletterListingSpotlight() {
     const state = getNewsletterListingSpotlightState();
     if (!state.ready) return null;
     return {
+        sectionTitle: state.sectionTitle,
         address: state.address,
         price: state.price,
         stats: state.stats,
@@ -4800,7 +4907,15 @@ function stripListingSpotlightSection(html) {
     return out;
 }
 
+function resolveListingSpotlightHeading(raw) {
+    const fallback = 'Listing Spotlight';
+    const t = String(raw || '').trim().slice(0, 80);
+    const heading = t || fallback;
+    return toCustomSectionTitleCase(heading) || heading;
+}
+
 function buildListingSpotlightTable(listing) {
+    const heading = escapeNewsletterCustomText(resolveListingSpotlightHeading(listing && listing.sectionTitle));
     const address = escapeNewsletterCustomText(toCustomSectionTitleCase(listing.address) || listing.address);
     const price = escapeNewsletterCustomText(listing.price);
     const stats = escapeNewsletterCustomText(listing.stats || '');
@@ -4819,8 +4934,9 @@ function buildListingSpotlightTable(listing) {
     return `<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-listing-spotlight="1" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
         <tr>
             <td style="padding:30px;">
+                <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">${heading}</h2>
                 ${photoHtml}
-                <h2 style="color:#002B5C; font-size:26px; margin:0 0 10px;">${address}</h2>
+                <p style="margin:0 0 8px; font-size:18px; line-height:1.4; color:#002B5C; font-weight:700;">${address}</p>
                 <p style="margin:0 0 12px; font-size:16px; line-height:1.5; color:#002B5C; font-weight:700;">${factsLine}</p>
                 ${hookHtml}
                 ${linkHtml}
@@ -4837,6 +4953,7 @@ function applyNewsletterListingSpotlight(html, listing) {
         return out;
     }
     const payload = {
+        sectionTitle: String(listing.sectionTitle || '').trim(),
         address: String(listing.address).trim(),
         price: String(listing.price).trim(),
         stats: String(listing.stats || '').trim(),
@@ -5950,6 +6067,7 @@ async function generateNewsletter(feedback = '') {
             : null;
         listingInjectPayload = listingForRun
             ? {
+                sectionTitle: listingForRun.sectionTitle,
                 address: listingForRun.address,
                 price: listingForRun.price,
                 stats: listingForRun.stats,
@@ -6400,6 +6518,9 @@ function copyForOutlook() {
   window.getNewsletterListingSpotlightState = getNewsletterListingSpotlightState;
   window.updateListingSpotlightFieldsVisibility = updateListingSpotlightFieldsVisibility;
   window.isListingSpotlightEnabled = isListingSpotlightEnabled;
+  window.applyNewsletterPreviewPaneHeight = applyNewsletterPreviewPaneHeight;
+  window.NL_PREVIEW_HEIGHT_KEY = NL_PREVIEW_HEIGHT_KEY;
+  window.buildListingSpotlightTable = buildListingSpotlightTable;
   window.ensurePersonalPhotoCentered = ensurePersonalPhotoCentered;
   window.isCustomSectionBrief = isCustomSectionBrief;
   window.toCustomSectionTitleCase = toCustomSectionTitleCase;
@@ -6814,6 +6935,7 @@ function copyForOutlook() {
     try { updateCustomContentChoicesVisibility(); } catch (e) {}
     try { wireCustomSectionPlaceholderHints(); } catch (e) {}
     try { applyListingSpotlightKillSwitch(); updateListingSpotlightFieldsVisibility(); } catch (e) {}
+    try { wireNewsletterPreviewResize(); } catch (e) {}
     try {
       if (window.NlColorBundles?.wireNewsletterBundlePicker) {
         window.NlColorBundles.wireNewsletterBundlePicker();

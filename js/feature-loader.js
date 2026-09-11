@@ -24,7 +24,7 @@
     'js/features/section-bottom-banners.js?v=20260720-review',
     'js/features/coach-polish.js?v=20260721-ux-polish',
     'js/features/partner-share.js?v=20260807-one-invite-branded',
-    'js/app-version.js?v=20260909-v3164',
+    'js/app-version.js?v=20260911-v3165',
     'js/features/newsletter-color-bundles.js?v=20260818-v3140',
     'js/features/generation-rules.js?v=20260720-hobby-restraint',
     'js/features/save-ribbon.js',
@@ -49,7 +49,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260909-nl-custom-chip-v3163',
+      'js/features/newsletter-generator.js?v=20260911-nl-preview-resize-v3165',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260827-nl-custom-v3162'
     ],
@@ -147,7 +147,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260909-nl-custom-chip-v3163',
+      'js/features/newsletter-generator.js?v=20260911-nl-preview-resize-v3165',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260827-nl-custom-v3162'
     ]

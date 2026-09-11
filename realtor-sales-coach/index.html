@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260825-nl-preview-fix-v384">
+    <link rel="stylesheet" href="css/main.css?v=20260911-nl-preview-resize-v3102">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -7835,6 +7835,10 @@
               </div>
               <div id="nl-listing-spotlight-fields" class="hidden px-3 pb-3 space-y-3">
                 <div>
+                  <label for="nl-listing-spotlight-title" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Section title <span class="font-normal text-gray-400">(optional)</span></label>
+                  <input type="text" id="nl-listing-spotlight-title" maxlength="80" placeholder="Listing Spotlight · Featured Home · Just Listed" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
+                </div>
+                <div>
                   <label for="nl-listing-spotlight-photo" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Photo URL <span class="font-normal text-gray-400">(optional)</span></label>
                   <input type="url" id="nl-listing-spotlight-photo" maxlength="500" placeholder="https://…" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-[#00A89D] focus:ring-2 focus:ring-[#00A89D]/30">
                 </div>
@@ -8117,7 +8121,10 @@
 
           <!-- Preview -->
           <div id="nl-empty-state" class="rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 mb-4"></div>
-          <div id="nl-preview" class="border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden min-h-[400px] bg-white dark:bg-gray-900 p-4" role="region" aria-live="polite" aria-label="Newsletter preview"></div>
+          <div id="nl-preview-shell" class="nl-preview-shell">
+            <div id="nl-preview" class="border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden min-h-[400px] bg-white dark:bg-gray-900 p-4" role="region" aria-live="polite" aria-label="Newsletter preview"></div>
+            <div id="nl-preview-resize" class="nl-preview-resize" role="separator" aria-orientation="horizontal" aria-label="Drag to resize newsletter preview" tabindex="0"></div>
+          </div>
           <textarea id="nl-html-raw" class="hidden" aria-hidden="true"></textarea>
         </div>
 
