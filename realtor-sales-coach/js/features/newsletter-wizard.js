@@ -452,8 +452,8 @@
     if (videoSize && formVideo && document.activeElement !== formVideo && formVideo.value !== videoSize.value) {
       formVideo.value = videoSize.value;
     }
-    if (commit && typeof window.commitPersonalMediaSize === 'function') {
-      try { window.commitPersonalMediaSize(); } catch (e) {}
+    if (commit && typeof window.updatePersonalMediaPreviews === 'function') {
+      try { window.updatePersonalMediaPreviews(); } catch (e) {}
     }
   }
 
@@ -2217,8 +2217,8 @@
     wizardEl.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     window.__nlWizardOpen = false;
-    if (typeof window.commitPersonalMediaSize === 'function') {
-      try { window.commitPersonalMediaSize(); } catch (e) {}
+    if (typeof window.updatePersonalMediaPreviews === 'function') {
+      try { window.updatePersonalMediaPreviews(); } catch (e) {}
     }
   }
 
