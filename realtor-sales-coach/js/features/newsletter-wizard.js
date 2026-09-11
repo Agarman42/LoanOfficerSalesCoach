@@ -2007,21 +2007,26 @@
     $('nl-wizard-video')?.addEventListener('input', onMediaInput);
     $('nl-wizard-include-photo')?.addEventListener('change', onMediaInput);
     $('nl-wizard-include-video')?.addEventListener('change', onMediaInput);
-    let _nlWizSizeRaf = 0;
-    const liveWizardMediaSize = () => {
-      if (_nlWizSizeRaf) return;
-      _nlWizSizeRaf = requestAnimationFrame(() => {
-        _nlWizSizeRaf = 0;
-        updateWizardMediaPreview();
-      });
+    const onWizardSizeInput = (e) => {
+      const el = e.currentTarget;
+      const isPhoto = el.id === 'nl-wizard-photo-size';
+      const label = $(isPhoto ? 'nl-wizard-photo-size-label' : 'nl-wizard-video-size-label');
+      if (label) {
+        const pct = isPhoto ? getWizardPhotoSizePercent() : getWizardVideoSizePercent();
+        label.textContent = (isPhoto ? 'Photo size · ' : 'Video size · ') + formatMediaSizeLabel(pct);
+      }
+    };
+    const onWizardSizeRelease = () => {
+      updateWizardMediaPreview();
+      syncMediaSizeToForm(true);
     };
     ['nl-wizard-photo-size', 'nl-wizard-video-size'].forEach((id) => {
       const el = $(id);
-      if (!el) return;
-      el.addEventListener('input', liveWizardMediaSize);
-      el.addEventListener('pointermove', (e) => { if (e.buttons) liveWizardMediaSize(); });
-      el.addEventListener('pointerup', () => syncMediaSizeToForm(true));
-      el.addEventListener('change', () => syncMediaSizeToForm(true));
+      if (!el || el.dataset.nlWizSizeWired === '1') return;
+      el.dataset.nlWizSizeWired = '1';
+      el.addEventListener('input', onWizardSizeInput);
+      el.addEventListener('pointerup', onWizardSizeRelease);
+      el.addEventListener('pointercancel', onWizardSizeRelease);
     });
 
     async function pasteIntoWizardMediaField(inputId, label) {
