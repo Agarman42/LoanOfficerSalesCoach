@@ -137,6 +137,12 @@ body.asc-auth-locked{overflow:hidden}
 }
 .asc-account-drop button:hover{background:#f1f5f9}
 .asc-account-drop button.danger{color:#b91c1c}
+.asc-presentation-chip{
+  font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;
+  padding:.28rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.22);color:#fff;cursor:pointer;white-space:nowrap;
+}
+.asc-presentation-chip:hover{background:rgba(0,0,0,.35)}
 #sidebar a[href="#admin-usage"]{display:none}
 body.asc-is-admin #sidebar a[href="#admin-usage"],
 body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
@@ -685,6 +691,13 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
             : 'Invite partners') +
           '</button>'
         : '') +
+      (currentUser.role === 'admin' || currentUser.is_admin
+        ? '<button type="button" data-asc-present>' +
+          (typeof window.isAgentPresentationMode === 'function' && window.isAgentPresentationMode()
+            ? 'Presentation mode · on'
+            : 'Presentation mode') +
+          '</button>'
+        : '') +
       '<button type="button" class="danger" data-asc-logout>Sign out</button>' +
       '</div>';
 
@@ -724,6 +737,22 @@ body.asc-can-invite #sidebar a[href="#admin-usage"]{display:flex}
         } else {
           location.hash = 'admin-usage';
         }
+      });
+    }
+    const presentBtn = wrap.querySelector('[data-asc-present]');
+    if (presentBtn && typeof window.setAgentPresentationMode === 'function') {
+      presentBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const next = !(typeof window.isAgentPresentationMode === 'function' && window.isAgentPresentationMode());
+        window.setAgentPresentationMode(next);
+        presentBtn.textContent = next ? 'Presentation mode · on' : 'Presentation mode';
+      });
+    }
+    if (!window._ascPresentMenuWired) {
+      window._ascPresentMenuWired = true;
+      window.addEventListener('asc-presentation-change', function (ev) {
+        const b = document.querySelector('[data-asc-present]');
+        if (b) b.textContent = ev.detail && ev.detail.on ? 'Presentation mode · on' : 'Presentation mode';
       });
     }
   }

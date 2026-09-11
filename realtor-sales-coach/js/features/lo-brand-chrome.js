@@ -193,6 +193,7 @@
       plate.classList.remove('is-populated');
       document.body.classList.remove('has-lo-brand');
       paintBrandFooter(null);
+      applyPresentationChrome();
       return;
     }
 
@@ -236,6 +237,116 @@
     document.body.classList.add('has-lo-brand');
     window.__loPartnerCard = card;
     paintBrandFooter(card);
+    applyPresentationChrome();
+  }
+
+  const PRESENT_KEY = 'agent-presentation-mode';
+
+  function isPresentationAdmin(u) {
+    u = u || window.__ascUser;
+    return !!(u && (u.role === 'admin' || u.is_admin === true));
+  }
+
+  function readPresentQuery() {
+    try {
+      const p = new URL(location.href).searchParams;
+      return p.get('demo') === '1' || p.get('present') === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function getPresentationStored() {
+    try {
+      return sessionStorage.getItem(PRESENT_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function isAgentPresentationMode() {
+    return isPresentationAdmin() && getPresentationStored();
+  }
+
+  function consumePresentQueryForAdmin() {
+    if (!isPresentationAdmin()) return;
+    if (readPresentQuery()) {
+      try { sessionStorage.setItem(PRESENT_KEY, '1'); } catch (e) {}
+    }
+  }
+
+  function setAgentPresentationMode(on) {
+    if (!isPresentationAdmin()) return false;
+    try {
+      sessionStorage.setItem(PRESENT_KEY, on ? '1' : '0');
+    } catch (e) {}
+    applyPresentationChrome();
+    try {
+      window.dispatchEvent(new CustomEvent('asc-presentation-change', { detail: { on: !!on } }));
+    } catch (err) {}
+    return !!on;
+  }
+
+  function paintPresentationChip(on) {
+    let chip = document.getElementById('asc-presentation-chip');
+    if (!on || !isPresentationAdmin()) {
+      if (chip) chip.remove();
+      return;
+    }
+    const cluster = document.querySelector('.header-quote-actions');
+    if (!chip) {
+      chip = document.createElement('button');
+      chip.id = 'asc-presentation-chip';
+      chip.type = 'button';
+      chip.className = 'asc-presentation-chip';
+      chip.title = 'Presentation mode is on — click to restore branded chrome';
+      chip.addEventListener('click', function () {
+        setAgentPresentationMode(false);
+      });
+    }
+    chip.textContent = 'Presentation mode';
+    if (cluster && chip.parentNode !== cluster) {
+      cluster.insertBefore(chip, cluster.firstChild);
+    } else if (!chip.parentNode) {
+      document.body.appendChild(chip);
+    }
+  }
+
+  function applyPresentationChrome() {
+    const on = isAgentPresentationMode();
+    document.body.classList.toggle('asc-presentation-mode', on);
+    paintPresentationChip(on);
+
+    const plate = document.getElementById('lo-brand-plate');
+    const card = window.__loPartnerCard;
+
+    if (on) {
+      if (plate) {
+        plate.hidden = true;
+        plate.setAttribute('aria-hidden', 'true');
+      }
+      document.body.classList.remove('has-lo-brand');
+      const footer = ensureBrandFooter();
+      footer.hidden = false;
+      document.body.classList.add('has-lo-brand-footer');
+      footer.innerHTML = `
+      <div class="lo-brand-footer-inner">
+        <span class="lo-brand-footer-label">Agent Sales Coach</span>
+      </div>
+      <div class="lo-brand-footer-version" aria-label="App version"></div>
+    `;
+      refreshLoBrandFooterVersion();
+      return;
+    }
+
+    if (card && card.name && plate) {
+      if (plate.hidden && plate.classList.contains('is-populated')) {
+        plate.hidden = false;
+        plate.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('has-lo-brand');
+      }
+      paintBrandFooter(card);
+    }
   }
 
   async function fetchCard(token) {
@@ -398,6 +509,9 @@
   };
   window.getLoPartnerToken = loadStoredToken;
   window.formatPartnerPhoneDisplay = formatPhoneDisplay;
+  window.setAgentPresentationMode = setAgentPresentationMode;
+  window.isAgentPresentationMode = isAgentPresentationMode;
+  window.applyAgentPresentationChrome = applyPresentationChrome;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', resolveAndPaint);
@@ -412,6 +526,8 @@
     if (brand && brand.name && !readTokenFromUrl()) {
       applyLinkedLoBrand(brand, { putInUrl: !!brand.partner_token });
     }
+    consumePresentQueryForAdmin();
+    applyPresentationChrome();
   });
 
   // If in-app nav changes the URL without ?lo=, re-attach short code from storage

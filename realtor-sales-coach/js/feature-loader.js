@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260911-agent-v3108';
+  var V = '20260911-agent-v3109';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [

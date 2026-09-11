@@ -150,6 +150,26 @@ body > header {
 #lo-brand-plate[hidden] {
     display: none !important;
 }
+body.asc-presentation-mode #lo-brand-plate,
+body.asc-presentation-mode .lo-brand-status {
+    display: none !important;
+}
+.asc-presentation-chip {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 800;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.22);
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.asc-presentation-chip:hover {
+    background: rgba(0, 0, 0, 0.35);
+}
 
 /* Status when ?lo= is present but card fetch fails (e.g. LO free-tier redeploy wiped short codes) */
 .lo-brand-status {
