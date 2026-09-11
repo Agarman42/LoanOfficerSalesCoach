@@ -7,7 +7,7 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'nlWizardLastStep';
-  const WIZARD_DOM_VERSION = '27';
+  const WIZARD_DOM_VERSION = '28';
   const PERSONAL_MIN_CHARS = 40;
 
   const STEP_META = [
@@ -76,9 +76,10 @@
 
   const NL_CARD_CONTENT_WIDTH = 540;
   const NL_CARD_SIDE_PADDING = 30;
-  const NL_MEDIA_SIZE_DEFAULT = 100;
+  const NL_MEDIA_SIZE_DEFAULT = 70;
   const NL_MEDIA_SIZE_MIN = 30;
-  const NL_MEDIA_SIZE_MAX = 100;
+  const NL_MEDIA_SIZE_MAX = 75;
+  const NL_MEDIA_MAX_PX = 400;
 
   /** Curated library sections — shuffle / browse modals on step 4. */
   const CURATED_SECTIONS = [
@@ -108,6 +109,21 @@
   let currentStep = 1;
   let step4SubTab = 'content';
   let wizardEl = null;
+  let _nlWizardSyncing = false;
+
+  function withWizardSync(fn) {
+    if (_nlWizardSyncing) return;
+    _nlWizardSyncing = true;
+    window.__nlFormSyncing = true;
+    try { fn(); } finally {
+      _nlWizardSyncing = false;
+      window.__nlFormSyncing = false;
+    }
+  }
+
+  function isWizardOpen() {
+    return !!(wizardEl && !wizardEl.classList.contains('hidden'));
+  }
 
   function $(id) {
     return document.getElementById(id);
@@ -125,34 +141,39 @@
     if (el.type === 'checkbox') {
       el.checked = !!value;
       try { localStorage.setItem(formId, el.checked ? '1' : '0'); } catch (e) {}
+    } else if (document.activeElement === el) {
+      /* source of truth is focused — never clobber from a wizard write */
+      if (isPersistedField(formId)) {
+        try { localStorage.setItem(formId, el.value); } catch (e) {}
+      }
     } else {
-      el.value = value ?? '';
+      if (el.value !== (value ?? '')) el.value = value ?? '';
       if (isPersistedField(formId)) {
         try { localStorage.setItem(formId, el.value); } catch (e) {}
       }
     }
-    if (!silent) {
-      el.dispatchEvent(new Event('input', { bubbles: true }));
+    if (!silent && !_nlWizardSyncing && !isWizardOpen()) {
       el.dispatchEvent(new Event('change', { bubbles: true }));
     }
   }
 
   function persistWizardSettings(options = {}) {
     const silent = options.silent !== false;
-    WIZARD_FIELD_MAP.forEach(([wizId, formId]) => {
-      if (!formId) return;
-      const w = $(wizId);
-      if (w) persistFormValue(formId, w.value, { silent });
+    withWizardSync(() => {
+      WIZARD_FIELD_MAP.forEach(([wizId, formId]) => {
+        if (!formId) return;
+        const w = $(wizId);
+        if (w) persistFormValue(formId, w.value, { silent: true });
+      });
+      CORE_DIRECTIONS.forEach((cfg) => {
+        const w = $(cfg.wizardId);
+        if (w) persistFormValue(cfg.inputId, w.value, { silent: true });
+      });
+      const wizPolish = $('nl-wizard-custom-section-polish');
+      if (wizPolish) setCheckbox('nl-custom-section-polish', wizPolish.checked);
+      const wizListingPolish = $('nl-wizard-listing-spotlight-polish');
+      if (wizListingPolish) setCheckbox('nl-listing-spotlight-polish', wizListingPolish.checked);
     });
-    CORE_DIRECTIONS.forEach((cfg) => {
-      const w = $(cfg.wizardId);
-      if (w) persistFormValue(cfg.inputId, w.value, { silent });
-    });
-    const wizPolish = $('nl-wizard-custom-section-polish');
-    if (wizPolish) setCheckbox('nl-custom-section-polish', wizPolish.checked);
-    const wizListingPolish = $('nl-wizard-listing-spotlight-polish');
-    if (wizListingPolish) setCheckbox('nl-listing-spotlight-polish', wizListingPolish.checked);
-    syncMediaSizeToForm();
   }
 
   function track(action, extra) {
@@ -170,10 +191,12 @@
     if (typeof window.updateNewsletterPreflightSummary === 'function') {
       window.updateNewsletterPreflightSummary();
     }
+    if (isWizardOpen() || _nlWizardSyncing) return;
     const root = $('newsletter-generator');
     if (!root) return;
     root.querySelectorAll('input, select, textarea').forEach((el) => {
       if (el.id === 'nl-feedback' || el.id === 'nl-html-raw') return;
+      if (el.id === 'nl-personal-photo-size' || el.id === 'nl-personal-video-size') return;
       el.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
@@ -182,7 +205,9 @@
     const el = $(id);
     if (!el || el.type !== 'checkbox') return;
     el.checked = !!checked;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
+    if (!_nlWizardSyncing) {
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
     syncWizardSectionToggle(id);
   }
 
@@ -407,46 +432,47 @@
     return Math.min(NL_MEDIA_SIZE_MAX, Math.max(NL_MEDIA_SIZE_MIN, raw));
   }
 
-  function formatMediaSizeLabel(pct) {
-    const px = Math.round(NL_CARD_CONTENT_WIDTH * pct / 100);
-    return pct >= 100 ? `Full width (${px}px)` : `${pct}% (${px}px)`;
+  function wizardMediaSizePx(pct) {
+    const fromPct = Math.round(NL_CARD_CONTENT_WIDTH * pct / 100);
+    return Math.min(NL_MEDIA_MAX_PX, Math.max(120, fromPct));
   }
 
-  function syncMediaSizeToForm() {
+  function formatMediaSizeLabel(pct) {
+    return `${wizardMediaSizePx(pct)}px`;
+  }
+
+  function syncMediaSizeToForm(commit) {
     const photoSize = $('nl-wizard-photo-size');
     const videoSize = $('nl-wizard-video-size');
     const formPhoto = $('nl-personal-photo-size');
     const formVideo = $('nl-personal-video-size');
-    if (photoSize && formPhoto) {
+    if (photoSize && formPhoto && document.activeElement !== formPhoto && formPhoto.value !== photoSize.value) {
       formPhoto.value = photoSize.value;
-      formPhoto.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    if (videoSize && formVideo) {
+    if (videoSize && formVideo && document.activeElement !== formVideo && formVideo.value !== videoSize.value) {
       formVideo.value = videoSize.value;
-      formVideo.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    if (typeof window.updatePersonalMediaPreviews === 'function') {
-      try { window.updatePersonalMediaPreviews(); } catch (e) {}
+    if (commit && typeof window.commitPersonalMediaSize === 'function') {
+      try { window.commitPersonalMediaSize(); } catch (e) {}
     }
   }
 
   function syncPersonalMediaToForm() {
-    const pairs = [
-      ['nl-wizard-photo', 'nl-personal-photo'],
-      ['nl-wizard-video', 'nl-personal-video']
-    ];
-    pairs.forEach(([wizId, formId]) => {
-      const w = $(wizId);
-      const f = $(formId);
-      if (w && f) {
-        f.value = w.value || '';
-        f.dispatchEvent(new Event('input', { bubbles: true }));
-      }
+    withWizardSync(() => {
+      const pairs = [
+        ['nl-wizard-photo', 'nl-personal-photo'],
+        ['nl-wizard-video', 'nl-personal-video']
+      ];
+      pairs.forEach(([wizId, formId]) => {
+        const w = $(wizId);
+        const f = $(formId);
+        if (w && f && f.value !== (w.value || '')) f.value = w.value || '';
+      });
+      setCheckbox('nl-personal', $('nl-wizard-personal')?.checked);
+      setCheckbox('nl-include-photo', $('nl-wizard-include-photo')?.checked);
+      setCheckbox('nl-include-video', $('nl-wizard-include-video')?.checked);
+      syncMediaSizeToForm(false);
     });
-    setCheckbox('nl-personal', $('nl-wizard-personal')?.checked);
-    setCheckbox('nl-include-photo', $('nl-wizard-include-photo')?.checked);
-    setCheckbox('nl-include-video', $('nl-wizard-include-video')?.checked);
-    syncMediaSizeToForm();
   }
 
   function applyWizardPhotoPreviewSizing() {
@@ -495,8 +521,8 @@
     const showPhotoControls = personalOn && photoOn;
     if (photoSizeWrap) photoSizeWrap.classList.toggle('hidden', !showPhotoControls);
     if (videoSizeWrap) videoSizeWrap.classList.toggle('hidden', !videoOn);
-    if (photoSizeLabel) photoSizeLabel.textContent = formatMediaSizeLabel(getWizardPhotoSizePercent());
-    if (videoSizeLabel) videoSizeLabel.textContent = formatMediaSizeLabel(getWizardVideoSizePercent());
+    if (photoSizeLabel) photoSizeLabel.textContent = `Photo size · ${formatMediaSizeLabel(getWizardPhotoSizePercent())}`;
+    if (videoSizeLabel) videoSizeLabel.textContent = `Video size · ${formatMediaSizeLabel(getWizardVideoSizePercent())}`;
 
     const photoWrap = $('nl-wizard-photo-preview-wrap');
     const photoImg = $('nl-wizard-photo-preview-img');
@@ -668,9 +694,10 @@
     const orig = window.updatePreviews;
     if (typeof orig !== 'function') return;
     window.updatePreviews = function () {
-      orig.apply(this, arguments);
       refreshWizardCuratedPreviewText();
       updateWizardMediaPreview();
+      if (window.__nlWizardOpen) return;
+      orig.apply(this, arguments);
     };
     window.__nlWizardPreviewHooked = true;
   }
@@ -864,7 +891,9 @@
         return;
       }
       if (f) {
-        if (formId === 'nl-location' && !(f.value || '').trim() && (w.value || '').trim()) {
+        if (document.activeElement === w) {
+          /* wizard field is focused — do not bounce form value back into it */
+        } else if (formId === 'nl-location' && !(f.value || '').trim() && (w.value || '').trim()) {
           persistFormValue('nl-location', w.value, { silent: true });
         } else {
           w.value = f.value || '';
@@ -915,10 +944,11 @@
     const silent = options.silent !== false;
     const syncUi = options.syncUi === true;
 
+    withWizardSync(() => {
     WIZARD_FIELD_MAP.forEach(([wizId, formId]) => {
       if (!formId) return;
       const w = $(wizId);
-      if (w) persistFormValue(formId, w.value, { silent });
+      if (w) persistFormValue(formId, w.value, { silent: true });
     });
 
     setCheckbox('nl-personal', $('nl-wizard-personal')?.checked);
@@ -929,12 +959,13 @@
     setCheckbox('nl-custom-section-polish', $('nl-wizard-custom-section-polish')?.checked);
     setCheckbox('nl-listing-spotlight-polish', $('nl-wizard-listing-spotlight-polish')?.checked);
 
-    syncMediaSizeToForm();
+    syncMediaSizeToForm(false);
 
     CORE_DIRECTIONS.forEach((cfg) => {
       const wiz = $(cfg.wizardId);
       const wizVal = (wiz?.value || '').trim();
-      persistFormValue(cfg.inputId, wizVal, { silent });
+      persistFormValue(cfg.inputId, wizVal, { silent: true });
+    });
     });
 
     if (syncUi) refreshNewsletterUi();
@@ -1645,9 +1676,9 @@
                   <div id="nl-wizard-photo-size-wrap" class="hidden mt-3">
                     <div class="flex items-center justify-between gap-2 mb-1">
                       <label for="nl-wizard-photo-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Size in newsletter</label>
-                      <span id="nl-wizard-photo-size-label" class="text-xs font-semibold text-[#00A89D]">Full width (540px)</span>
+                      <span id="nl-wizard-photo-size-label" class="text-xs font-semibold text-[#00A89D]">Photo size · 378px</span>
                     </div>
-                    <input type="range" id="nl-wizard-photo-size" min="30" max="100" step="5" value="100" class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
+                    <input type="range" id="nl-wizard-photo-size" min="30" max="75" step="5" value="70" class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
                     <div class="flex justify-between text-[10px] text-gray-400 mt-0.5"><span>Smaller</span><span>Full width</span></div>
                   </div>
                   <div id="nl-wizard-photo-preview-wrap" class="hidden mt-3 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900/50">
@@ -1675,9 +1706,9 @@
                   <div id="nl-wizard-video-size-wrap" class="hidden mt-3">
                     <div class="flex items-center justify-between gap-2 mb-1">
                       <label for="nl-wizard-video-size" class="text-xs font-medium text-gray-600 dark:text-gray-400">Size in newsletter</label>
-                      <span id="nl-wizard-video-size-label" class="text-xs font-semibold text-[#00A89D]">Full width (540px)</span>
+                      <span id="nl-wizard-video-size-label" class="text-xs font-semibold text-[#00A89D]">Video size · 378px</span>
                     </div>
-                    <input type="range" id="nl-wizard-video-size" min="30" max="100" step="5" value="100" class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
+                    <input type="range" id="nl-wizard-video-size" min="30" max="75" step="5" value="70" class="w-full h-2 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-[#00A89D] cursor-pointer">
                     <div class="flex justify-between text-[10px] text-gray-400 mt-0.5"><span>Smaller</span><span>Full width</span></div>
                   </div>
                   <div id="nl-wizard-video-preview-wrap" class="hidden mt-3 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900/50">
@@ -1918,7 +1949,11 @@
       if (chevron) chevron.classList.toggle('rotate-180', !open);
     });
 
-    const onPersistInput = () => persistWizardSettings();
+    const commitMappedField = (wizId, formId) => {
+      const w = $(wizId);
+      if (!w) return;
+      withWizardSync(() => persistFormValue(formId, w.value, { silent: true }));
+    };
     const locWiz = $('nl-wizard-location');
     if (locWiz) {
       locWiz.addEventListener('input', () => {
@@ -1926,33 +1961,25 @@
         const err = $('nl-wizard-step-error');
         if (err && (locWiz.value || '').trim()) err.classList.add('hidden');
       });
-      locWiz.addEventListener('blur', () => persistFormValue('nl-location', locWiz.value, { silent: true }));
-      locWiz.addEventListener('change', () => persistFormValue('nl-location', locWiz.value, { silent: true }));
+      locWiz.addEventListener('blur', () => commitMappedField('nl-wizard-location', 'nl-location'));
+      locWiz.addEventListener('change', () => commitMappedField('nl-wizard-location', 'nl-location'));
     }
-    [
-      'nl-wizard-audience', 'nl-wizard-tone', 'nl-wizard-length', 'nl-wizard-newsletter-title',
-      'nl-wizard-blog-url', 'nl-wizard-blog-title', 'nl-wizard-specific',
-      'nl-wizard-custom-section-title', 'nl-wizard-custom-section-body',
-      'nl-wizard-listing-spotlight-title',
-      'nl-wizard-listing-spotlight-photo', 'nl-wizard-listing-spotlight-address',
-      'nl-wizard-listing-spotlight-price', 'nl-wizard-listing-spotlight-stats',
-      'nl-wizard-listing-spotlight-hook', 'nl-wizard-listing-spotlight-link'
-    ].forEach((id) => {
-      const el = $(id);
+    WIZARD_FIELD_MAP.forEach(([wizId, formId]) => {
+      if (wizId === 'nl-wizard-location') return;
+      const el = $(wizId);
       if (!el) return;
-      el.addEventListener('input', () => {
-        onPersistInput();
-      });
+      el.addEventListener('blur', () => commitMappedField(wizId, formId));
+      el.addEventListener('change', () => commitMappedField(wizId, formId));
     });
     $('nl-wizard-color-bundle')?.addEventListener('change', () => {
       onWizardColorBundleChange();
-      persistWizardSettings();
     });
     wizardEl.querySelectorAll('.nl-wizard-direction-input').forEach((ta) => {
       ta.addEventListener('input', () => {
         updateWizardCoreDirectionUI();
-        onPersistInput();
       });
+      ta.addEventListener('blur', () => persistWizardSettings({ silent: true }));
+      ta.addEventListener('change', () => persistWizardSettings({ silent: true }));
     });
 
     $('nl-wizard-include-blog')?.addEventListener('change', toggleBlogFields);
@@ -1980,13 +2007,21 @@
     $('nl-wizard-video')?.addEventListener('input', onMediaInput);
     $('nl-wizard-include-photo')?.addEventListener('change', onMediaInput);
     $('nl-wizard-include-video')?.addEventListener('change', onMediaInput);
-    $('nl-wizard-photo-size')?.addEventListener('input', () => {
-      syncMediaSizeToForm();
-      updateWizardMediaPreview();
-    });
-    $('nl-wizard-video-size')?.addEventListener('input', () => {
-      syncMediaSizeToForm();
-      updateWizardMediaPreview();
+    let _nlWizSizeRaf = 0;
+    const liveWizardMediaSize = () => {
+      if (_nlWizSizeRaf) return;
+      _nlWizSizeRaf = requestAnimationFrame(() => {
+        _nlWizSizeRaf = 0;
+        updateWizardMediaPreview();
+      });
+    };
+    ['nl-wizard-photo-size', 'nl-wizard-video-size'].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener('input', liveWizardMediaSize);
+      el.addEventListener('pointermove', (e) => { if (e.buttons) liveWizardMediaSize(); });
+      el.addEventListener('pointerup', () => syncMediaSizeToForm(true));
+      el.addEventListener('change', () => syncMediaSizeToForm(true));
     });
 
     async function pasteIntoWizardMediaField(inputId, label) {
@@ -2124,6 +2159,7 @@
 
   function openNewsletterWizard() {
     ensureWizardDom();
+    window.__nlWizardOpen = true;
     hookNewsletterPreviewRefresh();
     if (typeof window.reloadNewsletterPersistedValues === 'function') {
       try { window.reloadNewsletterPersistedValues(); } catch (e) {}
@@ -2175,6 +2211,10 @@
     wizardEl.classList.add('hidden');
     wizardEl.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    window.__nlWizardOpen = false;
+    if (typeof window.commitPersonalMediaSize === 'function') {
+      try { window.commitPersonalMediaSize(); } catch (e) {}
+    }
   }
 
   function scrollToNewsletterForm() {

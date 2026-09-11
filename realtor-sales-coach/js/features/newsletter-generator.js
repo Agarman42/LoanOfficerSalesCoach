@@ -1874,7 +1874,11 @@ function getProfileMarketValue(profile) {
 function fillNewsletterLocationFromProfileIfEmpty() {
     const el = document.getElementById('nl-location');
     if (!el) return '';
-    if (document.activeElement === el) return (el.value || '').trim();
+    if (window.__nlFormSyncing) return (el.value || '').trim();
+    const wiz = document.getElementById('nl-wizard-location');
+    if (document.activeElement === el || document.activeElement === wiz) {
+        return (el.value || '').trim();
+    }
     if ((el.value || '').trim()) return el.value.trim();
     try {
       const saved = localStorage.getItem('nl-location');
@@ -3066,10 +3070,7 @@ function getPersonalPhotoWidthPx() {
 }
 
 function formatPersonalPhotoSizeLabel() {
-    const pct = getPersonalPhotoWidthPercent();
-    const px = getPersonalPhotoWidthPx();
-    if (pct >= NL_PHOTO_SIZE_MAX) return `Max size (${px}px)`;
-    return `${pct}% (${px}px)`;
+    return `Photo size · ${getPersonalPhotoWidthPx()}px`;
 }
 
 function buildPersonalPhotoInsert(photoUrl, widthPx) {
@@ -3154,11 +3155,11 @@ function clampPersonalMediaSizeSlider(el, maxPct, defaultPct) {
     if (!el) return;
     el.max = String(maxPct);
     el.min = String(NL_MEDIA_SIZE_MIN);
+    if (document.activeElement === el) return;
     let v = parseInt(el.value, 10);
     if (Number.isNaN(v)) v = defaultPct;
     if (v > maxPct) {
         el.value = String(maxPct);
-        try { localStorage.setItem(el.id, String(maxPct)); } catch (e) { /* ignore */ }
     } else if (v < NL_MEDIA_SIZE_MIN) {
         el.value = String(defaultPct);
     }
@@ -3203,10 +3204,7 @@ function getPersonalVideoWidthPx() {
 }
 
 function formatPersonalVideoSizeLabel() {
-    const pct = getPersonalVideoWidthPercent();
-    const px = getPersonalVideoWidthPx();
-    if (pct >= NL_MEDIA_SIZE_MAX) return `Max size (${px}px)`;
-    return `${pct}% (${px}px)`;
+    return `Video size · ${getPersonalVideoWidthPx()}px`;
 }
 
 function updatePersonalVideoSizeUI() {
@@ -3233,6 +3231,70 @@ function applyPersonalVideoPreviewSizing() {
     videoThumb.style.width = `${px}px`;
     videoThumb.style.maxWidth = '100%';
     videoThumb.style.height = 'auto';
+}
+
+function isNewsletterWizardOpen() {
+    return !!window.__nlWizardOpen;
+}
+
+function applyPersonalMediaSizeToPreviewIframe() {
+    const iframe = document.querySelector('#nl-preview iframe');
+    let doc = null;
+    try { doc = iframe?.contentDocument || iframe?.contentWindow?.document; } catch (e) { return; }
+    if (!doc) return;
+    const photoPx = getPersonalPhotoWidthPx();
+    doc.querySelectorAll('img[alt="Personal photo"], table[data-nl-personal-photo="1"] img').forEach((img) => {
+        img.style.width = photoPx + 'px';
+        img.style.maxWidth = '100%';
+        img.setAttribute('width', String(photoPx));
+    });
+    const videoPx = getPersonalVideoWidthPx();
+    doc.querySelectorAll('img[alt="Watch Personal Video"], table[data-nl-personal-video="1"] img').forEach((img) => {
+        img.style.width = videoPx + 'px';
+        img.style.maxWidth = '100%';
+        img.setAttribute('width', String(videoPx));
+    });
+}
+
+function applyPersonalMediaLiveSize() {
+    updatePersonalPhotoSizeUI();
+    updatePersonalVideoSizeUI();
+    applyPersonalPhotoPreviewSizing();
+    applyPersonalVideoPreviewSizing();
+    if (!isNewsletterWizardOpen()) applyPersonalMediaSizeToPreviewIframe();
+}
+
+function commitPersonalMediaSize() {
+    applyPersonalMediaLiveSize();
+    const photoEl = document.getElementById('nl-personal-photo-size');
+    const videoEl = document.getElementById('nl-personal-video-size');
+    try {
+        if (photoEl) localStorage.setItem('nl-personal-photo-size', photoEl.value);
+        if (videoEl) localStorage.setItem('nl-personal-video-size', videoEl.value);
+    } catch (e) { /* ignore */ }
+    if (!isNewsletterWizardOpen()) patchPersonalMediaSizesInNewsletter();
+}
+
+function wirePersonalMediaSizeSliders() {
+    ['nl-personal-photo-size', 'nl-personal-video-size'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el || el._nlSizeWired) return;
+        el._nlSizeWired = true;
+        let raf = 0;
+        const live = () => {
+            if (raf) return;
+            raf = requestAnimationFrame(() => {
+                raf = 0;
+                applyPersonalMediaLiveSize();
+            });
+        };
+        el.addEventListener('input', live);
+        el.addEventListener('pointermove', (e) => {
+            if (e.buttons) live();
+        });
+        el.addEventListener('pointerup', commitPersonalMediaSize);
+        el.addEventListener('change', commitPersonalMediaSize);
+    });
 }
 
 function stripFooterModulesForReEdit(html) {
@@ -3534,7 +3596,8 @@ function hardenNewsletterPreviewHtml(html) {
     out = out
         .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
         .replace(/<script\b[^>]*\/>/gi, '')
-        .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+        .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+        .replace(/\shref=(["'])javascript:[^"']*\1/gi, ' href="#"');
 
     out = injectNewsletterPreviewFluidCss(out);
 
@@ -3603,6 +3666,7 @@ function applyNewsletterPreviewIframeIsolation(iframe) {
     iframe.setAttribute('tabindex', '0');
     iframe.setAttribute('referrerpolicy', 'no-referrer');
     iframe.setAttribute('sandbox', 'allow-same-origin');
+    iframe.removeAttribute('allow-scripts');
     iframe.setAttribute('scrolling', 'yes');
     iframe.title = 'Newsletter preview — scroll inside to review';
     iframe.style.pointerEvents = 'auto';
@@ -3736,6 +3800,7 @@ function mountNewsletterPreviewIframe(previewEl, html) {
 }
 
 function setNewsletterPreviewHTML(html) {
+    if (isNewsletterWizardOpen()) return;
     const previewEl = document.getElementById('nl-preview');
     if (!previewEl || !html) return;
     const iframe = previewEl.querySelector('iframe');
@@ -3762,6 +3827,7 @@ function wireNewsletterFeedbackFocusGuard() {
 }
 
 function patchPersonalMediaSizesInNewsletter() {
+    if (isNewsletterWizardOpen()) return;
     const rawEl = document.getElementById('nl-html-raw');
     let html = (rawEl?.value || '').trim() || (lastGeneratedHTML || '').trim();
     if (!html) return;
@@ -5356,7 +5422,7 @@ function updatePersonalMediaPreviews() {
             photoImg.onload = () => { applyPersonalPhotoPreviewSizing(); photoStatus.innerHTML = '<span class="text-[#00A89D] font-medium">✓ Image loaded</span>'; };
             photoImg.onerror = () => { photoStatus.innerHTML = '<span class="text-amber-700">⚠ Could not load — check URL</span>'; };
             applyPersonalPhotoPreviewSizing();
-            photoImg.src = photoUrl;
+            if (photoImg.getAttribute('src') !== photoUrl) photoImg.src = photoUrl;
         }
     }
     if (videoWrap && videoThumb && videoLink && videoStatus) {
@@ -5381,7 +5447,7 @@ function updatePersonalMediaPreviews() {
         }
     }
 
-    patchPersonalMediaSizesInNewsletter();
+    if (!isNewsletterWizardOpen()) applyPersonalMediaSizeToPreviewIframe();
 }
 
 function getNewsletterGeneratorRoot() {
@@ -5477,6 +5543,7 @@ function wireNewsletterLiveFeedback() {
     if (!root || root.dataset.nlLiveFeedbackWired === '1') return;
     root.dataset.nlLiveFeedbackWired = '1';
     const refresh = () => {
+        if (isNewsletterWizardOpen() || window.__nlFormSyncing) return;
         updatePersonalCharMeter();
         updatePersonalMediaPreviews();
         updateCustomContentChoicesVisibility();
@@ -5486,6 +5553,7 @@ function wireNewsletterLiveFeedback() {
     };
     root.querySelectorAll('input, select, textarea').forEach((el) => {
         if (el.id === 'nl-feedback' || el.id === 'nl-html-raw') return;
+        if (el.id === 'nl-personal-photo-size' || el.id === 'nl-personal-video-size') return;
         el.addEventListener('input', refresh);
         el.addEventListener('change', refresh);
     });
@@ -5499,9 +5567,7 @@ function wireNewsletterLiveFeedback() {
             refresh();
         });
     }
-    ['nl-personal-photo-size', 'nl-personal-video-size'].forEach((id) => {
-        document.getElementById(id)?.addEventListener('input', refresh);
-    });
+    wirePersonalMediaSizeSliders();
     refresh();
 }
 
@@ -5706,13 +5772,15 @@ function wireNewsletterFormPersistence() {
                 else localStorage.setItem(id, el.value);
             } catch (e) { /* ignore */ }
         };
-        if (id === 'nl-location') {
+        if (id === 'nl-location' || id === 'nl-personal-photo-size' || id === 'nl-personal-video-size') {
             el.addEventListener('change', save);
             el.addEventListener('blur', save);
-            el.addEventListener('input', () => {
-                const err = document.getElementById('nl-location-error');
-                if (err && (el.value || '').trim()) err.classList.add('hidden');
-            });
+            if (id === 'nl-location') {
+                el.addEventListener('input', () => {
+                    const err = document.getElementById('nl-location-error');
+                    if (err && (el.value || '').trim()) err.classList.add('hidden');
+                });
+            }
         } else {
             el.addEventListener('input', save);
             el.addEventListener('change', save);
@@ -6703,6 +6771,8 @@ function copyForOutlook() {
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
   window.fillNewsletterLocationFromProfileIfEmpty = fillNewsletterLocationFromProfileIfEmpty;
   window.getNewsletterLocation = getNewsletterLocation;
+  window.applyPersonalMediaLiveSize = applyPersonalMediaLiveSize;
+  window.commitPersonalMediaSize = commitPersonalMediaSize;
   window.fillPersonalFromProfile = fillPersonalFromProfile;
 
   // These helpers are called from HTML onclick in the newsletter section
@@ -7125,6 +7195,8 @@ function copyForOutlook() {
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
   window.fillNewsletterLocationFromProfileIfEmpty = fillNewsletterLocationFromProfileIfEmpty;
   window.getNewsletterLocation = getNewsletterLocation;
+  window.applyPersonalMediaLiveSize = applyPersonalMediaLiveSize;
+  window.commitPersonalMediaSize = commitPersonalMediaSize;
   window.updateNewsletterProfileStatus = updateNewsletterProfileStatus;
   window.refreshNewsletterColorScheme = refreshNewsletterColorScheme;
   window.updateCustomContentChoicesVisibility = updateCustomContentChoicesVisibility;
