@@ -4914,30 +4914,71 @@ function resolveListingSpotlightHeading(raw) {
     return toCustomSectionTitleCase(heading) || heading;
 }
 
+function formatListingSpotlightPrice(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return '';
+    const cleaned = s.replace(/[^0-9.]/g, '');
+    if (!cleaned || cleaned === '.') return '$' + s.replace(/^\$+\s*/, '');
+    const parts = cleaned.split('.');
+    let intPart = (parts[0] || '').replace(/^0+(?=\d)/, '');
+    if (!intPart) intPart = '0';
+    const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    let out = '$' + withCommas;
+    if (parts.length > 1 && /^\d+$/.test(parts[1])) {
+        out += '.' + parts[1].slice(0, 2);
+    }
+    return out;
+}
+
+function formatListingSpotlightMeta(statsRaw) {
+    const s = String(statsRaw || '').trim();
+    if (!s) return '';
+    const parts = [];
+    const bed = s.match(/(\d+)\s*(?:beds?|br|bdrms?|bd)\b/i);
+    const bath = s.match(/(\d+(?:\.\d+)?)\s*(?:baths?|ba)\b/i);
+    const sq = s.match(/([\d,]+)\s*(?:sq\.?\s*ft|sqft|sf|sq\.?\s*feet|sq\.?\s*foot|square\s+feet)\b/i);
+    if (bed) parts.push(bed[1] + ' bed');
+    if (bath) parts.push(bath[1] + ' bath');
+    if (sq) {
+        const n = String(sq[1] || '').replace(/,/g, '');
+        if (/^\d+$/.test(n) && n !== '0') {
+            parts.push(n.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' sq ft');
+        }
+    }
+    if (parts.length) return parts.join(' · ');
+    return s
+        .replace(/\bsq\.?\s*foot\b/gi, 'sq ft')
+        .replace(/\bsquare\s+feet\b/gi, 'sq ft')
+        .replace(/\bsqft\b/gi, 'sq ft');
+}
+
 function buildListingSpotlightTable(listing) {
     const heading = escapeNewsletterCustomText(resolveListingSpotlightHeading(listing && listing.sectionTitle));
     const address = escapeNewsletterCustomText(toCustomSectionTitleCase(listing.address) || listing.address);
-    const price = escapeNewsletterCustomText(listing.price);
-    const stats = escapeNewsletterCustomText(listing.stats || '');
-    const factsLine = stats ? `${price} · ${stats}` : price;
+    const price = escapeNewsletterCustomText(formatListingSpotlightPrice(listing.price));
+    const meta = escapeNewsletterCustomText(formatListingSpotlightMeta(listing.stats || ''));
     const photoHref = listingPhotoUrlIsUsable(listing.photoUrl);
     const linkHref = sanitizeListingHttpUrl(listing.link);
     const hookHtml = listing.hook
         ? `<p style="margin:0 0 12px; font-size:16px; line-height:1.6; color:#333;">${escapeNewsletterCustomText(listing.hook)}</p>`
         : '';
     const photoHtml = photoHref
-        ? `<img src="${escapeNewsletterCustomText(photoHref)}" alt="${address}" width="540" style="display:block;width:100%;max-width:540px;height:auto;border-radius:8px;margin:0 0 16px;" onerror="this.style.display='none';this.removeAttribute('src');">`
+        ? `<img src="${escapeNewsletterCustomText(photoHref)}" alt="${address}" width="540" style="display:block;width:100%;max-width:540px;height:auto;border-radius:8px;margin:0 0 12px;" onerror="this.style.display='none';this.removeAttribute('src');">`
         : '';
     const linkHtml = linkHref
         ? `<p style="margin:0 0 12px;"><a href="${escapeNewsletterCustomText(linkHref)}" target="_blank" rel="noopener" style="color:#00A89D;font-weight:bold;text-decoration:none;font-size:16px;">See this listing →</a></p>`
+        : '';
+    const metaHtml = meta
+        ? `<p style="margin:0 0 12px; font-size:15px; line-height:1.45; color:#4A4A4A;">${meta}</p>`
         : '';
     return `<table width="100%" cellpadding="0" cellspacing="0" align="center" data-nl-listing-spotlight="1" style="${NL_MODULE_WIDTH_STYLE}background:#f9f9f9;border-left:8px solid #00A89D;border-collapse:separate;">
         <tr>
             <td style="padding:30px;">
                 <h2 style="color:#002B5C; font-size:26px; margin:0 0 15px;">${heading}</h2>
                 ${photoHtml}
-                <p style="margin:0 0 8px; font-size:18px; line-height:1.4; color:#002B5C; font-weight:700;">${address}</p>
-                <p style="margin:0 0 12px; font-size:16px; line-height:1.5; color:#002B5C; font-weight:700;">${factsLine}</p>
+                <p style="margin:0 0 6px; font-size:24px; line-height:1.2; color:#B8860B; font-weight:700;">${price}</p>
+                <p style="margin:0 0 6px; font-size:18px; line-height:1.35; color:#002B5C; font-weight:700;">${address}</p>
+                ${metaHtml}
                 ${hookHtml}
                 ${linkHtml}
                 <p style="margin:0; font-size:12px; line-height:1.4; color:#888;">Information supplied by the agent. Not an MLS feed.</p>
@@ -6521,6 +6562,8 @@ function copyForOutlook() {
   window.applyNewsletterPreviewPaneHeight = applyNewsletterPreviewPaneHeight;
   window.NL_PREVIEW_HEIGHT_KEY = NL_PREVIEW_HEIGHT_KEY;
   window.buildListingSpotlightTable = buildListingSpotlightTable;
+  window.formatListingSpotlightPrice = formatListingSpotlightPrice;
+  window.formatListingSpotlightMeta = formatListingSpotlightMeta;
   window.ensurePersonalPhotoCentered = ensurePersonalPhotoCentered;
   window.isCustomSectionBrief = isCustomSectionBrief;
   window.toCustomSectionTitleCase = toCustomSectionTitleCase;

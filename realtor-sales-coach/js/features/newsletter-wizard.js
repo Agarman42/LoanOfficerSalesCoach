@@ -1415,7 +1415,7 @@
           </div>
           <div>
             <label for="nl-wizard-listing-spotlight-stats" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">Beds / baths / sqft (optional)</label>
-            <input type="text" id="nl-wizard-listing-spotlight-stats" maxlength="80" placeholder="4 bed · 3 bath · 2,400 sqft" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+            <input type="text" id="nl-wizard-listing-spotlight-stats" maxlength="80" placeholder="3 bed · 2 bath · 1,806 sq ft" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
           </div>
           <div>
             <label for="nl-wizard-listing-spotlight-hook" class="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">One-line hook (optional) — Why this one</label>
