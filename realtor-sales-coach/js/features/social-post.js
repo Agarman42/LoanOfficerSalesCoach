@@ -20,6 +20,24 @@
   // =====================================================
   // CENTRAL PROFILE INTEGRATION (consistent with Blog Creator + Weekly Win Plan)
   // =====================================================
+  function socialEngagementRulesBlock(kind) {
+    const calendar = kind === 'calendar';
+    const lines = [
+      'ENGAGEMENT MIX (required):',
+      '- About 1 in 3 posts must solicit a response: a specific question, A/B choice, or "this or that."',
+      '- Questions must be answerable in one tap (e.g. "Grill or smoker this weekend?" / "Which listing photo would you tap first?"). Ban empty "Thoughts?" or "What do you think?" with no options.',
+      '- Remaining posts: value, story, or local — still saveable/shareable (a tip, a number, or a line someone would send a friend).',
+      '- Stay in realtor world: listings, buyers, sellers, sphere, local life. Do NOT mention cash-out, HELOC, refinance, mortgage rates, or lender products.'
+    ];
+    if (calendar) {
+      lines.push('- Spread engagement posts through the month — not clustered in week 1. Aim for about 10 of 30 days as engagement posts.');
+      lines.push('- Only use CHECKED themes listed above. Unchecked themes stay out of the calendar.');
+    } else {
+      lines.push('- At least ONE of the three caption options must be an engagement post (specific question or A/B). The other two: value/story/local, still shareable.');
+    }
+    return lines.join('\n');
+  }
+
   function getCentralProfile() {
     try {
       if (window.getUserProfile) return window.getUserProfile();
@@ -189,9 +207,10 @@ Requirements for EACH caption:
 - Warm, authentic, relationship-focused first. Never salesy or pushy.
 - Engaging and conversational — like texting a friend who happens to be a great agent.
 - Include relevant emojis naturally (not spammy).
-- End with a subtle, human CTA (question, "Comment below", "DM me if this is you", "Tag a friend who needs this", etc.).
 - Add 6–10 relevant hashtags at the very end (mix broad + local + niche).
 - Make the three options feel noticeably different (different hooks, angles, lengths, or emoji energy) while staying true to the voice.
+
+${socialEngagementRulesBlock('post')}
 
 Output format — EXACTLY this structure with no extra commentary:
 
@@ -706,9 +725,9 @@ async function generateMonthlyPlan() {
     if (document.getElementById('theme-fun')?.checked) themes.push('fun and humor');
     if (document.getElementById('theme-polls')?.checked) themes.push('polls and engagement');
     if (document.getElementById('theme-listings')?.checked) themes.push('listing tips and market updates');
-    if (document.getElementById('theme-cashout')?.checked) themes.push('seller proceeds and move-up ideas');
-    if (document.getElementById('theme-purchase')?.checked) themes.push('buyer and first-time homebuyer tips');
-    if (document.getElementById('theme-equity')?.checked) themes.push('home equity and move-up power');
+    if (document.getElementById('theme-cashout')?.checked) themes.push('seasonal home tips (yard, weather prep, holiday hosting — never cash-out, HELOC, refinance, or rates)');
+    if (document.getElementById('theme-purchase')?.checked) themes.push('buyer tips (shopping, offers, inspections, first-time buyers — realtor advice, not lender products)');
+    if (document.getElementById('theme-equity')?.checked) themes.push('selling and next home (listing prep, timing a sale, move-up path — not cash-out or refinance)');
     if (document.getElementById('theme-recipes')?.checked) themes.push('recipe ideas');
     if (document.getElementById('theme-trivia')?.checked) themes.push('trivia and fun facts');
     if (document.getElementById('theme-localbusiness')?.checked) themes.push('local business spotlights');
@@ -723,9 +742,12 @@ async function generateMonthlyPlan() {
 
 Core philosophy: 70% relationship-building (personal, local, fun, engaging) and 30% real estate value. Make people WANT to see posts — be entertaining, human, and trust-building.
 
-Weave in these themes naturally: ${themes.length ? themes.join(', ') : 'balanced personal and local content'}.
+Weave in ONLY these checked themes (leave unchecked themes out): ${themes.length ? themes.join(', ') : 'balanced personal and local content'}.
 
 Custom instructions: ${customPrompt || 'None — use best judgment'}.
+
+${socialEngagementRulesBlock('calendar')}
+AGENT BAN: Do not mention cash-out, HELOC, refinance, mortgage rates, or lender products anywhere in this calendar.
 
 AGENT PROFILE & VOICE (make the overview + posts feel like *this* agent — personality, voice, tone, market. Hobbies only when a theme day is Personal/Hobbies or when natural; do NOT make the whole month hobby-branded):
 ${personalization}

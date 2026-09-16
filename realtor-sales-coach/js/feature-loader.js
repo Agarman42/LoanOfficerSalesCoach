@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260912-agent-v3118';
+  var V = '20260912-agent-v3119';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -94,7 +94,7 @@
       'js/inline-extracted/re-block-1.js?v=20260818-demo-safe'
     ],
     'social-post': [
-      'js/features/social-post.js?v=20260912-profile-prefill-v3117',
+      'js/features/social-post.js?v=20260912-social-engage-v3119',
       'js/features/publish-kit.js?v=20260820-next-steps-direct'
     ],
     'sales-script': [

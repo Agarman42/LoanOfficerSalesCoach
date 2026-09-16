@@ -20,6 +20,24 @@
   // =====================================================
   // CENTRAL PROFILE INTEGRATION (consistent with Blog Creator + Weekly Win Plan)
   // =====================================================
+  function socialEngagementRulesBlock(kind) {
+    const calendar = kind === 'calendar';
+    const lines = [
+      'ENGAGEMENT MIX (required):',
+      '- About 1 in 3 posts must solicit a response: a specific question, A/B choice, or "this or that."',
+      '- Questions must be answerable in one tap (e.g. "Grill or smoker this weekend?" / "Fixed or extra principal this year?"). Ban empty "Thoughts?" or "What do you think?" with no options.',
+      '- Remaining posts: value, story, or local — still saveable/shareable (a tip, a number, or a line someone would send a friend).',
+      '- Stay in mortgage world: home financing, payments, credit, first-time buyers as borrowers, local life. Do not write as a listing agent.'
+    ];
+    if (calendar) {
+      lines.push('- Spread engagement posts through the month — not clustered in week 1. Aim for about 10 of 30 days as engagement posts.');
+      lines.push('- Only use CHECKED themes listed above. Unchecked themes stay out of the calendar.');
+    } else {
+      lines.push('- At least ONE of the three caption options must be an engagement post (specific question or A/B). The other two: value/story/local, still shareable.');
+    }
+    return lines.join('\n');
+  }
+
   function getCentralProfile() {
     try {
       if (window.getUserProfile) return window.getUserProfile();
@@ -196,9 +214,10 @@ Requirements for EACH caption:
 - Warm, authentic, relationship-focused first. Never salesy or "mortgage bro".
 - Engaging and conversational — like texting a friend who happens to be great at mortgages.
 - Include relevant emojis naturally (not spammy).
-- End with a subtle, human CTA (question, "Comment below", "DM me if this is you", "Tag a friend who needs this", etc.).
 - Add 6–10 relevant hashtags at the very end (mix broad + local + niche).
 - Make the three options feel noticeably different (different hooks, angles, lengths, or emoji energy) while staying true to the voice.
+
+${socialEngagementRulesBlock('post')}
 
 Output format — EXACTLY this structure with no extra commentary:
 
@@ -744,9 +763,11 @@ async function generateMonthlyPlan() {
 
 Core philosophy: 70% relationship-building (personal, local, fun, engaging) and 30% mortgage value. Make people WANT to see posts — be entertaining, human, and trust-building.
 
-Weave in these themes naturally: ${themes.length ? themes.join(', ') : 'balanced personal and local content'}.
+Weave in ONLY these checked themes (leave unchecked themes out): ${themes.length ? themes.join(', ') : 'balanced personal and local content'}.
 
 Custom instructions: ${customPrompt || 'None — use best judgment'}.
+
+${socialEngagementRulesBlock('calendar')}
 
 LO PROFILE & VOICE (make the overview + posts feel like *this* loan officer — personality, voice, tone, market. Hobbies only when a theme day is Personal/Hobbies or when natural; do NOT make the whole month hobby-branded):
 ${personalization}
