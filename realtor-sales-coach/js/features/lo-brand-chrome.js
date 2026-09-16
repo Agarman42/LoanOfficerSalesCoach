@@ -321,6 +321,7 @@
     const card = window.__loPartnerCard;
 
     if (on) {
+      showBrandStatus(null);
       if (plate) {
         plate.hidden = true;
         plate.setAttribute('aria-hidden', 'true');
@@ -385,10 +386,24 @@
     } catch (e) { /* ignore */ }
   }
 
-  /** Soft banner when ?lo= is present but LO server no longer has the card (common after LO redeploy). */
+  function hasUsableSavedCard(card) {
+    if (!card || !String(card.name || '').trim()) return false;
+    return !!(
+      String(card.phone || '').trim() ||
+      String(card.headshotUrl || card.photo || '').trim() ||
+      String(card.nmls || '').trim() ||
+      String(card.email || '').trim()
+    );
+  }
+
+  function hideBrandStatusForDemo() {
+    return isAgentPresentationMode() || readPresentQuery();
+  }
+
+  /** Banner only when there is no usable saved card AND the server failed. */
   function showBrandStatus(message, kind) {
     let el = document.getElementById('lo-brand-status');
-    if (!message) {
+    if (!message || hideBrandStatusForDemo()) {
       if (el) el.remove();
       return;
     }
@@ -406,6 +421,21 @@
     el.innerHTML = `<span class="lo-brand-status-text">${escapeHtml(message)}</span>
       <button type="button" class="lo-brand-status-dismiss" aria-label="Dismiss">×</button>`;
     el.querySelector('.lo-brand-status-dismiss')?.addEventListener('click', () => el.remove());
+  }
+
+  async function fetchCardOnceOrRetry(token) {
+    try {
+      return await fetchCard(token);
+    } catch (first) {
+      console.warn('[lo-brand] fetch failed', first && first.message ? first.message : first);
+      let already = false;
+      try {
+        already = sessionStorage.getItem('loBrandRetryOnce') === '1';
+        sessionStorage.setItem('loBrandRetryOnce', '1');
+      } catch (e) { /* ignore */ }
+      if (already) throw first;
+      return fetchCard(token);
+    }
   }
 
   async function resolveAndPaint() {
@@ -431,29 +461,24 @@
     if (cached) paintBrandPlate(cached);
 
     try {
-      const card = await fetchCard(token);
-      writeCachedCard(card);
-      paintBrandPlate(card);
-      showBrandStatus(null);
-      // After success, ensure short code remains bookmarkable
-      ensureTokenInUrl(token);
+      const card = await fetchCardOnceOrRetry(token);
+      if (card && card.name) {
+        writeCachedCard(card);
+        paintBrandPlate(card);
+        showBrandStatus(null);
+        ensureTokenInUrl(token);
+        return;
+      }
     } catch (e) {
       console.warn('[lo-brand] fetch failed', e.message || e);
-      const still = readCachedCard();
-      if (still) {
-        // Keep last-known LO plate/footer; explain refresh may be needed
-        paintBrandPlate(still);
-        showBrandStatus(
-          'Showing saved LO branding (couldn’t refresh from server). If this looks outdated, ask your LO to re-publish their partner link once.',
-          'info'
-        );
-      } else {
-        paintBrandPlate(null);
-        showBrandStatus(
-          'LO partner link not found on the server (common after a Loan Officer app redeploy). Ask your LO to open My Profile → re-publish partner share once — your same ?lo= link should work again.',
-          'error'
-        );
-      }
+    }
+    const still = readCachedCard() || cached;
+    if (still && still.name) {
+      paintBrandPlate(still);
+      showBrandStatus(null);
+    } else {
+      paintBrandPlate(null);
+      showBrandStatus('Partner card unavailable right now. Tools still work.', 'info');
     }
   }
 
