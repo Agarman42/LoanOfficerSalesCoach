@@ -204,11 +204,19 @@ app.use(
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
       }
+      // Never serve auth/session store via static.
+      // Only block the root `data/` folder — do NOT match `js/data/` (pop-by library, fact vault).
+      const authDataPrefix = path.join(ROOT, 'data') + path.sep;
+      if (filePath === path.join(ROOT, 'data') || filePath.startsWith(authDataPrefix)) {
+        res.statusCode = 404;
+      }
     }
   })
 );
 
-app.use('/data', (_req, res) => {
+app.use('/data', (req, res, next) => {
+  // `/js/data/*` is tool content and must not hit this 404.
+  if (String(req.path || '').startsWith('/js/')) return next();
   res.status(404).json({ error: 'Not found' });
 });
 

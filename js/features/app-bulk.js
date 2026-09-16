@@ -168,10 +168,9 @@ window.openExpandedSocialExamplesModal = function(pillar) {
   const searchInput = document.getElementById('social-strategy-search');
   const contentWrapper = document.getElementById('social-content');
 
-  if (!contentWrapper) return;
-
-  // Optional in-section search (toolbar removed from header UI; wire when present)
-  if (searchInput) searchInput.addEventListener('input', function() {
+  // Optional in-section search (toolbar removed from header UI; wire when present).
+  // Do not return here — this IIFE also owns VALUE_VAULT_ITEMS / Pop-By merge.
+  if (contentWrapper && searchInput) searchInput.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
     const cards = contentWrapper.querySelectorAll('.social-pillar-card, #social-supporting-grid > div');
     const expanded = contentWrapper.querySelectorAll('.social-pillar-expanded, [id^="supporting-"]');
@@ -5793,6 +5792,7 @@ Repeat this cycle every 90 days.`
   // snapshot above is therefore often empty for those libraries — append them when they
   // arrive (and again at render) so the Pop-By Ideas Library is not stuck at 0.
   function mergeLazyVaultLibraries() {
+    if (!Array.isArray(window.VALUE_VAULT_ITEMS)) window.VALUE_VAULT_ITEMS = VALUE_VAULT_ITEMS;
     const vault = window.VALUE_VAULT_ITEMS;
     if (!Array.isArray(vault)) return 0;
     const existing = new Set();
@@ -5997,7 +5997,8 @@ Repeat this cycle every 90 days.`
 
         if (e.target.closest('.popby-copy-btn')) {
           e.stopImmediatePropagation();
-          const item = VALUE_VAULT_ITEMS.find(i => i.id === id);
+          const vaultItems = Array.isArray(window.VALUE_VAULT_ITEMS) ? window.VALUE_VAULT_ITEMS : VALUE_VAULT_ITEMS;
+          const item = vaultItems.find(i => i.id === id);
           if (!item) return;
           const text = item.copyText || item.title || '';
           navigator.clipboard.writeText(text).then(() => {
@@ -6213,11 +6214,18 @@ Repeat this cycle every 90 days.`
       content.classList.remove('hidden');
       if (arrow) arrow.style.transform = 'rotate(180deg)';
       
-      // Render the Pop-By grid when expanded
-      if (typeof window.renderValueVault === 'function') {
-        setTimeout(() => {
-          window.renderValueVault();
-        }, 30);
+      const paint = function () {
+        if (typeof window.mergeLazyVaultLibraries === 'function') window.mergeLazyVaultLibraries();
+        if (typeof window.renderValueVault === 'function') window.renderValueVault();
+      };
+      paint();
+      if (!(window.POPBY_LIBRARY_ITEMS && window.POPBY_LIBRARY_ITEMS.length)) {
+        let tries = 0;
+        const t = setInterval(function () {
+          tries += 1;
+          paint();
+          if ((window.POPBY_LIBRARY_ITEMS && window.POPBY_LIBRARY_ITEMS.length) || tries > 20) clearInterval(t);
+        }, 150);
       }
     } else {
       content.classList.add('hidden');

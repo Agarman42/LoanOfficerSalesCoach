@@ -180,4 +180,7 @@
   if (typeof window.mergeLazyVaultLibraries === 'function') {
     window.mergeLazyVaultLibraries();
   }
+  if (typeof window.renderValueVault === 'function') {
+    try { window.renderValueVault(); } catch (e) { /* grid may not be in DOM yet */ }
+  }
 })();
