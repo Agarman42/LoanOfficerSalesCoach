@@ -86,14 +86,50 @@
     return arr;
   }
 
+  function showSwRefreshBanner() {
+    if (document.getElementById('lo-sw-refresh-banner')) return;
+    const el = document.createElement('div');
+    el.id = 'lo-sw-refresh-banner';
+    el.setAttribute('role', 'status');
+    el.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;align-items:center;gap:10px;background:#002B5C;color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13px;font-weight:600;max-width:calc(100vw - 24px);';
+    el.innerHTML = '<span>New version available</span><button type="button" style="background:#00A89D;color:#fff;border:0;border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer;">Refresh</button>';
+    el.querySelector('button').addEventListener('click', function () {
+      const worker = swReg && swReg.waiting;
+      if (worker) {
+        try { worker.postMessage({ type: 'SKIP_WAITING' }); } catch (e) { /* ignore */ }
+      }
+      location.reload();
+    });
+    (document.body || document.documentElement).appendChild(el);
+  }
+
+  function watchSwUpdates(reg) {
+    if (!reg) return;
+    if (reg.waiting && navigator.serviceWorker.controller) showSwRefreshBanner();
+    reg.addEventListener('updatefound', function () {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', function () {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          showSwRefreshBanner();
+        }
+      });
+    });
+    try { reg.update(); } catch (e) { /* ignore */ }
+  }
+
   async function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
       console.warn('[pwa] service workers not supported');
       return null;
     }
     try {
-      swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      swReg = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+        updateViaCache: 'none'
+      });
       console.log('[pwa] SW registered', swReg.scope);
+      watchSwUpdates(swReg);
       return swReg;
     } catch (e) {
       console.warn('[pwa] SW register failed', e);

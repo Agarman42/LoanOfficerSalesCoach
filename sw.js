@@ -1,37 +1,39 @@
-/* LO Sales Coach service worker — app shell cache + Web Push */
+/* LO Sales Coach service worker — bump CACHE_NAME with APP_VERSION on every release. */
 /* eslint-disable no-restricted-globals */
-const SW_VERSION = 'lo-sw-v1-20260818-v3141';
-const SHELL_CACHE = SW_VERSION + '-shell';
+const APP_VERSION = '3.167';
+const CACHE_NAME = 'sc-lo-v' + APP_VERSION;
+const OFFLINE_CACHE = CACHE_NAME + '-offline';
 
-const PRECACHE_URLS = [
-  '/',
-  '/index.html',
+const PRECACHE_ASSETS = [
   '/manifest.webmanifest',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-512-maskable.png',
   '/icons/apple-touch-icon.png',
-  '/icons/icon-32.png',
-  '/css/tailwind-built.css?v=20260721-noloadspin',
-  '/css/main.css?v=20260810-calc-rail',
-  '/js/api.js?v=20260806-pwa',
-  '/js/ui.js?v=20260729-no-backdrop',
-  '/js/main.js?v=20260812-lazy-features',
-  '/js/early-boot.js?v=20260818-v3140',
-  '/js/features/newsletter-color-bundles.js?v=20260818-v3140',
-  '/js/feature-loader.js?v=20260818-v3141-plan-blog',
-  '/js/app-version.js?v=20260818-v3141',
-  '/js/features/pwa-push.js?v=20260806-pwa'
+  '/icons/icon-32.png'
 ];
+
+function isDocumentRequest(req) {
+  if (req.mode === 'navigate') return true;
+  if (req.destination === 'document') return true;
+  try {
+    const path = new URL(req.url, self.location.origin).pathname;
+    if (path === '/' || path === '/index.html' || /\.html$/i.test(path)) return true;
+  } catch (e) {
+    /* ignore */
+  }
+  const accept = req.headers.get('accept') || '';
+  return accept.includes('text/html');
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
-      .open(SHELL_CACHE)
+      .open(CACHE_NAME)
       .then((cache) =>
         Promise.all(
-          PRECACHE_URLS.map((url) =>
+          PRECACHE_ASSETS.map((url) =>
             cache.add(url).catch((err) => {
               console.warn('[sw] precache skip', url, err && err.message);
             })
@@ -49,12 +51,19 @@ self.addEventListener('activate', (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((k) => k.startsWith('lo-sw-') && k !== SHELL_CACHE)
+            .filter((k) => k !== CACHE_NAME && k !== OFFLINE_CACHE)
+            .filter((k) => k.indexOf('lo-sw-') === 0 || k.indexOf('sc-lo-') === 0)
             .map((k) => caches.delete(k))
         )
       )
       .then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (event) => {
@@ -64,16 +73,20 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // Never cache API
   if (url.pathname.startsWith('/api/')) return;
+  if (url.pathname === '/sw.js') return;
 
-  // Network-first for navigations / HTML
-  if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
+  if (isDocumentRequest(req)) {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(SHELL_CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(OFFLINE_CACHE).then((c) => {
+              c.put(req, copy.clone()).catch(() => {});
+              c.put(new Request('/index.html'), copy).catch(() => {});
+            }).catch(() => {});
+          }
           return res;
         })
         .catch(() =>
@@ -83,7 +96,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static assets
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
@@ -91,7 +103,7 @@ self.addEventListener('fetch', (event) => {
         .then((res) => {
           if (res && res.ok) {
             const copy = res.clone();
-            caches.open(SHELL_CACHE).then((c) => c.put(req, copy)).catch(() => {});
+            caches.open(CACHE_NAME).then((c) => c.put(req, copy)).catch(() => {});
           }
           return res;
         })
@@ -151,7 +163,6 @@ self.addEventListener('notificationclick', (event) => {
         if (client.url && 'focus' in client) {
           return client.focus().then((c) => {
             if (c && c.navigate) return c.navigate(abs);
-            // Fallback: postMessage so the page can showSection
             try {
               c.postMessage({ type: 'lo-push-navigate', url: targetUrl });
             } catch (e) {

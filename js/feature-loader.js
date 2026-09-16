@@ -24,7 +24,7 @@
     'js/features/section-bottom-banners.js?v=20260720-review',
     'js/features/coach-polish.js?v=20260721-ux-polish',
     'js/features/partner-share.js?v=20260807-one-invite-branded',
-    'js/app-version.js?v=20260912-v3166',
+    'js/app-version.js?v=20260912-v3167',
     'js/features/newsletter-color-bundles.js?v=20260818-v3140',
     'js/features/generation-rules.js?v=20260720-hobby-restraint',
     'js/features/save-ribbon.js',
@@ -36,7 +36,7 @@
     'js/data/popby-library.js?v=20260912-popby-merge-v3166',
     'js/data/lo-fact-vault.js?v=20260912-popby-merge-v3166',
     'js/features/ai-chat.js?v=20260720-polish',
-    'js/features/pwa-push.js?v=20260806-pwa'
+    'js/features/pwa-push.js?v=20260912-v3167'
   ];
 
   /**

@@ -197,10 +197,12 @@ app.use(
     setHeaders(res, filePath) {
       if (
         filePath.endsWith('index.html') ||
+        filePath.endsWith(`${path.sep}sw.js`) ||
+        filePath.endsWith('sw.js') ||
         filePath.includes(`${path.sep}js${path.sep}`) ||
         filePath.includes(`${path.sep}css${path.sep}`)
       ) {
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Cache-Control', 'no-cache, max-age=0, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
       }
@@ -297,6 +299,9 @@ app.use((req, res, next) => {
     return res.status(404).type('text').send('Not found');
   }
   if (res.headersSent) return next();
+  res.setHeader('Cache-Control', 'no-cache, max-age=0, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   return res.sendFile('index.html', { root: ROOT }, (err) => {
     if (err) next(err);
   });
