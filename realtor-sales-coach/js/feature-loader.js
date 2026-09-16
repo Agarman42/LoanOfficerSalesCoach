@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260911-agent-v3110';
+  var V = '20260912-agent-v3117';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -46,13 +46,13 @@
   var LAZY_BUNDLES = {
     'weekly-win-plan': [
       'js/data/weekend-plan-policy.js?v=20260706-realtor-v273',
-      'js/features/weekly-win-plan.js?v=20260819-closings-copy',
+      'js/features/weekly-win-plan.js?v=20260912-profile-prefill-v3117',
       'js/features/prospecting-time-blocks.js?v=20260706-realtor-v273'
     ],
     // Business Plan generate/style/profile sync lives in weekly-win-plan.js
     'planning': [
       'js/data/weekend-plan-policy.js?v=20260706-realtor-v273',
-      'js/features/weekly-win-plan.js?v=20260819-closings-copy',
+      'js/features/weekly-win-plan.js?v=20260912-profile-prefill-v3117',
       'js/features/prospecting-time-blocks.js?v=20260706-realtor-v273',
       'js/features/business-plan-wizard.js?v=20260818-plan-profile'
     ],
@@ -62,7 +62,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260912-nl-slider-v3116',
+      'js/features/newsletter-generator.js?v=20260912-profile-prefill-v3117',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260911-nl-slider-v3114'
     ],
@@ -73,13 +73,13 @@
       'js/inline-extracted/re-block-1.js?v=20260818-demo-safe'
     ],
     'listing-description': [
-      'js/features/listing-description.js?v=20260706-realtor-v279'
+      'js/features/listing-description.js?v=20260912-profile-prefill-v3117'
     ],
     'open-house': [
-      'js/features/open-house.js?v=20260706-realtor-v278'
+      'js/features/open-house.js?v=20260912-profile-prefill-v3117'
     ],
     'consultation': [
-      'js/features/consultation-kit.js?v=20260706-realtor-v280'
+      'js/features/consultation-kit.js?v=20260912-profile-prefill-v3117'
     ],
     'bio-creator': [
       'js/features/bio-creator.js?v=20260818-realtor-bio',
@@ -87,18 +87,18 @@
     ],
     'blog': [
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/blog-creator.js?v=20260827-blog-show-first-v393'
+      'js/features/blog-creator.js?v=20260912-profile-prefill-v3117'
     ],
     'social': [
       'js/features/social-modals.js?v=20260818-demo-safe',
       'js/inline-extracted/re-block-1.js?v=20260818-demo-safe'
     ],
     'social-post': [
-      'js/features/social-post.js?v=20260729-profile-ux',
+      'js/features/social-post.js?v=20260912-profile-prefill-v3117',
       'js/features/publish-kit.js?v=20260820-next-steps-direct'
     ],
     'sales-script': [
-      'js/features/sales-scripts.js?v=20260706-realtor-v273'
+      'js/features/sales-scripts.js?v=20260912-profile-prefill-v3117'
     ],
     'process': [
       'js/features/process-rich-modals.js?v=20260706-realtor-v273',
@@ -128,14 +128,14 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260827-blog-show-first-v393',
+      'js/features/blog-creator.js?v=20260912-profile-prefill-v3117',
       'js/features/social-modals.js?v=20260818-demo-safe',
       'js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273',
       'js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273',
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260912-nl-slider-v3116',
+      'js/features/newsletter-generator.js?v=20260912-profile-prefill-v3117',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260911-nl-slider-v3114'
     ]

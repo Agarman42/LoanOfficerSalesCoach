@@ -638,6 +638,9 @@
     if (typeof window.onCoachSectionShown === 'function') {
       try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
     }
+    if (typeof window.applyProfilePrefillForSection === 'function') {
+      try { window.applyProfilePrefillForSection(id); } catch (e) {}
+    }
     // Home: full page top so header stays visible. Other tools: scroll section into view.
     try {
       if (id === 'home') {

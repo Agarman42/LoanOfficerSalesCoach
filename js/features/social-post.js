@@ -35,7 +35,7 @@
       ...central,
       name: central.name || '',
       email: central.email || '',
-      localArea: central.localArea || central.market || '',
+      localArea: central.localArea || central.location || central.localMarket || central.market || central.city || central.serviceArea || central.primaryMarket || '',
       voiceTraits: central.voiceTraits || [],
       personality: central.personality || '',
       tone: central.tone || 'Friendly & Relatable',
@@ -706,7 +706,13 @@ async function generateMonthlyPlan() {
     _monthlyPlanGenerating = true;
     const month = document.getElementById('plan-month').value;
     const year = document.getElementById('plan-year').value;
-    const localArea = document.getElementById('plan-areas')?.value.trim() || 'your area';
+    const localArea = (document.getElementById('plan-areas')?.value || '').trim()
+      || (typeof window.getProfileMarketText === 'function' ? window.getProfileMarketText() : '')
+      || 'your area';
+    const hobbiesForm = (document.getElementById('plan-hobbies')?.value || '').trim()
+      || (typeof window.getProfileHobbiesText === 'function' ? window.getProfileHobbiesText() : '');
+    const familyForm = (document.getElementById('plan-family')?.value || '').trim()
+      || (typeof window.getProfileFamilyText === 'function' ? window.getProfileFamilyText() : '');
     const customPrompt = document.getElementById('custom-plan-prompt')?.value.trim() || '';
 
     // Pull rich profile for the monthly calendar prompt (consistent with single-post gen + other tools)
@@ -744,7 +750,10 @@ Custom instructions: ${customPrompt || 'None — use best judgment'}.
 
 LO PROFILE & VOICE (make the overview + posts feel like *this* loan officer — personality, voice, tone, market. Hobbies only when a theme day is Personal/Hobbies or when natural; do NOT make the whole month hobby-branded):
 ${personalization}
-${eff.localArea ? `Primary market: ${eff.localArea}.` : ''}
+Primary market / area(s): ${localArea}.
+${hobbiesForm ? `Hobbies, passions & interests (light seasoning): ${hobbiesForm}.` : ''}
+${familyForm ? `Family info (sparse, only if natural): ${familyForm}.` : ''}
+${eff.localArea && eff.localArea !== localArea ? `Profile market: ${eff.localArea}.` : ''}
 ${typeof window.buildHobbyRestraintPromptBlock === 'function' ? window.buildHobbyRestraintPromptBlock() : ''}
 HOBBY / CALENDAR RESTRAINT: Unless the user selected a hobbies theme, keep hobby-specific posts sparse (roughly ≤2–4 days in the month). Even with hobbies theme selected, vary topics — not every day is golf/cooking/etc. Market, process, and partner posts stay professional without forced hobby puns.
 
@@ -1253,6 +1262,9 @@ setTimeout(() => prefillCalendarFromProfile(true), 800);
 
 window.prefillCalendarFromProfile = prefillCalendarFromProfile;
 window.restoreSocialCalendarForm = restoreSocialCalendarForm;
+if (typeof window.registerProfilePrefill === 'function') {
+  window.registerProfilePrefill('social-post', restoreSocialCalendarForm);
+}
 window.addEventListener('profile-updated', () => {
   try { prefillCalendarFromProfile(false); } catch (e) { /* ignore */ }
 });

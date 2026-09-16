@@ -35,7 +35,7 @@
       ...central,
       name: central.name || '',
       email: central.email || '',
-      localArea: central.localArea || central.market || '',
+      localArea: central.localArea || central.location || central.localMarket || central.market || central.city || central.serviceArea || central.primaryMarket || '',
       voiceTraits: central.voiceTraits || [],
       personality: central.personality || '',
       tone: central.tone || 'Friendly & Relatable',
@@ -685,7 +685,13 @@ function loadSavedSocialPlan() {
 async function generateMonthlyPlan() {
     const month = document.getElementById('plan-month').value;
     const year = document.getElementById('plan-year').value;
-    const localArea = document.getElementById('plan-areas')?.value.trim() || 'your area';
+    const localArea = (document.getElementById('plan-areas')?.value || '').trim()
+      || (typeof window.getProfileMarketText === 'function' ? window.getProfileMarketText() : '')
+      || 'your area';
+    const hobbiesForm = (document.getElementById('plan-hobbies')?.value || '').trim()
+      || (typeof window.getProfileHobbiesText === 'function' ? window.getProfileHobbiesText() : '');
+    const familyForm = (document.getElementById('plan-family')?.value || '').trim()
+      || (typeof window.getProfileFamilyText === 'function' ? window.getProfileFamilyText() : '');
     const customPrompt = document.getElementById('custom-plan-prompt')?.value.trim() || '';
 
     // Pull rich profile for the monthly calendar prompt (consistent with single-post gen + other tools)
@@ -723,7 +729,10 @@ Custom instructions: ${customPrompt || 'None — use best judgment'}.
 
 AGENT PROFILE & VOICE (make the overview + posts feel like *this* agent — personality, voice, tone, market. Hobbies only when a theme day is Personal/Hobbies or when natural; do NOT make the whole month hobby-branded):
 ${personalization}
-${eff.localArea ? `Primary market: ${eff.localArea}.` : ''}
+Primary market / area(s): ${localArea}.
+${hobbiesForm ? `Hobbies, passions & interests (light seasoning): ${hobbiesForm}.` : ''}
+${familyForm ? `Family info (sparse, only if natural): ${familyForm}.` : ''}
+${eff.localArea && eff.localArea !== localArea ? `Profile market: ${eff.localArea}.` : ''}
 ${typeof window.buildHobbyRestraintPromptBlock === 'function' ? window.buildHobbyRestraintPromptBlock() : ''}
 HOBBY / CALENDAR RESTRAINT: Unless the user selected a hobbies theme, keep hobby-specific posts sparse (roughly ≤2–4 days in the month). Even with hobbies theme selected, vary topics — not every day is golf/cooking/etc. Market, process, and partner posts stay professional without forced hobby puns.
 
@@ -1114,67 +1123,77 @@ window.copySinglePost = function(postId, event) {
     });
 };
 
-// Load saved personal info and themes + pre-fill from central profile
-document.addEventListener('DOMContentLoaded', () => {
-    const savedPersonal = localStorage.getItem('socialPlanPersonal');
-    if (savedPersonal) {
-        const data = JSON.parse(savedPersonal);
-        if (document.getElementById('plan-areas')) document.getElementById('plan-areas').value = data.areas || '';
-        if (document.getElementById('plan-hobbies')) document.getElementById('plan-hobbies').value = data.hobbies || '';
-        if (document.getElementById('plan-family')) document.getElementById('plan-family').value = data.family || '';
-        if (document.getElementById('custom-plan-prompt')) document.getElementById('custom-plan-prompt').value = data.custom || '';
-    }
-
-    const savedThemes = localStorage.getItem('socialPlanThemes');
-    if (savedThemes) {
-        const themes = JSON.parse(savedThemes);
-        const themeIds = [
-            'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
-            'theme-listings', 'theme-cashout', 'theme-purchase', 'theme-equity',
-            'theme-recipes', 'theme-trivia', 'theme-localbusiness'
-        ];
-        themeIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && themes[id] !== undefined) el.checked = themes[id];
-        });
-    }
-
-    // Pre-fill from central userProfile if the fields are still empty
-    prefillCalendarFromProfile();
-});
-
 function prefillCalendarFromProfile() {
     const profile = getCentralProfile();
-    if (!profile) return;
-
+    const market = (typeof window.getProfileMarketText === 'function'
+      ? window.getProfileMarketText(profile)
+      : (profile.localArea || profile.location || profile.localMarket || profile.market || profile.city || profile.serviceArea || profile.primaryMarket || ''));
+    const hobbies = (typeof window.getProfileHobbiesText === 'function'
+      ? window.getProfileHobbiesText(profile)
+      : '');
+    const family = (typeof window.getProfileFamilyText === 'function'
+      ? window.getProfileFamilyText(profile)
+      : (profile.family || profile.familyInfo || ''));
+    if (typeof window.fillEmptyToolField === 'function') {
+      window.fillEmptyToolField(document.getElementById('plan-areas'), market);
+      window.fillEmptyToolField(document.getElementById('plan-hobbies'), hobbies);
+      window.fillEmptyToolField(document.getElementById('plan-family'), family);
+      return;
+    }
     const areasEl = document.getElementById('plan-areas');
     const hobbiesEl = document.getElementById('plan-hobbies');
     const familyEl = document.getElementById('plan-family');
-
-    if (areasEl && !areasEl.value.trim()) {
-        const loc = profile.localArea || profile.location || profile.market || '';
-        if (loc) areasEl.value = loc;
-    }
-    if (hobbiesEl && !hobbiesEl.value.trim()) {
-        let hobbies = '';
-        if (Array.isArray(profile.hobbies) && profile.hobbies.length) {
-            hobbies = profile.hobbies.join(', ');
-        } else if (profile.hobbies) {
-            hobbies = profile.hobbies;
-        }
-        if (profile['hobbies-other'] || profile.hobbiesOther) {
-            hobbies += (hobbies ? ', ' : '') + (profile.hobbiesOther || profile['hobbies-other']);
-        }
-        if (hobbies) hobbiesEl.value = hobbies;
-    }
-    if (familyEl && !familyEl.value.trim() && profile.family) {
-        familyEl.value = profile.family;
-    }
+    if (areasEl && !areasEl.value.trim() && market) areasEl.value = market;
+    if (hobbiesEl && !hobbiesEl.value.trim() && hobbies) hobbiesEl.value = hobbies;
+    if (familyEl && !familyEl.value.trim() && family) familyEl.value = family;
 }
+
+function restoreSocialCalendarForm() {
+    prefillCalendarFromProfile();
+    try {
+      const savedPersonal = localStorage.getItem('socialPlanPersonal');
+      if (savedPersonal) {
+        const data = JSON.parse(savedPersonal);
+        const areasEl = document.getElementById('plan-areas');
+        const hobbiesEl = document.getElementById('plan-hobbies');
+        const familyEl = document.getElementById('plan-family');
+        const customEl = document.getElementById('custom-plan-prompt');
+        if (areasEl && (data.areas || '').trim()) areasEl.value = data.areas;
+        if (hobbiesEl && (data.hobbies || '').trim()) hobbiesEl.value = data.hobbies;
+        if (familyEl && (data.family || '').trim()) familyEl.value = data.family;
+        if (customEl && data.custom != null) customEl.value = data.custom || '';
+      }
+    } catch (e) { /* ignore */ }
+    try {
+      const savedThemes = localStorage.getItem('socialPlanThemes');
+      if (savedThemes) {
+        const themes = JSON.parse(savedThemes);
+        [
+          'theme-family', 'theme-hobbies', 'theme-local', 'theme-fun', 'theme-polls',
+          'theme-listings', 'theme-cashout', 'theme-purchase', 'theme-equity',
+          'theme-recipes', 'theme-trivia', 'theme-localbusiness'
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && themes[id] !== undefined) el.checked = !!themes[id];
+        });
+      }
+    } catch (e) { /* ignore */ }
+    prefillCalendarFromProfile();
+}
+
 window.prefillCalendarFromProfile = prefillCalendarFromProfile;
+window.restoreSocialCalendarForm = restoreSocialCalendarForm;
+if (typeof window.registerProfilePrefill === 'function') {
+  window.registerProfilePrefill('social-post', restoreSocialCalendarForm);
+}
 window.addEventListener('profile-updated', () => {
     try { prefillCalendarFromProfile(); } catch (e) { /* ignore */ }
 });
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', restoreSocialCalendarForm);
+} else {
+  restoreSocialCalendarForm();
+}
 
 // Save personal info on change
 ['plan-areas', 'plan-hobbies', 'plan-family', 'custom-plan-prompt'].forEach(id => {
@@ -1227,12 +1246,7 @@ themeIds.forEach(id => {
   // INITIALIZATION
   // =====================================================
   function initSocialPostFeature() {
-    // The original DOMContentLoaded for loadSavedSocialPlan is included above.
-    // Re-attach any additional listeners if needed when the script loads late.
-
-    // Theme checkbox persistence (the original code had this at the end of the block)
-    // It is already present in the appended calendar code.
-
+    try { restoreSocialCalendarForm(); } catch (e) {}
     console.log('%c[social-post.js] Social Media Post + Calendar Planner initialized', 'color:#00A89D');
   }
 

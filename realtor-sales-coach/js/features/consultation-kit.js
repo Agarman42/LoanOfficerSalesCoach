@@ -331,8 +331,12 @@
     const output = document.getElementById('consult-output');
     if (output) { output.classList.add('hidden'); output.innerHTML = ''; }
 
-    const prompt = `You are an elite real estate agent coach. Create a complete, professional consultation prep kit for this client appointment. Incorporate the selected key client highlights/situation flags into rapport, objections, and strategy sections for hyper-personalized output.
+    const profileSnippet = (typeof window.buildProfilePromptSnippet === 'function')
+      ? window.buildProfilePromptSnippet({ role: 'real estate agent' })
+      : '';
 
+    const prompt = `You are an elite real estate agent coach. Create a complete, professional consultation prep kit for this client appointment. Incorporate the selected key client highlights/situation flags into rapport, objections, and strategy sections for hyper-personalized output.
+${profileSnippet}
 Quick scenario: ${preset === 'custom' ? 'Fully custom' : preset}
 Appointment type: ${type}
 Property address: ${address || 'in a competitive local market'}

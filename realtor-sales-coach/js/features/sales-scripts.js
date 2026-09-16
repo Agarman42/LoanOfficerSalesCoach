@@ -327,8 +327,9 @@ async function generateSalesScript() {
 
     const prompt = `You are an expert real estate communication coach helping loan officers build better relationships.
 
-LOAN OFFICER PROFILE:
+AGENT PROFILE:
 ${personalization}
+${typeof window.buildProfilePromptSnippet === 'function' ? window.buildProfilePromptSnippet({ role: 'real estate agent' }) : ''}
 
 Generate exactly 4 varied, natural scripts for this situation:
 

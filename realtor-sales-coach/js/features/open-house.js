@@ -288,8 +288,12 @@
     const output = document.getElementById('oh-output');
     if (output) { output.classList.add('hidden'); output.innerHTML = ''; }
 
-    const prompt = `You are an elite real estate agent coach specializing in high-converting open houses. Create a complete, ready-to-use open house kit for this listing. Use as many of the highlighted features as possible to create specific, memorable talking points that differentiate this property.
+    const profileSnippet = (typeof window.buildProfilePromptSnippet === 'function')
+      ? window.buildProfilePromptSnippet({ role: 'real estate agent' })
+      : '';
 
+    const prompt = `You are an elite real estate agent coach specializing in high-converting open houses. Create a complete, ready-to-use open house kit for this listing. Use as many of the highlighted features as possible to create specific, memorable talking points that differentiate this property.
+${profileSnippet}
 Primary goal: ${goal}
 Open House Type: ${ohType}
 Property type: ${propertyType}

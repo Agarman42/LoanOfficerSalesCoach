@@ -142,7 +142,7 @@
     <script src="js/ui.js?v=20260911-nl-get-most-v3108"></script>
     <script src="js/features/app-feedback.js?v=20260709-realtor-v309"></script>
     <!-- Core UI (Phase 0.5) - menu, quotes, theme -->
-    <script defer src="js/main.js?v=20260818-hide-calc"></script>
+    <script defer src="js/main.js?v=20260912-profile-prefill-v3117"></script>
     <script defer src="js/features/sidebar-ai-indicators.js?v=20260728-ai-asterisk"></script>
     <!-- LO brand plate from ?lo= token (must not wait for full feature-loader) -->
     <script defer src="js/features/lo-brand-chrome.js?v=20260911-present-v3109"></script>
@@ -150,7 +150,7 @@
       Home Coach Setup: must not wait for sequential feature-loader (40+ scripts).
       defer = fetch during HTML parse, run right after main.js → setup paints ASAP.
     -->
-    <script defer src="js/features/user-profile.js?v=20260827-nl-bundle-profile"></script>
+    <script defer src="js/features/user-profile.js?v=20260912-profile-prefill-v3117"></script>
     <script defer src="js/features/home-favorites.js?v=20260818-hide-calc"></script>
     <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
     <!-- Invite-gated auth: lock UI until /api/auth/me succeeds (Realtor only) -->
@@ -9337,7 +9337,7 @@ try {
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260818-demo-bio"></script>
+<script src="js/feature-loader.js?v=20260912-v3117"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

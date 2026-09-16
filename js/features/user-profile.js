@@ -187,7 +187,9 @@
     const niches = asArray(p.niches);
     const voiceTraits = asArray(p.voiceTraits);
     const formats = asArray(p.formats);
-    const location = (p.location || p.localArea || p.market || '').trim();
+    const location = (
+      p.location || p.localMarket || p.localArea || p.market || p.city || p.serviceArea || p.primaryMarket || ''
+    ).trim();
 
     const goals = [
       p.monthlyUnits ? `${p.monthlyUnits} loans/mo` : '',
@@ -215,7 +217,7 @@
       databaseSize: p.databaseSize || '',
       databaseSizeLabel: DATABASE_LABELS[p.databaseSize] || '',
       partnerFocus: (p.partnerFocus || '').trim(),
-      family: (p.family || '').trim(),
+      family: (p.family || p.familyInfo || '').trim(),
       personality: (p.personality || '').trim(),
       tone: p.tone || '',
       contentNotes: (p.contentNotes || '').trim(),
@@ -1925,6 +1927,83 @@
 
     console.log('%c[user-profile] Initialized — polished guided setup + jump hints', 'color:#00A89D');
   }
+
+  const MARKET_KEYS = ['location', 'localMarket', 'localArea', 'market', 'city', 'serviceArea', 'primaryMarket'];
+
+  function pickProfileText(obj, keys) {
+    const p = obj || {};
+    for (let i = 0; i < keys.length; i++) {
+      const v = p[keys[i]];
+      if (v == null) continue;
+      const s = Array.isArray(v) ? v.filter(Boolean).join(', ') : String(v);
+      const t = s.trim();
+      if (t && t.toLowerCase() !== 'undefined' && t.toLowerCase() !== 'null') return t;
+    }
+    return '';
+  }
+
+  window.getProfileMarketText = function (profile) {
+    const p = profile || (typeof window.getUserProfile === 'function' ? window.getUserProfile() : {});
+    return pickProfileText(p, MARKET_KEYS);
+  };
+
+  window.getProfileHobbiesText = function (profile) {
+    const p = profile || (typeof window.getUserProfile === 'function' ? window.getUserProfile() : {});
+    const parts = [];
+    if (Array.isArray(p.hobbies)) parts.push.apply(parts, p.hobbies);
+    else if (p.hobbies) parts.push(p.hobbies);
+    const extra = p.hobbiesOther || p['hobbies-other'] || p.passions || p.interests || '';
+    if (extra) parts.push(extra);
+    return parts.map((x) => String(x || '').trim()).filter((x) => x && x.toLowerCase() !== 'undefined').join(', ');
+  };
+
+  window.getProfileFamilyText = function (profile) {
+    const p = profile || (typeof window.getUserProfile === 'function' ? window.getUserProfile() : {});
+    return pickProfileText(p, ['family', 'familyInfo', 'family-info']);
+  };
+
+  window.fillEmptyToolField = function (el, value) {
+    if (!el) return false;
+    if (window.__profileToolSyncing || window.__nlFormSyncing) return false;
+    if (document.activeElement === el) return false;
+    const v = String(value == null ? '' : value).trim();
+    if (!v || v.toLowerCase() === 'undefined' || v.toLowerCase() === 'null') return false;
+    if ((el.value || '').trim()) return false;
+    window.__profileToolSyncing = true;
+    try { el.value = v; } finally { window.__profileToolSyncing = false; }
+    return true;
+  };
+
+  window.buildProfilePromptSnippet = function (opts) {
+    const p = typeof window.getUserProfile === 'function' ? window.getUserProfile() : {};
+    const role = (opts && opts.role) || 'loan officer';
+    const lines = [];
+    if (p.name) lines.push('Name: ' + p.name);
+    const market = window.getProfileMarketText(p);
+    if (market) lines.push('Primary market: ' + market);
+    if (p.tone) lines.push('Voice/tone: ' + p.tone);
+    if (p.intro) lines.push('One-line intro: ' + p.intro);
+    if (p.nmls) lines.push('NMLS: ' + p.nmls);
+    if (p.title) lines.push('Title: ' + p.title);
+    const hobbies = window.getProfileHobbiesText(p);
+    if (hobbies) lines.push('Hobbies/passions (light seasoning only): ' + hobbies);
+    const family = window.getProfileFamilyText(p);
+    if (family) lines.push('Family/life (use only if natural): ' + family);
+    if (!lines.length) return '';
+    return '\nPROFILE for this ' + role + ' (use for local voice; do not invent missing details):\n' + lines.join('\n') + '\n';
+  };
+
+  const _profilePrefillFns = Object.create(null);
+  window.registerProfilePrefill = function (sectionId, fn) {
+    if (!sectionId || typeof fn !== 'function') return;
+    _profilePrefillFns[sectionId] = fn;
+  };
+  window.applyProfilePrefillForSection = function (sectionId) {
+    const fn = _profilePrefillFns[sectionId];
+    if (typeof fn === 'function') {
+      try { fn(); } catch (e) { console.warn('[profile-prefill]', sectionId, e); }
+    }
+  };
 
   window.getUserProfile = function getUserProfile() {
     return normalizeProfile(readRawProfile());

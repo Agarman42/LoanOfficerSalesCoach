@@ -6894,6 +6894,11 @@ function copyForOutlook() {
   }
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
+  if (typeof window.registerProfilePrefill === 'function') {
+    window.registerProfilePrefill('newsletter-generator', function () {
+      if (typeof window.syncNewsletterFromProfile === 'function') window.syncNewsletterFromProfile(true);
+    });
+  }
   window.syncNewsletterContactFromProfile = syncNewsletterContactFromProfile;
   window.showNewsletterReviewHandoff = showNewsletterReviewHandoff;
   window.updateCustomContentChoicesVisibility = updateCustomContentChoicesVisibility;

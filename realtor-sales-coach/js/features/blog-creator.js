@@ -199,7 +199,7 @@
       // Provide safe defaults
       name: central.name || '',
       email: central.email || '',
-      localArea: central.localArea || central.market || '',
+      localArea: central.localArea || central.location || central.localMarket || central.market || central.city || central.serviceArea || central.primaryMarket || '',
       voiceTraits: central.voiceTraits || [],
       personality: central.personality || '',
       tone: central.tone || 'Friendly & Relatable',
@@ -1561,11 +1561,13 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
     };
 
     if (localInput) {
-        // Prefill from central profile
-        const prof = getCentralProfile();
-        const savedArea = prof.localArea || prof.market || '';
-        if (savedArea && !localInput.value) {
-            localInput.value = savedArea;
+        const savedArea = (typeof window.getProfileMarketText === 'function')
+          ? window.getProfileMarketText(getCentralProfile())
+          : ((getCentralProfile().localArea || getCentralProfile().location || getCentralProfile().market || ''));
+        if (typeof window.fillEmptyToolField === 'function') {
+          window.fillEmptyToolField(localInput, savedArea);
+        } else if (savedArea && !localInput.value) {
+          localInput.value = savedArea;
         }
 
         // Save whenever user leaves the field
@@ -1615,6 +1617,14 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
         try { localStorage.setItem('lastBlogOutput', out.innerHTML); } catch (e) {}
       }
     } catch (e) {}
+
+    if (typeof window.registerProfilePrefill === 'function') {
+      window.registerProfilePrefill('blog', function () {
+        const el = document.getElementById('blog-local-area');
+        const market = typeof window.getProfileMarketText === 'function' ? window.getProfileMarketText() : '';
+        if (typeof window.fillEmptyToolField === 'function') window.fillEmptyToolField(el, market);
+      });
+    }
 
     console.log('%c[blog-creator.js] Blog Creator initialized', 'color:#00A89D');
   }

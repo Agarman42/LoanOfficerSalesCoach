@@ -285,8 +285,12 @@
       output.innerHTML = '';
     }
 
-    const prompt = `You are an elite real estate copywriter crafting emotionally compelling listing descriptions for top-producing agents.
+    const profileSnippet = (typeof window.buildProfilePromptSnippet === 'function')
+      ? window.buildProfilePromptSnippet({ role: 'real estate agent' })
+      : '';
 
+    const prompt = `You are an elite real estate copywriter crafting emotionally compelling listing descriptions for top-producing agents.
+${profileSnippet}
 Tone: ${tone}
 Property Type: ${propertyType}
 ${bedsBaths ? `Beds/Baths: ${bedsBaths}` : ''}

@@ -3281,6 +3281,15 @@ window.applyPlanFeedbackAndRegenerate = function() {
   }, 300);
 };
 
+if (typeof window.registerProfilePrefill === 'function') {
+  window.registerProfilePrefill('planning', function () {
+    if (typeof window.syncPlanningFormFromProfile === 'function') window.syncPlanningFormFromProfile();
+  });
+  window.registerProfilePrefill('weekly-win-plan', function () {
+    if (typeof window.syncPlanningFormFromProfile === 'function') window.syncPlanningFormFromProfile();
+  });
+}
+
 window.syncPlanningFormFromProfile = function(options) {
   const force = !!(options && options.force);
   const p = (typeof window.getUserProfile === 'function') ? window.getUserProfile() : {};

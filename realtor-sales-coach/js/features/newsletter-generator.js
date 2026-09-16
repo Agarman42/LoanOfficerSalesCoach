@@ -1887,8 +1887,14 @@ function fillNewsletterLocationFromProfileIfEmpty() {
         return el.value.trim();
       }
     } catch (e) { /* ignore */ }
-    const fromProfile = getProfileMarketValue();
-    if (fromProfile) el.value = fromProfile;
+    const fromProfile = (typeof window.getProfileMarketText === 'function')
+      ? window.getProfileMarketText()
+      : getProfileMarketValue();
+    if (fromProfile && typeof window.fillEmptyToolField === 'function') {
+      window.fillEmptyToolField(el, fromProfile);
+    } else if (fromProfile) {
+      el.value = fromProfile;
+    }
     return (el.value || '').trim();
 }
 
@@ -7228,6 +7234,9 @@ function copyForOutlook() {
 
   window.syncNewsletterFromProfile = syncNewsletterFromProfile;
   window.fillNewsletterLocationFromProfileIfEmpty = fillNewsletterLocationFromProfileIfEmpty;
+  if (typeof window.registerProfilePrefill === 'function') {
+    window.registerProfilePrefill('newsletter-generator', fillNewsletterLocationFromProfileIfEmpty);
+  }
   window.getNewsletterLocation = getNewsletterLocation;
   window.updatePersonalMediaPreviews = updatePersonalMediaPreviews;
   window.updateNewsletterProfileStatus = updateNewsletterProfileStatus;

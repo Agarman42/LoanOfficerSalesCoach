@@ -601,6 +601,9 @@
       if (typeof window.onCoachSectionShown === 'function') {
         try { window.onCoachSectionShown(id); } catch (e) { console.warn('[onboarding-coach]', e); }
       }
+      if (typeof window.applyProfilePrefillForSection === 'function') {
+        try { window.applyProfilePrefillForSection(id); } catch (e) {}
+      }
 
       // Weekly Win Plan (separate from 2026 Business Plan) button wiring (robust fallback)
       // IMPORTANT: Weekly Win Plan (time blocks) and 2026 Business Plan are TWO SEPARATE features.
