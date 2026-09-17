@@ -20,22 +20,65 @@
   // =====================================================
   // CENTRAL PROFILE INTEGRATION (consistent with Blog Creator + Weekly Win Plan)
   // =====================================================
-  function socialEngagementRulesBlock(kind) {
-    const calendar = kind === 'calendar';
-    const lines = [
-      'ENGAGEMENT MIX (required):',
-      '- About 1 in 3 posts must solicit a response: a specific question, A/B choice, or "this or that."',
-      '- Questions must be answerable in one tap (e.g. "Grill or smoker this weekend?" / "Which listing photo would you tap first?"). Ban empty "Thoughts?" or "What do you think?" with no options.',
-      '- Remaining posts: value, story, or local — still saveable/shareable (a tip, a number, or a line someone would send a friend).',
-      '- Stay in realtor world: listings, buyers, sellers, sphere, local life. Do NOT mention cash-out, HELOC, refinance, mortgage rates, or lender products.'
-    ];
-    if (calendar) {
-      lines.push('- Spread engagement posts through the month — not clustered in week 1. Aim for about 10 of 30 days as engagement posts.');
-      lines.push('- Only use CHECKED themes listed above. Unchecked themes stay out of the calendar.');
-    } else {
-      lines.push('- At least ONE of the three caption options must be an engagement post (specific question or A/B). The other two: value/story/local, still shareable.');
+  function socialClimateHint(monthNum, localArea) {
+    const m = parseInt(monthNum, 10) || (new Date().getMonth() + 1);
+    const area = String(localArea || '').toLowerCase();
+    const midwest = /indiana|fort wayne|carmel|fishers|noblesville|midwest|ohio|illinois|michigan|wisconsin|iowa|minnesota|missouri|kentucky/.test(area);
+    if (m === 12 || m === 1 || m === 2) {
+      return midwest
+        ? 'CLIMATE: Midwest winter. Indoor, chili, fireplace, snow, school calendars. Do NOT grill-in-the-yard or pool/beach as if it were July.'
+        : 'CLIMATE: Northern-hemisphere winter. Match outdoor ideas to cold weather unless the market is clearly a warm-climate city.';
     }
-    return lines.join('\n');
+    if (m >= 6 && m <= 8) {
+      return 'CLIMATE: Summer. Outdoor, grill, lake, heat are OK if the market supports them.';
+    }
+    if (m === 3 || m === 4 || m === 5) {
+      return 'CLIMATE: Spring. Yard clean-up, mud, opening windows — not peak beach season.';
+    }
+    return 'CLIMATE: Fall. Football weather, leaves, back-to-school, not July grilling.';
+  }
+
+  function socialQualityRulesBlock(kind, extra) {
+    extra = extra || {};
+    const calendar = kind === 'calendar';
+    const monthNum = extra.monthNum || (new Date().getMonth() + 1);
+    const year = extra.year || new Date().getFullYear();
+    const monthName = extra.monthName || '';
+    const days = extra.daysInMonth || 30;
+    const localArea = extra.localArea || 'the local market';
+    const lines = [
+      'QUALITY BAR (do not collapse later days or posts):',
+      'A. LENGTH — every day / every caption, not just the first ones:',
+      '- At least 2 sentences OR one sentence + a specific question (not "Relatable?").',
+      '- Value/story posts: target ~40–90 words. Engagement posts can be shorter but need a concrete hook.',
+      '- Ban a post that is only a pet name + "relatable."',
+      calendar ? `- Days ${Math.max(1, days - 9)}–${days} must match days 1–7 in substance. If you must shorten for tokens, cut repetition, never later days.` : '- All three caption options must have the same substance — option 3 cannot be a one-liner.',
+      'B. VARIETY' + (calendar ? ' (per 30-day plan):' : ':'),
+      calendar ? '- Max 4 posts that name a specific sports team or UFC.' : '- At most one of the three options may name a specific sports team or UFC.',
+      calendar ? '- Max 4 posts that name the pets.' : '- Pets: color, not the whole caption.',
+      calendar ? '- Max 3 golf posts; max 3 RZR/UTV posts.' : '- Do not make all three options the same hobby.',
+      calendar ? '- No two sports "or" questions in the same week. No hobby two days in a row.' : '- Do not reuse the same A/B across the three options.',
+      calendar ? '- Spread Profile hobbies across the month. MOST days = local, seasonal, people, or the job — not the hobby list.' : '- Prefer local/seasonal/job over hobby-list posts unless the user asked for a hobby angle.',
+      'C. DATE IS LAW. Each post is for that calendar day' + (monthName ? ` in ${monthName} ${year}` : '') + '.',
+      '- "Tonight / this weekend / on TV / kickoff" ONLY if that sport is in season THAT day.',
+      '- NFL: Sep–early Feb. After Super Bowl → no NFL tonight.',
+      '- MLB: late Mar–Oct only. Jan–Feb Yankees = offseason or "spring training isn\'t far" — NEVER "game on TV tonight."',
+      '- UFC: "anyone watching the next card?" is OK. Do not invent a fight night.',
+      '- Do not invent opponents, scores, or "I watched last night."',
+      socialClimateHint(monthNum, localArea),
+      'D. ENGAGEMENT (~1 in 3 posts):',
+      '- Specific, answerable, possible THAT day. One-tap A/B or this-or-that.',
+      '- Ban: "Thoughts?", "Relatable?", "Who\'s with me?" with no object, and the same A/B twice in a month.',
+      '- Rotate: local pick (coffee / park / trail), seasonal how-to, buyer/seller question, one-word poll tied to THAT week.',
+      calendar ? '- Spread engagement through the month (~10 of 30 days), not all in week 1.' : '- At least ONE of the three options is an engagement post; the other two are value/story/local.',
+      'E. DO NOT INVENT THE USER\'S WEEKEND.',
+      '- Profile facts (pets, hobbies, market, family names) are color, not a fake diary.',
+      '- OK: "Ka$h and King have claimed the couch again."',
+      '- NOT OK: "Tried a new taco spot last night" or "Watching UFC last night" unless Additional Instructions said so.',
+      'F. MIX: Stay in realtor world (listings, buyers, sellers, sphere, local). No cash-out, HELOC, refinance, rates-as-product, or pre-approval-as-your-job. Only CHECKED themes.',
+      calendar ? 'G. ORIGINALITY: Before you return the month, scan for repeated openers and repeated questions. Rewrite duplicates. Local color must vary (parks, winter, downtown, food) — not the same "best restaurant?" four times.' : 'G. ORIGINALITY: The three options must not recycle the same question or opener.'
+    ];
+    return lines.filter(Boolean).join('\n');
   }
 
   function getCentralProfile() {
@@ -210,7 +253,7 @@ Requirements for EACH caption:
 - Add 6–10 relevant hashtags at the very end (mix broad + local + niche).
 - Make the three options feel noticeably different (different hooks, angles, lengths, or emoji energy) while staying true to the voice.
 
-${socialEngagementRulesBlock('post')}
+${socialQualityRulesBlock('post', { localArea: (eff && eff.localArea) || '' })}
 
 Output format — EXACTLY this structure with no extra commentary:
 
@@ -746,7 +789,7 @@ Weave in ONLY these checked themes (leave unchecked themes out): ${themes.length
 
 Custom instructions: ${customPrompt || 'None — use best judgment'}.
 
-${socialEngagementRulesBlock('calendar')}
+${socialQualityRulesBlock('calendar', { monthNum: month, year, monthName, daysInMonth, localArea })}
 AGENT BAN: Do not mention cash-out, HELOC, refinance, mortgage rates, or lender products anywhere in this calendar.
 
 AGENT PROFILE & VOICE (make the overview + posts feel like *this* agent — personality, voice, tone, market. Hobbies only when a theme day is Personal/Hobbies or when natural; do NOT make the whole month hobby-branded):
@@ -756,13 +799,13 @@ ${hobbiesForm ? `Hobbies, passions & interests (light seasoning): ${hobbiesForm}
 ${familyForm ? `Family info (sparse, only if natural): ${familyForm}.` : ''}
 ${eff.localArea && eff.localArea !== localArea ? `Profile market: ${eff.localArea}.` : ''}
 ${typeof window.buildHobbyRestraintPromptBlock === 'function' ? window.buildHobbyRestraintPromptBlock() : ''}
-HOBBY / CALENDAR RESTRAINT: Unless the user selected a hobbies theme, keep hobby-specific posts sparse (roughly ≤2–4 days in the month). Even with hobbies theme selected, vary topics — not every day is golf/cooking/etc. Market, process, and partner posts stay professional without forced hobby puns.
+HOBBY / CALENDAR RESTRAINT: Hobbies are seasoning. Follow the variety caps above. Most days are local, seasonal, people, or the job.
 
 CRITICAL INSTRUCTIONS — DO NOT VIOLATE:
 - You MUST generate content for EVERY SINGLE ONE of the ${daysInMonth} days. Do not stop early, do not summarize, do not say "and so on".
 - The output table MUST contain EXACTLY ${daysInMonth} data rows (one for each day from 1 to ${daysInMonth}).
 - For EVERY day provide 3–4 varied, ready-to-post ideas (prefer 4). NEVER pad empty slots with "---", "—", "-", "N/A", or blank cells — only real captions.
-- If the month is long, keep individual posts concise but complete — never omit days to save tokens.
+- If the month is long, keep individual posts concise but complete — never omit days to save tokens. Days 25–31 must not be thinner than days 1–7.
 - Output as clean Markdown with:
   - Strong Overview section (key themes, why it works, execution motivation — inspiring and actionable).
   - Calendar as a table: columns "Day", "Date", "Theme", "Post 1", "Post 2", "Post 3", "Post 4".
@@ -854,11 +897,11 @@ Generate the COMPLETE table now with all ${daysInMonth} days.`;
         // Centralized API call (Phase 0) - supports system message
         const rawPlan = await window.callGrokAPI(null, {
             messages: [
-                { role: 'system', content: 'You are an expert social media strategist for real estate agents following the 70/30 relationship rule.' },
+                { role: 'system', content: 'You are an expert social media strategist for real estate agents. Follow date/season sports rules, variety caps, and keep days 25–31 as substantial as days 1–7. Never invent the user\'s weekend.' },
                 { role: 'user', content: fullPrompt }
             ],
             temperature: 0.7,
-            max_tokens: 9000
+            max_tokens: 12000
         });
 
         if (!rawPlan) throw new Error('Empty response from API');

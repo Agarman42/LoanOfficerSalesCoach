@@ -24,7 +24,7 @@
     'js/features/section-bottom-banners.js?v=20260720-review',
     'js/features/coach-polish.js?v=20260721-ux-polish',
     'js/features/partner-share.js?v=20260807-one-invite-branded',
-    'js/app-version.js?v=20260912-v3169',
+    'js/app-version.js?v=20260917-v3170',
     'js/features/newsletter-color-bundles.js?v=20260818-v3140',
     'js/features/generation-rules.js?v=20260720-hobby-restraint',
     'js/features/save-ribbon.js',
@@ -123,7 +123,7 @@
       'js/features/social-modals.js?v=20260623-lo-v222'
     ],
     'social-post': [
-      'js/features/social-post.js?v=20260912-social-engage-v3169'
+      'js/features/social-post.js?v=20260917-social-quality-v3170'
     ],
     'mindset-motivation': [
       'js/features/mindset-lab.js'
