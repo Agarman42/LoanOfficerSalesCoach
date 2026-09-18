@@ -49,6 +49,28 @@
     // Anything else (your Render URL, custom domain, Netlify, etc.) = hosted production
     return true;
   }
+  const SIGN_IN_REQUIRED_MSG = 'Sign in required — refresh or sign in again.';
+
+  function parseJsonSafe(text) {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function isAuthRequiredResponse(status, errorText, payload) {
+    if (status !== 401 && status !== 403) return false;
+    if (payload && payload.code === 'AUTH_REQUIRED') return true;
+    const t = String(errorText || (payload && (payload.error || payload.message)) || '');
+    return /AUTH_REQUIRED|Sign in required/i.test(t);
+  }
+
+  function isMissingServerKeyResponse(errorText, payload) {
+    const t = String(errorText || (payload && payload.error) || '');
+    return /No Grok API key provided|XAI_API_KEY|GROK_API_KEY|not configured with a (valid )?key/i.test(t);
+  }
+
   const DEFAULT_MODEL = 'grok-4-1-fast-reasoning';  // Workhorse for most tools
   const FAST_MODEL = 'grok-4-1-fast-reasoning';
   const CONTENT_MODEL = 'grok-4.6'; // Blog only — Newsletter uses FAST_MODEL
@@ -188,6 +210,7 @@
         response = await fetch(getProxyUrl(), {
           method: 'POST',
           headers,
+          credentials: 'include',
           body: JSON.stringify(payload),
           signal: controller.signal
         });
@@ -198,13 +221,19 @@
       if (!response.ok) {
         const errorText = await response.text().catch(() => '(no response body)');
         console.error('[Grok API] HTTP error', response.status, errorText);
+        const payloadErr = parseJsonSafe(errorText);
+
+        if (isAuthRequiredResponse(response.status, errorText, payloadErr)) {
+          const err = new Error(SIGN_IN_REQUIRED_MSG);
+          err.code = 'AUTH_REQUIRED';
+          err.status = response.status;
+          throw err;
+        }
 
         if (response.status === 401 || response.status === 403) {
-          if (isProductionHosted()) {
-            // Server-side key is missing or invalid on the hosted proxy
+          if (isMissingServerKeyResponse(errorText, payloadErr) || isProductionHosted()) {
             throw new Error('The hosted API service is not configured with a key. Please contact the site owner.');
           }
-          // Bad client key in local/dev mode
           localStorage.removeItem(STORAGE_KEY);
           throw new Error('Invalid or expired Grok API key. Please refresh and re-enter your key.');
         }
@@ -243,6 +272,12 @@
   window.callGrokAPI = callGrokAPI;
   window.ensureGrokApiKey = ensureApiKey;
   window.isProductionHosted = isProductionHosted;
+  window.GROK_SIGN_IN_REQUIRED_MSG = SIGN_IN_REQUIRED_MSG;
+  window.isGrokAuthRequiredError = function (err) {
+    if (!err) return false;
+    if (err.code === 'AUTH_REQUIRED') return true;
+    return /Sign in required|AUTH_REQUIRED/i.test(String(err.message || err));
+  };
 
   // Optional helper for debugging / settings UI later
   window.clearGrokApiKey = () => {
@@ -258,6 +293,7 @@
     try {
       const resp = await fetch(url, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer test-key'

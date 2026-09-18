@@ -5179,6 +5179,7 @@ async function prepareListingSpotlightHook(hook) {
         if (text.length > Math.max(raw.length * 3, raw.length + 180)) return raw;
         return text.slice(0, 280);
     } catch (e) {
+        // Optional polish — never fail the letter (including AUTH_REQUIRED).
         return raw;
     }
 }
@@ -5302,6 +5303,7 @@ async function prepareCustomSectionBody(title, body, options) {
         if (!asBrief && text.length > Math.max(raw.length * 3, raw.length + 400)) return raw;
         return text;
     } catch (e) {
+        // Optional polish / brief expand — never fail the letter (including AUTH_REQUIRED).
         return raw;
     }
 }
@@ -6331,7 +6333,8 @@ async function generateNewsletter(feedback = '') {
 
         const prompt = promptLines.join('\n');
 
-        // Centralized API call (Phase 0). Custom-section polish runs in parallel on the fast model.
+        // Main letter requires a valid session. Custom/spotlight polish is optional and
+        // must not reject Promise.all if it 401s or otherwise fails.
         const [fullContent, customBodyOut, listingHookOut] = await Promise.all([
             window.callGrokAPI(prompt, {
                 temperature: feedback ? 0.7 : 0.8,
@@ -6339,8 +6342,8 @@ async function generateNewsletter(feedback = '') {
                 timeoutMs: 75000,
                 model: window.GROK_FAST_MODEL || window.GROK_DEFAULT_MODEL || 'grok-4-1-fast-reasoning'
             }),
-            customBodyPromise,
-            listingHookPromise
+            Promise.resolve(customBodyPromise).catch(() => (customForRun && customForRun.body) || ''),
+            Promise.resolve(listingHookPromise).catch(() => (listingForRun && listingForRun.hook) || '')
         ]);
         customInjectPayload = customForRun
             ? { title: customForRun.title, body: customBodyOut || customForRun.body, rawBody: customForRun.body }
@@ -6377,9 +6380,14 @@ async function generateNewsletter(feedback = '') {
         console.error('Generation failed', err);
         html = '';
         const hadGoodPreview = !!(lastGeneratedHTML && lastGeneratedHTML.trim());
-        const friendly = isNewsletterTimeoutError(err)
-          ? newsletterTimeoutUserMessage()
-          : 'Newsletter generation failed. Please try again.';
+        const authFail = typeof window.isGrokAuthRequiredError === 'function'
+            ? window.isGrokAuthRequiredError(err)
+            : /Sign in required|AUTH_REQUIRED/i.test(String((err && err.message) || ''));
+        const friendly = authFail
+          ? (window.GROK_SIGN_IN_REQUIRED_MSG || 'Sign in required — refresh or sign in again.')
+          : isNewsletterTimeoutError(err)
+            ? newsletterTimeoutUserMessage()
+            : 'Newsletter generation failed. Please try again.';
         showNewsletterGenerateError(friendly, { preservePreview: hadGoodPreview });
         gtag('event', feedback ? 'edit_newsletter_failed' : 'generate_newsletter_failed', {
             event_category: 'Tool Usage',

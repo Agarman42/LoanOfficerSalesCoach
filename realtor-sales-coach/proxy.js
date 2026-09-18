@@ -118,6 +118,7 @@ app.get('/api/health', (_req, res) => {
     ok: true,
     service: 'agent-sales-coach-proxy',
     hasServerKey: !!(process.env.XAI_API_KEY || process.env.GROK_API_KEY),
+    hasSessionSecret: !!(process.env.AUTH_SESSION_SECRET || process.env.SESSION_SECRET),
     auth: process.env.AUTH_DISABLED === '1' ? 'disabled' : 'enabled',
     authBackend: agentAuthBackend || (process.env.DATABASE_URL ? 'postgres' : 'file'),
     authDurable: !!(agentAuthBackend === 'postgres' || process.env.DATABASE_URL),
