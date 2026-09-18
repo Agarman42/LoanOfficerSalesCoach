@@ -3282,33 +3282,12 @@ function persistPersonalMediaSizes() {
     } catch (e) { /* ignore */ }
 }
 
-/** CSS on existing letter images only — never srcdoc (srcdoc reloads stack and jank the tab). */
-function applyCommittedMediaSizeToPreviewIframe() {
-    if (isNewsletterWizardOpen()) return;
-    const iframe = document.querySelector('#nl-preview iframe');
-    if (!iframe) return;
-    let doc = null;
-    try { doc = iframe.contentDocument || iframe.contentWindow?.document; } catch (e) { return; }
-    if (!doc) return;
-    const photoPx = getPersonalPhotoWidthPx();
-    const videoPx = getPersonalVideoWidthPx();
-    doc.querySelectorAll('img[alt="Personal photo"], table[data-nl-personal-photo="1"] img').forEach((img) => {
-        img.style.width = photoPx + 'px';
-        img.style.maxWidth = '100%';
-    });
-    doc.querySelectorAll('img[alt="Watch Personal Video"], table[data-nl-personal-video="1"] img').forEach((img) => {
-        img.style.width = videoPx + 'px';
-        img.style.maxWidth = '100%';
-    });
-}
-
 function commitPersonalMediaSlider() {
     persistPersonalMediaSizes();
     applyPersonalPhotoPreviewSizing();
     applyPersonalVideoPreviewSizing();
     paintPersonalMediaSliderLabel(document.getElementById('nl-personal-photo-size'));
     paintPersonalMediaSliderLabel(document.getElementById('nl-personal-video-size'));
-    applyCommittedMediaSizeToPreviewIframe();
     const key = personalMediaSizeKey();
     if (key === _nlSliderLastKey) return;
     _nlSliderLastKey = key;
@@ -3316,7 +3295,7 @@ function commitPersonalMediaSlider() {
     _nlHtmlPatchTimer = setTimeout(() => {
         _nlHtmlPatchTimer = 0;
         patchPersonalMediaSizesInNewsletter({ skipPreview: true });
-    }, 400);
+    }, 0);
 }
 
 function queuePersonalMediaSliderCommit() {
@@ -5476,8 +5455,6 @@ function updatePersonalMediaPreviews() {
             applyPersonalVideoPreviewSizing();
         }
     }
-
-    patchPersonalMediaSizesInNewsletter();
 }
 
 function getNewsletterGeneratorRoot() {
@@ -5585,14 +5562,16 @@ function wireNewsletterLiveFeedback() {
         if (el.id === 'nl-feedback' || el.id === 'nl-html-raw') return;
         // Section chips have a cheap delegated handler — never run live preview/srcdoc work on toggle.
         if (el.type === 'checkbox' && el.id && el.id.startsWith('nl-')) return;
-        if (el.id === 'nl-personal-photo-size' || el.id === 'nl-personal-video-size') {
+        if (el.id === 'nl-personal-photo-size' || el.id === 'nl-personal-video-size' || el.type === 'range') {
             el.addEventListener('input', () => {
                 if (isNewsletterWizardOpen() || window.__nlFormSyncing) return;
                 paintPersonalMediaSliderLabel(el);
+                if (el.id === 'nl-personal-photo-size') applyPersonalPhotoPreviewSizing();
+                else if (el.id === 'nl-personal-video-size') applyPersonalVideoPreviewSizing();
             });
-            el.addEventListener('change', queuePersonalMediaSliderCommit);
             el.addEventListener('pointerup', queuePersonalMediaSliderCommit);
             el.addEventListener('pointercancel', queuePersonalMediaSliderCommit);
+            el.addEventListener('change', queuePersonalMediaSliderCommit);
             return;
         }
         el.addEventListener('input', refresh);
@@ -6866,19 +6845,17 @@ function copyForOutlook() {
     if (output) output.classList.add('hidden');
   };
 
-  // Restore last newsletter HTML into raw + preview iframe (called from init).
+  // Restore last newsletter HTML into raw + preview iframe (called from init / Last issue).
   function restoreLastNewsletter() {
     try {
       const last = localStorage.getItem('lastNewsletterHTML');
       if (!last) return;
-      // Skip heavy normalize on load — it can freeze the tab (ReDoS on large saved HTML).
-      // Lightweight header fix only: re-center title + "Insights from …" on restored previews.
-      // Trust saved HTML — dedupe stray duplicate headers only, never re-inject branding on refresh.
-      let html = dedupeRealtorBrandHeaders(last);
-      html = typeof ensureTitleHeaderRowCentered === 'function'
-        ? ensureTitleHeaderRowCentered(html)
-        : html;
-      html = sealAndStabilizeNewsletterHtml(html);
+      // Paint stored HTML only. Branding inject if the logo slot is still a placeholder —
+      // not a full generate, seal, listing inject, or photo-center pass.
+      let html = last;
+      if (!/data-nl-brand-header/i.test(html) && typeof injectAgentBranding === 'function') {
+        try { html = injectAgentBranding(html); } catch (e) { /* keep stored HTML */ }
+      }
       lastGeneratedHTML = html;
       const rawEl = document.getElementById('nl-html-raw');
       const previewEl = document.getElementById('nl-preview');
@@ -6903,6 +6880,7 @@ function copyForOutlook() {
   window.fillNewsletterLocationFromProfileIfEmpty = fillNewsletterLocationFromProfileIfEmpty;
   window.getNewsletterLocation = getNewsletterLocation;
   window.updatePersonalMediaPreviews = updatePersonalMediaPreviews;
+  window.updatePersonalCharMeter = updatePersonalCharMeter;
   window.fillPersonalFromProfile = fillPersonalFromProfile;
 
   // These helpers are called from HTML onclick in the newsletter section

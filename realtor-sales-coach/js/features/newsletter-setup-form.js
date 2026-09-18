@@ -109,25 +109,15 @@
     try { return (localStorage.getItem(PERSONAL_HISTORY_KEY) || '').trim(); } catch (e) { return ''; }
   }
 
-  /** Best-effort recover previous personal note from last generated HTML (legacy users). */
+  /** Recover previous personal note without DOMParser / querySelectorAll (those freeze large letters). */
   function extractPersonalFromLastNewsletter() {
     let html = '';
     try { html = localStorage.getItem('lastNewsletterHTML') || ''; } catch (e) { return ''; }
     if (!html || html.length < 40) return '';
     try {
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      // Prefer labeled personal modules, then common card patterns
-      const candidates = [
-        doc.querySelector('[data-nl-personal-update]'),
-        doc.querySelector('[data-nl-personal-note]'),
-        ...Array.from(doc.querySelectorAll('td, div, p')).filter((el) => {
-          const t = (el.textContent || '').trim();
-          const label = (el.previousElementSibling?.textContent || el.parentElement?.textContent || '').toLowerCase();
-          return t.length >= 40 && t.length < 1200 && /personal|from my desk|a note from/i.test(label + ' ' + (el.getAttribute('class') || ''));
-        })
-      ].filter(Boolean);
-      for (const el of candidates) {
-        const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      const m = html.match(/A Note From[\s\S]{0,400}?<p\b[^>]*>([\s\S]{40,1800}?)<\/p>/i);
+      if (m) {
+        const text = m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
         if (text.length >= 40) return text.slice(0, 1500);
       }
     } catch (e) { /* ignore */ }
@@ -160,20 +150,33 @@
     if (!last) $('nl-personal-history-popover')?.classList.add('hidden');
   }
 
+  function setLastIssueBusy(on) {
+    const btn = $('nl-personal-history-load-btn');
+    if (!btn) return;
+    btn.disabled = !!on;
+    btn.setAttribute('aria-busy', on ? 'true' : 'false');
+    if (on) {
+      if (!btn.dataset.nlIdleLabel) btn.dataset.nlIdleLabel = (btn.textContent || 'Last issue').trim();
+      btn.textContent = 'Loading…';
+    } else {
+      btn.textContent = btn.dataset.nlIdleLabel || 'Last issue';
+    }
+  }
+
   function applyPersonalStoryHistory() {
     const last = loadPersonalStoryHistory();
     const ta = $('nl-personal-text');
     if (!last || !ta) return;
-    // Ensure personal section is open so the user sees the load
     const personalCb = $('nl-personal');
     if (personalCb && !personalCb.checked) {
       personalCb.checked = true;
-      personalCb.dispatchEvent(new Event('change', { bubbles: true }));
     }
     const fields = $('personal-fields');
     if (fields) fields.classList.remove('hidden');
     ta.value = last;
-    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    if (typeof window.updatePersonalCharMeter === 'function') {
+      try { window.updatePersonalCharMeter(); } catch (e) {}
+    }
     $('nl-personal-history-popover')?.classList.add('hidden');
     if (window.showToast) window.showToast('Loaded your last personal update.', 'success');
     try { ta.focus({ preventScroll: false }); } catch (e) { ta.focus(); }
@@ -190,17 +193,26 @@
     loadBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!loadPersonalStoryHistory()) return;
-      if (popover) {
-        const open = !popover.classList.contains('hidden');
-        if (open) applyPersonalStoryHistory();
-        else {
-          updatePersonalHistoryUI();
-          popover.classList.remove('hidden');
+      const run = () => {
+        setLastIssueBusy(false);
+        if (!loadPersonalStoryHistory()) return;
+        if (popover) {
+          const open = !popover.classList.contains('hidden');
+          if (open) applyPersonalStoryHistory();
+          else {
+            updatePersonalHistoryUI();
+            popover.classList.remove('hidden');
+          }
+        } else {
+          applyPersonalStoryHistory();
         }
-      } else {
-        applyPersonalStoryHistory();
+      };
+      if (loadPersonalStoryHistory()) {
+        run();
+        return;
       }
+      setLastIssueBusy(true);
+      window.setTimeout(run, 0);
     });
 
     $('nl-personal-history-use')?.addEventListener('click', (e) => {

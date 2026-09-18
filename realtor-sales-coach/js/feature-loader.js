@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260918-agent-v3123';
+  var V = '20260918-agent-v3124';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -62,8 +62,8 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260918-nl-auth-v3123',
-      'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
+      'js/features/newsletter-generator.js?v=20260918-nl-slider-v3124',
+      'js/features/newsletter-setup-form.js?v=20260918-nl-slider-v3124',
       'js/features/newsletter-wizard.js?v=20260918-nl-chips-v3122'
     ],
     'value-vault': [
@@ -135,8 +135,8 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260827-nl-bundle-profile',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260918-nl-auth-v3123',
-      'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
+      'js/features/newsletter-generator.js?v=20260918-nl-slider-v3124',
+      'js/features/newsletter-setup-form.js?v=20260918-nl-slider-v3124',
       'js/features/newsletter-wizard.js?v=20260918-nl-chips-v3122'
     ]
   };
@@ -272,6 +272,10 @@
 
     if (coreReady && !needsLazy) return null;
 
+    if (needsLazy) {
+      showLazyOverlay(SECTION_LABELS[id] || 'Loading tool…');
+    }
+
     var p = ensureCore();
     if (!needsLazy) return p;
 
@@ -279,7 +283,10 @@
       var stillNeed = lazy.some(function (src) {
         return !loaded[src];
       });
-      if (!stillNeed) return;
+      if (!stillNeed) {
+        hideLazyOverlay();
+        return;
+      }
       showLazyOverlay(SECTION_LABELS[id] || 'Loading tool…');
       return loadScriptList(lazy).then(
         function () {
