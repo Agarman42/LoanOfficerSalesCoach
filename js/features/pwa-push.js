@@ -111,6 +111,7 @@
       if (!nw) return;
       nw.addEventListener('statechange', function () {
         if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          try { nw.postMessage({ type: 'SKIP_WAITING' }); } catch (e) { /* ignore */ }
           showSwRefreshBanner();
         }
       });
@@ -124,11 +125,14 @@
       return null;
     }
     try {
-      swReg = await navigator.serviceWorker.register('/sw.js', {
+      swReg = await navigator.serviceWorker.register('/sw.js?v=3.172', {
         scope: '/',
         updateViaCache: 'none'
       });
       console.log('[pwa] SW registered', swReg.scope);
+      if (swReg.waiting) {
+        try { swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) { /* ignore */ }
+      }
       watchSwUpdates(swReg);
       return swReg;
     } catch (e) {

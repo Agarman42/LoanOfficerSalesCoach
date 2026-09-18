@@ -4399,12 +4399,7 @@ function wireCoreSectionDirectionControls() {
         }
     });
 
-    NL_CORE_DIRECTION_SECTIONS.forEach((cfg) => {
-        const cb = document.getElementById(cfg.checkboxId);
-        cb?.addEventListener('change', () => {
-            updateCoreSectionDirectionUI();
-        });
-    });
+    // Core-section chips use the delegated handler on #newsletter-generator.
 }
 
 function updateSpecificTopicsPlaceholder() {
@@ -5586,6 +5581,8 @@ function wireNewsletterLiveFeedback() {
     };
     root.querySelectorAll('input, select, textarea').forEach((el) => {
         if (el.id === 'nl-feedback' || el.id === 'nl-html-raw') return;
+        // Section chips have a cheap delegated handler — never run live preview/srcdoc work on toggle.
+        if (el.type === 'checkbox' && el.id && el.id.startsWith('nl-')) return;
         if (el.id === 'nl-personal-photo-size' || el.id === 'nl-personal-video-size') {
             el.addEventListener('input', () => {
                 if (isNewsletterWizardOpen() || window.__nlFormSyncing) return;
@@ -5794,10 +5791,120 @@ function persistNewsletterSectionCheckboxes() {
         document.querySelectorAll('#newsletter-generator input[type="checkbox"]:checked')
     )
         .map((c) => c.id)
-        .filter((id) => id && id.startsWith('nl-'));
+        .filter((id) => id && id.startsWith('nl-') && !id.startsWith('nl-wizard-'));
     try {
         localStorage.setItem('nl-sections', JSON.stringify(checked));
     } catch (e) { /* private mode */ }
+}
+
+const NL_SECTION_CHIP_PERSIST_MS = 350;
+let _nlSectionChipPersistTimer = 0;
+
+function isNewsletterSectionChip(el) {
+    return !!(el && el.type === 'checkbox' && el.id && el.id.startsWith('nl-') && !el.id.startsWith('nl-wizard-'));
+}
+
+function flushNewsletterSectionDraftPersist() {
+    persistNewsletterSectionCheckboxes();
+    try { persistCustomSectionPolishCheckbox(); } catch (e) {}
+    try { persistListingSpotlightPolishCheckbox(); } catch (e) {}
+}
+
+function schedulePersistNewsletterSectionCheckboxes() {
+    if (_nlSectionChipPersistTimer) clearTimeout(_nlSectionChipPersistTimer);
+    _nlSectionChipPersistTimer = setTimeout(() => {
+        _nlSectionChipPersistTimer = 0;
+        flushNewsletterSectionDraftPersist();
+    }, NL_SECTION_CHIP_PERSIST_MS);
+}
+
+function applyNewsletterCustomBlockVisibilityForChip(cbId) {
+    if (typeof NL_CUSTOM_CONTENT_BLOCKS === 'undefined') return false;
+    const entry = Object.entries(NL_CUSTOM_CONTENT_BLOCKS).find(([, cfg]) => cfg.checkboxId === cbId);
+    if (!entry) return false;
+    const [key, cfg] = entry;
+    const show = !!document.getElementById(cfg.checkboxId)?.checked;
+    const block = cfg.blockId ? document.getElementById(cfg.blockId) : null;
+    const row = cfg.rowId ? document.getElementById(cfg.rowId) : null;
+    if (block) block.classList.toggle('hidden', !show);
+    if (row) {
+        row.classList.toggle('border-[#00A89D]/50', show);
+        row.classList.toggle('ring-1', show);
+        row.classList.toggle('ring-[#00A89D]/25', show);
+        row.querySelectorAll('.nl-curated-row-actions, .nl-curated-preview-wrap').forEach((el) => {
+            el.classList.toggle('hidden', !show);
+        });
+    }
+    const inlineBtn = document.querySelector(`.nl-inline-customize-btn[data-nl-jump-custom="${key}"]`);
+    if (inlineBtn && !row) inlineBtn.classList.toggle('hidden', !show);
+    return true;
+}
+
+/**
+ * Cheap chip path — same as LO. Previously Agent attached per-checkbox persist
+ * plus live-feedback refresh → updatePersonalMediaPreviews →
+ * patchPersonalMediaSizesInNewsletter → setNewsletterPreviewHTML (srcdoc).
+ * Preview HTML updates only after Generate / Refine / wizard Finish.
+ */
+function onNewsletterSectionCheckboxChange(cb) {
+    if (!isNewsletterSectionChip(cb)) return;
+
+    if (cb.id === 'nl-personal') {
+        const fields = document.getElementById('personal-fields');
+        if (fields) fields.classList.toggle('hidden', !cb.checked);
+        const meter = document.getElementById('nl-personal-char-meter');
+        if (meter) meter.classList.toggle('hidden', !cb.checked);
+    }
+    if (cb.id === 'nl-include-video' && cb.checked) {
+        const personalCb = document.getElementById('nl-personal');
+        const fields = document.getElementById('personal-fields');
+        if (personalCb && !personalCb.checked) {
+            personalCb.checked = true;
+            if (fields) fields.classList.remove('hidden');
+        }
+    }
+    if (cb.id === 'nl-include-blog') {
+        const fields = document.getElementById('blog-fields');
+        if (fields) fields.classList.toggle('hidden', !cb.checked);
+    }
+    if (cb.id === 'nl-custom-section' && typeof updateCustomSectionFieldsVisibility === 'function') {
+        updateCustomSectionFieldsVisibility();
+    }
+    if (cb.id === 'nl-listing-spotlight' && typeof updateListingSpotlightFieldsVisibility === 'function') {
+        updateListingSpotlightFieldsVisibility();
+    }
+    if (cb.id === 'nl-personal' || cb.id === 'nl-include-photo' || cb.id === 'nl-include-video') {
+        const photoOn = !!document.getElementById('nl-include-photo')?.checked && !!document.getElementById('nl-personal')?.checked;
+        const videoOn = !!document.getElementById('nl-include-video')?.checked && !!document.getElementById('nl-personal')?.checked;
+        document.getElementById('nl-personal-photo-preview-wrap')?.classList.toggle('hidden', !photoOn);
+        document.getElementById('nl-personal-video-preview-wrap')?.classList.toggle('hidden', !videoOn);
+    }
+    if (typeof NL_CORE_DIRECTION_SECTIONS !== 'undefined' &&
+        NL_CORE_DIRECTION_SECTIONS.some((cfg) => cfg.checkboxId === cb.id) &&
+        typeof updateCoreSectionDirectionUI === 'function') {
+        updateCoreSectionDirectionUI();
+    }
+    applyNewsletterCustomBlockVisibilityForChip(cb.id);
+
+    schedulePersistNewsletterSectionCheckboxes();
+}
+
+/**
+ * Delegated only — same as LO. Lazy-load cannot miss chips.
+ * Do not attach per-checkbox listeners (those double-fired persist + preview work).
+ */
+function wireNewsletterSectionCheckboxes() {
+    const root = document.getElementById('newsletter-generator');
+    if (root && !root._nlSectionDelegateWired) {
+        root._nlSectionDelegateWired = true;
+        root.addEventListener('change', (e) => {
+            const cb = e.target;
+            if (!cb || cb.type !== 'checkbox') return;
+            onNewsletterSectionCheckboxChange(cb);
+        });
+    }
+    try { updateCustomSectionFieldsVisibility(); } catch (e) {}
+    try { updateListingSpotlightFieldsVisibility(); } catch (e) {}
 }
 
 function wireNewsletterFormPersistence() {
@@ -5807,10 +5914,10 @@ function wireNewsletterFormPersistence() {
     persistentFields.forEach((id) => {
         const el = document.getElementById(id);
         if (!el) return;
+        if (el.type === 'checkbox') return;
         const save = () => {
             try {
-                if (el.type === 'checkbox') localStorage.setItem(id, el.checked ? 'true' : 'false');
-                else localStorage.setItem(id, el.value);
+                localStorage.setItem(id, el.value);
             } catch (e) { /* ignore */ }
         };
         if (id === 'nl-location' || id === 'nl-personal-photo-size' || id === 'nl-personal-video-size') {
@@ -5828,32 +5935,7 @@ function wireNewsletterFormPersistence() {
         }
     });
 
-    document.querySelectorAll('#newsletter-generator input[type="checkbox"]').forEach((cb) => {
-        if (cb._nlPersistWired) return;
-        cb._nlPersistWired = true;
-        cb.addEventListener('change', () => {
-            persistNewsletterSectionCheckboxes();
-            if (cb.id === 'nl-personal') {
-                const fields = document.getElementById('personal-fields');
-                if (fields) fields.classList.toggle('hidden', !cb.checked);
-            }
-            if (cb.id === 'nl-include-blog') {
-                const fields = document.getElementById('blog-fields');
-                if (fields) fields.classList.toggle('hidden', !cb.checked);
-            }
-            if (cb.id === 'nl-custom-section' && typeof updateCustomSectionFieldsVisibility === 'function') {
-                updateCustomSectionFieldsVisibility();
-            }
-            if (cb.id === 'nl-custom-section-polish') persistCustomSectionPolishCheckbox();
-            if (cb.id === 'nl-listing-spotlight' && typeof updateListingSpotlightFieldsVisibility === 'function') {
-                updateListingSpotlightFieldsVisibility();
-            }
-            if (cb.id === 'nl-listing-spotlight-polish') persistListingSpotlightPolishCheckbox();
-            if (cb.id === 'nl-include-signature' || cb.id === 'nl-include-social') {
-                if (typeof updateBrandPreview === 'function') updateBrandPreview();
-            }
-        });
-    });
+    wireNewsletterSectionCheckboxes();
 }
 
 document.getElementById('generate-newsletter-btn')?.addEventListener('click', async () => {
@@ -7138,6 +7220,7 @@ function copyForOutlook() {
 
     try { wireNewsletterLiveFeedback(); } catch (e) {}
     try { wireNewsletterFeedbackFocusGuard(); } catch (e) {}
+    try { wireNewsletterSectionCheckboxes(); } catch (e) {}
     try { wireCoreSectionDirectionControls(); } catch (e) {}
     try { wireCustomContentJumpControls(); } catch (e) {}
     try { updateCustomContentChoicesVisibility(); } catch (e) {}
@@ -7157,44 +7240,20 @@ function copyForOutlook() {
       }
     }, 50);
 
-    const sigCb = document.getElementById('nl-include-signature');
-    const socialCb = document.getElementById('nl-include-social');
-    if (sigCb && socialCb) {
-      sigCb.addEventListener('change', updateBrandPreview);
-      socialCb.addEventListener('change', updateBrandPreview);
-    }
-
-    // Ensure conditional fields (personal / blog) show/hide work
+    // Initial show/hide only — chip toggles use the cheap delegated handler.
     setTimeout(() => {
       const personalCb = document.getElementById('nl-personal');
       const personalFields = document.getElementById('personal-fields');
       if (personalCb && personalFields) {
-        const togglePersonal = () => {
-          personalFields.classList.toggle('hidden', !personalCb.checked);
-          try {
-            updatePersonalCharMeter();
-            updatePersonalMediaPreviews();
-            updateNewsletterPreflightSummary();
-          } catch (e) {}
-        };
-        personalCb.addEventListener('change', togglePersonal);
-        togglePersonal();
+        personalFields.classList.toggle('hidden', !personalCb.checked);
       }
-      ['nl-include-photo', 'nl-include-video'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el || el.dataset.nlMediaToggleWired) return;
-        el.dataset.nlMediaToggleWired = '1';
-        el.addEventListener('change', () => {
-          try { updatePersonalMediaPreviews(); } catch (e) {}
-        });
-      });
       const blogCb = document.getElementById('nl-include-blog');
       const blogFields = document.getElementById('blog-fields');
       if (blogCb && blogFields) {
-        const toggleBlog = () => blogFields.classList.toggle('hidden', !blogCb.checked);
-        blogCb.addEventListener('change', toggleBlog);
-        toggleBlog();
+        blogFields.classList.toggle('hidden', !blogCb.checked);
       }
+      try { updateCustomSectionFieldsVisibility(); } catch (e) {}
+      try { updateListingSpotlightFieldsVisibility(); } catch (e) {}
     }, 80);
 
     // Emergency clear: ?clearNewsletter=1 wipes saved HTML that may have hung the tab on load.

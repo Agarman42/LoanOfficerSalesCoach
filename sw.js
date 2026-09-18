@@ -1,6 +1,6 @@
 /* LO Sales Coach service worker — bump CACHE_NAME with APP_VERSION on every release. */
 /* eslint-disable no-restricted-globals */
-const APP_VERSION = '3.171';
+const APP_VERSION = '3.172';
 const CACHE_NAME = 'sc-lo-v' + APP_VERSION;
 const OFFLINE_CACHE = CACHE_NAME + '-offline';
 
@@ -66,15 +66,58 @@ self.addEventListener('message', (event) => {
   }
 });
 
+function swFallbackResponse() {
+  return new Response('', {
+    status: 504,
+    statusText: 'Offline',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+  });
+}
+
+function ensureResponse(value) {
+  return value instanceof Response ? value : swFallbackResponse();
+}
+
+function shouldSkipFetchIntercept(req) {
+  const raw = String((req && req.url) || '');
+  if (!raw) return true;
+  if (raw === 'about:srcdoc' || raw.startsWith('about:')) return true;
+  let url;
+  try {
+    url = new URL(raw);
+  } catch (e) {
+    return true;
+  }
+  if (url.protocol === 'about:' || url.protocol === 'blob:' || url.protocol === 'data:') return true;
+  if (url.origin !== self.location.origin) return true;
+  if (url.pathname.startsWith('/api/')) return true;
+  if (url.pathname === '/sw.js') return true;
+  return false;
+}
+
+function isShellScriptRequest(req) {
+  try {
+    const p = new URL(req.url, self.location.origin).pathname;
+    return p === '/js/app-version.js' || p === '/js/feature-loader.js' || p === '/index.html';
+  } catch (e) {
+    return false;
+  }
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  if (shouldSkipFetchIntercept(req)) return;
 
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
-
-  if (url.pathname.startsWith('/api/')) return;
-  if (url.pathname === '/sw.js') return;
+  // Never cache-first the version footer or loader (v3.141 frozen-query class).
+  if (isShellScriptRequest(req) && !isDocumentRequest(req)) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => ensureResponse(res))
+        .catch(() => caches.match(req).then((hit) => ensureResponse(hit)))
+    );
+    return;
+  }
 
   if (isDocumentRequest(req)) {
     event.respondWith(
@@ -87,28 +130,35 @@ self.addEventListener('fetch', (event) => {
               c.put(new Request('/index.html'), copy).catch(() => {});
             }).catch(() => {});
           }
-          return res;
+          return ensureResponse(res);
         })
         .catch(() =>
-          caches.match(req).then((hit) => hit || caches.match('/index.html'))
+          caches
+            .match(req)
+            .then((hit) => hit || caches.match('/index.html'))
+            .then((hit) => ensureResponse(hit))
         )
+        .then((res) => ensureResponse(res))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req)
-        .then((res) => {
-          if (res && res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then((c) => c.put(req, copy)).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => cached);
-    })
+    caches
+      .match(req)
+      .then((cached) => {
+        if (cached) return cached;
+        return fetch(req)
+          .then((res) => {
+            if (res && res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE_NAME).then((c) => c.put(req, copy)).catch(() => {});
+            }
+            return ensureResponse(res);
+          })
+          .catch(() => ensureResponse(cached));
+      })
+      .then((res) => ensureResponse(res))
   );
 });
 
