@@ -7,12 +7,12 @@
 
   const TOTAL_STEPS = 5;
   const STORAGE_KEY = 'nlWizardLastStep';
-  const WIZARD_DOM_VERSION = '26';
+  const WIZARD_DOM_VERSION = '27';
   const PERSONAL_MIN_CHARS = 40;
 
   const STEP_META = [
     { title: 'Welcome', subtitle: 'Quick profile check' },
-    { title: 'Audience & style', subtitle: 'Who + how it reads' },
+    { title: 'Title & style', subtitle: 'Market + how it reads' },
     { title: 'Your story', subtitle: 'Personal update' },
     { title: 'Sections', subtitle: 'Pick, direct & extras' },
     { title: 'Review', subtitle: 'Confirm & generate' }
@@ -1461,7 +1461,7 @@
               <p id="nl-wizard-profile-warn" class="hidden text-xs text-amber-700 dark:text-amber-300 mt-3 mb-0">Tip: Open <strong>My Profile</strong> to set your local market — local sections pull from there. Your company signature adds when you send in Outlook.</p>
             </div>
             <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2 m-0 pl-0 list-none">
-              <li class="flex gap-2"><span class="text-[#00A89D]">✓</span> Confirm who you're writing for</li>
+              <li class="flex gap-2"><span class="text-[#00A89D]">✓</span> Confirm market, tone, and title</li>
               <li class="flex gap-2"><span class="text-[#00A89D]">✓</span> Add your personal story (highest-open section)</li>
               <li class="flex gap-2"><span class="text-[#00A89D]">✓</span> Choose sections + curated library picks</li>
               <li class="flex gap-2"><span class="text-[#00A89D]">✓</span> Review everything, then generate</li>
@@ -1469,17 +1469,17 @@
             <p id="nl-wizard-resume-offer" class="hidden mt-4 text-xs text-gray-500 m-0"></p>
           </div>
 
-          <!-- Step 2: Audience -->
+          <!-- Step 2: Title, market, tone, length -->
           <div data-nl-wizard-step="2" class="hidden">
             <p id="nl-wizard-step2-profile-hint" class="hidden text-xs text-[#00A89D] bg-[#00A89D]/8 border border-[#00A89D]/20 rounded-xl px-3 py-2 mb-3 m-0">
               <i class="fas fa-user-check mr-1" aria-hidden="true"></i> Empty fields are filled from <strong>My Profile</strong> when you open the wizard — change anything for this issue.
             </p>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Who you're writing for and how this issue should read.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">How this issue should read. Send it to your full list — no audience picker.</p>
+            <select id="nl-wizard-audience" class="hidden" aria-hidden="true" tabindex="-1"><option value="full" selected>Full Database</option></select>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-audience">Audience</label>
-                <select id="nl-wizard-audience" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm"></select>
-                <p class="text-[11px] text-gray-400 mt-1 m-0">Shapes tone and examples in the AI draft.</p>
+                <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-newsletter-title">Newsletter title <span class="font-normal text-gray-400">(optional)</span></label>
+                <input type="text" id="nl-wizard-newsletter-title" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm" placeholder="e.g., The Lending Edge | March 2026 — leave blank for auto">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-location">Local market</label>
@@ -1495,10 +1495,6 @@
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-length">Length</label>
                 <select id="nl-wizard-length" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-sm"></select>
               </div>
-            </div>
-            <div class="mt-4">
-              <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1" for="nl-wizard-newsletter-title">Newsletter title <span class="font-normal text-gray-400">(optional)</span></label>
-              <input type="text" id="nl-wizard-newsletter-title" class="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm" placeholder="e.g., The Lending Edge | March 2026 — leave blank for auto">
             </div>
             <div class="mt-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50">
               <label for="nl-wizard-color-bundle" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
@@ -1964,7 +1960,7 @@
   function cloneSelectOptions(fromId, toId) {
     const from = $(fromId);
     const to = $(toId);
-    if (!from || !to) return;
+    if (!from || !to || from.tagName !== 'SELECT' || to.tagName !== 'SELECT') return;
     to.innerHTML = from.innerHTML;
   }
 

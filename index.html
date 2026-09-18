@@ -5182,7 +5182,7 @@
     </div>
 
     <!-- Form Sections - Premium Card Style (matching Social section) -->
-    <div class="space-y-8 mb-12">
+    <div class="space-y-6 mb-12">
 
         <!-- Card 1: Content Settings (premium match to 2026 Plan / Social tools) -->
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
@@ -5210,17 +5210,29 @@
                     </select>
                 </div>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-[#00A89D]">Primary Search Phrase (Optional)</label>
+                    <input type="text" id="blog-keyword" placeholder="e.g., Fort Wayne first-time home buyer" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
+                    <p class="text-xs text-gray-500 mt-1 mb-0">Helps SEO</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-[#00A89D]">Local Area / Market (for GEO content)</label>
+                    <input type="text" id="blog-local-area" placeholder="e.g., Fort Wayne, Indiana" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
+                    <p class="text-xs text-gray-500 mt-1 mb-0">Auto-saved to your profile</p>
+                </div>
+            </div>
         </div>
 
         <!-- Card 2: Topic & Details -->
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
-            <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 shadow-sm transition-all">
+            <h3 class="text-xl font-bold mb-4 text-[#002B5C] dark:text-white flex items-center gap-2">
                 <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-pen-fancy text-[#00A89D]"></i></span> Topic & Details
             </h3>
             
-            <div class="mb-6">
-                <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Topic</label>
-                <select id="blog-topic-select" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 mb-4">
+            <div class="mb-3">
+                <label class="block text-lg font-semibold mb-2 text-[#00A89D]">Blog Topic</label>
+                <select id="blog-topic-select" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50 mb-2">
                     <option value="" selected>Use Custom Topic (type below)</option>
                     <option value="" disabled>──────────────────</option>
                     <optgroup label="First-Time Home Buyers">
@@ -5365,51 +5377,34 @@
                 </select>
 
                 <input type="text" id="blog-topic" placeholder="Or type your own custom topic here" 
-                       class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Select or type a topic → choose tone → click Generate.</p>
+                       class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5 mb-0">Select or type a topic → choose tone → click Generate.</p>
             </div>
 
             <div>
-                <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Additional Context / Key Details (optional)</label>
-                <textarea id="blog-additional-context" rows="3" placeholder="Mention specific programs, local stats, a recent client story, or anything you want highlighted. You can also request a different language here (e.g. “Prepare the full blog in Spanish” or “Generate in French”)." class="w-full p-5 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
+                <label class="block text-lg font-semibold mb-2 text-[#00A89D]">Additional Context / Key Details (optional)</label>
+                <textarea id="blog-additional-context" rows="3" placeholder="Mention specific programs, local stats, a recent client story, or anything you want highlighted. You can also request a different language here (e.g. “Prepare the full blog in Spanish” or “Generate in French”)." class="w-full p-3 rounded-2xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50"></textarea>
                 <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">The AI will follow language requests from this box for the entire output (blog + captions + reel script).</p>
             </div>
         </div>
 
         <!-- Card 3: Supporting Materials -->
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
-            <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
-                <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-paperclip text-[#00A89D]"></i></span> Supporting Materials & SEO
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 shadow-sm transition-all">
+            <h3 class="text-xl font-bold mb-3 text-[#002B5C] dark:text-white flex items-center gap-2">
+                <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-paperclip text-[#00A89D]"></i></span> Supporting Materials
             </h3>
-
-            <!-- Document Upload -->
-            <div class="mb-8">
-                <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Upload Reference Document (PDF or TXT) – Optional</label>
-                <div id="blog-upload-area" class="border-2 border-dashed border-[#00A89D] rounded-3xl p-8 text-center hover:border-[#00A89D] hover:bg-[#00A89D]/5 transition-all cursor-pointer group">
-                    <i class="fas fa-cloud-upload-alt text-4xl text-[#00A89D] mb-3 group-hover:scale-110 transition-transform"></i>
-                    <p class="font-semibold">Drag & drop a PDF or TXT file</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">or</p>
-                    <label for="blog-file-upload" class="inline-flex items-center px-6 py-2 mt-2 bg-[#00A89D] text-white rounded-2xl cursor-pointer hover:bg-[#00887A] text-sm transition-all" onclick="event.stopImmediatePropagation()">
-                        <i class="fas fa-folder-open mr-2"></i>Browse Files
-                    </label>
-                    <input type="file" id="blog-file-upload" accept=".pdf,.txt" class="hidden">
-                    <p id="blog-file-name" class="mt-3 text-sm font-medium text-[#00A89D] hidden"></p>
-                </div>
-                <button onclick="removeBlogUploadedFile()" class="text-red-500 text-sm mt-2 hidden" id="blog-remove-file-btn">Remove file</button>
+            <label class="block text-sm font-semibold mb-2 text-[#00A89D]">Upload Reference Document (PDF or TXT) – Optional</label>
+            <div id="blog-upload-area" class="border-2 border-dashed border-[#00A89D] rounded-2xl px-4 py-3 text-center hover:border-[#00A89D] hover:bg-[#00A89D]/5 transition-all cursor-pointer group flex flex-col items-center justify-center" style="min-height:120px;max-height:140px">
+                <i class="fas fa-cloud-upload-alt text-2xl text-[#00A89D] mb-1 group-hover:scale-110 transition-transform"></i>
+                <p class="font-semibold text-sm m-0">Drag &amp; drop a PDF or TXT file</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-0">or</p>
+                <label for="blog-file-upload" class="inline-flex items-center px-4 py-1.5 mt-1 bg-[#00A89D] text-white rounded-2xl cursor-pointer hover:bg-[#00887A] text-xs transition-all" onclick="event.stopImmediatePropagation()">
+                    <i class="fas fa-folder-open mr-2"></i>Browse Files
+                </label>
+                <input type="file" id="blog-file-upload" accept=".pdf,.txt" class="hidden">
+                <p id="blog-file-name" class="mt-1 text-xs font-medium text-[#00A89D] hidden m-0"></p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Primary Search Phrase (Optional)</label>
-                    <input type="text" id="blog-keyword" placeholder="e.g., Fort Wayne first-time home buyer" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
-                    <p class="text-xs text-gray-500 mt-1">Helps SEO</p>
-                </div>
-                <div>
-                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Local Area / Market (for GEO content)</label>
-                    <input type="text" id="blog-local-area" placeholder="e.g., Fort Wayne, Indiana" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#F15A29]/50">
-                    <p class="text-xs text-gray-500 mt-1">Auto-saved to your profile</p>
-                </div>
-            </div>
+            <button onclick="removeBlogUploadedFile()" class="text-red-500 text-sm mt-2 hidden" id="blog-remove-file-btn">Remove file</button>
         </div>
     </div>
 
@@ -7282,17 +7277,14 @@
       <!-- Card 1: Audience + Market + Tone + Length + Title -->
       <div id="nl-form-start" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
         <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
-          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-bullseye text-[#00A89D]"></i></span> Audience, Market & Style
+          <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-bullseye text-[#00A89D]"></i></span> Title, Market &amp; Style
         </h3>
+        <input type="hidden" id="nl-audience" value="full" autocomplete="off">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
           <div>
-            <label class="block text-lg font-semibold text-[#00A89D] mb-3">Audience Focus</label>
-            <select id="nl-audience" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
-              <option value="full">Full Database</option>
-              <option value="partners">Referral Partners</option>
-              <option value="past">Past Clients</option>
-              <option value="sphere">Sphere of Influence</option>
-            </select>
+            <label class="block text-lg font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional)</label>
+            <input type="text" id="nl-title" placeholder="e.g., The Lending Edge | January 2026" 
+                   class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
           </div>
           <div>
             <label class="block text-lg font-semibold text-[#00A89D] mb-3">Your Local Market</label>
@@ -7321,11 +7313,6 @@
             </select>
             <p class="text-xs text-gray-500 mt-1 mb-0">How many sections you include also affects total length — fewer sections stay tighter even on Standard.</p>
           </div>
-        </div>
-        <div>
-          <label class="block text-lg font-semibold text-[#00A89D] mb-3">Newsletter Title (Optional)</label>
-          <input type="text" id="nl-title" placeholder="e.g., The Lending Edge | January 2026" 
-                 class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#F15A29]/50">
         </div>
         <p id="nl-setup-profile-hint" class="hidden text-xs text-[#00A89D] bg-[#00A89D]/8 border border-[#00A89D]/20 rounded-xl px-3 py-2 mt-6 mb-0">
           <i class="fas fa-user-check mr-1" aria-hidden="true"></i> Empty fields above are filled from <strong>My Profile</strong> when you open this tool — change anything for this issue.
@@ -9769,7 +9756,7 @@
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260917-v3170"></script>
+<script src="js/feature-loader.js?v=20260918-v3171"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

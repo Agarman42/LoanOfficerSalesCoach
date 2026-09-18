@@ -4885,7 +4885,7 @@ function updateNewsletterPreflightSummary() {
     const location = document.getElementById('nl-location')?.value.trim() || '';
     const toneLabel = document.getElementById('nl-tone')?.selectedOptions?.[0]?.textContent?.trim().replace(/\s*\(Recommended\)\s*/i, '') || '';
     const title = document.getElementById('nl-title')?.value.trim() || '';
-    const audienceLabel = document.getElementById('nl-audience')?.selectedOptions?.[0]?.textContent?.trim() || '';
+    const audienceLabel = '';
     const lengthLabel = getNewsletterLengthConfig().preflightLabel;
 
     if (location) chips.push({ text: `📍 ${location}`, style: 'meta' });
@@ -5315,7 +5315,7 @@ async function generateNewsletter(feedback = '') {
                 buildNewsletterSectionsPrompt(selections),
                 '',
                 'User Inputs:',
-                '- Audience: ' + (document.getElementById('nl-audience').value || 'Full Database'),
+                '- Audience: Full Database (whole list)',
                 '- Tone: ' + (document.getElementById('nl-tone').value || 'warm-professional') + ' — Write in this exact tone throughout the entire newsletter.',
                 '- Match the full "LO PROFILE & VOICE CONTEXT" section below for overall newsletter tone and voice — but the Personal Update must use ONLY what the user typed in the Personal Update field. Never substitute profile hobbies, goals, or challenges into the personal note.',
                 '- Location: ' + (function () {
