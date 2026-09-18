@@ -1,6 +1,6 @@
 /* LO Sales Coach service worker — bump CACHE_NAME with APP_VERSION on every release. */
 /* eslint-disable no-restricted-globals */
-const APP_VERSION = '3.172';
+const APP_VERSION = '3.173';
 const CACHE_NAME = 'sc-lo-v' + APP_VERSION;
 const OFFLINE_CACHE = CACHE_NAME + '-offline';
 

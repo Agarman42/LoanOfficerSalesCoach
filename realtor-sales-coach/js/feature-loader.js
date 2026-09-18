@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var V = '20260918-agent-v3124';
+  var V = '20260918-agent-v3125';
 
   /** Always loaded early — keep Home + chrome snappy. */
   var CORE_SCRIPTS = [
@@ -87,7 +87,7 @@
     ],
     'blog': [
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/blog-creator.js?v=20260912-profile-prefill-v3117'
+      'js/features/blog-creator.js?v=20260918-blog-intro-v3125'
     ],
     'social': [
       'js/features/social-modals.js?v=20260818-demo-safe',
@@ -128,7 +128,7 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260912-profile-prefill-v3117',
+      'js/features/blog-creator.js?v=20260918-blog-intro-v3125',
       'js/features/social-modals.js?v=20260818-demo-safe',
       'js/data/newsletter-dad-jokes.js?v=20260706-realtor-v273',
       'js/data/newsletter-brain-teasers.js?v=20260706-realtor-v273',

@@ -106,7 +106,7 @@
     <meta name="theme-color" content="#002B5C">
 
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
-    <link rel="stylesheet" href="css/main.css?v=20260911-present-v3109">
+    <link rel="stylesheet" href="css/main.css?v=20260918-blog-intro-v3125">
 
     <!--
       LO partner API host (public cards for brand plate).
@@ -152,7 +152,7 @@
     -->
     <script defer src="js/features/user-profile.js?v=20260912-profile-prefill-v3117"></script>
     <script defer src="js/features/home-favorites.js?v=20260818-hide-calc"></script>
-    <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
+    <script defer src="js/features/onboarding-coach.js?v=20260918-blog-intro-v3125"></script>
     <!-- Invite-gated auth: lock UI until /api/auth/me succeeds (Realtor only) -->
     <script defer src="js/features/auth-gate.js?v=20260911-present-v3109"></script>
     <script defer src="js/features/admin-usage.js?v=20260827-auth-mastermind"></script>
@@ -5347,16 +5347,19 @@
         </span>
     </div>
 
-    <p class="mb-8 text-lg text-gray-600 dark:text-gray-400">
-        Generate SEO + GEO-optimized blog posts (plus matching social caption, Google Business post, and a ready-to-film 30–45 second Reel script). Select or type a topic, pick your tone, and get everything you need to publish across channels.
-    </p>
-
-    <!-- Pre-Generate Explanatory Header: Purpose + How to Maximize Value (full width within the tool for consistent, premium visual flow with the generator form) -->
-    <div class="mb-8">
+    <details id="blog-how-this-works" class="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
+      <summary class="cursor-pointer list-none flex items-start gap-3 text-[#002B5C] dark:text-white">
+        <i class="fas fa-chevron-right nl-how-chevron text-[#00A89D] text-xs mt-1.5 transition-transform duration-200" aria-hidden="true"></i>
+        <span class="min-w-0">
+          <span class="block text-sm font-bold">Get the most from it</span>
+          <span class="block text-xs font-normal text-gray-500 dark:text-gray-400 mt-0.5">Why a blog post works — and how to use this page</span>
+        </span>
+      </summary>
+      <div class="mt-5">
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">ONE POST, MANY TOUCHES</span>
       </div>
-      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Blog Creator works — and how to get the most from it</h3>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">Get the most from it</h3>
       <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">This isn't just another blog post. It's a high-leverage asset that positions you as the local expert, ranks for searches, builds trust, and feeds every other channel in your system (social, newsletter, events, referrals).</p>
 
       <!-- 4 value cards (from the rich tips modal, adapted) -->
@@ -5418,10 +5421,10 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-sm text-gray-700 dark:text-gray-300">
             <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>Use the primary keyword naturally in the title, first paragraph, H2s, and FAQ.</span></div>
             <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>Always add 1–2 specific local stats, programs, or a recent client story.</span></div>
-            <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>End with a soft CTA: “Reach out — I’m happy to run the numbers for your situation.”</span></div>
+            <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>End with a soft CTA: “Thinking of buying or selling? Reach out — happy to help.”</span></div>
             <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>After generation, personalize with your own voice and one real example before publishing.</span></div>
-            <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>Repurpose the same blog into 3–4 different social angles (first-time buyer, rate, local program).</span></div>
-            <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>Upload reference documents (overlays, market reports) for hyper-accurate, on-brand output.</span></div>
+            <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>Repurpose the same blog into 3–4 different social angles (first-time buyer, listing, local neighborhood).</span></div>
+            <div class="flex gap-2"><span class="text-[#00A89D] font-bold mt-0.5">•</span> <span>Upload reference documents (market reports, listing notes) for hyper-accurate, on-brand output.</span></div>
           </div>
         </div>
 
@@ -5430,7 +5433,8 @@
           <span>One strong blog post can work for you for years. Generate, tweak with your voice, publish, then repurpose. The supporting materials (Reel script + captions) are included so you can execute the same day.</span>
         </div>
       </div>
-    </div>
+      </div>
+    </details>
 
     <!-- Form Sections - Premium Card Style (matching Social section) -->
     <div class="space-y-6 mb-12">
@@ -9324,7 +9328,7 @@ try {
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260918-v3124"></script>
+<script src="js/feature-loader.js?v=20260918-v3125"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

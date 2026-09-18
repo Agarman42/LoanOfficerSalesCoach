@@ -24,7 +24,7 @@
     'js/features/section-bottom-banners.js?v=20260720-review',
     'js/features/coach-polish.js?v=20260721-ux-polish',
     'js/features/partner-share.js?v=20260807-one-invite-branded',
-    'js/app-version.js?v=20260918-v3172',
+    'js/app-version.js?v=20260918-v3173',
     'js/features/newsletter-color-bundles.js?v=20260818-v3140',
     'js/features/generation-rules.js?v=20260720-hobby-restraint',
     'js/features/save-ribbon.js',
@@ -51,7 +51,7 @@
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260918-nl-chips-v3172',
+      'js/features/newsletter-generator.js?v=20260918-nl-intro-v3173',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260918-nl-chips-v3172'
     ],
@@ -86,7 +86,7 @@
     ],
     'blog': [
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/blog-creator.js?v=20260827-blog-show-first-v3157'
+      'js/features/blog-creator.js?v=20260918-blog-intro-v3173'
     ],
     // Business Plan generate/style/profile sync live in weekly-win-plan.js (shared file)
     'planning': [
@@ -142,14 +142,14 @@
     ],
     'content-hub': [
       // Hub tiles deep-link into blog / newsletter / social — warm those bundles
-      'js/features/blog-creator.js?v=20260827-blog-show-first-v3157',
+      'js/features/blog-creator.js?v=20260918-blog-intro-v3173',
       'js/features/social-modals.js?v=20260623-lo-v222',
       'js/data/newsletter-dad-jokes.js?v=20260625-lo-v231',
       'js/data/newsletter-brain-teasers.js?v=20260625-lo-v233',
       'js/features/newsletter-entertainment.js?v=20260729-blank-preview-fix',
       'js/features/newsletter-color-bundles.js?v=20260818-v3140',
       'js/features/publish-kit.js?v=20260820-next-steps-direct',
-      'js/features/newsletter-generator.js?v=20260918-nl-chips-v3172',
+      'js/features/newsletter-generator.js?v=20260918-nl-intro-v3173',
       'js/features/newsletter-setup-form.js?v=20260720-last-issue-chip',
       'js/features/newsletter-wizard.js?v=20260918-nl-chips-v3172'
     ]

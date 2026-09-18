@@ -1509,7 +1509,22 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   // =====================================================
   // INITIALIZATION
   // =====================================================
+  function wireBlogHowThisWorksPanel() {
+    const el = document.getElementById('blog-how-this-works');
+    if (!el) return;
+    const key = 'blog-how-this-works-seen-lo';
+    let seen = false;
+    try { seen = localStorage.getItem(key) === '1'; } catch (e) {}
+    el.open = !seen;
+    if (!seen) {
+      try { localStorage.setItem(key, '1'); } catch (e) {}
+    } else {
+      requestAnimationFrame(() => { el.open = false; });
+    }
+  }
+
   function initBlogCreator() {
+    try { wireBlogHowThisWorksPanel(); } catch (e) {}
     // The original top-level listeners for the upload area
     // are included in the moved code above.
 

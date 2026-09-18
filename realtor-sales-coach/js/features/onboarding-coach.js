@@ -551,21 +551,9 @@
       action: { label: 'Jump to form →', scroll: 'bio-wizard-entry' },
       needsProfile: ['name', 'location']
     },
-    'blog': {
-      icon: 'fa-newspaper',
-      title: 'Authority content, full package',
-      body: 'Set length, tone, and topic below — one generate = blog + social caption + Google post + Reel. Market from the form auto-saves to profile.',
-      action: { label: 'Jump to form →', scroll: 'blog-length' },
-      needsProfile: ['location']
-    },
-    'newsletter-generator': {
-      icon: 'fa-envelope-open-text',
-      title: 'Stay top of mind monthly',
-      body: 'Write a Personal Update (40+ characters), pick sections, generate, then review the preview before you send.',
-      // Land on guided-entry strip (wizard CTA) so it stays in view — not mid-form fields
-      action: { label: 'Jump to form →', scroll: 'nl-wizard-entry' },
-      needsProfile: ['name', 'location']
-    },
+    // blog + newsletter intro chrome lives in each tool's "Get the most from it" bar
+    'blog': null,
+    'newsletter-generator': null,
     'sales-script': {
       icon: 'fa-comments',
       title: 'Sound human under pressure',

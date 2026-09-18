@@ -26,6 +26,20 @@ let _nlGenerating = false;
 let _nlGeneratingStarted = 0;
 let _nlOverlayWatch = null;
 
+function wireHowThisWorksPanel() {
+    const el = document.getElementById('nl-how-this-works');
+    if (!el) return;
+    const key = 'nl-how-this-works-seen-lo';
+    let seen = false;
+    try { seen = localStorage.getItem(key) === '1'; } catch (e) {}
+    el.open = !seen;
+    if (!seen) {
+      try { localStorage.setItem(key, '1'); } catch (e) {}
+    } else {
+      requestAnimationFrame(() => { el.open = false; });
+    }
+}
+
 function safeParseJSONArray(storageKey, fallback = []) {
     try {
         const raw = localStorage.getItem(storageKey);
@@ -6866,6 +6880,7 @@ function copyForOutlook() {
     try { wireCustomSectionPlaceholderHints(); } catch (e) {}
     try { wireNewsletterPreviewResize(); } catch (e) {}
     try { wireNewsletterSectionCheckboxes(); } catch (e) {}
+    try { wireHowThisWorksPanel(); } catch (e) {}
 
     // Restore form/checkboxes THEN show engagement pickers.
     // Must run here (end of file) so NL_CUSTOM_CONTENT_BLOCKS exists — mid-script

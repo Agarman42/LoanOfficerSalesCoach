@@ -6944,3 +6944,11 @@ html.dark .lo-push-toggle { color: #e2e8f0; }
   outline: 2px solid #00A89D;
   outline-offset: 2px;
 }
+#nl-how-this-works[open] .nl-how-chevron,
+#blog-how-this-works[open] .nl-how-chevron {
+  transform: rotate(90deg);
+}
+#nl-how-this-works > summary::-webkit-details-marker,
+#blog-how-this-works > summary::-webkit-details-marker {
+  display: none;
+}

@@ -119,7 +119,7 @@
     <!-- Static Tailwind (built offline) — no Play CDN -->
     <link rel="stylesheet" href="css/tailwind-built.css?v=20260721-noloadspin">
     <!-- App-specific styles -->
-    <link rel="stylesheet" href="css/main.css?v=20260911-nl-preview-resize-v3165">
+    <link rel="stylesheet" href="css/main.css?v=20260918-nl-intro-v3173">
 
     <!-- Centralized API client (Phase 0) - must load early -->
     <script src="js/api.js?v=20260825-nl-fast-v3152"></script>
@@ -137,7 +137,7 @@
     -->
     <script defer src="js/features/user-profile.js?v=20260912-profile-prefill-v3168"></script>
     <script defer src="js/features/home-favorites.js?v=20260810-fav-catalog"></script>
-    <script defer src="js/features/onboarding-coach.js?v=20260730-home-tiles"></script>
+    <script defer src="js/features/onboarding-coach.js?v=20260918-nl-intro-v3173"></script>
     <!-- LO auth gate (@ruoff.com) + invite realtors / admin -->
     <script defer src="js/features/lo-auth-gate.js?v=20260807-admin-usage"></script>
     <script defer src="js/features/lo-invite-admin.js?v=20260807-lo-invite-ui"></script>
@@ -5010,103 +5010,26 @@
   </div>
 </div>
 
-<!-- Blog Creator Tips Modal -->
-<div id="blog-tips-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center">
-  <div class="bg-white dark:bg-gray-800 w-full max-w-3xl mx-4 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
-    <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#F15A29] px-8 py-6 flex items-center justify-between flex-shrink-0">
-      <div class="flex items-center gap-3">
-        <i class="fas fa-pen-fancy text-white text-2xl"></i>
-        <h3 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Why Great Blogs Win in Mortgage</h3>
-      </div>
-      <button onclick="window.closeBlogTips()" class="text-white/80 hover:text-white text-4xl leading-none transition">×</button>
-    </div>
-    <div class="flex-1 overflow-y-auto custom-modal-scroll p-8 md:p-10 space-y-6 text-[15px] leading-relaxed">
-      <p class="text-gray-700 dark:text-gray-300">One strong blog post is a compounding asset — it ranks, builds trust, and feeds every other channel in your system.</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="p-4 rounded-2xl bg-[#F15A29]/5 border border-[#F15A29]/20"><strong class="text-[#F15A29]">Position as Expert</strong><p class="text-sm mt-1 text-gray-600 dark:text-gray-400">Educate buyers and sellers so they remember you when it's time to act or refer.</p></div>
-        <div class="p-4 rounded-2xl bg-[#00A89D]/5 border border-[#00A89D]/20"><strong class="text-[#00A89D]">Rank on Google</strong><p class="text-sm mt-1 text-gray-600 dark:text-gray-400">Long-form, local + keyword-rich content beats short posts for sustained inbound leads.</p></div>
-        <div class="p-4 rounded-2xl bg-[#002B5C]/5 border border-[#002B5C]/20"><strong class="text-[#002B5C] dark:text-white">Build Trust Fast</strong><p class="text-sm mt-1 text-gray-600 dark:text-gray-400">Real answers with local flavor (programs, stats, stories) make people feel understood.</p></div>
-        <div class="p-4 rounded-2xl bg-[#F15A29]/5 border border-[#F15A29]/20"><strong class="text-[#F15A29]">Feed Your Whole System</strong><p class="text-sm mt-1 text-gray-600 dark:text-gray-400">Turn one blog into social posts, Reels, newsletter features, and Google Business updates.</p></div>
-      </div>
-      <div>
-        <div class="font-semibold text-[#002B5C] dark:text-white mb-2">Pro tips for maximum impact:</div>
-        <ul class="list-disc pl-6 space-y-1.5 text-gray-700 dark:text-gray-300 text-sm">
-          <li>Use your primary keyword naturally in the title, intro, and headings.</li>
-          <li>Add local examples (DPA programs, market trends) from your profile area.</li>
-          <li>End with a soft CTA: "Ready to explore options? Reach out — I'm here to help."</li>
-          <li>Publish → share a teaser on social + Google Business Profile the same day.</li>
-          <li>Personalize after generation: add your own stories for authenticity and compliance.</li>
-        </ul>
-      </div>
-    </div>
-    <div class="mt-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 rounded-b-3xl p-6 text-center flex-shrink-0">
-      <div class="text-[#00A89D] text-xs font-bold tracking-[2px] mb-2">NEXT LEVEL</div>
-      <p class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Turn authority content into pipeline</p>
-      <button onclick="window.closeBlogTips(); if(typeof window.showSection==='function') window.showSection('social');" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002B5C] hover:bg-black text-white text-sm font-semibold transition">
-        <i class="fas fa-share-alt"></i> Repurpose in Social Post Creator →
-      </button>
-    </div>
-    <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-gray-50 dark:bg-gray-900 flex-shrink-0">
-      <button onclick="window.closeBlogTips()" class="px-6 py-2.5 bg-[#002B5C] hover:bg-black text-white rounded-xl font-semibold transition">Got it — let's write!</button>
-    </div>
-  </div>
-</div>
-
-<!-- Newsletter Tips Modal -->
-<div id="newsletter-tips-modal" class="app-modal-overlay fixed inset-0 bg-black/70 z-[999] hidden items-center justify-center">
-  <div class="bg-white dark:bg-gray-800 w-full max-w-3xl mx-4 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
-    <div class="bg-gradient-to-r from-[#002B5C] via-[#003366] to-[#00A89D] px-8 py-6 flex items-center justify-between flex-shrink-0">
-      <div class="flex items-center gap-3">
-        <i class="fas fa-envelope text-white text-2xl"></i>
-        <h3 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Why Newsletters Are Pure Gold</h3>
-      </div>
-      <button onclick="window.closeNewsletterTips()" class="text-white/80 hover:text-white text-4xl leading-none transition">×</button>
-    </div>
-    <div class="flex-1 overflow-y-auto custom-modal-scroll p-8 md:p-10 space-y-6 text-[15px] leading-relaxed">
-      <p class="text-gray-700 dark:text-gray-300">Consistent, valuable sends keep you top-of-mind with the people who already know and trust you — turning your database into your most reliable referral engine.</p>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="p-4 rounded-2xl bg-[#00A89D]/5 border border-[#00A89D]/20 text-center"><strong class="text-[#00A89D]">Stay Top-of-Mind</strong><p class="text-xs mt-1 text-gray-600 dark:text-gray-400">Regular touchpoints = more referrals without cold outreach.</p></div>
-        <div class="p-4 rounded-2xl bg-[#F15A29]/5 border border-[#F15A29]/20 text-center"><strong class="text-[#F15A29]">Build Real Trust</strong><p class="text-xs mt-1 text-gray-600 dark:text-gray-400">Mix value + personal updates = genuine relationships that convert.</p></div>
-        <div class="p-4 rounded-2xl bg-[#002B5C]/5 border border-[#002B5C]/20 text-center"><strong class="text-[#002B5C] dark:text-white">Turn Sends into Referrals</strong><p class="text-xs mt-1 text-gray-600 dark:text-gray-400">Soft asks + great content = warm inbound without pressure.</p></div>
-      </div>
-      <div>
-        <div class="font-semibold text-[#002B5C] dark:text-white mb-2">Pro tips for sends that get opened:</div>
-        <ul class="list-disc pl-6 space-y-1.5 text-gray-700 dark:text-gray-300 text-sm">
-          <li>Send consistently (weekly or monthly) — momentum compounds.</li>
-          <li>Lead with your Personal Update + photo — it's the highest-open section.</li>
-          <li>Keep it scannable: bold headers, short paragraphs, one clear CTA.</li>
-          <li>End every issue: "Know anyone thinking about buying or refinancing? Happy to help."</li>
-          <li>Repurpose winners into 3–4 social posts or a blog angle the same week.</li>
-        </ul>
-      </div>
-    </div>
-    <div class="mt-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 rounded-b-3xl p-6 text-center flex-shrink-0">
-      <div class="text-[#00A89D] text-xs font-bold tracking-[2px] mb-2">NEXT LEVEL</div>
-      <p class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Make newsletters part of your weekly rhythm</p>
-      <button onclick="window.closeNewsletterTips(); if(typeof window.showSection==='function') window.showSection('weekly-win-plan');" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002B5C] hover:bg-black text-white text-sm font-semibold transition">
-        <i class="fas fa-calendar-check"></i> Block send time in Weekly Win Plan →
-      </button>
-    </div>
-    <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-gray-50 dark:bg-gray-900 flex-shrink-0">
-      <button onclick="window.closeNewsletterTips()" class="px-6 py-2.5 bg-[#002B5C] hover:bg-black text-white rounded-xl font-semibold transition">Got it — let's send!</button>
-    </div>
-  </div>
-</div>
-
-              <section id="blog" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
+<section id="blog" class="card bg-white dark:bg-gray-800 pt-6 pb-12 px-8 rounded-3xl shadow-xl animate-fade-in hidden">
     <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-2 text-[#F15A29]">Blog Creator – Authority-Building Content in Seconds</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">Turn one idea into an SEO + GEO-friendly blog post plus matching social caption, Google Business post, and Reel script — tailored to your voice and market.</p>
     </div>
 
-    <!-- Pre-Generate Explanatory Header -->
-    <div id="blog-pregen-guidance" class="mb-8">
+    <details id="blog-how-this-works" class="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
+      <summary class="cursor-pointer list-none flex items-start gap-3 text-[#002B5C] dark:text-white">
+        <i class="fas fa-chevron-right nl-how-chevron text-[#00A89D] text-xs mt-1.5 transition-transform duration-200" aria-hidden="true"></i>
+        <span class="min-w-0">
+          <span class="block text-sm font-bold">Get the most from it</span>
+          <span class="block text-xs font-normal text-gray-500 dark:text-gray-400 mt-0.5">Why a blog post works — and how to use this page</span>
+        </span>
+      </summary>
+      <div class="mt-5" id="blog-pregen-guidance">
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">ONE POST, MANY TOUCHES</span>
       </div>
-      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Blog Creator works — and how to get the most from it</h3>
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-2">This isn't just another blog post. It's a high-leverage asset that positions you as the local expert, ranks for searches, builds trust, and feeds every other channel in your system (social, newsletter, events, referrals).</p>
-      <p class="text-center mb-5"><button type="button" onclick="window.openBlogTips()" class="text-sm text-[#00A89D] underline hover:text-[#F15A29] font-semibold"><i class="fas fa-lightbulb mr-1"></i>Why blogs can be a game changer →</button></p>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">Get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">This isn't just another blog post. It's a high-leverage asset that positions you as the local expert, ranks for searches, builds trust, and feeds every other channel in your system (social, newsletter, events, referrals).</p>
 
       <!-- 4 value cards (from the rich tips modal, adapted) -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -5179,7 +5102,8 @@
           <span>One strong blog post can work for you for years. Generate, tweak with your voice, publish, then repurpose. The supporting materials (Reel script + captions) are included so you can execute the same day.</span>
         </div>
       </div>
-    </div>
+      </div>
+    </details>
 
     <!-- Form Sections - Premium Card Style (matching Social section) -->
     <div class="space-y-6 mb-12">
@@ -7196,14 +7120,20 @@
         </p>
     </div>
 
-    <!-- Pre-Generate Explanatory Header -->
-    <div id="nl-pregen-guidance" class="mb-8">
+    <details id="nl-how-this-works" class="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
+      <summary class="cursor-pointer list-none flex items-start gap-3 text-[#002B5C] dark:text-white">
+        <i class="fas fa-chevron-right nl-how-chevron text-[#00A89D] text-xs mt-1.5 transition-transform duration-200" aria-hidden="true"></i>
+        <span class="min-w-0">
+          <span class="block text-sm font-bold">Get the most from it</span>
+          <span class="block text-xs font-normal text-gray-500 dark:text-gray-400 mt-0.5">Why a monthly letter works — and how to use this page</span>
+        </span>
+      </summary>
+      <div class="mt-5" id="nl-pregen-guidance">
       <div class="text-center mb-3">
         <span class="inline-block text-[10px] font-bold tracking-[2px] text-[#00A89D] bg-[#00A89D]/10 px-3 py-1 rounded-full">CONSISTENCY + PERSONAL = REFERRALS</span>
       </div>
-      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">How the Newsletter Generator works — and how to get the most from it</h3>
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-2">This isn't just a mailer. It's a relationship engine that keeps you top-of-mind with the people who already know and trust you — turning your database into your most reliable source of referrals and repeat business.</p>
-      <p class="text-center mb-5"><button type="button" onclick="window.openNewsletterTips()" class="text-sm text-[#00A89D] underline hover:text-[#F15A29] font-semibold"><i class="fas fa-lightbulb mr-1"></i>Why newsletters crush it →</button></p>
+      <h3 class="text-center text-xl font-bold text-[#002B5C] dark:text-white mb-1.5">Get the most from it</h3>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 max-w-5xl mx-auto mb-5">This isn't just a mailer. It's a relationship engine that keeps you top-of-mind with the people who already know and trust you — turning your database into your most reliable source of referrals and repeat business.</p>
 
       <!-- 3 value / why cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -7252,7 +7182,8 @@
           <span>Regenerate or tweak as needed. Save your best issues (or individual sections) to My Saved Items. One consistent newsletter at a time, you’re building an asset that compounds for years.</span>
         </div>
       </div>
-    </div>
+      </div>
+    </details>
 
     <!-- Mode switch sits above the form (same placement as Business Plan / Bio) -->
     <div id="nl-wizard-entry" class="coach-mode-bar mb-8 scroll-mt-4" data-coach-mode-tool="newsletter">
@@ -9756,7 +9687,7 @@
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260918-v3172"></script>
+<script src="js/feature-loader.js?v=20260918-v3173"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">
