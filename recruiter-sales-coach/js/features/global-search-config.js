@@ -57,6 +57,15 @@
       group: 'Quick Actions',
     },
     {
+      id: 'action-call-recap',
+      title: 'Call Recap',
+      subtitle: 'Drop a recording or paste a transcript',
+      icon: 'fas fa-clipboard-list',
+      keywords: ['call', 'recap', 'recording', 'transcript', 'debrief', 'audio'],
+      sectionId: 'call-recap',
+      group: 'Quick Actions',
+    },
+    {
       id: 'action-coach',
       title: 'AI Coach',
       subtitle: 'Profile-aware text coach',

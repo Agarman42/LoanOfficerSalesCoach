@@ -187,7 +187,7 @@
     };
   }
 
-  /** Default ON — user can uncheck #blog-include-hobbies to exclude passions from this run. */
+  /** Default off. A saved draft that stored blog-include-hobbies-draft-lo = 1 stays on. */
   function blogIncludeHobbies() {
     const el = document.getElementById('blog-include-hobbies');
     // Missing checkbox = include (legacy / default)
@@ -1506,6 +1506,151 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   window.copySocialCaption = copySocialCaption;
   window.copyGooglePostWithFormatting = copyGooglePostWithFormatting;
 
+  function blogProfileMarket() {
+    try {
+      const p = getCentralProfile() || {};
+      return String(
+        p.localArea || p.market || p.location || p.localMarket || p.city || p.serviceArea || p.primaryMarket || ''
+      ).trim();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function withBlogMarket(base, market) {
+    const phrase = String(base || '').trim();
+    const area = String(market || '').trim();
+    if (!phrase) return area;
+    if (!area) return phrase;
+    if (phrase.toLowerCase().endsWith(area.toLowerCase())) return phrase;
+    return (phrase + ' ' + area).trim();
+  }
+
+  function blogTopicLiteral(topic, market) {
+    const cleaned = String(topic || '')
+      .replace(/\s+in\s+2026\b/ig, '')
+      .replace(/\b2026\b/g, '')
+      .replace(/[?!,:()“”"']/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 6)
+      .join(' ')
+      .toLowerCase();
+    return withBlogMarket(cleaned || 'home loan guide', market);
+  }
+
+  function blogKeywordForTopic(topic, market) {
+    const t = String(topic || '').trim();
+    if (!t) return '';
+    const area = market == null ? blogProfileMarket() : String(market || '').trim();
+    const rules = [
+      [/heloc vs|helocs and home equity|home equity loans/i, 'home equity loan'],
+      [/streamline refinanc|refinanc|rate-and-term|cash-out|buydown|no-closing-cost refinance/i, 'refinance home loan'],
+      [/\bva loans?\b/i, 'VA home loan'],
+      [/\bfha\b/i, 'FHA loan requirements'],
+      [/\busda\b/i, 'USDA home loan'],
+      [/first-time buyer programs|gift funds|down payment assistance|conventional 97|low down payment/i, 'down payment assistance'],
+      [/down payment/i, 'down payment for a home'],
+      [/pre-approv|credit score|credit report|debt-to-income|non-traditional credit|rapid rescor|hard vs\.? soft|compensating factors|co-borrowers?|co-signers?|employment gaps?|bankruptcy|foreclosure/i, 'mortgage pre approval'],
+      [/first-time|first time|buying your first home/i, 'first time home buyer'],
+      [/jumbo/i, 'jumbo home loan'],
+      [/reverse mortgage/i, 'reverse mortgage'],
+      [/physician|medical professional/i, 'physician home loan'],
+      [/bank statement/i, 'bank statement home loan'],
+      [/non-qm/i, 'non QM home loan'],
+      [/dscr/i, 'DSCR investment loan'],
+      [/1031/i, '1031 exchange'],
+      [/brrrr/i, 'BRRRR real estate strategy'],
+      [/short-term rental|airbnb|vrbo/i, 'short term rental loan'],
+      [/fix-and-flip|hard money/i, 'fix and flip loan'],
+      [/construction|renovation|203\(k\)|homestyle/i, 'renovation home loan'],
+      [/\bitin\b/i, 'ITIN home loan'],
+      [/bridge loan/i, 'bridge loan'],
+      [/portfolio loan|investment propert|rental property|multi-family|2–4 unit|2-4 unit/i, 'investment property loan'],
+      [/arms? vs fixed/i, 'adjustable vs fixed mortgage'],
+      [/locking your rate/i, 'mortgage rate lock'],
+      [/mortgage rate|lower rates|inflation and fed/i, 'mortgage rates'],
+      [/\bpmi\b/i, 'mortgage PMI'],
+      [/closing cost/i, 'mortgage closing costs'],
+      [/appraisal vs/i, 'home appraisal vs inspection'],
+      [/appraisal/i, 'home appraisal'],
+      [/underwriting/i, 'mortgage underwriting'],
+      [/escrow/i, 'mortgage escrow'],
+      [/title insurance/i, 'title insurance'],
+      [/closing delay|clear to close|what happens at closing|digital mortgage|mortgage application|contingenc/i, 'mortgage process'],
+      [/student loan/i, 'buying a home with student loans'],
+      [/rent vs buy/i, 'rent vs buy'],
+      [/condo/i, 'condo vs single family home'],
+      [/\bhoa\b/i, 'HOA fees'],
+      [/neighborhood|schools, commute/i, 'choosing a neighborhood'],
+      [/inspection/i, 'home inspection'],
+      [/home warranty/i, 'home warranty'],
+      [/eco-friendly|energy efficien|sustainable|green mortgage/i, 'energy efficient home'],
+      [/reloc/i, 'relocation mortgage'],
+      [/buyer.?s agent/i, 'buyers agent'],
+      [/hidden cost/i, 'hidden costs of homeownership'],
+      [/homeownership still worth/i, 'is buying a home worth it'],
+      [/second home|moving up/i, 'buying a second home'],
+      [/downsiz/i, 'downsizing your home'],
+      [/income property/i, 'investment property loan'],
+      [/home maintenance/i, 'home maintenance costs'],
+      [/property tax/i, 'property taxes'],
+      [/multi-generational/i, 'multi generational home'],
+      [/pet-friendly/i, 'pet friendly homes'],
+      [/home insurance|climate risk/i, 'home insurance'],
+      [/ibuyer|instant offer/i, 'instant home offers'],
+      [/inventory/i, 'home inventory'],
+      [/new construction/i, 'new construction vs resale'],
+      [/affordable housing/i, 'affordable housing programs'],
+      [/build-to-rent/i, 'build to rent'],
+      [/immigration|population growth/i, 'local housing demand'],
+      [/technology in real estate|virtual tour/i, 'digital home buying'],
+      [/regional market/i, 'local housing market'],
+      [/tax benefit/i, 'real estate investor taxes'],
+      [/joined ruoff|arrival at ruoff|move to ruoff|new role at ruoff/i, 'Ruoff Mortgage loan officer'],
+      [/competitive market|without overpaying/i, 'buying in a competitive market'],
+      [/building equity/i, 'building home equity'],
+      [/asset depletion/i, 'asset based mortgage']
+    ];
+    for (let i = 0; i < rules.length; i++) {
+      if (rules[i][0].test(t)) return withBlogMarket(rules[i][1], area);
+    }
+    return blogTopicLiteral(t, area);
+  }
+  window.blogKeywordForTopic = blogKeywordForTopic;
+
+  function wireBlogHobbiesDefault() {
+    const box = document.getElementById('blog-include-hobbies');
+    if (!box) return;
+    const key = 'blog-include-hobbies-draft-lo';
+    let stored = null;
+    try { stored = localStorage.getItem(key); } catch (e) {}
+    box.checked = stored === '1';
+    box.addEventListener('change', () => {
+      try { localStorage.setItem(key, box.checked ? '1' : '0'); } catch (e) {}
+    });
+  }
+
+  function wireBlogTopicKeyword() {
+    const topicSelect = document.getElementById('blog-topic-select');
+    const keywordEl = document.getElementById('blog-keyword');
+    if (!topicSelect || !keywordEl) return;
+    let lastAuto = '';
+    topicSelect.addEventListener('change', () => {
+      const topic = (topicSelect.value || '').trim();
+      if (!topic || topic === 'Use Custom Topic (type below)') return;
+      const next = blogKeywordForTopic(topic, blogProfileMarket());
+      if (!next) return;
+      const current = (keywordEl.value || '').trim();
+      if (!current || current === lastAuto) {
+        keywordEl.value = next;
+        lastAuto = next;
+      }
+    });
+  }
+
   // =====================================================
   // INITIALIZATION
   // =====================================================
@@ -1525,6 +1670,8 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
 
   function initBlogCreator() {
     try { wireBlogHowThisWorksPanel(); } catch (e) {}
+    try { wireBlogHobbiesDefault(); } catch (e) {}
+    try { wireBlogTopicKeyword(); } catch (e) {}
     // The original top-level listeners for the upload area
     // are included in the moved code above.
 

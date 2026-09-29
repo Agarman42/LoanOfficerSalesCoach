@@ -5332,14 +5332,14 @@
         </div>
     </div>
 
-    <!-- Hobbies / passions: include by default; click off for a fully professional blog -->
+    <!-- Hobbies / passions: off until the user turns them on, unless a saved draft had the box on -->
     <div class="max-w-2xl mx-auto mb-6">
       <label class="flex items-start gap-3 cursor-pointer select-none rounded-2xl border border-[#00A89D]/30 bg-gradient-to-br from-[#00A89D]/10 to-white dark:to-gray-800 p-4 sm:p-5">
-        <input type="checkbox" id="blog-include-hobbies" checked class="w-5 h-5 mt-0.5 accent-[#00A89D] flex-shrink-0" aria-describedby="blog-include-hobbies-help">
+        <input type="checkbox" id="blog-include-hobbies" class="w-5 h-5 mt-0.5 accent-[#00A89D] flex-shrink-0" aria-describedby="blog-include-hobbies-help">
         <div>
-          <span class="font-bold text-[#00A89D]"><i class="fas fa-heart mr-1" aria-hidden="true"></i> Include hobbies &amp; passions <span class="text-[10px] font-normal text-gray-500">(on by default)</span></span>
+          <span class="font-bold text-[#00A89D]"><i class="fas fa-heart mr-1" aria-hidden="true"></i> Include hobbies &amp; passions <span class="text-[10px] font-normal text-gray-500">(off by default)</span></span>
           <p id="blog-include-hobbies-help" class="text-xs text-gray-600 dark:text-gray-300 mt-1.5 m-0 leading-relaxed">
-            On = light personal flavor from your profile (golf, sports, family, etc.). Turn off to exclude hobbies and passions entirely — topic-focused content only.
+            Off by default — topic-focused, no hobbies or passions. Turn on for a light personal touch from your profile (golf, sports, family, and so on).
           </p>
         </div>
       </label>
@@ -9687,7 +9687,7 @@
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260918-v3173"></script>
+<script src="js/feature-loader.js?v=20260929-v3174"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">

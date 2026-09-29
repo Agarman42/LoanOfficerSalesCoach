@@ -36,6 +36,7 @@
       blog: 'Blog Bundle',
       coach: 'AI Coach Response',
       recruiting: 'Recruiting',
+      'call-recap': 'Call Recap',
       social: 'Social'
     };
     return map[t] || 'Saved Item';
@@ -61,6 +62,7 @@
       blog: 'bg-[#F15A29]/10 text-[#F15A29]',
       coach: 'bg-[#00A89D]/10 text-[#00A89D]',
       recruiting: 'bg-[#F15A29]/10 text-[#F15A29]',
+      'call-recap': 'bg-[#002B5C]/10 text-[#002B5C]',
       social: 'bg-teal-100 text-teal-700'
     };
     return colors[t] || 'bg-teal-100 text-teal-700';
@@ -68,7 +70,7 @@
 
   function previewText(item) {
     let text = item.content || '';
-    if (['newsletter', 'equity-opportunity', 'equity-scan', 'plan', 'script', 'social', 'underwriting', 'coach', 'postclosing', 'blog'].includes(item.type)) {
+    if (['newsletter', 'equity-opportunity', 'equity-scan', 'plan', 'script', 'social', 'underwriting', 'coach', 'postclosing', 'blog', 'call-recap'].includes(item.type)) {
       text = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     }
     return text.substring(0, 180) + (text.length > 180 ? '...' : '');
@@ -177,7 +179,7 @@
       contentWrapperClass = 'p-4 overflow-hidden flex-1 bg-gray-100 dark:bg-gray-800';
       const safeSrcdoc = (item.content || '').replace(/"/g, '&quot;');
       contentHTML = `<iframe style="width:100%;height:100%;min-height:500px;border:1px solid #ccc;border-radius:8px;background:white;" srcdoc="${safeSrcdoc}"></iframe>`;
-    } else if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing'].includes(item.type)) {
+    } else if (['equity-opportunity', 'equity-scan', 'underwriting', 'coach', 'social', 'script', 'plan', 'blog', 'postclosing', 'call-recap'].includes(item.type)) {
       contentWrapperClass = 'p-6 overflow-y-auto flex-1 text-sm bg-gray-50 dark:bg-gray-900';
     }
 
@@ -264,6 +266,7 @@
       ['plan', 'fa-chart-line', 'Plans'],
       ['blog', 'fa-pen-fancy', 'Blogs'],
       ['coach', 'fa-robot', 'Coach'],
+      ['call-recap', 'fa-clipboard-list', 'Call recaps'],
       ['custom', 'fa-edit', 'Custom']
     ];
 

@@ -209,23 +209,47 @@
     };
   }
 
+  /** Default off. A saved draft that stored blog-include-hobbies-draft-agent = 1 stays on. */
+  function blogIncludeHobbies() {
+    const box = document.getElementById('blog-include-hobbies');
+    if (!box) return false;
+    return box.checked === true;
+  }
+
   // Build a rich personalization string for the prompt
-  function buildBlogPersonalization(profile) {
-    if (typeof window.buildProfileAiContext === 'function') {
-      return window.buildProfileAiContext(profile || getCentralProfile());
+  function buildBlogPersonalization(profile, opts) {
+    const includeHobbies = !(opts && opts.includeHobbies === false);
+    const base = Object.assign({}, profile || getCentralProfile() || {});
+    if (!includeHobbies) {
+      base.hobbies = [];
+      base.hobbiesOther = '';
+      base.passions = '';
+      base.interests = '';
     }
-
-    const eff = getEffectiveSetup();
-    const parts = [];
-    if (eff.personality) parts.push(`Your personality: ${eff.personality}`);
-    if (eff.voiceTraits && eff.voiceTraits.length) parts.push(`Voice traits: ${eff.voiceTraits.join(', ')}`);
-    if (eff.tone) parts.push(`Preferred tone: ${eff.tone}`);
-    if (eff.localArea) parts.push(`Primary market: ${eff.localArea}`);
-    if (eff.targetPartners && eff.targetPartners.length) parts.push(`Ideal audience/referral partners: ${eff.targetPartners.join(', ')}`);
-    if (eff.goals) parts.push(`Current focus/goals: ${eff.goals}`);
-    if (eff.challenges) parts.push(`Key challenges you help clients with: ${eff.challenges}`);
-
-    return parts.length ? parts.join('. ') + '.' : 'Write in a helpful, trustworthy, conversational voice for a local real estate professional.';
+    let text = '';
+    if (typeof window.buildProfileAiContext === 'function') {
+      text = window.buildProfileAiContext(base) || '';
+    } else {
+      const eff = Object.assign({}, getEffectiveSetup(), base);
+      const parts = [];
+      if (eff.personality) parts.push(`Your personality: ${eff.personality}`);
+      if (eff.voiceTraits && eff.voiceTraits.length) parts.push(`Voice traits: ${eff.voiceTraits.join(', ')}`);
+      if (eff.tone) parts.push(`Preferred tone: ${eff.tone}`);
+      if (eff.localArea) parts.push(`Primary market: ${eff.localArea}`);
+      if (eff.targetPartners && eff.targetPartners.length) parts.push(`Ideal audience/referral partners: ${eff.targetPartners.join(', ')}`);
+      if (eff.goals) parts.push(`Current focus/goals: ${eff.goals}`);
+      if (eff.challenges) parts.push(`Key challenges you help clients with: ${eff.challenges}`);
+      text = parts.length ? parts.join('. ') + '.' : '';
+    }
+    if (!includeHobbies && text) {
+      text = text
+        .replace(/Hobbies\/passions[^\n]*/gi, '')
+        .replace(/\bHobbies?:\s*[^.]*\.?/gi, '')
+        .replace(/\bPassions?:\s*[^.]*\.?/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+    }
+    return text || 'Write in a helpful, trustworthy, conversational voice for a local real estate professional.';
   }
 
   function trimBundleSectionEdges(text) {
@@ -764,9 +788,13 @@ if (loadingEl) loadingEl.innerHTML = blogLoadingContent;
     // Pull rich personalization from the central Profile
     const profile = getCentralProfile();
     const richProfile = getEffectiveSetup();
-    const personalization = buildBlogPersonalization(richProfile);
+    const includeHobbies = blogIncludeHobbies();
+    const personalization = buildBlogPersonalization(richProfile, { includeHobbies });
+    const hobbyExcludeBlock = includeHobbies
+      ? ''
+      : '\n- HOBBIES / PASSIONS: EXCLUDED for this run. Do NOT mention the author\'s hobbies, sports, fitness, family hobbies, crafts, cooking, travel pastimes, or any personal pastime anywhere in the blog, social caption, Google post, or Reel.\n';
 
-    const systemPrompt = `You are an expert real estate content writer creating high-quality, GEO-optimized, authority-building content for real estate agents. Write in the exact voice and style of this specific agent: ${personalization}
+    const systemPrompt = `You are an expert real estate content writer creating high-quality, GEO-optimized, authority-building content for real estate agents. Write in the exact voice and style of this specific agent: ${personalization}${hobbyExcludeBlock}
 
 Key Requirements:
 - Length: Exactly aim for the middle of ${lengthGuide} range (e.g., ~1,750 words for 1,500–2,000). Do not generate shorter—expand with more detailed explanations, additional examples, sub-sections, or relevant anecdotes to reach the word count while keeping it engaging and reader-focused. 
@@ -833,6 +861,10 @@ let finalPrompt = systemPrompt;
 
     if (typeof window.buildGenerationRulesPromptBlock === 'function') {
       finalPrompt += '\n' + window.buildGenerationRulesPromptBlock('blog').join('\n');
+    }
+    if (!includeHobbies) {
+      finalPrompt +=
+        '\n\nHOBBIES / PASSIONS EXCLUDED (user left this off): Do not weave in golf, sports, fitness, family hobbies, crafts, cooking, travel pastimes, or any profile hobby or passion. Zero hobby references in the blog, caption, Google post, and Reel.';
     }
 
     if (feedback) {
@@ -1509,6 +1541,136 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   window.copySocialCaption = copySocialCaption;
   window.copyGooglePostWithFormatting = copyGooglePostWithFormatting;
 
+  function blogProfileMarket() {
+    try {
+      const p = getCentralProfile() || {};
+      return String(
+        p.localArea || p.market || p.location || p.localMarket || p.city || p.serviceArea || p.primaryMarket || ''
+      ).trim();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function applyAgentMarket(base, market, style) {
+    const phrase = String(base || '').trim();
+    const area = String(market || '').trim();
+    if (style === 'in') return area ? phrase + ' in ' + area : phrase;
+    if (style === 'to') return area ? phrase + ' ' + area : 'relocation';
+    if (!area) return phrase;
+    if (phrase.toLowerCase().endsWith(area.toLowerCase())) return phrase;
+    return (phrase + ' ' + area).trim();
+  }
+
+  function agentTopicLiteral(topic, market) {
+    let cleaned = String(topic || '')
+      .replace(/\s+in\s+2026\b/ig, '')
+      .replace(/\b2026\b/g, '')
+      .replace(/\b(fha|va|usda|dscr|heloc|jumbo|nmls|lender|lenders|mortgage|refinance|refinancing|apr|interest rates?|rates)\b/ig, ' ')
+      .replace(/[?!,:()“”"']/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 7)
+      .join(' ')
+      .toLowerCase();
+    if (cleaned.length < 8) cleaned = 'local real estate guide';
+    return applyAgentMarket(cleaned, market, 'append');
+  }
+
+  function blogKeywordForTopic(topic, market) {
+    const t = String(topic || '').trim();
+    if (!t) return '';
+    const area = market == null ? blogProfileMarket() : String(market || '').trim();
+    const rules = [
+      [/open house/i, 'open house tips', 'append'],
+      [/staging/i, 'home staging tips', 'append'],
+      [/price your home|how to price/i, 'home pricing tips', 'append'],
+      [/pre-listing|seller checklist|selling process|sell fast|fsbo|listing with an agent|multiple offer|time to list/i, 'selling my home', 'append'],
+      [/reloc|remote work/i, 'moving to', 'to'],
+      [/first-time|first time|buying your first/i, 'first time home buyer guide', 'append'],
+      [/down payment|gift fund|conventional 3%/i, 'down payment tips', 'append'],
+      [/buyer.?s agent|role of a buyer/i, 'buying a home', 'in'],
+      [/home buying process|rent vs/i, 'buying a home', 'in'],
+      [/neighborhood|schools, commute/i, 'choosing a neighborhood', 'append'],
+      [/inspection/i, 'home inspection tips', 'append'],
+      [/earnest money/i, 'earnest money explained', 'append'],
+      [/closing cost/i, 'buyer closing costs', 'append'],
+      [/what happens at closing|closing delay/i, 'closing day tips', 'append'],
+      [/appraisal/i, 'home appraisal vs inspection', 'append'],
+      [/escrow/i, 'escrow for buyers', 'append'],
+      [/title insurance/i, 'title insurance explained', 'append'],
+      [/contingenc/i, 'home offer contingencies', 'append'],
+      [/hidden cost/i, 'hidden costs of homeownership', 'append'],
+      [/203\(k\)|homestyle|renovation-ready|fixer/i, 'buying a fixer upper', 'append'],
+      [/homeownership still worth|worth it in/i, 'is buying a home worth it', 'append'],
+      [/move-up|next home|bridge/i, 'buying your next home', 'append'],
+      [/downsiz/i, 'downsizing your home', 'append'],
+      [/1031/i, '1031 exchange tips', 'append'],
+      [/new construction vs/i, 'new construction vs resale homes', 'append'],
+      [/income property|rental|investor|brrrr|airbnb|vrbo|short-term|portfolio|fix-and-flip|multi-family|2–4 unit|2-4 unit|house-hack/i, 'buying a rental property', 'append'],
+      [/maintenance/i, 'home maintenance tips', 'append'],
+      [/energy|eco-friendly|tax credit|sustainable/i, 'energy efficient homes', 'append'],
+      [/property tax/i, 'property taxes for buyers', 'append'],
+      [/multi-generational/i, 'multi generational homes', 'append'],
+      [/pet-friendly/i, 'pet friendly homes', 'append'],
+      [/insurance|climate/i, 'homeowners insurance', 'append'],
+      [/credit|pre-approv|debt-to-income|\bfha\b|\bva loans?\b|\busda\b|jumbo|\bdscr\b|heloc|bank statement|non-qm|physician|medical professional|\bitin\b|co-buyer|co-signer|bankruptcy|foreclosure|employment gap|compensating|rescor|soft credit|hard vs|home equity/i, 'questions buyers ask before touring', 'append'],
+      [/lower rates|wait for lower/i, 'when to buy a home', 'append'],
+      [/outlook|inventory|rates, jobs|affordab|ibuyer|instant offer|new construction|build-to-rent|immigration|population|technology in real estate|regional market|housing market/i, 'local housing market', 'append'],
+      [/condo/i, 'condo vs house', 'append'],
+      [/\bhoa\b/i, 'HOA fees explained', 'append'],
+      [/warranty/i, 'home warranty tips', 'append'],
+      [/expanded my team|new focus|joined a top|partnership with local/i, 'real estate agent announcement', 'append']
+    ];
+    let phrase = '';
+    let style = 'append';
+    for (let i = 0; i < rules.length; i++) {
+      if (rules[i][0].test(t)) {
+        phrase = rules[i][1];
+        style = rules[i][2];
+        break;
+      }
+    }
+    let out = phrase ? applyAgentMarket(phrase, area, style) : agentTopicLiteral(t, area);
+    if (/\b(nmls|lender|lenders|mortgage|refinance|refinancing|apr|interest rate|rates|fha|usda|dscr|heloc|jumbo|pre-approval|pre approval)\b/i.test(out)) {
+      out = applyAgentMarket('local real estate guide', area, 'append');
+    }
+    return out;
+  }
+  window.blogKeywordForTopic = blogKeywordForTopic;
+
+  function wireBlogHobbiesDefault() {
+    const box = document.getElementById('blog-include-hobbies');
+    if (!box) return;
+    const key = 'blog-include-hobbies-draft-agent';
+    let stored = null;
+    try { stored = localStorage.getItem(key); } catch (e) {}
+    box.checked = stored === '1';
+    box.addEventListener('change', () => {
+      try { localStorage.setItem(key, box.checked ? '1' : '0'); } catch (e) {}
+    });
+  }
+
+  function wireBlogTopicKeyword() {
+    const topicSelect = document.getElementById('blog-topic-select');
+    const keywordEl = document.getElementById('blog-keyword');
+    if (!topicSelect || !keywordEl) return;
+    let lastAuto = '';
+    topicSelect.addEventListener('change', () => {
+      const topic = (topicSelect.value || '').trim();
+      if (!topic || topic === 'Use Custom Topic (type below)') return;
+      const next = blogKeywordForTopic(topic, blogProfileMarket());
+      if (!next) return;
+      const current = (keywordEl.value || '').trim();
+      if (!current || current === lastAuto) {
+        keywordEl.value = next;
+        lastAuto = next;
+      }
+    });
+  }
+
   // =====================================================
   // INITIALIZATION
   // =====================================================
@@ -1528,6 +1690,8 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
 
   function initBlogCreator() {
     try { wireBlogHowThisWorksPanel(); } catch (e) {}
+    try { wireBlogHobbiesDefault(); } catch (e) {}
+    try { wireBlogTopicKeyword(); } catch (e) {}
     // The original top-level listeners for the upload area
     // are included in the moved code above.
 

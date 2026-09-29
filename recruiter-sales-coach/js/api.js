@@ -187,7 +187,8 @@
       const response = await fetch(getProxyUrl(), {
         method: 'POST',
         headers,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: options.signal
       });
 
       if (!response.ok) {
@@ -216,6 +217,7 @@
 
       return content;
     } catch (err) {
+      if (err && err.name === 'AbortError') throw err;
       console.error('[Grok API] callGrokAPI failed to ' + getProxyUrl() + ':', err);
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
         const hosted = isProductionHosted();
@@ -295,7 +297,7 @@
    * @param {File|Blob} file
    * @returns {Promise<{text:string, raw:object}>}
    */
-  async function transcribeAudioFile(file) {
+  async function transcribeAudioFile(file, options = {}) {
     if (!file) throw new Error('No audio file provided');
     const base = getProxyBaseUrl();
     const url = `${base}/api/v1/stt`;
@@ -307,7 +309,8 @@
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body: form
+      body: form,
+      signal: options.signal
     });
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
