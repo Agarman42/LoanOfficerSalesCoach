@@ -676,7 +676,7 @@ async function generateBlog(feedback = '') {
 
     const tone = document.getElementById('blog-tone').value;
     const lengthSelect = document.getElementById('blog-length')?.value || 'short';
-    const keywordInput = document.getElementById('blog-keyword')?.value.trim() || '';
+    const keywordInput = deriveBlogPrimaryPhrase(topicInput);
     const localArea = document.getElementById('blog-local-area')?.value.trim() || '';
 
     const additionalContext = document.getElementById('blog-additional-context')?.value.trim() || '';
@@ -1522,7 +1522,7 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
     const area = String(market || '').trim();
     if (!phrase) return area;
     if (!area) return phrase;
-    if (phrase.toLowerCase().endsWith(area.toLowerCase())) return phrase;
+    if (phrase.toLowerCase().includes(area.toLowerCase())) return phrase;
     return (phrase + ' ' + area).trim();
   }
 
@@ -1621,6 +1621,40 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   }
   window.blogKeywordForTopic = blogKeywordForTopic;
 
+  function blogMarketForPhrase() {
+    const field = (document.getElementById('blog-local-area')?.value || '').trim();
+    if (field) return field;
+    return blogProfileMarket();
+  }
+
+  function normalizeTopicText(value) {
+    return String(value || '')
+      .replace(/[\u2018\u2019\u201C\u201D]/g, "'")
+      .replace(/[\u2013\u2014]/g, '-')
+      .replace(/\u00A0/g, ' ')
+      .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function customTopicIsMoreSpecific(typed, selected) {
+    const custom = normalizeTopicText(typed);
+    const dropdown = normalizeTopicText(selected);
+    if (!custom || !dropdown || dropdown === 'use custom topic (type below)' || custom === dropdown) return false;
+    const selectedWords = new Set(dropdown.split(' ').filter((word) => word.length > 2));
+    return custom.split(' ').some((word) => word.length > 2 && !selectedWords.has(word));
+  }
+
+  function deriveBlogPrimaryPhrase(topicInput) {
+    const selected = (document.getElementById('blog-topic-select')?.value || '').trim();
+    const typed = String(topicInput || '').trim();
+    const market = blogMarketForPhrase();
+    if (customTopicIsMoreSpecific(typed, selected)) return withBlogMarket(typed, market);
+    const source = selected && selected !== 'Use Custom Topic (type below)' ? selected : typed;
+    return blogKeywordForTopic(source, market) || withBlogMarket(typed, market);
+  }
+
   function wireBlogHobbiesDefault() {
     const box = document.getElementById('blog-include-hobbies');
     if (!box) return;
@@ -1630,24 +1664,6 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
     box.checked = stored === '1';
     box.addEventListener('change', () => {
       try { localStorage.setItem(key, box.checked ? '1' : '0'); } catch (e) {}
-    });
-  }
-
-  function wireBlogTopicKeyword() {
-    const topicSelect = document.getElementById('blog-topic-select');
-    const keywordEl = document.getElementById('blog-keyword');
-    if (!topicSelect || !keywordEl) return;
-    let lastAuto = '';
-    topicSelect.addEventListener('change', () => {
-      const topic = (topicSelect.value || '').trim();
-      if (!topic || topic === 'Use Custom Topic (type below)') return;
-      const next = blogKeywordForTopic(topic, blogProfileMarket());
-      if (!next) return;
-      const current = (keywordEl.value || '').trim();
-      if (!current || current === lastAuto) {
-        keywordEl.value = next;
-        lastAuto = next;
-      }
     });
   }
 
@@ -1671,7 +1687,6 @@ window.copyGooglePostWithFormatting = function copyGooglePostWithFormatting() {
   function initBlogCreator() {
     try { wireBlogHowThisWorksPanel(); } catch (e) {}
     try { wireBlogHobbiesDefault(); } catch (e) {}
-    try { wireBlogTopicKeyword(); } catch (e) {}
     // The original top-level listeners for the upload area
     // are included in the moved code above.
 

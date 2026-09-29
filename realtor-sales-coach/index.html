@@ -5432,22 +5432,18 @@
     <div class="space-y-6 mb-12">
 
         <!-- Card 1: Content Settings (premium match to 2026 Plan / Social tools) -->
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm transition-all">
-            <h3 class="text-xl font-bold mb-6 text-[#002B5C] dark:text-white flex items-center gap-2">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-4 sm:p-5 shadow-sm transition-all">
+            <h3 class="text-lg font-bold mb-3 text-[#002B5C] dark:text-white flex items-center gap-2">
                 <span class="w-8 h-8 rounded-2xl bg-[#00A89D]/10 flex items-center justify-center flex-shrink-0"><i class="fas fa-sliders-h text-[#00A89D]"></i></span> Content Settings
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Length</label>
-                    <select id="blog-length" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#00A89D]/50 focus:border-[#00A89D] transition-all">
-                        <option value="short">Short (600-1000 words)</option>
-                        <option value="medium" selected>Medium (1,000-1,500 words)</option>
-                        <option value="long">Long (1,500–2,000 words)</option>
-                    </select>
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <div class="min-w-0">
+                    <label for="blog-local-area" class="block text-xs font-semibold mb-1 text-[#00A89D]">Local market</label>
+                    <input type="text" id="blog-local-area" placeholder="Fort Wayne" title="Auto-saved to your profile" class="w-full p-2 text-sm rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#00A89D]/50">
                 </div>
-                <div>
-                    <label class="block text-lg font-semibold mb-3 text-[#00A89D]">Blog Tone</label>
-                    <select id="blog-tone" class="w-full p-4 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#00A89D]/50">
+                <div class="min-w-0">
+                    <label for="blog-tone" class="block text-xs font-semibold mb-1 text-[#00A89D]">Tone</label>
+                    <select id="blog-tone" class="w-full p-2 text-sm rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#00A89D]/50">
                         <option value="Friendly & Relatable" selected>Friendly & Relatable (Recommended)</option>
                         <option value="Educational & Informative">Educational & Informative</option>
                         <option value="Professional & Authoritative">Professional & Authoritative</option>
@@ -5456,17 +5452,13 @@
                         <option value="Hilarious & Entertaining">Hilarious & Entertaining</option>
                     </select>
                 </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div>
-                    <label class="block text-sm font-semibold mb-1.5 text-[#00A89D]">Primary Search Phrase (Optional)</label>
-                    <input type="text" id="blog-keyword" placeholder="e.g., Fort Wayne first-time home buyer" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#00A89D]/50">
-                    <p class="text-xs text-gray-500 mt-1 mb-0">Helps SEO</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1.5 text-[#00A89D]">Local Area / Market (for GEO content)</label>
-                    <input type="text" id="blog-local-area" placeholder="e.g., Fort Wayne, Indiana" class="w-full p-3 rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#00A89D]/50">
-                    <p class="text-xs text-gray-500 mt-1 mb-0">Auto-saved to your profile</p>
+                <div class="min-w-0">
+                    <label for="blog-length" class="block text-xs font-semibold mb-1 text-[#00A89D]">Length</label>
+                    <select id="blog-length" class="w-full p-2 text-sm rounded-xl border-2 border-[#00A89D] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-[#00A89D]/50 focus:border-[#00A89D] transition-all">
+                        <option value="short">Short (600-1000 words)</option>
+                        <option value="medium" selected>Medium (1,000-1,500 words)</option>
+                        <option value="long">Long (1,500–2,000 words)</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -9332,7 +9324,7 @@ try {
 
 
 <!-- Heavy CDNs after load — keeps address bar from spinning forever -->
-<script src="js/feature-loader.js?v=20260929-v3127"></script>
+<script src="js/feature-loader.js?v=20260929-v3128"></script>
 <script src="js/lazy-libs.js?v=20260721-static-tw2"></script>
 
 <div id="coach-boot-fail" role="status">
