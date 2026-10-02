@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  window.APP_VERSION = '3.128';
+  window.APP_VERSION = '3.129';
   window.APP_BUILD_DATE = '2026-09-29';
 
   function applyAppVersionFooter() {

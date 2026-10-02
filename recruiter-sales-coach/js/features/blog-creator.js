@@ -222,6 +222,20 @@ window.removeBlogUploadedFile = function() {
     document.getElementById('blog-remove-file-btn').classList.add('hidden');
 };
 
+function blogLocalMarketCap(localArea, voiceLine) {
+  const place = String(localArea || '').trim();
+  return `\n\nLOCAL MARKET — use it like a person, not a stamp. This overrides keyword-density and LOCAL-FIRST lines that would repeat the city:
+- Place name to limit: ${place || 'none provided'}. If none is provided, do not invent a city.
+- Name that place in the title OR the first paragraph, not both unless it reads naturally.
+- Name it again in at most one later section (a local example, a neighborhood, or the close).
+- Hard cap: the city/region appears at most 3 times in the whole blog post, including the title.
+- After the first mention, say "here," "locally," "in this market," or "around here" instead of repeating the city.
+- Do not put the city in every H2, bullet, FAQ, or CTA.
+- Still ground one concrete local detail (a typical situation, the season, or a neighborhood type). Do not invent stats, rates, or program names.
+- If the primary search phrase includes the city, use that full phrase once. Do not echo the city every time the topic is mentioned.
+- ${voiceLine}`;
+}
+
 async function generateBlog(feedback = '') {
     console.log('%c[blog-creator] generateBlog() called', feedback ? 'with feedback' : 'fresh', 'color:#00A89D');
 
@@ -354,8 +368,8 @@ ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-ou
 - Write a complete recruiting-focused blog/article on: ${topicInput}
 - Audience: loan officer producers considering their career platform — not homebuyers
 - Topics should align with recruiting: culture, ops support, technology, career growth, purchase-business focus, authentic recruiter brand — NOT rate quotes or loan programs for consumers
-- Primary SEO keyword/phrase (use naturally throughout, especially in title if it fits, intro, H2s, and body — aim for 1–2% density with semantic variations): ${keywordInput || 'Optimize naturally for the main topic'}
-- Local Area (incorporate relevant local insights, programs, statistics, or examples if applicable to the topic and it fits naturally; otherwise, keep general/US-wide): ${localArea || 'None provided'}
+- Primary SEO keyword/phrase (use the topic naturally, with semantic variations that do not repeat the city. If this phrase includes the city, use the full phrase once and follow the local-market cap): ${keywordInput || 'Optimize naturally for the main topic'}
+- Local Area (one concrete local detail is enough: a typical situation, the season, or a neighborhood type. Do not invent stats, rates, or program names): ${localArea || 'None provided'}
 - Structure:
   - Engaging, clickable title (incorporate primary keyword if it fits naturally)
   - Strong intro hook that grabs attention and includes the primary keyword early
@@ -408,6 +422,7 @@ let finalPrompt = systemPrompt;
     }
 
     finalPrompt += `\n\nTopic: ${topicInput}`;
+    finalPrompt += blogLocalMarketCap(localArea, 'Recruiting voice. The market is the city you recruit in. Same cap. No invented pay, rankings, or guarantees.');
 
     if (feedback) {
         if (!lastBlogBundle) {

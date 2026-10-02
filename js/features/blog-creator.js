@@ -623,6 +623,20 @@ function hideBlogLoading() {
     if (typeof window.hideLoading === 'function') window.hideLoading();
 }
 
+function blogLocalMarketCap(localArea, voiceLine) {
+  const place = String(localArea || '').trim();
+  return `\n\nLOCAL MARKET — use it like a person, not a stamp. This overrides keyword-density and LOCAL-FIRST lines that would repeat the city:
+- Place name to limit: ${place || 'none provided'}. If none is provided, do not invent a city.
+- Name that place in the title OR the first paragraph, not both unless it reads naturally.
+- Name it again in at most one later section (a local example, a neighborhood, or the close).
+- Hard cap: the city/region appears at most 3 times in the whole blog post, including the title.
+- After the first mention, say "here," "locally," "in this market," or "around here" instead of repeating the city.
+- Do not put the city in every H2, bullet, FAQ, or CTA.
+- Still ground one concrete local detail (a typical situation, the season, or a neighborhood type). Do not invent stats, rates, or program names.
+- If the primary search phrase includes the city, use that full phrase once. Do not echo the city every time the topic is mentioned.
+- ${voiceLine}`;
+}
+
 async function generateBlog(feedback = '') {
     if (_blogGenerating) {
         if (!_blogGeneratingStarted || (Date.now() - _blogGeneratingStarted) < 80000) return;
@@ -783,8 +797,8 @@ Key Requirements:
 - Tone: ${tone}
 ${tone.toLowerCase().includes('hilarious') ? '- HILARIOUS MODE: Make it laugh-out-loud funny! Use clever wordplay, relatable mortgage humor, self-deprecating jokes, exaggerated analogies, and witty observations. Keep it light-hearted and entertaining while still being helpful — never mean-spirited. Sprinkle humor throughout (intro, body, headings, FAQs). Readers should smile or chuckle multiple times.' : ''}
 - Write a complete blog post on: ${topicInput}
-- Primary SEO keyword/phrase (use naturally throughout, especially in title if it fits, intro, H2s, and body — aim for 1–2% density with semantic variations): ${keywordInput || 'Optimize naturally for the main topic'}
-- Local Area (incorporate relevant local insights, programs, statistics, or examples if applicable to the topic and it fits naturally; otherwise, keep general/US-wide): ${localArea || 'None provided'}
+- Primary SEO keyword/phrase (use the topic naturally, with semantic variations that do not repeat the city. If this phrase includes the city, use the full phrase once and follow the local-market cap): ${keywordInput || 'Optimize naturally for the main topic'}
+- Local Area (one concrete local detail is enough: a typical situation, the season, or a neighborhood type. Do not invent stats, rates, or program names): ${localArea || 'None provided'}
 - Structure:
   - Engaging, clickable title (incorporate primary keyword if it fits naturally)
   - Strong intro hook that grabs attention and includes the primary keyword early
@@ -849,6 +863,8 @@ let finalPrompt = systemPrompt;
       finalPrompt +=
         '\n\nHOBBIES / PASSIONS EXCLUDED (user toggled off): Do not weave in golf, sports teams, fitness, family hobbies, crafts, cooking, travel pastimes, or any profile hobby/passion. Zero hobby references in blog, caption, Google post, and Reel.';
     }
+
+    finalPrompt += blogLocalMarketCap(localArea, 'Loan officer voice, compliant: no "best rate," no guarantees, no promised savings.');
 
     if (feedback) {
         if (!lastBlogBundle) {
